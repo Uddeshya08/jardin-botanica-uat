@@ -34,20 +34,20 @@ export async function generateStaticParams() {
         .filter(Boolean) as string[]
   )
 
-  const collectionHandles = collections.map(
-    (collection: StoreCollection) => collection.handle
-  )
+  const collectionHandles = collections
+    .map((collection: StoreCollection) => collection.handle)
+    .filter((handle): handle is string => Boolean(handle))
 
   const staticParams = countryCodes
     ?.map((countryCode: string) =>
-      collectionHandles.map((handle: string | undefined) => ({
+      collectionHandles.map((handle: string) => ({
         countryCode,
         handle,
       }))
     )
     .flat()
 
-  return staticParams
+  return staticParams || []
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
