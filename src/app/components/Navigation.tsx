@@ -31,6 +31,7 @@ export function Navigation({
   const [isNavHovered, setIsNavHovered] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [isHomePage, setIsHomePage] = useState(false)
+  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false)
   const cartRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -188,6 +189,7 @@ export function Navigation({
     {
       label: 'HANDS',
       url: '/hands',
+      hasMegaMenu: true,
     },
     {
       label: 'HOME CREATIONS',
@@ -200,10 +202,6 @@ export function Navigation({
     {
       label: 'THE LAB',
       url: '/the-lab',
-    },
-    {
-      label: 'PRODUCTS',
-      url: '/store'
     }
   ]
 
@@ -349,22 +347,123 @@ export function Navigation({
           className="hidden lg:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2 gap-6"
         >
           {menuItems.map((item, index) => (
-            <motion.a
+            <div
               key={item.label}
-              href={item.url}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 + index * 0.1, duration: 0.4 }}
-              className="font-light text-sm tracking-widest transition-all duration-300 relative group hover:opacity-80 whitespace-nowrap px-1"
-              style={{ color: navStyles.textColor }}
+              className="relative"
+              onMouseEnter={() => item.hasMegaMenu && setIsMegaMenuOpen(true)}
+              onMouseLeave={() => item.hasMegaMenu && setIsMegaMenuOpen(false)}
             >
-              {item.label}
-              <span
-                className="absolute bottom-[-4px] left-0 w-0 h-px bg-orange-400 transition-all duration-500 group-hover:w-full"
-              ></span>
-            </motion.a>
+              <motion.a
+                href={item.url}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 + index * 0.1, duration: 0.4 }}
+                className="font-light text-sm tracking-widest transition-all duration-300 relative group hover:opacity-80 whitespace-nowrap px-1 block"
+                style={{ color: navStyles.textColor }}
+              >
+                {item.label}
+                <span
+                  className="absolute bottom-[-4px] left-0 w-0 h-px bg-orange-400 transition-all duration-500 group-hover:w-full"
+                ></span>
+              </motion.a>
+            </div>
           ))}
         </motion.div>
+
+        {/* Mega Menu */}
+        <AnimatePresence>
+          {isMegaMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="absolute top-full left-0 right-0 shadow-lg z-40"
+              style={{ 
+                backgroundColor: '#e3e3d8',
+                borderTop: '1px solid rgba(0, 0, 0, 0.1)' 
+              }}
+              onMouseEnter={() => setIsMegaMenuOpen(true)}
+              onMouseLeave={() => setIsMegaMenuOpen(false)}
+            >
+              <div className="max-w-7xl mx-auto px-6 lg:px-12 py-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Cedar Bloom Card */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1, duration: 0.4 }}
+                    className="group cursor-pointer"
+                  >
+                    <Link href="/products/cedarbloom">
+                      <div className="bg-transparent hover:bg-white hover:bg-opacity-15 transition-all duration-300 group cursor-pointer p-4 rounded-lg border-b-0 hover:border-b-2 hover:border-orange-400"
+                           onMouseEnter={(e) => {
+                             e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+                           }}
+                           onMouseLeave={(e) => {
+                             e.currentTarget.style.backgroundColor = 'transparent'
+                           }}>
+                        <div className="flex flex-col">
+                          <div className="w-full h-56 overflow-hidden mb-4 rounded-lg">
+                            <img
+                              src="/assets/botanicalLeaves.png"
+                              alt="Cedar Bloom Collection"
+                              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                            />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-din-arabic text-black text-opacity-60 font-light text-xs mb-2 tracking-wide uppercase">
+                              Hand Care
+                            </p>
+                            <h3 className="font-din-arabic text-black font-light text-lg mb-3 leading-tight">
+                              Cedar Bloom Collection
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+
+                  {/* Cleansers & Exfoliants Card */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2, duration: 0.4 }}
+                    className="group cursor-pointer"
+                  >
+                    <Link href="/products/cleansersexfoliants">
+                      <div className="bg-transparent hover:bg-white hover:bg-opacity-15 transition-all duration-300 group cursor-pointer p-4 rounded-lg border-b-0 hover:border-b-2 hover:border-orange-400"
+                           onMouseEnter={(e) => {
+                             e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+                           }}
+                           onMouseLeave={(e) => {
+                             e.currentTarget.style.backgroundColor = 'transparent'
+                           }}>
+                        <div className="flex flex-col">
+                          <div className="w-full h-56 overflow-hidden mb-4 rounded-lg">
+                            <img
+                              src="/assets/handCareImage.png"
+                              alt="Cleansers & Exfoliants"
+                              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                            />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-din-arabic text-black text-opacity-60 font-light text-xs mb-2 tracking-wide uppercase">
+                              Hand Care
+                            </p>
+                            <h3 className="font-din-arabic text-black font-light text-lg mb-3 leading-tight">
+                              Cleansers & Exfoliants
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Actions */}
         <motion.div
@@ -472,17 +571,23 @@ export function Navigation({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-0 top-full mt-2 w-96 bg-stone-100 border border-black border-opacity-10 shadow-2xl z-50"
+                  className="absolute right-0 top-full mt-2 w-96 border border-black border-opacity-10 shadow-2xl z-50"
+                  style={{ backgroundColor: '#e3e3d8' }}
                 >
                   {/* Cart Header */}
                   <div className="p-4 border-b border-black border-opacity-10">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg text-black font-medium">
+                      <h3 className="font-american-typewriter text-lg text-black">
                         Your Cart
                       </h3>
                       <button
                         onClick={() => setIsCartOpen(false)}
-                        className="p-1 hover:bg-black hover:bg-opacity-10 transition-colors rounded"
+                        className="p-1 transition-colors rounded"
+                        style={{ 
+                          '--hover-bg': 'rgb(0 0 0 / 7%)'
+                        } as React.CSSProperties}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(0 0 0 / 7%)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
                         <X className="w-4 h-4 text-black text-opacity-70" />
                       </button>
@@ -497,12 +602,12 @@ export function Navigation({
                         <div className="mb-4">
                           <ShoppingBag className="w-12 h-12 text-black text-opacity-30 mx-auto" />
                         </div>
-                        <p className="text-black text-opacity-70 mb-4 font-light">
+                        <p className="font-din-arabic text-black text-opacity-70 mb-4">
                           Nothing is in your cart
                         </p>
                         <button
                           onClick={() => setIsCartOpen(false)}
-                          className="px-6 py-2 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide font-light"
+                          className="px-6 py-2 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide font-din-arabic"
                         >
                           Continue Shopping
                         </button>
@@ -513,7 +618,8 @@ export function Navigation({
                         {cartItems.map((item) => (
                           <div
                             key={item.id}
-                            className="flex items-center gap-3 p-3 bg-white bg-opacity-50 border border-black border-opacity-5"
+                            className="flex items-center gap-3 p-3 border border-black border-opacity-5"
+                            style={{ backgroundColor: '#f1f1ec' }}
                           >
                             {item.image && (
                               <img
@@ -523,10 +629,10 @@ export function Navigation({
                               />
                             )}
                             <div className="flex-1">
-                              <h4 className="text-black  font-light">
+                              <h4 className="font-din-arabic text-black">
                                 {item.name}
                               </h4>
-                              <p className="text-black text-opacity-70 text-sm font-light">
+                              <p className="font-din-arabic text-black text-opacity-70 text-sm">
                                 ₹{item.price}
                               </p>
                             </div>
@@ -535,18 +641,22 @@ export function Navigation({
                                 onClick={() =>
                                   handleQuantityChange(item.id, -1)
                                 }
-                                className="p-1 hover:bg-black hover:bg-opacity-10 transition-colors rounded"
+                                className="p-1 transition-colors rounded"
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(0 0 0 / 7%)'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                               >
                                 <Minus className="w-3 h-3 text-black text-opacity-70" />
                               </button>
-                              <span className="text-black text-sm min-w-[20px] text-center font-light">
+                              <span className="font-din-arabic text-black text-sm min-w-[20px] text-center">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() =>
                                   handleQuantityChange(item.id, 1)
                                 }
-                                className="p-1 hover:bg-black hover:bg-opacity-10 transition-colors rounded"
+                                className="p-1 transition-colors rounded"
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(0 0 0 / 7%)'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                               >
                                 <Plus className="w-3 h-3 text-black text-opacity-70" />
                               </button>
@@ -558,26 +668,27 @@ export function Navigation({
                   </div>
 
                   {/* Cart Footer */}
-                  {/* {cartItems.length} */}
                   {cartItems.length > 0 && (
                     <div className="p-4 border-t border-black border-opacity-10">
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-black font-light">
+                        <span className="font-din-arabic text-black">
                           Total: 
                         </span>
-                        <span className="text-black  font-light">
+                        <span className="font-din-arabic text-black">
                           ₹{getTotalPrice()}
                         </span>
                       </div>
                       <div className="space-y-2 text-center">
                        <Link href={"/cart"}>
-                        <button className="w-full py-3 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide text-center font-light">
+                        <button className="w-full py-3 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide text-center font-din-arabic">
                           Checkout
                         </button>
                        </Link>
                         <button
                           onClick={() => setIsCartOpen(false)}
-                          className="w-full py-2 border border-black border-opacity-20 text-black hover:bg-black hover:bg-opacity-5 transition-colors tracking-wide text-center font-light"
+                          className="w-full py-2 border border-black border-opacity-20 text-black transition-colors tracking-wide text-center font-din-arabic"
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(0 0 0 / 7%)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                         >
                           Continue Shopping
                         </button>

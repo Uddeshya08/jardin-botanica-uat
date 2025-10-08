@@ -392,7 +392,7 @@ const Product = () => {
           <div className="flex flex-col md:flex-row justify-between px-6 py-8 gap-8 md:gap-0">
             <div className="text-center space-y-2">
               <div className="w-12 h-12 mx-auto">
-                <img src="/Images/chat.svg" alt="chat" />
+                {/* <img src="/Images/chat.svg" alt="chat" /> */}
               </div>
               <p
                 style={{
@@ -460,8 +460,8 @@ const Product = () => {
 
             {/* Right - Text (45%) */}
             <div className="space-y-6 bg-[#C5C8B3] w-full h-full pl-6 lg:pl-20 pt-12">
-              <h2 style={fontStyles.subsequentHeading} className="px-2">
-                A FOREST REBORN
+              <h2 style={{...fontStyles.subsequentHeading}} className="px-2">
+                A Forest Reborn
               </h2>
               <p
                 style={{ ...fontStyles.subCopy, lineHeight: "1.8" }}
@@ -500,7 +500,7 @@ const Product = () => {
                   whiteSpace: "nowrap",
                 }}
               >
-                OTHER AROMAS WORTH LIGHTING
+                Other Aromas Worth Lighting
               </h2>
               <div className="w-full">
                 <p

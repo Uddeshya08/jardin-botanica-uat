@@ -291,7 +291,7 @@ export function ProductHero({
           />
 
           {/* Collapsible Ritual in Practice */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.0 }}
@@ -317,19 +317,19 @@ export function ProductHero({
                 />
               </motion.div>
             </button>
-          </motion.div>
+          </motion.div> */}
 
           {/* Separator line before Actives & Key Botanicals */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ duration: 0.6, delay: 1.1 }}
             className="w-full h-px origin-left"
             style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
-          />
+          /> */}
 
           {/* Collapsible Actives & Key Botanicals */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.2 }}
@@ -355,16 +355,16 @@ export function ProductHero({
                 />
               </motion.div>
             </button>
-          </motion.div>
+          </motion.div> */}
 
           {/* Separator line before Fragrance Notes */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ duration: 0.6, delay: 1.3 }}
             className="w-full h-px origin-left"
             style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
-          />
+          /> */}
 
           {/* Collapsible Fragrance Notes */}
           <motion.div
@@ -405,7 +405,7 @@ export function ProductHero({
           />
 
           {/* Collapsible Full Ingredients */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.6 }}
@@ -431,7 +431,7 @@ export function ProductHero({
                 />
               </motion.div>
             </button>
-          </motion.div>
+          </motion.div> */}
         </div>
       </motion.div>
 
@@ -499,7 +499,7 @@ export function ProductHero({
       </motion.div>
 
       {/* Panels */}
-      <InfoPanel
+      {/* <InfoPanel
         isOpen={isRitualPanelOpen}
         onClose={() => setIsRitualPanelOpen(false)}
         title="RITUAL IN PRACTICE"
@@ -557,7 +557,7 @@ export function ProductHero({
             </span>
           </div>
         </div>
-      </InfoPanel>
+      </InfoPanel> */}
       <InfoPanel
         isOpen={isFragranceNotesOpen}
         onClose={() => setIsFragranceNotesOpen(false)}
@@ -569,7 +569,7 @@ export function ProductHero({
               Top Notes —{" "}
             </span>
             <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-              Fresh bergamot, green tea leaves, crisp cucumber.
+              Fresh Pine
             </span>
           </div>
           <div className="group">
@@ -577,7 +577,7 @@ export function ProductHero({
               Heart Notes —{" "}
             </span>
             <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-              Black tea concentrate, white jasmine, subtle mint.
+            Resinous Balsam
             </span>
           </div>
           <div className="group">
@@ -585,12 +585,12 @@ export function ProductHero({
               Base Notes —{" "}
             </span>
             <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-              Cedarwood, soft musk, clean linen.
+              Grounded Cedarwood
             </span>
           </div>
         </div>
       </InfoPanel>
-      <InfoPanel
+      {/* <InfoPanel
         isOpen={isIngredientsPanelOpen}
         onClose={() => setIsIngredientsPanelOpen(false)}
         title="FULL INGREDIENTS"
@@ -602,7 +602,7 @@ export function ProductHero({
           Acid, Phenoxyethanol, Ethylhexylglycerin, Natural Fragrance,
           Tocopherol (Vitamin E).
         </p>
-      </InfoPanel>
+      </InfoPanel> */}
     </div>
   )
 }

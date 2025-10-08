@@ -176,6 +176,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           product={product}
           onUpdateHeroQuantity={handleHeroQuantityUpdate}
           onCartUpdate={handleCartUpdate}
+          cartItems={cartItems}
         />
 
         <Afterlife product={product} />

@@ -557,7 +557,7 @@ const productImage = '/assets/productImage.png';
         <div className="space-y-4">
           <div className="group">
             <span className="font-din-arabic text-black inline">Top Notes — </span>
-            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">Fresh bergamot, green tea leaves, crisp cucumber.</span>
+            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">Fresh Pine</span>
           </div>
           <div className="group">
             <span className="font-din-arabic text-black inline">Heart Notes — </span>
