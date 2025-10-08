@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { User, Search, ShoppingBag, X, Plus, Minus, Heart } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 
 interface CartItem {
   id: string
@@ -32,9 +33,12 @@ export function Navigation({
   const [mounted, setMounted] = useState(false)
   const [isHomePage, setIsHomePage] = useState(false)
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false)
+  const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null)
+  const megaMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const cartRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const pathname = usePathname()
 
   // Handle component mounting and home page detection
   useEffect(() => {
@@ -148,6 +152,15 @@ export function Navigation({
     }
   }, [isSearchOpen])
 
+  // Cleanup mega menu timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (megaMenuTimeoutRef.current) {
+        clearTimeout(megaMenuTimeoutRef.current)
+      }
+    }
+  }, [])
+
   const getTotalPrice = () => {
     return cartItems.reduce(
       (total, item) => total + item.price * item.quantity,
@@ -185,6 +198,30 @@ export function Navigation({
     }
   }
 
+  const handleMegaMenuOpen = (menuLabel: string) => {
+    // Clear any existing timeout
+    if (megaMenuTimeoutRef.current) {
+      clearTimeout(megaMenuTimeoutRef.current)
+    }
+    setIsMegaMenuOpen(true)
+    setActiveMegaMenu(menuLabel)
+  }
+
+  const handleMegaMenuClose = () => {
+    // Add a small delay before closing to prevent flickering
+    megaMenuTimeoutRef.current = setTimeout(() => {
+      setIsMegaMenuOpen(false)
+      setActiveMegaMenu(null)
+    }, 150)
+  }
+
+  const handleMegaMenuEnter = () => {
+    // Cancel the close timeout when mouse enters the mega menu
+    if (megaMenuTimeoutRef.current) {
+      clearTimeout(megaMenuTimeoutRef.current)
+    }
+  }
+
   const menuItems = [
     {
       label: 'HANDS',
@@ -194,6 +231,7 @@ export function Navigation({
     {
       label: 'HOME CREATIONS',
       url: '/home-creations',
+      hasMegaMenu: true,
     },
     {
       label: 'JOURNAL',
@@ -266,6 +304,17 @@ export function Navigation({
   }
 
   const navStyles = getNavStyles()
+
+  // Get country code from pathname
+  const getCountryCode = () => {
+    if (pathname) {
+      const pathParts = pathname.split('/')
+      return pathParts[1] || 'in'
+    }
+    return 'in'
+  }
+
+  const countryCode = getCountryCode()
 
   return (
     <>
@@ -350,8 +399,16 @@ export function Navigation({
             <div
               key={item.label}
               className="relative"
-              onMouseEnter={() => item.hasMegaMenu && setIsMegaMenuOpen(true)}
-              onMouseLeave={() => item.hasMegaMenu && setIsMegaMenuOpen(false)}
+              onMouseEnter={() => {
+                if (item.hasMegaMenu) {
+                  handleMegaMenuOpen(item.label)
+                }
+              }}
+              onMouseLeave={() => {
+                if (item.hasMegaMenu) {
+                  handleMegaMenuClose()
+                }
+              }}
             >
               <motion.a
                 href={item.url}
@@ -383,83 +440,163 @@ export function Navigation({
                 backgroundColor: '#e3e3d8',
                 borderTop: '1px solid rgba(0, 0, 0, 0.1)' 
               }}
-              onMouseEnter={() => setIsMegaMenuOpen(true)}
-              onMouseLeave={() => setIsMegaMenuOpen(false)}
+              onMouseEnter={handleMegaMenuEnter}
+              onMouseLeave={handleMegaMenuClose}
             >
               <div className="max-w-7xl mx-auto px-6 lg:px-12 py-20">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Cedar Bloom Card */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1, duration: 0.4 }}
-                    className="group cursor-pointer"
-                  >
-                    <Link href="/products/cedarbloom">
-                      <div className="bg-transparent hover:bg-white hover:bg-opacity-15 transition-all duration-300 group cursor-pointer p-4 rounded-lg border-b-0 hover:border-b-2 hover:border-orange-400"
-                           onMouseEnter={(e) => {
-                             e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
-                           }}
-                           onMouseLeave={(e) => {
-                             e.currentTarget.style.backgroundColor = 'transparent'
-                           }}>
-                        <div className="flex flex-col">
-                          <div className="w-full h-56 overflow-hidden mb-4 rounded-lg">
-                            <img
-                              src="/assets/botanicalLeaves.png"
-                              alt="Cedar Bloom Collection"
-                              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                            />
-                          </div>
-                          <div className="text-left">
-                            <p className="font-din-arabic text-black text-opacity-60 font-light text-xs mb-2 tracking-wide uppercase">
-                              Hand Care
-                            </p>
-                            <h3 className="font-din-arabic text-black font-light text-lg mb-3 leading-tight">
-                              Cedar Bloom Collection
-                            </h3>
+                {/* HANDS Mega Menu */}
+                {activeMegaMenu === 'HANDS' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Cedar Bloom Card */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1, duration: 0.4 }}
+                      className="group cursor-pointer"
+                    >
+                      <Link href="/products/cedarbloom">
+                        <div className="bg-transparent hover:bg-white hover:bg-opacity-15 transition-all duration-300 group cursor-pointer p-4 rounded-lg border-b-0 hover:border-b-2 hover:border-orange-400"
+                             onMouseEnter={(e) => {
+                               e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+                             }}
+                             onMouseLeave={(e) => {
+                               e.currentTarget.style.backgroundColor = 'transparent'
+                             }}>
+                          <div className="flex flex-col">
+                            <div className="w-full h-56 overflow-hidden mb-4 rounded-lg">
+                              <img
+                                src="/assets/botanicalLeaves.png"
+                                alt="Cedar Bloom Collection"
+                                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                              />
+                            </div>
+                            <div className="text-left">
+                              <p className="font-din-arabic text-black text-opacity-60 font-light text-xs mb-2 tracking-wide uppercase">
+                                Hand Care
+                              </p>
+                              <h3 className="font-din-arabic text-black font-light text-lg mb-3 leading-tight">
+                                Cedar Bloom Collection
+                              </h3>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Link>
-                  </motion.div>
+                      </Link>
+                    </motion.div>
 
-                  {/* Cleansers & Exfoliants Card */}
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2, duration: 0.4 }}
-                    className="group cursor-pointer"
-                  >
-                    <Link href="/products/cleansersexfoliants">
-                      <div className="bg-transparent hover:bg-white hover:bg-opacity-15 transition-all duration-300 group cursor-pointer p-4 rounded-lg border-b-0 hover:border-b-2 hover:border-orange-400"
-                           onMouseEnter={(e) => {
-                             e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
-                           }}
-                           onMouseLeave={(e) => {
-                             e.currentTarget.style.backgroundColor = 'transparent'
-                           }}>
-                        <div className="flex flex-col">
-                          <div className="w-full h-56 overflow-hidden mb-4 rounded-lg">
-                            <img
-                              src="/assets/handCareImage.png"
-                              alt="Cleansers & Exfoliants"
-                              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                            />
-                          </div>
-                          <div className="text-left">
-                            <p className="font-din-arabic text-black text-opacity-60 font-light text-xs mb-2 tracking-wide uppercase">
-                              Hand Care
-                            </p>
-                            <h3 className="font-din-arabic text-black font-light text-lg mb-3 leading-tight">
-                              Cleansers & Exfoliants
-                            </h3>
+                    {/* Hand Lotion Card */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2, duration: 0.4 }}
+                      className="group cursor-pointer"
+                    >
+                      <Link href="/products/handlotion">
+                        <div className="bg-transparent hover:bg-white hover:bg-opacity-15 transition-all duration-300 group cursor-pointer p-4 rounded-lg border-b-0 hover:border-b-2 hover:border-orange-400"
+                             onMouseEnter={(e) => {
+                               e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+                             }}
+                             onMouseLeave={(e) => {
+                               e.currentTarget.style.backgroundColor = 'transparent'
+                             }}>
+                          <div className="flex flex-col">
+                            <div className="w-full h-56 overflow-hidden mb-4 rounded-lg">
+                              <img
+                                src="/assets/handLotion.png"
+                                alt="Hand Lotion"
+                                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                              />
+                            </div>
+                            <div className="text-left">
+                              <p className="font-din-arabic text-black text-opacity-60 font-light text-xs mb-2 tracking-wide uppercase">
+                                Hand Care
+                              </p>
+                              <h3 className="font-din-arabic text-black font-light text-lg mb-3 leading-tight">
+                                Hand Lotion
+                              </h3>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Link>
-                  </motion.div>
-                </div>
+                      </Link>
+                    </motion.div>
+                  </div>
+                )}
+
+                {/* HOME CREATIONS Mega Menu */}
+                {activeMegaMenu === 'HOME CREATIONS' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Cleaners Card */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1, duration: 0.4 }}
+                      className="group cursor-pointer"
+                    >
+                      <Link href="/products/cleaners">
+                        <div className="bg-transparent hover:bg-white hover:bg-opacity-15 transition-all duration-300 group cursor-pointer p-4 rounded-lg border-b-0 hover:border-b-2 hover:border-orange-400"
+                             onMouseEnter={(e) => {
+                               e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+                             }}
+                             onMouseLeave={(e) => {
+                               e.currentTarget.style.backgroundColor = 'transparent'
+                             }}>
+                          <div className="flex flex-col">
+                            <div className="w-full h-56 overflow-hidden mb-4 rounded-lg">
+                              <img
+                                src="/assets/handwashImg.png"
+                                alt="Cleaners"
+                                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                              />
+                            </div>
+                            <div className="text-left">
+                              <p className="font-din-arabic text-black text-opacity-60 font-light text-xs mb-2 tracking-wide uppercase">
+                                Home Creations
+                              </p>
+                              <h3 className="font-din-arabic text-black font-light text-lg mb-3 leading-tight">
+                                Cleaners
+                              </h3>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+
+                    {/* Exfoliants Card */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2, duration: 0.4 }}
+                      className="group cursor-pointer"
+                    >
+                      <Link href="/products/exfoliants">
+                        <div className="bg-transparent hover:bg-white hover:bg-opacity-15 transition-all duration-300 group cursor-pointer p-4 rounded-lg border-b-0 hover:border-b-2 hover:border-orange-400"
+                             onMouseEnter={(e) => {
+                               e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+                             }}
+                             onMouseLeave={(e) => {
+                               e.currentTarget.style.backgroundColor = 'transparent'
+                             }}>
+                          <div className="flex flex-col">
+                            <div className="w-full h-56 overflow-hidden mb-4 rounded-lg">
+                              <img
+                                src="/assets/handCareImage.png"
+                                alt="Exfoliants"
+                                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                              />
+                            </div>
+                            <div className="text-left">
+                              <p className="font-din-arabic text-black text-opacity-60 font-light text-xs mb-2 tracking-wide uppercase">
+                                Home Creations
+                              </p>
+                              <h3 className="font-din-arabic text-black font-light text-lg mb-3 leading-tight">
+                                Exfoliants
+                              </h3>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -679,9 +816,9 @@ export function Navigation({
                         </span>
                       </div>
                       <div className="space-y-2 text-center">
-                       <Link href={"/cart"}>
+                       <Link href={`/${countryCode}/cart`}>
                         <button className="w-full py-3 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide text-center font-din-arabic">
-                          Checkout
+                         Checkout
                         </button>
                        </Link>
                         <button

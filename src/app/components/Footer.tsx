@@ -2,21 +2,36 @@
 import React from 'react'
 import { motion } from 'motion/react'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 
 export function Footer() {
+  const pathname = usePathname()
+  
+  // Get country code from pathname
+  const getCountryCode = () => {
+    if (pathname) {
+      const pathParts = pathname.split('/')
+      return pathParts[1] || 'in'
+    }
+    return 'in'
+  }
+
+  const countryCode = getCountryCode()
+
   const footerSections = [
     {
       title: 'ABOUT US',
       links: [
         { name: 'Brand', href: '#' },
-        { name: 'Journal', href: '#' },
+        { name: 'Journal', href: `/${countryCode}/blogs` },
         { name: 'Careers', href: '#' },
       ],
     },
     {
       title: 'SHOP',
       links: [
-        { name: 'Home Creations', href: '#' },
+        { name: 'Home Creations', href: `/${countryCode}/home-creations` },
         { name: 'Collections', href: '#' },
         { name: 'Gift Sets', href: '#' },
       ],
@@ -24,18 +39,18 @@ export function Footer() {
     {
       title: 'ORDERS AND SUPPORT',
       links: [
-        { name: 'Order History', href: '#' },
+        { name: 'Order History', href: `/${countryCode}/account` },
         { name: 'Track Your Order', href: '#' },
         { name: 'Help & FAQs', href: '#' },
-        { name: 'Returns & Exchanges', href: '#' },
-        { name: 'Terms & Conditions', href: '#' },
+        { name: 'Returns & Exchanges', href: `/${countryCode}/returns-and-exchanges` },
+        { name: 'Terms & Conditions', href: `/${countryCode}/terms-and-conditions` },
       ],
     },
     {
       title: 'FOLLOW US',
       links: [
-        { name: 'Instagram', href: '#' },
-        { name: 'Facebook', href: '#' },
+        { name: 'Instagram', href: 'https://instagram.com/jardinbotanica', external: true },
+        { name: 'Facebook', href: 'https://facebook.com/jardinbotanica', external: true },
       ],
     },
   ]
@@ -89,13 +104,26 @@ export function Footer() {
                     }}
                     viewport={{ once: true }}
                   >
-                    <motion.a
-                      href={link.href}
-                      whileHover={{ x: 4, color: '#ffffff' }}
-                      className="font-din-arabic text-sm text-white/60 hover:text-white transition-all duration-300 block"
-                    >
-                      {link.name}
-                    </motion.a>
+                    {(link as any).external ? (
+                      <motion.a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ x: 4, color: '#ffffff' }}
+                        className="font-din-arabic text-sm text-white/60 hover:text-white transition-all duration-300 block"
+                      >
+                        {link.name}
+                      </motion.a>
+                    ) : (
+                      <Link href={link.href}>
+                        <motion.span
+                          whileHover={{ x: 4, color: '#ffffff' }}
+                          className="font-din-arabic text-sm text-white/60 hover:text-white transition-all duration-300 block cursor-pointer"
+                        >
+                          {link.name}
+                        </motion.span>
+                      </Link>
+                    )}
                   </motion.li>
                 ))}
               </ul>
