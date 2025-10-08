@@ -16,38 +16,47 @@ type Props = {
 }
 
 export const PRODUCT_LIMIT = 12
+export const dynamicParams = true
 
 export async function generateStaticParams() {
-  const { collections } = await listCollections({
-    fields: "*products",
-  })
+  try {
+    const { collections } = await listCollections({
+      fields: "*products",
+    })
 
-  if (!collections) {
+    if (!collections || collections.length === 0) {
+      return []
+    }
+
+    const regions = await listRegions()
+    
+    if (!regions || regions.length === 0) {
+      return []
+    }
+
+    const countryCodes = regions
+      .map((r) => r.countries?.map((c) => c.iso_2))
+      .flat()
+      .filter(Boolean) as string[]
+
+    const collectionHandles = collections
+      .map((collection: StoreCollection) => collection.handle)
+      .filter((handle): handle is string => Boolean(handle))
+
+    const staticParams = countryCodes
+      ?.map((countryCode: string) =>
+        collectionHandles.map((handle: string) => ({
+          countryCode,
+          handle,
+        }))
+      )
+      .flat()
+
+    return staticParams || []
+  } catch (error) {
+    console.warn("Failed to generate static params for collections:", error)
     return []
   }
-
-  const countryCodes = await listRegions().then(
-    (regions: StoreRegion[]) =>
-      regions
-        ?.map((r) => r.countries?.map((c) => c.iso_2))
-        .flat()
-        .filter(Boolean) as string[]
-  )
-
-  const collectionHandles = collections
-    .map((collection: StoreCollection) => collection.handle)
-    .filter((handle): handle is string => Boolean(handle))
-
-  const staticParams = countryCodes
-    ?.map((countryCode: string) =>
-      collectionHandles.map((handle: string) => ({
-        countryCode,
-        handle,
-      }))
-    )
-    .flat()
-
-  return staticParams || []
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
