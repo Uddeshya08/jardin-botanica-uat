@@ -57,8 +57,48 @@ function formatPrice(price?: number, currency?: string) {
   return `$${Math.round(price)}`
 }
 
+const products = [
+  {
+    id: 1,
+    name: "Body Floral",
+    price: 1800,
+    image: '/assets/handLotion.png',
+    hoverImage: "https://images.unsplash.com/photo-1729603370129-4816f7021a8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBoYW5kJTIwY3JlYW0lMjBib3RhbmljYWx8ZW58MXx8fHwxNzU3NjE0NDk2fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    description: "Delicate blooms, lingering scents",
+    badge: "BEST SELLER"
+  },
+  {
+    id: 2,
+    name: "Warm Roots",
+    price: 2200,
+    image: '/assets/crushedPineCandle.png',
+    hoverImage: "https://images.unsplash.com/photo-1611643380829-8f9b66da7e6f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBjYW5kbGUlMjBuYXR1cmFsfGVufDF8fHx8MTc1NzYxNDQ5OHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    description: "Grounded in earth, rooted warmth",
+    badge: "NEW"
+  },
+  {
+    id: 3,
+    name: "Aqua Vitei",
+    price: 1900,
+    image: '/assets/scentedCandle.png',
+    hoverImage: "https://images.unsplash.com/photo-1596642748852-5596416147ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvcmdhbmljJTIwc2tpbmNhcmUlMjBib3R0bGV8ZW58MXx8fHwxNzU3NjE0NTAzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    description: "Fresh as the tide, crisp notes",
+    badge: "POPULAR"
+  },
+  {
+    id: 4,
+    name: "Rose Garden",
+    price: 2100,
+    image: '/assets/handLotion.png',
+    hoverImage: "https://images.unsplash.com/photo-1624372635277-283042097f31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXR1cmFsJTIwc29hcCUyMGJvdGFuaWNhbHxlbnwxfHx8fDE3NTc2MTQ1MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    description: "Petals and morning dew",
+    badge: "LIMITED"
+  }
+];
+
 export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
   const [hoveredId, setHoveredId] = useState<string | number | null>(null)
+  const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
   const [addedToCart, setAddedToCart] = useState<string | number | null>(null)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -185,7 +225,7 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="font-american-typewriter text-3xl tracking-tight mb-8 text-black leading-tight"
+            className="font-american-typewriter text-3xl tracking-tight mb-8 text-black"
           >
             {heading}
           </motion.h2>
@@ -203,7 +243,7 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
         </motion.div>
 
         {/* Cards */}
-        {cards.map((p, index) => (
+        {/* {cards.map((p, index) => (
           <motion.div
             key={p.id ?? `${p.name}-${index}`}
             initial={{ opacity: 0, y: 20 }}
@@ -273,7 +313,110 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
               </motion.button>
             </div>
           </motion.div>
-        ))}
+        ))} */}
+
+       {products.map((product, index) => (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.08 }}
+              viewport={{ once: true }}
+              className="flex-shrink-0 group cursor-pointer relative"
+              style={{ 
+                width: '280px',
+                scrollSnapAlign: 'start'
+              }}
+              onMouseEnter={() => setHoveredProduct(product.id)}
+              onMouseLeave={() => setHoveredProduct(null)}
+            >
+                  {/* Product Image */}
+                  <div className="relative mb-6 overflow-hidden bg-white/20 rounded-sm">
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      className="relative"
+                      style={{ height: '320px' }}
+                    >
+                      {/* Base Image */}
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-opacity duration-300"
+                        style={{
+                          opacity: hoveredProduct === product.id ? 0 : 1
+                        }}
+                      />
+                      
+                      {/* Hover Image */}
+                      <img
+                        src={product.hoverImage}
+                        alt={`${product.name} alternative view`}
+                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                        style={{
+                          opacity: hoveredProduct === product.id ? 1 : 0
+                        }}
+                      />
+
+                      {/* Badge */}
+                      <div className="absolute top-4 left-4">
+                        <span 
+                          className="px-3 py-1 text-xs font-din-arabic tracking-wide font-medium"
+                          style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            color: '#000',
+                            borderRadius: '12px'
+                          }}
+                        >
+                          {product.badge}
+                        </span>
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  {/* Product Details */}
+                  <div className="space-y-3">
+                    {/* Product Name and Price */}
+                    <div className="flex items-start justify-between">
+                      <h3 
+                        className="font-american-typewriter text-black group-hover:text-black/80 transition-colors duration-200 flex-1"
+                        style={{ fontSize: '18px', lineHeight: '1.3', letterSpacing: '0.05em' }}
+                      >
+                        {product.name}
+                      </h3>
+                      
+                      <span 
+                        className="font-din-arabic text-black ml-4 flex-shrink-0 group-hover:text-black/80 transition-colors duration-200"
+                        style={{ fontSize: '16px', lineHeight: '1.3', letterSpacing: '0.1em' }}
+                      >
+                        ${(product.price / 100).toFixed(0)}
+                      </span>
+                    </div>
+
+                    {/* Product Description */}
+                    <p 
+                      className="font-din-arabic text-black/70 group-hover:text-black/60 transition-colors duration-200"
+                      style={{ fontSize: '14px', lineHeight: '1.4', letterSpacing: '0.1em' }}
+                    >
+                      {product.description}
+                    </p>
+
+                    {/* Quick Add Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(product.id);
+                      }}
+                      className="w-full mt-4 px-4 py-2 bg-transparent border border-black/20 text-black hover:bg-black hover:text-white transition-all duration-300 font-din-arabic text-sm tracking-wide opacity-0 group-hover:opacity-100 text-center"
+                    >
+                      {addedToCart === product.id ? '✓ Added' : 'Quick Add'}
+                    </motion.button>
+                  </div>
+
+                </motion.div>
+            ))}
 
         <div className="flex-shrink-0 w-6 lg:w-12" />
       </div>

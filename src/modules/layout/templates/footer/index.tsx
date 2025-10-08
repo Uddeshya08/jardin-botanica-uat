@@ -401,7 +401,7 @@ const Product = () => {
             {/* Right - Text (45%) */}
             <div className="space-y-6 bg-[#C5C8B3] w-full h-full pl-6 lg:pl-20 pt-12">
               <h2 style={fontStyles.subsequentHeading} className="px-2">
-                A FOREST REBORN
+                A Forest Reborn
               </h2>
               <p
                 style={{ ...fontStyles.subCopy, lineHeight: "1.8" }}

@@ -16,6 +16,7 @@ interface StickyCartBarProps {
   heroCartItem?: any
   onUpdateHeroQuantity?: (quantity: number) => void
   onCartUpdate?: (item: any | null) => void
+  cartItems?: any[]
 }
 
 /* ————— helpers ————— */
@@ -51,6 +52,7 @@ export function StickyCartBar({
   heroCartItem,
   onUpdateHeroQuantity,
   onCartUpdate,
+  cartItems = [],
 }: StickyCartBarProps) {
   const [quantity, setQuantity] = useState(1)
   const [isAddedToCart, setIsAddedToCart] = useState(false)
@@ -90,15 +92,29 @@ export function StickyCartBar({
     setUiError(null)
     setIsAddedToCart(true)
 
+    // Check if item already exists in cart
+    const productId = product?.id ?? variant.id
+    const existingItem = cartItems.find((item) => item.id === productId || item.variant_id === variant.id)
+    
     // optimistic updates for nav / other UIs
-    onCartUpdate?.({
-      id: product?.id ?? variant.id,
-      variant_id: variant.id,
-      name,
-      price: minor,
-      quantity,
-      image,
-    })
+    if (existingItem) {
+      // If item exists, update quantity
+      onCartUpdate?.({
+        ...existingItem,
+        quantity: existingItem.quantity + quantity,
+      })
+    } else {
+      // If item doesn't exist, add as new
+      onCartUpdate?.({
+        id: productId,
+        variant_id: variant.id,
+        name,
+        price: minor,
+        quantity,
+        image,
+      })
+    }
+    
     emitCartUpdated({ quantityDelta: quantity })
 
     // background network
@@ -129,9 +145,10 @@ export function StickyCartBar({
         <motion.div
           initial={{ y: 100, opacity: 0, scale: 0.95 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94], exit: { duration: 0.3 } }}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 bg-white/50 backdrop-blur-3xl border border-white/30 rounded-3xl shadow-2xl shadow-black/10 max-w-4xl w-full mx-6"
+          style={{ pointerEvents: 'auto' }}
         >
           <div className="px-6 py-3 relative">
             <div className="flex items-center justify-between">

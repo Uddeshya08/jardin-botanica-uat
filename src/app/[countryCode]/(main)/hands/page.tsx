@@ -120,6 +120,7 @@ export default function App() {
         heroCartItem={heroCartItem}
         onUpdateHeroQuantity={handleHeroQuantityUpdate}
         onCartUpdate={handleCartUpdate}
+        cartItems={cartItems}
       />
       {/* Bottom Fold Sections */}
       <Afterlife />
