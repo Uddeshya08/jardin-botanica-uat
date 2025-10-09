@@ -72,7 +72,7 @@ const TERMS_SECTIONS: TermsSection[] = [
 export function TermsAndConditions() {
 
   return (
-    <div className="min-h-screen pt-32 pb-24 px-6 md:px-12 lg:px-20" style={{ backgroundColor: '#f8f8f8' }}>
+    <div className="min-h-screen pt-32 pb-24 px-6 md:px-12 lg:px-20">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div 
@@ -81,49 +81,45 @@ export function TermsAndConditions() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="font-american-typewriter text-4xl md:text-5xl mb-6 text-black">
+          <h1 className="font-american-typewriter text-3xl mb-6 text-black">
             Terms & Conditions
           </h1>
-          <div className="h-px w-24 bg-black/20 mb-6"></div>
-          <p className="font-din-arabic text-black/60 tracking-wide text-sm">
-            Last updated: October 8, 2025
+          <div className="h-px w-20 bg-black/15 mb-6"></div>
+          <p className="font-din-arabic text-black/50 tracking-wide">
+            Last updated: October 5, 2025
           </p>
         </motion.div>
 
         {/* Content */}
-        <div className="space-y-0 bg-white shadow-sm" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+        <div className="space-y-0">
           {TERMS_SECTIONS.map((section, index) => (
             <motion.section
               key={section.number}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.05 }}
-              className={`group relative border-b border-black/10 px-6 md:px-12 ${
-                index === TERMS_SECTIONS.length - 1 
-                  ? 'border-b-0 py-10 pb-12' 
-                  : 'py-10'
-              }`}
+              className={`group relative border-b border-black/10 ${index === TERMS_SECTIONS.length - 1 ? 'border-b-0 py-10 pb-0' : 'py-10'}`}
             >
               <div className="flex gap-6 md:gap-10 items-start">
                 {/* Number */}
-                <div className="flex-shrink-0 w-8 md:w-10 pt-1">
-                  <span className="font-din-arabic text-xl md:text-2xl text-black/20 tracking-wide font-light">
+                <div className="flex-shrink-0 w-10 pt-1">
+                  <span className="font-din-arabic text-black/25 tracking-wide">
                     {section.number}
                   </span>
                 </div>
                 
                 {/* Content */}
                 <div className="flex-1">
-                  <h2 className="font-american-typewriter text-xl md:text-2xl mb-4 text-black">
+                  <h2 className="font-american-typewriter mb-5 text-black font-bold">
                     {section.title}
                   </h2>
-                  <p className="font-din-arabic text-black/70 leading-relaxed text-base">
+                  <p className="font-din-arabic text-black/65 leading-relaxed">
                     {section.isContact ? (
                       <>
                         For questions, concerns, or clarifications, please write to us at{' '}
                         <a 
                           href="mailto:hello@jardinbotanica.com" 
-                          className="text-black font-medium underline decoration-black/30 hover:decoration-black/80 transition-all duration-300"
+                          className="text-black underline decoration-black/20 hover:decoration-black/60 transition-all duration-300"
                         >
                           hello@jardinbotanica.com
                         </a>
@@ -141,18 +137,18 @@ export function TermsAndConditions() {
 
         {/* Footer Note */}
         <motion.div 
-          className="mt-20 md:mt-32"
+          className="mt-32 pt-16 border-t border-black/8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.8 }}
         >
-          <div className="text-center space-y-6 py-12 bg-white shadow-sm" style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+          <div className="text-center space-y-6">
             <div className="flex items-center justify-center gap-3">
-              <div className="h-px w-12 bg-black/10"></div>
-              <span className="font-din-arabic text-black/30 text-xs">●</span>
-              <div className="h-px w-12 bg-black/10"></div>
+              <div className="h-px w-12 bg-black/8"></div>
+              <span className="font-din-arabic text-black/20 text-xs">●</span>
+              <div className="h-px w-12 bg-black/8"></div>
             </div>
-            <p className="font-din-arabic text-black/50 tracking-wide text-sm">
+            <p className="font-din-arabic text-black/40 tracking-wide text-sm">
               Thank you for choosing Jardin Botanica
             </p>
           </div>
