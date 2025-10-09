@@ -76,6 +76,26 @@ export function ProductHero({
   const imgs = product.images?.map((i) => i.url).filter(Boolean) ?? []
   const productImages = imgs.length ? imgs : [fallbackImg]
 
+  // Check if the product is a cleanser or exfoliant
+  const isCleanserOrExfoliant = () => {
+    const title = product.title?.toLowerCase() || ""
+    const handle = (product as any).handle?.toLowerCase() || ""
+    
+    // Check for cleanser/exfoliant keywords
+    const keywords = ["cleanser", "exfoliant", "hand wash", "handwash", "scrub", "cleansing"]
+    const canSeeActives = keywords.some(keyword => 
+      title.includes(keyword) || handle.includes(keyword)
+    )
+    
+    // Exclude candles and fragrances
+    const excludeKeywords = ["candle", "fragrance", "scent", "bloom", "cedar"]
+    const isExcluded = excludeKeywords.some(keyword => 
+      title.includes(keyword) || handle.includes(keyword)
+    )
+    
+    return canSeeActives && !isExcluded
+  }
+
   const handleAddToCart = () => {
     if (!variantId || adding || isPending) return
 
@@ -141,6 +161,8 @@ export function ProductHero({
       prev === productImages.length - 1 ? 0 : prev + 1
     )
   }
+
+  console.log('product--',product)
 
   return (
     <div className="flex" style={{ paddingTop: "80px", minHeight: "35vh" }}>
@@ -282,16 +304,16 @@ export function ProductHero({
           )}
 
           {/* Separator line before Ritual in Practice */}
-          <motion.div
+          {isCleanserOrExfoliant() && ( <motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ duration: 0.6, delay: 0.9 }}
             className="w-full h-px origin-left"
             style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
-          />
+          />)}
 
           {/* Collapsible Ritual in Practice */}
-          {/* <motion.div
+          {isCleanserOrExfoliant() && (<motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.0 }}
@@ -317,54 +339,57 @@ export function ProductHero({
                 />
               </motion.div>
             </button>
-          </motion.div> */}
+          </motion.div>)}
 
           {/* Separator line before Actives & Key Botanicals */}
-          {/* <motion.div
+          {isCleanserOrExfoliant() && (
+          <motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ duration: 0.6, delay: 1.1 }}
             className="w-full h-px origin-left"
             style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
-          /> */}
+          />)}
 
-          {/* Collapsible Actives & Key Botanicals */}
-          {/* <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.2 }}
-            className="space-y-1"
-          >
-            <button
-              onClick={() => setIsActivesPanelOpen(true)}
-              className="flex items-center justify-between w-full py-1 text-left group"
+          {/* Collapsible Actives & Key Botanicals - Only show for cleansers and exfoliants */}
+          {isCleanserOrExfoliant() && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.2 }}
+              className="space-y-1"
             >
-              <span
-                className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
-                style={{ color: "#a28b6f" }}
+              <button
+                onClick={() => setIsActivesPanelOpen(true)}
+                className="flex items-center justify-between w-full py-1 text-left group"
               >
-                ACTIVES & KEY BOTANICALS
-              </span>
-              <motion.div
-                whileHover={{ rotate: 90 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                <Plus
-                  className="w-4 h-4 transition-colors duration-300"
+                <span
+                  className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
                   style={{ color: "#a28b6f" }}
-                />
-              </motion.div>
-            </button>
-          </motion.div> */}
+                >
+                  ACTIVES & KEY BOTANICALS
+                </span>
+                <motion.div
+                  whileHover={{ rotate: 90 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <Plus
+                    className="w-4 h-4 transition-colors duration-300"
+                    style={{ color: "#a28b6f" }}
+                  />
+                </motion.div>
+              </button>
+            </motion.div>
+          )}
 
           {/* Separator line before Fragrance Notes */}
-          {/* <motion.div
+      {isCleanserOrExfoliant() && (    <motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ duration: 0.6, delay: 1.3 }}
             className="w-full h-px origin-left"
             style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
-          /> */}
+          />)}
 
           {/* Collapsible Fragrance Notes */}
           <motion.div
@@ -405,7 +430,7 @@ export function ProductHero({
           />
 
           {/* Collapsible Full Ingredients */}
-          {/* <motion.div
+          {isCleanserOrExfoliant() && ( <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.6 }}
@@ -431,7 +456,7 @@ export function ProductHero({
                 />
               </motion.div>
             </button>
-          </motion.div> */}
+          </motion.div>)}
         </div>
       </motion.div>
 
@@ -499,7 +524,7 @@ export function ProductHero({
       </motion.div>
 
       {/* Panels */}
-      {/* <InfoPanel
+      <InfoPanel
         isOpen={isRitualPanelOpen}
         onClose={() => setIsRitualPanelOpen(false)}
         title="RITUAL IN PRACTICE"
@@ -557,7 +582,7 @@ export function ProductHero({
             </span>
           </div>
         </div>
-      </InfoPanel> */}
+      </InfoPanel>
       <InfoPanel
         isOpen={isFragranceNotesOpen}
         onClose={() => setIsFragranceNotesOpen(false)}
@@ -590,7 +615,7 @@ export function ProductHero({
           </div>
         </div>
       </InfoPanel>
-      {/* <InfoPanel
+      <InfoPanel
         isOpen={isIngredientsPanelOpen}
         onClose={() => setIsIngredientsPanelOpen(false)}
         title="FULL INGREDIENTS"
@@ -602,7 +627,7 @@ export function ProductHero({
           Acid, Phenoxyethanol, Ethylhexylglycerin, Natural Fragrance,
           Tocopherol (Vitamin E).
         </p>
-      </InfoPanel> */}
+      </InfoPanel>
     </div>
   )
 }

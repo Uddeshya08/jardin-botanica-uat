@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { User, Search, ShoppingBag, X, Plus, Minus, Heart } from 'lucide-react'
+import { User, Search, ShoppingBag, X, Plus, Minus, Heart, Menu, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
 
 interface CartItem {
   id: string
@@ -17,13 +16,16 @@ interface NavigationProps {
   isScrolled?: boolean
   cartItems?: CartItem[]
   onCartUpdate?: (item: CartItem | null) => void
+  onDropdownChange?: (isOpen: boolean) => void
 }
 
 export function Navigation({
   isScrolled = false,
   cartItems = [],
   onCartUpdate,
+  onDropdownChange,
 }: NavigationProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
@@ -32,13 +34,13 @@ export function Navigation({
   const [isNavHovered, setIsNavHovered] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [isHomePage, setIsHomePage] = useState(false)
-  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false)
-  const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null)
-  const megaMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [mobileActiveDropdown, setMobileActiveDropdown] = useState<string | null>(null)
   const cartRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const pathname = usePathname()
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Handle component mounting and home page detection
   useEffect(() => {
@@ -107,6 +109,18 @@ export function Navigation({
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', handleFocus)
       document.body.classList.remove('home-page')
+      // Clean up any blur overlays
+      const blurOverlay = document.getElementById('dropdown-blur-overlay')
+      if (blurOverlay && blurOverlay.parentNode) {
+        blurOverlay.parentNode.removeChild(blurOverlay)
+      }
+      
+      // Reset navigation styles
+      const navigationElement = document.querySelector('nav') as HTMLElement
+      if (navigationElement) {
+        navigationElement.style.zIndex = ''
+        navigationElement.style.position = ''
+      }
     }
   }, [])
 
@@ -152,13 +166,18 @@ export function Navigation({
     }
   }, [isSearchOpen])
 
-  // Cleanup mega menu timeout on unmount
+  // Preload dropdown images for instant display
   useEffect(() => {
-    return () => {
-      if (megaMenuTimeoutRef.current) {
-        clearTimeout(megaMenuTimeoutRef.current)
+    menuItems.forEach(item => {
+      if (item.dropdown) {
+        item.dropdown.forEach(dropdownItem => {
+          if (dropdownItem.image) {
+            const img = new window.Image()
+            img.src = dropdownItem.image
+          }
+        })
       }
-    }
+    })
   }, [])
 
   const getTotalPrice = () => {
@@ -198,49 +217,118 @@ export function Navigation({
     }
   }
 
-  const handleMegaMenuOpen = (menuLabel: string) => {
-    // Clear any existing timeout
-    if (megaMenuTimeoutRef.current) {
-      clearTimeout(megaMenuTimeoutRef.current)
+  const handleMouseEnter = (itemName: string) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current)
+      dropdownTimeoutRef.current = null
     }
-    setIsMegaMenuOpen(true)
-    setActiveMegaMenu(menuLabel)
-  }
-
-  const handleMegaMenuClose = () => {
-    // Add a small delay before closing to prevent flickering
-    megaMenuTimeoutRef.current = setTimeout(() => {
-      setIsMegaMenuOpen(false)
-      setActiveMegaMenu(null)
-    }, 150)
-  }
-
-  const handleMegaMenuEnter = () => {
-    // Cancel the close timeout when mouse enters the mega menu
-    if (megaMenuTimeoutRef.current) {
-      clearTimeout(megaMenuTimeoutRef.current)
+    setActiveDropdown(itemName)
+    setHoveredItem(null) // Reset hovered item when opening a new dropdown
+    onDropdownChange?.(true)
+    
+    // Add overlay blur effect instead of direct element blur
+    const navigationElement = document.querySelector('nav') as HTMLElement
+    
+    // Keep navigation sharp and on top
+    if (navigationElement) {
+      navigationElement.style.filter = 'none'
+      navigationElement.style.zIndex = '60'
+      navigationElement.style.position = 'relative'
     }
+    
+    // Create a blur overlay instead of blurring elements directly
+    let blurOverlay = document.getElementById('dropdown-blur-overlay')
+    if (!blurOverlay) {
+      blurOverlay = document.createElement('div')
+      blurOverlay.id = 'dropdown-blur-overlay'
+      blurOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        backdrop-filter: blur(2px);
+        background: rgba(0, 0, 0, 0.1);
+        z-index: 45;
+        pointer-events: none;
+        transition: opacity 0.2s ease-out;
+        opacity: 0;
+      `
+      document.body.appendChild(blurOverlay)
+    }
+    
+    // Show the blur overlay
+    setTimeout(() => {
+      if (blurOverlay) {
+        blurOverlay.style.opacity = '1'
+      }
+    }, 10)
   }
 
+  const handleMouseLeave = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setActiveDropdown(null)
+      setHoveredItem(null)
+      onDropdownChange?.(false)
+      
+      // Remove blur overlay when dropdown closes
+      const blurOverlay = document.getElementById('dropdown-blur-overlay')
+      if (blurOverlay) {
+        blurOverlay.style.opacity = '0'
+        setTimeout(() => {
+          if (blurOverlay && blurOverlay.parentNode) {
+            blurOverlay.parentNode.removeChild(blurOverlay)
+          }
+        }, 200) // Wait for transition to complete
+      }
+      
+      // Reset navigation styles
+      const navigationElement = document.querySelector('nav') as HTMLElement
+      if (navigationElement) {
+        navigationElement.style.zIndex = ''
+        navigationElement.style.position = ''
+      }
+    }, 100) // Reduced for faster, smoother response
+  }
+
+  const handleDropdownItemHover = (itemLabel: string) => {
+    setHoveredItem(itemLabel)
+  }
+
+  // Define menu items with dropdown structure
   const menuItems = [
     {
-      label: 'HANDS',
-      url: '/hands',
-      hasMegaMenu: true,
+      name: 'BODY & HANDS',
+      dropdown: [
+        { 
+          label: 'Cedar Bloom Collection', 
+          href: '/products/cedarbloom',
+          image: '/assets/botanicalLeaves.png'
+        },
+        { 
+          label: 'Cleansers & Exfoliants', 
+          href: '/products/cleansersexfoliants',
+          image: '/assets/handCareImage.png'
+        }
+      ]
     },
     {
-      label: 'HOME CREATIONS',
-      url: '/home-creations',
-      hasMegaMenu: true,
+      name: 'HOME CREATIONS',
+      dropdown: [
+        { 
+          label: 'Candles', 
+          href: '#',
+          image: 'https://images.unsplash.com/photo-1648310379950-2773bb5d2525?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb3Jlc3QlMjBzY2VudGVkJTIwY2FuZGxlfGVufDF8fHx8MTc1OTc2OTE1NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+        },
+        { 
+          label: 'Lava Rock Diffusers', 
+          href: '#',
+          image: 'https://images.unsplash.com/photo-1747198919508-a7657e63d4f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXZhJTIwcm9jayUyMGRpZmZ1c2VyJTIwYXJvbWF0aGVyYXB5fGVufDF8fHx8MTc1OTc2ODkyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+        }
+      ]
     },
-    {
-      label: 'JOURNAL',
-      url: '/blogs',
-    },
-    {
-      label: 'THE LAB',
-      url: '/the-lab',
-    }
+    { name: 'JOURNAL', href: '/blogs' },
+    { name: 'BOTANIST\'S LAB', href: '/the-lab' }
   ]
 
 
@@ -304,17 +392,6 @@ export function Navigation({
   }
 
   const navStyles = getNavStyles()
-
-  // Get country code from pathname
-  const getCountryCode = () => {
-    if (pathname) {
-      const pathParts = pathname.split('/')
-      return pathParts[1] || 'in'
-    }
-    return 'in'
-  }
-
-  const countryCode = getCountryCode()
 
   return (
     <>
@@ -393,221 +470,163 @@ export function Navigation({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="hidden lg:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2 gap-6"
+          className="hidden lg:flex space-x-8 absolute left-1/2 transform -translate-x-1/2"
         >
           {menuItems.map((item, index) => (
-            <div
-              key={item.label}
+            <div 
+              key={item.name}
               className="relative"
-              onMouseEnter={() => {
-                if (item.hasMegaMenu) {
-                  handleMegaMenuOpen(item.label)
-                }
-              }}
-              onMouseLeave={() => {
-                if (item.hasMegaMenu) {
-                  handleMegaMenuClose()
-                }
-              }}
+              onMouseEnter={() => item.dropdown && handleMouseEnter(item.name)}
+              onMouseLeave={handleMouseLeave}
             >
               <motion.a
-                href={item.url}
+                href={item.href || '#'}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + index * 0.1, duration: 0.4 }}
-                className="font-light text-sm tracking-widest transition-all duration-300 relative group hover:opacity-80 whitespace-nowrap px-1 block"
+                className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative group/item hover:opacity-80 whitespace-nowrap"
                 style={{ color: navStyles.textColor }}
               >
-                {item.label}
-                <span
-                  className="absolute bottom-[-4px] left-0 w-0 h-px bg-orange-400 transition-all duration-500 group-hover:w-full"
+                {item.name}
+                <span 
+                  className="absolute bottom-[-4px] left-0 w-0 h-[1px] transition-all duration-500 group-hover/item:w-full"
+                  style={{ backgroundColor: '#e58a4d' }}
                 ></span>
               </motion.a>
+
+              {/* Dropdown Menu */}
+              <AnimatePresence>
+                {item.dropdown && activeDropdown === item.name && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ 
+                      duration: 0.2, 
+                      ease: 'easeOut'
+                    }}
+                    className="absolute top-full left-0 pt-4 z-50"
+                  >
+                    <div 
+                      className="border shadow-2xl overflow-hidden"
+                      style={{ 
+                        backgroundColor: '#e3e3d8',
+                        borderColor: 'rgba(0, 0, 0, 0.1)',
+                      }}
+                    >
+                      <div className="flex h-72">
+                        {/* Menu Items */}
+                        <div className="py-6 w-80 flex flex-col">
+                          {item.dropdown.map((dropdownItem, idx) => (
+                            <a
+                              key={idx}
+                              href={dropdownItem.href}
+                              className="group/dropdown-item block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150 relative"
+                              style={{
+                                color: '#000000',
+                                fontSize: '0.95rem'
+                              }}
+                              onMouseEnter={() => {
+                                handleDropdownItemHover(dropdownItem.label)
+                              }}
+                            >
+                              <span className="relative inline-block">
+                                {dropdownItem.label}
+                                <span 
+                                  className="absolute bottom-[-2px] left-0 w-0 h-[1px] transition-all duration-300 group-hover/dropdown-item:w-full"
+                                  style={{ backgroundColor: '#e58a4d' }}
+                                ></span>
+                              </span>
+                            </a>
+                          ))}
+                        </div>
+                        
+                        {/* Individual Dropdown Images */}
+                        <div className="w-96 h-full overflow-hidden relative p-4" style={{ backgroundColor: '#e3e3d8' }}>
+                          {item.dropdown.map((dropdownItem, idx) => (
+                            <img
+                              key={dropdownItem.label}
+                              src={dropdownItem.image}
+                              alt={dropdownItem.label}
+                              className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                              style={{ 
+                                opacity: hoveredItem === dropdownItem.label ? 1 : 0,
+                                transition: 'opacity 0.2s ease-out',
+                                zIndex: hoveredItem === dropdownItem.label ? 2 : 1
+                              }}
+                              loading="eager"
+                            />
+                          ))}
+                          {item.dropdown[0]?.image && (
+                            <img
+                              key="default"
+                              src={item.dropdown[0].image}
+                              alt={item.dropdown[0].label}
+                              className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                              style={{ 
+                                opacity: !hoveredItem ? 1 : 0,
+                                transition: 'opacity 0.2s ease-out',
+                                zIndex: 0
+                              }}
+                              loading="eager"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           ))}
         </motion.div>
 
-        {/* Mega Menu */}
-        <AnimatePresence>
-          {isMegaMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="absolute top-full left-0 right-0 shadow-lg z-40"
-              style={{ 
-                backgroundColor: '#e3e3d8',
-                borderTop: '1px solid rgba(0, 0, 0, 0.1)' 
-              }}
-              onMouseEnter={handleMegaMenuEnter}
-              onMouseLeave={handleMegaMenuClose}
-            >
-              <div className="max-w-7xl mx-auto px-6 lg:px-12 py-20">
-                {/* HANDS Mega Menu */}
-                {activeMegaMenu === 'HANDS' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Cedar Bloom Card */}
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1, duration: 0.4 }}
-                      className="group cursor-pointer"
-                    >
-                      <Link href="/products/cedarbloom">
-                        <div className="bg-transparent hover:bg-white hover:bg-opacity-15 transition-all duration-300 group cursor-pointer p-4 rounded-lg border-b-0 hover:border-b-2 hover:border-orange-400"
-                             onMouseEnter={(e) => {
-                               e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
-                             }}
-                             onMouseLeave={(e) => {
-                               e.currentTarget.style.backgroundColor = 'transparent'
-                             }}>
-                          <div className="flex flex-col">
-                            <div className="w-full h-56 overflow-hidden mb-4 rounded-lg">
-                              <img
-                                src="/assets/botanicalLeaves.png"
-                                alt="Cedar Bloom Collection"
-                                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                              />
-                            </div>
-                            <div className="text-left">
-                              <p className="font-din-arabic text-black text-opacity-60 font-light text-xs mb-2 tracking-wide uppercase">
-                                Hand Care
-                              </p>
-                              <h3 className="font-din-arabic text-black font-light text-lg mb-3 leading-tight">
-                                Cedar Bloom Collection
-                              </h3>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </motion.div>
-
-                    {/* Hand Lotion Card */}
-                    <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2, duration: 0.4 }}
-                      className="group cursor-pointer"
-                    >
-                      <Link href="/products/handlotion">
-                        <div className="bg-transparent hover:bg-white hover:bg-opacity-15 transition-all duration-300 group cursor-pointer p-4 rounded-lg border-b-0 hover:border-b-2 hover:border-orange-400"
-                             onMouseEnter={(e) => {
-                               e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
-                             }}
-                             onMouseLeave={(e) => {
-                               e.currentTarget.style.backgroundColor = 'transparent'
-                             }}>
-                          <div className="flex flex-col">
-                            <div className="w-full h-56 overflow-hidden mb-4 rounded-lg">
-                              <img
-                                src="/assets/handLotion.png"
-                                alt="Hand Lotion"
-                                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                              />
-                            </div>
-                            <div className="text-left">
-                              <p className="font-din-arabic text-black text-opacity-60 font-light text-xs mb-2 tracking-wide uppercase">
-                                Hand Care
-                              </p>
-                              <h3 className="font-din-arabic text-black font-light text-lg mb-3 leading-tight">
-                                Hand Lotion
-                              </h3>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </motion.div>
-                  </div>
-                )}
-
-                {/* HOME CREATIONS Mega Menu */}
-                {activeMegaMenu === 'HOME CREATIONS' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Cleaners Card */}
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1, duration: 0.4 }}
-                      className="group cursor-pointer"
-                    >
-                      <Link href="/products/cleaners">
-                        <div className="bg-transparent hover:bg-white hover:bg-opacity-15 transition-all duration-300 group cursor-pointer p-4 rounded-lg border-b-0 hover:border-b-2 hover:border-orange-400"
-                             onMouseEnter={(e) => {
-                               e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
-                             }}
-                             onMouseLeave={(e) => {
-                               e.currentTarget.style.backgroundColor = 'transparent'
-                             }}>
-                          <div className="flex flex-col">
-                            <div className="w-full h-56 overflow-hidden mb-4 rounded-lg">
-                              <img
-                                src="/assets/handwashImg.png"
-                                alt="Cleaners"
-                                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                              />
-                            </div>
-                            <div className="text-left">
-                              <p className="font-din-arabic text-black text-opacity-60 font-light text-xs mb-2 tracking-wide uppercase">
-                                Home Creations
-                              </p>
-                              <h3 className="font-din-arabic text-black font-light text-lg mb-3 leading-tight">
-                                Cleaners
-                              </h3>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </motion.div>
-
-                    {/* Exfoliants Card */}
-                    <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2, duration: 0.4 }}
-                      className="group cursor-pointer"
-                    >
-                      <Link href="/products/exfoliants">
-                        <div className="bg-transparent hover:bg-white hover:bg-opacity-15 transition-all duration-300 group cursor-pointer p-4 rounded-lg border-b-0 hover:border-b-2 hover:border-orange-400"
-                             onMouseEnter={(e) => {
-                               e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
-                             }}
-                             onMouseLeave={(e) => {
-                               e.currentTarget.style.backgroundColor = 'transparent'
-                             }}>
-                          <div className="flex flex-col">
-                            <div className="w-full h-56 overflow-hidden mb-4 rounded-lg">
-                              <img
-                                src="/assets/handCareImage.png"
-                                alt="Exfoliants"
-                                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                              />
-                            </div>
-                            <div className="text-left">
-                              <p className="font-din-arabic text-black text-opacity-60 font-light text-xs mb-2 tracking-wide uppercase">
-                                Home Creations
-                              </p>
-                              <h3 className="font-din-arabic text-black font-light text-lg mb-3 leading-tight">
-                                Exfoliants
-                              </h3>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </motion.div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Actions */}
+        {/* Mobile Menu Toggle */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7, duration: 0.6 }}
-          className="flex items-center gap-6"
+          className="lg:hidden flex items-center space-x-4"
+        >
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 transition-all duration-300"
+            style={{ color: navStyles.textColor }}
+            aria-label="Menu"
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </motion.button>
+          
+          <div className="relative" ref={cartRef}>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsCartOpen(!isCartOpen)}
+              className="p-2 transition-all duration-300"
+              style={{ color: navStyles.textColor }}
+              aria-label="Shopping bag"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {getTotalItems() > 0 && (
+                <span 
+                  className="absolute -top-1 -right-1 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-din-arabic"
+                  style={{ backgroundColor: '#e58a4d' }}
+                >
+                  {getTotalItems()}
+                </span>
+              )}
+            </motion.button>
+          </div>
+        </motion.div>
+
+        {/* Desktop Actions */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7, duration: 0.6 }}
+          className="hidden lg:flex items-center space-x-6"
         >
           {/* Search Section */}
           <div className="relative flex items-center" ref={searchRef}>
@@ -676,7 +695,7 @@ export function Navigation({
             style={{ color: navStyles.textColor }}
             aria-label="Profile"
           >
-            <a href="/account">
+            <a href="/profile">
               <User className="w-5 h-5" />
             </a>
           </motion.button>
@@ -816,9 +835,9 @@ export function Navigation({
                         </span>
                       </div>
                       <div className="space-y-2 text-center">
-                       <Link href={`/${countryCode}/cart`}>
+                       <Link href={"/cart"}>
                         <button className="w-full py-3 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide text-center font-din-arabic">
-                         Checkout
+                          Checkout
                         </button>
                        </Link>
                         <button
@@ -840,6 +859,244 @@ export function Navigation({
       </div>
     </div>
         </motion.nav>
+
+        {/* Mobile Menu Drawer */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+                onClick={() => setIsMobileMenuOpen(false)}
+                style={{ top: '106px' }} // Below the header
+              />
+              
+              {/* Menu Content */}
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                className="fixed right-0 top-[106px] bottom-0 w-full max-w-sm z-50 overflow-y-auto lg:hidden"
+                style={{ backgroundColor: '#e3e3d8' }}
+              >
+                <div className="p-6">
+                  {/* Mobile Navigation Links */}
+                  <nav className="space-y-1">
+                    {menuItems.map((item) => (
+                      <div key={item.name}>
+                        {item.dropdown ? (
+                          <div>
+                            <button
+                              onClick={() => setMobileActiveDropdown(
+                                mobileActiveDropdown === item.name ? null : item.name
+                              )}
+                              className="w-full flex items-center justify-between px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
+                            >
+                              <span>{item.name}</span>
+                              <ChevronDown 
+                                className={`w-4 h-4 transition-transform ${
+                                  mobileActiveDropdown === item.name ? 'rotate-180' : ''
+                                }`}
+                              />
+                            </button>
+                            <AnimatePresence>
+                              {mobileActiveDropdown === item.name && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="pl-4 py-2 space-y-1">
+                                    {item.dropdown.map((dropdownItem) => (
+                                      <a
+                                        key={dropdownItem.label}
+                                        href={dropdownItem.href}
+                                        className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                      >
+                                        {dropdownItem.label}
+                                      </a>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        ) : (
+                          <a
+                            href={item.href}
+                            className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            {item.name}
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </nav>
+
+                  {/* Mobile Search */}
+                  <div className="mt-8 pt-6 border-t" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
+                    <form onSubmit={handleSearchSubmit} className="relative">
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search..."
+                        className="w-full px-4 py-3 bg-white/50 border font-din-arabic tracking-wide focus:outline-none focus:border-black transition-colors"
+                        style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}
+                      />
+                      <button
+                        type="submit"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
+                      >
+                        <Search className="w-5 h-5" />
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Mobile Actions */}
+                  <div className="mt-6 space-y-3">
+                    <button
+                      onClick={() => {
+                        setIsWishlisted(!isWishlisted)
+                      }}
+                      className="w-full flex items-center justify-between px-4 py-3 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300"
+                      style={{ borderColor: '#D8D2C7' }}
+                    >
+                      <span>Wishlist</span>
+                      <Heart 
+                        className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`}
+                        style={{ color: isWishlisted ? '#e58a4d' : 'currentColor' }}
+                      />
+                    </button>
+                    
+                    <a
+                      href="/profile"
+                      className="w-full flex items-center justify-between px-4 py-3 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300"
+                      style={{ borderColor: '#D8D2C7' }}
+                    >
+                      <span>Account</span>
+                      <User className="w-5 h-5" />
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Mobile Cart Dropdown - Separate from desktop */}
+        <AnimatePresence>
+          {isCartOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="lg:hidden fixed right-4 top-[110px] w-[calc(100%-2rem)] max-w-sm bg-white border border-black/10 shadow-2xl z-50"
+              style={{ backgroundColor: '#e3e3d8' }}
+            >
+              {/* Cart Header */}
+              <div className="p-4 border-b border-black/10">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-american-typewriter text-lg text-black">Your Cart</h3>
+                  <button
+                    onClick={() => setIsCartOpen(false)}
+                    className="p-1 hover:bg-black/10 transition-colors rounded"
+                  >
+                    <X className="w-4 h-4 text-black/70" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Cart Content */}
+              <div className="max-h-[60vh] overflow-y-auto">
+                {cartItems.length === 0 ? (
+                  // Empty Cart State
+                  <div className="p-8 text-center">
+                    <div className="mb-4">
+                      <ShoppingBag className="w-12 h-12 text-black/30 mx-auto" />
+                    </div>
+                    <p className="font-din-arabic text-black/70 mb-4">Nothing is in your cart</p>
+                    <button
+                      onClick={() => setIsCartOpen(false)}
+                      className="font-din-arabic px-6 py-2 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
+                    >
+                      Continue Shopping
+                    </button>
+                  </div>
+                ) : (
+                  // Cart Items
+                  <div className="p-4 space-y-4">
+                    {cartItems.map((item) => (
+                      <div key={item.id} className="flex items-center space-x-3 p-3 bg-white/50 border border-black/5">
+                        {item.image && (
+                          <img 
+                            src={item.image} 
+                            alt={item.name}
+                            className="w-16 h-16 object-cover"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-din-arabic text-black font-medium truncate">{item.name}</h4>
+                          <p className="font-din-arabic text-black/70 text-sm">₹{item.price}</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <button 
+                            onClick={() => handleQuantityChange(item.id, -1)}
+                            className="p-1 hover:bg-black/10 transition-colors rounded"
+                          >
+                            <Minus className="w-3 h-3 text-black/70" />
+                          </button>
+                          <span className="font-din-arabic text-black text-sm min-w-[20px] text-center">
+                            {item.quantity}
+                          </span>
+                          <button 
+                            onClick={() => handleQuantityChange(item.id, 1)}
+                            className="p-1 hover:bg-black/10 transition-colors rounded"
+                          >
+                            <Plus className="w-3 h-3 text-black/70" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Cart Footer */}
+              {cartItems.length > 0 && (
+                <div className="p-4 border-t border-black/10">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-din-arabic text-black">Total:</span>
+                    <span className="font-din-arabic text-black font-medium">₹{getTotalPrice()}</span>
+                  </div>
+                  <div className="space-y-2 text-center">
+                    <Link href="/cart">
+                      <button className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide text-center">
+                        Checkout
+                      </button>
+                    </Link>
+                    <button 
+                      onClick={() => setIsCartOpen(false)}
+                      className="w-full font-din-arabic py-2 border border-black/20 text-black hover:bg-black/5 transition-colors tracking-wide text-center"
+                    >
+                      Continue Shopping
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </>
   )
