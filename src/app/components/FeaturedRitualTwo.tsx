@@ -1,94 +1,46 @@
 'use client'
-import React, { useMemo } from 'react'
+import React from 'react'
 import { motion } from 'motion/react'
+import { FeaturedRitualTwoSection } from '../../types/contentful'
 
-type ProductLike = {
-  title?: string
-  handle?: string
-  metadata?: Record<string, any>
+type FeaturedRitualTwoProps = {
+  featuredRitualTwoContent?: FeaturedRitualTwoSection | null
 }
 
-type Cta = {
-  label?: string
-  href?: string
-}
+export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTwoProps) {
+  // Default values if no Contentful data is provided
+  const defaults: FeaturedRitualTwoSection = {
+    title: '',
+    sectionKey: '',
+    productHandle: undefined,
+    heading: 'Hand Care Elevated',
+    subheading: 'A refreshing blend of tea antioxidants and gentle exfoliants, this handwash keeps your hands healthy, glowing, and nourished.',
+    backgroundColor: '#e3e3d8',
+    imageUrl: '/assets/handCareImage.png',
+    imageAlt: 'Jardin Botanica Tea Exfoliant Rinse with hands and botanical elements',
+    cta: { label: 'Read more', href: '#' },
+    imagePosition: 'left', // Changed default to image-left as requested
+    active: true,
+  }
 
-type FeaturedMeta = {
-  heading?: string
-  subheading?: string
-  bg?: string
-  image?: string
-  imageAlt?: string
-  cta?: Cta
-  // optional layout control
-  align?: 'image-right' | 'image-left'
-}
+  console.log('=== FeaturedRitualTwo Component Debug ===');
+  console.log('featuredRitualTwoContent:', featuredRitualTwoContent);
+  
+  if (featuredRitualTwoContent) {
+    console.log('Product Handle:', featuredRitualTwoContent.productHandle);
+    console.log('Section Key:', featuredRitualTwoContent.sectionKey);
+    console.log('Heading:', featuredRitualTwoContent.heading);
+    console.log('Image URL:', featuredRitualTwoContent.imageUrl);
+    console.log('Active:', featuredRitualTwoContent.active);
+  }
+  
+  const meta = featuredRitualTwoContent || defaults
 
-function stripJsonComments(str: string) {
-  return str
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/(^|[^:])\/\/.*$/gm, '$1')
-}
-function parseMaybe(v: any) {
-  if (typeof v !== 'string') return v
-  try { return JSON.parse(stripJsonComments(v.trim())) } catch { return v }
-}
-function parseTwice(v: any) {
-  const once = parseMaybe(v)
-  return typeof once === 'string' ? parseMaybe(once) : once
-}
-
-export function FeaturedRitualTwo({ product }: { product?: ProductLike }) {
-  // Read from metadata: prefer flat key, then sections.featuredRitualTwo
-  const meta: Required<FeaturedMeta> = useMemo(() => {
-    const defaults: Required<FeaturedMeta> = {
-      heading: 'Hand Care Elev',
-      subheading:
-        'A refreshing blend of tea antioxidants and gentle exfoliants, this handwash keeps your hands healthy, glowing, and nourished.',
-      bg: '#e3e3d8',
-      image: '/assets/handCareImage.png',
-      imageAlt:
-        'Jardin Botanica Tea Exfoliant Rinse with hands and botanical elements',
-      cta: { label: 'Read more', href: '#' },
-      align: 'image-right',
-    }
-
-    const raw =
-      product?.metadata?.featuredRitualTwo ??
-      product?.metadata?.sections?.featuredRitualTwo
-
-    if (!raw) return defaults
-
-    const parsed: any = parseTwice(raw)
-    if (!parsed || typeof parsed !== 'object') return defaults
-
-    return {
-      heading:
-        typeof parsed.heading === 'string' ? parsed.heading : defaults.heading,
-      subheading:
-        typeof parsed.subheading === 'string'
-          ? parsed.subheading
-          : defaults.subheading,
-      bg: typeof parsed.bg === 'string' ? parsed.bg : defaults.bg,
-      image: typeof parsed.image === 'string' ? parsed.image : defaults.image,
-      imageAlt:
-        typeof parsed.imageAlt === 'string' ? parsed.imageAlt : defaults.imageAlt,
-      cta: {
-        label:
-          typeof parsed.cta?.label === 'string'
-            ? parsed.cta.label
-            : defaults.cta.label,
-        href:
-          typeof parsed.cta?.href === 'string'
-            ? parsed.cta.href
-            : defaults.cta.href,
-      },
-      align:
-        parsed.align === 'image-left' || parsed.align === 'image-right'
-          ? parsed.align
-          : defaults.align,
-    }
-  }, [product])
+  // Don't render if Contentful data exists but is inactive
+  if (featuredRitualTwoContent && !featuredRitualTwoContent.active) {
+    console.log('Section is inactive, not rendering');
+    return null
+  }
 
   const Left = (
     <motion.div
@@ -149,7 +101,7 @@ export function FeaturedRitualTwo({ product }: { product?: ProductLike }) {
       <div className="h-[80vh] overflow-hidden">
         <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.9 }} className="w-full h-full">
           <img
-            src={meta.image}
+            src={meta.imageUrl}
             alt={meta.imageAlt}
             className="w-full h-full object-cover object-center"
           />
@@ -158,8 +110,8 @@ export function FeaturedRitualTwo({ product }: { product?: ProductLike }) {
     </motion.div>
   )
 
-  // Optional layout flip via metadata.align
-  const content = meta.align === 'image-left' ? (
+  // Layout based on imagePosition (default is image-left as requested)
+  const content = meta.imagePosition === 'left' ? (
     <>
       {Right}
       {Left}
@@ -173,8 +125,8 @@ export function FeaturedRitualTwo({ product }: { product?: ProductLike }) {
 
   return (
     <section
-      className="pt-4 pb-12 lg:pt-6 lg:pb-20"
-      style={{ backgroundColor: meta.bg, marginTop: '20px' }}
+      // className="pt-4 pb-12 lg:pt-6 lg:pb-20"
+      style={{ backgroundColor: meta.backgroundColor, marginTop: '20px' }}
     >
       <div className="flex">{content}</div>
     </section>
