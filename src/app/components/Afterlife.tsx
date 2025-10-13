@@ -171,13 +171,13 @@ export function Afterlife({ product }: { product?: ProductLike }) {
                 >
                   <div className={`flex items-start mb-3 ${item.title ? 'space-x-3' : 'justify-center'}`}>
                     <div
-                      className="p-2 rounded-full group/icon flex-shrink-0"
+                      className="p-3 rounded-full group/icon flex-shrink-0"
                       style={{ backgroundColor: "rgba(162, 139, 111, 0.08)" }}
                     >
                       {isOldFormat ? (
                         // Render Lucide icon for old format
                         <LucideIcon
-                          className="w-4 h-4 transition-transform duration-300 group-hover/icon:rotate-180"
+                          className="w-6 h-6 transition-transform duration-1000 ease-in-out group-hover/icon:rotate-[30deg]"
                           style={{ color: "#a28b6f" }}
                         />
                       ) : (
@@ -185,9 +185,9 @@ export function Afterlife({ product }: { product?: ProductLike }) {
                         <Image
                           src={iconSrc}
                           alt={iconAlt}
-                          width={16}
-                          height={16}
-                          className="w-4 h-4 transition-transform duration-300 group-hover/icon:rotate-180"
+                          width={24}
+                          height={24}
+                          className="w-6 h-6 transition-transform duration-1000 ease-in-out group-hover/icon:rotate-[30deg]"
                           style={{ 
                             filter: "brightness(0) saturate(100%) invert(57%) sepia(16%) saturate(543%) hue-rotate(1deg) brightness(91%) contrast(86%)"
                           }}
