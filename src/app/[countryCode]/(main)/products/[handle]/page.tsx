@@ -2,6 +2,14 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
+import { 
+  getProductContentByHandle, 
+  getFeaturedSectionByKey,
+  getTestimonialsSectionByKey,
+  getTestimonialsSectionByProductHandle,
+  getFeaturedRitualTwoSectionByKey,
+  getFeaturedRitualTwoSectionByProductHandle
+} from "@lib/data/contentful"
 import ProductTemplate from "@modules/products/templates"
 
 type Props = {
@@ -63,7 +71,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   const product = await listProducts({
     countryCode: params.countryCode,
-    queryParams: { handle },
+    queryParams: { handle: handle },
   }).then(({ response }) => response.products[0])
 
   if (!product) {
@@ -100,11 +108,75 @@ export default async function ProductPage(props: Props) {
     notFound()
   }
 
+  // Fetch product content from Contentful
+  const productContent = await getProductContentByHandle(params.handle)
+  
+  // Fetch featured section content from Contentful
+  // You can use different keys for different pages: "pdp-featured", "homepage-featured", etc.
+  const featuredContent = await getFeaturedSectionByKey("pdp-featured")
+  
+  // Fetch testimonials section content from Contentful
+  // Try product-specific testimonials by productHandle first
+  let testimonialsContent = await getTestimonialsSectionByProductHandle(params.handle)
+  
+  // Fall back to section key approach if product handle search doesn't find anything
+  if (!testimonialsContent) {
+    const productTestimonialsKey = `${params.handle}-testimonials`
+    testimonialsContent = await getTestimonialsSectionByKey(productTestimonialsKey)
+  }
+  
+  // Final fallback to generic PDP testimonials if product-specific not found
+  if (!testimonialsContent) {
+    testimonialsContent = await getTestimonialsSectionByKey("pdp-testimonials")
+  }
+  
+  // Debug logging for testimonials
+  console.log("Testimonials content found:", !!testimonialsContent)
+  if (testimonialsContent) {
+    console.log("Testimonials data:", {
+      title: testimonialsContent.title,
+      productHandle: testimonialsContent.productHandle,
+      sectionKey: testimonialsContent.sectionKey,
+      itemsCount: testimonialsContent.items.length
+    })
+  }
+
+  // Fetch featured ritual two section content from Contentful
+  // Try product-specific featured ritual two by productHandle first
+  let featuredRitualTwoContent = await getFeaturedRitualTwoSectionByProductHandle(params.handle)
+  
+  // Fall back to section key approach if product handle search doesn't find anything
+  if (!featuredRitualTwoContent) {
+    const productFeaturedRitualTwoKey = `${params.handle}-featured-ritual-two`
+    featuredRitualTwoContent = await getFeaturedRitualTwoSectionByKey(productFeaturedRitualTwoKey)
+  }
+  
+  // Final fallback to generic PDP featured ritual two if product-specific not found
+  if (!featuredRitualTwoContent) {
+    featuredRitualTwoContent = await getFeaturedRitualTwoSectionByKey("pdp-featured-ritual-two")
+  }
+  
+  // Debug logging
+  console.log("Product handle:", params.handle)
+  console.log("Featured ritual two content found:", !!featuredRitualTwoContent)
+  if (featuredRitualTwoContent) {
+    console.log("Featured ritual two data:", {
+      title: featuredRitualTwoContent.title,
+      productHandle: featuredRitualTwoContent.productHandle,
+      heading: featuredRitualTwoContent.heading,
+      imageUrl: featuredRitualTwoContent.imageUrl
+    })
+  }
+
   return (
     <ProductTemplate
       product={pricedProduct}
       region={region}
       countryCode={params.countryCode}
+      productContent={productContent}
+      featuredContent={featuredContent}
+      testimonialsContent={testimonialsContent}
+      featuredRitualTwoContent={featuredRitualTwoContent}
     />
   )
 }

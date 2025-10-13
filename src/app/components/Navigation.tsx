@@ -301,14 +301,14 @@ export function Navigation({
       name: 'BODY & HANDS',
       dropdown: [
         { 
-          label: 'Cedar Bloom Collection', 
-          href: '/products/cedarbloom',
-          image: '/assets/botanicalLeaves.png'
-        },
-        { 
           label: 'Cleansers & Exfoliants', 
           href: '/products/cleansersexfoliants',
           image: '/assets/handCareImage.png'
+        },
+        { 
+          label: 'Lotions & Moisturisers', 
+          href: '/products/cedarbloom',
+          image: '/assets/botanicalLeaves.png'
         }
       ]
     },
@@ -476,6 +476,7 @@ export function Navigation({
             <div 
               key={item.name}
               className="relative"
+              style={index === 0 ? { marginRight: 0 } : {}}
               onMouseEnter={() => item.dropdown && handleMouseEnter(item.name)}
               onMouseLeave={handleMouseLeave}
             >
@@ -629,7 +630,7 @@ export function Navigation({
           className="hidden lg:flex items-center space-x-6"
         >
           {/* Search Section */}
-          <div className="relative flex items-center" ref={searchRef}>
+          <div className="relative flex items-center" ref={searchRef} style={{margin:0}}>
             <AnimatePresence>
               {isSearchOpen && (
                 <motion.form
@@ -664,7 +665,7 @@ export function Navigation({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleSearchToggle}
-              className="p-2 transition-all duration-300"
+              className="p-2 transition-all duration-300" 
               style={{ color: navStyles.textColor }}
               aria-label="Search"
             >

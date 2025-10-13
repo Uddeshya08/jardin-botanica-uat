@@ -11,6 +11,7 @@ import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-relat
 import { notFound } from "next/navigation"
 import ProductActionsWrapper from "./product-actions-wrapper"
 import { HttpTypes } from "@medusajs/types"
+import { ProductContent, FeaturedSection, TestimonialsSection, FeaturedRitualTwoSection } from "../../../types/contentful"
 // import { ProductHero } from "app/components/ProductHero"
 // import React, {  Suspense } from 'react'
 import { motion } from "motion/react"
@@ -31,6 +32,10 @@ type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   countryCode: string
+  productContent?: ProductContent | null
+  featuredContent?: FeaturedSection | null
+  testimonialsContent?: TestimonialsSection | null
+  featuredRitualTwoContent?: FeaturedRitualTwoSection | null
 }
 
 interface CartItem {
@@ -44,6 +49,10 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   product,
   region,
   countryCode,
+  productContent,
+  featuredContent,
+  testimonialsContent,
+  featuredRitualTwoContent,
 }) => {
   if (!product || !product.id) {
     return notFound()
@@ -123,39 +132,10 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   }, [])
 
   console.log("products => ", product)
+  console.log("productContent from Contentful => ", productContent)
 
   return (
     <>
-      <div>
-        {/* old medusa tamplate */}
-        {/* <div
-          className="content-container flex flex-col small:flex-row small:items-start py-6 relative"
-          data-testid="product-container"
-        >
-          <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-6">
-            <ProductInfo product={product} />
-            <ProductTabs product={product} />
-          </div>
-          <div className="block w-full relative">
-            <ImageGallery images={product?.images || []} />
-          </div>
-          <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-12">
-            <ProductOnboardingCta />
-            <Suspense
-              fallback={
-                <ProductActions
-                  disabled={true}
-                  product={product}
-                  region={region}
-                />
-              }
-            >
-              <ProductActionsWrapper id={product.id} region={region} />
-            </Suspense>
-          </div>
-        </div> */}
-      </div>
-
       {/* my new code tamplate */}
       <div className="min-h-screen">
         <RippleEffect />
@@ -166,10 +146,10 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         />
         <div className="h-4"></div>
         <ProductHero
-  product={product}
-  countryCode={'in'} // e.g. "in"
-  onCartUpdate={handleCartUpdate}
-/>
+          product={product}
+          countryCode={'in'} // e.g. "in"
+          onCartUpdate={handleCartUpdate}
+        />
 
         <StickyCartBar
           isVisible={showStickyCart}
@@ -181,9 +161,15 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
         <Afterlife product={product} />
         <PeopleAlsoBought product={product} />
-        <FeaturedRitualTwo product={product} />
-        <CustomerTestimonials product={product} />
-        <Featured product={product} />
+        <FeaturedRitualTwo 
+          key={featuredRitualTwoContent?.productHandle || featuredRitualTwoContent?.sectionKey || 'default'} 
+          featuredRitualTwoContent={featuredRitualTwoContent} 
+        />
+        <CustomerTestimonials 
+          key={testimonialsContent?.productHandle || testimonialsContent?.sectionKey || 'default'} 
+          testimonialsContent={testimonialsContent} 
+        />
+        <Featured featuredContent={featuredContent} />
       </div>
     </>
   )
