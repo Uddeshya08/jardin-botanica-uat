@@ -701,7 +701,7 @@ const Product = () => {
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <a href="/in/help-and-faqs" className="hover:text-white transition-colors">
                     Help & FAQs
                   </a>
                 </li>
