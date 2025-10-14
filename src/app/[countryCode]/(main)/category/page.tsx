@@ -130,7 +130,7 @@ const Category = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
-            className="text-lg md:text-[42px] text-[#4f5864] font-medium mb-2 md:mb-10 tracking-[5px] font-typewriter"
+            className="text-3xl lg:text-4xl text-[#4f5864] font-medium mb-2 md:mb-10 tracking-tight font-american-typewriter"
           >
             CANDLES
           </motion.h2>
@@ -139,7 +139,7 @@ const Category = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="text-sm md:text-[16px] text-[#626262] font-din tracking-[1px]"
+            className="text-lg text-[#626262] font-din-arabic leading-relaxed"
           >
             Inspired by ancient stargazers, these candles fill your space with soft, lingering scent bringing calm, beauty, and a touch of the cosmos to your everyday moments.
           </motion.h3>
@@ -159,7 +159,7 @@ const Category = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
-          className="text-lg md:px-12 md:text-[30px] font-sm tracking-[4px] opacity-[50%] font-typewriter"
+          className="text-3xl md:px-12 tracking-tight opacity-[50%] font-american-typewriter"
         >
           A STORY IN SCENT
         </motion.p>
@@ -207,22 +207,20 @@ const Category = () => {
                 animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
               />
-              {/* Overlay */}
+              {/* Black Overlay - Only on hover */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
                 transition={{ duration: 0.3 }}
-                className="absolute inset-0 bg-black bg-opacity-20 rounded-lg flex items-center justify-center"
-              >
-                <motion.p
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: hoveredProductIndex === i ? 0 : 10, opacity: hoveredProductIndex === i ? 1 : 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="text-white text-[28px] md:text-[28px] font-bold tracking-widest font-din"
-                >
+                className="absolute inset-0 bg-black bg-opacity-20 rounded-lg"
+              />
+              
+              {/* Text - Always visible */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <p className="text-white text-2xl font-bold tracking-wide font-din-arabic drop-shadow-lg">
                   {label}
-                </motion.p>
-              </motion.div>
+                </p>
+              </div>
             </motion.div>
           </motion.div>
         ))}
@@ -242,7 +240,7 @@ const Category = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
-            className="text-[24px] font-normal opacity-[50%] mb-2 md:mb-4 tracking-wider font-typewriter"
+            className="text-3xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter"
           >
             NEED A HAND CHOOSING?
           </motion.h2>
@@ -251,7 +249,7 @@ const Category = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="text-base md:text-[16px] text-[#626262] leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 font-dinRegular px-4 md:px-0 tracking-[1px]"
+            className="text-lg text-[#626262] leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 font-din-arabic px-4 md:px-0"
           >
             Connect with one of our experts for personalized guidance and thoughtful product recommendations-crafted just for your skin, your rituals, your glow.
           </motion.p>
@@ -262,7 +260,7 @@ const Category = () => {
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-8 md:px-[88px] py-3 md:py-[9px] text-sm md:text-[20px] font-normal tracking-wide rounded-none font-dinRegular"
+            className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-8 py-3 font-normal tracking-wide rounded-none font-din-arabic"
           >
             Speak With Us
           </motion.button>
@@ -275,7 +273,7 @@ const Category = () => {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="py-8 md:py-16"
+        className="py-4"
       >
         <div className="flex flex-col md:flex-row">
           <motion.div
@@ -306,7 +304,7 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="text-[24px] font-normal opacity-[50%] mb-4 md:mb-6 tracking-wide leading-tight font-typewriter"
+                className="text-3xl font-normal opacity-[50%] mb-4 md:mb-6 tracking-tight leading-tight font-american-typewriter"
               >
                 SOFT ORRIS - THE SCENT OF STILLNESS
               </motion.h2>
@@ -315,7 +313,7 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
-                className="text-base md:text-[16px] text-[#626262] leading-relaxed mb-6 md:mb-4 pr-4 font-din tracking-[2px]"
+                className="text-lg text-[#626262] leading-relaxed mb-6 md:mb-4 pr-4 font-din-arabic"
               >
                 Powdery, elegant, and quietly floral-Soft Orris wraps your space in a gentle hug. Perfect for slow mornings, self-care rituals, or unwinding at dusk. It's calm, bottled in wax.
               </motion.p>
@@ -329,7 +327,7 @@ const Category = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-8 md:px-[14px] py-3 md:py-[9px] text-sm md:text-[20px] font-normal tracking-wide rounded-none font-dinRegular"
+                  className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-8 py-3 font-normal tracking-wide rounded-none font-din-arabic"
                 >
                   Read More
                 </motion.button>
@@ -345,9 +343,9 @@ const Category = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="py-12 md:py-10 px-4 md:px-12 bg-[#c5c7b2]"
+        className="py-12 md:py-10 px-4 md:px-12"
       >
-        <div className="">
+        <div className="pb-4">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -361,7 +359,7 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="text-[22px] md:text-[24px] font-normal opacity-[50%] mb-4 tracking-wide font-typewriter"
+                className="text-3xl font-normal opacity-[50%] mb-4 tracking-tight font-american-typewriter"
               >
                 LET'S STAY IN TOUCH
               </motion.h2>
@@ -370,7 +368,7 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
-                className="text-base md:text-[16px] text-[#626262] leading-[1.4] font-din tracking-widest"
+                className="text-lg text-[#626262] leading-relaxed font-din-arabic"
               >
                 Follow us on Instagram and Facebook for moments of calm,
               </motion.p>
@@ -379,11 +377,11 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
                 viewport={{ once: true }}
-                className="text-base md:text-[16px] text-[#626262] leading-[1.4] font-din tracking-widest"
+                className="text-lg text-[#626262] leading-relaxed font-din-arabic"
               >
                 candlelight rituals, and a peek behind the scenes{" "}
-                <span className="text-orange-500 font-din">@</span>
-                <span className="text-orange-500 font-din border-b-[1px] border-orange-500">
+                <span className="text-orange-500 font-din-arabic">@</span>
+                <span className="text-orange-500 font-din-arabic border-b-[1px] border-orange-500">
                   JardinBotanica.
                 </span>
               </motion.p>
@@ -395,16 +393,14 @@ const Category = () => {
               viewport={{ once: true }}
               className="w-full md:w-[60%] relative"
             >
-              <div className="flex gap-2 md:gap-4 overflow-hidden">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
+              <div className="flex gap-2 md:gap-4 overflow-hidden relative px-12">
+                <button
                   onClick={prevImages}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white bg-opacity-80 rounded-full p-1 md:p-2 shadow-lg hover:bg-opacity-100 transition-all"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-300 rounded-full p-2 hover:bg-black hover:border-black transition-all duration-300"
                   disabled={carouselImages.length <= 3}
                 >
                   <svg
-                    className="w-4 h-4 md:w-6 md:h-6 text-gray-700"
+                    className="w-4 h-4 text-gray-700 hover:text-white transition-colors duration-300"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -416,7 +412,7 @@ const Category = () => {
                       d="M15 19l-7-7 7-7"
                     />
                   </svg>
-                </motion.button>
+                </button>
                 <div className="flex gap-2 md:gap-4 w-full transition-all duration-300 ease-in-out">
                   {getVisibleImages().map((imageSrc, index) => (
                     <motion.div
@@ -425,7 +421,7 @@ const Category = () => {
                       whileInView={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                       viewport={{ once: true }}
-                      className="w-full h-auto aspect-square overflow-hidden rounded-lg"
+                      className="w-full h-auto aspect-square overflow-hidden rounded-lg relative"
                     >
                       <motion.img
                         whileHover={{ scale: 1.05 }}
@@ -434,18 +430,20 @@ const Category = () => {
                         alt={`Instagram post ${index + 1}`}
                         className="w-[300px] h-full object-cover"
                       />
+                      {/* Vertical Divider - only between 2nd and 3rd images */}
+                      {index === 1 && (
+                        <div className="absolute right-0 top-0 bottom-0 w-px bg-gray-300 z-10"></div>
+                      )}
                     </motion.div>
                   ))}
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={nextImages}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white bg-opacity-80 rounded-full p-1 md:p-2 shadow-lg hover:bg-opacity-100 transition-all"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-300 rounded-full p-2 hover:bg-black hover:border-black transition-all duration-300"
                   disabled={carouselImages.length <= 3}
                 >
                   <svg
-                    className="w-4 h-4 md:w-6 md:h-6 text-gray-700"
+                    className="w-4 h-4 text-gray-700 hover:text-white transition-colors duration-300"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -457,7 +455,7 @@ const Category = () => {
                       d="M9 5l7 7-7 7"
                     />
                   </svg>
-                </motion.button>
+                </button>
               </div>
             </motion.div>
           </div>
