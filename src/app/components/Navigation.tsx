@@ -462,8 +462,8 @@ export function Navigation({
             <img
               src={navStyles.logoSrc}
               alt="Jardin Botanica Logo"
-              width={200}
-              height={60}
+              width={250}
+              height={30}
               className="transition-all duration-300"
             />
           </a>

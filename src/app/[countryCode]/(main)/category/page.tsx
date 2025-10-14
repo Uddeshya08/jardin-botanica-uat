@@ -159,7 +159,7 @@ const Category = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
-          className="text-3xl md:px-12 tracking-tight opacity-[50%] font-american-typewriter"
+          className="text-3xl px-10 lg:px-16 tracking-tight opacity-[50%] font-american-typewriter"
         >
           A STORY IN SCENT
         </motion.p>
@@ -171,7 +171,7 @@ const Category = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="flex flex-col md:flex-row w-full gap-4 px-4 md:px-8"
+        className="flex flex-col md:flex-row w-full gap-4 px-10 lg:px-16"
       >
         {products.map(({ src, label, hoverSrc }, i) => (
           <motion.div
