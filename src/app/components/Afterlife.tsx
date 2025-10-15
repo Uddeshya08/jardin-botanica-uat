@@ -169,15 +169,15 @@ export function Afterlife({ product }: { product?: ProductLike }) {
                   viewport={{ once: true }}
                   className={`space-y-3 ${idx === 0 ? "lg:-ml-4" : idx === 2 ? "lg:ml-4" : ""}`}
                 >
-                  <div className={`flex items-start mb-3 ${item.title ? 'space-x-3' : 'justify-center'}`}>
+                  <div className={`flex ${isOldFormat ? 'items-center' : 'items-start'} mb-3 ${item.title ? 'space-x-5' : 'justify-center'}`}>
                     <div
-                      className="p-2 rounded-full group/icon flex-shrink-0"
-                      style={{ backgroundColor: "rgba(162, 139, 111, 0.08)" }}
+                      className={`${isOldFormat ? 'p-2 rounded-full' : ''} group/icon flex-shrink-0`}
+                      style={isOldFormat ? { backgroundColor: "rgba(162, 139, 111, 0.08)" } : {}}
                     >
                       {isOldFormat ? (
                         // Render Lucide icon for old format
                         <LucideIcon
-                          className="w-4 h-4 transition-transform duration-300 group-hover/icon:rotate-180"
+                          className="w-5 h-5 transition-transform duration-1000 ease-in-out group-hover/icon:rotate-[30deg]"
                           style={{ color: "#a28b6f" }}
                         />
                       ) : (
@@ -185,11 +185,11 @@ export function Afterlife({ product }: { product?: ProductLike }) {
                         <Image
                           src={iconSrc}
                           alt={iconAlt}
-                          width={16}
-                          height={16}
-                          className="w-4 h-4 transition-transform duration-300 group-hover/icon:rotate-180"
+                          width={48}
+                          height={48}
+                          className="w-12 h-12"
                           style={{ 
-                            filter: "brightness(0) saturate(100%) invert(57%) sepia(16%) saturate(543%) hue-rotate(1deg) brightness(91%) contrast(86%)"
+                            filter: "brightness(0) saturate(100%) invert(37%) sepia(10%) saturate(662%) hue-rotate(52deg) brightness(94%) contrast(110%) drop-shadow(0 0 0.5px rgba(84, 93, 74, 0.8))"
                           }}
                         />
                       )}

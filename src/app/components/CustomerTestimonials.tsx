@@ -158,7 +158,7 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
                   className="group"
                 >
                   <motion.div
-                    className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-6 shadow-xl shadow-black/5 relative overflow-hidden"
+                    className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-6 shadow-xl shadow-black/5 relative overflow-hidden min-h-[300px] max-h-[400px] flex flex-col"
                     whileHover={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)', borderColor: 'rgba(255, 255, 255, 0.4)' }}
                     transition={{ duration: 0.3 }}
                   >
@@ -195,11 +195,11 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
                       whileInView={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, delay: index * 0.1 + 0.6 }}
                       viewport={{ once: true }}
-                      className="relative"
+                      className="relative flex-1 overflow-y-auto"
                     >
                       <Quote className="absolute -top-2 -left-2 w-6 h-6 text-black/20" strokeWidth={1} />
                       <p className="font-din-arabic text-black/80 leading-relaxed italic relative z-10 pl-4">
-                        {t.review}
+                        {t.review.length > 200 ? `${t.review.substring(0, 200)}...` : t.review}
                       </p>
                     </motion.div>
                   </motion.div>

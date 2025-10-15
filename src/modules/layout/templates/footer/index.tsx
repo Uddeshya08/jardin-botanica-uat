@@ -636,7 +636,9 @@ const Product = () => {
                 <img
                   src="/Images/Jardinlogo.png"
                   alt="JardinLogo"
-                  className="w-48"
+                  width="250"
+                  height="30"
+                  className=""
                 />
               </div>
             </div>

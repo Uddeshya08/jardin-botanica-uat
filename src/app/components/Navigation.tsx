@@ -17,6 +17,8 @@ interface NavigationProps {
   cartItems?: CartItem[]
   onCartUpdate?: (item: CartItem | null) => void
   onDropdownChange?: (isOpen: boolean) => void
+  disableSticky?: boolean
+  disableAnimations?: boolean
 }
 
 export function Navigation({
@@ -24,6 +26,8 @@ export function Navigation({
   cartItems = [],
   onCartUpdate,
   onDropdownChange,
+  disableSticky = false,
+  disableAnimations = false,
 }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -395,12 +399,12 @@ export function Navigation({
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50">
+      <div className={disableSticky ? "relative" : "fixed top-0 left-0 right-0 z-50"}>
         {/* Top Shipping Bar */}
         <motion.div
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          initial={disableAnimations ? false : { y: -50, opacity: 0 }}
+          animate={disableAnimations ? false : { y: 0, opacity: 1 }}
+          transition={disableAnimations ? {} : { duration: 0.6, ease: 'easeOut' }}
           className="text-white py-2"
           style={{ backgroundColor: '#545d4a' }}
         >
@@ -415,9 +419,9 @@ export function Navigation({
 
         {/* Main Navigation */}
         <motion.nav
-          initial={{ y: -100 }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
+          initial={disableAnimations ? false : { y: -100 }}
+          animate={disableAnimations ? false : { y: 0 }}
+          transition={disableAnimations ? {} : { duration: 0.8, ease: 'easeOut', delay: 0.3 }}
           className="group/nav"
           onMouseEnter={() => setIsNavHovered(true)}
           onMouseLeave={() => setIsNavHovered(false)}
@@ -426,7 +430,7 @@ export function Navigation({
             backdropFilter: navStyles.backdropFilter,
             WebkitBackdropFilter: navStyles.WebkitBackdropFilter,
             borderBottom: navStyles.borderBottom,
-            transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+            transition: disableAnimations ? 'none' : 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
             position: 'relative',
           }}
         >
@@ -449,17 +453,17 @@ export function Navigation({
       <div className="flex items-center justify-between py-4 relative">
         {/* Logo */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
+          initial={disableAnimations ? false : { opacity: 0 }}
+          animate={disableAnimations ? false : { opacity: 1 }}
+          transition={disableAnimations ? {} : { delay: 0.3, duration: 0.6 }}
           className="flex w-full"
         >
           <a href="/" className="">
             <img
               src={navStyles.logoSrc}
               alt="Jardin Botanica Logo"
-              width={200}
-              height={60}
+              width={250}
+              height={30}
               className="transition-all duration-300"
             />
           </a>
@@ -467,9 +471,9 @@ export function Navigation({
 
         {/* Absolutely Centered Navigation Menu */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
+          initial={disableAnimations ? false : { opacity: 0 }}
+          animate={disableAnimations ? false : { opacity: 1 }}
+          transition={disableAnimations ? {} : { delay: 0.4, duration: 0.6 }}
           className="hidden lg:flex space-x-8 absolute left-1/2 transform -translate-x-1/2"
         >
           {menuItems.map((item, index) => (
@@ -482,9 +486,9 @@ export function Navigation({
             >
               <motion.a
                 href={item.href || '#'}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + index * 0.1, duration: 0.4 }}
+                initial={disableAnimations ? false : { opacity: 0, y: -10 }}
+                animate={disableAnimations ? false : { opacity: 1, y: 0 }}
+                transition={disableAnimations ? {} : { delay: 0.4 + index * 0.1, duration: 0.4 }}
                 className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative group/item hover:opacity-80 whitespace-nowrap"
                 style={{ color: navStyles.textColor }}
               >
@@ -584,14 +588,14 @@ export function Navigation({
 
         {/* Mobile Menu Toggle */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
+          initial={disableAnimations ? false : { opacity: 0 }}
+          animate={disableAnimations ? false : { opacity: 1 }}
+          transition={disableAnimations ? {} : { delay: 0.7, duration: 0.6 }}
           className="lg:hidden flex items-center space-x-4"
         >
           <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={disableAnimations ? {} : { scale: 1.1 }}
+            whileTap={disableAnimations ? {} : { scale: 0.9 }}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2 transition-all duration-300"
             style={{ color: navStyles.textColor }}
@@ -602,8 +606,8 @@ export function Navigation({
           
           <div className="relative" ref={cartRef}>
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={disableAnimations ? {} : { scale: 1.1 }}
+              whileTap={disableAnimations ? {} : { scale: 0.9 }}
               onClick={() => setIsCartOpen(!isCartOpen)}
               className="p-2 transition-all duration-300"
               style={{ color: navStyles.textColor }}
@@ -624,9 +628,9 @@ export function Navigation({
 
         {/* Desktop Actions */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
+          initial={disableAnimations ? false : { opacity: 0 }}
+          animate={disableAnimations ? false : { opacity: 1 }}
+          transition={disableAnimations ? {} : { delay: 0.7, duration: 0.6 }}
           className="hidden lg:flex items-center space-x-6"
         >
           {/* Search Section */}
@@ -662,8 +666,8 @@ export function Navigation({
             </AnimatePresence>
 
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={disableAnimations ? {} : { scale: 1.1 }}
+              whileTap={disableAnimations ? {} : { scale: 0.9 }}
               onClick={handleSearchToggle}
               className="p-2 transition-all duration-300" 
               style={{ color: navStyles.textColor }}
@@ -674,8 +678,8 @@ export function Navigation({
           </div>
 
           <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={disableAnimations ? {} : { scale: 1.1 }}
+            whileTap={disableAnimations ? {} : { scale: 0.9 }}
             onClick={() => setIsWishlisted(!isWishlisted)}
             className="p-2 transition-all duration-300"
             style={{ color: isWishlisted ? '#e58a4d' : navStyles.textColor }}
@@ -690,8 +694,8 @@ export function Navigation({
 
           {/* Profile Icon */}
           <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={disableAnimations ? {} : { scale: 1.1 }}
+            whileTap={disableAnimations ? {} : { scale: 0.9 }}
             className="p-2 transition-all duration-300"
             style={{ color: navStyles.textColor }}
             aria-label="Profile"
@@ -703,8 +707,8 @@ export function Navigation({
 
           <div className="relative" ref={cartRef}>
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={disableAnimations ? {} : { scale: 1.1 }}
+              whileTap={disableAnimations ? {} : { scale: 0.9 }}
               onClick={() => setIsCartOpen(!isCartOpen)}
               className="p-2 transition-all duration-300 relative"
               style={{ color: navStyles.textColor }}

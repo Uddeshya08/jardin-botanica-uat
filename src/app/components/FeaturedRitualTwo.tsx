@@ -99,7 +99,7 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
       className="w-3/5 relative"
     >
       <div className="h-[80vh] overflow-hidden">
-        <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.9 }} className="w-full h-full">
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.9 }} className="w-full h-full">
           <img
             src={meta.imageUrl}
             alt={meta.imageAlt}
@@ -125,7 +125,6 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
 
   return (
     <section
-      // className="pt-4 pb-12 lg:pt-6 lg:pb-20"
       style={{ backgroundColor: meta.backgroundColor, marginTop: '20px' }}
     >
       <div className="flex">{content}</div>

@@ -41,7 +41,7 @@ export function JournalSection() {
           viewport={{ once: true }}
           className="mb-12 max-w-8xl mx-auto"
         >
-          <h2 className="font-american-typewriter  text-3xl lg:text-4xl tracking-tight mb-6 text-black">
+          <h2 className="font-american-typewriter text-center  text-3xl lg:text-4xl tracking-tight mb-6 text-black">
             From the Journal
           </h2>
         </motion.div>
