@@ -85,15 +85,11 @@ export default function Home() {
         onCartUpdate={handleCartUpdate}
       />
       <HeroSection />
-
-      {/* Bottom Fold Sections */}
       <DesignPhilosophy />
       <FeaturedRitual />
       <BespokeGifting />
       <JournalSection />
-
-      {/* Newsletter/Contact Section */}
-     <Newsletter />
+      <Newsletter />
     </div>
   )
 }

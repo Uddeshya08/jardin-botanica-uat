@@ -228,7 +228,7 @@ export async function getTestimonialsSectionByProductHandle(
   try {
     const client = getContentfulClient()
 
-    console.log(`Searching for testimonials section with productHandle: ${productHandle}`)
+    // console.log(`Searching for testimonials section with productHandle: ${productHandle}`)
 
     // Query Contentful for entries with matching productHandle
     const response = await client.getEntries({
@@ -238,15 +238,15 @@ export async function getTestimonialsSectionByProductHandle(
       limit: 1,
     })
 
-    console.log(`Found ${response.items.length} testimonials entries for productHandle: ${productHandle}`)
+    // console.log(`Found ${response.items.length} testimonials entries for productHandle: ${productHandle}`)
 
     if (response.items && response.items.length > 0) {
       const entry = response.items[0] as unknown as Entry<ContentfulTestimonials>
-      console.log("Testimonials entry fields:", entry.fields) // Debug logging
+      // console.log("Testimonials entry fields:", entry.fields) // Debug logging
       return transformTestimonialsSectionEntry(entry)
     }
 
-    console.warn(`No testimonials section found for productHandle: ${productHandle}`)
+    // console.warn(`No testimonials section found for productHandle: ${productHandle}`)
     return null
   } catch (error) {
     console.error("Error fetching testimonials section from Contentful:", error)
@@ -283,7 +283,7 @@ export async function getTestimonialsSectionByKey(
     }
 
     const entry = response.items[0] as unknown as Entry<ContentfulTestimonials>
-    console.log("Testimonials entry fields:", entry.fields) // Debug logging
+    // console.log("Testimonials entry fields:", entry.fields) // Debug logging
     
     return transformTestimonialsSectionEntry(entry)
   } catch (error) {
@@ -395,7 +395,7 @@ export async function getFeaturedRitualTwoSectionByProductHandle(
 
     if (response.items && response.items.length > 0) {
       const entry = response.items[0] as unknown as Entry<ContentfulFeaturedRitualTwo>
-      console.log("Entry fields:", entry.fields) // Debug logging
+      // console.log("Entry fields:", entry.fields) // Debug logging
       return transformFeaturedRitualTwoSectionEntry(entry)
     }
 
@@ -436,7 +436,7 @@ export async function getFeaturedRitualTwoSectionByKey(
     }
 
     const entry = response.items[0] as unknown as Entry<ContentfulFeaturedRitualTwo>
-    console.log("Entry fields:", entry.fields) // Debug logging
+    // console.log("Entry fields:", entry.fields) // Debug logging
     
     return transformFeaturedRitualTwoSectionEntry(entry)
   } catch (error) {

@@ -28,6 +28,15 @@ import { PeopleAlsoBoughtTwo } from "app/components/PeopleAlsoBoughtTwo"
 import { FeaturedRitualTwo } from "app/components/FeaturedRitualTwo"
 import Featured from "app/components/Featured"
 
+interface RitualProduct {
+  variantId: string
+  name: string
+  price: number
+  currency: string
+  image?: string
+  isRitualProduct?: boolean
+}
+
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
@@ -36,6 +45,7 @@ type ProductTemplateProps = {
   featuredContent?: FeaturedSection | null
   testimonialsContent?: TestimonialsSection | null
   featuredRitualTwoContent?: FeaturedRitualTwoSection | null
+  ritualProduct?: RitualProduct | null
 }
 
 interface CartItem {
@@ -44,6 +54,7 @@ interface CartItem {
   price: number
   quantity: number
   image?: string
+  isRitualProduct?: boolean
 }
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
   product,
@@ -53,6 +64,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   featuredContent,
   testimonialsContent,
   featuredRitualTwoContent,
+  ritualProduct: ritualProductProp,
 }) => {
   if (!product || !product.id) {
     return notFound()
@@ -129,10 +141,10 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [heroCartItem])
 
+  // Log ritual product received from server
   console.log("products => ", product)
-  console.log("productContent from Contentful => ", productContent)
 
   return (
     <>
@@ -146,21 +158,22 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         />
         <div className="h-4"></div>
         <ProductHero
-          product={product}
+          product={product as any}
           countryCode={'in'} // e.g. "in"
           onCartUpdate={handleCartUpdate}
         />
 
         <StickyCartBar
           isVisible={showStickyCart}
-          product={product}
+          product={product as any}
           onUpdateHeroQuantity={handleHeroQuantityUpdate}
           onCartUpdate={handleCartUpdate}
           cartItems={cartItems}
+          ritualProduct={ritualProductProp}
         />
 
-        <Afterlife product={product} />
-        <PeopleAlsoBought product={product} />
+        <Afterlife product={product as any} />
+        <PeopleAlsoBought product={product as any} />
         <FeaturedRitualTwo 
           key={featuredRitualTwoContent?.productHandle || featuredRitualTwoContent?.sectionKey || 'default'} 
           featuredRitualTwoContent={featuredRitualTwoContent} 

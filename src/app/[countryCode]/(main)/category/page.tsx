@@ -4,6 +4,7 @@ import { Github } from "@medusajs/icons"
 import { Heading } from "@medusajs/ui"
 import { useEffect, useState } from "react"
 import { motion } from "motion/react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
 
@@ -28,6 +29,7 @@ const Category = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isScrolled, setIsScrolled] = useState(false)
   const [hoveredProductIndex, setHoveredProductIndex] = useState<number | null>(null)
+  const [videoError, setVideoError] = useState(false)
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
       id: "soft-orris-hand-veil",
@@ -86,10 +88,10 @@ const Category = () => {
   }
 
   const products = [
-    { src: "/Images/SoftFloral.jpg", label: "FLORAL SPICE", hoverSrc: "/Images/SoftFloral.jpg" },
-    { src: "/Images/Crushedpine.jpg", label: "CEDAR BLOOM", hoverSrc: "/Images/Crushedpine.jpg" },
-    { src: "/Images/warmroots.jpg", label: "FOREST FLOOR", hoverSrc: "/Images/warmroots.jpg" },
-    { src: "/Images/AquaVeil1.jpg", label: "WATER & WOOD", hoverSrc: "/Images/AquaVeil1.jpg" },
+    { src: "/Images/SoftFloral.jpg", label: "Floral Spice", hoverSrc: "/Images/SoftFloral.jpg" },
+    { src: "/Images/Crushedpine.jpg", label: "Cedar Bloom", hoverSrc: "/Images/Crushedpine.jpg" },
+    { src: "/Images/warmroots.jpg", label: "Forest Floor", hoverSrc: "/Images/warmroots.jpg" },
+    { src: "/Images/AquaVeil1.jpg", label: "Water & Wood", hoverSrc: "/Images/AquaVeil1.jpg" },
   ]
 
   return (
@@ -99,6 +101,7 @@ const Category = () => {
         isScrolled={isScrolled}
         cartItems={cartItems}
         onCartUpdate={handleCartUpdate}
+        forceWhiteText={true}
       />
       
       {/* first section */}
@@ -107,42 +110,58 @@ const Category = () => {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="relative w-full md:h-[570px] h-[300px]"
+        className="relative w-full md:h-[570px] h-[300px] overflow-hidden"
       >
-        <motion.img
-          initial={{ scale: 1.1, opacity: 0 }}
-          whileInView={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.2 }}
-          viewport={{ once: true }}
-          src="/Images/TopBanner.jpg"
-          alt="Topbanner"
-          className="w-full h-full object-cover"
-        />
+        {!videoError ? (
+          <motion.video
+            initial={{ scale: 1.1, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.2 }}
+            viewport={{ once: true }}
+            src="/assets/video-banner.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            onError={() => setVideoError(true)}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <motion.img
+            initial={{ scale: 1.1, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.2 }}
+            viewport={{ once: true }}
+            src="/Images/TopBanner.jpg"
+            alt="Topbanner"
+            className="w-full h-full object-cover"
+          />
+        )}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
           viewport={{ once: true }}
-          className="absolute top-6 left-4 md:top-28 md:left-[63px] max-w-xs md:max-w-md"
+          className="absolute top-1/2 left-4 md:left-[63px] -translate-y-1/2 max-w-xs md:max-w-md"
         >
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
-            className="text-3xl lg:text-4xl text-[#4f5864] font-medium mb-2 md:mb-10 tracking-tight font-american-typewriter"
+            className="text-white font-medium mb-4 md:mb-6 tracking-tight font-american-typewriter text-2xl md:text-3xl lg:text-4xl"
           >
-            CANDLES
+            Candles
           </motion.h2>
-          <motion.h3
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="text-lg text-[#626262] font-din-arabic leading-relaxed"
+            className="font-din-arabic text-base md:text-lg text-white/90 leading-relaxed"
           >
             Inspired by ancient stargazers, these candles fill your space with soft, lingering scent bringing calm, beauty, and a touch of the cosmos to your everyday moments.
-          </motion.h3>
+          </motion.p>
         </motion.div>
       </motion.div>
 
@@ -154,15 +173,15 @@ const Category = () => {
         viewport={{ once: true }}
         className="py-4 md:py-12 text-left"
       >
-        <motion.p
+        <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
-          className="text-3xl px-10 lg:px-16 tracking-tight opacity-[50%] font-american-typewriter"
+          className="text-2xl md:text-3xl lg:text-4xl px-6 md:px-10 lg:px-16 tracking-tight opacity-[50%] font-american-typewriter"
         >
-          A STORY IN SCENT
-        </motion.p>
+          A Story in Scent
+        </motion.h2>
       </motion.div>
 
       {/* mid section - product grid with PAB hover effects */}
@@ -171,7 +190,7 @@ const Category = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="flex flex-col md:flex-row w-full gap-4 px-10 lg:px-16"
+        className="flex flex-col md:flex-row w-full gap-4 px-6 md:px-10 lg:px-16"
       >
         {products.map(({ src, label, hoverSrc }, i) => (
           <motion.div
@@ -185,7 +204,7 @@ const Category = () => {
             onMouseLeave={() => setHoveredProductIndex(null)}
           >
             <motion.div
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.03 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
               className="aspect-square overflow-hidden rounded-lg shadow-lg relative"
             >
@@ -240,16 +259,16 @@ const Category = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
-            className="text-3xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter"
+            className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter"
           >
-            NEED A HAND CHOOSING?
+            Need a Hand Choosing?
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="text-lg text-[#626262] leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 font-din-arabic px-4 md:px-0"
+            className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-4 md:px-0"
           >
             Connect with one of our experts for personalized guidance and thoughtful product recommendations-crafted just for your skin, your rituals, your glow.
           </motion.p>
@@ -260,7 +279,7 @@ const Category = () => {
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-8 py-3 font-normal tracking-wide rounded-none font-din-arabic"
+            className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base"
           >
             Speak With Us
           </motion.button>
@@ -273,9 +292,9 @@ const Category = () => {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="py-4"
+        className="py-4 md:py-8"
       >
-        <div className="flex flex-col md:flex-row">
+        <div className="flex flex-col md:flex-row px-0 md:px-0">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -284,7 +303,7 @@ const Category = () => {
             className="w-full md:w-[68%] h-[300px] md:h-[600px] overflow-hidden mb-6 md:mb-0 object-cover"
           >
             <motion.img
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.03 }}
               transition={{ duration: 0.6 }}
               src="/Images/Blog.jpg"
               alt="Soft Orris"
@@ -296,7 +315,7 @@ const Category = () => {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
-            className="w-full md:w-[45%] relative md:-ml-44 z-10 md:mt-10"
+            className="w-full md:w-[45%] relative md:-ml-44 z-10 md:mt-10 px-6 md:px-0"
           >
             <div className="">
               <motion.h2
@@ -304,16 +323,16 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="text-3xl font-normal opacity-[50%] mb-4 md:mb-6 tracking-tight leading-tight font-american-typewriter"
+                className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-4 md:mb-6 tracking-tight leading-tight font-american-typewriter"
               >
-                SOFT ORRIS - THE SCENT OF STILLNESS
+                Soft Orris - The Scent of Stillness
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
-                className="text-lg text-[#626262] leading-relaxed mb-6 md:mb-4 pr-4 font-din-arabic"
+                className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-6 md:mb-4 pr-4"
               >
                 Powdery, elegant, and quietly floral-Soft Orris wraps your space in a gentle hug. Perfect for slow mornings, self-care rituals, or unwinding at dusk. It's calm, bottled in wax.
               </motion.p>
@@ -322,12 +341,12 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
                 viewport={{ once: true }}
-                className="text-center pl-[370px]"
+                className="text-center md:pl-[370px]"
               >
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-8 py-3 font-normal tracking-wide rounded-none font-din-arabic"
+                  className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base"
                 >
                   Read More
                 </motion.button>
@@ -359,16 +378,16 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="text-3xl font-normal opacity-[50%] mb-4 tracking-tight font-american-typewriter"
+                className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-4 tracking-tight font-american-typewriter"
               >
-                LET'S STAY IN TOUCH
+                Let's Stay in Touch
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
-                className="text-lg text-[#626262] leading-relaxed font-din-arabic"
+                className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed"
               >
                 Follow us on Instagram and Facebook for moments of calm,
               </motion.p>
@@ -377,7 +396,7 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
                 viewport={{ once: true }}
-                className="text-lg text-[#626262] leading-relaxed font-din-arabic"
+                className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed"
               >
                 candlelight rituals, and a peek behind the scenes{" "}
                 <span className="text-orange-500 font-din-arabic">@</span>
@@ -391,28 +410,25 @@ const Category = () => {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="w-full md:w-[60%] relative"
+              className="w-full md:w-[60%] relative mt-8 md:mt-0"
             >
-              <div className="flex gap-2 md:gap-4 overflow-hidden relative px-12">
-                <button
-                  onClick={prevImages}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-300 rounded-full p-2 hover:bg-black hover:border-black transition-all duration-300"
-                  disabled={carouselImages.length <= 3}
-                >
-                  <svg
-                    className="w-4 h-4 text-gray-700 hover:text-white transition-colors duration-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+              <div className="flex gap-2 md:gap-4 overflow-hidden relative px-6 md:px-12">
+                {/* Left Navigation Button */}
+                <div className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 mt-8 z-20">
+                  <motion.button
+                    whileHover={{ scale: 1.05, x: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={prevImages}
+                    className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden"
+                    aria-label="Scroll left"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </button>
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-black/70 group-hover:text-black transition-all duration-300" />
+                    </div>
+                    <div className="absolute inset-0 rounded-full ring-1 ring-black/5 group-hover:ring-black/15 transition-all duration-300" />
+                  </motion.button>
+                </div>
                 <div className="flex gap-2 md:gap-4 w-full transition-all duration-300 ease-in-out">
                   {getVisibleImages().map((imageSrc, index) => (
                     <motion.div
@@ -437,25 +453,22 @@ const Category = () => {
                     </motion.div>
                   ))}
                 </div>
-                <button
-                  onClick={nextImages}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-300 rounded-full p-2 hover:bg-black hover:border-black transition-all duration-300"
-                  disabled={carouselImages.length <= 3}
-                >
-                  <svg
-                    className="w-4 h-4 text-gray-700 hover:text-white transition-colors duration-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                {/* Right Navigation Button */}
+                <div className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 mt-8 z-20">
+                  <motion.button
+                    whileHover={{ scale: 1.05, x: 2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={nextImages}
+                    className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden"
+                    aria-label="Scroll right"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
+                    <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-black/70 group-hover:text-black transition-all duration-300" />
+                    </div>
+                    <div className="absolute inset-0 rounded-full ring-1 ring-black/5 group-hover:ring-black/15 transition-all duration-300" />
+                  </motion.button>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -501,21 +514,21 @@ const Category = () => {
         />
         <div className="container mx-auto px-6 lg:px-12 relative z-10">
           <div className="max-w-2xl mx-auto text-center">
-            <motion.h3
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="font-american-typewriter text-3xl lg:text-4xl tracking-tight mb-6 text-black"
+              className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 text-black"
             >
               Join the Circle
-            </motion.h3>
+            </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
-              className="font-din-arabic text-black/70 mb-8 leading-relaxed text-lg"
+              className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8"
             >
               Be the first to discover new blends, exclusive rituals, and
               stories from our botanical laboratory.

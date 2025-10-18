@@ -10,6 +10,7 @@ interface CartItem {
   price: number
   quantity: number
   image?: string
+  isRitualProduct?: boolean
 }
 
 interface NavigationProps {
@@ -19,6 +20,7 @@ interface NavigationProps {
   onDropdownChange?: (isOpen: boolean) => void
   disableSticky?: boolean
   disableAnimations?: boolean
+  forceWhiteText?: boolean
 }
 
 export function Navigation({
@@ -28,6 +30,7 @@ export function Navigation({
   onDropdownChange,
   disableSticky = false,
   disableAnimations = false,
+  forceWhiteText = false,
 }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -52,7 +55,12 @@ export function Navigation({
     
     const checkAndSetHomePage = () => {
       const currentPath = window.location.pathname
-      const isHome = currentPath === '/in'
+      // Check if it's home page or category page (should have white text navigation)
+      const isHome = currentPath === '/in' || 
+                     currentPath === '/in/' || 
+                     currentPath.includes('/category') ||
+                     currentPath.endsWith('/category') ||
+                     currentPath.includes('/in/category')
       setIsHomePage(isHome)
       
       // Set body class for CSS styling
@@ -307,12 +315,12 @@ export function Navigation({
         { 
           label: 'Cleansers & Exfoliants', 
           href: '/products/cleansersexfoliants',
-          image: '/assets/handCareImage.png'
+          image: 'https://images.unsplash.com/photo-1743597979473-5b1c0cae1bce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBoYW5kJTIwY3JlYW0lMjBsb3Rpb258ZW58MXx8fHwxNzU5NzQ5NDg0fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
         },
         { 
           label: 'Lotions & Moisturisers', 
           href: '/products/cedarbloom',
-          image: '/assets/botanicalLeaves.png'
+          image: 'https://images.unsplash.com/photo-1660675558428-5a7a1b8546f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBoYW5kJTIwbG90aW9uJTIwbW9pc3R1cml6ZXJ8ZW58MXx8fHwxNzU5NzY4OTIwfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
         }
       ]
     },
@@ -339,8 +347,8 @@ export function Navigation({
 
   // Determine navigation background and text styling
   const getNavStyles = () => {
-    if (isHomePage) {
-      // Home page: always transparent with white text, glassy on scroll/hover
+    if (isHomePage || forceWhiteText) {
+      // Home page or forced white text: always transparent with white text, glassy on scroll/hover
       if (isScrolled || isNavHovered) {
         return {
           backgroundColor: 'rgba(0, 0, 0, 0.65)',
@@ -782,7 +790,8 @@ export function Navigation({
                             className="flex items-center gap-3 p-3 border border-black border-opacity-5"
                             style={{ backgroundColor: '#f1f1ec' }}
                           >
-                            {item.image && (
+                            {/* Only show image for ritual products */}
+                            {item.isRitualProduct && item.image && (
                               <img
                                 src={item.image}
                                 alt={item.name}
@@ -877,7 +886,7 @@ export function Navigation({
                 transition={{ duration: 0.3 }}
                 className="fixed inset-0 bg-black/60 z-40 lg:hidden"
                 onClick={() => setIsMobileMenuOpen(false)}
-                style={{ top: '106px' }} // Below the header
+                style={{ top: '90px' }} // Below the header
               />
               
               {/* Menu Content */}
@@ -886,7 +895,7 @@ export function Navigation({
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                className="fixed right-0 top-[106px] bottom-0 w-full max-w-sm z-50 overflow-y-auto lg:hidden"
+                className="fixed right-0 top-[90px] bottom-0 w-full max-w-sm z-50 overflow-y-auto lg:hidden"
                 style={{ backgroundColor: '#e3e3d8' }}
               >
                 <div className="p-6">
@@ -1006,7 +1015,7 @@ export function Navigation({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="lg:hidden fixed right-4 top-[110px] w-[calc(100%-2rem)] max-w-sm bg-white border border-black/10 shadow-2xl z-50"
+              className="lg:hidden fixed right-4 top-[90px] w-[calc(100%-2rem)] max-w-sm bg-white border border-black/10 shadow-2xl z-50"
               style={{ backgroundColor: '#e3e3d8' }}
             >
               {/* Cart Header */}
@@ -1043,7 +1052,8 @@ export function Navigation({
                   <div className="p-4 space-y-4">
                     {cartItems.map((item) => (
                       <div key={item.id} className="flex items-center space-x-3 p-3 bg-white/50 border border-black/5">
-                        {item.image && (
+                        {/* Only show image for ritual products */}
+                        {item.isRitualProduct && item.image && (
                           <img 
                             src={item.image} 
                             alt={item.name}

@@ -266,7 +266,7 @@ const Home = () => {
         <div className="fixed top-0 left-0 right-0 z-50 bg-[#FEFDF3]">
           <div className="w-full">
             {/* Sticky Journal Heading */}
-            <h1 className="font-american-typewriter text-center text-5xl md:text-6xl lg:text-7xl tracking-tight uppercase">
+            <h1 className="font-american-typewriter text-center text-5xl md:text-6xl lg:text-7xl tracking-tight">
               Journal
             </h1>
 

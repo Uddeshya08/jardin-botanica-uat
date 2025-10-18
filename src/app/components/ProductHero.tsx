@@ -21,6 +21,7 @@ interface CartItem {
   price: number // minor units
   quantity: number
   image?: string
+  isRitualProduct?: boolean
 }
 
 interface ProductHeroProps {
@@ -104,13 +105,14 @@ export function ProductHero({
     setUiError(null)
     setIsAddedToCart(true)
 
-    // optimistic nav/sticky updates if parent listens
+    // optimistic nav/sticky updates if parent listens (regular product - no image in nav)
     onCartUpdate?.({
       id: variantId,
       name: product.title,
       price: minorAmount,
       quantity,
       image: fallbackImg,
+      isRitualProduct: false,
     })
     emitCartUpdated({ quantityDelta: quantity })
 
@@ -147,6 +149,7 @@ export function ProductHero({
         price: minorAmount,
         quantity: newQuantity,
         image: fallbackImg,
+        isRitualProduct: false,
       })
     }
   }
@@ -327,7 +330,7 @@ export function ProductHero({
                 className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
                 style={{ color: "#a28b6f" }}
               >
-                RITUAL IN PRACTICE
+                Ritual in Practice
               </span>
               <motion.div
                 whileHover={{ rotate: 90 }}
@@ -367,7 +370,7 @@ export function ProductHero({
                   className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
                   style={{ color: "#a28b6f" }}
                 >
-                  ACTIVES & KEY BOTANICALS
+                  Actives & Key Botanicals
                 </span>
                 <motion.div
                   whileHover={{ rotate: 90 }}
@@ -406,7 +409,7 @@ export function ProductHero({
                 className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
                 style={{ color: "#a28b6f" }}
               >
-                FRAGRANCE NOTES
+                Fragrance Notes
               </span>
               <motion.div
                 whileHover={{ rotate: 90 }}
@@ -444,7 +447,7 @@ export function ProductHero({
                 className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
                 style={{ color: "#a28b6f" }}
               >
-                FULL INGREDIENTS
+                Full Ingredients
               </span>
               <motion.div
                 whileHover={{ rotate: 90 }}
@@ -527,7 +530,7 @@ export function ProductHero({
       <InfoPanel
         isOpen={isRitualPanelOpen}
         onClose={() => setIsRitualPanelOpen(false)}
-        title="RITUAL IN PRACTICE"
+        title="Ritual in Practice"
       >
         <p className="font-din-arabic text-black/80 leading-relaxed">
           Dispense a measured amount. Work slowly into damp hands, letting the
@@ -538,7 +541,7 @@ export function ProductHero({
       <InfoPanel
         isOpen={isActivesPanelOpen}
         onClose={() => setIsActivesPanelOpen(false)}
-        title="ACTIVES & KEY BOTANICALS"
+        title="Actives & Key Botanicals"
       >
         <div className="space-y-4">
           <div className="group">
@@ -586,7 +589,7 @@ export function ProductHero({
       <InfoPanel
         isOpen={isFragranceNotesOpen}
         onClose={() => setIsFragranceNotesOpen(false)}
-        title="FRAGRANCE NOTES"
+        title="Fragrance Notes"
       >
         <div className="space-y-4">
           <div className="group">
@@ -618,7 +621,7 @@ export function ProductHero({
       <InfoPanel
         isOpen={isIngredientsPanelOpen}
         onClose={() => setIsIngredientsPanelOpen(false)}
-        title="FULL INGREDIENTS"
+        title="Full Ingredients"
       >
         <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
           Water, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Black Tea

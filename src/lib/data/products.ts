@@ -7,6 +7,54 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { getRegion, retrieveRegion } from "./regions"
 
+/**
+ * Retrieve a single product by ID
+ */
+export const retrieveProduct = async (id: string, regionId: string) => {
+  console.log("🔍 retrieveProduct called with:", { id, regionId })
+  
+  const next = {
+    ...(await getCacheOptions("products")),
+  }
+
+  const headers = {
+    ...(await getAuthHeaders()),
+  }
+
+  console.log("📡 Fetching product from: /store/products/" + id)
+
+  return sdk.client
+    .fetch<{ product: HttpTypes.StoreProduct }>(
+      `/store/products/${id}`,
+      {
+        method: "GET",
+        query: {
+          region_id: regionId,
+          fields: "*variants,*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,+images",
+        },
+        headers,
+        next,
+        cache: "force-cache",
+      }
+    )
+    .then(({ product }) => {
+      console.log("✅ Product fetched successfully:", product?.title || product)
+      console.log("📦 Product variants:", product?.variants?.length || 0, "variants found")
+      if (product?.variants?.[0]) {
+        console.log("💰 First variant:", {
+          id: product.variants[0].id,
+          title: product.variants[0].title,
+          price: product.variants[0].calculated_price
+        })
+      }
+      return product
+    })
+    .catch((error) => {
+      console.error("❌ Error fetching product:", error)
+      return null
+    })
+}
+
 export const listProducts = async ({
   pageParam = 1,
   queryParams,
