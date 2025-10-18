@@ -8,7 +8,16 @@ import { useParams } from "next/navigation"
 import { addToCartAction } from "@lib/data/cart-actions"
 import { emitCartUpdated } from "@lib/util/cart-client"
 
-type ProductLike = Partial<HttpTypes.Product> & { metadata?: Record<string, any> }
+type ProductLike = Partial<HttpTypes.StoreProduct> & { metadata?: Record<string, any> }
+
+interface RitualProduct {
+  variantId: string
+  name: string
+  price: number
+  currency: string
+  image?: string
+  isRitualProduct?: boolean
+}
 
 interface StickyCartBarProps {
   isVisible: boolean
@@ -17,6 +26,7 @@ interface StickyCartBarProps {
   onUpdateHeroQuantity?: (quantity: number) => void
   onCartUpdate?: (item: any | null) => void
   cartItems?: any[]
+  ritualProduct?: RitualProduct | null
 }
 
 /* ————— helpers ————— */
@@ -53,12 +63,17 @@ export function StickyCartBar({
   onUpdateHeroQuantity,
   onCartUpdate,
   cartItems = [],
+  ritualProduct,
 }: StickyCartBarProps) {
   const [quantity, setQuantity] = useState(1)
   const [isAddedToCart, setIsAddedToCart] = useState(false)
   const [adding, setAdding] = useState(false)
   const [uiError, setUiError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [previouslyQualified, setPreviouslyQualified] = useState(false)
+  const [justUnlocked, setJustUnlocked] = useState(false)
+  const [ritualCompleted, setRitualCompleted] = useState(false)
+  const [showGoToCart, setShowGoToCart] = useState(false)
 
   // read /[countryCode]/... from route, fallback to "in"
   const params = useParams() as any
@@ -68,7 +83,7 @@ export function StickyCartBar({
   const minor = useMemo(() => getMinorPrice(variant), [variant])
   const currency =
     (variant?.calculated_price?.currency_code ??
-      variant?.prices?.[0]?.currency_code ??
+      (variant as any)?.prices?.[0]?.currency_code ??
       "inr").toUpperCase()
 
   const name = product?.title ?? "Product"
@@ -79,10 +94,29 @@ export function StickyCartBar({
   const currentTotalMinor = minor * quantity
   const qualifiesShipping = currentTotalMinor >= shippingThresholdMinor
 
+  // Debug logging
+  // console.log("=== StickyCartBar Debug ===")
+  // console.log("Ritual Product:", ritualProduct)
+  // console.log("Current Total:", currentTotalMinor)
+  // console.log("Qualifies Shipping:", qualifiesShipping)
+  // console.log("Ritual Completed:", ritualCompleted)
+  // console.log("Show Go To Cart:", showGoToCart)
+
   const handleQuantityChange = (delta: number) => {
     const next = Math.min(10, Math.max(1, quantity + delta))
     setQuantity(next)
     onUpdateHeroQuantity?.(next)
+    
+    // Check if this change unlocks shipping
+    const nextTotal = minor * next
+    const willQualify = nextTotal >= shippingThresholdMinor
+    
+    if (!previouslyQualified && willQualify) {
+      setJustUnlocked(true)
+      setTimeout(() => setJustUnlocked(false), 3000)
+    }
+    
+    setPreviouslyQualified(willQualify)
   }
 
   const addFromSticky = () => {
@@ -104,7 +138,7 @@ export function StickyCartBar({
         quantity: existingItem.quantity + quantity,
       })
     } else {
-      // If item doesn't exist, add as new
+      // If item doesn't exist, add as new (regular product - no image in nav)
       onCartUpdate?.({
         id: productId,
         variant_id: variant.id,
@@ -112,6 +146,7 @@ export function StickyCartBar({
         price: minor,
         quantity,
         image,
+        isRitualProduct: false,
       })
     }
     
@@ -136,6 +171,90 @@ export function StickyCartBar({
     })
   }
 
+  const completeRitual = () => {
+    if (!ritualProduct?.variantId || !variant?.id || adding || isPending || ritualCompleted) return
+
+    setAdding(true)
+    setUiError(null)
+    setRitualCompleted(true)
+
+    const productId = product?.id ?? variant.id
+
+    // Add main product to cart first (no image in nav)
+    onCartUpdate?.({
+      id: productId,
+      variant_id: variant.id,
+      name,
+      price: minor,
+      quantity,
+      image,
+      isRitualProduct: false,
+    })
+
+    // Then add ritual product to cart (with image in nav)
+    onCartUpdate?.({
+      id: ritualProduct.variantId,
+      variant_id: ritualProduct.variantId,
+      name: ritualProduct.name,
+      price: ritualProduct.price,
+      quantity: 1,
+      image: ritualProduct.image,
+      isRitualProduct: true,
+    })
+    
+    emitCartUpdated({ quantityDelta: quantity + 1 })
+
+    // background network - add both products
+    startTransition(async () => {
+      try {
+        // Add main product first
+        await addToCartAction({ 
+          variantId: variant.id, 
+          quantity, 
+          countryCode 
+        })
+        
+        // Then add ritual product
+        try {
+          await addToCartAction({ 
+            variantId: ritualProduct.variantId, 
+            quantity: 1, 
+            countryCode 
+          })
+          
+          // Show "Go to Cart" button after successful addition
+          setShowGoToCart(true)
+          setJustUnlocked(true)
+          setTimeout(() => setJustUnlocked(false), 3000)
+        } catch (ritualError: any) {
+          // If ritual product fails, still show success for main product but inform user
+          console.error("Ritual product add failed:", ritualError)
+          const errorMsg = ritualError?.message || "Could not add ritual product"
+          
+          if (errorMsg.includes("do not have a price")) {
+            setUiError("Ritual product price not configured. Main product added to cart.")
+          } else {
+            setUiError(`Main product added. Ritual: ${errorMsg}`)
+          }
+          
+          // Still show success since main product was added
+          setShowGoToCart(true)
+          setJustUnlocked(true)
+          setTimeout(() => setJustUnlocked(false), 3000)
+        }
+      } catch (e: any) {
+        // rollback visual success - main product failed
+        setRitualCompleted(false)
+        setUiError(e?.message || "Could not add to cart")
+        console.error("Add to cart failed:", e)
+      } finally {
+        setTimeout(() => {
+          setAdding(false)
+        }, 800)
+      }
+    })
+  }
+
   // no variant to add
   if (!variant?.id) return null
 
@@ -155,7 +274,13 @@ export function StickyCartBar({
               {/* Product Info */}
               <div className="flex items-center space-x-3 flex-shrink-0">
                 <div className="w-10 h-10 bg-black/10 backdrop-blur-sm rounded-xl flex items-center justify-center overflow-hidden">
-                  {image ? (
+                  {(ritualProduct && qualifiesShipping && !showGoToCart) ? (
+                    ritualProduct.image ? (
+                      <img src={ritualProduct.image} alt={ritualProduct.name} className="w-10 h-10 object-cover rounded-xl" />
+                    ) : (
+                      <ShoppingBag className="w-5 h-5 text-black/70" />
+                    )
+                  ) : image ? (
                     <img src={image} alt={name} className="w-10 h-10 object-cover rounded-xl" />
                   ) : (
                     <ShoppingBag className="w-5 h-5 text-black/70" />
@@ -163,21 +288,28 @@ export function StickyCartBar({
                 </div>
                 <div>
                   <h3 className="font-american-typewriter text-black/90 whitespace-nowrap text-sm">
-                    {name} {variant?.title ? `• ${variant.title}` : ""}
+                    {(ritualProduct && qualifiesShipping && !showGoToCart) 
+                      ? ritualProduct.name 
+                      : `${name}${variant?.title ? ` • ${variant.title}` : ""}`}
                   </h3>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-1">
                     <p className="font-din-arabic-bold text-sm text-black/70">
-                      {formatMinor(minor, currency)}
+                      {(ritualProduct && qualifiesShipping && !showGoToCart)
+                        ? formatMinor(ritualProduct.price, ritualProduct.currency)
+                        : formatMinor(minor, currency)}
                     </p>
                     {qualifiesShipping && (
                       <motion.p
+                        key={justUnlocked ? "unlocked" : "qualifies"}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3 }}
                         className="font-din-arabic text-xs whitespace-nowrap"
                         style={{ color: "#545d4a" }}
                       >
-                        Complimentary Shipping Unlocked
+                        {justUnlocked 
+                          ? "Complimentary Shipping Unlocked!" 
+                          : "Order Qualifies For Complimentary Shipping"}
                       </motion.p>
                     )}
                   </div>
@@ -222,44 +354,92 @@ export function StickyCartBar({
                     TOTAL
                   </p>
                   <p className="font-din-arabic-bold text-black/90 whitespace-nowrap">
-                    {formatMinor(currentTotalMinor, currency)}
+                    {(ritualProduct && qualifiesShipping && !showGoToCart)
+                      ? formatMinor(ritualProduct.price, ritualProduct.currency)
+                      : formatMinor(currentTotalMinor, currency)}
                   </p>
                 </div>
 
-                {/* Single add button (no nested buttons!) */}
-                <motion.button
-                  type="button"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={addFromSticky}
-                  disabled={!variant?.id || adding || isPending}
-                  className="font-din-arabic px-3 sm:px-5 py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-xl relative overflow-hidden flex items-center space-x-1 sm:space-x-2 whitespace-nowrap text-xs sm:text-sm"
-                >
-                  <ShoppingBag className="w-4 h-4" />
-                  <AnimatePresence mode="wait">
-                    {isAddedToCart ? (
-                      <motion.span
-                        key="added"
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: -20, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        Added to Cart
-                      </motion.span>
-                    ) : (
-                      <motion.span
-                        key="add"
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: -20, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        Add to Cart
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </motion.button>
+                {/* Action buttons: Add to Cart, Complete Ritual, or Go to Cart */}
+                {showGoToCart ? (
+                  <motion.a
+                    href={`/${countryCode}/cart`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="font-din-arabic px-3 sm:px-5 py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-xl relative overflow-hidden flex items-center space-x-1 sm:space-x-2 whitespace-nowrap text-xs sm:text-sm"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    <span>Go to Cart</span>
+                  </motion.a>
+                ) : ritualProduct && qualifiesShipping ? (
+                  <motion.button
+                    type="button"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={completeRitual}
+                    disabled={adding || isPending || ritualCompleted}
+                    className="font-din-arabic px-3 sm:px-5 py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-xl relative overflow-hidden flex items-center space-x-1 sm:space-x-2 whitespace-nowrap text-xs sm:text-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    <AnimatePresence mode="wait">
+                      {ritualCompleted ? (
+                        <motion.span
+                          key="ritual-completed"
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: -20, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          Adding...
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          key="complete-ritual"
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: -20, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          Complete the Ritual
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    type="button"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={addFromSticky}
+                    disabled={!variant?.id || adding || isPending}
+                    className="font-din-arabic px-3 sm:px-5 py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-xl relative overflow-hidden flex items-center space-x-1 sm:space-x-2 whitespace-nowrap text-xs sm:text-sm"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    <AnimatePresence mode="wait">
+                      {isAddedToCart ? (
+                        <motion.span
+                          key="added"
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: -20, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          Added to Cart
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          key="add"
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: -20, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          Add to Cart
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.button>
+                )}
               </div>
             </div>
 

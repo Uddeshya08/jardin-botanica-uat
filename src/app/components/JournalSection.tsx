@@ -32,7 +32,7 @@ const journalPosts = [
 
 export function JournalSection() {
   return (
-    <section className="py-20" style={{ backgroundColor: '#e3e3d8' }}>
+    <section className="md:py-20 py-10" style={{ backgroundColor: '#e3e3d8' }}>
       <div className="container mx-auto px-6 lg:px-12">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

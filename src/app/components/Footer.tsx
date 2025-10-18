@@ -21,7 +21,7 @@ export function Footer() {
 
   const footerSections = [
     {
-      title: 'ABOUT US',
+      title: 'About Us',
       links: [
         { name: 'Brand', href: '#' },
         { name: 'Journal', href: `/${countryCode}/blogs` },
@@ -29,7 +29,7 @@ export function Footer() {
       ],
     },
     {
-      title: 'SHOP',
+      title: 'Shop',
       links: [
         { name: 'Home Creations', href: `/${countryCode}/home-creations` },
         { name: 'Collections', href: '#' },
@@ -37,7 +37,7 @@ export function Footer() {
       ],
     },
     {
-      title: 'ORDERS AND SUPPORT',
+      title: 'Orders and Support',
       links: [
         { name: 'Order History', href: `/${countryCode}/account` },
         { name: 'Track Your Order', href: '#' },
@@ -47,7 +47,7 @@ export function Footer() {
       ],
     },
     {
-      title: 'FOLLOW US',
+      title: 'Follow Us',
       links: [
         { name: 'Instagram', href: 'https://instagram.com/jardinbotanica', external: true },
         { name: 'Facebook', href: 'https://facebook.com/jardinbotanica', external: true },
@@ -72,7 +72,7 @@ export function Footer() {
               <Image
                 src="/assets/Jardinlogo.svg"
                 alt="JArdin"
-                width={200}
+                width={300}
                 height={60}
                 className="transition-all duration-300"
               />

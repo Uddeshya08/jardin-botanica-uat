@@ -23,22 +23,22 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
     active: true,
   }
 
-  console.log('=== FeaturedRitualTwo Component Debug ===');
-  console.log('featuredRitualTwoContent:', featuredRitualTwoContent);
+  // console.log('=== FeaturedRitualTwo Component Debug ===');
+  // console.log('featuredRitualTwoContent:', featuredRitualTwoContent);
   
-  if (featuredRitualTwoContent) {
-    console.log('Product Handle:', featuredRitualTwoContent.productHandle);
-    console.log('Section Key:', featuredRitualTwoContent.sectionKey);
-    console.log('Heading:', featuredRitualTwoContent.heading);
-    console.log('Image URL:', featuredRitualTwoContent.imageUrl);
-    console.log('Active:', featuredRitualTwoContent.active);
-  }
+  // if (featuredRitualTwoContent) {
+  //   console.log('Product Handle:', featuredRitualTwoContent.productHandle);
+  //   console.log('Section Key:', featuredRitualTwoContent.sectionKey);
+  //   console.log('Heading:', featuredRitualTwoContent.heading);
+  //   console.log('Image URL:', featuredRitualTwoContent.imageUrl);
+  //   console.log('Active:', featuredRitualTwoContent.active);
+  // }
   
   const meta = featuredRitualTwoContent || defaults
 
   // Don't render if Contentful data exists but is inactive
   if (featuredRitualTwoContent && !featuredRitualTwoContent.active) {
-    console.log('Section is inactive, not rendering');
+    // console.log('Section is inactive, not rendering');
     return null
   }
 
