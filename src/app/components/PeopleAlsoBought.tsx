@@ -217,7 +217,7 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="flex-shrink-0 w-2/5 flex flex-col px-16 "
+          className="flex-shrink-0 w-2/5 flex flex-col px-4 md:px-16 "
           style={{ scrollSnapAlign: 'start', paddingTop: '135px' }}
         >
           <motion.h2

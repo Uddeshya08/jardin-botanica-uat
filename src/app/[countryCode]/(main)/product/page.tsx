@@ -229,7 +229,7 @@ const Product = () => {
           <div className="grid grid-cols-1 lg:grid-cols-10 items-center">
             {/* Left Side - Product Info - 40% width on laptop */}
             <div className="lg:col-span-4 space-y-8 py-[57.5px] border-b-[2px] border-[#a3a37f]/30 ">
-              <div className="px-12">
+              <div className="px-4 md:px-8 lg:px-12">
                 <h1
                   style={{
                     ...fontStyles.bannerHeading,
