@@ -101,7 +101,7 @@ const productImage = '/assets/productImage.png';
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full lg:w-[40%] flex items-center justify-center py-12 px-8 lg:px-16 xl:px-20 relative overflow-hidden"
+        className="w-full lg:w-[40%] flex items-center justify-center py-12 px-4 md:px-8 lg:px-16 xl:px-20 relative overflow-hidden"
         style={{ backgroundColor: '#e3e3d8' }}
       >
         {/* Subtle botanical pattern overlay */}

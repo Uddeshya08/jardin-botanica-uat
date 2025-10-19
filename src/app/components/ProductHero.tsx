@@ -168,13 +168,13 @@ export function ProductHero({
   console.log('product--',product)
 
   return (
-    <div className="flex" style={{ paddingTop: "80px", minHeight: "35vh" }}>
+    <div className="flex flex-col lg:flex-row" style={{ paddingTop: "80px", minHeight: "35vh" }}>
       {/* LEFT: (content) */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full lg:w-[40%] flex items-center justify-center py-12 pl-[45px] pr-8 lg:pr-16 xl:pr-20 relative overflow-hidden"
+        className="w-full lg:w-[40%] flex items-center justify-center py-8 md:py-12 px-4 md:px-8 lg:px-16 xl:px-20 relative overflow-hidden"
         style={{ backgroundColor: "#e3e3d8" }}
       >
         <div className="space-y-6 max-w-lg relative z-10">
@@ -183,7 +183,7 @@ export function ProductHero({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="font-american-typewriter text-3xl tracking-tight text-black relative"
+            className="font-american-typewriter text-2xl md:text-3xl tracking-tight text-black relative"
             style={{ paddingTop: "8px", paddingBottom: "8px" }}
           >
             <span className="relative">
@@ -204,7 +204,7 @@ export function ProductHero({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="font-din-arabic text-lg text-black leading-relaxed mb-4"
+              className="font-din-arabic text-base md:text-lg text-black leading-relaxed mb-4"
             >
               {product.subtitle}
             </motion.p>
@@ -217,7 +217,7 @@ export function ProductHero({
             transition={{ duration: 0.6, delay: 0.5 }}
             className="space-y-2 pb-4 pt-3"
           >
-            <p className="font-din-arabic-bold text-3xl text-black mt-4">
+            <p className="font-din-arabic-bold text-2xl md:text-3xl text-black mt-4">
               ₹{minorAmount}
             </p>
           </motion.div>
@@ -235,14 +235,14 @@ export function ProductHero({
             >
               QUANTITY
             </h3>
-            <div className="flex items-center gap-4">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+              <div className="relative w-full sm:w-auto">
                 <select
                   value={quantity.toString()}
                   onChange={(e) =>
                     handleQuantityChange(parseInt(e.target.value))
                   }
-                  className="font-din-arabic appearance-none bg-transparent border border-black/30 px-4 py-3 pr-8 text-black focus:outline-none focus:border-black transition-colors min-w-[80px]"
+                  className="font-din-arabic appearance-none bg-transparent border border-black/30 px-4 py-3 pr-8 text-black focus:outline-none focus:border-black transition-colors w-full sm:min-w-[80px]"
                 >
                   {[...Array(10)].map((_, i) => (
                     <option key={i + 1} value={(i + 1).toString()}>
@@ -257,7 +257,7 @@ export function ProductHero({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleAddToCart}
-                className="font-din-arabic px-8 py-3 bg-black text-white hover:bg-black/90 transition-all duration-300 tracking-wide relative overflow-hidden"
+                className="font-din-arabic px-6 md:px-8 py-3 bg-black text-white hover:bg-black/90 transition-all duration-300 tracking-wide relative overflow-hidden w-full sm:w-auto"
                 disabled={!variantId || adding || isPending}
               >
                 <AnimatePresence mode="wait">
@@ -300,7 +300,7 @@ export function ProductHero({
               transition={{ duration: 0.6, delay: 0.7 }}
               className="space-y-2 mt-6 mb-6"
             >
-              <p className="font-din-arabic text-black/80 leading-relaxed py-4">
+              <p className="font-din-arabic text-sm md:text-base text-black/80 leading-relaxed py-4">
                 {product.description}
               </p>
             </motion.div>
@@ -468,24 +468,24 @@ export function ProductHero({
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full lg:w-[60%] relative flex items-center justify-center py-6 overflow-hidden"
+        className="w-full lg:w-[60%] relative flex items-center justify-center py-8 md:py-12 lg:py-6 overflow-hidden min-h-[300px] md:min-h-[400px]"
         style={{ backgroundColor: "#d6d6c6" }}
       >
         <motion.button
           onClick={handlePrevImage}
-          className="absolute left-8 top-1/2 -translate-y-1/2 z-10 p-4 rounded-full text-black/60 hover:text-black transition-all backdrop-blur-sm"
+          className="absolute left-2 md:left-4 lg:left-8 top-1/2 -translate-y-1/2 z-10 p-2 md:p-3 lg:p-4 rounded-full text-black/60 hover:text-black transition-all backdrop-blur-sm bg-white/80 md:bg-transparent"
           aria-label="Previous image"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
         </motion.button>
 
-        <div className="relative max-w-4xl mx-auto">
+        <div className="relative max-w-4xl mx-auto px-12 md:px-16 lg:px-8">
           <img
             src={productImages[currentImageIndex]}
             alt={product.title}
             className="w-full h-auto object-contain mx-auto relative z-10"
             style={{
-              maxHeight: "500px",
+              maxHeight: "300px",
               filter: "drop-shadow(0 20px 45px rgba(0, 0, 0, 0.15))",
             }}
           />
@@ -500,13 +500,13 @@ export function ProductHero({
 
         <motion.button
           onClick={handleNextImage}
-          className="absolute right-8 top-1/2 -translate-y-1/2 z-10 p-4 rounded-full text-black/60 hover:text-black transition-all backdrop-blur-sm"
+          className="absolute right-2 md:right-4 lg:right-8 top-1/2 -translate-y-1/2 z-10 p-2 md:p-3 lg:p-4 rounded-full text-black/60 hover:text-black transition-all backdrop-blur-sm bg-white/80 md:bg-transparent"
           aria-label="Next image"
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
         </motion.button>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-3">
+        <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 md:space-x-3">
           {productImages.map((_, index) => (
             <motion.button
               key={index}
@@ -514,7 +514,7 @@ export function ProductHero({
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                currentImageIndex === index ? "w-8" : ""
+                currentImageIndex === index ? "w-6 md:w-8" : ""
               }`}
               style={{
                 backgroundColor:

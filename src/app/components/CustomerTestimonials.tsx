@@ -96,26 +96,26 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
         }}
       />
 
-      <div className="container mx-auto px-6 lg:px-12 relative z-10">
+      <div className="container mx-auto px-4 md:px-6 lg:px-12 relative z-10">
         {/* Section Title */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="inline-block mb-4"
+            className="text-center mb-8 md:mb-12 lg:mb-16"
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="inline-block mb-3 md:mb-4"
+            >
             <Quote className="w-8 h-8 text-black/30 mx-auto" strokeWidth={1} />
           </motion.div>
 
-          <h2 className="font-american-typewriter text-3xl tracking-tight text-black mb-4">
+          <h2 className="font-american-typewriter text-2xl md:text-3xl tracking-tight text-black mb-3 md:mb-4">
             {heading}
           </h2>
 
@@ -125,7 +125,7 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
-              className="font-din-arabic text-black/70 max-w-2xl mx-auto mb-6"
+              className="font-din-arabic text-sm md:text-base text-black/70 max-w-2xl mx-auto mb-4 md:mb-6"
             >
               {subheading}
             </motion.p>
@@ -158,7 +158,7 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
                   className="group"
                 >
                   <motion.div
-                    className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-6 shadow-xl shadow-black/5 relative overflow-hidden min-h-[300px] max-h-[400px] flex flex-col"
+                    className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-4 md:p-6 shadow-xl shadow-black/5 relative overflow-hidden min-h-[280px] md:min-h-[300px] max-h-[400px] flex flex-col"
                     whileHover={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)', borderColor: 'rgba(255, 255, 255, 0.4)' }}
                     transition={{ duration: 0.3 }}
                   >
@@ -176,7 +176,7 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
                       className="text-center mb-4"
                     >
                       <div className="flex items-center justify-center mb-2">
-                        <h3 className="font-american-typewriter text-lg text-black">
+                        <h3 className="font-american-typewriter text-base md:text-lg text-black">
                           {t.name}
                         </h3>
                         {t.verified && <VerifiedBadge delay={index * 0.1 + 0.4} />}

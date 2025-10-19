@@ -48,14 +48,14 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
       whileInView={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.8, delay: 0.2 }}
       viewport={{ once: true }}
-      className="w-2/5 flex flex-col justify-center px-16 py-16"
+      className="w-full lg:w-2/5 flex flex-col justify-center px-6 md:px-10 lg:px-16 py-8 md:py-12 lg:py-16"
     >
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
         viewport={{ once: true }}
-        className="font-american-typewriter text-3xl tracking-tight mb-8 text-black leading-tight"
+        className="font-american-typewriter text-2xl md:text-3xl tracking-tight mb-6 md:mb-8 text-black leading-tight"
       >
         {meta.heading}
       </motion.h2>
@@ -65,7 +65,7 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4 }}
         viewport={{ once: true }}
-        className="font-din-arabic text-lg text-black/70 leading-relaxed mb-12"
+        className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8 md:mb-12"
       >
         {meta.subheading}
       </motion.p>
@@ -96,14 +96,14 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
       initial={{ opacity: 0, x: 50 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      className="w-3/5 relative"
+      className="w-full lg:w-3/5 relative px-4 md:px-0"
     >
-      <div className="h-[80vh] overflow-hidden">
+      <div className="min-h-[400px] h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden rounded-lg md:rounded-none">
         <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.9 }} className="w-full h-full">
           <img
             src={meta.imageUrl}
             alt={meta.imageAlt}
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-contain md:object-cover object-center"
           />
         </motion.div>
       </div>
@@ -127,7 +127,7 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
     <section
       style={{ backgroundColor: meta.backgroundColor, marginTop: '20px' }}
     >
-      <div className="flex">{content}</div>
+      <div className="flex flex-col lg:flex-row">{content}</div>
     </section>
   )
 }

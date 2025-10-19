@@ -110,7 +110,7 @@ const Category = () => {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="relative w-full md:h-[570px] h-[300px] overflow-hidden"
+        className="relative w-full md:h-[570px] h-[500px] overflow-hidden"
       >
         {!videoError ? (
           <motion.video
@@ -341,7 +341,7 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
                 viewport={{ once: true }}
-                className="text-center md:pl-[370px]"
+                className="text-center md:text-right"
               >
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -412,7 +412,7 @@ const Category = () => {
               viewport={{ once: true }}
               className="w-full md:w-[60%] relative mt-8 md:mt-0"
             >
-              <div className="flex gap-2 md:gap-4 overflow-hidden relative px-6 md:px-12">
+              <div className="flex gap-2 md:gap-4 overflow-hidden relative px-2 md:px-12">
                 {/* Left Navigation Button */}
                 <div className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 mt-8 z-20">
                   <motion.button
@@ -444,7 +444,7 @@ const Category = () => {
                         transition={{ duration: 0.3 }}
                         src={imageSrc}
                         alt={`Instagram post ${index + 1}`}
-                        className="w-[300px] h-full object-cover"
+                        className="w-full h-full object-cover"
                       />
                       {/* Vertical Divider - only between 2nd and 3rd images */}
                       {index === 1 && (
