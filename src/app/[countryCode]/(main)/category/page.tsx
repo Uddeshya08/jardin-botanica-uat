@@ -110,7 +110,7 @@ const Category = () => {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="relative w-full md:h-[570px] h-[300px] overflow-hidden"
+        className="relative w-full md:h-[570px] h-[500px] overflow-hidden"
       >
         {!videoError ? (
           <motion.video

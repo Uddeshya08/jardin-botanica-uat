@@ -272,7 +272,7 @@ const Product = () => {
               {/* Line */}
               <div className="w-full h-[2px] bg-[#b9a893] opacity-[22%] mt-10"></div>
 
-              <div className="space-y-4 px-12 py-3">
+              <div className="space-y-4 px-4 md:px-8 lg:px-12 py-3">
                 <div>
                   {/* <h3 style={fontStyles.description}>PRICE</h3> */}
                   <p className="font-dinBold" style={fontStyles.price}>
@@ -324,7 +324,7 @@ const Product = () => {
               </div>
               {/* Line */}
               <div className="w-full h-[2px] bg-[#a3a37f] opacity-[30%]"></div>
-              <div className="pt-4 px-12 py-3">
+              <div className="pt-4 px-4 md:px-8 lg:px-12 py-3">
                 <h3 className="py-2 text-[#a28b6f] font-dinRegular text-[12px] tracking-[1px]">
                   FRAGRANCE PROFILE
                 </h3>
@@ -358,10 +358,10 @@ const Product = () => {
             >
               <div className="relative">
                 <button
-                  className="absolute left-8 top-1/2 transform -translate-y-1/2 hover:scale-110 transition-transform z-10"
+                  className="absolute left-2 md:left-8 top-1/2 transform -translate-y-1/2 hover:scale-110 transition-transform z-10 bg-white/80 md:bg-transparent rounded-full p-1 md:p-0"
                   onClick={prevImage}
                 >
-                  <ChevronLeft size={40} />
+                  <ChevronLeft size={32} className="md:w-10 md:h-10" />
                 </button>
                 <div className="w-full relative flex items-center justify-center">
                   <img
@@ -372,10 +372,10 @@ const Product = () => {
                 </div>
 
                 <button
-                  className="absolute right-8 top-1/2 transform -translate-y-1/2 hover:scale-110 transition-transform z-10"
+                  className="absolute right-2 md:right-8 top-1/2 transform -translate-y-1/2 hover:scale-110 transition-transform z-10 bg-white/80 md:bg-transparent rounded-full p-1 md:p-0"
                   onClick={nextImage}
                 >
-                  <ChevronRight size={40} />
+                  <ChevronRight size={32} className="md:w-10 md:h-10" />
                 </button>
               </div>
             </div>
@@ -459,13 +459,13 @@ const Product = () => {
             </div>
 
             {/* Right - Text (45%) */}
-            <div className="space-y-6 bg-[#C5C8B3] w-full h-full pl-6 lg:pl-20 pt-12">
+            <div className="space-y-6 bg-[#C5C8B3] w-full h-full px-6 md:px-8 lg:pl-20 py-8 md:py-12">
               <h2 style={{...fontStyles.subsequentHeading}} className="px-2">
                 A Forest Reborn
               </h2>
               <p
                 style={{ ...fontStyles.subCopy, lineHeight: "1.8" }}
-                className="pl-2 pr-8 "
+                className="pl-2 pr-4 md:pr-8"
               >
                 Crushed Pine by Jardin Botanica evokes the quiet majesty of
                 mist-covered evergreens after winter rain. It is a scent of
@@ -480,9 +480,9 @@ const Product = () => {
       </div>
 
       {/* Forth Section */}
-      <div className="py-40 overflow-hidden">
-        <div className="max-w-8xl mx-auto pl-8">
-          <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-60">
+      <div className="py-12 md:py-20 lg:py-40 overflow-hidden">
+        <div className="max-w-8xl mx-auto px-4 md:px-8">
+          <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-16 xl:gap-60">
             {/* Left Side - Heading */}
             <div
               className={`flex-shrink-0 w-full lg:w-96 transition-all duration-300 ease-out ${
@@ -504,15 +504,25 @@ const Product = () => {
               </h2>
               <div className="w-full">
                 <p
+                  className="hidden lg:block"
                   style={{
                     ...fontStyles.subCopy,
-
                     lineHeight: "1.5",
                     textAlign: "right",
                     paddingRight: "0",
                     marginRight: "0",
                     letterSpacing: "1.5px",
                     transform: "translateX(10ch)",
+                  }}
+                >
+                  Because one scent is never enough
+                </p>
+                <p
+                  className="lg:hidden"
+                  style={{
+                    ...fontStyles.subCopy,
+                    lineHeight: "1.5",
+                    letterSpacing: "1px",
                   }}
                 >
                   Because one scent is never enough
@@ -526,7 +536,7 @@ const Product = () => {
                 aromaSlide > 0 ? "w-full" : "flex-1"
               }`}
               style={{
-                marginLeft: aromaSlide > 0 ? "-25rem" : "0",
+                marginLeft: aromaSlide > 0 ? "0" : "0",
                 transition: "margin-left 300ms ease-out",
               }}
             >
@@ -620,7 +630,7 @@ const Product = () => {
         >
           LOVED BY OUR CUSTOMERS
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-28 my-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 lg:gap-28 my-8">
           {reviews.map((review, index) => (
             <div key={index} className="">
               {" "}

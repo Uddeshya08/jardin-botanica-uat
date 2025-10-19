@@ -121,14 +121,14 @@ export function Afterlife({ product }: { product?: ProductLike }) {
 //  console.log("heading = ", heading)
   return (
     <section className="py-16 lg:py-20" style={{ backgroundColor: bg ?? "#EBEBE1" }}>
-      <div className="container mx-auto px-8 lg:px-16">
+      <div className="container mx-auto px-4 md:px-8 lg:px-16">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-8 md:mb-12 lg:mb-16"
           >
             <motion.h2
               initial={{ opacity: 0, y: 15 }}
@@ -141,7 +141,7 @@ export function Afterlife({ product }: { product?: ProductLike }) {
             </motion.h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-24 lg:gap-32">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-16 lg:gap-24 xl:gap-32">
             {items.map((item, idx) => {
               // Determine if using old format (string) or new format (object)
               const isOldFormat = typeof item.icon === "string"

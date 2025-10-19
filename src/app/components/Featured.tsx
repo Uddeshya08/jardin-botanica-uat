@@ -50,14 +50,14 @@ export default function Featured({ featuredContent }: FeaturedProps) {
         transition={{ duration: 20, ease: [0.25, 0.46, 0.45, 0.94], repeat: Infinity }}
       />
 
-      <div className="container mx-auto px-6 lg:px-12 relative z-10">
+      <div className="container mx-auto px-4 md:px-6 lg:px-12 relative z-10">
         <div className="max-w-2xl mx-auto text-center">
           <motion.h3
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="font-american-typewriter text-3xl tracking-tight mb-6 text-black"
+            className="font-american-typewriter text-2xl md:text-3xl tracking-tight mb-4 md:mb-6 text-black"
           >
             {meta.heading}
           </motion.h3>
@@ -67,7 +67,7 @@ export default function Featured({ featuredContent }: FeaturedProps) {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
-            className="font-din-arabic text-black/70 mb-8 leading-relaxed text-lg"
+            className="font-din-arabic text-black/70 mb-6 md:mb-8 leading-relaxed text-base md:text-lg"
           >
             {meta.subheading}
           </motion.p>
