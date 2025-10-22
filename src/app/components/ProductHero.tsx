@@ -165,7 +165,6 @@ export function ProductHero({
     )
   }
 
-  console.log('product--',product)
 
   return (
     <div className="flex flex-col lg:flex-row" style={{ paddingTop: "80px", minHeight: "35vh" }}>

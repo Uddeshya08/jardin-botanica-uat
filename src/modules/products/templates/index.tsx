@@ -143,8 +143,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     return () => window.removeEventListener("scroll", handleScroll)
   }, [heroCartItem])
 
-  // Log ritual product received from server
-  console.log("products => ", product)
 
   return (
     <>
