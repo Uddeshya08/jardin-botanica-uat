@@ -1,11 +1,11 @@
 "use client"
 
-import React, { useMemo, useState, useTransition } from "react"
+import React, { useMemo, useState, useTransition, useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { ShoppingBag, Plus, Minus } from "lucide-react"
 import type { HttpTypes } from "@medusajs/types"
 import { useParams } from "next/navigation"
-import { addToCartAction } from "@lib/data/cart-actions"
+import { addToCartAction, addRitualToCartAction } from "@lib/data/cart-actions"
 import { emitCartUpdated } from "@lib/util/cart-client"
 
 type ProductLike = Partial<HttpTypes.StoreProduct> & { metadata?: Record<string, any> }
@@ -74,12 +74,56 @@ export function StickyCartBar({
   const [justUnlocked, setJustUnlocked] = useState(false)
   const [ritualCompleted, setRitualCompleted] = useState(false)
   const [showGoToCart, setShowGoToCart] = useState(false)
+  const [showRitualSuggestion, setShowRitualSuggestion] = useState(false)
+  const [ritualQuantity, setRitualQuantity] = useState(1)
 
   // read /[countryCode]/... from route, fallback to "in"
   const params = useParams() as any
   const countryCode: string = (params?.countryCode ?? "in").toString().toLowerCase()
 
   const variant = useMemo(() => pickVariant(product ?? undefined), [product])
+
+  // Monitor cart changes and update sticky cart bar state accordingly
+  useEffect(() => {
+    if (!product || !variant?.id) return
+
+    const productId = product.id ?? variant.id
+    const mainProductInCart = cartItems.find(item => 
+      (item.id === productId || item.variant_id === variant.id) && !item.isRitualProduct
+    )
+    const ritualProductInCart = cartItems.find(item => 
+      ritualProduct && item.id === ritualProduct.variantId && item.isRitualProduct
+    )
+
+    // Update ritual completion state based on cart contents
+    if (ritualProduct && mainProductInCart && ritualProductInCart) {
+      // Both products are in cart - ritual is completed
+      setRitualCompleted(true)
+      setShowGoToCart(true)
+      setShowRitualSuggestion(false)
+    } else if (ritualProduct && mainProductInCart && !ritualProductInCart) {
+      // Only main product is in cart - show ritual suggestion
+      setRitualCompleted(false)
+      setShowGoToCart(false)
+      setShowRitualSuggestion(true)
+    } else {
+      // No products in cart or only ritual product - reset states
+      setRitualCompleted(false)
+      setShowGoToCart(false)
+      setShowRitualSuggestion(false)
+    }
+
+    // Sync quantity state with cart if main product is in cart
+    if (mainProductInCart) {
+      setQuantity(mainProductInCart.quantity)
+    }
+    
+    // Sync ritual quantity state with cart if ritual product is in cart
+    if (ritualProductInCart) {
+      setRitualQuantity(ritualProductInCart.quantity)
+    }
+
+  }, [cartItems, product, variant, ritualProduct])
   const minor = useMemo(() => getMinorPrice(variant), [variant])
   const currency =
     (variant?.calculated_price?.currency_code ??
@@ -91,24 +135,77 @@ export function StickyCartBar({
     (Array.isArray(product?.images) && product!.images[0]?.url) || product?.thumbnail
 
   const shippingThresholdMinor = 2500 // you appear to treat prices as whole rupees already
-  const currentTotalMinor = minor * quantity
+  
+  // Calculate total based on current state:
+  // - If showing ritual suggestion: show only ritual product total
+  // - If ritual completed: show combined total (main + ritual)
+  // - Otherwise: show only main product total
+  const mainProductTotal = minor * quantity
+  const ritualProductTotal = ritualProduct ? ritualProduct.price * ritualQuantity : 0
+  
+  let currentTotalMinor: number
+  if (showRitualSuggestion && !ritualCompleted) {
+    // Show only ritual product total when suggesting ritual
+    currentTotalMinor = ritualProductTotal
+  } else if (ritualCompleted) {
+    // Show combined total when ritual is completed
+    currentTotalMinor = mainProductTotal + ritualProductTotal
+  } else {
+    // Show only main product total
+    currentTotalMinor = mainProductTotal
+  }
+  
+  
+  // Shipping qualification logic:
+  // - If showing ritual suggestion: check if ritual product alone qualifies
+  // - If ritual completed: check if combined total qualifies  
+  // - Otherwise: check if main product alone qualifies
   const qualifiesShipping = currentTotalMinor >= shippingThresholdMinor
 
-  // Debug logging
-  // console.log("=== StickyCartBar Debug ===")
-  // console.log("Ritual Product:", ritualProduct)
-  // console.log("Current Total:", currentTotalMinor)
-  // console.log("Qualifies Shipping:", qualifiesShipping)
-  // console.log("Ritual Completed:", ritualCompleted)
-  // console.log("Show Go To Cart:", showGoToCart)
 
   const handleQuantityChange = (delta: number) => {
     const next = Math.min(10, Math.max(1, quantity + delta))
     setQuantity(next)
     onUpdateHeroQuantity?.(next)
     
-    // Check if this change unlocks shipping
-    const nextTotal = minor * next
+    // Check if this change unlocks shipping (including ritual product)
+    const nextMainTotal = minor * next
+    const nextRitualTotal = ritualProduct ? ritualProduct.price * ritualQuantity : 0
+    
+    let nextTotal: number
+    if (showRitualSuggestion && !ritualCompleted) {
+      nextTotal = nextRitualTotal
+    } else if (ritualCompleted) {
+      nextTotal = nextMainTotal + nextRitualTotal
+    } else {
+      nextTotal = nextMainTotal
+    }
+    const willQualify = nextTotal >= shippingThresholdMinor
+    
+    if (!previouslyQualified && willQualify) {
+      setJustUnlocked(true)
+      setTimeout(() => setJustUnlocked(false), 3000)
+    }
+    
+    setPreviouslyQualified(willQualify)
+  }
+
+  const handleRitualQuantityChange = (delta: number) => {
+    const next = Math.min(10, Math.max(1, ritualQuantity + delta))
+    setRitualQuantity(next)
+    
+    // Check if this change unlocks shipping (including ritual product)
+    const nextMainTotal = minor * quantity
+    const nextRitualTotal = ritualProduct ? ritualProduct.price * next : 0
+    
+    let nextTotal: number
+    if (showRitualSuggestion && !ritualCompleted) {
+      nextTotal = nextRitualTotal
+    } else if (ritualCompleted) {
+      nextTotal = nextMainTotal + nextRitualTotal
+    } else {
+      nextTotal = nextMainTotal
+    }
     const willQualify = nextTotal >= shippingThresholdMinor
     
     if (!previouslyQualified && willQualify) {
@@ -156,6 +253,13 @@ export function StickyCartBar({
     startTransition(async () => {
       try {
         await addToCartAction({ variantId: variant.id, quantity, countryCode })
+        
+        // After successful add to cart, show ritual suggestion if available
+        if (ritualProduct && !ritualCompleted) {
+          setTimeout(() => {
+            setShowRitualSuggestion(true)
+          }, 1000) // Show ritual suggestion after 1 second
+        }
       } catch (e: any) {
         // rollback visual success
         setIsAddedToCart(false)
@@ -197,56 +301,32 @@ export function StickyCartBar({
       variant_id: ritualProduct.variantId,
       name: ritualProduct.name,
       price: ritualProduct.price,
-      quantity: 1,
+      quantity: ritualQuantity,
       image: ritualProduct.image,
       isRitualProduct: true,
     })
     
-    emitCartUpdated({ quantityDelta: quantity + 1 })
+    emitCartUpdated({ quantityDelta: quantity + ritualQuantity })
 
-    // background network - add both products
+    // background network - add both products using optimized ritual action
     startTransition(async () => {
       try {
-        // Add main product first
-        await addToCartAction({ 
-          variantId: variant.id, 
-          quantity, 
-          countryCode 
+        await addRitualToCartAction({
+          mainProduct: { variantId: variant.id, quantity },
+          ritualProduct: { variantId: ritualProduct.variantId, quantity: ritualQuantity },
+          countryCode
         })
         
-        // Then add ritual product
-        try {
-          await addToCartAction({ 
-            variantId: ritualProduct.variantId, 
-            quantity: 1, 
-            countryCode 
-          })
-          
-          // Show "Go to Cart" button after successful addition
-          setShowGoToCart(true)
-          setJustUnlocked(true)
-          setTimeout(() => setJustUnlocked(false), 3000)
-        } catch (ritualError: any) {
-          // If ritual product fails, still show success for main product but inform user
-          console.error("Ritual product add failed:", ritualError)
-          const errorMsg = ritualError?.message || "Could not add ritual product"
-          
-          if (errorMsg.includes("do not have a price")) {
-            setUiError("Ritual product price not configured. Main product added to cart.")
-          } else {
-            setUiError(`Main product added. Ritual: ${errorMsg}`)
-          }
-          
-          // Still show success since main product was added
-          setShowGoToCart(true)
-          setJustUnlocked(true)
-          setTimeout(() => setJustUnlocked(false), 3000)
-        }
+        // Show "Go to Cart" button after successful addition
+        setShowGoToCart(true)
+        setShowRitualSuggestion(false) // Hide ritual suggestion
+        setJustUnlocked(true)
+        setTimeout(() => setJustUnlocked(false), 3000)
       } catch (e: any) {
-        // rollback visual success - main product failed
+        // rollback visual success
         setRitualCompleted(false)
-        setUiError(e?.message || "Could not add to cart")
-        console.error("Add to cart failed:", e)
+        setUiError(e?.message || "Could not add ritual to cart")
+        console.error("Ritual cart addition failed:", e)
       } finally {
         setTimeout(() => {
           setAdding(false)
@@ -274,7 +354,7 @@ export function StickyCartBar({
               {/* Product Info */}
               <div className="flex items-center space-x-3 flex-shrink-0">
                 <div className="w-10 h-10 bg-black/10 backdrop-blur-sm rounded-xl flex items-center justify-center overflow-hidden">
-                  {(ritualProduct && qualifiesShipping && !showGoToCart) ? (
+                  {(ritualProduct && showRitualSuggestion && !showGoToCart) ? (
                     ritualProduct.image ? (
                       <img src={ritualProduct.image} alt={ritualProduct.name} className="w-10 h-10 object-cover rounded-xl" />
                     ) : (
@@ -288,27 +368,31 @@ export function StickyCartBar({
                 </div>
                 <div>
                   <h3 className="font-american-typewriter text-black/90 whitespace-nowrap text-sm">
-                    {(ritualProduct && qualifiesShipping && !showGoToCart) 
+                    {(ritualProduct && showRitualSuggestion && !showGoToCart) 
                       ? ritualProduct.name 
                       : `${name}${variant?.title ? ` • ${variant.title}` : ""}`}
                   </h3>
                   <div className="flex items-center space-x-1">
                     <p className="font-din-arabic-bold text-sm text-black/70">
-                      {(ritualProduct && qualifiesShipping && !showGoToCart)
+                      {(ritualProduct && showRitualSuggestion && !showGoToCart)
                         ? formatMinor(ritualProduct.price, ritualProduct.currency)
                         : formatMinor(minor, currency)}
                     </p>
                     {qualifiesShipping && (
                       <motion.p
-                        key={justUnlocked ? "unlocked" : "qualifies"}
+                        key="qualifies"
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3 }}
                         className="font-din-arabic text-xs whitespace-nowrap"
-                        style={{ color: "#545d4a" }}
+                        style={{ 
+                          color: showGoToCart ? "#f97316" : "#545d4a" // Orange color for "Complimentary Shipping Unlocked"
+                        }}
                       >
-                        {justUnlocked 
-                          ? "Complimentary Shipping Unlocked!" 
+                        {showRitualSuggestion && !ritualCompleted
+                          ? "Complete Your Ritual"
+                          : showGoToCart
+                          ? "Complimentary Shipping Unlocked"
                           : "Order Qualifies For Complimentary Shipping"}
                       </motion.p>
                     )}
@@ -327,21 +411,41 @@ export function StickyCartBar({
                     <motion.button
                       type="button"
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => handleQuantityChange(-1)}
+                      onClick={() => {
+                        if (ritualProduct && showRitualSuggestion && !showGoToCart) {
+                          handleRitualQuantityChange(-1)
+                        } else {
+                          handleQuantityChange(-1)
+                        }
+                      }}
                       className="p-1.5 hover:bg-black/10 transition-colors rounded-l-lg"
-                      disabled={quantity <= 1}
+                      disabled={
+                        (ritualProduct && showRitualSuggestion && !showGoToCart) 
+                          ? ritualQuantity <= 1 
+                          : quantity <= 1
+                      }
                     >
                       <Minus className="w-3 h-3 text-black/70" />
                     </motion.button>
                     <span className="font-din-arabic px-2 sm:px-3 py-1.5 text-black text-sm min-w-[30px] sm:min-w-[35px] text-center">
-                      {quantity}
+                      {(ritualProduct && showRitualSuggestion && !showGoToCart) ? ritualQuantity : quantity}
                     </span>
                     <motion.button
                       type="button"
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => handleQuantityChange(1)}
+                      onClick={() => {
+                        if (ritualProduct && showRitualSuggestion && !showGoToCart) {
+                          handleRitualQuantityChange(1)
+                        } else {
+                          handleQuantityChange(1)
+                        }
+                      }}
                       className="p-1.5 hover:bg-black/10 transition-colors rounded-r-lg"
-                      disabled={quantity >= 10}
+                      disabled={
+                        (ritualProduct && showRitualSuggestion && !showGoToCart) 
+                          ? ritualQuantity >= 10 
+                          : quantity >= 10
+                      }
                     >
                       <Plus className="w-3 h-3 text-black/70" />
                     </motion.button>
@@ -354,9 +458,7 @@ export function StickyCartBar({
                     TOTAL
                   </p>
                   <p className="font-din-arabic-bold text-black/90 whitespace-nowrap">
-                    {(ritualProduct && qualifiesShipping && !showGoToCart)
-                      ? formatMinor(ritualProduct.price, ritualProduct.currency)
-                      : formatMinor(currentTotalMinor, currency)}
+                    {formatMinor(currentTotalMinor, currency)}
                   </p>
                 </div>
 
@@ -371,7 +473,7 @@ export function StickyCartBar({
                     <ShoppingBag className="w-4 h-4" />
                     <span>Go to Cart</span>
                   </motion.a>
-                ) : ritualProduct && qualifiesShipping ? (
+                ) : ritualProduct && showRitualSuggestion ? (
                   <motion.button
                     type="button"
                     whileHover={{ scale: 1.02 }}

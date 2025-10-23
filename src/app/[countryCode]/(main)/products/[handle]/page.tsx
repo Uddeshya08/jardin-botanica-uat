@@ -97,7 +97,6 @@ export default async function ProductPage(props: Props) {
     notFound()
   }
 
-  console.log("region", region);
 
   const pricedProduct = await listProducts({
     countryCode: params.countryCode,
@@ -130,16 +129,6 @@ export default async function ProductPage(props: Props) {
     testimonialsContent = await getTestimonialsSectionByKey("pdp-testimonials")
   }
   
-  // Debug logging for testimonials
-  // console.log("Testimonials content found:", !!testimonialsContent)
-  // if (testimonialsContent) {
-  //   console.log("Testimonials data:", {
-  //     title: testimonialsContent.title,
-  //     productHandle: testimonialsContent.productHandle,
-  //     sectionKey: testimonialsContent.sectionKey,
-  //     itemsCount: testimonialsContent.items.length
-  //   })
-  // }
 
   // Fetch featured ritual two section content from Contentful
   // Try product-specific featured ritual two by productHandle first
@@ -156,94 +145,100 @@ export default async function ProductPage(props: Props) {
     featuredRitualTwoContent = await getFeaturedRitualTwoSectionByKey("pdp-featured-ritual-two")
   }
   
-  // Debug logging
-  // console.log("Product handle:", params.handle)
-  // console.log("Featured ritual two content found:", !!featuredRitualTwoContent)
-  // if (featuredRitualTwoContent) {
-  //   console.log("Featured ritual two data:", {
-  //     title: featuredRitualTwoContent.title,
-  //     productHandle: featuredRitualTwoContent.productHandle,
-  //     heading: featuredRitualTwoContent.heading,
-  //     imageUrl: featuredRitualTwoContent.imageUrl
-  //   })
-  // }
 
   // Fetch ritual product if available in product metadata
   let ritualProduct = null
-  const ritualProductId = (pricedProduct?.metadata?.ritualProduct as string | undefined)?.trim()
+  const ritualProductHandle = (pricedProduct?.metadata?.ritual_product as string | undefined)?.trim()
   
-  // Validate ritual product ID format
-  const isValidProductId = ritualProductId && ritualProductId.startsWith('prod_') && ritualProductId.length > 10
+  // Validate ritual product handle format (now expects handles like "soft-orris" instead of product IDs)
+  const isValidProductHandle = ritualProductHandle && ritualProductHandle.length > 0 && !ritualProductHandle.startsWith('prod_')
   
-  console.log("================================")
-  console.log("RITUAL PRODUCT DEBUG")
-  console.log("================================")
-  console.log("Main product metadata:", pricedProduct?.metadata)
-  console.log("Ritual product ID from metadata:", ritualProductId)
-  console.log("Ritual product ID length:", ritualProductId?.length)
-  console.log("Is valid product ID:", isValidProductId)
-  console.log("Region ID:", region?.id)
   
-  if (ritualProductId && isValidProductId) {
+  if (ritualProductHandle && isValidProductHandle) {
     try {
-      // Fetch ritual product with proper region and calculated prices
-      console.log("🔄 Fetching ritual product with region:", region?.id)
+      // Fetch ritual product with proper region and calculated prices using handle
       
-      // Use retrieveProduct to get the ritual product with calculated prices for the region
-      const ritualProd = await retrieveProduct(ritualProductId, region.id)
+      // Use listProducts to get the ritual product by handle with calculated prices for the region
+      const ritualProductResponse = await listProducts({
+        countryCode: params.countryCode,
+        queryParams: { handle: ritualProductHandle } as any,
+      })
+      
+      let ritualProd = ritualProductResponse.response.products?.[0]
+
+      // If no product found by exact handle, try alternative search methods
+      if (!ritualProd) {
+        
+        // Method 1: Search by title containing the handle
+        try {
+          const allProductsResponse = await listProducts({
+            countryCode: params.countryCode,
+            queryParams: {} as any, // Get all products
+          })
+          
+          const allProducts = allProductsResponse.response.products || []
+          
+          // Look for products with matching handle in title or metadata
+          const possibleMatches = allProducts.filter(prod => {
+            const titleMatch = prod.title?.toLowerCase().includes(ritualProductHandle.toLowerCase())
+            const handleMatch = prod.handle?.toLowerCase().includes(ritualProductHandle.toLowerCase())
+            const metadataMatch = (prod.metadata?.["product-name"] as string)?.toLowerCase() === ritualProductHandle.toLowerCase()
+            
+            return titleMatch || handleMatch || metadataMatch
+          })
+          
+          // Use the first match if found
+          if (possibleMatches.length > 0) {
+            ritualProd = possibleMatches[0]
+          }
+        } catch (searchError) {
+          console.error("Error in alternative search:", searchError)
+        }
+      }
       
       if (ritualProd) {
-        console.log("✅ Found ritual product:", ritualProd.title)
-        console.log("Ritual product has variants:", ritualProd.variants?.length || 0)
+        // Check if the ritual product has matching product-name metadata
+        const ritualProductName = (ritualProd.metadata?.["product-name"] as string | undefined)?.trim()
+        const isMatchingRitualProduct = ritualProductName === ritualProductHandle
         
-        const variant = ritualProd.variants?.[0]
+        // More flexible matching - check multiple criteria
+        const flexibleMatch = 
+          isMatchingRitualProduct || // Exact metadata match
+          ritualProd.handle === ritualProductHandle || // Exact handle match
+          ritualProd.title?.toLowerCase().includes(ritualProductHandle.toLowerCase()) || // Title contains handle
+          ritualProductName?.toLowerCase().includes(ritualProductHandle.toLowerCase()) // Metadata contains handle
         
-        console.log("Ritual product:", ritualProd.title)
-        console.log("Ritual product variant:", variant)
-        console.log("Variant calculated_price:", variant?.calculated_price)
-        console.log("Variant ID:", variant?.id)
-        
-        if (variant) {
-          const calculatedAmount = variant.calculated_price?.calculated_amount
-          const hasValidPrice = typeof calculatedAmount === 'number' && calculatedAmount > 0
+        if (!flexibleMatch) {
+          ritualProduct = null
+        } else {
+          const variant = ritualProd.variants?.[0]
           
-          ritualProduct = {
-            variantId: variant.id,
-            name: ritualProd.title || "Ritual Product",
-            price: hasValidPrice ? calculatedAmount : 0,
-            currency: variant.calculated_price?.currency_code || "inr",
-            image: ritualProd.thumbnail || ritualProd.images?.[0]?.url,
-          }
-          
-          if (hasValidPrice) {
-            console.log("✅ Ritual product prepared with valid price:", ritualProduct)
+          if (variant) {
+            const calculatedAmount = variant.calculated_price?.calculated_amount
+            const hasValidPrice = typeof calculatedAmount === 'number' && calculatedAmount > 0
+            
+            ritualProduct = {
+              variantId: variant.id,
+              name: ritualProd.title || "Ritual Product",
+              price: hasValidPrice ? calculatedAmount : 0,
+              currency: variant.calculated_price?.currency_code || "inr",
+              image: ritualProd.thumbnail || ritualProd.images?.[0]?.url,
+            }
+            
+            if (!hasValidPrice) {
+              // Set to null if no valid price to prevent cart errors
+              ritualProduct = null
+            }
           } else {
-            console.warn("⚠️ Ritual product has no valid price for region:", region?.id)
-            console.warn("Variant ID:", variant.id)
-            console.warn("Skipping ritual product to prevent cart errors")
-            // Set to null if no valid price to prevent cart errors
             ritualProduct = null
           }
-        } else {
-          console.warn("⚠️ Ritual product has no variants")
-          ritualProduct = null
         }
       } else {
-        console.log("❌ No ritual product found with ID:", ritualProductId)
         ritualProduct = null
       }
     } catch (error) {
-      console.error("Failed to fetch ritual product:", error)
       // Don't throw error, just set ritualProduct to null
       ritualProduct = null
-      console.log("⚠️ Continuing without ritual product due to fetch error")
-    }
-  } else {
-    if (ritualProductId && !isValidProductId) {
-      console.warn("⚠️ Invalid ritual product ID format:", ritualProductId)
-      console.warn("Expected format: prod_xxxxxxxxxxxxxxxxxxxx")
-    } else {
-      console.log("No ritual product configured for this product")
     }
   }
 
