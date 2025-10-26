@@ -25,7 +25,7 @@ export function Footer() {
       links: [
         { name: 'Brand', href: '#' },
         { name: 'Journal', href: `/${countryCode}/blogs` },
-        { name: 'Careers', href: '#' },
+        { name: 'Careers', href: `/${countryCode}/careers` },
       ],
     },
     {

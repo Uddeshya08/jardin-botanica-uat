@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight, Settings, Package, MapPin, CreditCard, LogOut, Plus, Trash2, Edit, X, Smartphone, University, Wallet, Check, AlertCircle } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from 'app/components/ui/dialog';
+import { ChevronRight, Settings, Package, MapPin, CreditCard, LogOut, Plus, Trash2, Edit, X, Smartphone, University, Wallet, Check, AlertCircle, Heart, ShoppingBag } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from 'app/components/ui/dialog';
 import { Input } from 'app/components/ui/input';
 import { Label } from 'app/components/ui/label';
 import { Button } from 'app/components/ui/button';
 import { ScrollArea } from 'app/components/ui/scroll-area';
 import { Checkbox } from 'app/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from 'app/components/ui/radio-group';
 import { toast } from 'sonner';
 import { Navigation } from 'app/components/Navigation';
 
@@ -121,9 +122,29 @@ export default function ProfilePage() {
     }
   }, [])
   
+  const [favorites, setFavorites] = useState<Array<{
+    id: string;
+    name: string;
+    price: number;
+    image: string;
+    description?: string;
+    category?: string;
+  }>>([]);
+  const [sizeDialogOpen, setSizeDialogOpen] = useState(false);
+  const [selectedSize, setSelectedSize] = useState('250ml');
+  const [selectedFavoriteItem, setSelectedFavoriteItem] = useState<{
+    id: string;
+    name: string;
+    price: number;
+    image: string;
+    description?: string;
+    category?: string;
+  } | null>(null);
+
   const sidebarItems = [
     { id: 'account-settings', label: 'Account Settings', icon: Settings },
     { id: 'order-history', label: 'Orders', icon: Package },
+    { id: 'favorites', label: 'Favorites', icon: Heart },
     { id: 'address-book', label: 'Saved Addresses', icon: MapPin },
     { id: 'credit-cards', label: 'Payment Methods', icon: CreditCard },
   ];
@@ -229,6 +250,45 @@ export default function ProfilePage() {
     if (contentArea) {
       contentArea.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  const handleAddToCartClick = (item: {
+    id: string;
+    name: string;
+    price: number;
+    image: string;
+    description?: string;
+    category?: string;
+  }) => {
+    // Check if this is the botanical hand wash
+    if (item.id === 'botanical-hand-wash') {
+      setSelectedFavoriteItem(item);
+      setSelectedSize('250ml');
+      setSizeDialogOpen(true);
+    } else {
+      // For other items, add directly to cart
+      toast.success('Added to cart');
+    }
+  };
+
+  const handleConfirmAddToCart = () => {
+    if (selectedFavoriteItem) {
+      // Calculate price based on selected size
+      const basePrice = 1950;
+      const finalPrice = selectedSize === '500ml' ? Math.round(basePrice * 1.5) : basePrice;
+      
+      // Create a modified item with size information
+      const itemToAdd = {
+        ...selectedFavoriteItem,
+        id: `${selectedFavoriteItem.id}-${selectedSize}`,
+        name: `${selectedFavoriteItem.name} (${selectedSize})`,
+        price: finalPrice
+      };
+      
+      toast.success('Added to cart');
+    }
+    setSizeDialogOpen(false);
+    setSelectedFavoriteItem(null);
   };
 
   const renderActiveSection = () => {
@@ -551,6 +611,119 @@ export default function ProfilePage() {
                 </motion.div>
               ))}
             </div>
+          </motion.div>
+        );
+
+      case 'favorites':
+        return (
+          <motion.div
+            key="favorites"
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <div className="flex items-center justify-between mb-8 lg:mb-16">
+              <div>
+                <h1 className="font-american-typewriter text-2xl lg:text-3xl text-black">Your Favorites</h1>
+                <p className="font-din-arabic text-base text-black/60 tracking-wide mt-2">
+                  {favorites.length} {favorites.length === 1 ? 'item' : 'items'} saved
+                </p>
+              </div>
+            </div>
+
+            {favorites.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-20"
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-black/5 to-black/10 flex items-center justify-center"
+                >
+                  <Heart className="w-12 h-12 text-black/30" />
+                </motion.div>
+                <p className="font-din-arabic text-black/60 mb-8 max-w-md mx-auto" style={{ letterSpacing: '0.1em' }}>
+                  Nothing here yet. Your favorites will appear as you wander the Botanist's Lab.
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleSectionChange('account-settings')}
+                  className="px-8 py-3 bg-black text-white font-din-arabic tracking-wide hover:bg-black/90 transition-colors"
+                  style={{ letterSpacing: '0.1em' }}
+                >
+                  Browse the Collection →
+                </motion.button>
+              </motion.div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <AnimatePresence mode="popLayout">
+                  {favorites.map((item, index) => (
+                    <motion.div
+                      key={item.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                      transition={{ delay: index * 0.05 }}
+                      className="group relative bg-white/40 backdrop-blur-sm rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
+                    >
+                      {/* Remove Button */}
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setFavorites(favorites.filter(f => f.id !== item.id))}
+                        className="absolute top-3 right-3 z-10 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Heart className="w-4 h-4 fill-current" style={{ color: '#e58a4d' }} />
+                      </motion.button>
+
+                      {/* Product Image */}
+                      <div className="relative aspect-square overflow-hidden">
+                        <motion.img
+                          whileHover={{ scale: 1.03 }}
+                          transition={{ duration: 0.3 }}
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+
+                      {/* Product Details */}
+                      <div className="p-4">
+                        <h3 className="font-american-typewriter mb-1" style={{ letterSpacing: '0.05em' }}>
+                          {item.name}
+                        </h3>
+                        {item.description && (
+                          <p className="font-din-arabic text-sm text-black/60 mb-3 line-clamp-1" style={{ letterSpacing: '0.1em' }}>
+                            {item.description}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-din-arabic whitespace-nowrap" style={{ letterSpacing: '0.1em' }}>
+                            ₹{item.price.toLocaleString()}
+                          </span>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleAddToCartClick(item)}
+                            className="flex items-center space-x-2 px-4 py-2 bg-black text-white rounded-lg font-din-arabic text-sm hover:bg-black/90 transition-colors whitespace-nowrap"
+                            style={{ letterSpacing: '0.1em' }}
+                          >
+                            <ShoppingBag className="w-4 h-4" />
+                            <span>Add to Cart</span>
+                          </motion.button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
           </motion.div>
         );
 
@@ -1357,6 +1530,74 @@ export default function ProfilePage() {
           {renderActiveSection()}
         </AnimatePresence>
       </div>
+
+      {/* Size Selection Dialog */}
+      <Dialog open={sizeDialogOpen} onOpenChange={setSizeDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] border-black/20" style={{ backgroundColor: '#e3e3d8' }}>
+          <DialogHeader>
+            <DialogTitle className="font-american-typewriter tracking-tight text-black" style={{ letterSpacing: '0.05em' }}>
+              {selectedFavoriteItem?.name}
+            </DialogTitle>
+            <DialogDescription className="font-din-arabic text-black/70 leading-relaxed pt-2" style={{ letterSpacing: '0.1em' }}>
+              {selectedFavoriteItem?.description}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Size Selection */}
+            <div className="space-y-3">
+              <h3 className="font-din-arabic text-sm tracking-wider uppercase" style={{ color: '#a28b6f', letterSpacing: '0.15em' }}>
+                Select Size
+              </h3>
+              <RadioGroup value={selectedSize} onValueChange={setSelectedSize} className="flex flex-col gap-3">
+                <div className="flex items-center space-x-3 p-4 border border-black/20 hover:border-black/40 transition-colors cursor-pointer rounded-sm bg-white/30">
+                  <RadioGroupItem value="250ml" id="size-250ml-account" className="border-black/30 text-black" />
+                  <Label 
+                    htmlFor="size-250ml-account" 
+                    className="flex-1 font-din-arabic text-black cursor-pointer flex justify-between items-center"
+                    style={{ letterSpacing: '0.1em' }}
+                  >
+                    <span>250ml</span>
+                    <span>₹1,950</span>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-3 p-4 border border-black/20 hover:border-black/40 transition-colors cursor-pointer rounded-sm bg-white/30">
+                  <RadioGroupItem value="500ml" id="size-500ml-account" className="border-black/30 text-black" />
+                  <Label 
+                    htmlFor="size-500ml-account" 
+                    className="flex-1 font-din-arabic text-black cursor-pointer flex justify-between items-center"
+                    style={{ letterSpacing: '0.1em' }}
+                  >
+                    <span>500ml</span>
+                    <span>₹2,925</span>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setSizeDialogOpen(false)}
+              className="font-din-arabic px-6 py-3 border border-black/30 text-black hover:bg-black/5 transition-all duration-300 tracking-wide flex-1 sm:flex-initial"
+              style={{ letterSpacing: '0.1em' }}
+            >
+              Cancel
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleConfirmAddToCart}
+              className="font-din-arabic px-6 py-3 bg-black text-white hover:bg-black/90 transition-all duration-300 tracking-wide flex-1 sm:flex-initial"
+              style={{ letterSpacing: '0.1em' }}
+            >
+              Add to Cart
+            </motion.button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
     </>
   );
