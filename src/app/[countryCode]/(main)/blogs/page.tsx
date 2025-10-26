@@ -168,16 +168,7 @@ const Home = () => {
   const [showStickyHeader, setShowStickyHeader] = useState(false)
   const [showStickyCart, setShowStickyCart] = useState(false)
   const [heroCartItem, setHeroCartItem] = useState<CartItem | null>(null)
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 'soft-orris-hand-veil',
-      name: 'Soft Orris Hand Veil',
-      price: 1800,
-      quantity: 1,
-      image:
-        'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop',
-    },
-  ])
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
 
   const handleCartUpdate = (item: CartItem | null) => {
     setHeroCartItem(item)

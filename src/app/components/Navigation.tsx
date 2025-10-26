@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { User, Search, ShoppingBag, X, Plus, Minus, Heart, Menu, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 
 interface CartItem {
   id: string
@@ -48,6 +49,58 @@ export function Navigation({
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const pathname = usePathname()
+  
+  // Get country code from pathname
+  const getCountryCode = () => {
+    if (pathname) {
+      const pathParts = pathname.split('/')
+      return pathParts[1] || 'in'
+    }
+    return 'in'
+  }
+
+  const countryCode = getCountryCode()
+  const [persistedCartItems, setPersistedCartItems] = useState<CartItem[]>([])
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedCart = localStorage.getItem('jardin-cart')
+        if (savedCart) {
+          const parsedCart = JSON.parse(savedCart)
+          console.log('Navigation: Loaded cart from localStorage on mount:', parsedCart)
+          setPersistedCartItems(parsedCart)
+          // Also trigger onCartUpdate to sync with parent component if needed
+          if (onCartUpdate && parsedCart.length > 0) {
+            parsedCart.forEach((item: CartItem) => {
+              onCartUpdate(item)
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error loading cart from localStorage:', error)
+      }
+    }
+  }, []) // Only run on mount
+
+  // Sync cartItems to localStorage whenever they change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && cartItems.length > 0) {
+      try {
+        console.log('Navigation: Saving cart to localStorage:', cartItems)
+        localStorage.setItem('jardin-cart', JSON.stringify(cartItems))
+        setPersistedCartItems(cartItems)
+      } catch (error) {
+        console.error('Error saving cart to localStorage:', error)
+      }
+    } else if (typeof window !== 'undefined' && cartItems.length === 0 && persistedCartItems.length > 0) {
+      // If cartItems is empty but we have persisted items, keep the persisted ones
+      console.log('Navigation: Keeping persisted cart items')
+    }
+  }, [cartItems, persistedCartItems.length])
 
   // Handle component mounting and home page detection
   useEffect(() => {
@@ -192,25 +245,38 @@ export function Navigation({
     })
   }, [])
 
+  // Use persisted cart items if component cartItems is empty
+  const displayCartItems = cartItems.length > 0 ? cartItems : persistedCartItems
+
   const getTotalPrice = () => {
-    return cartItems.reduce(
+    return displayCartItems.reduce(
       (total, item) => total + item.price * item.quantity,
       0
     )
   }
 
   const getTotalItems = () => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0)
+    return displayCartItems.reduce((total, item) => total + item.quantity, 0)
   }
 
   const handleQuantityChange = (itemId: string, change: number) => {
-    const item = cartItems.find((item) => item.id === itemId)
+    const item = displayCartItems.find((item) => item.id === itemId)
     if (item && onCartUpdate) {
       const newQuantity = Math.max(0, item.quantity + change)
       onCartUpdate({
         ...item,
         quantity: newQuantity,
       })
+      // Also update localStorage directly
+      if (typeof window !== 'undefined') {
+        try {
+          import("@lib/util/local-cart").then(({ updateLocalCartItem }) => {
+            updateLocalCartItem(itemId, newQuantity)
+          })
+        } catch (error) {
+          console.error('Error updating cart in localStorage:', error)
+        }
+      }
     }
   }
 
@@ -765,7 +831,7 @@ export function Navigation({
 
                   {/* Cart Content */}
                   <div className="max-h-96 overflow-y-auto">
-                    {cartItems.length === 0 ? (
+                    {displayCartItems.length === 0 ? (
                       // Empty Cart State
                       <div className="p-8 text-center">
                         <div className="mb-4">
@@ -784,7 +850,7 @@ export function Navigation({
                     ) : (
                       // Cart Items
                       <div className="p-4 space-y-4">
-                        {cartItems.map((item) => (
+                        {displayCartItems.map((item) => (
                           <div
                             key={item.id}
                             className="flex items-center gap-3 p-3 border border-black border-opacity-5"
@@ -838,7 +904,7 @@ export function Navigation({
                   </div>
 
                   {/* Cart Footer */}
-                  {cartItems.length > 0 && (
+                  {displayCartItems.length > 0 && (
                     <div className="p-4 border-t border-black border-opacity-10">
                       <div className="flex items-center justify-between mb-4">
                         <span className="font-din-arabic text-black">
@@ -849,7 +915,7 @@ export function Navigation({
                         </span>
                       </div>
                       <div className="space-y-2 text-center">
-                       <Link href={"/cart"}>
+                       <Link href={`/${countryCode}/product-checkout`}>
                         <button className="w-full py-3 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide text-center font-din-arabic">
                           Checkout
                         </button>
@@ -1033,7 +1099,7 @@ export function Navigation({
 
               {/* Cart Content */}
               <div className="max-h-[60vh] overflow-y-auto">
-                {cartItems.length === 0 ? (
+                {displayCartItems.length === 0 ? (
                   // Empty Cart State
                   <div className="p-8 text-center">
                     <div className="mb-4">
@@ -1050,7 +1116,7 @@ export function Navigation({
                 ) : (
                   // Cart Items
                   <div className="p-4 space-y-4">
-                    {cartItems.map((item) => (
+                    {displayCartItems.map((item) => (
                       <div key={item.id} className="flex items-center space-x-3 p-3 bg-white/50 border border-black/5">
                         {/* Only show image for ritual products */}
                         {item.isRitualProduct && item.image && (
@@ -1088,14 +1154,14 @@ export function Navigation({
               </div>
 
               {/* Cart Footer */}
-              {cartItems.length > 0 && (
+              {displayCartItems.length > 0 && (
                 <div className="p-4 border-t border-black/10">
                   <div className="flex items-center justify-between mb-4">
                     <span className="font-din-arabic text-black">Total:</span>
                     <span className="font-din-arabic text-black font-medium">₹{getTotalPrice()}</span>
                   </div>
                   <div className="space-y-2 text-center">
-                    <Link href="/cart">
+                    <Link href={`/${countryCode}/product-checkout`}>
                       <button className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide text-center">
                         Checkout
                       </button>
