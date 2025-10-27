@@ -59,9 +59,9 @@ const Summary = ({ cart }: SummaryProps) => {
       // Add minimum delay to show loading state (800ms for better visibility)
       const minLoadingTime = new Promise(resolve => setTimeout(resolve, 800))
       
-      console.log("Starting navigation to checkout...")
-      // Navigate to checkout
-      const navigationPromise = router.push(`/${countryCode}/checkout?step=${step}`)
+      console.log("Starting navigation to product-checkout...")
+      // Navigate to product checkout
+      const navigationPromise = router.push(`/${countryCode}/product-checkout`)
 
       // Wait for both minimum loading time and navigation to complete
       await Promise.all([minLoadingTime, navigationPromise])
