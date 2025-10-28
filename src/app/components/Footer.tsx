@@ -57,16 +57,16 @@ export function Footer() {
 
   return (
     <footer className="bg-black text-white py-16">
-      <div className="container mx-auto px-6 lg:px-12">
+      <div className="px-6 lg:px-12">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-12">
-          {/* Brand Section */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-12 pl-4 md:pl-0">
+          {/* Brand Section - Hidden on Mobile, Visible on Desktop */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="md:col-span-1"
+            className="hidden md:block md:col-span-1"
           >
             <h4 className="font-american-typewriter text-xl tracking-widest">
               <Image

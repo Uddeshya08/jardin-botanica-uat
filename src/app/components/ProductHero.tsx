@@ -167,7 +167,7 @@ export function ProductHero({
 
 
   return (
-    <div className="flex flex-col lg:flex-row" style={{ paddingTop: "80px", minHeight: "35vh" }}>
+    <div className="flex flex-col-reverse lg:flex-row" style={{ paddingTop: "80px", minHeight: "35vh" }}>
       {/* LEFT: (content) */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}

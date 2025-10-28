@@ -33,13 +33,13 @@ const journalPosts = [
 export function JournalSection() {
   return (
     <section className="md:py-20 py-10" style={{ backgroundColor: '#e3e3d8' }}>
-      <div className="container mx-auto px-6 lg:px-12">
+      <div className="w-full md:container md:mx-auto px-0 md:px-6 lg:px-12">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="mb-12 max-w-8xl mx-auto"
+          className="mb-12 max-w-8xl mx-auto px-6"
         >
           <h2 className="font-american-typewriter text-center  text-3xl lg:text-4xl tracking-tight mb-6 text-black">
             From the Journal
@@ -82,7 +82,7 @@ export function JournalSection() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.2 + 0.3 }}
                   viewport={{ once: true }}
-                  className="space-y-4"
+                  className="space-y-4 px-6"
                 >
                   {/* Category */}
                   <motion.span 
@@ -127,7 +127,7 @@ export function JournalSection() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.8 }}
             viewport={{ once: true }}
-            className="text-center"
+            className="text-center px-6"
           >
             <motion.button 
               whileHover={{ scale: 1.02 }}

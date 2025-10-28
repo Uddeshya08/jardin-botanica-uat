@@ -346,34 +346,34 @@ export function StickyCartBar({
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ opacity: 0, y: 100 }}
           transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 bg-white/50 backdrop-blur-3xl border border-white/30 rounded-3xl shadow-2xl shadow-black/10 max-w-4xl w-full mx-6"
+          className="fixed bottom-3 md:bottom-6 left-1/2 transform -translate-x-1/2 z-40 bg-white/50 backdrop-blur-3xl border border-white/30 rounded-2xl md:rounded-3xl shadow-2xl shadow-black/10 max-w-4xl w-[calc(100%-32px)] md:w-full md:mx-6"
           style={{ pointerEvents: 'auto' }}
         >
-          <div className="px-6 py-3 relative">
+          <div className="px-3 md:px-6 py-2 md:py-3 relative">
             <div className="flex items-center justify-between">
               {/* Product Info */}
-              <div className="flex items-center space-x-3 flex-shrink-0">
-                <div className="w-10 h-10 bg-black/10 backdrop-blur-sm rounded-xl flex items-center justify-center overflow-hidden">
+              <div className="flex items-center space-x-2 md:space-x-3 flex-shrink min-w-0">
+                <div className="w-8 h-8 md:w-10 md:h-10 bg-black/10 backdrop-blur-sm rounded-lg md:rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
                   {(ritualProduct && showRitualSuggestion && !showGoToCart) ? (
                     ritualProduct.image ? (
-                      <img src={ritualProduct.image} alt={ritualProduct.name} className="w-10 h-10 object-cover rounded-xl" />
+                      <img src={ritualProduct.image} alt={ritualProduct.name} className="w-8 h-8 md:w-10 md:h-10 object-cover rounded-lg md:rounded-xl" />
                     ) : (
-                      <ShoppingBag className="w-5 h-5 text-black/70" />
+                      <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-black/70" />
                     )
                   ) : image ? (
-                    <img src={image} alt={name} className="w-10 h-10 object-cover rounded-xl" />
+                    <img src={image} alt={name} className="w-8 h-8 md:w-10 md:h-10 object-cover rounded-lg md:rounded-xl" />
                   ) : (
-                    <ShoppingBag className="w-5 h-5 text-black/70" />
+                    <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-black/70" />
                   )}
                 </div>
-                <div>
-                  <h3 className="font-american-typewriter text-black/90 whitespace-nowrap text-sm">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-american-typewriter text-black/90 text-xs md:text-sm truncate">
                     {(ritualProduct && showRitualSuggestion && !showGoToCart) 
                       ? ritualProduct.name 
                       : `${name}${variant?.title ? ` • ${variant.title}` : ""}`}
                   </h3>
-                  <div className="flex items-center space-x-1">
-                    <p className="font-din-arabic-bold text-sm text-black/70">
+                  <div className="flex items-center space-x-1 overflow-hidden">
+                    <p className="font-din-arabic-bold text-xs md:text-sm text-black/70 whitespace-nowrap">
                       {(ritualProduct && showRitualSuggestion && !showGoToCart)
                         ? formatMinor(ritualProduct.price, ritualProduct.currency)
                         : formatMinor(minor, currency)}
@@ -384,7 +384,7 @@ export function StickyCartBar({
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="font-din-arabic text-xs whitespace-nowrap"
+                        className="font-din-arabic text-[10px] md:text-xs truncate"
                         style={{ 
                           color: showGoToCart ? "#f97316" : "#545d4a" // Orange color for "Complimentary Shipping Unlocked"
                         }}
@@ -392,8 +392,8 @@ export function StickyCartBar({
                         {showRitualSuggestion && !ritualCompleted
                           ? "Complete Your Ritual"
                           : showGoToCart
-                          ? "Complimentary Shipping Unlocked"
-                          : "Order Qualifies For Complimentary Shipping"}
+                          ? "Shipping Unlocked"
+                          : "Free Shipping"}
                       </motion.p>
                     )}
                   </div>
@@ -401,10 +401,10 @@ export function StickyCartBar({
               </div>
 
               {/* Controls + Add to Cart */}
-              <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+              <div className="flex items-center space-x-1.5 md:space-x-3 flex-shrink-0">
                 {/* Qty */}
-                <div className="flex items-center space-x-1 sm:space-x-2">
-                  <span className="font-din-arabic text-xs text-black/60 uppercase hidden sm:block">
+                <div className="flex items-center space-x-0.5 md:space-x-2">
+                  <span className="font-din-arabic text-xs text-black/60 uppercase hidden md:block">
                     QTY
                   </span>
                   <div className="flex items-center bg-black/10 backdrop-blur-sm rounded-lg">
@@ -418,7 +418,7 @@ export function StickyCartBar({
                           handleQuantityChange(-1)
                         }
                       }}
-                      className="p-1.5 hover:bg-black/10 transition-colors rounded-l-lg"
+                      className="p-1 md:p-1.5 hover:bg-black/10 transition-colors rounded-l-lg"
                       disabled={
                         (ritualProduct && showRitualSuggestion && !showGoToCart) 
                           ? ritualQuantity <= 1 
@@ -427,7 +427,7 @@ export function StickyCartBar({
                     >
                       <Minus className="w-3 h-3 text-black/70" />
                     </motion.button>
-                    <span className="font-din-arabic px-2 sm:px-3 py-1.5 text-black text-sm min-w-[30px] sm:min-w-[35px] text-center">
+                    <span className="font-din-arabic px-1.5 md:px-3 py-1 md:py-1.5 text-black text-xs md:text-sm min-w-[25px] md:min-w-[35px] text-center">
                       {(ritualProduct && showRitualSuggestion && !showGoToCart) ? ritualQuantity : quantity}
                     </span>
                     <motion.button
@@ -440,7 +440,7 @@ export function StickyCartBar({
                           handleQuantityChange(1)
                         }
                       }}
-                      className="p-1.5 hover:bg-black/10 transition-colors rounded-r-lg"
+                      className="p-1 md:p-1.5 hover:bg-black/10 transition-colors rounded-r-lg"
                       disabled={
                         (ritualProduct && showRitualSuggestion && !showGoToCart) 
                           ? ritualQuantity >= 10 
@@ -453,7 +453,7 @@ export function StickyCartBar({
                 </div>
 
                 {/* Total */}
-                <div className="hidden md:block text-center">
+                <div className="hidden lg:block text-center">
                   <p className="font-din-arabic text-xs text-black/60 uppercase whitespace-nowrap">
                     TOTAL
                   </p>
@@ -468,10 +468,11 @@ export function StickyCartBar({
                     href={`/${countryCode}/cart`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="font-din-arabic px-3 sm:px-5 py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-xl relative overflow-hidden flex items-center space-x-1 sm:space-x-2 whitespace-nowrap text-xs sm:text-sm"
+                    className="font-din-arabic px-2.5 md:px-5 py-2 md:py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-lg md:rounded-xl relative overflow-hidden flex items-center space-x-1 md:space-x-2 whitespace-nowrap text-xs md:text-sm"
                   >
-                    <ShoppingBag className="w-4 h-4" />
-                    <span>Go to Cart</span>
+                    <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                    <span className="hidden sm:inline">Go to Cart</span>
+                    <span className="sm:hidden">Cart</span>
                   </motion.a>
                 ) : ritualProduct && showRitualSuggestion ? (
                   <motion.button
@@ -480,9 +481,9 @@ export function StickyCartBar({
                     whileTap={{ scale: 0.98 }}
                     onClick={completeRitual}
                     disabled={adding || isPending || ritualCompleted}
-                    className="font-din-arabic px-3 sm:px-5 py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-xl relative overflow-hidden flex items-center space-x-1 sm:space-x-2 whitespace-nowrap text-xs sm:text-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="font-din-arabic px-2.5 md:px-5 py-2 md:py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-lg md:rounded-xl relative overflow-hidden flex items-center space-x-1 md:space-x-2 whitespace-nowrap text-xs md:text-sm disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    <ShoppingBag className="w-4 h-4" />
+                    <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     <AnimatePresence mode="wait">
                       {ritualCompleted ? (
                         <motion.span
@@ -492,7 +493,8 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          Adding...
+                          <span className="hidden sm:inline">Adding...</span>
+                          <span className="sm:hidden">Add...</span>
                         </motion.span>
                       ) : (
                         <motion.span
@@ -502,7 +504,8 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          Complete the Ritual
+                          <span className="hidden sm:inline">Complete the Ritual</span>
+                          <span className="sm:hidden">Ritual</span>
                         </motion.span>
                       )}
                     </AnimatePresence>
@@ -514,9 +517,9 @@ export function StickyCartBar({
                     whileTap={{ scale: 0.98 }}
                     onClick={addFromSticky}
                     disabled={!variant?.id || adding || isPending}
-                    className="font-din-arabic px-3 sm:px-5 py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-xl relative overflow-hidden flex items-center space-x-1 sm:space-x-2 whitespace-nowrap text-xs sm:text-sm"
+                    className="font-din-arabic px-2.5 md:px-5 py-2 md:py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-lg md:rounded-xl relative overflow-hidden flex items-center space-x-1 md:space-x-2 whitespace-nowrap text-xs md:text-sm"
                   >
-                    <ShoppingBag className="w-4 h-4" />
+                    <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     <AnimatePresence mode="wait">
                       {isAddedToCart ? (
                         <motion.span
@@ -526,7 +529,8 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          Added to Cart
+                          <span className="hidden sm:inline">Added to Cart</span>
+                          <span className="sm:hidden">Added</span>
                         </motion.span>
                       ) : (
                         <motion.span
@@ -536,7 +540,8 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          Add to Cart
+                          <span className="hidden sm:inline">Add to Cart</span>
+                          <span className="sm:hidden">Add</span>
                         </motion.span>
                       )}
                     </AnimatePresence>
