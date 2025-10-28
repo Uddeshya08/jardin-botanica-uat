@@ -48,7 +48,7 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
       whileInView={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.8, delay: 0.2 }}
       viewport={{ once: true }}
-      className="w-full lg:w-2/5 flex flex-col justify-center px-6 md:px-10 lg:px-16 py-8 md:py-12 lg:py-16"
+      className="w-full lg:w-2/5 flex flex-col justify-center px-4 md:px-10 lg:px-16 py-6 md:py-12 lg:py-16"
     >
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
@@ -96,14 +96,14 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
       initial={{ opacity: 0, x: 50 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      className="w-full lg:w-3/5 relative px-4 md:px-0"
+      className="w-full lg:w-3/5 relative px-0 md:px-0"
     >
       <div className="min-h-[400px] h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden rounded-lg md:rounded-none">
         <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.9 }} className="w-full h-full">
           <img
             src={meta.imageUrl}
             alt={meta.imageAlt}
-            className="w-full h-full object-contain md:object-cover object-center"
+            className="w-full h-full object-contain md:object-cover object-center scale-150 md:scale-100"
           />
         </motion.div>
       </div>
@@ -127,7 +127,7 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
     <section
       style={{ backgroundColor: meta.backgroundColor, marginTop: '20px' }}
     >
-      <div className="flex flex-col lg:flex-row">{content}</div>
+      <div className="flex flex-col lg:flex-row gap-0">{content}</div>
     </section>
   )
 }

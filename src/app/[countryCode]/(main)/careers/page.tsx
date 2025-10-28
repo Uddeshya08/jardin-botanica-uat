@@ -70,7 +70,7 @@ export default function CareersPage() {
               className="mb-16 text-center"
             >
               <h1 
-                className="font-american-typewriter mb-4 text-4xl lg:text-5xl"
+                className="font-american-typewriter mb-4 text-3xl text-center"
                 style={{ letterSpacing: '0.05em' }}
               >
                 Work with the Botanist's Lab

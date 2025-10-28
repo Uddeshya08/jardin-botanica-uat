@@ -160,8 +160,10 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
   const scroll = (dir: 'left' | 'right') => {
     const sc = scrollContainerRef.current
     if (!sc) return
-    const cardWidth = 300
-    const target = dir === 'left' ? Math.max(0, sc.scrollLeft - cardWidth) : sc.scrollLeft + cardWidth
+    // Use full viewport width on mobile to scroll exactly one product, fixed width on desktop
+    const isMobile = window.innerWidth < 768
+    const scrollAmount = isMobile ? window.innerWidth : 300
+    const target = dir === 'left' ? Math.max(0, sc.scrollLeft - scrollAmount) : sc.scrollLeft + scrollAmount
     sc.scrollTo({ left: target, behavior: 'smooth' })
   }
   const handleScrollBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -206,18 +208,45 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
 
   return (
     <section className="pt-8 lg:pt-12 relative" style={{ backgroundColor: bg }}>
+      {/* Heading and Subheading - Centered on Mobile, Part of Scroll on Desktop */}
+      <div className="lg:hidden px-4 md:px-8 text-center py-6">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          viewport={{ once: true }}
+          className="font-american-typewriter text-2xl tracking-tight mb-4 text-black"
+        >
+          {heading}
+        </motion.h2>
+        {subheading && (
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="font-din-arabic text-base text-black/70 leading-relaxed"
+          >
+            {subheading}
+          </motion.p>
+        )}
+      </div>
+
       <div
         ref={scrollContainerRef}
-        className="flex gap-4 md:gap-6 lg:gap-8 overflow-x-auto scrollbar-hide py-8 relative"
-        style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+        className="flex overflow-x-auto scrollbar-hide py-8 relative"
+        style={{ 
+          scrollSnapType: 'x mandatory', 
+          WebkitOverflowScrolling: 'touch',
+        }}
       >
-        {/* Left intro column */}
+        {/* Left intro column - Hidden on Mobile, Visible on Desktop */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="flex-shrink-0 w-[70%] sm:w-1/2 md:w-2/5 flex flex-col px-4 md:px-8 lg:px-16"
+          className="hidden lg:flex flex-shrink-0 w-2/5 flex-col px-8 lg:px-16"
           style={{ scrollSnapAlign: 'start', paddingTop: '60px' }}
         >
           <motion.h2
@@ -225,7 +254,7 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="font-american-typewriter text-2xl md:text-3xl tracking-tight mb-4 md:mb-6 lg:mb-8 text-black"
+            className="font-american-typewriter text-3xl tracking-tight mb-6 lg:mb-8 text-black"
           >
             {heading}
           </motion.h2>
@@ -235,86 +264,13 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
               viewport={{ once: true }}
-              className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed"
+              className="font-din-arabic text-lg text-black/70 leading-relaxed"
             >
               {subheading}
             </motion.p>
           )}
         </motion.div>
-
-        {/* Cards */}
-        {/* {cards.map((p, index) => (
-          <motion.div
-            key={p.id ?? `${p.name}-${index}`}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.05, ease: 'easeOut' }}
-            viewport={{ once: true }}
-            className="flex-shrink-0 group cursor-pointer relative"
-            style={{ width: '280px', scrollSnapAlign: 'start' }}
-            onMouseEnter={() => setHoveredId(p.id ?? index)}
-            onMouseLeave={() => setHoveredId(null)}
-            onClick={() => { if (p.url) window.location.href = p.url! }}
-          >
-            <div className="relative mb-6 overflow-hidden bg-white/20 rounded-sm">
-              <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.3, ease: 'easeOut' }} className="relative" style={{ height: '320px' }}>
-                <motion.img
-                  src={p.image ?? ''}
-                  alt={p.name}
-                  className="w-full h-full object-cover absolute inset-0"
-                  initial={{ opacity: 1 }}
-                  animate={{ opacity: hoveredId === (p.id ?? index) ? 0 : 1 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
-                />
-                <motion.img
-                  src={p.hoverImage ?? (p.image ?? '')}
-                  alt={`${p.name} alternative view`}
-                  className="w-full h-full object-cover absolute inset-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: hoveredId === (p.id ?? index) ? 1 : 0 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
-                />
-                {p.badge && (
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 text-xs font-din-arabic tracking-wide font-medium"
-                          style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', color: '#000', borderRadius: '12px' }}>
-                      {p.badge}
-                    </span>
-                  </div>
-                )}
-              </motion.div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-start justify-between">
-                <h3 className="font-american-typewriter text-black group-hover:text-black/80 transition-colors duration-200 flex-1"
-                    style={{ fontSize: '18px', lineHeight: '1.3', letterSpacing: '0.05em' }}>
-                  {p.name}
-                </h3>
-                <span className="font-din-arabic text-black ml-4 flex-shrink-0 group-hover:text-black/80 transition-colors duration-200"
-                      style={{ fontSize: '16px', lineHeight: '1.3', letterSpacing: '0.1em' }}>
-                  {formatPrice(p.price, p.currency)}
-                </span>
-              </div>
-              {p.description && (
-                <p className="font-din-arabic text-black/70 group-hover:text-black/60 transition-colors duration-200"
-                   style={{ fontSize: '14px', lineHeight: '1.4', letterSpacing: '0.1em' }}>
-                  {p.description}
-                </p>
-              )}
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={(e) => { e.stopPropagation(); handleAddToCart(p.id ?? index) }}
-                className="w-full mt-4 px-4 py-2 bg-transparent border border-black/20 text-black hover:bg-black hover:text-white transition-all duration-300 font-din-arabic text-sm tracking-wide opacity-0 group-hover:opacity-100 text-center"
-              >
-                {addedToCart === (p.id ?? index) ? '✓ Added' : 'Quick Add'}
-              </motion.button>
-            </div>
-          </motion.div>
-        ))} */}
-
+       
        {products.map((product, index) => (
             <motion.div
               key={product.id}
@@ -322,13 +278,14 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.08 }}
               viewport={{ once: true }}
-              className="flex-shrink-0 group cursor-pointer relative w-[240px] sm:w-[260px] md:w-[280px]"
+              className="flex-shrink-0 group cursor-pointer relative w-screen px-6 md:w-[280px] md:px-0 md:mr-8"
               style={{ 
-                scrollSnapAlign: 'start'
+                scrollSnapAlign: 'center',
               }}
               onMouseEnter={() => setHoveredProduct(product.id)}
               onMouseLeave={() => setHoveredProduct(null)}
             >
+              <div className="max-w-[340px] mx-auto md:max-w-none md:w-full">
                   {/* Product Image */}
                   <div className="relative mb-4 md:mb-6 overflow-hidden bg-white/20 rounded-sm">
                     <motion.div
@@ -414,33 +371,66 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
                       {addedToCart === product.id ? '✓ Added' : 'Quick Add'}
                     </motion.button>
                   </div>
-
-                </motion.div>
+                </div>
+              </motion.div>
             ))}
-
-        <div className="flex-shrink-0 w-4 md:w-6 lg:w-12" />
       </div>
 
-      {/* Arrows */}
+      {/* Arrows - Always Visible on Mobile, Conditional on Desktop */}
+      <div className="absolute left-2 md:hidden z-20" style={{ top: 'calc(50% + 40px)', transform: 'translateY(-50%)' }}>
+        <motion.button 
+          whileHover={{ scale: 1.05, x: -2 }} 
+          whileTap={{ scale: 0.95 }} 
+          onClick={() => scroll('left')}
+          disabled={!canScrollLeft}
+          className="group relative w-10 h-10 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed" 
+          aria-label="Scroll left"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <ChevronLeft className="w-5 h-5 text-black/70 group-hover:text-black transition-all duration-300" />
+          </div>
+          <div className="absolute inset-0 rounded-full ring-1 ring-black/5 group-hover:ring-black/15 transition-all duration-300" />
+        </motion.button>
+      </div>
+      
+      <div className="absolute right-2 md:hidden z-20" style={{ top: 'calc(50% + 40px)', transform: 'translateY(-50%)' }}>
+        <motion.button 
+          whileHover={{ scale: 1.05, x: 2 }} 
+          whileTap={{ scale: 0.95 }} 
+          onClick={() => scroll('right')}
+          disabled={!canScrollRight}
+          className="group relative w-10 h-10 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed" 
+          aria-label="Scroll right"
+        >
+          <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <ChevronRight className="w-5 h-5 text-black/70 group-hover:text-black transition-all duration-300" />
+          </div>
+          <div className="absolute inset-0 rounded-full ring-1 ring-black/5 group-hover:ring-black/15 transition-all duration-300" />
+        </motion.button>
+      </div>
+
+      {/* Desktop Arrows */}
       {canScrollLeft && (
-        <div className="absolute left-2 md:left-4 lg:left-6 z-20" style={{ top: 'calc(50% - 40px)', transform: 'translateY(-50%)' }}>
+        <div className="hidden md:block absolute left-4 lg:left-6 z-20" style={{ top: 'calc(50% - 40px)', transform: 'translateY(-50%)' }}>
           <motion.button whileHover={{ scale: 1.05, x: -2 }} whileTap={{ scale: 0.95 }} onClick={() => scroll('left')}
-            className="group relative w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden" aria-label="Scroll left">
+            className="group relative w-12 h-12 lg:w-14 lg:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden" aria-label="Scroll left">
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-black/70 group-hover:text-black transition-all duration-300" />
+              <ChevronLeft className="w-6 h-6 text-black/70 group-hover:text-black transition-all duration-300" />
             </div>
             <div className="absolute inset-0 rounded-full ring-1 ring-black/5 group-hover:ring-black/15 transition-all duration-300" />
           </motion.button>
         </div>
       )}
       {canScrollRight && (
-        <div className="absolute right-2 md:right-4 lg:right-6 z-20" style={{ top: 'calc(50% - 40px)', transform: 'translateY(-50%)' }}>
+        <div className="hidden md:block absolute right-4 lg:right-6 z-20" style={{ top: 'calc(50% - 40px)', transform: 'translateY(-50%)' }}>
           <motion.button whileHover={{ scale: 1.05, x: 2 }} whileTap={{ scale: 0.95 }} onClick={() => scroll('right')}
-            className="group relative w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden" aria-label="Scroll right">
+            className="group relative w-12 h-12 lg:w-14 lg:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden" aria-label="Scroll right">
             <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-black/70 group-hover:text-black transition-all duration-300" />
+              <ChevronRight className="w-6 h-6 text-black/70 group-hover:text-black transition-all duration-300" />
             </div>
             <div className="absolute inset-0 rounded-full ring-1 ring-black/5 group-hover:ring-black/15 transition-all duration-300" />
           </motion.button>
