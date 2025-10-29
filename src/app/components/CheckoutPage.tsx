@@ -259,6 +259,10 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
 
   const [phoneError, setPhoneError] = useState('');
   const [pincodeError, setPincodeError] = useState('');
+  const [pincodeLoading, setPincodeLoading] = useState(false);
+  const [serviceabilityData, setServiceabilityData] = useState<any>(null);
+  const [serviceabilityError, setServiceabilityError] = useState('');
+  const [isServiceable, setIsServiceable] = useState(false);
 
   const currentCountry = countryCodes.find(c => c.code === formData.countryCode)?.country || 'India';
   const currentLocationData = locationData[currentCountry] || locationData['India'];
@@ -302,6 +306,68 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
   const tax = Math.round(discountedSubtotal * 0.18);
   const total = discountedSubtotal + shipping + tax;
 
+  const checkDelhiveryPincode = async (pincode: string) => {
+    if (!pincode || pincode.length !== 6) {
+      return;
+    }
+
+    setPincodeLoading(true);
+    setServiceabilityError('');
+    
+    try {
+      console.log('Calling Delhivery serviceability API for pincode:', pincode);
+      
+      const response = await fetch(
+        `/api/delhivery/serviceability?pincode=${pincode}`,
+        {
+          method: 'GET',
+          cache: 'no-store',
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Delhivery API Error:', response.status, errorText);
+        throw new Error(`Failed to check serviceability: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Delhivery serviceability data:', data);
+      setServiceabilityData(data);
+      
+      // Check if delivery_codes array is empty or not serviceable
+      if (!data.delivery_codes || data.delivery_codes.length === 0) {
+        // Empty delivery_codes array - location not serviceable
+        setIsServiceable(false);
+        toast.error('❌ We do not deliver to this pincode area. Please try a different location.');
+      } else if (data.delivery_codes?.[0]?.postal_code) {
+        const postalCode = data.delivery_codes[0].postal_code;
+        const serviceableStatus = postalCode.pickup === 'Y' && postalCode.repl === 'Y';
+        setIsServiceable(serviceableStatus);
+        
+        if (serviceableStatus) {
+          toast.success(`✅ Delivery available! COD: ${postalCode.cod === 'Y' ? 'Available' : 'Not Available'}, Prepaid: ${postalCode.pre_paid === 'Y' ? 'Available' : 'Not Available'}`);
+        } else {
+          toast.error('❌ Delivery not available to this pincode');
+        }
+      } else {
+        setIsServiceable(false);
+        toast.error('❌ Unable to verify serviceability for this pincode');
+      }
+    } catch (error) {
+      console.error('Error checking Delhivery pincode:', error);
+      setServiceabilityError('Failed to check serviceability');
+      
+      // Mark as not serviceable if API fails
+      setIsServiceable(false);
+      // Don't show error toast - just log it for development
+      // The UI will still work for checkout, just without serviceability details
+      console.log('Continuing without serviceability data...');
+    } finally {
+      setPincodeLoading(false);
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -327,10 +393,16 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
       
       if (digitsOnly.length === expectedLength) {
         setPincodeError('');
+        // Check serviceability for Indian pincodes
+        if (country === 'India' && digitsOnly.length === 6) {
+          checkDelhiveryPincode(digitsOnly);
+        }
       } else if (digitsOnly.length > 0) {
         setPincodeError('Invalid postal code.');
       } else {
         setPincodeError('');
+        setServiceabilityData(null);
+        setIsServiceable(false);
       }
     }
   };
@@ -382,6 +454,21 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
           !formData.state || !formData.pincode) {
         toast.error('Please fill in all shipping details');
         return false;
+      }
+      
+      // Check if pincode is serviceable (only for Indian pincodes)
+      const country = countryCodes.find(c => c.code === formData.countryCode)?.country || 'India';
+      if (country === 'India' && formData.pincode.length === 6) {
+        // Check if we have checked serviceability
+        if (serviceabilityData !== null && !isServiceable) {
+          toast.error('Delivery is not available to this pincode. Please enter a different pincode.');
+          return false;
+        }
+        // If pincode is entered but serviceability data is loading, don't allow proceeding
+        if (pincodeLoading) {
+          toast.error('Please wait for serviceability check to complete.');
+          return false;
+        }
       }
     } else if (step === 2) {
       if (selectedPayment === 'card') {
@@ -684,19 +771,101 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
 
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
                       <Label htmlFor="pincode" className="font-din-arabic mb-2 block">{currentPostalConfig.label}</Label>
-                      <Input
-                        id="pincode"
-                        name="pincode"
-                        value={formData.pincode}
-                        onChange={handleInputChange}
-                        className="bg-white/80 border-black/10 focus:border-black/30 transition-all duration-300 placeholder:text-black/30"
-                        maxLength={currentPostalConfig.maxLength}
-                        placeholder={currentPostalConfig.placeholder}
-                      />
+                      <div className="relative">
+                        <Input
+                          id="pincode"
+                          name="pincode"
+                          value={formData.pincode}
+                          onChange={handleInputChange}
+                          className="bg-white/80 border-black/10 focus:border-black/30 transition-all duration-300 placeholder:text-black/30"
+                          maxLength={currentPostalConfig.maxLength}
+                          placeholder={currentPostalConfig.placeholder}
+                        />
+                        {pincodeLoading && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <div className="w-4 h-4 border-2 border-black/30 border-t-black/70 rounded-full animate-spin"></div>
+                          </div>
+                        )}
+                      </div>
                       {pincodeError && (
                         <motion.p initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="font-din-arabic text-xs text-red-600 mt-1">
                           {pincodeError}
                         </motion.p>
+                      )}
+                      {serviceabilityData && !pincodeError && (
+                        serviceabilityData.delivery_codes && serviceabilityData.delivery_codes.length > 0 ? (
+                          <motion.div 
+                            initial={{ opacity: 0, y: -5 }} 
+                            animate={{ opacity: 1, y: 0 }} 
+                            className="mt-3 p-4 bg-white/60 rounded-lg border border-white/80"
+                          >
+                            <div className="flex items-start gap-2">
+                              <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1">
+                                <h4 className="font-din-arabic-bold text-sm text-black">Serviceability Details</h4>
+                              {(() => {
+                                const pc = serviceabilityData.delivery_codes[0].postal_code;
+                                const isServiceable = pc.pickup === 'Y' && pc.repl === 'Y';
+                                return (
+                                  <div className="mt-2 space-y-1">
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-din-arabic text-xs text-black/60">City:</span>
+                                      <span className="font-din-arabic text-xs text-black">{pc.city}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-din-arabic text-xs text-black/60">District:</span>
+                                      <span className="font-din-arabic text-xs text-black">{pc.district}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-din-arabic text-xs text-black/60">State:</span>
+                                      <span className="font-din-arabic text-xs text-black">{pc.state_code}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-din-arabic text-xs text-black/60">COD Available:</span>
+                                      <span className={`font-din-arabic text-xs ${pc.cod === 'Y' ? 'text-green-600' : 'text-red-600'}`}>
+                                        {pc.cod === 'Y' ? 'Yes' : 'No'}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-din-arabic text-xs text-black/60">Prepaid:</span>
+                                      <span className={`font-din-arabic text-xs ${pc.pre_paid === 'Y' ? 'text-green-600' : 'text-red-600'}`}>
+                                        {pc.pre_paid === 'Y' ? 'Yes' : 'No'}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-din-arabic text-xs text-black/60">Pickup:</span>
+                                      <span className={`font-din-arabic text-xs ${pc.pickup === 'Y' ? 'text-green-600' : 'text-red-600'}`}>
+                                        {pc.pickup === 'Y' ? 'Available' : 'Not Available'}
+                                      </span>
+                                    </div>
+                                    {isServiceable && (
+                                      <div className="mt-2 pt-2 border-t border-black/10">
+                                        <p className="font-din-arabic text-xs text-green-600">✅ Delivery is available to this location</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          </div>
+                        </motion.div>
+                        ) : (
+                          <motion.div 
+                            initial={{ opacity: 0, y: -5 }} 
+                            animate={{ opacity: 1, y: 0 }} 
+                            className="mt-3 p-4 bg-red-50/80 rounded-lg border border-red-200"
+                          >
+                            <div className="flex items-start gap-2">
+                              <X className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1">
+                                <h4 className="font-din-arabic-bold text-sm text-red-600">Delivery Not Available</h4>
+                                <p className="font-din-arabic text-xs text-red-600 mt-1">
+                                  We do not deliver to this pincode area. Please enter a different pincode to continue.
+                                </p>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )
                       )}
                     </motion.div>
                   </div>
