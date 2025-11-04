@@ -392,8 +392,8 @@ export function StickyCartBar({
                         {showRitualSuggestion && !ritualCompleted
                           ? "Complete Your Ritual"
                           : showGoToCart
-                          ? "Shipping Unlocked"
-                          : "Free Shipping"}
+                          ? "Order Qualifies For Complimentary Shipping"
+                          : "Order Qualifies For Complimentary Shipping"}
                       </motion.p>
                     )}
                   </div>

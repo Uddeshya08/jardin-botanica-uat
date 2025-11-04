@@ -44,18 +44,20 @@ function safeParseTwice(v: any) {
 }
 function getAfterlifeContent(product?: ProductLike): AfterlifeContent {
   const defaults: AfterlifeContent = {
-    heading: "Afterli",
+    heading: "Afterlife",
     bg: "#EBEBE1",
-    // items: [
-    //   { icon: "recycle", title: "Glass Vessels", text: "Our amber glass bottles are designed for recycling and reuse — they can be rinsed, refilled, or even reimagined as planters." },
-    //   { icon: "refresh", title: "Pump Systems", text: "Pumps are a mix of metal and plastic. We encourage reusing them across bottles until their natural end." },
-    //   { icon: "leaf",    title: "Mindful End",   text: "When the pump no longer functions, please discard thoughtfully. Every choice matters to the gardens we're preserving." }
-    // ],
+    items: [
+      { icon: "recycle", title: "Glass Vessels", text: "Our amber glass bottles are designed for recycling and reuse — they can be rinsed, refilled, or even reimagined as planters." },
+      { icon: "refresh", title: "Pump Systems", text: "Pumps are a mix of metal and plastic. We encourage reusing them across bottles until their natural end." },
+      { icon: "leaf",    title: "Mindful End",   text: "When the pump no longer functions, please discard thoughtfully. Every choice matters to the gardens we're preserving." }
+    ],
   }
 
   if (!product?.metadata) return defaults
 
   // accept either metadata.afterlife OR metadata.sections.afterlife
+
+  console.log("product = ", product)
   const raw = product.metadata.afterlife ?? product.metadata.sections?.afterlife
   if (!raw) return defaults
   // console.log("raw => ", raw)

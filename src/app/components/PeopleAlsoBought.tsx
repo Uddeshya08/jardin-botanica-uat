@@ -111,7 +111,7 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
   // ------- READ METADATA (key: peopleAlsoBought) -------
   const meta: Required<MetaShape> = useMemo(() => {
     const defaults: Required<MetaShape> = {
-      heading: 'From the La',
+      heading: 'From the Lab',
       subheading: 'Formulations most often paired in practice.',
       bg: '#e3e3d8',
       products: [],

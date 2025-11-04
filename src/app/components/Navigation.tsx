@@ -380,7 +380,7 @@ export function Navigation({
       dropdown: [
         { 
           label: 'Cleansers & Exfoliants', 
-          href: '/products/cleansersexfoliants',
+          href: '/products/tea-exfoliant-rinse',
           image: 'https://images.unsplash.com/photo-1743597979473-5b1c0cae1bce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBoYW5kJTIwY3JlYW0lMjBsb3Rpb258ZW58MXx8fHwxNzU5NzQ5NDg0fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
         },
         { 
