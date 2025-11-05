@@ -75,7 +75,6 @@ export default function ProductCheckout() {
 
   const handleCartUpdate = (item: any) => {
     if (!item) return
-
     // Update cart in local state
     if (item.quantity === 0) {
       // Remove item
