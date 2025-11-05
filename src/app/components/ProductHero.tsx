@@ -167,13 +167,13 @@ export function ProductHero({
 
 
   return (
-    <div className="flex flex-col-reverse lg:flex-row" style={{ paddingTop: "80px", minHeight: "35vh" }}>
+    <div className="flex flex-col-reverse lg:flex-row pl-0 md:pl-8 lg:pl-16 xl:pl-15 relative overflow-hidden" style={{ paddingTop: "80px", minHeight: "35vh" }}>
       {/* LEFT: (content) */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full lg:w-[40%] flex items-center justify-center py-8 md:py-12 px-4 md:px-8 lg:px-16 xl:px-20 relative overflow-hidden"
+        className="w-full lg:w-[40%] flex items-center py-8 md:py-12 px-4 md:px-0 relative overflow-hidden"
         style={{ backgroundColor: "#e3e3d8" }}
       >
         <div className="space-y-6 max-w-lg relative z-10">
