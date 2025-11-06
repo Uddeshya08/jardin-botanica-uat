@@ -61,21 +61,10 @@ export function ProductHero({
   countryCode,
   onCartUpdate,
 }: ProductHeroProps) {
-  // const [quantity, setQuantity] = useState(1)
-  // const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  // const [isAddedToCart, setIsAddedToCart] = useState(false)
   const [isRitualPanelOpen, setIsRitualPanelOpen] = useState(false)
   const [isActivesPanelOpen, setIsActivesPanelOpen] = useState(false)
   const [isFragranceNotesOpen, setIsFragranceNotesOpen] = useState(false)
   const [isIngredientsPanelOpen, setIsIngredientsPanelOpen] = useState(false)
-
-  // const variant = product.variants?.[0]
-  // const variantId = variant?.id
-  // const minorAmount = variant?.calculated_price?.calculated_amount ?? 0
-
-  // const fallbackImg = product.thumbnail ?? "/assets/productImage.png"
-  // const imgs = product.images?.map((i) => i.url).filter(Boolean) ?? []
-  // const productImages = imgs.length ? imgs : [fallbackImg]
 
   const router = useRouter()
   const [quantity, setQuantity] = useState(1)
@@ -508,7 +497,7 @@ export function ProductHero({
                 className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
                 style={{ color: "#a28b6f" }}
               >
-                Fragrance Notes
+                Fragrance Profile
               </span>
               <motion.div
                 whileHover={{ rotate: 90 }}
@@ -744,7 +733,7 @@ export function ProductHero({
       <InfoPanel
         isOpen={isFragranceNotesOpen}
         onClose={() => setIsFragranceNotesOpen(false)}
-        title="Fragrance Notes"
+        title="Fragrance Profile"
       >
         <div className="space-y-4">
           <div className="group">

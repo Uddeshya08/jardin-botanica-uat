@@ -354,7 +354,7 @@ const productImage = '/assets/productImage.png';
               className="flex items-center justify-between w-full py-1 text-left group"
             >
               <span className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300" style={{ color: '#a28b6f' }}>
-                FRAGRANCE NOTES
+                FRAGRANCE Profile
               </span>
               <motion.div
                 whileHover={{ rotate: 90 }}
@@ -552,7 +552,7 @@ const productImage = '/assets/productImage.png';
       <InfoPanel
         isOpen={isFragranceNotesOpen}
         onClose={() => setIsFragranceNotesOpen(false)}
-        title="FRAGRANCE NOTES"
+        title="FRAGRANCE Profile"
       >
         <div className="space-y-4">
           <div className="group">
