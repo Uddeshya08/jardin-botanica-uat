@@ -12,8 +12,14 @@ import { ShippingStep } from './checkout/ShippingStep';
 import { PaymentStep } from './checkout/PaymentStep';
 import { ReviewStep } from './checkout/ReviewStep';
 import { OrderSummary } from './checkout/OrderSummary';
+import { usePathname, useRouter } from 'next/navigation';
+import { useRazorpay, RazorpayOrderOptions } from 'react-razorpay';
 
 export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPageProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const countryCode = (pathname?.split('/')?.[1] || 'in');
+  const { Razorpay } = useRazorpay();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPayment, setSelectedPayment] = useState<string>('card');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -215,23 +221,116 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
   };
 
   const handlePlaceOrder = async () => {
+    if (selectedPayment !== 'cod') {
+      const rzpMethod = selectedPayment; // 'upi' | 'card' | 'netbanking' | 'wallet'
+      try {
+        // Prepare payload for backend Razorpay checkout
+        const { total } = calculateTotals(cartItems, appliedCoupon)
+        const checkoutRes = await fetch(`/api/razorpay/checkout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: Number(total),
+            currency: 'INR',
+            order_id: `temp_${Date.now()}`,
+            receipt: `receipt_${Date.now()}`,
+            customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
+            customer_email: formData.email,
+            customer_contact: formData.phone,
+            notes: {
+              source: 'jardin-custom-ui',
+            },
+          }),
+        })
+        if (!checkoutRes.ok) {
+          const err = await checkoutRes.json().catch(() => ({}))
+          throw new Error(err?.error || 'Failed to create Razorpay order')
+        }
+        const { order, key_id } = await checkoutRes.json()
+
+        const methodConfig: any = {
+          method: {
+            upi: rzpMethod === 'upi',
+            card: rzpMethod === 'card',
+            netbanking: rzpMethod === 'netbanking',
+            wallet: rzpMethod === 'wallet',
+          },
+          config: { display: { sequence: [`block.${rzpMethod}`] } },
+          upi: rzpMethod === 'upi' ? { flow: 'intent' } : undefined,
+        }
+
+        const options: RazorpayOrderOptions & any = {
+          key: key_id,
+          amount: order.amount,
+          currency: order.currency,
+          order_id: order.id,
+          name: process.env.COMPANY_NAME ?? 'Jardin Botanica',
+          description: `Order Payment`,
+          ...methodConfig,
+          prefill: {
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            contact: formData.phone,
+          },
+          handler: async (response: any) => {
+            try {
+              const verifyRes = await fetch(`/api/razorpay/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                }),
+              })
+              const verifyJson = await verifyRes.json()
+              if (!verifyRes.ok || !verifyJson?.verified) {
+                throw new Error(verifyJson?.error || 'Payment verification failed')
+              }
+              toast.success('Payment successful!')
+              // Clear local cart visuals if you store locally
+              if (typeof window !== 'undefined') {
+                import("@lib/util/local-cart").then(({ clearLocalCart }) => {
+                  clearLocalCart();
+                  window.dispatchEvent(new CustomEvent('localCartUpdated', { detail: { items: [] } }));
+                })
+              }
+              router.push(`/${countryCode}/account`)
+            } catch (e: any) {
+              toast.error(e?.message || 'Verification failed')
+            }
+          },
+          modal: {
+            backdropclose: true,
+            escape: true,
+            handleback: true,
+            confirm_close: true,
+          },
+          theme: { color: '#000000' },
+        }
+
+        const rzp = new (Razorpay as any)(options)
+        rzp.open()
+      } catch (e:any) {
+        toast.error(e?.message || 'Payment start failed')
+      }
+      return
+    }
+
+    // COD flow (local)
     setIsProcessing(true);
     await new Promise(resolve => setTimeout(resolve, 2500));
     setIsProcessing(false);
     toast.success('Order placed successfully! You will receive a confirmation email shortly.');
-    
     if (typeof window !== 'undefined') {
       import("@lib/util/local-cart").then(({ clearLocalCart }) => {
         clearLocalCart();
-        window.dispatchEvent(new CustomEvent('localCartUpdated', {
-          detail: { items: [] }
-        }));
+        window.dispatchEvent(new CustomEvent('localCartUpdated', { detail: { items: [] } }));
       });
     }
-    
-    setTimeout(() => {
-      onBack();
-    }, 1500);
+    setTimeout(() => { onBack(); }, 1500);
   };
 
   return (

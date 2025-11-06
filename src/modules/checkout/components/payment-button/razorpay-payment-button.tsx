@@ -1,11 +1,12 @@
 
 import { Button } from "@medusajs/ui"
 import Spinner from "@modules/common/icons/spinner"
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import  {useRazorpay, RazorpayOrderOptions } from "react-razorpay"
 import { HttpTypes } from "@medusajs/types"
 import {  placeOrder,  } from "@lib/data/cart"
 import { CurrencyCode } from "react-razorpay/dist/constants/currency"
+import { useSearchParams } from "next/navigation"
 export const RazorpayPaymentButton = ({
   session,
   notReady,
@@ -20,6 +21,8 @@ export const RazorpayPaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
   const {Razorpay
    } = useRazorpay();
+  const searchParams = useSearchParams()
+  const selectedRzpMethod = (searchParams.get("rzpMethod") || "upi").toLowerCase()
   
   const [orderData,setOrderData] = useState({razorpayOrder:{id:""}})
 
@@ -44,8 +47,24 @@ export const RazorpayPaymentButton = ({
         setSubmitting(false)
       }
     
-    const options: RazorpayOrderOptions = {
-      key: "rzp_test_KZp3v4sgtPHTJI",
+    const key = (process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY || "") as string
+    const methodConfig: any = {
+      method: {
+        upi: selectedRzpMethod === "upi",
+        card: selectedRzpMethod === "card",
+        netbanking: selectedRzpMethod === "netbanking",
+        wallet: selectedRzpMethod === "wallet",
+      },
+      config: {
+        display: {
+          sequence: [`block.${selectedRzpMethod}`],
+        },
+      },
+      upi: selectedRzpMethod === "upi" ? { flow: "intent" } : undefined,
+    }
+
+    const options: RazorpayOrderOptions & any = {
+      key,
       callback_url: `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/razorpay/hooks`,
       amount: session.amount*100*100,
       order_id: orderData.razorpayOrder.id,
@@ -53,7 +72,7 @@ export const RazorpayPaymentButton = ({
       name: process.env.COMPANY_NAME ?? "your company name ",
       description: `Order number ${orderData.razorpayOrder.id}`,
       remember_customer:true,
-      
+      ...methodConfig,
 
       image: "https://example.com/your_logo",
       modal: {
@@ -103,7 +122,7 @@ export const RazorpayPaymentButton = ({
   }, [Razorpay, cart.billing_address?.first_name, 
     cart.billing_address?.last_name, cart.currency_code,
      cart?.email, cart?.shipping_address?.phone, orderData.razorpayOrder.id, 
-     session.amount, session.provider_id]);
+     session.amount, session.provider_id, selectedRzpMethod]);
   console.log("orderData"+JSON.stringify(orderData))
   return (
     <>
@@ -114,7 +133,7 @@ export const RazorpayPaymentButton = ({
           handlePayment()}
         }
       >
-        {submitting ? <Spinner /> : "Checkout"}
+        {submitting ? <Spinner /> : "Place order"}
       </Button>
       {errorMessage && (
         <div className="text-red-500 text-small-regular mt-2">
