@@ -33,8 +33,6 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
 
   return (
     <>
-      {/* <Nav  cartItems={cartItems}
-        /> */}
       {customer && cart && (
         <CartMismatchBanner customer={customer} cart={cart} />
       )}
