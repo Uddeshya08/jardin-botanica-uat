@@ -2,19 +2,25 @@
 
 import React, { useTransition, useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
-import {
-  ChevronLeft,
-  ChevronRight,
-  Star,
-  Plus,
-  Home,
-  ChevronRight as BreadcrumbChevron,
-} from "lucide-react"
+import { ChevronLeft, ChevronRight, Star, Heart, Share2, Plus, Minus, Home, ChevronRight as BreadcrumbChevron } from 'lucide-react';
+
 import { IoIosArrowDown } from "react-icons/io";
 import { InfoPanel } from "./InfoPanel"
 import { addToCartAction } from "@lib/data/cart-actions"
 import { useRouter } from "next/navigation"
 import { emitCartUpdated } from "@lib/util/cart-client"
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
+import { Label } from "./ui/label"
+
+import {
+  Breadcrumb,
+  BreadcrumbEllipsis,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "./ui/breadcrumb";
 interface CartItem {
   id: string
   name: string
@@ -32,9 +38,18 @@ interface ProductHeroProps {
     description?: string
     thumbnail?: string
     images?: { url: string }[]
+    options?: Array<{
+      id: string
+      title?: string
+    }>
     variants: Array<{
       id: string
+      title?: string
       calculated_price?: { calculated_amount?: number; currency_code?: string }
+      options?: Array<{
+        option_id: string
+        value: string
+      }>
     }>
   }
   countryCode: string
@@ -69,36 +84,55 @@ export function ProductHero({
   const [adding, setAdding] = useState(false)
   const [uiError, setUiError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
-  const variant = product.variants?.[0]
-  const variantId = variant?.id
-  const minorAmount = variant?.calculated_price?.calculated_amount ?? 0
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
+    product.variants?.[0]?.id ?? null
+  )
+  const selectedVariant = product.variants?.find((v) => v.id === selectedVariantId) ?? product.variants?.[0]
+  const minorAmount = selectedVariant?.calculated_price?.calculated_amount ?? 0
 
   const fallbackImg = product.thumbnail ?? "/assets/productImage.png"
   const imgs = product.images?.map((i) => i.url).filter(Boolean) ?? []
   const productImages = imgs.length ? imgs : [fallbackImg]
 
+  // Build dynamic size options from product options/variants
+  const sizeOptionId = (product as any).options?.find(
+    (o: any) => (o?.title || "").toLowerCase() === "size"
+  )?.id
+  const sizeOptions: Array<{ id: string; label: string }> = (product.variants || [])
+    .map((v: any) => {
+      const label = v?.options?.find((vo: any) => vo.option_id === sizeOptionId)?.value ?? v?.title ?? ""
+      return { id: v.id, label }
+    })
+    .filter((o) => !!o.label)
+
   // Check if the product is a cleanser or exfoliant
   const isCleanserOrExfoliant = () => {
     const title = product.title?.toLowerCase() || ""
     const handle = (product as any).handle?.toLowerCase() || ""
-    
+
     // Check for cleanser/exfoliant keywords
     const keywords = ["cleanser", "exfoliant", "hand wash", "handwash", "scrub", "cleansing"]
-    const canSeeActives = keywords.some(keyword => 
+    const canSeeActives = keywords.some(keyword =>
       title.includes(keyword) || handle.includes(keyword)
     )
-    
+
     // Exclude candles and fragrances
     const excludeKeywords = ["candle", "fragrance", "scent", "bloom", "cedar"]
-    const isExcluded = excludeKeywords.some(keyword => 
+    const isExcluded = excludeKeywords.some(keyword =>
       title.includes(keyword) || handle.includes(keyword)
     )
-    
+
     return canSeeActives && !isExcluded
   }
 
+  // Dynamic breadcrumb label based on product type
+  const breadcrumbLeafLabel = isCleanserOrExfoliant()
+    ? "Cleansers & Exfoliants"
+    : "Lotions & Moisturisers"
+
   const handleAddToCart = () => {
-    if (!variantId || adding || isPending) return
+    if (!selectedVariantId || adding || isPending) return
 
     // instant UI — don’t block on network
     setAdding(true)
@@ -107,7 +141,7 @@ export function ProductHero({
 
     // optimistic nav/sticky updates if parent listens (regular product - no image in nav)
     onCartUpdate?.({
-      id: variantId,
+      id: selectedVariantId,
       name: product.title,
       price: minorAmount,
       quantity,
@@ -120,7 +154,7 @@ export function ProductHero({
     startTransition(async () => {
       try {
         await addToCartAction({
-          variantId,
+          variantId: selectedVariantId,
           quantity,
           countryCode: (countryCode || "in").toLowerCase(),
         })
@@ -142,9 +176,9 @@ export function ProductHero({
   const handleQuantityChange = (newQuantity: number) => {
     setQuantity(newQuantity)
     // keep parent UI synced while changing qty (optional)
-    if (variantId) {
+    if (selectedVariantId) {
       onCartUpdate?.({
-        id: variantId,
+        id: selectedVariantId,
         name: product.title,
         price: minorAmount,
         quantity: newQuantity,
@@ -167,16 +201,49 @@ export function ProductHero({
 
 
   return (
-    <div className="flex flex-col-reverse lg:flex-row" style={{ paddingTop: "80px", minHeight: "35vh" }}>
+    <div className="flex flex-col-reverse lg:flex-row pl-0 md:pl-8 lg:pl-16 xl:pl-15 relative overflow-hidden" style={{ paddingTop: "80px", minHeight: "35vh" }}>
       {/* LEFT: (content) */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full lg:w-[40%] flex items-center justify-center py-8 md:py-12 px-4 md:px-8 lg:px-16 xl:px-20 relative overflow-hidden"
+        className="w-full lg:w-[40%] flex items-center py-8 md:py-12 px-4 md:px-0 relative overflow-hidden"
         style={{ backgroundColor: "#e3e3d8" }}
       >
         <div className="space-y-6 max-w-lg relative z-10">
+          {/* Breadcrumbs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href={`/${countryCode}`} className="font-din-arabic text-xs tracking-wide flex items-center" style={{ color: '#a28b6f' }}>
+                    <Home className="w-3 h-3 mr-1" />
+                    Home
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <BreadcrumbChevron className="w-3 h-3" style={{ color: '#a28b6f' }} />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="#" className="font-din-arabic text-xs tracking-wide" style={{ color: '#a28b6f' }}>
+                    Body & Hands
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <BreadcrumbChevron className="w-3 h-3" style={{ color: '#a28b6f' }} />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="font-din-arabic text-xs tracking-wide text-black/80">
+                    {breadcrumbLeafLabel}
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </motion.div>
           {/* Title */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -203,18 +270,51 @@ export function ProductHero({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="font-din-arabic text-base md:text-lg text-black leading-relaxed mb-4"
+              className="font-din-arabic text-black leading-relaxed mb-4"
             >
               {product.subtitle}
             </motion.p>
           )}
+
+          {/* Size Selection with Radio Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="space-y-3 pb-0 pt-3"
+          >
+            <h3 className="font-din-arabic text-sm tracking-wider uppercase" style={{ color: '#a28b6f' }}>
+              SIZE
+            </h3>
+            <RadioGroup 
+              value={selectedVariantId ?? ""}
+              onValueChange={(value) => setSelectedVariantId(value)}
+              className="!flex flex-row gap-6"
+            >
+              {sizeOptions.map((opt) => (
+                <div key={opt.id} className="flex items-center gap-2">
+                  <RadioGroupItem
+                    value={opt.id}
+                    id={`size-${opt.id}`}
+                    className="peer size-4 border-2 border-black/40 data-[state=checked]:border-[#00000066]"
+                  />
+                  <Label
+                    htmlFor={`size-${opt.id}`}
+                    className="font-din-arabic text-black cursor-pointer"
+                  >
+                    {opt.label}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </motion.div>
 
           {/* Price */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="space-y-2 pb-4 pt-3"
+            className="space-y-2 pb-4 pt-2"
           >
             <p className="font-din-arabic-bold text-2xl md:text-3xl text-black mt-4">
               ₹{minorAmount}
@@ -257,7 +357,7 @@ export function ProductHero({
                 whileTap={{ scale: 0.98 }}
                 onClick={handleAddToCart}
                 className="font-din-arabic px-6 md:px-8 py-3 bg-black text-white hover:bg-black/90 transition-all duration-300 tracking-wide relative overflow-hidden w-full sm:w-auto"
-                disabled={!variantId || adding || isPending}
+                disabled={!selectedVariantId || adding || isPending}
               >
                 <AnimatePresence mode="wait">
                   {isAddedToCart ? (
@@ -306,7 +406,7 @@ export function ProductHero({
           )}
 
           {/* Separator line before Ritual in Practice */}
-          {isCleanserOrExfoliant() && ( <motion.div
+          {isCleanserOrExfoliant() && (<motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ duration: 0.6, delay: 0.9 }}
@@ -345,13 +445,13 @@ export function ProductHero({
 
           {/* Separator line before Actives & Key Botanicals */}
           {isCleanserOrExfoliant() && (
-          <motion.div
-            initial={{ opacity: 0, scaleX: 0 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ duration: 0.6, delay: 1.1 }}
-            className="w-full h-px origin-left"
-            style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
-          />)}
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ duration: 0.6, delay: 1.1 }}
+              className="w-full h-px origin-left"
+              style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
+            />)}
 
           {/* Collapsible Actives & Key Botanicals - Only show for cleansers and exfoliants */}
           {isCleanserOrExfoliant() && (
@@ -385,7 +485,7 @@ export function ProductHero({
           )}
 
           {/* Separator line before Fragrance Notes */}
-      {isCleanserOrExfoliant() && (    <motion.div
+          {isCleanserOrExfoliant() && (<motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ duration: 0.6, delay: 1.3 }}
@@ -432,7 +532,7 @@ export function ProductHero({
           />
 
           {/* Collapsible Full Ingredients */}
-          {isCleanserOrExfoliant() && ( <motion.div
+          {isCleanserOrExfoliant() && (<motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.6 }}
@@ -462,69 +562,125 @@ export function ProductHero({
         </div>
       </motion.div>
 
-      {/* RIGHT: image area */}
       <motion.div
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full lg:w-[60%] relative flex items-center justify-center py-8 md:py-12 lg:py-6 overflow-hidden min-h-[300px] md:min-h-[400px]"
-        style={{ backgroundColor: "#d6d6c6" }}
+        className="w-full lg:w-[60%] relative flex items-center justify-center py-6 overflow-hidden"
+        style={{ backgroundColor: '#d6d6c6' }}
       >
+        {/* Botanical Blend Badge - Top Left */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="absolute top-8 left-8 z-20"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
+            <Star className="w-3 h-3" style={{ color: '#a28b6f' }} />
+            <span className="font-din-arabic text-xs tracking-wide" style={{ color: '#a28b6f' }}>BOTANICAL BLEND</span>
+          </div>
+        </motion.div>
+
+        {/* Action Icons - Positioned at top-right above product image */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="absolute top-8 right-8 flex items-center gap-4 z-20"
+        >
+          {/* Favorite/Wishlist Icon */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsWishlisted(!isWishlisted)}
+            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 ${isWishlisted ? 'text-[#fb923c]' : 'text-black/60 hover:text-black'
+              }`}
+          >
+            <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+          </motion.button>
+
+          {/* Share Icon */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="p-2 text-black/60 hover:text-black transition-colors bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30"
+          >
+            <Share2 className="w-5 h-5" />
+          </motion.button>
+        </motion.div>
+
+
+        {/* Enhanced Previous Arrow */}
         <motion.button
+          whileHover={{
+            scale: 1.1,
+            backgroundColor: 'rgba(162, 139, 111, 0.1)'
+          }}
+          whileTap={{ scale: 0.9 }}
           onClick={handlePrevImage}
-          className="absolute left-2 md:left-4 lg:left-8 top-1/2 -translate-y-1/2 z-10 p-2 md:p-3 lg:p-4 rounded-full text-black/60 hover:text-black transition-all backdrop-blur-sm bg-white/80 md:bg-transparent"
+          className="absolute left-8 top-1/2 transform -translate-y-1/2 z-10 p-4 rounded-full text-black/60 hover:text-black transition-all backdrop-blur-sm"
           aria-label="Previous image"
         >
-          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+          <ChevronLeft className="w-6 h-6" />
         </motion.button>
 
-        <div className="relative max-w-4xl mx-auto px-12 md:px-16 lg:px-8">
+        {/* Product Image - Static & Bigger */}
+        <div className="relative max-w-4xl mx-auto">
           <img
             src={productImages[currentImageIndex]}
-            alt={product.title}
+            alt="Jardin Botanica Tea Exfoliant Rinse"
             className="w-full h-auto object-contain mx-auto relative z-10"
             style={{
-              maxHeight: "300px",
-              filter: "drop-shadow(0 20px 45px rgba(0, 0, 0, 0.15))",
+              maxHeight: '500px', // Reduced for more compact hero section
+              filter: 'drop-shadow(0 20px 45px rgba(0, 0, 0, 0.15))'
             }}
           />
+
+          {/* Enhanced shadow for bigger image */}
           <div
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-8 w-3/4 h-10 rounded-full blur-2xl"
+            className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-8 w-3/4 h-10 rounded-full blur-2xl"
             style={{
-              background:
-                "radial-gradient(ellipse, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.12) 50%, transparent 100%)",
+              backgroundColor: 'rgba(0, 0, 0, 0.18)',
+              background: 'radial-gradient(ellipse, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.12) 50%, transparent 100%)'
             }}
           />
         </div>
 
+        {/* Enhanced Next Arrow */}
         <motion.button
+          whileHover={{
+            scale: 1.1,
+            backgroundColor: 'rgba(162, 139, 111, 0.1)'
+          }}
+          whileTap={{ scale: 0.9 }}
           onClick={handleNextImage}
-          className="absolute right-2 md:right-4 lg:right-8 top-1/2 -translate-y-1/2 z-10 p-2 md:p-3 lg:p-4 rounded-full text-black/60 hover:text-black transition-all backdrop-blur-sm bg-white/80 md:bg-transparent"
+          className="absolute right-8 top-1/2 transform -translate-y-1/2 z-10 p-4 rounded-full text-black/60 hover:text-black transition-all backdrop-blur-sm"
           aria-label="Next image"
         >
-          <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+          <ChevronRight className="w-6 h-6" />
         </motion.button>
 
-        <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 md:space-x-3">
+        {/* Enhanced Image Indicators */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3">
           {productImages.map((_, index) => (
             <motion.button
               key={index}
               onClick={() => setCurrentImageIndex(index)}
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                currentImageIndex === index ? "w-6 md:w-8" : ""
-              }`}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${currentImageIndex === index ? 'w-8' : ''
+                }`}
               style={{
-                backgroundColor:
-                  currentImageIndex === index ? "#a28b6f" : "rgba(0,0,0,0.3)",
+                backgroundColor: currentImageIndex === index ? '#a28b6f' : 'rgba(0, 0, 0, 0.3)'
               }}
               aria-label={`View image ${index + 1}`}
             />
           ))}
         </div>
-      </motion.div>
 
+
+      </motion.div>
       {/* Panels */}
       <InfoPanel
         isOpen={isRitualPanelOpen}
@@ -604,7 +760,7 @@ export function ProductHero({
               Heart Notes —{" "}
             </span>
             <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-            Resinous Balsam
+              Resinous Balsam
             </span>
           </div>
           <div className="group">
