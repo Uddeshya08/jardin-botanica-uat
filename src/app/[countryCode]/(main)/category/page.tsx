@@ -7,6 +7,7 @@ import { motion } from "motion/react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
+import { upsertCartItems } from "lib/util/cart-helpers"
 
 interface CartItem {
   id: string
@@ -35,20 +36,8 @@ const Category = () => {
   const [maxProductScroll, setMaxProductScroll] = useState(0)
 
   const handleCartUpdate = (item: CartItem | null) => {
-    if (item && item.quantity > 0) {
-      setCartItems((prevItems) => {
-        const existingIndex = prevItems.findIndex((cartItem) => cartItem.id === item.id)
-        if (existingIndex >= 0) {
-          const updatedItems = [...prevItems]
-          updatedItems[existingIndex] = item
-          return updatedItems
-        } else {
-          return [...prevItems, item]
-        }
-      })
-    } else if (item && item.quantity === 0) {
-      setCartItems((prevItems) => prevItems.filter((cartItem) => cartItem.id !== item.id))
-    }
+    if (!item) return
+    setCartItems((prevItems) => upsertCartItems(prevItems, item))
   }
 
   useEffect(() => {
