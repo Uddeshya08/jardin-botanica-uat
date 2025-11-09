@@ -52,6 +52,78 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
   const [selectedBillingId, setSelectedBillingId] = useState<string>('');
   const [showBillingForm, setShowBillingForm] = useState(false);
 
+  const syncLocalCartToMedusa = async (cartId: string) => {
+  if (typeof window === "undefined") return;
+
+  // read your local jardin cart
+  const raw = localStorage.getItem("jardin-cart");
+  const items: Array<{
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image?: string;
+    isRitualProduct?: boolean;
+  }> = raw ? JSON.parse(raw) : [];
+
+  // push every item to medusa
+  for (const item of items) {
+    // your item.id is already like "variant_..."
+    const variantId = item.id;
+    if (!variantId) continue;
+
+    await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/store/carts/${cartId}/line-items`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-publishable-api-key":
+            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          variant_id: variantId,
+          quantity: item.quantity || 1,
+          metadata: {
+            name: item.name || "",
+            image: item.image || "",
+            price: item.price || "",
+            isRitualProduct: item.isRitualProduct ?? false,
+            source: "jardin-cart",
+          },
+        }),
+      }
+    );
+  }
+
+  // now update cart with the form info you collected in checkout
+  await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/store/carts/${cartId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-publishable-api-key":
+        process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      email: formData.email,
+      shipping_address: {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        address_1: formData.address,
+        address_2: "",
+        city: formData.city,
+        province: formData.state,
+        postal_code: formData.pincode,
+        country_code: "in",
+        phone: formData.phone,
+      },
+    }),
+  });
+};
+
+
   // Load saved addresses on mount
   useEffect(() => {
     const addresses = loadSavedAddresses();
@@ -299,6 +371,8 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
     if (!cartId) {
       throw new Error('Cart not found – cannot create order');
     }
+
+    await syncLocalCartToMedusa(cartId);  
     const completeRes = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/store/carts/${cartId}/complete`,
       {
