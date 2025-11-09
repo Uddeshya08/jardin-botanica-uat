@@ -7,6 +7,7 @@ import { motion } from "motion/react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
+import { upsertCartItems } from "lib/util/cart-helpers"
 
 interface CartItem {
   id: string
@@ -35,20 +36,8 @@ const Category = () => {
   const [maxProductScroll, setMaxProductScroll] = useState(0)
 
   const handleCartUpdate = (item: CartItem | null) => {
-    if (item && item.quantity > 0) {
-      setCartItems((prevItems) => {
-        const existingIndex = prevItems.findIndex((cartItem) => cartItem.id === item.id)
-        if (existingIndex >= 0) {
-          const updatedItems = [...prevItems]
-          updatedItems[existingIndex] = item
-          return updatedItems
-        } else {
-          return [...prevItems, item]
-        }
-      })
-    } else if (item && item.quantity === 0) {
-      setCartItems((prevItems) => prevItems.filter((cartItem) => cartItem.id !== item.id))
-    }
+    if (!item) return
+    setCartItems((prevItems) => upsertCartItems(prevItems, item))
   }
 
   useEffect(() => {
@@ -200,7 +189,7 @@ const Category = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="font-din-arabic text-xl md:text-2xl text-white/90 leading-relaxed"
+            className="font-din-arabic text-base md:text-lg text-white/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-4 md:px-0"
           >
             Inspired by ancient stargazers, these candles fill your space with soft, lingering scent bringing calm, beauty, and a touch of the cosmos to your everyday moments.
           </motion.p>
@@ -274,7 +263,7 @@ const Category = () => {
             </div>
           )}
 
-          <div id="product-slider" className="overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory">
+          <div id="product-slider" className="overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory">
             <div className="flex gap-4 pl-4">
               {products.map(({ src, label, hoverSrc }, i) => (
                 <motion.div

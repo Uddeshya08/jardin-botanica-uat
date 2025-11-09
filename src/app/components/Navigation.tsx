@@ -1,9 +1,12 @@
+"use client"
+
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { User, Search, ShoppingBag, X, Plus, Minus, Heart, Menu, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
+import { useLedger } from 'app/context/ledger-context'
 
 interface CartItem {
   id: string
@@ -36,7 +39,6 @@ export function Navigation({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
-  const [isWishlisted, setIsWishlisted] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isNavHovered, setIsNavHovered] = useState(false)
@@ -49,9 +51,10 @@ export function Navigation({
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const router = useRouter();
 
   const pathname = usePathname()
+  const router = useRouter()
+  const { ledger } = useLedger()
   
   // Get country code from pathname
   const getCountryCode = () => {
@@ -64,6 +67,7 @@ export function Navigation({
 
   const countryCode = getCountryCode()
   const [persistedCartItems, setPersistedCartItems] = useState<CartItem[]>([])
+  const hasSyncedCartRef = useRef(false)
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -89,19 +93,42 @@ export function Navigation({
 
   // Sync cartItems to localStorage whenever they change
   useEffect(() => {
-    if (typeof window !== 'undefined' && cartItems.length > 0) {
-      try {
-        console.log('Navigation: Saving cart to localStorage:', cartItems)
-        localStorage.setItem('jardin-cart', JSON.stringify(cartItems))
-        setPersistedCartItems(cartItems)
-      } catch (error) {
-        console.error('Error saving cart to localStorage:', error)
-      }
-    } else if (typeof window !== 'undefined' && cartItems.length === 0 && persistedCartItems.length > 0) {
-      // If cartItems is empty but we have persisted items, keep the persisted ones
-      console.log('Navigation: Keeping persisted cart items')
+    if (typeof window === 'undefined') {
+      return
     }
-  }, [cartItems, persistedCartItems.length])
+
+    if (!hasSyncedCartRef.current) {
+      hasSyncedCartRef.current = true
+      if (cartItems.length === 0) {
+        return
+      }
+    }
+
+    try {
+      console.log('Navigation: Saving cart to localStorage:', cartItems)
+      localStorage.setItem('jardin-cart', JSON.stringify(cartItems))
+      setPersistedCartItems(cartItems)
+    } catch (error) {
+      console.error('Error saving cart to localStorage:', error)
+    }
+  }, [cartItems])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const handleLocalCartUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<{ items?: CartItem[] }>
+      const updatedItems = customEvent.detail?.items ?? []
+      setPersistedCartItems(updatedItems)
+    }
+
+    window.addEventListener('localCartUpdated', handleLocalCartUpdate as EventListener)
+    return () => {
+      window.removeEventListener('localCartUpdated', handleLocalCartUpdate as EventListener)
+    }
+  }, [])
 
   // Handle component mounting and home page detection
   useEffect(() => {
@@ -190,6 +217,17 @@ export function Navigation({
     }
   }, [])
 
+  // Listen for global cart open event triggered from other components (e.g., StickyCartBar)
+  useEffect(() => {
+    const handleOpenCart = (_e: Event) => {
+      setIsCartOpen(true)
+    }
+    window.addEventListener('cart:open', handleOpenCart as EventListener)
+    return () => {
+      window.removeEventListener('cart:open', handleOpenCart as EventListener)
+    }
+  }, [])
+
   // Close cart and search when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -255,6 +293,8 @@ export function Navigation({
       0
     )
   }
+
+  const ledgerCount = ledger.length
 
   const getTotalItems = () => {
     return displayCartItems.reduce((total, item) => total + item.quantity, 0)
@@ -378,6 +418,7 @@ export function Navigation({
   const menuItems = [
     {
       name: 'BODY & HANDS',
+      href: `/${countryCode}/body-hands`,
       dropdown: [
         { 
           label: 'Cleansers & Exfoliants', 
@@ -463,7 +504,7 @@ export function Navigation({
           backdropFilter: 'none',
           WebkitBackdropFilter: 'none',
           borderBottom: 'none',
-          textColor: 'black',
+          textColor: '#1a1a1a',
           logoSrc: '/assets/Jardinlogoblack.svg'
         }
       }
@@ -788,16 +829,19 @@ export function Navigation({
           <motion.button
             whileHover={disableAnimations ? {} : { scale: 1.1 }}
             whileTap={disableAnimations ? {} : { scale: 0.9 }}
-            onClick={() => setIsWishlisted(!isWishlisted)}
-            className="p-2 transition-all duration-300"
-            style={{ color: isWishlisted ? '#e58a4d' : navStyles.textColor }}
-            aria-label="Favorites"
+            onClick={() => router.push(`/${countryCode}/ledger`)}
+            className="p-2 transition-all duration-300 relative"
+            style={{ color: ledgerCount > 0 ? '#e58a4d' : navStyles.textColor }}
+            aria-label="Ledger"
           >
             <Heart
-              className={`w-5 h-5 transition-colors ${
-                isWishlisted ? 'fill-current' : ''
-              }`}
+              className={`w-5 h-5 transition-colors ${ledgerCount > 0 ? 'fill-current' : ''}`}
             />
+            {ledgerCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-[#e58a4d] text-black text-xs rounded-full w-4 h-4 flex items-center justify-center font-light">
+                {ledgerCount}
+              </span>
+            )}
           </motion.button>
 
           {/* Profile Icon */}
@@ -1080,16 +1124,24 @@ export function Navigation({
                   <div className="mt-6 space-y-3">
                     <button
                       onClick={() => {
-                        setIsWishlisted(!isWishlisted)
+                        setIsMobileMenuOpen(false)
+                        router.push(`/${countryCode}/ledger`)
                       }}
                       className="w-full flex items-center justify-between px-4 py-3 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300"
                       style={{ borderColor: '#D8D2C7' }}
                     >
-                      <span>Wishlist</span>
-                      <Heart 
-                        className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`}
-                        style={{ color: isWishlisted ? '#e58a4d' : 'currentColor' }}
-                      />
+                      <span>Ledger</span>
+                      <span className="flex items-center gap-2">
+                        {ledgerCount > 0 && (
+                          <span className="inline-flex items-center justify-center w-5 h-5 text-xs bg-[#e58a4d] text-black rounded-full">
+                            {ledgerCount}
+                          </span>
+                        )}
+                        <Heart
+                          className={`w-5 h-5 ${ledgerCount > 0 ? 'fill-current' : ''}`}
+                          style={{ color: ledgerCount > 0 ? '#e58a4d' : 'currentColor' }}
+                        />
+                      </span>
                     </button>
                     
                     <a

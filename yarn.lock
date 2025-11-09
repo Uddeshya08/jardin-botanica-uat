@@ -1317,7 +1317,7 @@
     "@radix-ui/react-context" "1.1.1"
     "@radix-ui/react-primitive" "2.0.1"
 
-"@radix-ui/react-radio-group@^1.3.8":
+"@radix-ui/react-radio-group@^1.2.3":
   version "1.3.8"
   resolved "https://registry.npmjs.org/@radix-ui/react-radio-group/-/react-radio-group-1.3.8.tgz"
   integrity sha512-VBKYIYImA5zsxACdisNQ3BjCBfmbGH3kQlnFVqlWU4tXwjy7cGX8ta80BcrO+WJXIn5iBylEH3K6ZTlee//lgQ==
@@ -5532,10 +5532,10 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
-lucide-react@^0.536.0:
-  version "0.536.0"
-  resolved "https://registry.npmjs.org/lucide-react/-/lucide-react-0.536.0.tgz"
-  integrity sha512-2PgvNa9v+qz4Jt/ni8vPLt4jwoFybXHuubQT8fv4iCW5TjDxkbZjNZZHa485ad73NSEn/jdsEtU57eE1g+ma8A==
+lucide-react@^0.487.0:
+  version "0.487.0"
+  resolved "https://registry.npmjs.org/lucide-react/-/lucide-react-0.487.0.tgz"
+  integrity sha512-aKqhOQ+YmFnwq8dWgGjOuLc8V1R9/c/yOd+zDY4+ohsR2Jo05lSGc3WsstYPIzcTpeosN7LoCkLReUUITvaIvw==
 
 make-dir@^3.0.2, make-dir@^3.1.0:
   version "3.1.0"

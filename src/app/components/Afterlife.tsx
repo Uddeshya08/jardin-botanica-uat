@@ -1,9 +1,7 @@
-// app/components/Afterlife.tsx
 import React from "react"
 import { motion } from "motion/react"
 import Image from "next/image"
 import { Recycle, RefreshCw, Leaf } from "lucide-react"
-// If you have Medusa types available:
 import type { HttpTypes } from "@medusajs/types"
 
 type AfterlifeItem = {
@@ -17,7 +15,7 @@ type AfterlifeItem = {
 
 type AfterlifeContent = {
   heading?: string
-  bg?: string            // hex or rgb(a)
+  bg?: string           
   items?: AfterlifeItem[]
 }
 
@@ -25,15 +23,8 @@ type ProductLike = {
   title?: string
   handle?: string
   metadata?: Record<string, any>
-} & Partial<HttpTypes.Product>
+} & Partial<HttpTypes.StoreProduct>
 
-/**
- * Safely read and normalize afterlife content from product.metadata.
- * Supports:
- * - metadata.afterlife as object
- * - metadata.afterlife as JSON string
- * Falls back to defaults when not present or invalid.
- */
 function safeParseOnce(v: any) {
   if (typeof v !== "string") return v
   try { return JSON.parse(v) } catch { return v }
@@ -55,28 +46,22 @@ function getAfterlifeContent(product?: ProductLike): AfterlifeContent {
 
   if (!product?.metadata) return defaults
 
-  // accept either metadata.afterlife OR metadata.sections.afterlife
-
-  console.log("product = ", product)
   const raw = product.metadata.afterlife ?? product.metadata.sections?.afterlife
+
   if (!raw) return defaults
-  // console.log("raw => ", raw)
-  // handle: object | JSON string | "JSON string inside a JSON string"
+
   const parsed: any = safeParseTwice(raw)
   if (!parsed || typeof parsed !== "object") return defaults
 
   const itemsSrc = Array.isArray(parsed.items) ? parsed.items : []
   const items = itemsSrc.length
     ? itemsSrc.map((it: any): AfterlifeItem => {
-        // Handle both old format (string: "recycle"/"refresh"/"leaf") and new format (object with src/alt)
         let icon: string | { src: string; alt: string } | undefined = undefined
         
         if (it?.icon) {
           if (typeof it.icon === "string" && (it.icon === "recycle" || it.icon === "refresh" || it.icon === "leaf")) {
-            // Old format: string icon name
             icon = it.icon
           } else if (typeof it.icon === "object" && it.icon.src && it.icon.alt) {
-            // New format: object with src and alt
             icon = { src: it.icon.src, alt: it.icon.alt }
           }
         }
@@ -95,10 +80,7 @@ function getAfterlifeContent(product?: ProductLike): AfterlifeContent {
     items,
   }
 }
-
-// Helper function to normalize icon paths and match local assets
 function normalizeIconPath(iconSrc: string): string {
-  // Extract filename from path (e.g., "/Images/chat.svg" -> "chat.svg")
   const filename = iconSrc.split('/').pop()?.toLowerCase() || ''
   
   // Map database paths to local asset paths

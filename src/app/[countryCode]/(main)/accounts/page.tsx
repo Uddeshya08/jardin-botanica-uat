@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Navigation } from 'app/components/Navigation';
 import { AccountPage } from 'app/components/AccountPage';
 import { RippleEffect } from 'app/components/RippleEffect';
+import { upsertCartItems } from 'lib/util/cart-helpers';
 
 
 interface CartItem {
@@ -18,24 +19,8 @@ export default function App() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   const handleCartUpdate = (item: CartItem | null) => {
-    // Update cartItems array for navigation
-    if (item && item.quantity > 0) {
-      setCartItems(prevItems => {
-        const existingIndex = prevItems.findIndex(cartItem => cartItem.id === item.id);
-        if (existingIndex >= 0) {
-          // Update existing item
-          const updatedItems = [...prevItems];
-          updatedItems[existingIndex] = item;
-          return updatedItems;
-        } else {
-          // Add new item
-          return [...prevItems, item];
-        }
-      });
-    } else if (item && item.quantity === 0) {
-      // Remove item if quantity is 0
-      setCartItems(prevItems => prevItems.filter(cartItem => cartItem.id !== item.id));
-    }
+    if (!item) return;
+    setCartItems(prevItems => upsertCartItems(prevItems, item));
   };
 
   useEffect(() => {

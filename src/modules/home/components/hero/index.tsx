@@ -9,6 +9,7 @@ import { BespokeGifting } from "app/components/BespokeGifting"
 import { JournalSection } from "app/components/JournalSection"
 import { RippleEffect } from "app/components/RippleEffect"
 import Newsletter from "app/components/Newsletter"
+import { upsertCartItems } from "lib/util/cart-helpers"
 interface CartItem {
   id: string
   name: string
@@ -21,24 +22,8 @@ export default function Home() {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
 
   const handleCartUpdate = (item: CartItem | null) => {
-    if (item && item.quantity > 0) {
-      setCartItems((prevItems) => {
-        const existingIndex = prevItems.findIndex(
-          (cartItem) => cartItem.id === item.id
-        )
-        if (existingIndex >= 0) {
-          const updatedItems = [...prevItems]
-          updatedItems[existingIndex] = item
-          return updatedItems
-        } else {
-          return [...prevItems, item]
-        }
-      })
-    } else if (item && item.quantity === 0) {
-      setCartItems((prevItems) =>
-        prevItems.filter((cartItem) => cartItem.id !== item.id)
-      )
-    }
+    if (!item) return
+    setCartItems((prevItems) => upsertCartItems(prevItems, item))
   }
 
   useEffect(() => {
