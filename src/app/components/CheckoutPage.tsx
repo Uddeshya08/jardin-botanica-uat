@@ -289,15 +289,53 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
               if (!verifyRes.ok || !verifyJson?.verified) {
                 throw new Error(verifyJson?.error || 'Payment verification failed')
               }
+
+              let cartId: string | null = null;
+
+    if (typeof window !== 'undefined') {
+      cartId = localStorage.getItem('medusa_cart_id');
+    }
+
+    if (!cartId) {
+      throw new Error('Cart not found – cannot create order');
+    }
+    const completeRes = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/store/carts/${cartId}/complete`,
+      {
+        method: 'POST',
+       headers: { 'Content-Type': 'application/json',
+      'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+     },
+    credentials: 'include', 
+      }
+    );
+
+    const completeJson = await completeRes.json();
+    const order = completeJson.order;
+
+ // ✅ store order ids in localStorage as ARRAY
+            if (typeof window !== 'undefined' && order?.id) {
+              // also keep your single last order
+              localStorage.setItem('last_order_id', order.id);
+
+              const existingRaw = localStorage.getItem('medusa_order_ids');
+              const existingIds = existingRaw ? JSON.parse(existingRaw) as string[] : [];
+              // add + dedupe
+              const updated = Array.from(new Set([...existingIds, order.id]));
+              localStorage.setItem('medusa_order_ids', JSON.stringify(updated));
+            }
+
+    if (!completeRes.ok || !completeJson?.order) {
+      throw new Error(completeJson?.message || 'Failed to create order in Medusa');
+    }
               toast.success('Payment successful!')
-              // Clear local cart visuals if you store locally
               if (typeof window !== 'undefined') {
                 import("@lib/util/local-cart").then(({ clearLocalCart }) => {
                   clearLocalCart();
                   window.dispatchEvent(new CustomEvent('localCartUpdated', { detail: { items: [] } }));
                 })
               }
-              router.push(`/${countryCode}/account`)
+              router.push(`/in/profile`)
             } catch (e: any) {
               toast.error(e?.message || 'Verification failed')
             }
@@ -485,7 +523,7 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
                   ) : (
                     <>
                       <Lock className="w-5 h-5" />
-                      <span>Place Order</span>
+                      <span>Place Orders</span>
                       <Sparkles className="w-5 h-5" />
                     </>
                   )}
