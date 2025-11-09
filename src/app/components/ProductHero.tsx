@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useTransition, useState } from "react"
+import React, { useTransition, useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { ChevronLeft, ChevronRight, Star, Heart, Share2, Plus, Minus, Home, ChevronRight as BreadcrumbChevron } from 'lucide-react';
 
@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation"
 import { emitCartUpdated } from "@lib/util/cart-client"
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
 import { Label } from "./ui/label"
+import { useLedger, LedgerItem } from "app/context/ledger-context"
+import { toast } from "sonner"
 
 import {
   Breadcrumb,
@@ -21,6 +23,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
+
 interface CartItem {
   id: string
   name: string
@@ -56,26 +59,67 @@ interface ProductHeroProps {
   onCartUpdate?: (item: CartItem | null) => void
 }
 
+const extractNumericSize = (label: string) => {
+  const match = label?.toLowerCase().match(/([\d.]+)\s*(ml|l|g|kg|oz)?/)
+  if (!match) {
+    return Number.MAX_SAFE_INTEGER
+  }
+
+  const value = parseFloat(match[1])
+  const unit = match[2]
+
+  if (!unit || unit === "ml" || unit === "g" || unit === "oz") {
+    return value
+  }
+
+  if (unit === "l") {
+    return value * 1000
+  }
+
+  if (unit === "kg") {
+    return value * 1000
+  }
+
+  return value
+}
+
+const buildSizeOptions = (
+  product: ProductHeroProps["product"],
+  sizeOptionId?: string
+) => {
+  return (product.variants || [])
+    .map((variant) => {
+      const label = sizeOptionId
+        ? variant?.options?.find((opt) => opt.option_id === sizeOptionId)?.value ??
+          variant?.title ??
+          ""
+        : variant?.title ??
+          variant?.options?.[0]?.value ??
+          ""
+
+      return label
+        ? {
+            id: variant.id,
+            label,
+          }
+        : null
+    })
+    .filter((option): option is { id: string; label: string } => Boolean(option))
+    .sort((a, b) => extractNumericSize(a.label) - extractNumericSize(b.label))
+}
+
+const isRecognizedSizeLabel = (label: string) =>
+  extractNumericSize(label) !== Number.MAX_SAFE_INTEGER
+
 export function ProductHero({
   product,
   countryCode,
   onCartUpdate,
 }: ProductHeroProps) {
-  // const [quantity, setQuantity] = useState(1)
-  // const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  // const [isAddedToCart, setIsAddedToCart] = useState(false)
   const [isRitualPanelOpen, setIsRitualPanelOpen] = useState(false)
   const [isActivesPanelOpen, setIsActivesPanelOpen] = useState(false)
   const [isFragranceNotesOpen, setIsFragranceNotesOpen] = useState(false)
   const [isIngredientsPanelOpen, setIsIngredientsPanelOpen] = useState(false)
-
-  // const variant = product.variants?.[0]
-  // const variantId = variant?.id
-  // const minorAmount = variant?.calculated_price?.calculated_amount ?? 0
-
-  // const fallbackImg = product.thumbnail ?? "/assets/productImage.png"
-  // const imgs = product.images?.map((i) => i.url).filter(Boolean) ?? []
-  // const productImages = imgs.length ? imgs : [fallbackImg]
 
   const router = useRouter()
   const [quantity, setQuantity] = useState(1)
@@ -84,10 +128,48 @@ export function ProductHero({
   const [adding, setAdding] = useState(false)
   const [uiError, setUiError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
-  const [isWishlisted, setIsWishlisted] = useState(false);
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-    product.variants?.[0]?.id ?? null
+  const { toggleLedgerItem, isInLedger } = useLedger()
+  const sizeOptionId = product.options?.find(
+    (option) => (option?.title || "").toLowerCase() === "size"
+  )?.id
+  const sizeOptions = useMemo(
+    () => buildSizeOptions(product, sizeOptionId),
+    [product, sizeOptionId]
   )
+  const visibleSizeOptions = useMemo(() => {
+    const seen = new Map<string, { id: string; label: string }>()
+
+    sizeOptions.forEach((option) => {
+      const key = option.label.trim().toLowerCase()
+      if (!seen.has(key)) {
+        seen.set(key, option)
+      }
+    })
+
+    return Array.from(seen.values())
+  }, [sizeOptions])
+  const defaultVariantId = useMemo(() => {
+    if (!product.variants?.length) {
+      return null
+    }
+
+    if (!visibleSizeOptions.length) {
+      return product.variants[0]?.id ?? null
+    }
+
+    const preferredOption =
+      visibleSizeOptions.find((option) =>
+        option.label.replace(/\s+/g, "").toLowerCase().includes("500ml")
+      ) ?? visibleSizeOptions[visibleSizeOptions.length - 1]
+
+    return preferredOption?.id ?? product.variants[0]?.id ?? null
+  }, [product, visibleSizeOptions])
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
+    defaultVariantId
+  )
+  useEffect(() => {
+    setSelectedVariantId(defaultVariantId)
+  }, [defaultVariantId])
   const selectedVariant = product.variants?.find((v) => v.id === selectedVariantId) ?? product.variants?.[0]
   const minorAmount = selectedVariant?.calculated_price?.calculated_amount ?? 0
 
@@ -95,16 +177,14 @@ export function ProductHero({
   const imgs = product.images?.map((i) => i.url).filter(Boolean) ?? []
   const productImages = imgs.length ? imgs : [fallbackImg]
 
-  // Build dynamic size options from product options/variants
-  const sizeOptionId = (product as any).options?.find(
-    (o: any) => (o?.title || "").toLowerCase() === "size"
-  )?.id
-  const sizeOptions: Array<{ id: string; label: string }> = (product.variants || [])
-    .map((v: any) => {
-      const label = v?.options?.find((vo: any) => vo.option_id === sizeOptionId)?.value ?? v?.title ?? ""
-      return { id: v.id, label }
-    })
-    .filter((o) => !!o.label)
+  const selectedSizeLabel = visibleSizeOptions.find((opt) => opt.id === selectedVariantId)?.label
+  const uniqueSizeLabels = useMemo(
+    () => Array.from(new Set(visibleSizeOptions.map((option) => option.label.toLowerCase()))),
+    [visibleSizeOptions]
+  )
+  const shouldShowSizeOptions =
+    visibleSizeOptions.length > 1 &&
+    uniqueSizeLabels.every(isRecognizedSizeLabel)
 
   // Check if the product is a cleanser or exfoliant
   const isCleanserOrExfoliant = () => {
@@ -199,6 +279,29 @@ export function ProductHero({
     )
   }
 
+  const handleToggleLedger = () => {
+    const alreadyInLedger = isInLedger(product.id)
+    const ledgerItem: LedgerItem = {
+      id: product.id,
+      name: product.title,
+      price: minorAmount,
+      image: productImages[0] ?? fallbackImg,
+      description: product.subtitle ?? product.description ?? "",
+      size: selectedSizeLabel,
+      availableSizes: visibleSizeOptions.map((opt) => opt.label),
+      selectedVariantId,
+      variants: product.variants,
+      countryCode,
+    }
+
+    toggleLedgerItem(ledgerItem)
+    toast.success(`${product.title} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+      duration: 2000,
+    })
+  }
+
+  const isProductInLedger = isInLedger(product.id)
+
 
   return (
     <div className="flex flex-col-reverse lg:flex-row pl-0 md:pl-8 lg:pl-16 xl:pl-15 relative overflow-hidden" style={{ paddingTop: "80px", minHeight: "35vh" }}>
@@ -277,37 +380,39 @@ export function ProductHero({
           )}
 
           {/* Size Selection with Radio Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="space-y-3 pb-0 pt-3"
-          >
-            <h3 className="font-din-arabic text-sm tracking-wider uppercase" style={{ color: '#a28b6f' }}>
-              SIZE
-            </h3>
-            <RadioGroup 
-              value={selectedVariantId ?? ""}
-              onValueChange={(value) => setSelectedVariantId(value)}
-              className="!flex flex-row gap-6"
+          {shouldShowSizeOptions && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="space-y-3 pb-0 pt-3"
             >
-              {sizeOptions.map((opt) => (
-                <div key={opt.id} className="flex items-center gap-2">
-                  <RadioGroupItem
-                    value={opt.id}
-                    id={`size-${opt.id}`}
-                    className="peer size-4 border-2 border-black/40 data-[state=checked]:border-[#00000066]"
-                  />
-                  <Label
-                    htmlFor={`size-${opt.id}`}
-                    className="font-din-arabic text-black cursor-pointer"
-                  >
-                    {opt.label}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          </motion.div>
+              <h3 className="font-din-arabic text-sm tracking-wider uppercase" style={{ color: '#a28b6f' }}>
+                SIZE
+              </h3>
+              <RadioGroup 
+                value={selectedVariantId ?? ""}
+                onValueChange={(value) => setSelectedVariantId(value)}
+                className="!flex flex-row gap-6"
+              >
+                {visibleSizeOptions.map((opt) => (
+                  <div key={opt.id} className="flex items-center gap-2">
+                    <RadioGroupItem
+                      value={opt.id}
+                      id={`size-${opt.id}`}
+                      className="peer size-4 border-2 border-black/40 data-[state=checked]:border-[#00000066]"
+                    />
+                    <Label
+                      htmlFor={`size-${opt.id}`}
+                      className="font-din-arabic text-black cursor-pointer"
+                    >
+                      {opt.label}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </motion.div>
+          )}
 
           {/* Price */}
           <motion.div
@@ -508,7 +613,7 @@ export function ProductHero({
                 className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
                 style={{ color: "#a28b6f" }}
               >
-                Fragrance Notes
+                Fragrance Profile
               </span>
               <motion.div
                 whileHover={{ rotate: 90 }}
@@ -593,11 +698,11 @@ export function ProductHero({
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => setIsWishlisted(!isWishlisted)}
-            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 ${isWishlisted ? 'text-[#fb923c]' : 'text-black/60 hover:text-black'
-              }`}
+            onClick={handleToggleLedger}
+            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"}`}
+            aria-label={isProductInLedger ? "Remove from ledger" : "Add to ledger"}
           >
-            <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+            <Heart className={`w-5 h-5 transition-colors ${isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"}`} />
           </motion.button>
 
           {/* Share Icon */}
@@ -744,7 +849,7 @@ export function ProductHero({
       <InfoPanel
         isOpen={isFragranceNotesOpen}
         onClose={() => setIsFragranceNotesOpen(false)}
-        title="Fragrance Notes"
+        title="Fragrance Profile"
       >
         <div className="space-y-4">
           <div className="group">

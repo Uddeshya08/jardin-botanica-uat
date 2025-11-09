@@ -13,6 +13,7 @@ import { RippleEffect } from "app/components/RippleEffect"
 import { PeopleAlsoBoughtTwo } from "app/components/PeopleAlsoBoughtTwo"
 import { FeaturedRitualTwo } from "app/components/FeaturedRitualTwo"
 import { ProductHeroHands } from "app/components/ProductHeroHands"
+import { upsertCartItems } from "lib/util/cart-helpers"
 
 interface CartItem {
   id: string
@@ -31,28 +32,8 @@ export default function App() {
   const handleCartUpdate = (item: CartItem | null) => {
     setHeroCartItem(item)
 
-    // Update cartItems array for navigation
-    if (item && item.quantity > 0) {
-      setCartItems((prevItems) => {
-        const existingIndex = prevItems.findIndex(
-          (cartItem) => cartItem.id === item.id
-        )
-        if (existingIndex >= 0) {
-          // Update existing item
-          const updatedItems = [...prevItems]
-          updatedItems[existingIndex] = item
-          return updatedItems
-        } else {
-          // Add new item
-          return [...prevItems, item]
-        }
-      })
-    } else if (item && item.quantity === 0) {
-      // Remove item if quantity is 0
-      setCartItems((prevItems) =>
-        prevItems.filter((cartItem) => cartItem.id !== item.id)
-      )
-    }
+    if (!item) return
+    setCartItems((prevItems) => upsertCartItems(prevItems, item))
   }
 
   const handleHeroQuantityUpdate = (quantity: number) => {

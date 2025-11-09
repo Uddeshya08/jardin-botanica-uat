@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { RippleEffect } from 'app/components/RippleEffect'
 import { Navigation } from 'app/components/Navigation'
+import { upsertCartItems } from 'lib/util/cart-helpers'
 
 interface CartItem {
   id: string
@@ -173,28 +174,8 @@ const Home = () => {
   const handleCartUpdate = (item: CartItem | null) => {
     setHeroCartItem(item)
 
-    // Update cartItems array for navigation
-    if (item && item.quantity > 0) {
-      setCartItems((prevItems) => {
-        const existingIndex = prevItems.findIndex(
-          (cartItem) => cartItem.id === item.id
-        )
-        if (existingIndex >= 0) {
-          // Update existing item
-          const updatedItems = [...prevItems]
-          updatedItems[existingIndex] = item
-          return updatedItems
-        } else {
-          // Add new item
-          return [...prevItems, item]
-        }
-      })
-    } else if (item && item.quantity === 0) {
-      // Remove item if quantity is 0
-      setCartItems((prevItems) =>
-        prevItems.filter((cartItem) => cartItem.id !== item.id)
-      )
-    }
+    if (!item) return
+    setCartItems((prevItems) => upsertCartItems(prevItems, item))
   }
 
   const handleHeroQuantityUpdate = (quantity: number) => {

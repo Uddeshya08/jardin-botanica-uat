@@ -27,6 +27,7 @@ import { RippleEffect } from "app/components/RippleEffect"
 import { PeopleAlsoBoughtTwo } from "app/components/PeopleAlsoBoughtTwo"
 import { FeaturedRitualTwo } from "app/components/FeaturedRitualTwo"
 import Featured from "app/components/Featured"
+import { upsertCartItems } from "lib/util/cart-helpers"
 
 interface RitualProduct {
   variantId: string
@@ -78,28 +79,8 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   const handleCartUpdate = (item: CartItem | null) => {
     setHeroCartItem(item)
 
-    // Update cartItems array for navigation
-    if (item && item.quantity > 0) {
-      setCartItems((prevItems) => {
-        const existingIndex = prevItems.findIndex(
-          (cartItem) => cartItem.id === item.id
-        )
-        if (existingIndex >= 0) {
-          // Update existing item
-          const updatedItems = [...prevItems]
-          updatedItems[existingIndex] = item
-          return updatedItems
-        } else {
-          // Add new item
-          return [...prevItems, item]
-        }
-      })
-    } else if (item && item.quantity === 0) {
-      // Remove item if quantity is 0
-      setCartItems((prevItems) =>
-        prevItems.filter((cartItem) => cartItem.id !== item.id)
-      )
-    }
+    if (!item) return
+    setCartItems((prevItems) => upsertCartItems(prevItems, item))
   }
 
   const handleHeroQuantityUpdate = (quantity: number) => {
@@ -153,6 +134,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           isScrolled={isScrolled}
           cartItems={cartItems}
           onCartUpdate={handleCartUpdate}
+          forceWhiteText={false}
         />
         <div className="h-4"></div>
         <ProductHero

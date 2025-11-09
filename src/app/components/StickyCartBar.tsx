@@ -6,7 +6,7 @@ import { ShoppingBag, Plus, Minus } from "lucide-react"
 import type { HttpTypes } from "@medusajs/types"
 import { useParams } from "next/navigation"
 import { addToCartAction, addRitualToCartAction } from "@lib/data/cart-actions"
-import { emitCartUpdated } from "@lib/util/cart-client"
+import { emitCartUpdated, emitCartOpen } from "@lib/util/cart-client"
 
 type ProductLike = Partial<HttpTypes.StoreProduct> & { metadata?: Record<string, any> }
 
@@ -464,16 +464,19 @@ export function StickyCartBar({
 
                 {/* Action buttons: Add to Cart, Complete Ritual, or Go to Cart */}
                 {showGoToCart ? (
-                  <motion.a
-                    href={`/${countryCode}/cart`}
+                  <motion.button
+                    type="button"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      try { emitCartOpen() } catch {}
+                    }}
                     className="font-din-arabic px-2.5 md:px-5 py-2 md:py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-lg md:rounded-xl relative overflow-hidden flex items-center space-x-1 md:space-x-2 whitespace-nowrap text-xs md:text-sm"
                   >
                     <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                    <span className="hidden sm:inline">Go to Cart</span>
+                    <span className="hidden sm:inline">View Cart</span>
                     <span className="sm:hidden">Cart</span>
-                  </motion.a>
+                  </motion.button>
                 ) : ritualProduct && showRitualSuggestion ? (
                   <motion.button
                     type="button"

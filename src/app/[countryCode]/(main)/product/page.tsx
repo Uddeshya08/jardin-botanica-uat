@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Star, ThumbsUp } from "lucide-react"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
 import Newsletter from "app/components/Newsletter"
+import { upsertCartItems } from "lib/util/cart-helpers"
 
 const Product = () => {
   const [quantity, setQuantity] = useState(2)
@@ -26,28 +27,8 @@ const Product = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
 
   const handleCartUpdate = (item: CartItem | null) => {
-    // Update cartItems array for navigation
-    if (item && item.quantity > 0) {
-      setCartItems((prevItems) => {
-        const existingIndex = prevItems.findIndex(
-          (cartItem) => cartItem.id === item.id
-        )
-        if (existingIndex >= 0) {
-          // Update existing item
-          const updatedItems = [...prevItems]
-          updatedItems[existingIndex] = item
-          return updatedItems
-        } else {
-          // Add new item
-          return [...prevItems, item]
-        }
-      })
-    } else if (item && item.quantity === 0) {
-      // Remove item if quantity is 0
-      setCartItems((prevItems) =>
-        prevItems.filter((cartItem) => cartItem.id !== item.id)
-      )
-    }
+    if (!item) return
+    setCartItems((prevItems) => upsertCartItems(prevItems, item))
   }
 
   useEffect(() => {
