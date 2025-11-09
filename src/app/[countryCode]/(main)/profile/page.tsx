@@ -90,6 +90,67 @@ export default function ProfilePage() {
       isDefault: true
     }
   ]);
+  const [orders, setOrders] = useState<any[]>([]);
+const [ordersLoading, setOrdersLoading] = useState(false);
+const [ordersError, setOrdersError] = useState<string | null>(null);
+
+useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const raw = localStorage.getItem("medusa_order_ids");
+  if (!raw) return;
+
+  let orderIds: string[] = [];
+  try {
+    orderIds = JSON.parse(raw); // we stored an array
+  } catch {
+    // if somehow a single id was stored as a string
+    orderIds = raw ? [raw] : [];
+  }
+
+  if (orderIds.length === 0) return;
+
+  const fetchOrders = async () => {
+    try {
+      setOrdersLoading(true);
+      setOrdersError(null);
+
+      const base = process.env.NEXT_PUBLIC_BASE_URL;
+
+      const results = await Promise.all(
+        orderIds.map(async (id) => {
+          const res = await fetch(`${base}/store/orders/${id}`, {
+            headers: {
+              "Content-Type": "application/json",
+              "x-publishable-api-key":
+                process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+            },
+            credentials: "include",
+          });
+
+          if (!res.ok) {
+            return null; // don't break all, just skip this one
+          }
+
+          const data = await res.json();
+          return data.order ?? null;
+        })
+      );
+
+      const cleaned = results.filter(Boolean) as any[];
+      setOrders(cleaned);
+    } catch (err: any) {
+      console.error(err);
+      setOrdersError(err?.message || "Failed to load orders");
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  fetchOrders();
+}, []);
+
+
   
   // Set page metadata and scroll detection
   useEffect(() => {
@@ -557,62 +618,102 @@ export default function ProfilePage() {
           </motion.div>
         );
 
-      case 'order-history':
-        return (
-          <motion.div
-            key="order-history"
-            variants={sectionVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-          >
-            <h1 className="font-american-typewriter text-2xl lg:text-3xl mb-8 lg:mb-16 text-black">Orders</h1>
+      case "order-history":
+  return (
+    <motion.div
+      key="order-history"
+      variants={sectionVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+    >
+      <h1 className="font-american-typewriter text-2xl lg:text-3xl mb-8 lg:mb-16 text-black">
+        Orders
+      </h1>
 
-            <div className="space-y-8 lg:space-y-12">
-              {[
-                { id: '#JB001234', date: 'March 15, 2024', amount: '₹3,600', status: 'Delivered', product: 'Soft Orris Hand Veil × 2', action: 'View details' },
-                { id: '#JB001233', date: 'February 28, 2024', amount: '₹2,400', status: 'In transit', product: 'Botanical Essence Set × 1', action: 'Track order' },
-                { id: '#JB001232', date: 'January 12, 2024', amount: '₹1,800', status: 'Delivered', product: 'Garden Ritual Kit × 1', action: 'Reorder' }
-              ].map((order, index) => (
-                <motion.div 
-                  key={order.id}
-                  className={`py-8 ${index < 2 ? 'border-b' : ''}`}
-                  style={{ borderColor: '#D8D2C7' }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.4 }}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-start mb-8 space-y-4 sm:space-y-0 sm:gap-12">
-                    <div className="flex-1">
-                      <h3 className="font-din-arabic text-xl text-black tracking-wide mb-2">{order.id}</h3>
-                      <p className="font-din-arabic text-base text-black/50 tracking-wide">{order.date}</p>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-din-arabic text-xl text-black tracking-wide mb-2">{order.amount}</p>
-                      <span className={`font-din-arabic text-sm tracking-wide ${order.status === 'Delivered' ? 'text-green-600' : order.status === 'In transit' ? 'text-blue-600' : 'text-black/50'}`}>
-                        {order.status}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="mb-6">
-                    <p className="font-din-arabic text-lg text-black tracking-wide">{order.product}</p>
-                  </div>
-                  
-                  <motion.button
-                    whileHover={{ scale: 1.02, y: -1 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => toast.success(`${order.action} - Order ${order.id}`)}
-                    className="px-8 py-4 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
-                    style={{ borderColor: '#D8D2C7' }}
+      {ordersLoading && (
+        <p className="font-din-arabic text-black/60">Loading your orders…</p>
+      )}
+
+      {ordersError && (
+        <p className="font-din-arabic text-red-600">{ordersError}</p>
+      )}
+
+      {!ordersLoading && !ordersError && orders.length === 0 && (
+        <p className="font-din-arabic text-black/60">
+          No orders found. Place an order first.
+        </p>
+      )}
+
+      {!ordersLoading && !ordersError && orders.length > 0 && (
+        <div className="space-y-8 lg:space-y-12">
+          {orders.map((order: any, index: number) => (
+            <motion.div
+              key={order.id}
+              className={`py-8 ${index < orders.length - 1 ? "border-b" : ""}`}
+              style={{ borderColor: "#D8D2C7" }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.4 }}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-start mb-6 gap-6 sm:gap-12">
+                <div className="flex-1">
+                  <h3 className="font-din-arabic text-xl text-black tracking-wide mb-1">
+                    #{order.display_id ?? order.id}
+                  </h3>
+                  <p className="font-din-arabic text-base text-black/50 tracking-wide">
+                    {order.created_at
+                      ? new Date(order.created_at).toLocaleString()
+                      : ""}
+                  </p>
+                </div>
+                <div className="flex-1">
+                  <p className="font-din-arabic text-xl text-black tracking-wide mb-2">
+                    ₹{(order.total || 0) / 100}
+                  </p>
+                  <span className="font-din-arabic text-sm tracking-wide text-black/50">
+                    {order.status ?? "completed"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                {order.items?.map((item: any) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between py-3 border-b last:border-b-0"
+                    style={{ borderColor: "rgba(0,0,0,0.05)" }}
                   >
-                    {order.action}
-                  </motion.button>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        );
+                    <div>
+                      <p className="font-din-arabic text-black">
+                        {item.title}
+                        {item.variant?.title ? ` – ${item.variant.title}` : ""}
+                      </p>
+                      <p className="font-din-arabic text-black/50 text-sm">
+                        Qty: {item.quantity}
+                      </p>
+                    </div>
+                    <p className="font-din-arabic text-black">
+                      ₹{(item.unit_price * item.quantity) / 100}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 flex justify-between">
+                <span className="font-din-arabic text-black/70">Total</span>
+                <span className="font-din-arabic text-black text-lg">
+                  ₹{(order.total || 0) / 100}
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+
+
 
       case 'favorites':
         return (

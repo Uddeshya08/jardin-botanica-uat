@@ -513,6 +513,39 @@ export function Navigation({
 
   const navStyles = getNavStyles()
 
+  const getOrCreateMedusaCart = async () => {
+    console.log("function called")
+  if (typeof window === 'undefined') return null;
+     console.log("type window successs")
+  let cartId = localStorage.getItem('medusa_cart_id');
+  if (cartId) {
+    router.push(`/${countryCode}/product-checkout`);
+    return cartId;
+  }
+
+  console.log("have cart id")
+
+  // create new cart in Medusa
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/store/carts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json',
+      'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+     },
+    credentials: 'include', 
+  });
+    console.log(res, "res of mudusa cart id api")
+    console.log(process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY, "env ")
+
+  const data = await res.json();
+  cartId = data?.cart?.id;
+  if (cartId) {
+    localStorage.setItem('medusa_cart_id', cartId);
+  }
+  router.push(`/${countryCode}/product-checkout`);
+  return cartId;
+};
+
+
   return (
     <>
       <div className={disableSticky ? "relative" : "fixed top-0 left-0 right-0 z-50"}>
@@ -960,11 +993,11 @@ export function Navigation({
                         </span>
                       </div>
                       <div className="space-y-2 text-center">
-                       <Link href={`/${countryCode}/product-checkout`}>
-                        <button className="w-full py-3 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide text-center font-din-arabic">
+                       {/* <Link href={`/${countryCode}/product-checkout`}> */}
+                        <button  onClick={getOrCreateMedusaCart} className="w-full py-3 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide text-center font-din-arabic">
                           Checkout
                         </button>
-                       </Link>
+                       {/* </Link> */}
                         <button
                           onClick={() => setIsCartOpen(false)}
                           className="w-full py-2 border border-black border-opacity-20 text-black transition-colors tracking-wide text-center font-din-arabic"
@@ -1214,11 +1247,11 @@ export function Navigation({
                     <span className="font-din-arabic text-black font-medium">₹{getTotalPrice()}</span>
                   </div>
                   <div className="space-y-2 text-center">
-                    <Link href={`/${countryCode}/product-checkout`}>
-                      <button className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide text-center">
+                    {/* <Link href={`/${countryCode}/product-checkout`}> */}
+                      <button  onClick={getOrCreateMedusaCart} className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide text-center">
                         Checkout
                       </button>
-                    </Link>
+                    {/* </Link> */}
                     <button 
                       onClick={() => setIsCartOpen(false)}
                       className="w-full font-din-arabic py-2 border border-black/20 text-black hover:bg-black/5 transition-colors tracking-wide text-center"
