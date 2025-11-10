@@ -1,12 +1,17 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { User, Search, ShoppingBag, X, Plus, Minus, Heart, Menu, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useLedger } from 'app/context/ledger-context'
+import { toast } from 'sonner'
+
+const getJsonHeaders = (): Record<string, string> => ({
+  'Content-Type': 'application/json',
+})
 
 interface CartItem {
   id: string
@@ -29,7 +34,7 @@ interface NavigationProps {
 
 export function Navigation({
   isScrolled = false,
-  cartItems = [],
+  cartItems,
   onCartUpdate,
   onDropdownChange,
   disableSticky = false,
@@ -68,6 +73,11 @@ export function Navigation({
   const countryCode = getCountryCode()
   const [persistedCartItems, setPersistedCartItems] = useState<CartItem[]>([])
   const hasSyncedCartRef = useRef(false)
+  const lastSerializedCartRef = useRef<string | null>(null)
+
+  const resolvedCartItems = useMemo<CartItem[]>(() => {
+    return cartItems ?? []
+  }, [cartItems])
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -93,20 +103,21 @@ export function Navigation({
 
   // Sync cartItems to localStorage whenever they change
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || cartItems === undefined) {
       return
     }
 
-    if (!hasSyncedCartRef.current) {
-      hasSyncedCartRef.current = true
-      if (cartItems.length === 0) {
-        return
-      }
+    const serialized = JSON.stringify(cartItems)
+
+    if (lastSerializedCartRef.current === serialized) {
+      return
     }
+
+    lastSerializedCartRef.current = serialized
 
     try {
       console.log('Navigation: Saving cart to localStorage:', cartItems)
-      localStorage.setItem('jardin-cart', JSON.stringify(cartItems))
+      localStorage.setItem('jardin-cart', serialized)
       setPersistedCartItems(cartItems)
     } catch (error) {
       console.error('Error saving cart to localStorage:', error)
@@ -285,7 +296,8 @@ export function Navigation({
   }, [])
 
   // Use persisted cart items if component cartItems is empty
-  const displayCartItems = cartItems.length > 0 ? cartItems : persistedCartItems
+  const displayCartItems =
+    resolvedCartItems.length > 0 ? resolvedCartItems : persistedCartItems
 
   const getTotalPrice = () => {
     return displayCartItems.reduce(
@@ -514,35 +526,68 @@ export function Navigation({
   const navStyles = getNavStyles()
 
   const getOrCreateMedusaCart = async () => {
-    console.log("function called")
-  if (typeof window === 'undefined') return null;
-     console.log("type window successs")
-  let cartId = localStorage.getItem('medusa_cart_id');
-  if (cartId) {
-    router.push(`/${countryCode}/product-checkout`);
-    return cartId;
-  }
+    try {
+      console.log("function called")
+    if (typeof window === 'undefined') return null;
+       console.log("type window successs")
+    let cartId = localStorage.getItem('medusa_cart_id');
+    if (cartId) {
+      try {
+        const existingCartRes = await fetch(`/api/medusa/carts/${cartId}`, {
+          method: 'GET',
+          headers: getJsonHeaders(),
+          credentials: 'include',
+        })
 
-  console.log("have cart id")
+        if (existingCartRes.ok) {
+          const existingCart = await existingCartRes.json().catch(() => null)
+          const isCompleted = existingCart?.cart?.completed_at
 
-  // create new cart in Medusa
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/store/carts`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json',
-      'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
-     },
-    credentials: 'include', 
-  });
-    console.log(res, "res of mudusa cart id api")
+          if (!isCompleted) {
+            router.push(`/${countryCode}/product-checkout`);
+            return cartId;
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to retrieve existing Medusa cart', error)
+      }
+
+      localStorage.removeItem('medusa_cart_id');
+      cartId = null;
+    }
+
+    console.log("have cart id")
+
+    // create new cart in Medusa
+    const response = await fetch(`/api/medusa/carts`, {
+      method: 'POST',
+      headers: getJsonHeaders(),
+      credentials: 'include',
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      console.error('Failed to create Medusa cart', error)
+      throw new Error(error?.message || 'Unable to create Medusa cart')
+    }
+
+    const data = await response.json()
+
+    console.log(data, "res of mudusa cart id api")
     console.log(process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY, "env ")
 
-  const data = await res.json();
-  cartId = data?.cart?.id;
-  if (cartId) {
-    localStorage.setItem('medusa_cart_id', cartId);
-  }
-  router.push(`/${countryCode}/product-checkout`);
-  return cartId;
+    cartId = data?.cart?.id;
+    if (cartId) {
+      localStorage.setItem('medusa_cart_id', cartId);
+    }
+    router.push(`/${countryCode}/product-checkout`);
+    return cartId;
+    } catch (error) {
+      console.error('getOrCreateMedusaCart failed', error)
+      const message = error instanceof Error ? error.message : 'Unable to start checkout. Please try again.'
+      toast.error(message)
+      return null
+    }
 };
 
 

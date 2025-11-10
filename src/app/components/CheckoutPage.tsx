@@ -15,6 +15,73 @@ import { OrderSummary } from './checkout/OrderSummary';
 import { usePathname, useRouter } from 'next/navigation';
 import { useRazorpay, RazorpayOrderOptions } from 'react-razorpay';
 
+const getJsonHeaders = (): Record<string, string> => ({
+  'Content-Type': 'application/json',
+});
+
+const DEFAULT_SHIPPING_OPTION_ID =
+  process.env.NEXT_PUBLIC_MEDUSA_DEFAULT_SHIPPING_OPTION_ID ||
+  process.env.MEDUSA_DEFAULT_SHIPPING_OPTION_ID ||
+  "";
+
+const extractErrorMessage = (error: unknown, fallback = "Something went wrong"): string => {
+  if (!error) return fallback
+
+  if (typeof error === "string") return error || fallback
+
+  if (error instanceof Error) {
+    if (typeof error.message === "string" && error.message) {
+      return error.message
+    }
+    const errorMessage = (error as any)?.response?.data?.message
+    if (typeof errorMessage === "string" && errorMessage) {
+      return errorMessage
+    }
+  }
+
+  if (typeof error === "object") {
+    const errObj = error as Record<string, unknown>
+    const keysInOrder = ["message", "error", "detail", "title"]
+
+    for (const key of keysInOrder) {
+      const value = errObj[key]
+      if (typeof value === "string" && value) return value
+      if (value && typeof value === "object") {
+        const nested = extractErrorMessage(value, "")
+        if (nested) return nested
+      }
+    }
+
+    try {
+      const serialized = JSON.stringify(error)
+      if (serialized && serialized !== "{}") {
+        return serialized
+      }
+    } catch {
+      /* noop */
+    }
+  }
+
+  return fallback
+}
+
+const parseMedusaError = async (response: Response): Promise<string> => {
+  const raw = await response.text()
+  try {
+    const parsed = raw ? JSON.parse(raw) : {}
+    return (
+      parsed?.message ||
+      parsed?.error ||
+      parsed?.errors?.[0]?.message ||
+      parsed?.errors?.[0]?.detail ||
+      raw ||
+      "Unexpected error from Medusa"
+    )
+  } catch {
+    return raw || "Unexpected error from Medusa"
+  }
+}
+
 export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPageProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -63,48 +130,71 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
     price: number;
     quantity: number;
     image?: string;
+    variant_id?: string;
     isRitualProduct?: boolean;
   }> = raw ? JSON.parse(raw) : [];
 
+  const headers = getJsonHeaders();
+
   // push every item to medusa
   for (const item of items) {
-    // your item.id is already like "variant_..."
-    const variantId = item.id;
-    if (!variantId) continue;
+    const variantId =
+      item.variant_id ||
+      (typeof item.id === "string" && item.id.startsWith("variant_") ? item.id : null)
 
-    await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/store/carts/${cartId}/line-items`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-publishable-api-key":
-            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          variant_id: variantId,
-          quantity: item.quantity || 1,
-          metadata: {
-            name: item.name || "",
-            image: item.image || "",
-            price: item.price || "",
-            isRitualProduct: item.isRitualProduct ?? false,
-            source: "jardin-cart",
-          },
-        }),
-      }
-    );
+    if (!variantId) {
+      console.warn("[syncLocalCartToMedusa] Missing variant id for cart item", {
+        cartId,
+        item,
+      })
+      toast.error(
+        `Unable to add ${item.name || "item"} to Medusa cart: missing variant information`
+      )
+      throw new Error("Missing variant_id on cart item")
+    }
+
+    const quantity = Number.isFinite(item.quantity) ? Math.max(1, Number(item.quantity)) : 1
+    const lineItemPayload = {
+      variant_id: variantId,
+      quantity,
+      metadata: {
+        name: item.name || "",
+        image: item.image || "",
+        price: item.price || "",
+        isRitualProduct: item.isRitualProduct ?? false,
+        source: "jardin-cart",
+      },
+    }
+
+    console.info("[syncLocalCartToMedusa] Adding line item to Medusa", {
+      cartId,
+      payload: lineItemPayload,
+      sourceItem: item,
+    })
+
+    const res = await fetch(`/api/medusa/carts/${cartId}/line-items`, {
+      method: "POST",
+      headers,
+      credentials: "include",
+      body: JSON.stringify(lineItemPayload),
+    });
+
+    if (!res.ok) {
+      const message = await parseMedusaError(res)
+      console.error("Failed to add item to Medusa cart:", {
+        variantId,
+        status: res.status,
+        message,
+      })
+      toast.error(`Unable to add ${item.name} to Medusa cart: ${message}`)
+      throw new Error(message || "Failed to add item to Medusa cart")
+    }
   }
 
   // now update cart with the form info you collected in checkout
-  await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/store/carts/${cartId}`, {
+  const updateRes = await fetch(`/api/medusa/carts/${cartId}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-publishable-api-key":
-        process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
-    },
+    headers,
     credentials: "include",
     body: JSON.stringify({
       email: formData.email,
@@ -121,7 +211,351 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
       },
     }),
   });
+
+  if (!updateRes.ok) {
+    const message = await parseMedusaError(updateRes)
+    console.error("Failed to update Medusa cart:", {
+      status: updateRes.status,
+      message,
+      payload: {
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      },
+    })
+    toast.error(`Unable to update Medusa cart: ${message}`)
+    throw new Error(message || "Failed to update Medusa cart")
+  }
 };
+
+  const fetchMedusaCart = async (cartId: string) => {
+    const res = await fetch(
+      `/api/medusa/carts/${cartId}?fields=` +
+        encodeURIComponent(
+          [
+            "*items",
+            "*shipping_methods",
+            "*payment_collection.payment_sessions",
+            "*region.shipping_options",
+          ].join(",")
+        ),
+      {
+        method: "GET",
+        headers: getJsonHeaders(),
+        credentials: "include",
+      }
+    )
+
+    const responseClone = res.clone()
+    const text = await res.text()
+
+    let payload: any = {}
+    try {
+      payload = text ? JSON.parse(text) : {}
+    } catch {
+      payload = {}
+    }
+
+    if (!res.ok) {
+      const message = await parseMedusaError(responseClone)
+      console.error("[fetchMedusaCart] Failed to retrieve cart", {
+        cartId,
+        status: res.status,
+        message,
+        payload,
+      })
+      throw new Error(message || "Failed to retrieve Medusa cart")
+    }
+
+    return payload
+  }
+
+  const ensurePaymentCollection = async (cartId: string) => {
+    const res = await fetch(`/api/medusa/payment-collections`, {
+      method: "POST",
+      headers: getJsonHeaders(),
+      credentials: "include",
+      body: JSON.stringify({ cart_id: cartId }),
+    })
+
+    const responseClone = res.clone()
+    let payload: any = {}
+    try {
+      payload = await res.json()
+    } catch {
+      payload = {}
+    }
+
+    if (!res.ok && res.status !== 409) {
+      const message =
+        typeof payload === "object" &&
+        payload !== null &&
+        "message" in payload &&
+        typeof (payload as { message?: unknown }).message === "string"
+          ? (payload as { message?: string }).message ?? ""
+          : await parseMedusaError(responseClone)
+
+      console.error("[ensurePaymentCollection] Failed to initiate payment collection", {
+        cartId,
+        status: res.status,
+        payload,
+        message,
+      })
+
+      throw new Error(message || "Unable to initiate payment collection")
+    }
+
+    const directCollection =
+      (payload as { payment_collection?: unknown })?.payment_collection ??
+      (payload as { data?: { payment_collection?: unknown } })?.data?.payment_collection
+
+    if (directCollection && typeof directCollection === "object" && (directCollection as { id?: unknown }).id) {
+      const collection = directCollection as { id: string; payment_sessions?: unknown }
+      console.info("[ensurePaymentCollection] Payment collection ready", {
+        cartId,
+        paymentCollectionId: collection.id,
+      })
+      return collection
+    }
+
+    if (res.status === 409) {
+      console.info("[ensurePaymentCollection] Payment collection already exists, fetching current state", {
+        cartId,
+        payload,
+      })
+    } else {
+      console.warn("[ensurePaymentCollection] Payment collection response did not contain collection, fetching cart", {
+        cartId,
+        status: res.status,
+        payload,
+      })
+    }
+
+    const cartPayload = await fetchMedusaCart(cartId)
+    const medusaCart = (cartPayload as any)?.cart ?? cartPayload
+    const resolvedCollection = medusaCart?.payment_collection
+
+    if (!resolvedCollection?.id) {
+      console.error("[ensurePaymentCollection] Unable to resolve payment collection from cart", {
+        cartId,
+        cartPayload,
+      })
+      throw new Error("Unable to resolve payment collection for cart")
+    }
+
+    console.info("[ensurePaymentCollection] Resolved payment collection from cart", {
+      cartId,
+      paymentCollectionId: resolvedCollection.id,
+    })
+
+    return resolvedCollection
+  }
+
+  const ensureShippingMethod = async (cartId: string) => {
+    console.group(`[ensureShippingMethod] Start for cart: ${cartId}`);
+  
+    // 1️⃣ Get full cart
+    const cartPayload = await fetchMedusaCart(cartId);
+    const cart = (cartPayload as any)?.cart ?? cartPayload;
+  
+    // If cart already has a shipping method, return it
+    if (Array.isArray(cart?.shipping_methods) && cart.shipping_methods.length > 0) {
+      console.info("[ensureShippingMethod] Existing shipping method found");
+      console.groupEnd();
+      return cart;
+    }
+  
+    // 2️⃣ Fetch all available options for this cart
+    const optionsRes = await fetch(`/api/medusa/shipping-options?cart_id=${cartId}`, {
+      method: "GET",
+      headers: getJsonHeaders(),
+      credentials: "include",
+    });
+  
+    const optionsJson = await optionsRes.json().catch(() => ({}));
+    const shippingOptions = optionsJson?.shipping_options ?? optionsJson?.data ?? [];
+  
+    if (!optionsRes.ok || !Array.isArray(shippingOptions) || shippingOptions.length === 0) {
+      console.error("[ensureShippingMethod] No shipping options found for cart", optionsJson);
+      toast.error("No shipping options available. Please check your region or contact support.");
+      throw new Error("No shipping options available for cart");
+    }
+  
+    console.log("[ensureShippingMethod] Available shipping options:", shippingOptions.map((s: any) => ({
+      id: s.id, name: s.name, profile: s.shipping_profile_id
+    })));
+  
+    // 3️⃣ Find the profile used by the cart’s first item
+    const firstItemProfileId = cart?.items?.[0]?.variant?.product?.shipping_profile_id;
+    let selectedOption = null;
+  
+    // 4️⃣ Try to find matching profile option
+    if (firstItemProfileId) {
+      selectedOption = shippingOptions.find(
+        (opt: any) => opt.shipping_profile_id === firstItemProfileId
+      );
+    }
+  
+    // 5️⃣ Fallback: default shipping option or first available
+    if (!selectedOption && DEFAULT_SHIPPING_OPTION_ID) {
+      selectedOption = shippingOptions.find(
+        (opt: any) => opt.id === DEFAULT_SHIPPING_OPTION_ID
+      );
+    }
+  
+    if (!selectedOption && shippingOptions.length > 0) {
+      selectedOption = shippingOptions[0];
+    }
+  
+    if (!selectedOption?.id) {
+      console.error("[ensureShippingMethod] Still no valid shipping option found", {
+        firstItemProfileId,
+        shippingOptions,
+      });
+      toast.error("No valid shipping option found for your cart items.");
+      throw new Error("No valid shipping option found for your cart items.");
+    }
+  
+    console.info("[ensureShippingMethod] Applying shipping option:", {
+      id: selectedOption.id,
+      name: selectedOption.name,
+      profile: selectedOption.shipping_profile_id,
+    });
+  
+    // 6️⃣ Apply this shipping method
+    const setRes = await fetch(`/api/medusa/carts/${cartId}/shipping-methods`, {
+      method: "POST",
+      headers: getJsonHeaders(),
+      credentials: "include",
+      body: JSON.stringify({ option_id: selectedOption.id }),
+    });
+  
+    const setText = await setRes.text();
+    if (!setRes.ok) {
+      const message = await parseMedusaError(setRes);
+      console.error("[ensureShippingMethod] Failed to set shipping method:", { message, body: setText });
+      throw new Error(message || "Unable to set shipping method");
+    }
+  
+    console.info("[ensureShippingMethod] Shipping method applied successfully");
+  
+    // 7️⃣ Re-fetch updated cart
+    const updatedCartPayload = await fetchMedusaCart(cartId);
+    const updatedCart = (updatedCartPayload as any)?.cart ?? updatedCartPayload;
+  
+    console.groupEnd();
+    return updatedCart;
+  };
+  
+  
+
+  const ensureRazorpayPaymentSession = async (
+    cartId: string,
+    paymentCollection?: { id: string; payment_sessions?: Array<any> }
+  ) => {
+    let collection = paymentCollection
+
+    if (!collection?.id) {
+      const cartPayload = await fetchMedusaCart(cartId)
+      const medusaCart = (cartPayload as any)?.cart ?? cartPayload
+      collection = medusaCart?.payment_collection
+    }
+
+    if (!collection?.id) {
+      console.error("[ensureRazorpayPaymentSession] Payment collection missing", {
+        cartId,
+        paymentCollection,
+      })
+      throw new Error("Payment collection not found for cart")
+    }
+
+    const existingSession = collection.payment_sessions?.find(
+      (session: any) =>
+        session?.provider_id?.startsWith("pp_razorpay") && session?.status !== "canceled"
+    )
+
+    if (existingSession) {
+      console.info("[ensureRazorpayPaymentSession] Found existing Razorpay session", {
+        cartId,
+        paymentCollectionId: collection.id,
+        sessionId: existingSession.id,
+        status: existingSession.status,
+      })
+      return existingSession
+    }
+
+    const res = await fetch(
+      `/api/medusa/payment-collections/${collection.id}/payment-sessions`,
+      {
+        method: "POST",
+        headers: getJsonHeaders(),
+        credentials: "include",
+        body: JSON.stringify({ provider_id: "pp_razorpay_razorpay" }),
+      }
+    )
+
+    const responseClone = res.clone()
+    let payload: any = {}
+    try {
+      payload = await res.json()
+    } catch {
+      payload = {}
+    }
+
+    if (!res.ok) {
+      const message =
+        typeof payload === "object" &&
+        payload !== null &&
+        "message" in payload &&
+        typeof (payload as { message?: unknown }).message === "string"
+          ? (payload as { message?: string }).message ?? ""
+          : await parseMedusaError(responseClone)
+
+      console.error("[ensureRazorpayPaymentSession] Failed to create payment session", {
+        cartId,
+        paymentCollectionId: collection.id,
+        status: res.status,
+        payload,
+        message,
+      })
+
+      throw new Error(message || "Unable to initiate payment session")
+    }
+
+    console.info("[ensureRazorpayPaymentSession] Created Razorpay payment session", {
+      cartId,
+      paymentCollectionId: collection.id,
+      payload,
+    })
+
+    const updatedCartPayload = await fetchMedusaCart(cartId)
+    const updatedCollection =
+      (updatedCartPayload as any)?.cart?.payment_collection ??
+      (updatedCartPayload as any)?.payment_collection
+
+    const updatedSession = updatedCollection?.payment_sessions?.find(
+      (session: any) =>
+        session?.provider_id?.startsWith("pp_razorpay") && session?.status !== "canceled"
+    )
+
+    if (updatedSession) {
+      console.info("[ensureRazorpayPaymentSession] Confirmed Razorpay session on cart", {
+        cartId,
+        paymentCollectionId: updatedCollection?.id,
+        sessionId: updatedSession.id,
+        status: updatedSession.status,
+      })
+      return updatedSession
+    }
+
+    console.warn("[ensureRazorpayPaymentSession] Razorpay session not found after creation", {
+      cartId,
+      paymentCollectionId: updatedCollection?.id ?? collection.id,
+      payload,
+    })
+
+    return payload
+  }
 
 
   // Load saved addresses on mount
@@ -364,28 +798,33 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
 
               let cartId: string | null = null;
 
-    if (typeof window !== 'undefined') {
-      cartId = localStorage.getItem('medusa_cart_id');
+              if (typeof window !== 'undefined') {
+                cartId = localStorage.getItem('medusa_cart_id');
+              }
+
+              if (!cartId) {
+                throw new Error('Cart not found – cannot create order');
+              }
+
+              await syncLocalCartToMedusa(cartId);
+              await ensureShippingMethod(cartId);
+              const paymentCollection = await ensurePaymentCollection(cartId);
+              await ensureRazorpayPaymentSession(cartId, paymentCollection);
+
+              const completeRes = await fetch(`/api/medusa/carts/${cartId}/complete`, {
+                method: 'POST',
+                headers: getJsonHeaders(),
+                credentials: 'include',
+              });
+
+    const completeText = await completeRes.text();
+    let completeJson: any = {};
+    try {
+      completeJson = completeText ? JSON.parse(completeText) : {};
+    } catch {
+      completeJson = {};
     }
-
-    if (!cartId) {
-      throw new Error('Cart not found – cannot create order');
-    }
-
-    await syncLocalCartToMedusa(cartId);  
-    const completeRes = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/store/carts/${cartId}/complete`,
-      {
-        method: 'POST',
-       headers: { 'Content-Type': 'application/json',
-      'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
-     },
-    credentials: 'include', 
-      }
-    );
-
-    const completeJson = await completeRes.json();
-    const order = completeJson.order;
+    const order = completeJson?.order;
 
  // ✅ store order ids in localStorage as ARRAY
             if (typeof window !== 'undefined' && order?.id) {
@@ -399,8 +838,20 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
               localStorage.setItem('medusa_order_ids', JSON.stringify(updated));
             }
 
-    if (!completeRes.ok || !completeJson?.order) {
-      throw new Error(completeJson?.message || 'Failed to create order in Medusa');
+    if (!completeRes.ok || !order) {
+      const message =
+        completeJson?.message ||
+        completeJson?.error ||
+        completeJson?.errors?.[0]?.message ||
+        completeText ||
+        'Failed to create order in Medusa';
+      console.error('Failed to complete Medusa cart:', {
+        status: completeRes.status,
+        message,
+        body: completeJson,
+      });
+      toast.error(message);
+      throw new Error(message);
     }
               toast.success('Payment successful!')
               if (typeof window !== 'undefined') {
@@ -408,10 +859,11 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
                   clearLocalCart();
                   window.dispatchEvent(new CustomEvent('localCartUpdated', { detail: { items: [] } }));
                 })
+                localStorage.removeItem('medusa_cart_id');
               }
               router.push(`/in/profile`)
             } catch (e: any) {
-              toast.error(e?.message || 'Verification failed')
+              toast.error(extractErrorMessage(e, 'Verification failed'))
             }
           },
           modal: {
@@ -426,7 +878,7 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
         const rzp = new (Razorpay as any)(options)
         rzp.open()
       } catch (e:any) {
-        toast.error(e?.message || 'Payment start failed')
+        toast.error(extractErrorMessage(e, 'Payment start failed'))
       }
       return
     }
@@ -441,6 +893,7 @@ export function CheckoutPage({ cartItems, onBack, onCartUpdate }: CheckoutPagePr
         clearLocalCart();
         window.dispatchEvent(new CustomEvent('localCartUpdated', { detail: { items: [] } }));
       });
+    localStorage.removeItem('medusa_cart_id');
     }
     setTimeout(() => { onBack(); }, 1500);
   };
