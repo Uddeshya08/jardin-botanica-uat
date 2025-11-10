@@ -183,16 +183,7 @@ export function BodyHandsPage({ onAddToCart }: BodyHandsPageProps) {
                 </button>
               ))}
             </motion.div>
-            <motion.button
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              onClick={() => setIsLedgerOpen(true)}
-              className="inline-flex items-center gap-2 self-start rounded-full border border-black/40 px-4 py-2 font-din-arabic text-xs tracking-[0.2em] uppercase text-black transition hover:bg-black hover:text-white"
-            >
-              <ShoppingBag className="h-4 w-4" />
-              Ledger {ledgerCount > 0 ? `(${ledgerCount})` : ""}
-            </motion.button>
+           
           </div>
         </div>
       </section>

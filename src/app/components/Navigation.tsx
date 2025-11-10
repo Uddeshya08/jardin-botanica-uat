@@ -446,21 +446,22 @@ export function Navigation({
     },
     {
       name: 'HOME CREATIONS',
+      href: `/${countryCode}/home-creations`,
       dropdown: [
         { 
           label: 'Candles', 
-          href: '#',
+          href: `/${countryCode}/home-creations?filter=candle`,
           image: 'https://images.unsplash.com/photo-1648310379950-2773bb5d2525?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb3Jlc3QlMjBzY2VudGVkJTIwY2FuZGxlfGVufDF8fHx8MTc1OTc2OTE1NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
         },
         { 
           label: 'Lava Rock Diffusers', 
-          href: '#',
+          href: `/${countryCode}/home-creations?filter=diffuser`,
           image: 'https://images.unsplash.com/photo-1747198919508-a7657e63d4f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXZhJTIwcm9jayUyMGRpZmZ1c2VyJTIwYXJvbWF0aGVyYXB5fGVufDF8fHx8MTc1OTc2ODkyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
         }
       ]
     },
     { name: 'JOURNAL', href: '/blogs' },
-    { name: 'BOTANIST\'S LAB', href: '/the-lab' }
+    { name: 'BOTANIST\'S LAB', href: `/${countryCode}/the-lab` }
   ]
 
 
@@ -876,17 +877,12 @@ export function Navigation({
             whileTap={disableAnimations ? {} : { scale: 0.9 }}
             onClick={() => router.push(`/${countryCode}/ledger`)}
             className="p-2 transition-all duration-300 relative"
-            style={{ color: ledgerCount > 0 ? '#e58a4d' : navStyles.textColor }}
+            style={{ color: navStyles.textColor }}
             aria-label="Ledger"
           >
             <Heart
-              className={`w-5 h-5 transition-colors ${ledgerCount > 0 ? 'fill-current' : ''}`}
+              className={'w-5 h-5 transition-colors fill-none stroke-current'}
             />
-            {ledgerCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#e58a4d] text-black text-xs rounded-full w-4 h-4 flex items-center justify-center font-light">
-                {ledgerCount}
-              </span>
-            )}
           </motion.button>
 
           {/* Profile Icon */}
@@ -1183,7 +1179,11 @@ export function Navigation({
                           </span>
                         )}
                         <Heart
-                          className={`w-5 h-5 ${ledgerCount > 0 ? 'fill-current' : ''}`}
+                          className={`w-5 h-5 transition-colors ${
+                            ledgerCount > 0
+                              ? 'fill-[#e58a4d] stroke-[#e58a4d]'
+                              : 'fill-none stroke-current'
+                          }`}
                           style={{ color: ledgerCount > 0 ? '#e58a4d' : 'currentColor' }}
                         />
                       </span>
