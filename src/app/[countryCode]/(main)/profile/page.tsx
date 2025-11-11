@@ -12,6 +12,7 @@ import { Checkbox } from 'app/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from 'app/components/ui/radio-group';
 import { toast } from 'sonner';
 import { Navigation } from 'app/components/Navigation';
+import { useLedger, LedgerItem } from 'app/context/ledger-context';
 
 export default function ProfilePage() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -183,29 +184,15 @@ useEffect(() => {
     }
   }, [])
   
-  const [favorites, setFavorites] = useState<Array<{
-    id: string;
-    name: string;
-    price: number;
-    image: string;
-    description?: string;
-    category?: string;
-  }>>([]);
   const [sizeDialogOpen, setSizeDialogOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState('250ml');
-  const [selectedFavoriteItem, setSelectedFavoriteItem] = useState<{
-    id: string;
-    name: string;
-    price: number;
-    image: string;
-    description?: string;
-    category?: string;
-  } | null>(null);
+  const [selectedLedgerItem, setSelectedLedgerItem] = useState<LedgerItem | null>(null);
+  const { ledger, removeFromLedger } = useLedger();
 
   const sidebarItems = [
     { id: 'account-settings', label: 'Account Settings', icon: Settings },
     { id: 'order-history', label: 'Orders', icon: Package },
-    { id: 'favorites', label: 'Favorites', icon: Heart },
+    { id: 'favorites', label: 'Ledgers', icon: Heart },
     { id: 'address-book', label: 'Saved Addresses', icon: MapPin },
     { id: 'credit-cards', label: 'Payment Methods', icon: CreditCard },
   ];
@@ -313,17 +300,10 @@ useEffect(() => {
     }
   };
 
-  const handleAddToCartClick = (item: {
-    id: string;
-    name: string;
-    price: number;
-    image: string;
-    description?: string;
-    category?: string;
-  }) => {
+  const handleAddToCartClick = (item: LedgerItem) => {
     // Check if this is the botanical hand wash
     if (item.id === 'botanical-hand-wash') {
-      setSelectedFavoriteItem(item);
+      setSelectedLedgerItem(item);
       setSelectedSize('250ml');
       setSizeDialogOpen(true);
     } else {
@@ -333,23 +313,23 @@ useEffect(() => {
   };
 
   const handleConfirmAddToCart = () => {
-    if (selectedFavoriteItem) {
+    if (selectedLedgerItem) {
       // Calculate price based on selected size
       const basePrice = 1950;
       const finalPrice = selectedSize === '500ml' ? Math.round(basePrice * 1.5) : basePrice;
       
       // Create a modified item with size information
       const itemToAdd = {
-        ...selectedFavoriteItem,
-        id: `${selectedFavoriteItem.id}-${selectedSize}`,
-        name: `${selectedFavoriteItem.name} (${selectedSize})`,
+        ...selectedLedgerItem,
+        id: `${selectedLedgerItem.id}-${selectedSize}`,
+        name: `${selectedLedgerItem.name} (${selectedSize})`,
         price: finalPrice
       };
       
       toast.success('Added to cart');
     }
     setSizeDialogOpen(false);
-    setSelectedFavoriteItem(null);
+    setSelectedLedgerItem(null);
   };
 
   const renderActiveSection = () => {
@@ -726,14 +706,14 @@ useEffect(() => {
           >
             <div className="flex items-center justify-between mb-8 lg:mb-16">
               <div>
-                <h1 className="font-american-typewriter text-2xl lg:text-3xl text-black">Your Favorites</h1>
+                <h1 className="font-american-typewriter text-2xl lg:text-3xl text-black">Your Ledger</h1>
                 <p className="font-din-arabic text-base text-black/60 tracking-wide mt-2">
-                  {favorites.length} {favorites.length === 1 ? 'item' : 'items'} saved
+                  {ledger.length} {ledger.length === 1 ? 'item' : 'items'} saved
                 </p>
               </div>
             </div>
 
-            {favorites.length === 0 ? (
+            {ledger.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -747,7 +727,7 @@ useEffect(() => {
                   <Heart className="w-12 h-12 text-black/30" />
                 </motion.div>
                 <p className="font-din-arabic text-black/60 mb-8 max-w-md mx-auto" style={{ letterSpacing: '0.1em' }}>
-                  Nothing here yet. Your favorites will appear as you wander the Botanist's Lab.
+                  Nothing here yet. Your Ledgers will appear as you wander the Botanist's Lab.
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -762,7 +742,7 @@ useEffect(() => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <AnimatePresence mode="popLayout">
-                  {favorites.map((item, index) => (
+                  {ledger.map((item, index) => (
                     <motion.div
                       key={item.id}
                       layout
@@ -776,7 +756,7 @@ useEffect(() => {
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => setFavorites(favorites.filter(f => f.id !== item.id))}
+                        onClick={() => removeFromLedger(item.id)}
                         className="absolute top-3 right-3 z-10 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <Heart className="w-4 h-4 fill-current" style={{ color: '#e58a4d' }} />
@@ -1637,10 +1617,10 @@ useEffect(() => {
         <DialogContent className="sm:max-w-[500px] border-black/20" style={{ backgroundColor: '#e3e3d8' }}>
           <DialogHeader>
             <DialogTitle className="font-american-typewriter tracking-tight text-black" style={{ letterSpacing: '0.05em' }}>
-              {selectedFavoriteItem?.name}
+              {selectedLedgerItem?.name}
             </DialogTitle>
             <DialogDescription className="font-din-arabic text-black/70 leading-relaxed pt-2" style={{ letterSpacing: '0.1em' }}>
-              {selectedFavoriteItem?.description}
+              {selectedLedgerItem?.description}
             </DialogDescription>
           </DialogHeader>
           
