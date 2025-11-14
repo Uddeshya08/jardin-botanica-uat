@@ -8,7 +8,6 @@ import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 import { Footer } from "app/components/Footer"
-import { LedgerProvider } from "app/context/ledger-context"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -34,6 +33,8 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
 
   return (
     <>
+      {/* <Nav  cartItems={cartItems}
+        /> */}
       {customer && cart && (
         <CartMismatchBanner customer={customer} cart={cart} />
       )}
@@ -45,10 +46,8 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
           shippingOptions={shippingOptions}
         />
       )}
-      <LedgerProvider>
-        {props.children}
-        <Footer />
-      </LedgerProvider>
+      {props.children}
+      <Footer />
     </>
   )
 }

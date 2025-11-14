@@ -166,14 +166,14 @@ const SingleBlogPage = () => {
   return (
     <div className="bg-[#FEFDF3] min-h-screen">
       <div
-        className="max-w-7xl mx-auto py-12 px-4 md:px-6"
+        className="max-w-7xl mx-auto  py-12 "
         style={{  marginTop: '70px' }}
       >
-        <div className="flex flex-col md:flex-row gap-6 md:gap-16">
+        <div className="flex gap-16">
           {/* Main Content - Left Side */}
           <div
-            className="flex-1 max-w-4xl px-4 md:px-12"
-            style={{ borderRight: '0 md:2px solid #000' }}
+            className="flex-1 max-w-4xl px-12"
+            style={{ borderRight: '2px solid #000' }}
           >
             {/* Sports Category */}
             <motion.div

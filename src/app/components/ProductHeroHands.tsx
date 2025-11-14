@@ -101,7 +101,7 @@ const productImage = '/assets/productImage.png';
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full lg:w-[40%] flex items-center justify-center py-12 px-4 md:px-8 lg:px-16 xl:px-20 relative overflow-hidden"
+        className="w-full lg:w-[40%] flex items-center justify-center py-12 px-8 lg:px-16 xl:px-20 relative overflow-hidden"
         style={{ backgroundColor: '#e3e3d8' }}
       >
         {/* Subtle botanical pattern overlay */}
@@ -354,7 +354,7 @@ const productImage = '/assets/productImage.png';
               className="flex items-center justify-between w-full py-1 text-left group"
             >
               <span className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300" style={{ color: '#a28b6f' }}>
-                FRAGRANCE Profile
+                FRAGRANCE NOTES
               </span>
               <motion.div
                 whileHover={{ rotate: 90 }}
@@ -552,12 +552,12 @@ const productImage = '/assets/productImage.png';
       <InfoPanel
         isOpen={isFragranceNotesOpen}
         onClose={() => setIsFragranceNotesOpen(false)}
-        title="FRAGRANCE Profile"
+        title="FRAGRANCE NOTES"
       >
         <div className="space-y-4">
           <div className="group">
             <span className="font-din-arabic text-black inline">Top Notes — </span>
-            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">Fresh Pine</span>
+            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">Fresh bergamot, green tea leaves, crisp cucumber.</span>
           </div>
           <div className="group">
             <span className="font-din-arabic text-black inline">Heart Notes — </span>

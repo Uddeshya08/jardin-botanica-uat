@@ -4,10 +4,8 @@ import { Github } from "@medusajs/icons"
 import { Heading } from "@medusajs/ui"
 import { useEffect, useState } from "react"
 import { motion } from "motion/react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
-import { upsertCartItems } from "lib/util/cart-helpers"
 
 interface CartItem {
   id: string
@@ -30,14 +28,31 @@ const Category = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isScrolled, setIsScrolled] = useState(false)
   const [hoveredProductIndex, setHoveredProductIndex] = useState<number | null>(null)
-  const [videoError, setVideoError] = useState(false)
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
-  const [productScrollPosition, setProductScrollPosition] = useState(0)
-  const [maxProductScroll, setMaxProductScroll] = useState(0)
+  const [cartItems, setCartItems] = useState<CartItem[]>([
+    {
+      id: "soft-orris-hand-veil",
+      name: "Soft Orris Hand Veil",
+      price: 1800,
+      quantity: 1,
+      image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop",
+    },
+  ])
 
   const handleCartUpdate = (item: CartItem | null) => {
-    if (!item) return
-    setCartItems((prevItems) => upsertCartItems(prevItems, item))
+    if (item && item.quantity > 0) {
+      setCartItems((prevItems) => {
+        const existingIndex = prevItems.findIndex((cartItem) => cartItem.id === item.id)
+        if (existingIndex >= 0) {
+          const updatedItems = [...prevItems]
+          updatedItems[existingIndex] = item
+          return updatedItems
+        } else {
+          return [...prevItems, item]
+        }
+      })
+    } else if (item && item.quantity === 0) {
+      setCartItems((prevItems) => prevItems.filter((cartItem) => cartItem.id !== item.id))
+    }
   }
 
   useEffect(() => {
@@ -71,59 +86,11 @@ const Category = () => {
   }
 
   const products = [
-    { src: "/Images/SoftFloral.jpg", label: "Floral Spice", hoverSrc: "/Images/SoftFloral.jpg" },
-    { src: "/Images/Crushedpine.jpg", label: "Cedar Bloom", hoverSrc: "/Images/Crushedpine.jpg" },
-    { src: "/Images/warmroots.jpg", label: "Forest Floor", hoverSrc: "/Images/warmroots.jpg" },
-    { src: "/Images/AquaVeil1.jpg", label: "Water & Wood", hoverSrc: "/Images/AquaVeil1.jpg" },
+    { src: "/Images/SoftFloral.jpg", label: "FLORAL SPICE", hoverSrc: "/Images/SoftFloral.jpg" },
+    { src: "/Images/Crushedpine.jpg", label: "CEDAR BLOOM", hoverSrc: "/Images/Crushedpine.jpg" },
+    { src: "/Images/warmroots.jpg", label: "FOREST FLOOR", hoverSrc: "/Images/warmroots.jpg" },
+    { src: "/Images/AquaVeil1.jpg", label: "WATER & WOOD", hoverSrc: "/Images/AquaVeil1.jpg" },
   ]
-
-  const scrollProducts = (direction: 'left' | 'right') => {
-    const scrollContainer = document.getElementById('product-slider')
-    if (scrollContainer) {
-      // Calculate scroll amount: 2 items + gap
-      // Item width: (100vw - 2rem) / 2 - 0.5rem
-      // Gap: 1rem = 16px
-      const containerWidth = scrollContainer.clientWidth
-      const itemWidth = (containerWidth - 32 - 16) / 2 // Account for px-4 (32px) and gap
-      const scrollAmount = (itemWidth * 2) + 16 // Two images + gap
-      
-      const currentScroll = scrollContainer.scrollLeft
-      const newPosition = direction === 'right' 
-        ? currentScroll + scrollAmount 
-        : Math.max(0, currentScroll - scrollAmount)
-      
-      scrollContainer.scrollTo({ 
-        left: newPosition, 
-        behavior: 'smooth' 
-      })
-      setProductScrollPosition(newPosition)
-    }
-  }
-
-  useEffect(() => {
-    const scrollContainer = document.getElementById('product-slider')
-    if (!scrollContainer) return
-
-    const updateScrollInfo = () => {
-      setProductScrollPosition(scrollContainer.scrollLeft)
-      setMaxProductScroll(scrollContainer.scrollWidth - scrollContainer.clientWidth)
-    }
-
-    updateScrollInfo()
-    scrollContainer.addEventListener('scroll', updateScrollInfo)
-    
-    // Recalculate on resize
-    window.addEventListener('resize', updateScrollInfo)
-    
-    return () => {
-      scrollContainer.removeEventListener('scroll', updateScrollInfo)
-      window.removeEventListener('resize', updateScrollInfo)
-    }
-  }, [])
-
-  const canScrollLeft = productScrollPosition > 0
-  const canScrollRight = productScrollPosition < maxProductScroll - 10 // Small buffer for smooth scrolling
-
 
   return (
     <div className="bg-[#e2e2d8]">
@@ -132,7 +99,6 @@ const Category = () => {
         isScrolled={isScrolled}
         cartItems={cartItems}
         onCartUpdate={handleCartUpdate}
-        forceWhiteText={true}
       />
       
       {/* first section */}
@@ -141,58 +107,42 @@ const Category = () => {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="relative w-full h-screen md:h-[570px] overflow-hidden"
+        className="relative w-full md:h-[570px] h-[300px]"
       >
-        {!videoError ? (
-          <motion.video
-            initial={{ scale: 1.1, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1.2 }}
-            viewport={{ once: true }}
-            src="/assets/video-banner.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-            onError={() => setVideoError(true)}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <motion.img
-            initial={{ scale: 1.1, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1.2 }}
-            viewport={{ once: true }}
-            src="/Images/TopBanner.jpg"
-            alt="Topbanner"
-            className="w-full h-full object-cover"
-          />
-        )}
+        <motion.img
+          initial={{ scale: 1.1, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.2 }}
+          viewport={{ once: true }}
+          src="/Images/TopBanner.jpg"
+          alt="Topbanner"
+          className="w-full h-full object-cover"
+        />
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
           viewport={{ once: true }}
-          className="absolute top-[37%] md:top-1/2 left-8 md:left-[63px] md:-translate-y-1/2 max-w-xs md:max-w-md"
+          className="absolute top-6 left-4 md:top-28 md:left-[63px] max-w-xs md:max-w-md"
         >
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
-            className="text-white font-medium mb-6 md:mb-8 tracking-tight font-american-typewriter text-5xl md:text-6xl lg:text-7xl"
+            className="text-lg md:text-[42px] text-[#4f5864] font-medium mb-2 md:mb-10 tracking-[5px] font-typewriter"
           >
-            Candles
+            CANDLES
           </motion.h2>
-          <motion.p
+          <motion.h3
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="font-din-arabic text-base md:text-lg text-white/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-4 md:px-0"
+            className="text-sm md:text-[16px] text-[#626262] font-din tracking-[1px]"
           >
             Inspired by ancient stargazers, these candles fill your space with soft, lingering scent bringing calm, beauty, and a touch of the cosmos to your everyday moments.
-          </motion.p>
+          </motion.h3>
         </motion.div>
       </motion.div>
 
@@ -204,15 +154,15 @@ const Category = () => {
         viewport={{ once: true }}
         className="py-4 md:py-12 text-left"
       >
-        <motion.h2
+        <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
-          className="text-2xl md:text-3xl lg:text-4xl px-6 md:px-10 lg:px-16 tracking-tight opacity-[50%] font-american-typewriter"
+          className="text-lg md:px-12 md:text-[30px] font-sm tracking-[4px] opacity-[50%] font-typewriter"
         >
-          A Story in Scent
-        </motion.h2>
+          A STORY IN SCENT
+        </motion.p>
       </motion.div>
 
       {/* mid section - product grid with PAB hover effects */}
@@ -221,151 +171,61 @@ const Category = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="w-full"
+        className="flex flex-col md:flex-row w-full gap-4 px-4 md:px-8"
       >
-        {/* Mobile view - horizontal scroll with 2 images per row */}
-        <div className="md:hidden relative py-4">
-          {/* Left Arrow - only show if can scroll left */}
-          {canScrollLeft && (
-            <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20">
-              <motion.button
-                onClick={() => scrollProducts('left')}
-                whileHover={{ scale: 1.05, x: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="group relative w-10 h-10 rounded-full backdrop-blur-md transition-all duration-500 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl overflow-hidden"
-                aria-label="Scroll left"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ChevronLeft className="w-4 h-4 text-white group-hover:text-white transition-all duration-300" />
-                </div>
-                <div className="absolute inset-0 rounded-full ring-1 ring-white/30 group-hover:ring-white/50 transition-all duration-300" />
-              </motion.button>
-            </div>
-          )}
-          
-          {/* Right Arrow - only show if can scroll right */}
-          {canScrollRight && (
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20">
-              <motion.button
-                onClick={() => scrollProducts('right')}
-                whileHover={{ scale: 1.05, x: 2 }}
-                whileTap={{ scale: 0.95 }}
-                className="group relative w-10 h-10 rounded-full backdrop-blur-md transition-all duration-500 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl overflow-hidden"
-                aria-label="Scroll right"
-              >
-                <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ChevronRight className="w-4 h-4 text-white group-hover:text-white transition-all duration-300" />
-                </div>
-                <div className="absolute inset-0 rounded-full ring-1 ring-white/30 group-hover:ring-white/50 transition-all duration-300" />
-              </motion.button>
-            </div>
-          )}
-
-          <div id="product-slider" className="overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory">
-            <div className="flex gap-4 pl-4">
-              {products.map(({ src, label, hoverSrc }, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
-                  viewport={{ once: true }}
-                  className="relative flex-shrink-0 group cursor-pointer w-[calc((100vw-2rem)/2-0.5rem)] snap-center"
-                  onMouseEnter={() => setHoveredProductIndex(i)}
-                  onMouseLeave={() => setHoveredProductIndex(null)}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.03 }}
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="aspect-square overflow-hidden rounded-lg shadow-lg relative mb-3"
-                  >
-                    {/* Base Image */}
-                    <motion.img
-                      src={src}
-                      alt={label}
-                      className="w-full h-full object-cover absolute inset-0"
-                      initial={{ opacity: 1 }}
-                      animate={{ opacity: hoveredProductIndex === i ? 0 : 1 }}
-                      transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    />
-                    {/* Hover Image */}
-                    <motion.img
-                      src={hoverSrc}
-                      alt={`${label} hover`}
-                      className="w-full h-full object-cover absolute inset-0"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
-                      transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    />
-                  </motion.div>
-                  {/* Text below image for mobile */}
-                  <p className="text-black text-lg font-bold tracking-wide font-din-arabic text-center">
-                    {label}
-                  </p>
-                </motion.div>
-              ))}
-              {/* Extra spacing at the end to ensure last view has right padding equal to left padding */}
-              <div className="flex-shrink-0 w-1" />
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop view - original layout */}
-        <div className="hidden md:flex md:flex-row w-full gap-4 px-10 lg:px-16">
-          {products.map(({ src, label, hoverSrc }, i) => (
+        {products.map(({ src, label, hoverSrc }, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: i * 0.1 }}
+            viewport={{ once: true }}
+            className="relative w-full md:w-1/4 group cursor-pointer mb-4 md:mb-0"
+            onMouseEnter={() => setHoveredProductIndex(i)}
+            onMouseLeave={() => setHoveredProductIndex(null)}
+          >
             <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              viewport={{ once: true }}
-              className="relative w-1/4 group cursor-pointer"
-              onMouseEnter={() => setHoveredProductIndex(i)}
-              onMouseLeave={() => setHoveredProductIndex(null)}
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="aspect-square overflow-hidden rounded-lg shadow-lg relative"
             >
+              {/* Base Image */}
+              <motion.img
+                src={src}
+                alt={label}
+                className="w-full h-full object-cover absolute inset-0"
+                initial={{ opacity: 1 }}
+                animate={{ opacity: hoveredProductIndex === i ? 0 : 1 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+              />
+              {/* Hover Image */}
+              <motion.img
+                src={hoverSrc}
+                alt={`${label} hover`}
+                className="w-full h-full object-cover absolute inset-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+              />
+              {/* Overlay */}
               <motion.div
-                whileHover={{ scale: 1.03 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="aspect-square overflow-hidden rounded-lg shadow-lg relative"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0 bg-black bg-opacity-20 rounded-lg flex items-center justify-center"
               >
-                {/* Base Image */}
-                <motion.img
-                  src={src}
-                  alt={label}
-                  className="w-full h-full object-cover absolute inset-0"
-                  initial={{ opacity: 1 }}
-                  animate={{ opacity: hoveredProductIndex === i ? 0 : 1 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
-                />
-                {/* Hover Image */}
-                <motion.img
-                  src={hoverSrc}
-                  alt={`${label} hover`}
-                  className="w-full h-full object-cover absolute inset-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
-                />
-                {/* Black Overlay - Only on hover */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
+                <motion.p
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: hoveredProductIndex === i ? 0 : 10, opacity: hoveredProductIndex === i ? 1 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="absolute inset-0 bg-black bg-opacity-20 rounded-lg"
-                />
-                
-                {/* Text - Always visible */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <p className="text-white text-2xl font-bold tracking-wide font-din-arabic drop-shadow-lg">
-                    {label}
-                  </p>
-                </div>
+                  className="text-white text-[28px] md:text-[28px] font-bold tracking-widest font-din"
+                >
+                  {label}
+                </motion.p>
               </motion.div>
             </motion.div>
-          ))}
-        </div>
+          </motion.div>
+        ))}
       </motion.div>
 
       {/* Need a Hand Choosing Section */}
@@ -382,16 +242,16 @@ const Category = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
-            className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter"
+            className="text-[24px] font-normal opacity-[50%] mb-2 md:mb-4 tracking-wider font-typewriter"
           >
-            Need a Hand Choosing?
+            NEED A HAND CHOOSING?
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-4 md:px-0"
+            className="text-base md:text-[16px] text-[#626262] leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 font-dinRegular px-4 md:px-0 tracking-[1px]"
           >
             Connect with one of our experts for personalized guidance and thoughtful product recommendations-crafted just for your skin, your rituals, your glow.
           </motion.p>
@@ -402,7 +262,7 @@ const Category = () => {
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base"
+            className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-8 md:px-[88px] py-3 md:py-[9px] text-sm md:text-[20px] font-normal tracking-wide rounded-none font-dinRegular"
           >
             Speak With Us
           </motion.button>
@@ -415,9 +275,9 @@ const Category = () => {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="py-4 md:py-8"
+        className="py-8 md:py-16"
       >
-        <div className="flex flex-col md:flex-row px-0 md:px-0">
+        <div className="flex flex-col md:flex-row">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -426,7 +286,7 @@ const Category = () => {
             className="w-full md:w-[68%] h-[300px] md:h-[600px] overflow-hidden mb-6 md:mb-0 object-cover"
           >
             <motion.img
-              whileHover={{ scale: 1.03 }}
+              whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.6 }}
               src="/Images/Blog.jpg"
               alt="Soft Orris"
@@ -438,7 +298,7 @@ const Category = () => {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
-            className="w-full md:w-[45%] relative md:-ml-44 z-10 md:mt-10 px-6 md:px-0"
+            className="w-full md:w-[45%] relative md:-ml-44 z-10 md:mt-10"
           >
             <div className="">
               <motion.h2
@@ -446,16 +306,16 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-4 md:mb-6 tracking-tight leading-tight font-american-typewriter"
+                className="text-[24px] font-normal opacity-[50%] mb-4 md:mb-6 tracking-wide leading-tight font-typewriter"
               >
-                Soft Orris - The Scent of Stillness
+                SOFT ORRIS - THE SCENT OF STILLNESS
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
-                className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-6 md:mb-4 pr-4 line-clamp-2 md:line-clamp-none"
+                className="text-base md:text-[16px] text-[#626262] leading-relaxed mb-6 md:mb-4 pr-4 font-din tracking-[2px]"
               >
                 Powdery, elegant, and quietly floral-Soft Orris wraps your space in a gentle hug. Perfect for slow mornings, self-care rituals, or unwinding at dusk. It's calm, bottled in wax.
               </motion.p>
@@ -464,12 +324,12 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
                 viewport={{ once: true }}
-                className="text-center md:text-right md:mr-12"
+                className="text-center pl-[370px]"
               >
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base"
+                  className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-8 md:px-[14px] py-3 md:py-[9px] text-sm md:text-[20px] font-normal tracking-wide rounded-none font-dinRegular"
                 >
                   Read More
                 </motion.button>
@@ -485,32 +345,32 @@ const Category = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="py-12 md:py-10 px-4 md:px-12"
+        className="py-12 md:py-10 px-4 md:px-12 bg-[#c5c7b2]"
       >
-        <div className="pb-4">
+        <div className="">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               viewport={{ once: true }}
-              className="w-full relative md:w-1/2 md:pr-12 mt-[4%] pl-4 md:pl-0"
+              className="w-full relative md:w-1/2 md:pr-12 mt-[4%]"
             >
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-4 tracking-tight font-american-typewriter"
+                className="text-[22px] md:text-[24px] font-normal opacity-[50%] mb-4 tracking-wide font-typewriter"
               >
-                Let's Stay in Touch
+                LET'S STAY IN TOUCH
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
-                className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed"
+                className="text-base md:text-[16px] text-[#626262] leading-[1.4] font-din tracking-widest"
               >
                 Follow us on Instagram and Facebook for moments of calm,
               </motion.p>
@@ -519,11 +379,11 @@ const Category = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
                 viewport={{ once: true }}
-                className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed"
+                className="text-base md:text-[16px] text-[#626262] leading-[1.4] font-din tracking-widest"
               >
                 candlelight rituals, and a peek behind the scenes{" "}
-                <span className="text-orange-500 font-din-arabic">@</span>
-                <span className="text-orange-500 font-din-arabic border-b-[1px] border-orange-500">
+                <span className="text-orange-500 font-din">@</span>
+                <span className="text-orange-500 font-din border-b-[1px] border-orange-500">
                   JardinBotanica.
                 </span>
               </motion.p>
@@ -533,25 +393,30 @@ const Category = () => {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="w-full md:w-[60%] relative mt-8 md:mt-0"
+              className="w-full md:w-[60%] relative"
             >
-              <div className="flex gap-2 md:gap-4 overflow-hidden relative px-2 md:px-12">
-                {/* Left Navigation Button */}
-                <div className="absolute left-0 md:left-4 top-1/2 -translate-y-1/2 mt-8 z-20">
-                  <motion.button
-                    whileHover={{ scale: 1.05, x: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={prevImages}
-                    className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl overflow-hidden"
-                    aria-label="Scroll left"
+              <div className="flex gap-2 md:gap-4 overflow-hidden">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={prevImages}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white bg-opacity-80 rounded-full p-1 md:p-2 shadow-lg hover:bg-opacity-100 transition-all"
+                  disabled={carouselImages.length <= 3}
+                >
+                  <svg
+                    className="w-4 h-4 md:w-6 md:h-6 text-gray-700"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-white transition-all duration-300" />
-                    </div>
-                    <div className="absolute inset-0 rounded-full ring-1 ring-white/30 group-hover:ring-white/50 transition-all duration-300" />
-                  </motion.button>
-                </div>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </motion.button>
                 <div className="flex gap-2 md:gap-4 w-full transition-all duration-300 ease-in-out">
                   {getVisibleImages().map((imageSrc, index) => (
                     <motion.div
@@ -560,38 +425,39 @@ const Category = () => {
                       whileInView={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                       viewport={{ once: true }}
-                      className="w-full h-auto aspect-square overflow-hidden rounded-lg relative"
+                      className="w-full h-auto aspect-square overflow-hidden rounded-lg"
                     >
                       <motion.img
                         whileHover={{ scale: 1.05 }}
                         transition={{ duration: 0.3 }}
                         src={imageSrc}
                         alt={`Instagram post ${index + 1}`}
-                        className="w-full h-full object-cover"
+                        className="w-[300px] h-full object-cover"
                       />
-                      {/* Vertical Divider - only between 2nd and 3rd images */}
-                      {index === 1 && (
-                        <div className="absolute right-0 top-0 bottom-0 w-px bg-gray-300 z-10"></div>
-                      )}
                     </motion.div>
                   ))}
                 </div>
-                {/* Right Navigation Button */}
-                <div className="absolute right-0 md:right-4 top-1/2 -translate-y-1/2 mt-8 z-20">
-                  <motion.button
-                    whileHover={{ scale: 1.05, x: 2 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={nextImages}
-                    className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl overflow-hidden"
-                    aria-label="Scroll right"
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={nextImages}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white bg-opacity-80 rounded-full p-1 md:p-2 shadow-lg hover:bg-opacity-100 transition-all"
+                  disabled={carouselImages.length <= 3}
+                >
+                  <svg
+                    className="w-4 h-4 md:w-6 md:h-6 text-gray-700"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-white transition-all duration-300" />
-                    </div>
-                    <div className="absolute inset-0 rounded-full ring-1 ring-white/30 group-hover:ring-white/50 transition-all duration-300" />
-                  </motion.button>
-                </div>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </motion.button>
               </div>
             </motion.div>
           </div>
@@ -637,21 +503,21 @@ const Category = () => {
         />
         <div className="container mx-auto px-6 lg:px-12 relative z-10">
           <div className="max-w-2xl mx-auto text-center">
-            <motion.h2
+            <motion.h3
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 text-black"
+              className="font-american-typewriter text-3xl lg:text-4xl tracking-tight mb-6 text-black"
             >
               Join the Circle
-            </motion.h2>
+            </motion.h3>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
-              className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8"
+              className="font-din-arabic text-black/70 mb-8 leading-relaxed text-lg"
             >
               Be the first to discover new blends, exclusive rituals, and
               stories from our botanical laboratory.

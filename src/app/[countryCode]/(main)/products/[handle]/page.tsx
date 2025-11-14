@@ -1,22 +1,12 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { listProducts, retrieveProduct } from "@lib/data/products"
+import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
-import { 
-  getProductContentByHandle, 
-  getFeaturedSectionByKey,
-  getTestimonialsSectionByKey,
-  getTestimonialsSectionByProductHandle,
-  getFeaturedRitualTwoSectionByKey,
-  getFeaturedRitualTwoSectionByProductHandle
-} from "@lib/data/contentful"
 import ProductTemplate from "@modules/products/templates"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
 }
-
-export const dynamicParams = true
 
 export async function generateStaticParams() {
   try {
@@ -71,7 +61,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   const product = await listProducts({
     countryCode: params.countryCode,
-    queryParams: { handle: handle } as any,
+    queryParams: { handle },
   }).then(({ response }) => response.products[0])
 
   if (!product) {
@@ -97,149 +87,15 @@ export default async function ProductPage(props: Props) {
     notFound()
   }
 
+  console.log("region", region);
 
   const pricedProduct = await listProducts({
     countryCode: params.countryCode,
-    queryParams: { handle: params.handle } as any,
+    queryParams: { handle: params.handle },
   }).then(({ response }) => response.products[0])
 
   if (!pricedProduct) {
     notFound()
-  }
-
-  // Fetch product content from Contentful
-  const productContent = await getProductContentByHandle(params.handle)
-  
-  // Fetch featured section content from Contentful
-  // You can use different keys for different pages: "pdp-featured", "homepage-featured", etc.
-  const featuredContent = await getFeaturedSectionByKey("pdp-featured")
-  
-  // Fetch testimonials section content from Contentful
-  // Try product-specific testimonials by productHandle first
-  let testimonialsContent = await getTestimonialsSectionByProductHandle(params.handle)
-  
-  // Fall back to section key approach if product handle search doesn't find anything
-  if (!testimonialsContent) {
-    const productTestimonialsKey = `${params.handle}-testimonials`
-    testimonialsContent = await getTestimonialsSectionByKey(productTestimonialsKey)
-  }
-  
-  // Final fallback to generic PDP testimonials if product-specific not found
-  if (!testimonialsContent) {
-    testimonialsContent = await getTestimonialsSectionByKey("pdp-testimonials")
-  }
-  
-
-  // Fetch featured ritual two section content from Contentful
-  // Try product-specific featured ritual two by productHandle first
-  let featuredRitualTwoContent = await getFeaturedRitualTwoSectionByProductHandle(params.handle)
-  
-  // Fall back to section key approach if product handle search doesn't find anything
-  if (!featuredRitualTwoContent) {
-    const productFeaturedRitualTwoKey = `${params.handle}-featured-ritual-two`
-    featuredRitualTwoContent = await getFeaturedRitualTwoSectionByKey(productFeaturedRitualTwoKey)
-  }
-  
-  // Final fallback to generic PDP featured ritual two if product-specific not found
-  if (!featuredRitualTwoContent) {
-    featuredRitualTwoContent = await getFeaturedRitualTwoSectionByKey("pdp-featured-ritual-two")
-  }
-  
-
-  // Fetch ritual product if available in product metadata
-  let ritualProduct = null
-  const ritualProductHandle = (pricedProduct?.metadata?.ritual_product as string | undefined)?.trim()
-  
-  // Validate ritual product handle format (now expects handles like "soft-orris" instead of product IDs)
-  const isValidProductHandle = ritualProductHandle && ritualProductHandle.length > 0 && !ritualProductHandle.startsWith('prod_')
-  
-  
-  if (ritualProductHandle && isValidProductHandle) {
-    try {
-      // Fetch ritual product with proper region and calculated prices using handle
-      
-      // Use listProducts to get the ritual product by handle with calculated prices for the region
-      const ritualProductResponse = await listProducts({
-        countryCode: params.countryCode,
-        queryParams: { handle: ritualProductHandle } as any,
-      })
-      
-      let ritualProd = ritualProductResponse.response.products?.[0]
-
-      // If no product found by exact handle, try alternative search methods
-      if (!ritualProd) {
-        
-        // Method 1: Search by title containing the handle
-        try {
-          const allProductsResponse = await listProducts({
-            countryCode: params.countryCode,
-            queryParams: {} as any, // Get all products
-          })
-          
-          const allProducts = allProductsResponse.response.products || []
-          
-          // Look for products with matching handle in title or metadata
-          const possibleMatches = allProducts.filter(prod => {
-            const titleMatch = prod.title?.toLowerCase().includes(ritualProductHandle.toLowerCase())
-            const handleMatch = prod.handle?.toLowerCase().includes(ritualProductHandle.toLowerCase())
-            const metadataMatch = (prod.metadata?.["product-name"] as string)?.toLowerCase() === ritualProductHandle.toLowerCase()
-            
-            return titleMatch || handleMatch || metadataMatch
-          })
-          
-          // Use the first match if found
-          if (possibleMatches.length > 0) {
-            ritualProd = possibleMatches[0]
-          }
-        } catch (searchError) {
-          console.error("Error in alternative search:", searchError)
-        }
-      }
-      
-      if (ritualProd) {
-        // Check if the ritual product has matching product-name metadata
-        const ritualProductName = (ritualProd.metadata?.["product-name"] as string | undefined)?.trim()
-        const isMatchingRitualProduct = ritualProductName === ritualProductHandle
-        
-        // More flexible matching - check multiple criteria
-        const flexibleMatch = 
-          isMatchingRitualProduct || // Exact metadata match
-          ritualProd.handle === ritualProductHandle || // Exact handle match
-          ritualProd.title?.toLowerCase().includes(ritualProductHandle.toLowerCase()) || // Title contains handle
-          ritualProductName?.toLowerCase().includes(ritualProductHandle.toLowerCase()) // Metadata contains handle
-        
-        if (!flexibleMatch) {
-          ritualProduct = null
-        } else {
-          const variant = ritualProd.variants?.[0]
-          
-          if (variant) {
-            const calculatedAmount = variant.calculated_price?.calculated_amount
-            const hasValidPrice = typeof calculatedAmount === 'number' && calculatedAmount > 0
-            
-            ritualProduct = {
-              variantId: variant.id,
-              name: ritualProd.title || "Ritual Product",
-              price: hasValidPrice ? calculatedAmount : 0,
-              currency: variant.calculated_price?.currency_code || "inr",
-              image: ritualProd.thumbnail || ritualProd.images?.[0]?.url,
-            }
-            
-            if (!hasValidPrice) {
-              // Set to null if no valid price to prevent cart errors
-              ritualProduct = null
-            }
-          } else {
-            ritualProduct = null
-          }
-        }
-      } else {
-        ritualProduct = null
-      }
-    } catch (error) {
-      // Don't throw error, just set ritualProduct to null
-      ritualProduct = null
-    }
   }
 
   return (
@@ -247,11 +103,6 @@ export default async function ProductPage(props: Props) {
       product={pricedProduct}
       region={region}
       countryCode={params.countryCode}
-      productContent={productContent}
-      featuredContent={featuredContent}
-      testimonialsContent={testimonialsContent}
-      featuredRitualTwoContent={featuredRitualTwoContent}
-      ritualProduct={ritualProduct}
     />
   )
 }

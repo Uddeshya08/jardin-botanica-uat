@@ -10,7 +10,6 @@ import { Eye, EyeOff, Smartphone } from "lucide-react"
 import { login, signup } from "@lib/data/customer"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
-import { upsertCartItems } from "lib/util/cart-helpers"
 
 interface CartItem {
   id: string
@@ -66,8 +65,28 @@ export default function AuthPage() {
   const handleCartUpdate = (item: CartItem | null) => {
     setHeroCartItem(item)
 
-    if (!item) return
-    setCartItems((prevItems) => upsertCartItems(prevItems, item))
+    // Update cartItems array for navigation
+    if (item && item.quantity > 0) {
+      setCartItems((prevItems) => {
+        const existingIndex = prevItems.findIndex(
+          (cartItem) => cartItem.id === item.id
+        )
+        if (existingIndex >= 0) {
+          // Update existing item
+          const updatedItems = [...prevItems]
+          updatedItems[existingIndex] = item
+          return updatedItems
+        } else {
+          // Add new item
+          return [...prevItems, item]
+        }
+      })
+    } else if (item && item.quantity === 0) {
+      // Remove item if quantity is 0
+      setCartItems((prevItems) =>
+        prevItems.filter((cartItem) => cartItem.id !== item.id)
+      )
+    }
   }
 
   const handleHeroQuantityUpdate = (quantity: number) => {

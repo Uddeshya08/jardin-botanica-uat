@@ -13,7 +13,6 @@ import { RippleEffect } from "app/components/RippleEffect"
 import { PeopleAlsoBoughtTwo } from "app/components/PeopleAlsoBoughtTwo"
 import { FeaturedRitualTwo } from "app/components/FeaturedRitualTwo"
 import { ProductHeroHands } from "app/components/ProductHeroHands"
-import { upsertCartItems } from "lib/util/cart-helpers"
 
 interface CartItem {
   id: string
@@ -27,13 +26,42 @@ export default function App() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [showStickyCart, setShowStickyCart] = useState(false)
   const [heroCartItem, setHeroCartItem] = useState<CartItem | null>(null)
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [cartItems, setCartItems] = useState<CartItem[]>([
+    {
+      id: "soft-orris-hand-veil",
+      name: "Soft Orris Hand Veil",
+      price: 1800,
+      quantity: 1,
+      image:
+        "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop",
+    },
+  ])
 
   const handleCartUpdate = (item: CartItem | null) => {
     setHeroCartItem(item)
 
-    if (!item) return
-    setCartItems((prevItems) => upsertCartItems(prevItems, item))
+    // Update cartItems array for navigation
+    if (item && item.quantity > 0) {
+      setCartItems((prevItems) => {
+        const existingIndex = prevItems.findIndex(
+          (cartItem) => cartItem.id === item.id
+        )
+        if (existingIndex >= 0) {
+          // Update existing item
+          const updatedItems = [...prevItems]
+          updatedItems[existingIndex] = item
+          return updatedItems
+        } else {
+          // Add new item
+          return [...prevItems, item]
+        }
+      })
+    } else if (item && item.quantity === 0) {
+      // Remove item if quantity is 0
+      setCartItems((prevItems) =>
+        prevItems.filter((cartItem) => cartItem.id !== item.id)
+      )
+    }
   }
 
   const handleHeroQuantityUpdate = (quantity: number) => {
@@ -92,7 +120,6 @@ export default function App() {
         heroCartItem={heroCartItem}
         onUpdateHeroQuantity={handleHeroQuantityUpdate}
         onCartUpdate={handleCartUpdate}
-        cartItems={cartItems}
       />
       {/* Bottom Fold Sections */}
       <Afterlife />

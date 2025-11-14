@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Star, ThumbsUp } from "lucide-react"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
 import Newsletter from "app/components/Newsletter"
-import { upsertCartItems } from "lib/util/cart-helpers"
 
 const Product = () => {
   const [quantity, setQuantity] = useState(2)
@@ -24,11 +23,40 @@ const Product = () => {
     "/Images/product2.png",
   ]
   const [isScrolled, setIsScrolled] = useState(false)
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [cartItems, setCartItems] = useState<CartItem[]>([
+    {
+      id: "soft-orris-hand-veil",
+      name: "Soft Orris Hand Veil",
+      price: 1800,
+      quantity: 1,
+      image:
+        "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop",
+    },
+  ])
 
   const handleCartUpdate = (item: CartItem | null) => {
-    if (!item) return
-    setCartItems((prevItems) => upsertCartItems(prevItems, item))
+    // Update cartItems array for navigation
+    if (item && item.quantity > 0) {
+      setCartItems((prevItems) => {
+        const existingIndex = prevItems.findIndex(
+          (cartItem) => cartItem.id === item.id
+        )
+        if (existingIndex >= 0) {
+          // Update existing item
+          const updatedItems = [...prevItems]
+          updatedItems[existingIndex] = item
+          return updatedItems
+        } else {
+          // Add new item
+          return [...prevItems, item]
+        }
+      })
+    } else if (item && item.quantity === 0) {
+      // Remove item if quantity is 0
+      setCartItems((prevItems) =>
+        prevItems.filter((cartItem) => cartItem.id !== item.id)
+      )
+    }
   }
 
   useEffect(() => {
@@ -201,7 +229,7 @@ const Product = () => {
           <div className="grid grid-cols-1 lg:grid-cols-10 items-center">
             {/* Left Side - Product Info - 40% width on laptop */}
             <div className="lg:col-span-4 space-y-8 py-[57.5px] border-b-[2px] border-[#a3a37f]/30 ">
-              <div className="px-4 md:px-8 lg:px-12">
+              <div className="px-12">
                 <h1
                   style={{
                     ...fontStyles.bannerHeading,
@@ -244,7 +272,7 @@ const Product = () => {
               {/* Line */}
               <div className="w-full h-[2px] bg-[#b9a893] opacity-[22%] mt-10"></div>
 
-              <div className="space-y-4 px-4 md:px-8 lg:px-12 py-3">
+              <div className="space-y-4 px-12 py-3">
                 <div>
                   {/* <h3 style={fontStyles.description}>PRICE</h3> */}
                   <p className="font-dinBold" style={fontStyles.price}>
@@ -296,7 +324,7 @@ const Product = () => {
               </div>
               {/* Line */}
               <div className="w-full h-[2px] bg-[#a3a37f] opacity-[30%]"></div>
-              <div className="pt-4 px-4 md:px-8 lg:px-12 py-3">
+              <div className="pt-4 px-12 py-3">
                 <h3 className="py-2 text-[#a28b6f] font-dinRegular text-[12px] tracking-[1px]">
                   FRAGRANCE PROFILE
                 </h3>
@@ -330,10 +358,10 @@ const Product = () => {
             >
               <div className="relative">
                 <button
-                  className="absolute left-2 md:left-8 top-1/2 transform -translate-y-1/2 hover:scale-110 transition-transform z-10 bg-white/80 md:bg-transparent rounded-full p-1 md:p-0"
+                  className="absolute left-8 top-1/2 transform -translate-y-1/2 hover:scale-110 transition-transform z-10"
                   onClick={prevImage}
                 >
-                  <ChevronLeft size={32} className="md:w-10 md:h-10" />
+                  <ChevronLeft size={40} />
                 </button>
                 <div className="w-full relative flex items-center justify-center">
                   <img
@@ -344,10 +372,10 @@ const Product = () => {
                 </div>
 
                 <button
-                  className="absolute right-2 md:right-8 top-1/2 transform -translate-y-1/2 hover:scale-110 transition-transform z-10 bg-white/80 md:bg-transparent rounded-full p-1 md:p-0"
+                  className="absolute right-8 top-1/2 transform -translate-y-1/2 hover:scale-110 transition-transform z-10"
                   onClick={nextImage}
                 >
-                  <ChevronRight size={32} className="md:w-10 md:h-10" />
+                  <ChevronRight size={40} />
                 </button>
               </div>
             </div>
@@ -364,7 +392,7 @@ const Product = () => {
           <div className="flex flex-col md:flex-row justify-between px-6 py-8 gap-8 md:gap-0">
             <div className="text-center space-y-2">
               <div className="w-12 h-12 mx-auto">
-                {/* <img src="/Images/chat.svg" alt="chat" /> */}
+                <img src="/Images/chat.svg" alt="chat" />
               </div>
               <p
                 style={{
@@ -431,13 +459,13 @@ const Product = () => {
             </div>
 
             {/* Right - Text (45%) */}
-            <div className="space-y-6 bg-[#C5C8B3] w-full h-full px-6 md:px-8 lg:pl-20 py-8 md:py-12">
-              <h2 style={{...fontStyles.subsequentHeading}} className="px-2">
-                A Forest Reborn
+            <div className="space-y-6 bg-[#C5C8B3] w-full h-full pl-6 lg:pl-20 pt-12">
+              <h2 style={fontStyles.subsequentHeading} className="px-2">
+                A FOREST REBORN
               </h2>
               <p
                 style={{ ...fontStyles.subCopy, lineHeight: "1.8" }}
-                className="pl-2 pr-4 md:pr-8"
+                className="pl-2 pr-8 "
               >
                 Crushed Pine by Jardin Botanica evokes the quiet majesty of
                 mist-covered evergreens after winter rain. It is a scent of
@@ -452,9 +480,9 @@ const Product = () => {
       </div>
 
       {/* Forth Section */}
-      <div className="py-12 md:py-20 lg:py-40 overflow-hidden">
-        <div className="max-w-8xl mx-auto px-4 md:px-8">
-          <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-16 xl:gap-60">
+      <div className="py-40 overflow-hidden">
+        <div className="max-w-8xl mx-auto pl-8">
+          <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-60">
             {/* Left Side - Heading */}
             <div
               className={`flex-shrink-0 w-full lg:w-96 transition-all duration-300 ease-out ${
@@ -472,29 +500,19 @@ const Product = () => {
                   whiteSpace: "nowrap",
                 }}
               >
-                Other Aromas Worth Lighting
+                OTHER AROMAS WORTH LIGHTING
               </h2>
               <div className="w-full">
                 <p
-                  className="hidden lg:block"
                   style={{
                     ...fontStyles.subCopy,
+
                     lineHeight: "1.5",
                     textAlign: "right",
                     paddingRight: "0",
                     marginRight: "0",
                     letterSpacing: "1.5px",
                     transform: "translateX(10ch)",
-                  }}
-                >
-                  Because one scent is never enough
-                </p>
-                <p
-                  className="lg:hidden"
-                  style={{
-                    ...fontStyles.subCopy,
-                    lineHeight: "1.5",
-                    letterSpacing: "1px",
                   }}
                 >
                   Because one scent is never enough
@@ -508,7 +526,7 @@ const Product = () => {
                 aromaSlide > 0 ? "w-full" : "flex-1"
               }`}
               style={{
-                marginLeft: aromaSlide > 0 ? "0" : "0",
+                marginLeft: aromaSlide > 0 ? "-25rem" : "0",
                 transition: "margin-left 300ms ease-out",
               }}
             >
@@ -602,7 +620,7 @@ const Product = () => {
         >
           LOVED BY OUR CUSTOMERS
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 lg:gap-28 my-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-28 my-8">
           {reviews.map((review, index) => (
             <div key={index} className="">
               {" "}

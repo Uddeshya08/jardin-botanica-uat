@@ -45,9 +45,7 @@ module.exports = {
       fontFamily: {
         jane: ['"Jane Austen"', "cursive"],
         typewriter: ['"American Typewriter"'],
-        "american-typewriter": ['"American Typewriter"'],
         din: ['"DIN Next LT Arabic Light"'],
-        "din-arabic": ['"DIN Next LT Arabic Light"'],
         dinUltraLight: ['"DIN Next LT Arabic Ultra"'],
         dinBold: ['"DIN Arabic Bold"'],
         dinRegular: ['"DIN Arabic Regular"'],

@@ -11,7 +11,6 @@ import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-relat
 import { notFound } from "next/navigation"
 import ProductActionsWrapper from "./product-actions-wrapper"
 import { HttpTypes } from "@medusajs/types"
-import { ProductContent, FeaturedSection, TestimonialsSection, FeaturedRitualTwoSection } from "../../../types/contentful"
 // import { ProductHero } from "app/components/ProductHero"
 // import React, {  Suspense } from 'react'
 import { motion } from "motion/react"
@@ -27,26 +26,11 @@ import { RippleEffect } from "app/components/RippleEffect"
 import { PeopleAlsoBoughtTwo } from "app/components/PeopleAlsoBoughtTwo"
 import { FeaturedRitualTwo } from "app/components/FeaturedRitualTwo"
 import Featured from "app/components/Featured"
-import { upsertCartItems } from "lib/util/cart-helpers"
-
-interface RitualProduct {
-  variantId: string
-  name: string
-  price: number
-  currency: string
-  image?: string
-  isRitualProduct?: boolean
-}
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   countryCode: string
-  productContent?: ProductContent | null
-  featuredContent?: FeaturedSection | null
-  testimonialsContent?: TestimonialsSection | null
-  featuredRitualTwoContent?: FeaturedRitualTwoSection | null
-  ritualProduct?: RitualProduct | null
 }
 
 interface CartItem {
@@ -55,17 +39,11 @@ interface CartItem {
   price: number
   quantity: number
   image?: string
-  isRitualProduct?: boolean
 }
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
   product,
   region,
   countryCode,
-  productContent,
-  featuredContent,
-  testimonialsContent,
-  featuredRitualTwoContent,
-  ritualProduct: ritualProductProp,
 }) => {
   if (!product || !product.id) {
     return notFound()
@@ -79,8 +57,28 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   const handleCartUpdate = (item: CartItem | null) => {
     setHeroCartItem(item)
 
-    if (!item) return
-    setCartItems((prevItems) => upsertCartItems(prevItems, item))
+    // Update cartItems array for navigation
+    if (item && item.quantity > 0) {
+      setCartItems((prevItems) => {
+        const existingIndex = prevItems.findIndex(
+          (cartItem) => cartItem.id === item.id
+        )
+        if (existingIndex >= 0) {
+          // Update existing item
+          const updatedItems = [...prevItems]
+          updatedItems[existingIndex] = item
+          return updatedItems
+        } else {
+          // Add new item
+          return [...prevItems, item]
+        }
+      })
+    } else if (item && item.quantity === 0) {
+      // Remove item if quantity is 0
+      setCartItems((prevItems) =>
+        prevItems.filter((cartItem) => cartItem.id !== item.id)
+      )
+    }
   }
 
   const handleHeroQuantityUpdate = (quantity: number) => {
@@ -122,11 +120,42 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [heroCartItem])
+  }, [])
 
+  console.log("products => ", product)
 
   return (
     <>
+      <div>
+        {/* old medusa tamplate */}
+        {/* <div
+          className="content-container flex flex-col small:flex-row small:items-start py-6 relative"
+          data-testid="product-container"
+        >
+          <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-6">
+            <ProductInfo product={product} />
+            <ProductTabs product={product} />
+          </div>
+          <div className="block w-full relative">
+            <ImageGallery images={product?.images || []} />
+          </div>
+          <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-12">
+            <ProductOnboardingCta />
+            <Suspense
+              fallback={
+                <ProductActions
+                  disabled={true}
+                  product={product}
+                  region={region}
+                />
+              }
+            >
+              <ProductActionsWrapper id={product.id} region={region} />
+            </Suspense>
+          </div>
+        </div> */}
+      </div>
+
       {/* my new code tamplate */}
       <div className="min-h-screen">
         <RippleEffect />
@@ -134,35 +163,26 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           isScrolled={isScrolled}
           cartItems={cartItems}
           onCartUpdate={handleCartUpdate}
-          forceWhiteText={false}
         />
         <div className="h-4"></div>
         <ProductHero
-          product={product as any}
-          countryCode={'in'} // e.g. "in"
-          onCartUpdate={handleCartUpdate}
-        />
+  product={product}
+  countryCode={'in'} // e.g. "in"
+  onCartUpdate={handleCartUpdate}
+/>
 
         <StickyCartBar
           isVisible={showStickyCart}
-          product={product as any}
+          product={product}
           onUpdateHeroQuantity={handleHeroQuantityUpdate}
           onCartUpdate={handleCartUpdate}
-          cartItems={cartItems}
-          ritualProduct={ritualProductProp}
         />
 
-        <Afterlife product={product as any} />
-        <PeopleAlsoBought product={product as any} />
-        <FeaturedRitualTwo 
-          key={featuredRitualTwoContent?.productHandle || featuredRitualTwoContent?.sectionKey || 'default'} 
-          featuredRitualTwoContent={featuredRitualTwoContent} 
-        />
-        <CustomerTestimonials 
-          key={testimonialsContent?.productHandle || testimonialsContent?.sectionKey || 'default'} 
-          testimonialsContent={testimonialsContent} 
-        />
-        <Featured featuredContent={featuredContent} />
+        <Afterlife product={product} />
+        <PeopleAlsoBought product={product} />
+        <FeaturedRitualTwo product={product} />
+        <CustomerTestimonials product={product} />
+        <Featured product={product} />
       </div>
     </>
   )

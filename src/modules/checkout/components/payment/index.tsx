@@ -1,7 +1,7 @@
 "use client"
 
 import { RadioGroup } from "@headlessui/react"
-import { isStripe as isStripeFunc, paymentInfoMap, isRazorpay } from "@lib/constants"
+import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { initiatePaymentSession } from "@lib/data/cart"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
 import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
@@ -28,7 +28,6 @@ const Payment = ({
   const [error, setError] = useState<string | null>(null)
   const [cardBrand, setCardBrand] = useState<string | null>(null)
   const [cardComplete, setCardComplete] = useState(false)
-  const [razorpayMethod, setRazorpayMethod] = useState<string>("upi")
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
     activeSession?.provider_id ?? ""
   )
@@ -89,16 +88,12 @@ const Payment = ({
       }
 
       if (!shouldInputCard) {
-        const params = new URLSearchParams(searchParams)
-        params.set("step", "review")
-        // pass selected razorpay method to review if applicable
-        if (isRazorpay(selectedPaymentMethod)) {
-          params.set("rzpMethod", razorpayMethod)
-        }
-
-        return router.push(pathname + "?" + params.toString(), {
-          scroll: false,
-        })
+        return router.push(
+          pathname + "?" + createQueryString("step", "review"),
+          {
+            scroll: false,
+          }
+        )
       }
     } catch (err: any) {
       setError(err.message)
@@ -112,7 +107,7 @@ const Payment = ({
   }, [isOpen])
 
   return (
-    <div className="bg-white">
+    <div className="bg-[#e3e3d8]">
       <div className="flex flex-row items-center justify-between mb-6">
         <Heading
           level="h2"
@@ -163,38 +158,7 @@ const Payment = ({
                         paymentInfoMap={paymentInfoMap}
                         paymentProviderId={paymentMethod.id}
                         selectedPaymentOptionId={selectedPaymentMethod}
-                      >
-                        {selectedPaymentMethod === paymentMethod.id &&
-                          isRazorpay(paymentMethod.id) && (
-                            <div className="mt-4">
-                              <Text className="txt-medium-plus text-ui-fg-base mb-2">
-                                Choose Razorpay method
-                              </Text>
-                              <div className="flex gap-3 flex-wrap">
-                                {[
-                                  { id: "upi", label: "UPI" },
-                                  { id: "card", label: "Card" },
-                                  { id: "netbanking", label: "Netbanking" },
-                                  { id: "wallet", label: "Wallet" },
-                                ].map((opt) => (
-                                  <button
-                                    key={opt.id}
-                                    type="button"
-                                    onClick={() => setRazorpayMethod(opt.id)}
-                                    className={clx(
-                                      "px-3 py-1 rounded-md border text-small-regular",
-                                      razorpayMethod === opt.id
-                                        ? "border-ui-border-interactive bg-ui-bg-base"
-                                        : "border-ui-border-base bg-ui-bg-subtle hover:bg-ui-bg-base"
-                                    )}
-                                  >
-                                    {opt.label}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                      </PaymentContainer>
+                      />
                     )}
                   </div>
                 ))}

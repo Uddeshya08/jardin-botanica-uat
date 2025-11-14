@@ -118,10 +118,34 @@ export async function addToCart({
     throw new Error("Missing variant ID when adding to cart")
   }
 
-  // UI-only cart management - no API calls until checkout
+  const cart = await getOrSetCart(countryCode)
 
-  // Return success immediately - actual cart operations happen at checkout
-  return { success: true, message: "Item added to cart (UI only)" }
+  if (!cart) {
+    throw new Error("Error retrieving or creating cart")
+  }
+
+  const headers = {
+    ...(await getAuthHeaders()),
+  }
+
+  await sdk.store.cart
+    .createLineItem(
+      cart.id,
+      {
+        variant_id: variantId,
+        quantity,
+      },
+      {},
+      headers
+    )
+    .then(async () => {
+      const cartCacheTag = await getCacheTag("carts")
+      revalidateTag(cartCacheTag)
+
+      const fulfillmentCacheTag = await getCacheTag("fulfillment")
+      revalidateTag(fulfillmentCacheTag)
+    })
+    .catch(medusaError)
 }
 
 export async function updateLineItem({
@@ -386,8 +410,7 @@ export async function placeOrder(cartId?: string) {
     revalidateTag(orderCacheTag)
 
     removeCartId()
-    // Redirect customer to Account Orders after successful payment
-    redirect(`/${countryCode}/account`)
+    redirect(`/${countryCode}/order/${cartRes?.order.id}/confirmed`)
   }
 
   return cartRes.cart

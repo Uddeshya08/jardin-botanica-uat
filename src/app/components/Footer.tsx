@@ -2,77 +2,62 @@
 import React from 'react'
 import { motion } from 'motion/react'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
-import Link from 'next/link'
 
 export function Footer() {
-  const pathname = usePathname()
-  
-  // Get country code from pathname
-  const getCountryCode = () => {
-    if (pathname) {
-      const pathParts = pathname.split('/')
-      return pathParts[1] || 'in'
-    }
-    return 'in'
-  }
-
-  const countryCode = getCountryCode()
-
   const footerSections = [
     {
-      title: 'About Us',
+      title: 'ABOUT US',
       links: [
         { name: 'Brand', href: '#' },
-        { name: 'Journal', href: `/${countryCode}/blogs` },
-        { name: 'Careers', href: `/${countryCode}/careers` },
+        { name: 'Journal', href: '#' },
+        { name: 'Careers', href: '#' },
       ],
     },
     {
-      title: 'Shop',
+      title: 'SHOP',
       links: [
-        { name: 'Home Creations', href: `/${countryCode}/home-creations` },
+        { name: 'Home Creations', href: '#' },
         { name: 'Collections', href: '#' },
         { name: 'Gift Sets', href: '#' },
       ],
     },
     {
-      title: 'Orders and Support',
+      title: 'ORDERS AND SUPPORT',
       links: [
-        { name: 'Order History', href: `/${countryCode}/account` },
+        { name: 'Order History', href: '#' },
         { name: 'Track Your Order', href: '#' },
-        { name: 'Help & FAQs', href: `/${countryCode}/help-and-faqs` },
-        { name: 'Returns & Exchanges', href: `/${countryCode}/returns-and-exchanges` },
-        { name: 'Terms & Conditions', href: `/${countryCode}/terms-and-conditions` },
+        { name: 'Help & FAQs', href: '#' },
+        { name: 'Returns & Exchanges', href: '#' },
+        { name: 'Terms & Conditions', href: '#' },
       ],
     },
     {
-      title: 'Follow Us',
+      title: 'FOLLOW US',
       links: [
-        { name: 'Instagram', href: 'https://instagram.com/jardinbotanica', external: true },
-        { name: 'Facebook', href: 'https://facebook.com/jardinbotanica', external: true },
+        { name: 'Instagram', href: '#' },
+        { name: 'Facebook', href: '#' },
       ],
     },
   ]
 
   return (
     <footer className="bg-black text-white py-16">
-      <div className="px-6 lg:px-12">
+      <div className="container mx-auto px-6 lg:px-12">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-12 pl-4 md:pl-0">
-          {/* Brand Section - Hidden on Mobile, Visible on Desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-12">
+          {/* Brand Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="hidden md:block md:col-span-1"
+            className="md:col-span-1"
           >
             <h4 className="font-american-typewriter text-xl tracking-widest">
               <Image
                 src="/assets/Jardinlogo.svg"
                 alt="JArdin"
-                width={300}
+                width={200}
                 height={60}
                 className="transition-all duration-300"
               />
@@ -104,26 +89,13 @@ export function Footer() {
                     }}
                     viewport={{ once: true }}
                   >
-                    {(link as any).external ? (
-                      <motion.a
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ x: 4, color: '#ffffff' }}
-                        className="font-din-arabic text-sm text-white/60 hover:text-white transition-all duration-300 block"
-                      >
-                        {link.name}
-                      </motion.a>
-                    ) : (
-                      <Link href={link.href}>
-                        <motion.span
-                          whileHover={{ x: 4, color: '#ffffff' }}
-                          className="font-din-arabic text-sm text-white/60 hover:text-white transition-all duration-300 block cursor-pointer"
-                        >
-                          {link.name}
-                        </motion.span>
-                      </Link>
-                    )}
+                    <motion.a
+                      href={link.href}
+                      whileHover={{ x: 4, color: '#ffffff' }}
+                      className="font-din-arabic text-sm text-white/60 hover:text-white transition-all duration-300 block"
+                    >
+                      {link.name}
+                    </motion.a>
                   </motion.li>
                 ))}
               </ul>

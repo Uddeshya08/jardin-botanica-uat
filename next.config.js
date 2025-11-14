@@ -36,6 +36,31 @@ const nextConfig = {
         protocol: "https",
         hostname: "medusa-server-testing.s3.us-east-1.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "jardin-botanica-uat.vercel.app",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "app.jardinbotanica.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "app.jardinbotanica.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "*.jardinbotanica.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.jardinbotanica.com",
+        pathname: "/**",
+      },
     ],
   },
 }
