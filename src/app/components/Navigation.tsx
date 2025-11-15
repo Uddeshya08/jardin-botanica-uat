@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { User, Search, ShoppingBag, X, Plus, Minus, Heart } from 'lucide-react'
+import { User, Search, ShoppingBag, X, Plus, Minus, Heart, Menu, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -53,6 +53,8 @@ export function Navigation({
   const [isNavHovered, setIsNavHovered] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [isHomePage, setIsHomePage] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [mobileActiveDropdown, setMobileActiveDropdown] = useState<string | null>(null)
   const cartRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -139,13 +141,14 @@ export function Navigation({
     }
   }, [])
 
-  // Handle escape key to close search
+  // Handle escape key to close search and mobile menu
   useEffect(() => {
     function handleEscapeKey(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setIsSearchOpen(false)
         setSearchQuery('')
         setActiveDropdown(null)
+        setIsMobileMenuOpen(false)
       }
     }
 
@@ -154,6 +157,30 @@ export function Navigation({
       document.removeEventListener('keydown', handleEscapeKey)
     }
   }, [])
+
+  // Close mobile menu when window is resized to desktop
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth >= 1024) {
+        setIsMobileMenuOpen(false)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isMobileMenuOpen])
 
   // Focus search input when opened
   useEffect(() => {
@@ -200,9 +227,23 @@ export function Navigation({
 
   const handleSearchToggle = () => {
     setIsSearchOpen(!isSearchOpen)
+    setIsCartOpen(false) // Close cart when opening search
+    setIsMobileMenuOpen(false) // Close mobile menu when opening search
     if (isSearchOpen) {
       setSearchQuery('')
     }
+  }
+
+  const handleCartToggle = () => {
+    setIsCartOpen(!isCartOpen)
+    setIsSearchOpen(false) // Close search when opening cart
+    setIsMobileMenuOpen(false) // Close mobile menu when opening cart
+  }
+
+  const handleMobileMenuToggle = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen)
+    setIsSearchOpen(false) // Close search when opening menu
+    setIsCartOpen(false) // Close cart when opening menu
   }
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -549,12 +590,215 @@ export function Navigation({
                 ))}
               </motion.div>
 
-              {/* Actions */}
+              {/* Mobile Menu Toggle - Search, Cart, and Hamburger */}
               <motion.div
                 initial={disableAnimations ? undefined : { opacity: 0 }}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
                 transition={disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }}
-                className="flex items-center gap-6"
+                className="lg:hidden flex items-center space-x-1 z-10"
+              >
+                {/* Mobile Search */}
+                <div className="relative -mr-1" ref={searchRef}>
+                  <motion.button
+                    whileHover={disableAnimations ? {} : { scale: 1.1 }}
+                    whileTap={disableAnimations ? {} : { scale: 0.9 }}
+                    onClick={handleSearchToggle}
+                    className="p-2 transition-all duration-300"
+                    style={{ color: navStyles.textColor }}
+                    aria-label="Search"
+                  >
+                    <Search className="w-5 h-5" />
+                  </motion.button>
+                  {/* Mobile Search Dropdown */}
+                  <AnimatePresence>
+                    {isSearchOpen && (
+                      <motion.div
+                        initial={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
+                        animate={disableAnimations ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                        exit={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
+                        transition={disableAnimations ? undefined : { duration: 0.2 }}
+                        className="fixed left-4 right-4 top-[110px] max-w-md mx-auto border shadow-2xl z-[100]"
+                        style={{ 
+                          backgroundColor: '#e3e3d8',
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }}
+                      >
+                        <div className="p-4">
+                          <form onSubmit={handleSearchSubmit} className="relative">
+                            <input
+                              ref={searchInputRef}
+                              type="text"
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              placeholder="Search products..."
+                              className="w-full px-4 py-3 bg-white/60 border font-din-arabic tracking-wide focus:outline-none focus:border-black transition-colors rounded-lg"
+                              style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}
+                            />
+                            <button
+                              type="submit"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
+                            >
+                              <Search className="w-5 h-5" />
+                            </button>
+                          </form>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Mobile Cart */}
+                <div className="relative" ref={cartRef}>
+                  <motion.button
+                    whileHover={disableAnimations ? {} : { scale: 1.1 }}
+                    whileTap={disableAnimations ? {} : { scale: 0.9 }}
+                    onClick={() => setIsCartOpen(!isCartOpen)}
+                    className="relative p-2 transition-all duration-300"
+                    style={{ color: navStyles.textColor }}
+                    aria-label="Shopping bag"
+                  >
+                    <ShoppingBag className="w-5 h-5" />
+                    {getTotalItems() > 0 && (
+                      <span
+                        className="absolute top-0 right-0 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-din-arabic"
+                        style={{ 
+                          backgroundColor: '#e58a4d',
+                          fontWeight: 600
+                        }}
+                      >
+                        {getTotalItems()}
+                      </span>
+                    )}
+                  </motion.button>
+                  {/* Mobile Cart Dropdown */}
+                  <AnimatePresence>
+                    {isCartOpen && (
+                      <motion.div
+                        initial={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
+                        animate={disableAnimations ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                        exit={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
+                        transition={disableAnimations ? undefined : { duration: 0.2 }}
+                        className="fixed left-4 right-4 top-[110px] max-w-md mx-auto border shadow-2xl z-[100]"
+                        style={{ 
+                          backgroundColor: '#e3e3d8',
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }}
+                      >
+                        {/* Cart Header */}
+                        <div className="p-4 border-b" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-american-typewriter text-lg text-black">Your Cart</h3>
+                            <button
+                              onClick={() => setIsCartOpen(false)}
+                              className="p-1 hover:bg-black/10 transition-colors rounded"
+                            >
+                              <X className="w-4 h-4 text-black/70" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Cart Content */}
+                        <div className="max-h-[60vh] overflow-y-auto">
+                          {cartItems.length === 0 ? (
+                            <div className="p-8 text-center">
+                              <div className="mb-4">
+                                <ShoppingBag className="w-12 h-12 text-black/30 mx-auto" />
+                              </div>
+                              <p className="font-din-arabic text-black/70 mb-4">Nothing is in your cart</p>
+                              <button
+                                onClick={() => setIsCartOpen(false)}
+                                className="font-din-arabic px-6 py-2 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
+                              >
+                                Continue Shopping
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="p-4 space-y-4">
+                              {cartItems.map((item) => (
+                                <div key={item.id} className="flex items-center space-x-3 p-3 bg-white/50 border" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
+                                  {item.image && (
+                                    <img 
+                                      src={item.image} 
+                                      alt={item.name}
+                                      className="w-16 h-16 object-cover"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-din-arabic text-black font-medium truncate">{item.name}</h4>
+                                    <p className="font-din-arabic text-black/70 text-sm">₹{item.price}</p>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <button 
+                                      onClick={() => handleQuantityChange(item.id, -1)}
+                                      className="p-1 hover:bg-black/10 transition-colors rounded"
+                                    >
+                                      <Minus className="w-3 h-3 text-black/70" />
+                                    </button>
+                                    <span className="font-din-arabic text-black text-sm min-w-[20px] text-center">
+                                      {item.quantity}
+                                    </span>
+                                    <button 
+                                      onClick={() => handleQuantityChange(item.id, 1)}
+                                      className="p-1 hover:bg-black/10 transition-colors rounded"
+                                    >
+                                      <Plus className="w-3 h-3 text-black/70" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Cart Footer */}
+                        {cartItems.length > 0 && (
+                          <div className="p-4 border-t" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
+                            <div className="flex items-center justify-between mb-4">
+                              <span className="font-din-arabic text-black">Total:</span>
+                              <span className="font-din-arabic text-black font-medium">₹{getTotalPrice()}</span>
+                            </div>
+                            <div className="space-y-2 text-center">
+                              <Link href={"/cart"}>
+                                <button 
+                                  onClick={() => setIsCartOpen(false)}
+                                  className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
+                                >
+                                  Checkout
+                                </button>
+                              </Link>
+                              <button 
+                                onClick={() => setIsCartOpen(false)}
+                                className="w-full font-din-arabic py-2 border text-black hover:bg-black/5 transition-colors tracking-wide text-center"
+                                style={{ borderColor: 'rgba(0, 0, 0, 0.2)' }}
+                              >
+                                Continue Shopping
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                
+                <motion.button
+                  whileHover={disableAnimations ? {} : { scale: 1.1 }}
+                  whileTap={disableAnimations ? {} : { scale: 0.9 }}
+                  onClick={handleMobileMenuToggle}
+                  className="p-2 transition-all duration-300"
+                  style={{ color: navStyles.textColor }}
+                  aria-label="Menu"
+                >
+                  {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </motion.button>
+              </motion.div>
+
+              {/* Desktop Actions */}
+              <motion.div
+                initial={disableAnimations ? undefined : { opacity: 0 }}
+                animate={disableAnimations ? undefined : { opacity: 1 }}
+                transition={disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }}
+                className="hidden lg:flex items-center gap-6"
               >
                 {/* Search Section */}
                 <div className="relative flex items-center" ref={searchRef}>
@@ -609,7 +853,7 @@ export function Navigation({
                   aria-label="Favorites"
                 >
                   <Heart
-                    className={`w-5 h-5 transition-colors ${isWishlisted ? 'fill-current' : ''}`}
+                    className={`w-5 h-5 transition-colors`}
                   />
                 </motion.button>
 
@@ -630,7 +874,7 @@ export function Navigation({
                   <motion.button
                     whileHover={disableAnimations ? {} : { scale: 1.1 }}
                     whileTap={disableAnimations ? {} : { scale: 0.9 }}
-                    onClick={() => setIsCartOpen(!isCartOpen)}
+                    onClick={handleCartToggle}
                     className="p-2 transition-all duration-300 relative"
                     style={{ color: navStyles.textColor }}
                     aria-label="Shopping bag"
@@ -638,7 +882,11 @@ export function Navigation({
                     <ShoppingBag className="w-5 h-5" />
                     {getTotalItems() > 0 && (
                       <span
-                        className="absolute -top-1 -right-1 bg-orange-400 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-light"
+                        className="absolute -top-1 -right-1 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-din-arabic"
+                        style={{ 
+                          backgroundColor: '#e58a4d',
+                          fontWeight: 600
+                        }}
                       >
                         {getTotalItems()}
                       </span>
@@ -653,19 +901,23 @@ export function Navigation({
                         animate={disableAnimations ? undefined : { opacity: 1, y: 0, scale: 1 }}
                         exit={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
                         transition={disableAnimations ? undefined : { duration: 0.2 }}
-                        className="absolute right-0 top-full mt-2 w-96 bg-stone-100 border border-black border-opacity-10 shadow-2xl z-50"
+                        className="absolute right-0 top-full mt-2 w-96 border shadow-2xl z-50"
+                        style={{ 
+                          backgroundColor: '#e3e3d8',
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }}
                       >
                         {/* Cart Header */}
-                        <div className="p-4 border-b border-black border-opacity-10">
+                        <div className="p-4 border-b" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
                           <div className="flex items-center justify-between">
-                            <h3 className="text-lg text-black font-medium">
+                            <h3 className="font-american-typewriter text-lg text-black">
                               Your Cart
                             </h3>
                             <button
                               onClick={() => setIsCartOpen(false)}
-                              className="p-1 hover:bg-black hover:bg-opacity-10 transition-colors rounded"
+                              className="p-1 hover:bg-black/10 transition-colors rounded"
                             >
-                              <X className="w-4 h-4 text-black text-opacity-70" />
+                              <X className="w-4 h-4 text-black/70" />
                             </button>
                           </div>
                         </div>
@@ -675,14 +927,14 @@ export function Navigation({
                           {cartItems.length === 0 ? (
                             <div className="p-8 text-center">
                               <div className="mb-4">
-                                <ShoppingBag className="w-12 h-12 text-black text-opacity-30 mx-auto" />
+                                <ShoppingBag className="w-12 h-12 text-black/30 mx-auto" />
                               </div>
-                              <p className="text-black text-opacity-70 mb-4 font-light">
+                              <p className="font-din-arabic text-black/70 mb-4">
                                 Nothing is in your cart
                               </p>
                               <button
                                 onClick={() => setIsCartOpen(false)}
-                                className="px-6 py-2 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide font-light"
+                                className="font-din-arabic px-6 py-2 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
                               >
                                 Continue Shopping
                               </button>
@@ -692,7 +944,8 @@ export function Navigation({
                               {cartItems.map((item) => (
                                 <div
                                   key={item.id}
-                                  className="flex items-center gap-3 p-3 bg-white bg-opacity-50 border border-black border-opacity-5"
+                                  className="flex items-center gap-3 p-3 bg-white/50 border"
+                                  style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}
                                 >
                                   {item.image && (
                                     <img
@@ -702,28 +955,28 @@ export function Navigation({
                                     />
                                   )}
                                   <div className="flex-1">
-                                    <h4 className="text-black  font-light">
+                                    <h4 className="font-din-arabic text-black font-medium">
                                       {item.name}
                                     </h4>
-                                    <p className="text-black text-opacity-70 text-sm font-light">
+                                    <p className="font-din-arabic text-black/70 text-sm">
                                       ₹{item.price}
                                     </p>
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <button
                                       onClick={() => handleQuantityChange(item.id, -1)}
-                                      className="p-1 hover:bg-black hover:bg-opacity-10 transition-colors rounded"
+                                      className="p-1 hover:bg-black/10 transition-colors rounded"
                                     >
-                                      <Minus className="w-3 h-3 text-black text-opacity-70" />
+                                      <Minus className="w-3 h-3 text-black/70" />
                                     </button>
-                                    <span className="text-black text-sm min-w-[20px] text-center font-light">
+                                    <span className="font-din-arabic text-black text-sm min-w-[20px] text-center">
                                       {item.quantity}
                                     </span>
                                     <button
                                       onClick={() => handleQuantityChange(item.id, 1)}
-                                      className="p-1 hover:bg-black hover:bg-opacity-10 transition-colors rounded"
+                                      className="p-1 hover:bg-black/10 transition-colors rounded"
                                     >
-                                      <Plus className="w-3 h-3 text-black text-opacity-70" />
+                                      <Plus className="w-3 h-3 text-black/70" />
                                     </button>
                                   </div>
                                 </div>
@@ -734,24 +987,25 @@ export function Navigation({
 
                         {/* Cart Footer */}
                         {cartItems.length > 0 && (
-                          <div className="p-4 border-t border-black border-opacity-10">
+                          <div className="p-4 border-t" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
                             <div className="flex items-center justify-between mb-4">
-                              <span className="text-black font-light">
+                              <span className="font-din-arabic text-black">
                                 Total:
                               </span>
-                              <span className="text-black  font-light">
+                              <span className="font-din-arabic text-black font-medium">
                                 ₹{getTotalPrice()}
                               </span>
                             </div>
                             <div className="space-y-2 text-center">
                               <Link href={"/cart"}>
-                                <button className="w-full py-3 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide text-center font-light">
+                                <button className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide text-center">
                                   Checkout
                                 </button>
                               </Link>
                               <button
                                 onClick={() => setIsCartOpen(false)}
-                                className="w-full py-2 border border-black border-opacity-20 text-black hover:bg-black hover:bg-opacity-5 transition-colors tracking-wide text-center font-light"
+                                className="w-full font-din-arabic py-2 border text-black hover:bg-black/5 transition-colors tracking-wide text-center"
+                                style={{ borderColor: 'rgba(0, 0, 0, 0.2)' }}
                               >
                                 Continue Shopping
                               </button>
@@ -767,6 +1021,135 @@ export function Navigation({
           </div>
         </motion.nav>
       </div>
+
+      {/* Mobile Menu Drawer */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+              style={{ top: '106px' }}
+            />
+            
+            {/* Menu Content */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed right-0 top-[106px] bottom-0 w-full max-w-sm z-50 overflow-y-auto lg:hidden"
+              style={{ backgroundColor: '#e3e3d8' }}
+            >
+              <div className="p-6">
+                {/* Mobile Navigation Links */}
+                <nav className="space-y-1">
+                  {menuItems.map((item) => (
+                    <div key={item.name}>
+                      {item.dropdown ? (
+                        <div>
+                          <button
+                            onClick={() => setMobileActiveDropdown(
+                              mobileActiveDropdown === item.name ? null : item.name
+                            )}
+                            className="w-full flex items-center justify-between px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
+                          >
+                            <span>{item.name}</span>
+                            <ChevronDown 
+                              className={`w-4 h-4 transition-transform ${
+                                mobileActiveDropdown === item.name ? 'rotate-180' : ''
+                              }`}
+                            />
+                          </button>
+                          <AnimatePresence>
+                            {mobileActiveDropdown === item.name && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="pl-4 py-2 space-y-1">
+                                  {item.dropdown.map((dropdownItem) => (
+                                    <a
+                                      key={dropdownItem.label}
+                                      href={dropdownItem.href}
+                                      className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
+                                      onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                      {dropdownItem.label}
+                                    </a>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ) : (
+                        <a
+                          href={item.href}
+                          className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          {item.name}
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </nav>
+
+                {/* Mobile Search */}
+                <div className="mt-8 pt-6 border-t" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
+                  <form onSubmit={handleSearchSubmit} className="relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search..."
+                      className="w-full px-4 py-3 bg-white/50 border font-din-arabic tracking-wide focus:outline-none focus:border-black transition-colors"
+                      style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}
+                    />
+                    <button
+                      type="submit"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
+                    >
+                      <Search className="w-5 h-5" />
+                    </button>
+                  </form>
+                </div>
+
+                {/* Mobile Quick Actions */}
+                <div className="mt-6 pt-6 border-t space-y-3" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false)
+                      setIsWishlisted(!isWishlisted)
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-3 text-black font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
+                  >
+                    <span>Ledger</span>
+                    <Heart className={`w-5 h-5 text-[#e58a4d]`} />
+                  </button>
+                  <a
+                    href="/account"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-between px-4 py-3 text-black font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
+                  >
+                    <span>My Account</span>
+                    <User className="w-5 h-5" />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   )
 }
