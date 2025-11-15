@@ -88,6 +88,7 @@ export default function ClientAccountShell({
           isScrolled={isScrolled}
           cartItems={cartItems}
           onCartUpdate={handleCartUpdate}
+          isLoggedIn={!!customer}
         />
         <AccountLayout customer={customer}>{dashboard}</AccountLayout>
         {/* If you render StickyCartBar here, pass showStickyCart/heroCartItem/handlers as props */}

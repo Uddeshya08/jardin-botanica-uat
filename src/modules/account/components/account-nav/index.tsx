@@ -1,13 +1,17 @@
 "use client"
 
-import { clx } from "@medusajs/ui"
-import { ArrowRightOnRectangle } from "@medusajs/icons"
 import { useParams, usePathname } from "next/navigation"
+import { motion } from "motion/react"
+import { 
+  Settings, 
+  Package, 
+  MapPin, 
+  CreditCard, 
+  LogOut, 
+  ChevronRight,
+  Heart 
+} from "lucide-react"
 
-import ChevronDown from "@modules/common/icons/chevron-down"
-import User from "@modules/common/icons/user"
-import MapPin from "@modules/common/icons/map-pin"
-import Package from "@modules/common/icons/package"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { signout } from "@lib/data/customer"
@@ -24,175 +28,125 @@ const AccountNav = ({
     await signout(countryCode)
   }
 
+  const sidebarItems = [
+    { id: 'account', href: '/account', label: 'Account Settings', icon: Settings },
+    { id: 'orders', href: '/account/orders', label: 'Orders', icon: Package },
+    { id: 'ledger', href: '/account/ledger', label: 'Ledger', icon: Heart },
+    { id: 'addresses', href: '/account/addresses', label: 'Saved Addresses', icon: MapPin },
+    { id: 'payment', href: '/account/payment', label: 'Payment Methods', icon: CreditCard },
+  ]
+
+  const isActive = (href: string) => {
+    const path = route.split(countryCode)[1] || ''
+    if (href === '/account') {
+      return path === '/account' || path === '/account/'
+    }
+    return path === href || path.startsWith(href + '/')
+  }
+
+  // Desktop Sidebar
   return (
-    <div>
-      <div className="small:hidden" data-testid="mobile-account-nav">
-        {route !== `/${countryCode}/account` ? (
-          <LocalizedClientLink
-            href="/account"
-            className="flex items-center gap-x-2 text-small-regular py-2"
-            data-testid="account-main-link"
+    <>
+      <div className="hidden lg:block" data-testid="account-nav">
+        {/* Greeting */}
+        <motion.div 
+          className="mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <div className="space-y-2 text-center">
+            <h2 className="font-american-typewriter text-3xl text-black tracking-wide">
+              Hello, {customer?.first_name || "there"}
+            </h2>
+            <p className="font-din-arabic text-sm text-black/50 tracking-wide">
+              Manage your account and preferences
+            </p>
+          </div>
+        </motion.div>
+
+        <nav className="space-y-2">
+          {sidebarItems.map((item, index) => {
+            const Icon = item.icon
+            const active = isActive(item.href)
+            
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + index * 0.1, duration: 0.4 }}
+              >
+                <LocalizedClientLink href={item.href}>
+                  <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`w-full flex items-center justify-between px-4 py-4 rounded transition-all duration-300 ${
+                      active
+                        ? 'bg-black text-white'
+                        : 'text-black hover:bg-black/5'
+                    }`}
+                    data-testid={`${item.id}-link`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Icon className="w-5 h-5" />
+                      <span className="font-din-arabic tracking-wide">{item.label}</span>
+                    </div>
+                    <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${active ? 'rotate-90' : ''}`} />
+                  </motion.button>
+                </LocalizedClientLink>
+              </motion.div>
+            )
+          })}
+        </nav>
+
+        <motion.div 
+          className="mt-12 pt-8 border-t" 
+          style={{ borderColor: "#D8D2C7" }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+        >
+          <motion.button
+            whileHover={{ scale: 1.02, x: 4 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-3 px-4 py-3 text-black hover:bg-black/5 rounded transition-all duration-300"
+            data-testid="logout-button"
           >
-            <>
-              <ChevronDown className="transform rotate-90" />
-              <span>Account</span>
-            </>
-          </LocalizedClientLink>
-        ) : (
-          <>
-            <div className="text-xl-semi mb-4 px-8">
-              Hello {customer?.first_name}
-            </div>
-            <div className="text-base-regular">
-              <ul>
-                <li>
-                  <LocalizedClientLink
-                    href="/account/profile"
-                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
-                    data-testid="profile-link"
-                  >
-                    <>
-                      <div className="flex items-center gap-x-2">
-                        <User size={20} />
-                        <span>Profile</span>
-                      </div>
-                      <ChevronDown className="transform -rotate-90" />
-                    </>
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    href="/account/addresses"
-                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
-                    data-testid="addresses-link"
-                  >
-                    <>
-                      <div className="flex items-center gap-x-2">
-                        <MapPin size={20} />
-                        <span>Addresses</span>
-                      </div>
-                      <ChevronDown className="transform -rotate-90" />
-                    </>
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    href="/account/orders"
-                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
-                    data-testid="orders-link"
-                  >
-                    <div className="flex items-center gap-x-2">
-                      <Package size={20} />
-                      <span>Orders</span>
-                    </div>
-                    <ChevronDown className="transform -rotate-90" />
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8 w-full"
-                    onClick={handleLogout}
-                    data-testid="logout-button"
-                  >
-                    <div className="flex items-center gap-x-2">
-                      <ArrowRightOnRectangle />
-                      <span>Log out</span>
-                    </div>
-                    <ChevronDown className="transform -rotate-90" />
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </>
-        )}
+            <LogOut className="w-5 h-5" />
+            <span className="font-din-arabic tracking-wide">Sign Out</span>
+          </motion.button>
+        </motion.div>
       </div>
-      <div className="hidden small:block" data-testid="account-nav">
-        <div>
-          <div className="pb-4">
-            <h3 className="text-base-semi">Account</h3>
-          </div>
-          <div className="text-base-regular">
-            <ul className="flex mb-0 justify-start items-start flex-col gap-y-4">
-              <li>
-                <AccountNavLink
-                  href="/account"
-                  route={route!}
-                  data-testid="overview-link"
-                >
-                  Overview
-                </AccountNavLink>
-              </li>
-              <li>
-                <AccountNavLink
-                  href="/account/profile"
-                  route={route!}
-                  data-testid="profile-link"
-                >
-                  Profile
-                </AccountNavLink>
-              </li>
-              <li>
-                <AccountNavLink
-                  href="/account/addresses"
-                  route={route!}
-                  data-testid="addresses-link"
-                >
-                  Addresses
-                </AccountNavLink>
-              </li>
-              <li>
-                <AccountNavLink
-                  href="/account/orders"
-                  route={route!}
-                  data-testid="orders-link"
-                >
-                  Orders
-                </AccountNavLink>
-              </li>
-              <li className="text-grey-700">
+
+      {/* Mobile Tab Navigation */}
+      <div className="lg:hidden" data-testid="mobile-account-nav">
+        <div className="flex justify-center space-x-3">
+          {sidebarItems.map((item) => {
+            const Icon = item.icon
+            const active = isActive(item.href)
+            
+            return (
+              <LocalizedClientLink key={item.id} href={item.href}>
                 <button
-                  type="button"
-                  onClick={handleLogout}
-                  data-testid="logout-button"
+                  className={`flex items-center justify-center p-4 rounded-full transition-all duration-300 min-w-[48px] min-h-[48px] ${
+                    active
+                      ? 'bg-black text-white shadow-lg'
+                      : 'bg-white/50 text-black hover:bg-black/10'
+                  }`}
+                  title={item.label}
+                  aria-label={item.label}
+                  data-testid={`${item.id}-link`}
                 >
-                  Log out
+                  <Icon className="w-5 h-5" />
                 </button>
-              </li>
-            </ul>
-          </div>
+              </LocalizedClientLink>
+            )
+          })}
         </div>
       </div>
-    </div>
-  )
-}
-
-type AccountNavLinkProps = {
-  href: string
-  route: string
-  children: React.ReactNode
-  "data-testid"?: string
-}
-
-const AccountNavLink = ({
-  href,
-  route,
-  children,
-  "data-testid": dataTestId,
-}: AccountNavLinkProps) => {
-  const { countryCode }: { countryCode: string } = useParams()
-
-  const active = route.split(countryCode)[1] === href
-  return (
-    <LocalizedClientLink
-      href={href}
-      className={clx("text-ui-fg-subtle hover:text-ui-fg-base", {
-        "text-ui-fg-base font-semibold": active,
-      })}
-      data-testid={dataTestId}
-    >
-      {children}
-    </LocalizedClientLink>
+    </>
   )
 }
 

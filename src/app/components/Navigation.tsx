@@ -5,6 +5,15 @@ import { motion, AnimatePresence } from 'motion/react'
 import { User, Search, ShoppingBag, X, Plus, Minus, Heart, Menu, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter, usePathname } from 'next/navigation'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog'
+import { useAuth } from 'app/context/auth-context'
 
 interface CartItem {
   id: string
@@ -34,6 +43,7 @@ interface NavigationProps {
   forceWhiteText?: boolean
   disableSticky?: boolean
   disableAnimations?: boolean
+  isLoggedIn?: boolean
 }
 
 export function Navigation({
@@ -44,7 +54,11 @@ export function Navigation({
   disableSticky = false,
   disableAnimations = false,
   forceWhiteText = false,
+  isLoggedIn = false,
 }: NavigationProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const { isLoggedIn: authIsLoggedIn } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
@@ -55,9 +69,13 @@ export function Navigation({
   const [isHomePage, setIsHomePage] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [mobileActiveDropdown, setMobileActiveDropdown] = useState<string | null>(null)
+  const [showLoginDialog, setShowLoginDialog] = useState(false)
   const cartRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Determine if user is logged in - prioritize prop, then context, then fallback to false
+  const userIsLoggedIn = isLoggedIn !== false ? isLoggedIn : authIsLoggedIn
 
   // --- Mega menu state & refs ---
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
@@ -251,6 +269,20 @@ export function Navigation({
     if (searchQuery.trim()) {
       console.log('Searching for:', searchQuery)
       // Add your search logic here
+    }
+  }
+
+  const handleHeartClick = () => {
+    if (userIsLoggedIn) {
+      // User is logged in, redirect to ledger
+      const currentPath = pathname || ''
+      // Extract country code from path if present (e.g., /in/account/...)
+      const countryMatch = currentPath.match(/^\/([^\/]+)/)
+      const countryCode = countryMatch ? countryMatch[1] : 'in'
+      router.push(`/${countryCode}/account/ledger`)
+    } else {
+      // User is not logged in, show login dialog
+      setShowLoginDialog(true)
     }
   }
 
@@ -847,7 +879,7 @@ export function Navigation({
                 <motion.button
                   whileHover={disableAnimations ? {} : { scale: 1.1 }}
                   whileTap={disableAnimations ? {} : { scale: 0.9 }}
-                  onClick={() => setIsWishlisted(!isWishlisted)}
+                  onClick={handleHeartClick}
                   className="p-2 transition-all duration-300"
                   style={{ color: isWishlisted ? '#e58a4d' : navStyles.textColor }}
                   aria-label="Favorites"
@@ -1129,7 +1161,7 @@ export function Navigation({
                   <button
                     onClick={() => {
                       setIsMobileMenuOpen(false)
-                      setIsWishlisted(!isWishlisted)
+                      handleHeartClick()
                     }}
                     className="w-full flex items-center justify-between px-4 py-3 text-black font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
                   >
@@ -1150,6 +1182,41 @@ export function Navigation({
           </>
         )}
       </AnimatePresence>
+
+      {/* Login Required Dialog */}
+      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-american-typewriter text-xl text-black">
+              Login Required
+            </DialogTitle>
+            <DialogDescription className="font-din-arabic text-black/70 pt-2">
+              You need to login first to access your ledger.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 pt-4">
+            <button
+              onClick={() => {
+                setShowLoginDialog(false)
+                const currentPath = pathname || ''
+                const countryMatch = currentPath.match(/^\/([^\/]+)/)
+                const countryCode = countryMatch ? countryMatch[1] : 'in'
+                router.push(`/${countryCode}/account`)
+              }}
+              className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
+            >
+              Go to Login
+            </button>
+            <button
+              onClick={() => setShowLoginDialog(false)}
+              className="w-full font-din-arabic py-2 border text-black hover:bg-black/5 transition-colors tracking-wide"
+              style={{ borderColor: 'rgba(0, 0, 0, 0.2)' }}
+            >
+              Cancel
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
