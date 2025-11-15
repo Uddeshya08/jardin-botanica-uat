@@ -1,36 +1,38 @@
 "use client"
-import React, { Suspense, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 
-import ImageGallery from "@modules/products/components/image-gallery"
-import ProductActions from "@modules/products/components/product-actions"
-import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
-import ProductTabs from "@modules/products/components/product-tabs"
-import RelatedProducts from "@modules/products/components/related-products"
-import ProductInfo from "@modules/products/templates/product-info"
-import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import { notFound } from "next/navigation"
-import ProductActionsWrapper from "./product-actions-wrapper"
 import { HttpTypes } from "@medusajs/types"
-// import { ProductHero } from "app/components/ProductHero"
-// import React, {  Suspense } from 'react'
-import { motion } from "motion/react"
+import { ProductContent, FeaturedSection, TestimonialsSection, FeaturedRitualTwoSection } from "../../../types/contentful"
 import { Navigation } from "app/components/Navigation"
 import { ProductHero } from "app/components/ProductHero"
 import { StickyCartBar } from "app/components/StickyCartBar"
 import { Afterlife } from "app/components/Afterlife"
 import { PeopleAlsoBought } from "app/components/PeopleAlsoBought"
-import { FeaturedRitual } from "app/components/FeaturedRitual"
 
 import { CustomerTestimonials } from "app/components/CustomerTestimonials"
 import { RippleEffect } from "app/components/RippleEffect"
-import { PeopleAlsoBoughtTwo } from "app/components/PeopleAlsoBoughtTwo"
 import { FeaturedRitualTwo } from "app/components/FeaturedRitualTwo"
 import Featured from "app/components/Featured"
+
+interface RitualProduct {
+  variantId: string
+  name: string
+  price: number
+  currency: string
+  image?: string
+  isRitualProduct?: boolean
+}
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   countryCode: string
+  productContent?: ProductContent | null
+  featuredContent?: FeaturedSection | null
+  testimonialsContent?: TestimonialsSection | null
+  featuredRitualTwoContent?: FeaturedRitualTwoSection | null
+  ritualProduct?: RitualProduct | null
 }
 
 interface CartItem {
@@ -39,11 +41,17 @@ interface CartItem {
   price: number
   quantity: number
   image?: string
+  isRitualProduct?: boolean
 }
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
   product,
   region,
   countryCode,
+  productContent,
+  featuredContent,
+  testimonialsContent,
+  featuredRitualTwoContent,
+  ritualProduct: ritualProductProp,
 }) => {
   if (!product || !product.id) {
     return notFound()
@@ -80,6 +88,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
       )
     }
   }
+
 
   const handleHeroQuantityUpdate = (quantity: number) => {
     if (heroCartItem) {
@@ -120,42 +129,11 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [heroCartItem])
 
-  console.log("products => ", product)
 
   return (
     <>
-      <div>
-        {/* old medusa tamplate */}
-        {/* <div
-          className="content-container flex flex-col small:flex-row small:items-start py-6 relative"
-          data-testid="product-container"
-        >
-          <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-6">
-            <ProductInfo product={product} />
-            <ProductTabs product={product} />
-          </div>
-          <div className="block w-full relative">
-            <ImageGallery images={product?.images || []} />
-          </div>
-          <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-12">
-            <ProductOnboardingCta />
-            <Suspense
-              fallback={
-                <ProductActions
-                  disabled={true}
-                  product={product}
-                  region={region}
-                />
-              }
-            >
-              <ProductActionsWrapper id={product.id} region={region} />
-            </Suspense>
-          </div>
-        </div> */}
-      </div>
-
       {/* my new code tamplate */}
       <div className="min-h-screen">
         <RippleEffect />
@@ -163,26 +141,35 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           isScrolled={isScrolled}
           cartItems={cartItems}
           onCartUpdate={handleCartUpdate}
+          forceWhiteText={false}
         />
         <div className="h-4"></div>
         <ProductHero
-  product={product}
-  countryCode={'in'} // e.g. "in"
-  onCartUpdate={handleCartUpdate}
-/>
-
-        <StickyCartBar
-          isVisible={showStickyCart}
-          product={product}
-          onUpdateHeroQuantity={handleHeroQuantityUpdate}
+          product={product as any}
+          countryCode={'in'} // e.g. "in"
           onCartUpdate={handleCartUpdate}
         />
 
-        <Afterlife product={product} />
-        <PeopleAlsoBought product={product} />
-        <FeaturedRitualTwo product={product} />
-        <CustomerTestimonials product={product} />
-        <Featured product={product} />
+        <StickyCartBar
+          isVisible={showStickyCart}
+          product={product as any}
+          onUpdateHeroQuantity={handleHeroQuantityUpdate}
+          onCartUpdate={handleCartUpdate}
+          cartItems={cartItems}
+          ritualProduct={ritualProductProp}
+        />
+
+        <Afterlife product={product as any} />
+        <PeopleAlsoBought product={product as any} />
+        <FeaturedRitualTwo 
+          key={featuredRitualTwoContent?.productHandle || featuredRitualTwoContent?.sectionKey || 'default'} 
+          featuredRitualTwoContent={featuredRitualTwoContent} 
+        />
+        <CustomerTestimonials 
+          key={testimonialsContent?.productHandle || testimonialsContent?.sectionKey || 'default'} 
+          testimonialsContent={testimonialsContent} 
+        />
+        <Featured featuredContent={featuredContent} />
       </div>
     </>
   )

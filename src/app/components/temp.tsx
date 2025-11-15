@@ -11,7 +11,6 @@ import {
   ChevronRight as BreadcrumbChevron,
 } from "lucide-react"
 import { InfoPanel } from "./InfoPanel"
-import { addToCartAction } from "@lib/actions/cart-actions" // <-- Server Action
 
 interface CartItem {
   id: string
@@ -63,11 +62,11 @@ export function ProductHero({
     if (!variantId) return
 
     try {
-      await addToCartAction({
-        variantId,
-        quantity,
-        countryCode, // e.g. "in" from your route segment
-      })
+      // await addToCartAction({
+      //   variantId,
+      //   quantity,
+      //   countryCode, // e.g. "in" from your route segment
+      // })
 
       setIsAddedToCart(true)
 

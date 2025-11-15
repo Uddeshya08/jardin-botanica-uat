@@ -5,7 +5,7 @@ import { retrieveCustomer } from "@lib/data/customer"
 import { getBaseURL } from "@lib/util/env"
 import { StoreCartShippingOption } from "@medusajs/types"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
-
+import { LedgerProvider } from "app/context/ledger-context"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 import { Footer } from "app/components/Footer"
 
@@ -46,8 +46,10 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
           shippingOptions={shippingOptions}
         />
       )}
-      {props.children}
-      <Footer />
+      <LedgerProvider>
+        {props.children}
+        <Footer />
+      </LedgerProvider>
     </>
   )
 }

@@ -1,66 +1,33 @@
 'use client'
-import React, { useMemo } from 'react'
+import React from 'react'
 import { motion } from 'motion/react'
+import { FeaturedSection } from '../../types/contentful'
 
-type ProductLike = { metadata?: Record<string, any> }
-
-type FeaturedMeta = {
-  heading?: string
-  subheading?: string
-  bg?: string
-  inputPlaceholder?: string
-  ctaLabel?: string
-  ctaHref?: string    // optional link for Subscribe button
+type FeaturedProps = {
+  featuredContent?: FeaturedSection | null
 }
 
-function stripJsonComments(str: string) {
-  return str
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/(^|[^:])\/\/.*$/gm, '$1')
-}
-function parseMaybe(v: any) {
-  if (typeof v !== 'string') return v
-  try { return JSON.parse(stripJsonComments(v.trim())) } catch { return v }
-}
-function parseTwice(v: any) {
-  const once = parseMaybe(v)
-  return typeof once === 'string' ? parseMaybe(once) : once
-}
+export default function Featured({ featuredContent }: FeaturedProps) {
+  // Default values if no Contentful data is provided
+  const defaults = {
+    heading: 'Cultivate Your Ritu',
+    subheading:
+      'Subscribe to receive hand care wisdom, botanical insights, and early access to our latest concoctions.',
+    backgroundColor: '#e3e3d8',
+    inputPlaceholder: 'Enter your email',
+    ctaLabel: 'Subscribe',
+    ctaLink: '#',
+  }
 
-export default function Featured({ product }: { product?: ProductLike }) {
-  const meta: Required<FeaturedMeta> = useMemo(() => {
-    const defaults: Required<FeaturedMeta> = {
-      heading: 'Cultivate Your Ritu',
-      subheading:
-        'Subscribe to receive hand care wisdom, botanical insights, and early access to our latest concoctions.',
-      bg: '#e3e3d8',
-      inputPlaceholder: 'Enter your email',
-      ctaLabel: 'Subscribe',
-      ctaHref: '#',
-    }
+  const meta = featuredContent || defaults
 
-    const raw =
-      product?.metadata?.featured ??
-      product?.metadata?.sections?.featured
-
-    if (!raw) return defaults
-
-    const parsed: any = parseTwice(raw)
-    if (!parsed || typeof parsed !== 'object') return defaults
-
-    return {
-      heading: typeof parsed.heading === 'string' ? parsed.heading : defaults.heading,
-      subheading: typeof parsed.subheading === 'string' ? parsed.subheading : defaults.subheading,
-      bg: typeof parsed.bg === 'string' ? parsed.bg : defaults.bg,
-      inputPlaceholder:
-        typeof parsed.inputPlaceholder === 'string' ? parsed.inputPlaceholder : defaults.inputPlaceholder,
-      ctaLabel: typeof parsed.ctaLabel === 'string' ? parsed.ctaLabel : defaults.ctaLabel,
-      ctaHref: typeof parsed.ctaHref === 'string' ? parsed.ctaHref : defaults.ctaHref,
-    }
-  }, [product])
+  // Don't render if Contentful data exists but is inactive
+  if (featuredContent && !featuredContent.isActive) {
+    return null
+  }
 
   return (
-    <section className="py-20 relative overflow-hidden" style={{ backgroundColor: meta.bg }}>
+    <section className="py-20 relative overflow-hidden" style={{ backgroundColor: meta.backgroundColor }}>
       {/* animated background layers (unchanged) */}
       <motion.div
         className="absolute inset-0 opacity-15"
@@ -83,14 +50,14 @@ export default function Featured({ product }: { product?: ProductLike }) {
         transition={{ duration: 20, ease: [0.25, 0.46, 0.45, 0.94], repeat: Infinity }}
       />
 
-      <div className="container mx-auto px-6 lg:px-12 relative z-10">
+      <div className="container mx-auto px-4 md:px-6 lg:px-12 relative z-10">
         <div className="max-w-2xl mx-auto text-center">
           <motion.h3
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="font-american-typewriter text-3xl tracking-tight mb-6 text-black"
+            className="font-american-typewriter text-2xl md:text-3xl tracking-tight mb-4 md:mb-6 text-black"
           >
             {meta.heading}
           </motion.h3>
@@ -100,7 +67,7 @@ export default function Featured({ product }: { product?: ProductLike }) {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
-            className="font-din-arabic text-black/70 mb-8 leading-relaxed text-lg"
+            className="font-din-arabic text-black/70 mb-6 md:mb-8 leading-relaxed text-base md:text-lg"
           >
             {meta.subheading}
           </motion.p>
@@ -118,9 +85,9 @@ export default function Featured({ product }: { product?: ProductLike }) {
               placeholder={meta.inputPlaceholder}
               className="font-din-arabic flex-1 px-4 py-3 bg-transparent border border-black/30 text-black placeholder-black/60 focus:outline-none focus:border-black transition-all duration-300"
             />
-            {/* If ctaHref is provided, render as a link; otherwise plain button */}
-            {meta.ctaHref && meta.ctaHref !== '#' ? (
-              <a href={meta.ctaHref} aria-label={meta.ctaLabel}>
+            {/* If ctaLink is provided, render as a link; otherwise plain button */}
+            {meta.ctaLink && meta.ctaLink !== '#' ? (
+              <a href={meta.ctaLink} aria-label={meta.ctaLabel}>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}

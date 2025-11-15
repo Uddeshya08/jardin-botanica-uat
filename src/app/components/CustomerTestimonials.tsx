@@ -1,100 +1,8 @@
 'use client'
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Check, Star, Quote } from 'lucide-react'
-import type { HttpTypes } from '@medusajs/types'
-
-// --------- helpers ----------
-type ProductLike = Partial<HttpTypes.Product> & {
-  metadata?: Record<string, any>
-}
-
-function safeParseOnce(v: any) {
-  if (typeof v !== 'string') return v
-  try { return JSON.parse(v) } catch { return v }
-}
-function safeParseTwice(v: any) {
-  const once = safeParseOnce(v)
-  return typeof once === 'string' ? safeParseOnce(once) : once
-}
-
-type TestimonialItem = {
-  id: number
-  name: string
-  initials: string
-  location: string
-  rating: number
-  review: string
-  product?: string
-  purchaseDate?: string
-  verified?: boolean
-}
-
-type TestimonialsContent = {
-  heading?: string
-  subheading?: string
-  bg?: string
-  cta?: { showMore?: string; showLess?: string; initialCount?: number }
-  items?: TestimonialItem[]
-}
-
-function readTestimonials(product?: ProductLike): Required<TestimonialsContent> {
-  // sensible defaults (your current UI)
-  const defaults: Required<TestimonialsContent> = {
-    heading: 'Loved By Our Customers',
-    subheading:
-      `Real experiences from those who've made our ${product?.title ?? 'product'} part of their daily ritual.`,
-    bg: '#e3e3d8',
-    cta: { showMore: 'View All Reviews', showLess: 'Show Less Reviews', initialCount: 3 },
-    items: [],
-  }
-
-  if (!product?.metadata) return defaults
-
-  // Allow either `testimonials` or `sections.testimonials`
-  const raw = product.metadata.testimonials ?? product.metadata.sections?.testimonials
-  if (!raw) return defaults
-// console.log("testimonial = ", raw)
-  const parsed: any = safeParseTwice(raw)
-  if (!parsed || typeof parsed !== 'object') return defaults
-
-  const items: TestimonialItem[] = Array.isArray(parsed.items)
-    ? parsed.items.map((t: any, i: number) => ({
-        id: Number(t?.id ?? i + 1),
-        name: String(t?.name ?? ''),
-        initials: String(t?.initials ?? ''),
-        location: String(t?.location ?? ''),
-        rating: Number(t?.rating ?? 5),
-        review: String(t?.review ?? ''),
-        product: typeof t?.product === 'string' ? t.product : product?.title,
-        purchaseDate: typeof t?.purchaseDate === 'string' ? t.purchaseDate : undefined,
-        verified: Boolean(t?.verified ?? true),
-      }))
-    : defaults.items
-
-  // Replace {{product}} tokens in subheading
-  const sub =
-    typeof parsed.subheading === 'string'
-      ? parsed.subheading.replaceAll('{{product}}', String(product?.title ?? 'product'))
-      : defaults.subheading
-
-  return {
-    heading: typeof parsed.heading === 'string' ? parsed.heading : defaults.heading,
-    subheading: sub,
-    bg: typeof parsed.bg === 'string' ? parsed.bg : defaults.bg,
-    cta: {
-      showMore:
-        typeof parsed.cta?.showMore === 'string' ? parsed.cta.showMore : defaults.cta.showMore,
-      showLess:
-        typeof parsed.cta?.showLess === 'string' ? parsed.cta.showLess : defaults.cta.showLess,
-      initialCount:
-        typeof parsed.cta?.initialCount === 'number'
-          ? Math.max(1, parsed.cta.initialCount)
-          : defaults.cta.initialCount,
-    },
-    items: items.length ? items : defaults.items,
-  }
-}
+import { TestimonialsSection, TestimonialItem } from '../../types/contentful'
 
 // --------- UI bits you already had ----------
 const StarRating = ({ rating, delay = 0 }: { rating: number; delay?: number }) => (
@@ -133,12 +41,38 @@ const VerifiedBadge = ({ delay = 0 }: { delay?: number }) => (
 )
 
 // --------- Dynamic component ----------
-export function CustomerTestimonials({ product }: { product?: ProductLike }) {
-  const content = useMemo(() => readTestimonials(product), [product])
-  const { heading, subheading, bg, cta, items } = content
+type CustomerTestimonialsProps = {
+  testimonialsContent?: TestimonialsSection | null
+}
+
+export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonialsProps) {
+  // Default values if no Contentful data is provided
+  const defaults: TestimonialsSection = {
+    title: '',
+    sectionKey: '',
+    heading: 'Loved By Our Customers',
+    subheading: 'Real experiences from those who have made our product part of their daily ritual.',
+    backgroundColor: '#e3e3d8',
+    cta: { showMore: 'View All Reviews', showLess: 'Show Less Reviews', initialCount: 3 },
+    items: [],
+    isActive: true,
+  }
+
+  const content = testimonialsContent || defaults
+  const { heading, subheading, backgroundColor: bg, cta, items } = content
 
   const [visibleCount, setVisibleCount] = useState<number>(cta.initialCount)
   const [isExpanded, setIsExpanded] = useState(false)
+
+  // Don't render if Contentful data exists but is inactive
+  if (testimonialsContent && !testimonialsContent.isActive) {
+    return null
+  }
+
+  // Don't render if no items
+  if (items.length === 0) {
+    return null
+  }
 
   const handleShowMore = () => {
     setVisibleCount(items.length)
@@ -150,7 +84,7 @@ export function CustomerTestimonials({ product }: { product?: ProductLike }) {
   }
 
   return (
-    <section className="pb-20 relative overflow-hidden" style={{ backgroundColor: bg }}>
+    <section className="pt-20 pb-20 lg:pt-10 lg:pb-20 relative overflow-hidden" style={{ backgroundColor: bg }}>
       {/* Subtle Background Pattern */}
       <div
         className="absolute inset-0 opacity-5"
@@ -162,26 +96,26 @@ export function CustomerTestimonials({ product }: { product?: ProductLike }) {
         }}
       />
 
-      <div className="container mx-auto px-6 lg:px-12 relative z-10">
+      <div className="container mx-auto px-4 md:px-6 lg:px-12 relative z-10">
         {/* Section Title */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="inline-block mb-4"
+            className="text-center mb-8 md:mb-12 lg:mb-16"
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="inline-block mb-3 md:mb-4"
+            >
             <Quote className="w-8 h-8 text-black/30 mx-auto" strokeWidth={1} />
           </motion.div>
 
-          <h2 className="font-american-typewriter text-3xl tracking-tight text-black mb-4">
+          <h2 className="font-american-typewriter text-2xl md:text-3xl tracking-tight text-black mb-3 md:mb-4">
             {heading}
           </h2>
 
@@ -191,7 +125,7 @@ export function CustomerTestimonials({ product }: { product?: ProductLike }) {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
-              className="font-din-arabic text-black/70 max-w-2xl mx-auto mb-6"
+              className="font-din-arabic text-sm md:text-base text-black/70 max-w-2xl mx-auto mb-4 md:mb-6"
             >
               {subheading}
             </motion.p>
@@ -224,7 +158,7 @@ export function CustomerTestimonials({ product }: { product?: ProductLike }) {
                   className="group"
                 >
                   <motion.div
-                    className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-6 shadow-xl shadow-black/5 relative overflow-hidden"
+                    className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-4 md:p-6 shadow-xl shadow-black/5 relative overflow-hidden min-h-[280px] md:min-h-[300px] max-h-[400px] flex flex-col"
                     whileHover={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)', borderColor: 'rgba(255, 255, 255, 0.4)' }}
                     transition={{ duration: 0.3 }}
                   >
@@ -242,7 +176,7 @@ export function CustomerTestimonials({ product }: { product?: ProductLike }) {
                       className="text-center mb-4"
                     >
                       <div className="flex items-center justify-center mb-2">
-                        <h3 className="font-american-typewriter text-lg text-black">
+                        <h3 className="font-american-typewriter text-base md:text-lg text-black">
                           {t.name}
                         </h3>
                         {t.verified && <VerifiedBadge delay={index * 0.1 + 0.4} />}
@@ -261,11 +195,11 @@ export function CustomerTestimonials({ product }: { product?: ProductLike }) {
                       whileInView={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, delay: index * 0.1 + 0.6 }}
                       viewport={{ once: true }}
-                      className="relative"
+                      className="relative flex-1 overflow-y-auto"
                     >
                       <Quote className="absolute -top-2 -left-2 w-6 h-6 text-black/20" strokeWidth={1} />
                       <p className="font-din-arabic text-black/80 leading-relaxed italic relative z-10 pl-4">
-                        {t.review}
+                        {t.review.length > 200 ? `${t.review.substring(0, 200)}...` : t.review}
                       </p>
                     </motion.div>
                   </motion.div>

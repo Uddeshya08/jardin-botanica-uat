@@ -8,7 +8,7 @@ export function DesignPhilosophy() {
       className="py-20 lg:py-32"
       style={{ backgroundColor: '#edede2' }}
     >
-      <div className="container mx-auto px-8 lg:px-16">
+      <div className="w-full md:container md:mx-auto px-0 md:px-8 lg:px-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Image on Left */}
           <motion.div
@@ -18,7 +18,7 @@ export function DesignPhilosophy() {
             viewport={{ once: true }}
             className="relative group cursor-pointer"
           >
-            <div className="aspect-[4/3] overflow-hidden relative rounded-sm">
+            <div className="aspect-[4/3] overflow-hidden relative rounded-none md:rounded-sm">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
@@ -55,7 +55,7 @@ export function DesignPhilosophy() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
-            className="space-y-10"
+            className="space-y-10 px-8 md:px-0"
           >
             {/* Small Label */}
             <motion.div
