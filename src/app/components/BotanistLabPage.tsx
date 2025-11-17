@@ -8,9 +8,9 @@ import { ImageWithFallback } from "./figma/ImageWithFallback"
 import { BotanicalCollections } from "./BotanicalCollections"
 
 const ICON_IMAGE =
-  "http://localhost:3000/src/assets/5e7abbd36dd434d9a9e9d73ccb05729c2e547809.png"
+  "/assets/b-labs-logo.png"
 const FOUNDER_WORKSPACE_IMAGE =
-  "http://localhost:3000/src/assets/d43ea85880ab31870b87f37b4dba3931b6741add.png"
+  "/assets/founder-pic.png"
 
 const questionText = "Every formula begins as a question."
 const answerPart1 = "We observe, formulate, and reiterate until there's proof."
