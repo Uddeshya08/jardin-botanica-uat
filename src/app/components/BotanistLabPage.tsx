@@ -19,7 +19,7 @@ const fullAnswerText =
   "We observe, formulate, and reiterate until there's proof. The result: formulas shaped by climate, chemistry, and care."
 
 const OVERLAY_GRADIENT =
-  "absolute inset-0 bg-gradient-to-b from-black/65 via-black/45 to-black/70 pointer-events-none"
+  "absolute inset-0 bg-gradient-to-b from-black/75 via-black/50 to-black/70 pointer-events-none"
 
 const useTypewriter = (
   text: string,
@@ -320,20 +320,37 @@ function InteractiveLabImage() {
                   <div
                     className={`absolute ${
                       hotspot.id === 3 || hotspot.id === 4 ? "-bottom-2" : "-top-2"
-                    } w-4 h-4 bg-white/95 rotate-45`}
+                    } w-4 h-4 bg-white/95 rotate-45 shadow-lg z-30`}
                     style={{
                       left: hotspot.id === 3 ? "24px" : hotspot.position.left ? "24px" : "auto",
                       right: hotspot.id === 4 ? "24px" : hotspot.position.right ? "24px" : "auto",
                     }}
                   />
+                  {/* Connecting line between hotspot and popup */}
+                  <motion.div
+                    initial={{ opacity: 0, scaleY: 0 }}
+                    animate={{ opacity: 1, scaleY: 1 }}
+                    exit={{ opacity: 0, scaleY: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                    className={`absolute ${
+                      hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-0" : "top-full mt-0"
+                    } left-1/2 -translate-x-1/2 w-0.5 bg-gradient-to-b ${
+                      hotspot.id === 3 || hotspot.id === 4
+                        ? "from-white/95 to-[#a28b6f]/40"
+                        : "from-[#a28b6f]/40 to-white/95"
+                    }`}
+                    style={{
+                      height: hotspot.id === 3 || hotspot.id === 4 ? "16px" : "16px",
+                    }}
+                  />
                   <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-4">
                       <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        className="w-8 h-8 rounded-full flex items-center justify-center shadow-md"
                         style={{ backgroundColor: "#a28b6f" }}
                       >
                         <span
-                          className="font-american-typewriter text-white text-sm"
+                          className="font-american-typewriter text-white text-sm font-semibold"
                           style={{ letterSpacing: "0.05em" }}
                         >
                           {hotspot.number}
@@ -361,11 +378,23 @@ function InteractiveLabImage() {
                       </p>
                     </div>
                     <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: "100%" }}
-                      transition={{ duration: 0.5, delay: 0.2 }}
-                      className="h-px bg-gradient-to-r from-transparent via-[#a28b6f] to-transparent mt-4"
-                    />
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: "100%", opacity: 1 }}
+                      transition={{ duration: 0.8, delay: 0.3 }}
+                      className="h-[2px] bg-gradient-to-b from-black via-[#a28b6f]/60  mt-6 relative overflow-visible"
+                    >
+                      <motion.div
+                        animate={{
+                          x: ["-100%", "100%"],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                        className="absolute inset-0 w-1/3 "
+                      />
+                    </motion.div>
                   </div>
                 </motion.div>
               )}
@@ -665,7 +694,7 @@ function FounderSection({
             transition={{ duration: 0.8 }}
             className="lg:col-span-5"
           >
-            <div className="relative aspect-[3/4] lg:sticky lg:top-24">
+            <div className="relative aspect-[3/3.4] lg:sticky lg:top-24">
               <ImageWithFallback
                 src={founderWorkspaceImage}
                 alt="The Founder's Workspace"

@@ -492,7 +492,7 @@ export function Navigation({
           )}
 
           <div className="px-6 lg:px-12 relative z-20">
-            <div className="flex items-center justify-between py-4 relative">
+            <div className="flex items-center justify-between py-6 relative">
               {/* Logo */}
               <motion.div
                 initial={disableAnimations ? undefined : { opacity: 0 }}
@@ -504,7 +504,7 @@ export function Navigation({
                   <img
                     src={navStyles.logoSrc}
                     alt="Jardin Botanica Logo"
-                    width={200}
+                    width={270}
                     height={60}
                     className="transition-all duration-300"
                   />

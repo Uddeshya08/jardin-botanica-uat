@@ -48,7 +48,7 @@ const HERO_IMAGE =
   "https://images.unsplash.com/photo-1632118588340-c4c7a674c707?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncmVlbmhvdXNlJTIwYm90YW5pY2FsJTIwdmludGFnZXxlbnwxfHx8fDE3NjIwMDk0Mjh8MA&ixlib=rb-4.1.0&q=80&w=1920&utm_source=figma&utm_medium=referral"
 
 const EDITORIAL_IMAGE =
-  "https://images.unsplash.com/photo-1696391267294-103e9c210c6b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob21lJTIwY3JlYXRpb25zJTIwaW50ZXJpb3IlMjBib3RhbmljYWx8ZW58MXx8fHwxNzYyMDA5NDI3fDA&ixlib=rb-4.1.0&q=80&w=1920&utm_source=figma&utm_medium=referral"
+  "/assets/99b7e68b7e2b2dbbfbf85a52e8237ce212b58258.png"
 
 const products: Product[] = [
   {
@@ -211,30 +211,31 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
         <motion.div initial={{ scale: 1.1 }} animate={{ scale: 1 }} transition={{ duration: 1.5, ease: "easeOut" }} className="w-full h-full">
           <ImageWithFallback src={HERO_IMAGE} alt="Home Creations Collection" className="w-full h-full object-cover" />
         </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-black/50 to-black h-full" />
 
         {/* Hero Text */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center px-4 sm:px-6">
             <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.2 }}>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.5 }}
-                className="font-din-arabic text-white/80 text-xs mb-4 sm:mb-6 tracking-widest"
-                style={{ letterSpacing: "0.2em" }}
-              >
-                BOTANICAL HOME FRAGRANCE
-              </motion.p>
-              <h1 className="font-american-typewriter text-white text-3xl sm:text-4xl md:text-5xl lg:text-7xl mb-4 sm:mb-6" style={{ letterSpacing: "0.05em" }}>
-                Home Creations
-              </h1>
-              <p
-                className="font-din-arabic text-white/95 max-w-2xl mx-auto text-sm sm:text-base lg:text-lg leading-relaxed px-4"
-                style={{ letterSpacing: "0.1em" }}
-              >
-                Hand-poured candles and artisanal diffusers to create atmosphere, warmth, and an enduring sense of ease.
-              </p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="font-din-arabic text-white/80 text-xs sm:text-sm mb-4 sm:mb-6 tracking-widest"
+              style={{ letterSpacing: "0.2em" }}
+            >
+              BOTANICAL HOME FRAGRANCE
+            </motion.p>
+            <h1 className="font-american-typewriter text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-4 sm:mb-6"
+              style={{ letterSpacing: '0.05em',fontSize:'5rem' }}>
+              Home Creations
+            </h1>
+            <p
+              className="font-din-arabic text-white/95 max-w-2xl mx-auto text-base sm:text-lg lg:text-xl leading-relaxed px-4"
+              style={{ letterSpacing: "0.1em" }}
+            >
+              Hand-poured candles and artisanal diffusers to create atmosphere, warmth, and an enduring sense of ease.
+            </p>
             </motion.div>
           </div>
         </div>
