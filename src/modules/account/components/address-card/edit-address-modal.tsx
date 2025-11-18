@@ -7,7 +7,13 @@ import { Button, Heading, Text, clx } from "@medusajs/ui"
 import useToggleState from "@lib/hooks/use-toggle-state"
 import CountrySelect from "@modules/checkout/components/country-select"
 import Input from "@modules/common/components/input"
-import Modal from "@modules/common/components/modal"
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../../../../app/components/ui/dialog"
 import Spinner from "@modules/common/icons/spinner"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import { HttpTypes } from "@medusajs/types"
@@ -65,13 +71,43 @@ const EditAddress: React.FC<EditAddressProps> = ({
     <>
       <div
         className={clx(
-          "border rounded-rounded p-5 min-h-[220px] h-full w-full flex flex-col justify-between transition-colors",
+          "border rounded-rounded p-5 h-full w-full flex flex-col gap-3 transition-colors",
           {
             "border-gray-900": isActive,
           }
         )}
         data-testid="address-container"
       >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-base-semi">
+              {address.company || "Home"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              className="h-9 w-9 inline-flex items-center justify-center border border-ui-border-base rounded-md"
+              onClick={open}
+              data-testid="address-edit-button"
+              aria-label="Edit address"
+            >
+              <Edit />
+            </button>
+            <button
+              className="h-9 w-9 inline-flex items-center justify-center border border-ui-border-base rounded-md"
+              onClick={removeAddress}
+              data-testid="address-delete-button"
+              aria-label="Remove address"
+            >
+              {removing ? <Spinner /> : <Trash />}
+            </button>
+          </div>
+        </div>
+        {address.is_default_shipping && (
+          <span className="text-xxs tracking-wide text-ui-fg-subtle uppercase">
+            Default Address
+          </span>
+        )}
         <div className="flex flex-col">
           <Heading
             className="text-left text-base-semi"
@@ -79,55 +115,36 @@ const EditAddress: React.FC<EditAddressProps> = ({
           >
             {address.first_name} {address.last_name}
           </Heading>
-          {address.company && (
-            <Text
-              className="txt-compact-small text-ui-fg-base"
-              data-testid="address-company"
-            >
-              {address.company}
-            </Text>
-          )}
           <Text className="flex flex-col text-left text-base-regular mt-2">
             <span data-testid="address-address">
               {address.address_1}
               {address.address_2 && <span>, {address.address_2}</span>}
             </span>
             <span data-testid="address-postal-city">
-              {address.postal_code}, {address.city}
+              {address.city} - {address.postal_code}
             </span>
             <span data-testid="address-province-country">
               {address.province && `${address.province}, `}
               {address.country_code?.toUpperCase()}
             </span>
+            {address.phone && (
+              <span className="mt-2" data-testid="address-phone">
+                {address.phone}
+              </span>
+            )}
           </Text>
-        </div>
-        <div className="flex items-center gap-x-4">
-          <button
-            className="text-small-regular text-ui-fg-base flex items-center gap-x-2"
-            onClick={open}
-            data-testid="address-edit-button"
-          >
-            <Edit />
-            Edit
-          </button>
-          <button
-            className="text-small-regular text-ui-fg-base flex items-center gap-x-2"
-            onClick={removeAddress}
-            data-testid="address-delete-button"
-          >
-            {removing ? <Spinner /> : <Trash />}
-            Remove
-          </button>
         </div>
       </div>
 
-      <Modal isOpen={state} close={close} data-testid="edit-address-modal">
-        <Modal.Title>
-          <Heading className="mb-2">Edit address</Heading>
-        </Modal.Title>
-        <form action={formAction}>
-          <input type="hidden" name="addressId" value={address.id} />
-          <Modal.Body>
+      <Dialog open={state} onOpenChange={(isOpen: boolean) => (isOpen ? open() : close())}>
+        <DialogContent data-testid="edit-address-modal">
+          <DialogHeader>
+            <DialogTitle>
+              <Heading className="mb-2">Edit address</Heading>
+            </DialogTitle>
+          </DialogHeader>
+          <form action={formAction}>
+            <input type="hidden" name="addressId" value={address.id} />
             <div className="grid grid-cols-1 gap-y-2">
               <div className="grid grid-cols-2 gap-x-2">
                 <Input
@@ -147,13 +164,13 @@ const EditAddress: React.FC<EditAddressProps> = ({
                   data-testid="last-name-input"
                 />
               </div>
-              <Input
+              {/* <Input
                 label="Company"
                 name="company"
                 autoComplete="organization"
                 defaultValue={address.company || undefined}
                 data-testid="company-input"
-              />
+              /> */}
               <Input
                 label="Address"
                 name="address_1"
@@ -215,23 +232,23 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 {formState.error}
               </div>
             )}
-          </Modal.Body>
-          <Modal.Footer>
-            <div className="flex gap-3 mt-6">
-              <Button
-                type="reset"
-                variant="secondary"
-                onClick={close}
-                className="h-10"
-                data-testid="cancel-button"
-              >
-                Cancel
-              </Button>
-              <SubmitButton data-testid="save-button">Save</SubmitButton>
-            </div>
-          </Modal.Footer>
-        </form>
-      </Modal>
+            <DialogFooter>
+              <div className="flex gap-3 mt-6">
+                <Button
+                  type="reset"
+                  variant="secondary"
+                  onClick={close}
+                  className="h-10"
+                  data-testid="cancel-button"
+                >
+                  Cancel
+                </Button>
+                <SubmitButton data-testid="save-button">Save</SubmitButton>
+              </div>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

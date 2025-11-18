@@ -5,7 +5,6 @@ import { useEffect, useState } from "react"
 import AccountLayout from "@modules/account/templates/account-layout"
 import { Navigation } from "app/components/Navigation"
 import { RippleEffect } from "app/components/RippleEffect"
-import { upsertCartItems } from "lib/util/cart-helpers"
 
 interface CartItem {
   id: string
@@ -32,8 +31,19 @@ export default function ClientAccountShell({
   const handleCartUpdate = (item: CartItem | null) => {
     setHeroCartItem(item)
 
-    if (!item) return
-    setCartItems((prev) => upsertCartItems(prev, item))
+    if (item && item.quantity > 0) {
+      setCartItems((prev) => {
+        const idx = prev.findIndex((i) => i.id === item.id)
+        if (idx >= 0) {
+          const copy = [...prev]
+          copy[idx] = item
+          return copy
+        }
+        return [...prev, item]
+      })
+    } else if (item && item.quantity === 0) {
+      setCartItems((prev) => prev.filter((i) => i.id !== item.id))
+    }
   }
 
   const handleHeroQuantityUpdate = (quantity: number) => {
@@ -78,6 +88,7 @@ export default function ClientAccountShell({
           isScrolled={isScrolled}
           cartItems={cartItems}
           onCartUpdate={handleCartUpdate}
+          isLoggedIn={!!customer}
         />
         <AccountLayout customer={customer}>{dashboard}</AccountLayout>
         {/* If you render StickyCartBar here, pass showStickyCart/heroCartItem/handlers as props */}

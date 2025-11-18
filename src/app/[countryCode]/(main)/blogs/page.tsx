@@ -12,7 +12,6 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { RippleEffect } from 'app/components/RippleEffect'
 import { Navigation } from 'app/components/Navigation'
-import { upsertCartItems } from 'lib/util/cart-helpers'
 
 interface CartItem {
   id: string
@@ -175,7 +174,6 @@ const Home = () => {
     setHeroCartItem(item)
 
     if (!item) return
-    setCartItems((prevItems) => upsertCartItems(prevItems, item))
   }
 
   const handleHeroQuantityUpdate = (quantity: number) => {

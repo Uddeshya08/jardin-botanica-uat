@@ -4,9 +4,9 @@ import React, { useMemo, useState, useTransition, useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { ShoppingBag, Plus, Minus } from "lucide-react"
 import type { HttpTypes } from "@medusajs/types"
-import { useParams } from "next/navigation"
-import { addToCartAction, addRitualToCartAction } from "@lib/data/cart-actions"
-import { emitCartUpdated, emitCartOpen } from "@lib/util/cart-client"
+import { useParams, useRouter } from "next/navigation"
+import { addToCartAction} from "@lib/data/cart-actions"
+import { emitCartUpdated } from "@lib/util/cart-client"
 
 type ProductLike = Partial<HttpTypes.StoreProduct> & { metadata?: Record<string, any> }
 
@@ -80,6 +80,7 @@ export function StickyCartBar({
   // read /[countryCode]/... from route, fallback to "in"
   const params = useParams() as any
   const countryCode: string = (params?.countryCode ?? "in").toString().toLowerCase()
+  const router = useRouter()
 
   const variant = useMemo(() => pickVariant(product ?? undefined), [product])
 
@@ -311,11 +312,11 @@ export function StickyCartBar({
     // background network - add both products using optimized ritual action
     startTransition(async () => {
       try {
-        await addRitualToCartAction({
-          mainProduct: { variantId: variant.id, quantity },
-          ritualProduct: { variantId: ritualProduct.variantId, quantity: ritualQuantity },
-          countryCode
-        })
+        // await addRitualToCartAction({
+        //   mainProduct: { variantId: variant.id, quantity },
+        //   ritualProduct: { variantId: ritualProduct.variantId, quantity: ritualQuantity },
+        //   countryCode
+        // })
         
         // Show "Go to Cart" button after successful addition
         setShowGoToCart(true)
@@ -386,7 +387,7 @@ export function StickyCartBar({
                         transition={{ duration: 0.3 }}
                         className="font-din-arabic text-[10px] md:text-xs truncate"
                         style={{ 
-                          color: showGoToCart ? "#f97316" : "#545d4a" // Orange color for "Complimentary Shipping Unlocked"
+                          color: showGoToCart ? "#f97316" : "#545d4a" 
                         }}
                       >
                         {showRitualSuggestion && !ritualCompleted
@@ -469,12 +470,12 @@ export function StickyCartBar({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
-                      try { emitCartOpen() } catch {}
+                      router.push(`/${countryCode}/cart`)
                     }}
                     className="font-din-arabic px-2.5 md:px-5 py-2 md:py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-lg md:rounded-xl relative overflow-hidden flex items-center space-x-1 md:space-x-2 whitespace-nowrap text-xs md:text-sm"
                   >
                     <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                    <span className="hidden sm:inline">View Cart</span>
+                    <span className="hidden sm:inline">Checkout</span>
                     <span className="sm:hidden">Cart</span>
                   </motion.button>
                 ) : ritualProduct && showRitualSuggestion ? (

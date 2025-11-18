@@ -7,7 +7,6 @@ import { motion } from "motion/react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
-import { upsertCartItems } from "lib/util/cart-helpers"
 
 interface CartItem {
   id: string
@@ -37,7 +36,6 @@ const Category = () => {
 
   const handleCartUpdate = (item: CartItem | null) => {
     if (!item) return
-    setCartItems((prevItems) => upsertCartItems(prevItems, item))
   }
 
   useEffect(() => {

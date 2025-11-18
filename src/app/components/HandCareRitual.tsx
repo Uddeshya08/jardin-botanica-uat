@@ -82,7 +82,8 @@ export function HandCareRitualSection() {
             >
               {/* Connector Line - Not for last item */}
               {index < ritualSteps.length - 1 && (
-                <div className="absolute left-[1.25rem] top-14 bottom-[-2.5rem] w-px bg-gradient-to-b from-black/15 via-black/10 to-transparent hidden sm:block" />
+                <div className="absolute left-[1.25rem] top-14 bottom-[-2.5rem] w-px bg-gradient-to-b from-black/15 via-black/10 to-transparent hidden sm:block" 
+                style={{ background: "linear-gradient(to bottom, rgba(96, 95, 95, 0.15), rgba(186, 181, 181, 0.1))" }} />
               )}
 
               <div className="flex items-start gap-8 lg:gap-12">
@@ -171,4 +172,3 @@ export function HandCareRitualSection() {
     </motion.section>
   )
 }
-

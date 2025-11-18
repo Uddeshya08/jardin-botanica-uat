@@ -1,33 +1,19 @@
 "use client"
-import React, { Suspense, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 
-import ImageGallery from "@modules/products/components/image-gallery"
-import ProductActions from "@modules/products/components/product-actions"
-import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
-import ProductTabs from "@modules/products/components/product-tabs"
-import RelatedProducts from "@modules/products/components/related-products"
-import ProductInfo from "@modules/products/templates/product-info"
-import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import { notFound } from "next/navigation"
-import ProductActionsWrapper from "./product-actions-wrapper"
 import { HttpTypes } from "@medusajs/types"
 import { ProductContent, FeaturedSection, TestimonialsSection, FeaturedRitualTwoSection } from "../../../types/contentful"
-// import { ProductHero } from "app/components/ProductHero"
-// import React, {  Suspense } from 'react'
-import { motion } from "motion/react"
 import { Navigation } from "app/components/Navigation"
 import { ProductHero } from "app/components/ProductHero"
 import { StickyCartBar } from "app/components/StickyCartBar"
 import { Afterlife } from "app/components/Afterlife"
 import { PeopleAlsoBought } from "app/components/PeopleAlsoBought"
-import { FeaturedRitual } from "app/components/FeaturedRitual"
 
 import { CustomerTestimonials } from "app/components/CustomerTestimonials"
 import { RippleEffect } from "app/components/RippleEffect"
-import { PeopleAlsoBoughtTwo } from "app/components/PeopleAlsoBoughtTwo"
 import { FeaturedRitualTwo } from "app/components/FeaturedRitualTwo"
 import Featured from "app/components/Featured"
-import { upsertCartItems } from "lib/util/cart-helpers"
 
 interface RitualProduct {
   variantId: string
@@ -79,9 +65,30 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   const handleCartUpdate = (item: CartItem | null) => {
     setHeroCartItem(item)
 
-    if (!item) return
-    setCartItems((prevItems) => upsertCartItems(prevItems, item))
+    // Update cartItems array for navigation
+    if (item && item.quantity > 0) {
+      setCartItems((prevItems) => {
+        const existingIndex = prevItems.findIndex(
+          (cartItem) => cartItem.id === item.id
+        )
+        if (existingIndex >= 0) {
+          // Update existing item
+          const updatedItems = [...prevItems]
+          updatedItems[existingIndex] = item
+          return updatedItems
+        } else {
+          // Add new item
+          return [...prevItems, item]
+        }
+      })
+    } else if (item && item.quantity === 0) {
+      // Remove item if quantity is 0
+      setCartItems((prevItems) =>
+        prevItems.filter((cartItem) => cartItem.id !== item.id)
+      )
+    }
   }
+
 
   const handleHeroQuantityUpdate = (quantity: number) => {
     if (heroCartItem) {

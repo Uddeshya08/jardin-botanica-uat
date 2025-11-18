@@ -40,7 +40,7 @@ console.log("cart => ", cart);
   const [message, formAction] = useActionState(setAddresses, null)
 
   return (
-    <div className="bg-white">
+    <div className="bg-[#e3e3d8]">
       <div className="flex flex-row items-center justify-between mb-6">
         <Heading
           level="h2"

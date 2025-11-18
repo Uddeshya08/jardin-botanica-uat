@@ -7,7 +7,13 @@ import { useEffect, useState, useActionState } from "react"
 import useToggleState from "@lib/hooks/use-toggle-state"
 import CountrySelect from "@modules/checkout/components/country-select"
 import Input from "@modules/common/components/input"
-import Modal from "@modules/common/components/modal"
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../../../../app/components/ui/dialog"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import { HttpTypes } from "@medusajs/types"
 import { addCustomerAddress } from "@lib/data/customer"
@@ -49,20 +55,22 @@ const AddAddress = ({
   return (
     <>
       <button
-        className="border border-ui-border-base rounded-rounded p-5 min-h-[220px] h-full w-full flex flex-col justify-between"
+        className="px-8 py-4 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md flex items-center gap-2"
         onClick={open}
         data-testid="add-address-button"
       >
-        <span className="text-base-semi">New address</span>
+        <span className="text-base-regular">Add Address</span>
         <Plus />
       </button>
 
-      <Modal isOpen={state} close={close} data-testid="add-address-modal">
-        <Modal.Title>
-          <Heading className="mb-2">Add address</Heading>
-        </Modal.Title>
-        <form action={formAction}>
-          <Modal.Body>
+      <Dialog open={state} onOpenChange={(isOpen: boolean) => (isOpen ? open() : close())}>
+        <DialogContent data-testid="add-address-modal">
+          <DialogHeader>
+            <DialogTitle>
+              <Heading className="mb-2">Add address</Heading>
+            </DialogTitle>
+          </DialogHeader>
+          <form action={formAction}>
             <div className="flex flex-col gap-y-2">
               <div className="grid grid-cols-2 gap-x-2">
                 <Input
@@ -80,12 +88,12 @@ const AddAddress = ({
                   data-testid="last-name-input"
                 />
               </div>
-              <Input
+              {/* <Input
                 label="Company"
                 name="company"
                 autoComplete="organization"
                 data-testid="company-input"
-              />
+              /> */}
               <Input
                 label="Address"
                 name="address_1"
@@ -143,23 +151,23 @@ const AddAddress = ({
                 {formState.error}
               </div>
             )}
-          </Modal.Body>
-          <Modal.Footer>
-            <div className="flex gap-3 mt-6">
-              <Button
-                type="reset"
-                variant="secondary"
-                onClick={close}
-                className="h-10"
-                data-testid="cancel-button"
-              >
-                Cancel
-              </Button>
-              <SubmitButton data-testid="save-button">Save</SubmitButton>
-            </div>
-          </Modal.Footer>
-        </form>
-      </Modal>
+            <DialogFooter>
+              <div className="flex gap-3 mt-6">
+                <Button
+                  type="reset"
+                  variant="secondary"
+                  onClick={close}
+                  className="h-10"
+                  data-testid="cancel-button"
+                >
+                  Cancel
+                </Button>
+                <SubmitButton data-testid="save-button">Save</SubmitButton>
+              </div>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

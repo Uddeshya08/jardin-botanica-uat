@@ -181,4 +181,3 @@ export interface FeaturedRitualTwoSection {
   imagePosition: 'left' | 'right'
   active: boolean
 }
-

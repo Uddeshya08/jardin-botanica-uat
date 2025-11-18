@@ -4,9 +4,6 @@ import { motion, AnimatePresence } from 'motion/react'
 import {
   ChevronLeft,
   ChevronRight,
-  Facebook,
-  Instagram,
-  Twitter,
 } from 'lucide-react'
 
 const SingleBlogPage = () => {

@@ -5,8 +5,15 @@ import { motion, AnimatePresence } from 'motion/react'
 import { User, Search, ShoppingBag, X, Plus, Minus, Heart, Menu, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname, useRouter } from 'next/navigation'
-import { useLedger } from 'app/context/ledger-context'
+import { useRouter, usePathname } from 'next/navigation'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog'
+import { useAuth } from 'app/context/auth-context'
 
 interface CartItem {
   id: string
@@ -14,7 +21,18 @@ interface CartItem {
   price: number
   quantity: number
   image?: string
-  isRitualProduct?: boolean
+}
+
+interface DropdownItem {
+  label: string
+  href: string
+  image?: string
+}
+
+interface MenuItem {
+  name: string
+  href?: string
+  dropdown?: DropdownItem[]
 }
 
 interface NavigationProps {
@@ -22,9 +40,10 @@ interface NavigationProps {
   cartItems?: CartItem[]
   onCartUpdate?: (item: CartItem | null) => void
   onDropdownChange?: (isOpen: boolean) => void
+  forceWhiteText?: boolean
   disableSticky?: boolean
   disableAnimations?: boolean
-  forceWhiteText?: boolean
+  isLoggedIn?: boolean
 }
 
 export function Navigation({
@@ -35,196 +54,91 @@ export function Navigation({
   disableSticky = false,
   disableAnimations = false,
   forceWhiteText = false,
+  isLoggedIn = false,
 }: NavigationProps) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
+  const { isLoggedIn: authIsLoggedIn } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isWishlisted, setIsWishlisted] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isNavHovered, setIsNavHovered] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [isHomePage, setIsHomePage] = useState(false)
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [mobileActiveDropdown, setMobileActiveDropdown] = useState<string | null>(null)
+  const [showLoginDialog, setShowLoginDialog] = useState(false)
   const cartRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Determine if user is logged in - prioritize prop, then context, then fallback to false
+  const userIsLoggedIn = isLoggedIn !== false ? isLoggedIn : authIsLoggedIn
+
+  // --- Mega menu state & refs ---
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  const pathname = usePathname()
-  const router = useRouter()
-  const { ledger } = useLedger()
-  
-  // Get country code from pathname
-  const getCountryCode = () => {
-    if (pathname) {
-      const pathParts = pathname.split('/')
-      return pathParts[1] || 'in'
-    }
-    return 'in'
-  }
-
-  const countryCode = getCountryCode()
-  const [persistedCartItems, setPersistedCartItems] = useState<CartItem[]>([])
-  const hasSyncedCartRef = useRef(false)
-
-  // Load cart from localStorage on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const savedCart = localStorage.getItem('jardin-cart')
-        if (savedCart) {
-          const parsedCart = JSON.parse(savedCart)
-          console.log('Navigation: Loaded cart from localStorage on mount:', parsedCart)
-          setPersistedCartItems(parsedCart)
-          // Also trigger onCartUpdate to sync with parent component if needed
-          if (onCartUpdate && parsedCart.length > 0) {
-            parsedCart.forEach((item: CartItem) => {
-              onCartUpdate(item)
-            })
-          }
-        }
-      } catch (error) {
-        console.error('Error loading cart from localStorage:', error)
-      }
-    }
-  }, []) // Only run on mount
-
-  // Sync cartItems to localStorage whenever they change
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    if (!hasSyncedCartRef.current) {
-      hasSyncedCartRef.current = true
-      if (cartItems.length === 0) {
-        return
-      }
-    }
-
-    try {
-      console.log('Navigation: Saving cart to localStorage:', cartItems)
-      localStorage.setItem('jardin-cart', JSON.stringify(cartItems))
-      setPersistedCartItems(cartItems)
-    } catch (error) {
-      console.error('Error saving cart to localStorage:', error)
-    }
-  }, [cartItems])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    const handleLocalCartUpdate = (event: Event) => {
-      const customEvent = event as CustomEvent<{ items?: CartItem[] }>
-      const updatedItems = customEvent.detail?.items ?? []
-      setPersistedCartItems(updatedItems)
-    }
-
-    window.addEventListener('localCartUpdated', handleLocalCartUpdate as EventListener)
-    return () => {
-      window.removeEventListener('localCartUpdated', handleLocalCartUpdate as EventListener)
-    }
-  }, [])
 
   // Handle component mounting and home page detection
   useEffect(() => {
     setMounted(true)
-    
+
     const checkAndSetHomePage = () => {
-      const currentPath = window.location.pathname
-      // Check if it's home page or category page (should have white text navigation)
-      const isHome = currentPath === '/in' || 
-                     currentPath === '/in/' || 
-                     currentPath.includes('/category') ||
-                     currentPath.endsWith('/category') ||
-                     currentPath.includes('/in/category')
+      const currentPath = typeof window !== "undefined" ? window.location.pathname : '/'
+      const isHome = currentPath === '/in'
       setIsHomePage(isHome)
-      
-      // Set body class for CSS styling
+
       if (isHome) {
         document.body.classList.add('home-page')
       } else {
         document.body.classList.remove('home-page')
       }
     }
-    
-    // Initial check
+
     checkAndSetHomePage()
-    
-    // Listen for navigation changes
+
     const handleNavigation = () => {
       setTimeout(checkAndSetHomePage, 10)
     }
-    
-    // Listen for visibility change (tab switching)
+
     const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        setTimeout(checkAndSetHomePage, 10)
-      }
+      if (!document.hidden) setTimeout(checkAndSetHomePage, 10)
     }
-    
-    // Listen for focus events (tab switching fallback)
+
     const handleFocus = () => {
       setTimeout(checkAndSetHomePage, 10)
     }
-    
+
     window.addEventListener('popstate', handleNavigation)
     document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('focus', handleFocus)
-    
-    // Also listen for route changes in Next.js
-    const handleRouteChange = () => {
-      setTimeout(checkAndSetHomePage, 10)
-    }
-    
-    // If Next.js router is available
+
+    // intercept pushState/replaceState to detect SPA route changes (fallback)
     if (typeof window !== 'undefined' && window.history) {
       const originalPushState = window.history.pushState
       const originalReplaceState = window.history.replaceState
-      
-      window.history.pushState = function(...args) {
-        originalPushState.apply(this, args)
-        handleRouteChange()
+
+      window.history.pushState = function (data: any, unused: string, url?: string | URL | null) {
+        originalPushState.call(this, data, unused, url)
+        handleNavigation()
       }
-      
-      window.history.replaceState = function(...args) {
-        originalReplaceState.apply(this, args)
-        handleRouteChange()
+      window.history.replaceState = function (data: any, unused: string, url?: string | URL | null) {
+        originalReplaceState.call(this, data, unused, url)
+        handleNavigation()
       }
     }
-    
+
     return () => {
       window.removeEventListener('popstate', handleNavigation)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', handleFocus)
       document.body.classList.remove('home-page')
-      // Clean up any blur overlays
-      const blurOverlay = document.getElementById('dropdown-blur-overlay')
-      if (blurOverlay && blurOverlay.parentNode) {
-        blurOverlay.parentNode.removeChild(blurOverlay)
-      }
-      
-      // Reset navigation styles
-      const navigationElement = document.querySelector('nav') as HTMLElement
-      if (navigationElement) {
-        navigationElement.style.zIndex = ''
-        navigationElement.style.position = ''
-      }
-    }
-  }, [])
-
-  // Listen for global cart open event triggered from other components (e.g., StickyCartBar)
-  useEffect(() => {
-    const handleOpenCart = (_e: Event) => {
-      setIsCartOpen(true)
-    }
-    window.addEventListener('cart:open', handleOpenCart as EventListener)
-    return () => {
-      window.removeEventListener('cart:open', handleOpenCart as EventListener)
+      // cleanup overlay if still present
+      const overlay = document.getElementById('nav-blur-overlay')
+      if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay)
     }
   }, [])
 
@@ -234,10 +148,7 @@ export function Navigation({
       if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
         setIsCartOpen(false)
       }
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node)
-      ) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsSearchOpen(false)
       }
     }
@@ -248,12 +159,14 @@ export function Navigation({
     }
   }, [])
 
-  // Handle escape key to close search
+  // Handle escape key to close search and mobile menu
   useEffect(() => {
     function handleEscapeKey(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setIsSearchOpen(false)
         setSearchQuery('')
+        setActiveDropdown(null)
+        setIsMobileMenuOpen(false)
       }
     }
 
@@ -263,6 +176,30 @@ export function Navigation({
     }
   }, [])
 
+  // Close mobile menu when window is resized to desktop
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth >= 1024) {
+        setIsMobileMenuOpen(false)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isMobileMenuOpen])
+
   // Focus search input when opened
   useEffect(() => {
     if (isSearchOpen && searchInputRef.current) {
@@ -270,118 +207,116 @@ export function Navigation({
     }
   }, [isSearchOpen])
 
-  // Preload dropdown images for instant display
+  // Preload dropdown images
   useEffect(() => {
     menuItems.forEach(item => {
       if (item.dropdown) {
-        item.dropdown.forEach(dropdownItem => {
-          if (dropdownItem.image) {
+        item.dropdown.forEach(d => {
+          if (d.image) {
             const img = new window.Image()
-            img.src = dropdownItem.image
+            img.src = d.image
           }
         })
       }
     })
   }, [])
 
-  // Use persisted cart items if component cartItems is empty
-  const displayCartItems = cartItems.length > 0 ? cartItems : persistedCartItems
-
   const getTotalPrice = () => {
-    return displayCartItems.reduce(
+    return cartItems.reduce(
       (total, item) => total + item.price * item.quantity,
       0
     )
   }
 
-  const ledgerCount = ledger.length
-
   const getTotalItems = () => {
-    return displayCartItems.reduce((total, item) => total + item.quantity, 0)
+    return cartItems.reduce((total, item) => total + item.quantity, 0)
   }
 
   const handleQuantityChange = (itemId: string, change: number) => {
-    const item = displayCartItems.find((item) => item.id === itemId)
+    const item = cartItems.find((item) => item.id === itemId)
     if (item && onCartUpdate) {
       const newQuantity = Math.max(0, item.quantity + change)
       onCartUpdate({
         ...item,
         quantity: newQuantity,
       })
-      // Also update localStorage directly
-      if (typeof window !== 'undefined') {
-        try {
-          import("@lib/util/local-cart").then(({ updateLocalCartItem }) => {
-            updateLocalCartItem(itemId, newQuantity)
-          })
-        } catch (error) {
-          console.error('Error updating cart in localStorage:', error)
-        }
-      }
     }
   }
 
   const handleSearchToggle = () => {
     setIsSearchOpen(!isSearchOpen)
+    setIsCartOpen(false) // Close cart when opening search
+    setIsMobileMenuOpen(false) // Close mobile menu when opening search
     if (isSearchOpen) {
       setSearchQuery('')
     }
   }
 
+  const handleCartToggle = () => {
+    setIsCartOpen(!isCartOpen)
+    setIsSearchOpen(false) // Close search when opening cart
+    setIsMobileMenuOpen(false) // Close mobile menu when opening cart
+  }
+
+  const handleMobileMenuToggle = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen)
+    setIsSearchOpen(false) // Close search when opening menu
+    setIsCartOpen(false) // Close cart when opening menu
+  }
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      // Handle search functionality here
+      console.log('Searching for:', searchQuery)
       // Add your search logic here
     }
   }
 
+  const handleHeartClick = () => {
+    if (userIsLoggedIn) {
+      // User is logged in, redirect to ledger
+      const currentPath = pathname || ''
+      // Extract country code from path if present (e.g., /in/account/...)
+      const countryMatch = currentPath.match(/^\/([^\/]+)/)
+      const countryCode = countryMatch ? countryMatch[1] : 'in'
+      router.push(`/${countryCode}/account/ledger`)
+    } else {
+      // User is not logged in, show login dialog
+      setShowLoginDialog(true)
+    }
+  }
+
+  // --- Mega-menu handlers ---
   const handleMouseEnter = (itemName: string) => {
     if (dropdownTimeoutRef.current) {
       clearTimeout(dropdownTimeoutRef.current)
       dropdownTimeoutRef.current = null
     }
     setActiveDropdown(itemName)
-    setHoveredItem(null) // Reset hovered item when opening a new dropdown
+    setHoveredItem(null)
     onDropdownChange?.(true)
-    
-    // Add overlay blur effect instead of direct element blur
-    const navigationElement = document.querySelector('nav') as HTMLElement
-    
-    // Keep navigation sharp and on top
-    if (navigationElement) {
-      navigationElement.style.filter = 'none'
-      navigationElement.style.zIndex = '60'
-      navigationElement.style.position = 'relative'
-    }
-    
-    // Create a blur overlay instead of blurring elements directly
-    let blurOverlay = document.getElementById('dropdown-blur-overlay')
-    if (!blurOverlay) {
-      blurOverlay = document.createElement('div')
-      blurOverlay.id = 'dropdown-blur-overlay'
-      blurOverlay.style.cssText = `
+
+    // Create blur overlay if not present
+    let overlay = document.getElementById('nav-blur-overlay')
+    if (!overlay) {
+      overlay = document.createElement('div')
+      overlay.id = 'nav-blur-overlay'
+      overlay.style.cssText = `
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        top:0;left:0;right:0;bottom:0;
         backdrop-filter: blur(2px);
-        background: rgba(0, 0, 0, 0.1);
-        z-index: 45;
-        pointer-events: none;
-        transition: opacity 0.2s ease-out;
-        opacity: 0;
+        background: rgba(0,0,0,0.08);
+        z-index:40;
+        pointer-events:none;
+        opacity:0;
+        transition: opacity .18s ease-out;
       `
-      document.body.appendChild(blurOverlay)
+      document.body.appendChild(overlay)
+      // animate in
+      requestAnimationFrame(() => {
+        if (overlay) overlay.style.opacity = '1'
+      })
     }
-    
-    // Show the blur overlay
-    setTimeout(() => {
-      if (blurOverlay) {
-        blurOverlay.style.opacity = '1'
-      }
-    }, 10)
   }
 
   const handleMouseLeave = () => {
@@ -389,69 +324,59 @@ export function Navigation({
       setActiveDropdown(null)
       setHoveredItem(null)
       onDropdownChange?.(false)
-      
-      // Remove blur overlay when dropdown closes
-      const blurOverlay = document.getElementById('dropdown-blur-overlay')
-      if (blurOverlay) {
-        blurOverlay.style.opacity = '0'
+      // Remove blur overlay
+      const overlay = document.getElementById('nav-blur-overlay')
+      if (overlay) {
+        overlay.style.opacity = '0'
         setTimeout(() => {
-          if (blurOverlay && blurOverlay.parentNode) {
-            blurOverlay.parentNode.removeChild(blurOverlay)
-          }
-        }, 200) // Wait for transition to complete
+          if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay)
+        }, 180)
       }
-      
-      // Reset navigation styles
-      const navigationElement = document.querySelector('nav') as HTMLElement
-      if (navigationElement) {
-        navigationElement.style.zIndex = ''
-        navigationElement.style.position = ''
-      }
-    }, 100) // Reduced for faster, smoother response
+    }, 120)
   }
 
-  const handleDropdownItemHover = (itemLabel: string) => {
-    setHoveredItem(itemLabel)
+  const handleDropdownItemHover = (label: string) => {
+    setHoveredItem(label)
   }
 
-  // Define menu items with dropdown structure
-  const menuItems = [
+  // --- Menu items with dropdown structure ---
+  const menuItems: MenuItem[] = [
     {
       name: 'BODY & HANDS',
-      href: `/${countryCode}/body-hands`,
+      href: '/body-hands',
       dropdown: [
-        { 
-          label: 'Cleansers & Exfoliants', 
+        {
+          label: 'Cleansers & Exfoliants',
           href: '/products/tea-exfoliant-rinse',
-          image: 'https://images.unsplash.com/photo-1743597979473-5b1c0cae1bce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBoYW5kJTIwY3JlYW0lMjBsb3Rpb258ZW58MXx8fHwxNzU5NzQ5NDg0fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+          image: 'https://images.unsplash.com/photo-1743597979473-5b1c0cae1bce?auto=format&fit=crop&w=1080&q=80'
         },
-        { 
-          label: 'Lotions & Moisturisers', 
+        {
+          label: 'Lotions & Moisturisers',
           href: '/products/cedarbloom',
-          image: 'https://images.unsplash.com/photo-1660675558428-5a7a1b8546f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBoYW5kJTIwbG90aW9uJTIwbW9pc3R1cml6ZXJ8ZW58MXx8fHwxNzU5NzY4OTIwfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+          image: 'https://images.unsplash.com/photo-1660675558428-5a7a1b8546f4?auto=format&fit=crop&w=1080&q=80'
         }
       ]
     },
     {
       name: 'HOME CREATIONS',
+      href: '/home-creations',
       dropdown: [
-        { 
-          label: 'Candles', 
-          href: '#',
-          image: 'https://images.unsplash.com/photo-1648310379950-2773bb5d2525?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb3Jlc3QlMjBzY2VudGVkJTIwY2FuZGxlfGVufDF8fHx8MTc1OTc2OTE1NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+        {
+          label: 'Candles',
+          href: '/products/candles',
+          image: 'https://images.unsplash.com/photo-1648310379950-2773bb5d2525?auto=format&fit=crop&w=1080&q=80'
         },
-        { 
-          label: 'Lava Rock Diffusers', 
-          href: '#',
-          image: 'https://images.unsplash.com/photo-1747198919508-a7657e63d4f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXZhJTIwcm9jayUyMGRpZmZ1c2VyJTIwYXJvbWF0aGVyYXB5fGVufDF8fHx8MTc1OTc2ODkyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+        {
+          label: 'Lava Rock Diffusers',
+          href: '/products/diffusers',
+          image: 'https://images.unsplash.com/photo-1747198919508-a7657e63d4f9?auto=format&fit=crop&w=1080&q=80'
         }
       ]
     },
     { name: 'JOURNAL', href: '/blogs' },
-    { name: 'BOTANIST\'S LAB', href: '/the-lab' }
+    { name: "BOTANIST'S LAB", href: '/the-lab' },
+    // { name: 'PRODUCTS', href: '/store' },
   ]
-
-
 
   // Determine navigation background and text styling
   const getNavStyles = () => {
@@ -513,47 +438,14 @@ export function Navigation({
 
   const navStyles = getNavStyles()
 
-  const getOrCreateMedusaCart = async () => {
-    console.log("function called")
-  if (typeof window === 'undefined') return null;
-     console.log("type window successs")
-  let cartId = localStorage.getItem('medusa_cart_id');
-  if (cartId) {
-    router.push(`/${countryCode}/product-checkout`);
-    return cartId;
-  }
-
-  console.log("have cart id")
-
-  // create new cart in Medusa
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/store/carts`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json',
-      'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
-     },
-    credentials: 'include', 
-  });
-    console.log(res, "res of mudusa cart id api")
-    console.log(process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY, "env ")
-
-  const data = await res.json();
-  cartId = data?.cart?.id;
-  if (cartId) {
-    localStorage.setItem('medusa_cart_id', cartId);
-  }
-  router.push(`/${countryCode}/product-checkout`);
-  return cartId;
-};
-
-
   return (
     <>
       <div className={disableSticky ? "relative" : "fixed top-0 left-0 right-0 z-50"}>
         {/* Top Shipping Bar */}
         <motion.div
-          initial={disableAnimations ? false : { y: -50, opacity: 0 }}
-          animate={disableAnimations ? false : { y: 0, opacity: 1 }}
-          transition={disableAnimations ? {} : { duration: 0.6, ease: 'easeOut' }}
+          initial={disableAnimations ? undefined : { y: -50, opacity: 0 }}
+          animate={disableAnimations ? undefined : { y: 0, opacity: 1 }}
+          transition={disableAnimations ? undefined : { duration: 0.6, ease: 'easeOut' }}
           className="text-white py-2"
           style={{ backgroundColor: '#545d4a' }}
         >
@@ -568,16 +460,16 @@ export function Navigation({
 
         {/* Main Navigation */}
         <motion.nav
-          initial={disableAnimations ? false : { y: -100 }}
-          animate={disableAnimations ? false : { y: 0 }}
-          transition={disableAnimations ? {} : { duration: 0.8, ease: 'easeOut', delay: 0.3 }}
+          initial={disableAnimations ? undefined : { y: -100 }}
+          animate={disableAnimations ? undefined : { y: 0 }}
+          transition={disableAnimations ? undefined : { duration: 0.8, ease: 'easeOut', delay: 0.3 }}
           className="group/nav"
           onMouseEnter={() => setIsNavHovered(true)}
           onMouseLeave={() => setIsNavHovered(false)}
           style={{
             backgroundColor: navStyles.backgroundColor,
-            backdropFilter: navStyles.backdropFilter,
-            WebkitBackdropFilter: navStyles.WebkitBackdropFilter,
+            backdropFilter: navStyles.backdropFilter as any,
+            WebkitBackdropFilter: (navStyles as any).WebkitBackdropFilter,
             borderBottom: navStyles.borderBottom,
             transition: disableAnimations ? 'none' : 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
             position: 'relative',
@@ -598,673 +490,733 @@ export function Navigation({
               }}
             />
           )}
+
           <div className="px-6 lg:px-12 relative z-20">
-      <div className="flex items-center justify-between py-4 relative">
-        {/* Logo */}
-        <motion.div
-          initial={disableAnimations ? false : { opacity: 0 }}
-          animate={disableAnimations ? false : { opacity: 1 }}
-          transition={disableAnimations ? {} : { delay: 0.3, duration: 0.6 }}
-          className="flex w-full"
-        >
-          <a href="/" className="">
-            <img
-              src={navStyles.logoSrc}
-              alt="Jardin Botanica Logo"
-              width={250}
-              height={30}
-              className="transition-all duration-300"
-            />
-          </a>
-        </motion.div>
-
-        {/* Absolutely Centered Navigation Menu */}
-        <motion.div
-          initial={disableAnimations ? false : { opacity: 0 }}
-          animate={disableAnimations ? false : { opacity: 1 }}
-          transition={disableAnimations ? {} : { delay: 0.4, duration: 0.6 }}
-          className="hidden lg:flex space-x-8 absolute left-1/2 transform -translate-x-1/2"
-        >
-          {menuItems.map((item, index) => (
-            <div 
-              key={item.name}
-              className="relative"
-              style={index === 0 ? { marginRight: 0 } : {}}
-              onMouseEnter={() => item.dropdown && handleMouseEnter(item.name)}
-              onMouseLeave={handleMouseLeave}
-            >
-              <motion.a
-                href={item.href || '#'}
-                initial={disableAnimations ? false : { opacity: 0, y: -10 }}
-                animate={disableAnimations ? false : { opacity: 1, y: 0 }}
-                transition={disableAnimations ? {} : { delay: 0.4 + index * 0.1, duration: 0.4 }}
-                className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative group/item hover:opacity-80 whitespace-nowrap"
-                style={{ color: navStyles.textColor }}
+            <div className="flex items-center justify-between py-6 relative">
+              {/* Logo */}
+              <motion.div
+                initial={disableAnimations ? undefined : { opacity: 0 }}
+                animate={disableAnimations ? undefined : { opacity: 1 }}
+                transition={disableAnimations ? undefined : { delay: 0.3, duration: 0.6 }}
+                className="flex w-full"
               >
-                {item.name}
-                <span 
-                  className="absolute bottom-[-4px] left-0 w-0 h-[1px] transition-all duration-500 group-hover/item:w-full"
-                  style={{ backgroundColor: '#e58a4d' }}
-                ></span>
-              </motion.a>
+                <a href="/" className="">
+                  <img
+                    src={navStyles.logoSrc}
+                    alt="Jardin Botanica Logo"
+                    width={270}
+                    height={60}
+                    className="transition-all duration-300"
+                  />
+                </a>
+              </motion.div>
 
-              {/* Dropdown Menu */}
-              <AnimatePresence>
-                {item.dropdown && activeDropdown === item.name && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ 
-                      duration: 0.2, 
-                      ease: 'easeOut'
-                    }}
-                    className="absolute top-full left-0 pt-4 z-50"
+              {/* --- Centered Desktop Navigation with Mega Menu --- */}
+              <motion.div
+                initial={disableAnimations ? undefined : { opacity: 0 }}
+                animate={disableAnimations ? undefined : { opacity: 1 }}
+                transition={disableAnimations ? undefined : { delay: 0.4, duration: 0.6 }}
+                className="hidden lg:flex space-x-8 absolute left-1/2 transform -translate-x-1/2"
+              >
+                {menuItems.map((item, index) => (
+                  <div
+                    key={item.name}
+                    className="relative"
+                    onMouseEnter={() => item.dropdown && handleMouseEnter(item.name)}
+                    onMouseLeave={handleMouseLeave}
                   >
-                    <div 
-                      className="border shadow-2xl overflow-hidden"
-                      style={{ 
-                        backgroundColor: '#e3e3d8',
-                        borderColor: 'rgba(0, 0, 0, 0.1)',
-                      }}
+                    <motion.a
+                      href={item.href || '#'}
+                      initial={disableAnimations ? undefined : { opacity: 0, y: -10 }}
+                      animate={disableAnimations ? undefined : { opacity: 1, y: 0 }}
+                      transition={disableAnimations ? undefined : { delay: 0.4 + index * 0.1, duration: 0.4 }}
+                      className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative group/item hover:opacity-80 whitespace-nowrap"
+                      style={{ color: navStyles.textColor }}
                     >
-                      <div className="flex h-72">
-                        {/* Menu Items */}
-                        <div className="py-6 w-80 flex flex-col">
-                          {item.dropdown.map((dropdownItem, idx) => (
-                            <a
-                              key={idx}
-                              href={dropdownItem.href}
-                              className="group/dropdown-item block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150 relative"
-                              style={{
-                                color: '#000000',
-                                fontSize: '0.95rem'
-                              }}
-                              onMouseEnter={() => {
-                                handleDropdownItemHover(dropdownItem.label)
-                              }}
+                      {item.name}
+                      <span
+                        className="absolute bottom-[-4px] left-0 w-0 h-[1px] transition-all duration-500 group-hover/item:w-full"
+                        style={{ backgroundColor: '#e58a4d' }}
+                      />
+                    </motion.a>
+
+                    {/* Mega Dropdown */}
+                    <AnimatePresence>
+                      {item.dropdown && activeDropdown === item.name && (
+                        <motion.div
+                          initial={disableAnimations ? undefined : { opacity: 0 }}
+                          animate={disableAnimations ? undefined : { opacity: 1 }}
+                          exit={disableAnimations ? undefined : { opacity: 0 }}
+                          transition={disableAnimations ? undefined : { 
+                            duration: 0.2, 
+                            ease: 'easeOut'
+                          }}
+                          className="absolute top-full left-0 pt-4 z-50"
+                        >
+                          <div
+                            className="border shadow-2xl overflow-hidden"
+                            style={{
+                              backgroundColor: '#e3e3d8',
+                              borderColor: 'rgba(0,0,0,0.08)',
+                            }}
+                          >
+                            <div className="flex h-72">
+                              {/* Left: Links */}
+                              <div className="py-6 w-80 flex flex-col">
+                                {item.dropdown.map((dItem) => (
+                                  <a
+                                    key={dItem.label}
+                                    href={dItem.href}
+                                    className="group/dropdown-item block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150"
+                                    style={{ color: '#000', fontSize: '0.95rem' }}
+                                    onMouseEnter={() => handleDropdownItemHover(dItem.label)}
+                                  >
+                                    <span className="relative inline-block">
+                                      {dItem.label}
+                                      <span
+                                        className="absolute bottom-[-2px] left-0 w-0 h-[1px] transition-all duration-300 group-hover/dropdown-item:w-full"
+                                        style={{ backgroundColor: '#e58a4d' }}
+                                      />
+                                    </span>
+                                  </a>
+                                ))}
+                              </div>
+
+                              {/* Right: Image preview */}
+                              <div className="w-96 h-full overflow-hidden relative p-4" style={{ backgroundColor: '#e3e3d8' }}>
+                                {item.dropdown.map((dItem) => (
+                                  <img
+                                    key={dItem.label}
+                                    src={dItem.image}
+                                    alt={dItem.label}
+                                    className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                                    style={{
+                                      opacity: hoveredItem === dItem.label ? 1 : 0,
+                                      transition: 'opacity 0.18s ease-out',
+                                      zIndex: hoveredItem === dItem.label ? 2 : 1
+                                    }}
+                                    loading="eager"
+                                  />
+                                ))}
+                                {/* fallback/default image */}
+                                {item.dropdown[0]?.image && (
+                                  <img
+                                    src={item.dropdown[0].image}
+                                    alt="default"
+                                    className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                                    style={{
+                                      opacity: !hoveredItem ? 1 : 0,
+                                      transition: 'opacity 0.18s ease-out',
+                                      zIndex: 0
+                                    }}
+                                    loading="eager"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))}
+              </motion.div>
+
+              {/* Mobile Menu Toggle - Search, Cart, and Hamburger */}
+              <motion.div
+                initial={disableAnimations ? undefined : { opacity: 0 }}
+                animate={disableAnimations ? undefined : { opacity: 1 }}
+                transition={disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }}
+                className="lg:hidden flex items-center space-x-1 z-10"
+              >
+                {/* Mobile Search */}
+                <div className="relative -mr-1" ref={searchRef}>
+                  <motion.button
+                    whileHover={disableAnimations ? {} : { scale: 1.1 }}
+                    whileTap={disableAnimations ? {} : { scale: 0.9 }}
+                    onClick={handleSearchToggle}
+                    className="p-2 transition-all duration-300"
+                    style={{ color: navStyles.textColor }}
+                    aria-label="Search"
+                  >
+                    <Search className="w-5 h-5" />
+                  </motion.button>
+                  {/* Mobile Search Dropdown */}
+                  <AnimatePresence>
+                    {isSearchOpen && (
+                      <motion.div
+                        initial={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
+                        animate={disableAnimations ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                        exit={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
+                        transition={disableAnimations ? undefined : { duration: 0.2 }}
+                        className="fixed left-4 right-4 top-[110px] max-w-md mx-auto border shadow-2xl z-[100]"
+                        style={{ 
+                          backgroundColor: '#e3e3d8',
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }}
+                      >
+                        <div className="p-4">
+                          <form onSubmit={handleSearchSubmit} className="relative">
+                            <input
+                              ref={searchInputRef}
+                              type="text"
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              placeholder="Search products..."
+                              className="w-full px-4 py-3 bg-white/60 border font-din-arabic tracking-wide focus:outline-none focus:border-black transition-colors rounded-lg"
+                              style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}
+                            />
+                            <button
+                              type="submit"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
                             >
-                              <span className="relative inline-block">
-                                {dropdownItem.label}
-                                <span 
-                                  className="absolute bottom-[-2px] left-0 w-0 h-[1px] transition-all duration-300 group-hover/dropdown-item:w-full"
-                                  style={{ backgroundColor: '#e58a4d' }}
-                                ></span>
-                              </span>
-                            </a>
-                          ))}
+                              <Search className="w-5 h-5" />
+                            </button>
+                          </form>
                         </div>
-                        
-                        {/* Individual Dropdown Images */}
-                        <div className="w-96 h-full overflow-hidden relative p-4" style={{ backgroundColor: '#e3e3d8' }}>
-                          {item.dropdown.map((dropdownItem, idx) => (
-                            <img
-                              key={dropdownItem.label}
-                              src={dropdownItem.image}
-                              alt={dropdownItem.label}
-                              className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
-                              style={{ 
-                                opacity: hoveredItem === dropdownItem.label ? 1 : 0,
-                                transition: 'opacity 0.2s ease-out',
-                                zIndex: hoveredItem === dropdownItem.label ? 2 : 1
-                              }}
-                              loading="eager"
-                            />
-                          ))}
-                          {item.dropdown[0]?.image && (
-                            <img
-                              key="default"
-                              src={item.dropdown[0].image}
-                              alt={item.dropdown[0].label}
-                              className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
-                              style={{ 
-                                opacity: !hoveredItem ? 1 : 0,
-                                transition: 'opacity 0.2s ease-out',
-                                zIndex: 0
-                              }}
-                              loading="eager"
-                            />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Mobile Cart */}
+                <div className="relative" ref={cartRef}>
+                  <motion.button
+                    whileHover={disableAnimations ? {} : { scale: 1.1 }}
+                    whileTap={disableAnimations ? {} : { scale: 0.9 }}
+                    onClick={() => setIsCartOpen(!isCartOpen)}
+                    className="relative p-2 transition-all duration-300"
+                    style={{ color: navStyles.textColor }}
+                    aria-label="Shopping bag"
+                  >
+                    <ShoppingBag className="w-5 h-5" />
+                    {getTotalItems() > 0 && (
+                      <span
+                        className="absolute top-0 right-0 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-din-arabic"
+                        style={{ 
+                          backgroundColor: '#e58a4d',
+                          fontWeight: 600
+                        }}
+                      >
+                        {getTotalItems()}
+                      </span>
+                    )}
+                  </motion.button>
+                  {/* Mobile Cart Dropdown */}
+                  <AnimatePresence>
+                    {isCartOpen && (
+                      <motion.div
+                        initial={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
+                        animate={disableAnimations ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                        exit={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
+                        transition={disableAnimations ? undefined : { duration: 0.2 }}
+                        className="fixed left-4 right-4 top-[110px] max-w-md mx-auto border shadow-2xl z-[100]"
+                        style={{ 
+                          backgroundColor: '#e3e3d8',
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }}
+                      >
+                        {/* Cart Header */}
+                        <div className="p-4 border-b" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-american-typewriter text-lg text-black">Your Cart</h3>
+                            <button
+                              onClick={() => setIsCartOpen(false)}
+                              className="p-1 hover:bg-black/10 transition-colors rounded"
+                            >
+                              <X className="w-4 h-4 text-black/70" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Cart Content */}
+                        <div className="max-h-[60vh] overflow-y-auto">
+                          {cartItems.length === 0 ? (
+                            <div className="p-8 text-center">
+                              <div className="mb-4">
+                                <ShoppingBag className="w-12 h-12 text-black/30 mx-auto" />
+                              </div>
+                              <p className="font-din-arabic text-black/70 mb-4">Nothing is in your cart</p>
+                              <button
+                                onClick={() => setIsCartOpen(false)}
+                                className="font-din-arabic px-6 py-2 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
+                              >
+                                Continue Shopping
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="p-4 space-y-4">
+                              {cartItems.map((item) => (
+                                <div key={item.id} className="flex items-center space-x-3 p-3 bg-white/50 border" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
+                                  {item.image && (
+                                    <img 
+                                      src={item.image} 
+                                      alt={item.name}
+                                      className="w-16 h-16 object-cover"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-din-arabic text-black font-medium truncate">{item.name}</h4>
+                                    <p className="font-din-arabic text-black/70 text-sm">₹{item.price}</p>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <button 
+                                      onClick={() => handleQuantityChange(item.id, -1)}
+                                      className="p-1 hover:bg-black/10 transition-colors rounded"
+                                    >
+                                      <Minus className="w-3 h-3 text-black/70" />
+                                    </button>
+                                    <span className="font-din-arabic text-black text-sm min-w-[20px] text-center">
+                                      {item.quantity}
+                                    </span>
+                                    <button 
+                                      onClick={() => handleQuantityChange(item.id, 1)}
+                                      className="p-1 hover:bg-black/10 transition-colors rounded"
+                                    >
+                                      <Plus className="w-3 h-3 text-black/70" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           )}
                         </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
-        </motion.div>
 
-        {/* Mobile Menu Toggle */}
-        <motion.div
-          initial={disableAnimations ? false : { opacity: 0 }}
-          animate={disableAnimations ? false : { opacity: 1 }}
-          transition={disableAnimations ? {} : { delay: 0.7, duration: 0.6 }}
-          className="lg:hidden flex items-center space-x-4"
-        >
-          <motion.button
-            whileHover={disableAnimations ? {} : { scale: 1.1 }}
-            whileTap={disableAnimations ? {} : { scale: 0.9 }}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 transition-all duration-300"
-            style={{ color: navStyles.textColor }}
-            aria-label="Menu"
-          >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </motion.button>
-          
-          <div className="relative" ref={cartRef}>
-            <motion.button
-              whileHover={disableAnimations ? {} : { scale: 1.1 }}
-              whileTap={disableAnimations ? {} : { scale: 0.9 }}
-              onClick={() => setIsCartOpen(!isCartOpen)}
-              className="p-2 transition-all duration-300"
-              style={{ color: navStyles.textColor }}
-              aria-label="Shopping bag"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              {getTotalItems() > 0 && (
-                <span 
-                  className="absolute -top-1 -right-1 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-din-arabic"
-                  style={{ backgroundColor: '#e58a4d' }}
-                >
-                  {getTotalItems()}
-                </span>
-              )}
-            </motion.button>
-          </div>
-        </motion.div>
-
-        {/* Desktop Actions */}
-        <motion.div
-          initial={disableAnimations ? false : { opacity: 0 }}
-          animate={disableAnimations ? false : { opacity: 1 }}
-          transition={disableAnimations ? {} : { delay: 0.7, duration: 0.6 }}
-          className="hidden lg:flex items-center space-x-6"
-        >
-          {/* Search Section */}
-          <div className="relative flex items-center" ref={searchRef} style={{margin:0}}>
-            <AnimatePresence>
-              {isSearchOpen && (
-                <motion.form
-                  initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: 'auto', opacity: 1 }}
-                  exit={{ width: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
-                  onSubmit={handleSearchSubmit}
-                  className="mr-3 overflow-hidden"
-                >
-                  <motion.input
-                    ref={searchInputRef}
-                    initial={{ width: 0 }}
-                    animate={{ width: 200 }}
-                    exit={{ width: 0 }}
-                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search..."
-                    className="px-3 py-2 bg-transparent border-b border-opacity-30 transition-all duration-300 focus:outline-none placeholder-opacity-70 font-light"
-                    style={{ 
-                      color: navStyles.textColor,
-                      borderColor: navStyles.textColor === 'white' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)'
-                    }}
-                  />
-                </motion.form>
-              )}
-            </AnimatePresence>
-
-            <motion.button
-              whileHover={disableAnimations ? {} : { scale: 1.1 }}
-              whileTap={disableAnimations ? {} : { scale: 0.9 }}
-              onClick={handleSearchToggle}
-              className="p-2 transition-all duration-300" 
-              style={{ color: navStyles.textColor }}
-              aria-label="Search"
-            >
-              <Search className="w-5 h-5" />
-            </motion.button>
-          </div>
-
-          <motion.button
-            whileHover={disableAnimations ? {} : { scale: 1.1 }}
-            whileTap={disableAnimations ? {} : { scale: 0.9 }}
-            onClick={() => router.push(`/${countryCode}/ledger`)}
-            className="p-2 transition-all duration-300 relative"
-            style={{ color: ledgerCount > 0 ? '#e58a4d' : navStyles.textColor }}
-            aria-label="Ledger"
-          >
-            <Heart
-              className={`w-5 h-5 transition-colors ${ledgerCount > 0 ? 'fill-current' : ''}`}
-            />
-            {ledgerCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#e58a4d] text-black text-xs rounded-full w-4 h-4 flex items-center justify-center font-light">
-                {ledgerCount}
-              </span>
-            )}
-          </motion.button>
-
-          {/* Profile Icon */}
-          <motion.button
-            whileHover={disableAnimations ? {} : { scale: 1.1 }}
-            whileTap={disableAnimations ? {} : { scale: 0.9 }}
-            className="p-2 transition-all duration-300"
-            style={{ color: navStyles.textColor }}
-            aria-label="Profile"
-          >
-            <a href="/profile">
-              <User className="w-5 h-5" />
-            </a>
-          </motion.button>
-
-          <div className="relative" ref={cartRef}>
-            <motion.button
-              whileHover={disableAnimations ? {} : { scale: 1.1 }}
-              whileTap={disableAnimations ? {} : { scale: 0.9 }}
-              onClick={() => setIsCartOpen(!isCartOpen)}
-              className="p-2 transition-all duration-300 relative"
-              style={{ color: navStyles.textColor }}
-              aria-label="Shopping bag"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              {getTotalItems() > 0 && (
-                <span
-                  className="absolute -top-1 -right-1 bg-orange-400 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-light"
-                >
-                  {getTotalItems()}
-                </span>
-              )}
-            </motion.button>
-
-            {/* Cart Dropdown */}
-            <AnimatePresence>
-              {isCartOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute right-0 top-full mt-2 w-96 border border-black border-opacity-10 shadow-2xl z-50"
-                  style={{ backgroundColor: '#e3e3d8' }}
-                >
-                  {/* Cart Header */}
-                  <div className="p-4 border-b border-black border-opacity-10">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-american-typewriter text-lg text-black">
-                        Your Cart
-                      </h3>
-                      <button
-                        onClick={() => setIsCartOpen(false)}
-                        className="p-1 transition-colors rounded"
-                        style={{ 
-                          '--hover-bg': 'rgb(0 0 0 / 7%)'
-                        } as React.CSSProperties}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(0 0 0 / 7%)'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <X className="w-4 h-4 text-black text-opacity-70" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Cart Content */}
-                  <div className="max-h-96 overflow-y-auto">
-                    {displayCartItems.length === 0 ? (
-                      // Empty Cart State
-                      <div className="p-8 text-center">
-                        <div className="mb-4">
-                          <ShoppingBag className="w-12 h-12 text-black text-opacity-30 mx-auto" />
-                        </div>
-                        <p className="font-din-arabic text-black text-opacity-70 mb-4">
-                          Nothing is in your cart
-                        </p>
-                        <button
-                          onClick={() => setIsCartOpen(false)}
-                          className="px-6 py-2 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide font-din-arabic"
-                        >
-                          Continue Shopping
-                        </button>
-                      </div>
-                    ) : (
-                      // Cart Items
-                      <div className="p-4 space-y-4">
-                        {displayCartItems.map((item) => (
-                          <div
-                            key={item.id}
-                            className="flex items-center gap-3 p-3 border border-black border-opacity-5"
-                            style={{ backgroundColor: '#f1f1ec' }}
-                          >
-                            {/* Only show image for ritual products */}
-                            {item.isRitualProduct && item.image && (
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                                className="w-16 h-16 object-cover"
-                              />
-                            )}
-                            <div className="flex-1">
-                              <h4 className="font-din-arabic text-black">
-                                {item.name}
-                              </h4>
-                              <p className="font-din-arabic text-black text-opacity-70 text-sm">
-                                ₹{item.price}
-                              </p>
+                        {/* Cart Footer */}
+                        {cartItems.length > 0 && (
+                          <div className="p-4 border-t" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
+                            <div className="flex items-center justify-between mb-4">
+                              <span className="font-din-arabic text-black">Total:</span>
+                              <span className="font-din-arabic text-black font-medium">₹{getTotalPrice()}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() =>
-                                  handleQuantityChange(item.id, -1)
-                                }
-                                className="p-1 transition-colors rounded"
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(0 0 0 / 7%)'}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                              >
-                                <Minus className="w-3 h-3 text-black text-opacity-70" />
-                              </button>
-                              <span className="font-din-arabic text-black text-sm min-w-[20px] text-center">
-                                {item.quantity}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  handleQuantityChange(item.id, 1)
-                                }
-                                className="p-1 transition-colors rounded"
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(0 0 0 / 7%)'}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                              >
-                                <Plus className="w-3 h-3 text-black text-opacity-70" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Cart Footer */}
-                  {displayCartItems.length > 0 && (
-                    <div className="p-4 border-t border-black border-opacity-10">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="font-din-arabic text-black">
-                          Total: 
-                        </span>
-                        <span className="font-din-arabic text-black">
-                          ₹{getTotalPrice()}
-                        </span>
-                      </div>
-                      <div className="space-y-2 text-center">
-                       {/* <Link href={`/${countryCode}/product-checkout`}> */}
-                        <button  onClick={getOrCreateMedusaCart} className="w-full py-3 bg-black text-white hover:bg-opacity-90 transition-colors tracking-wide text-center font-din-arabic">
-                          Checkout
-                        </button>
-                       {/* </Link> */}
-                        <button
-                          onClick={() => setIsCartOpen(false)}
-                          className="w-full py-2 border border-black border-opacity-20 text-black transition-colors tracking-wide text-center font-din-arabic"
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(0 0 0 / 7%)'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                        >
-                          Continue Shopping
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.div>
-      </div>
-    </div>
-        </motion.nav>
-
-        {/* Mobile Menu Drawer */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <>
-              {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="fixed inset-0 bg-black/60 z-40 lg:hidden"
-                onClick={() => setIsMobileMenuOpen(false)}
-                style={{ top: '90px' }} // Below the header
-              />
-              
-              {/* Menu Content */}
-              <motion.div
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                className="fixed right-0 top-[90px] bottom-0 w-full max-w-sm z-50 overflow-y-auto lg:hidden"
-                style={{ backgroundColor: '#e3e3d8' }}
-              >
-                <div className="p-6">
-                  {/* Mobile Navigation Links */}
-                  <nav className="space-y-1">
-                    {menuItems.map((item) => (
-                      <div key={item.name}>
-                        {item.dropdown ? (
-                          <div>
-                            <button
-                              onClick={() => setMobileActiveDropdown(
-                                mobileActiveDropdown === item.name ? null : item.name
-                              )}
-                              className="w-full flex items-center justify-between px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
-                            >
-                              <span>{item.name}</span>
-                              <ChevronDown 
-                                className={`w-4 h-4 transition-transform ${
-                                  mobileActiveDropdown === item.name ? 'rotate-180' : ''
-                                }`}
-                              />
-                            </button>
-                            <AnimatePresence>
-                              {mobileActiveDropdown === item.name && (
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: 'auto', opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  transition={{ duration: 0.2 }}
-                                  className="overflow-hidden"
+                            <div className="space-y-2 text-center">
+                              <Link href={"/cart"}>
+                                <button 
+                                  onClick={() => setIsCartOpen(false)}
+                                  className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
                                 >
-                                  <div className="pl-4 py-2 space-y-1">
-                                    {item.dropdown.map((dropdownItem) => (
-                                      <a
-                                        key={dropdownItem.label}
-                                        href={dropdownItem.href}
-                                        className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                      >
-                                        {dropdownItem.label}
-                                      </a>
-                                    ))}
-                                  </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
+                                  Checkout
+                                </button>
+                              </Link>
+                              <button 
+                                onClick={() => setIsCartOpen(false)}
+                                className="w-full font-din-arabic py-2 border text-black hover:bg-black/5 transition-colors tracking-wide text-center"
+                                style={{ borderColor: 'rgba(0, 0, 0, 0.2)' }}
+                              >
+                                Continue Shopping
+                              </button>
+                            </div>
                           </div>
-                        ) : (
-                          <a
-                            href={item.href}
-                            className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            {item.name}
-                          </a>
                         )}
-                      </div>
-                    ))}
-                  </nav>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                
+                <motion.button
+                  whileHover={disableAnimations ? {} : { scale: 1.1 }}
+                  whileTap={disableAnimations ? {} : { scale: 0.9 }}
+                  onClick={handleMobileMenuToggle}
+                  className="p-2 transition-all duration-300"
+                  style={{ color: navStyles.textColor }}
+                  aria-label="Menu"
+                >
+                  {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </motion.button>
+              </motion.div>
 
-                  {/* Mobile Search */}
-                  <div className="mt-8 pt-6 border-t" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
-                    <form onSubmit={handleSearchSubmit} className="relative">
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search..."
-                        className="w-full px-4 py-3 bg-white/50 border font-din-arabic tracking-wide focus:outline-none focus:border-black transition-colors"
-                        style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}
-                      />
-                      <button
-                        type="submit"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
+              {/* Desktop Actions */}
+              <motion.div
+                initial={disableAnimations ? undefined : { opacity: 0 }}
+                animate={disableAnimations ? undefined : { opacity: 1 }}
+                transition={disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }}
+                className="hidden lg:flex items-center gap-6"
+              >
+                {/* Search Section */}
+                <div className="relative flex items-center" ref={searchRef}>
+                  <AnimatePresence>
+                    {isSearchOpen && (
+                      <motion.form
+                        initial={disableAnimations ? undefined : { width: 0, opacity: 0 }}
+                        animate={disableAnimations ? undefined : { width: 'auto', opacity: 1 }}
+                        exit={disableAnimations ? undefined : { width: 0, opacity: 0 }}
+                        transition={disableAnimations ? undefined : { duration: 0.3, ease: 'easeInOut' }}
+                        onSubmit={handleSearchSubmit}
+                        className="mr-3 overflow-hidden"
                       >
-                        <Search className="w-5 h-5" />
-                      </button>
-                    </form>
-                  </div>
-
-                  {/* Mobile Actions */}
-                  <div className="mt-6 space-y-3">
-                    <button
-                      onClick={() => {
-                        setIsMobileMenuOpen(false)
-                        router.push(`/${countryCode}/ledger`)
-                      }}
-                      className="w-full flex items-center justify-between px-4 py-3 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300"
-                      style={{ borderColor: '#D8D2C7' }}
-                    >
-                      <span>Ledger</span>
-                      <span className="flex items-center gap-2">
-                        {ledgerCount > 0 && (
-                          <span className="inline-flex items-center justify-center w-5 h-5 text-xs bg-[#e58a4d] text-black rounded-full">
-                            {ledgerCount}
-                          </span>
-                        )}
-                        <Heart
-                          className={`w-5 h-5 ${ledgerCount > 0 ? 'fill-current' : ''}`}
-                          style={{ color: ledgerCount > 0 ? '#e58a4d' : 'currentColor' }}
+                        <motion.input
+                          ref={searchInputRef}
+                          initial={disableAnimations ? undefined : { width: 0 }}
+                          animate={disableAnimations ? undefined : { width: 200 }}
+                          exit={disableAnimations ? undefined : { width: 0 }}
+                          transition={disableAnimations ? undefined : { duration: 0.3, ease: 'easeInOut' }}
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search..."
+                          className="px-3 py-2 bg-transparent border-b border-opacity-30 transition-all duration-300 focus:outline-none placeholder-opacity-70 font-light"
+                          style={{
+                            color: navStyles.textColor,
+                            borderColor: navStyles.textColor === 'white' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'
+                          }}
                         />
+                      </motion.form>
+                    )}
+                  </AnimatePresence>
+
+                  <motion.button
+                    whileHover={disableAnimations ? {} : { scale: 1.1 }}
+                    whileTap={disableAnimations ? {} : { scale: 0.9 }}
+                    onClick={handleSearchToggle}
+                    className="p-2 transition-all duration-300"
+                    style={{ color: navStyles.textColor }}
+                    aria-label="Search"
+                  >
+                    <Search className="w-5 h-5" />
+                  </motion.button>
+                </div>
+
+                <motion.button
+                  whileHover={disableAnimations ? {} : { scale: 1.1 }}
+                  whileTap={disableAnimations ? {} : { scale: 0.9 }}
+                  onClick={handleHeartClick}
+                  className="p-2 transition-all duration-300"
+                  style={{ color: isWishlisted ? '#e58a4d' : navStyles.textColor }}
+                  aria-label="Favorites"
+                >
+                  <Heart
+                    className={`w-5 h-5 transition-colors`}
+                  />
+                </motion.button>
+
+                {/* Profile Icon */}
+                <motion.button
+                  whileHover={disableAnimations ? {} : { scale: 1.1 }}
+                  whileTap={disableAnimations ? {} : { scale: 0.9 }}
+                  className="p-2 transition-all duration-300"
+                  style={{ color: navStyles.textColor }}
+                  aria-label="Profile"
+                >
+                  <a href="/account">
+                    <User className="w-5 h-5" />
+                  </a>
+                </motion.button>
+
+                <div className="relative" ref={cartRef}>
+                  <motion.button
+                    whileHover={disableAnimations ? {} : { scale: 1.1 }}
+                    whileTap={disableAnimations ? {} : { scale: 0.9 }}
+                    onClick={handleCartToggle}
+                    className="p-2 transition-all duration-300 relative"
+                    style={{ color: navStyles.textColor }}
+                    aria-label="Shopping bag"
+                  >
+                    <ShoppingBag className="w-5 h-5" />
+                    {getTotalItems() > 0 && (
+                      <span
+                        className="absolute -top-1 -right-1 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-din-arabic"
+                        style={{ 
+                          backgroundColor: '#e58a4d',
+                          fontWeight: 600
+                        }}
+                      >
+                        {getTotalItems()}
                       </span>
-                    </button>
-                    
-                    <a
-                      href="/profile"
-                      className="w-full flex items-center justify-between px-4 py-3 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300"
-                      style={{ borderColor: '#D8D2C7' }}
-                    >
-                      <span>Account</span>
-                      <User className="w-5 h-5" />
-                    </a>
-                  </div>
+                    )}
+                  </motion.button>
+
+                  {/* Cart Dropdown */}
+                  <AnimatePresence>
+                    {isCartOpen && (
+                      <motion.div
+                        initial={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
+                        animate={disableAnimations ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                        exit={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
+                        transition={disableAnimations ? undefined : { duration: 0.2 }}
+                        className="absolute right-0 top-full mt-2 w-96 border shadow-2xl z-50"
+                        style={{ 
+                          backgroundColor: '#e3e3d8',
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }}
+                      >
+                        {/* Cart Header */}
+                        <div className="p-4 border-b" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-american-typewriter text-lg text-black">
+                              Your Cart
+                            </h3>
+                            <button
+                              onClick={() => setIsCartOpen(false)}
+                              className="p-1 hover:bg-black/10 transition-colors rounded"
+                            >
+                              <X className="w-4 h-4 text-black/70" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Cart Content */}
+                        <div className="max-h-96 overflow-y-auto">
+                          {cartItems.length === 0 ? (
+                            <div className="p-8 text-center">
+                              <div className="mb-4">
+                                <ShoppingBag className="w-12 h-12 text-black/30 mx-auto" />
+                              </div>
+                              <p className="font-din-arabic text-black/70 mb-4">
+                                Nothing is in your cart
+                              </p>
+                              <button
+                                onClick={() => setIsCartOpen(false)}
+                                className="font-din-arabic px-6 py-2 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
+                              >
+                                Continue Shopping
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="p-4 space-y-4">
+                              {cartItems.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="flex items-center gap-3 p-3 bg-white/50 border"
+                                  style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}
+                                >
+                                  {item.image && (
+                                    <img
+                                      src={item.image}
+                                      alt={item.name}
+                                      className="w-16 h-16 object-cover"
+                                    />
+                                  )}
+                                  <div className="flex-1">
+                                    <h4 className="font-din-arabic text-black font-medium">
+                                      {item.name}
+                                    </h4>
+                                    <p className="font-din-arabic text-black/70 text-sm">
+                                      ₹{item.price}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => handleQuantityChange(item.id, -1)}
+                                      className="p-1 hover:bg-black/10 transition-colors rounded"
+                                    >
+                                      <Minus className="w-3 h-3 text-black/70" />
+                                    </button>
+                                    <span className="font-din-arabic text-black text-sm min-w-[20px] text-center">
+                                      {item.quantity}
+                                    </span>
+                                    <button
+                                      onClick={() => handleQuantityChange(item.id, 1)}
+                                      className="p-1 hover:bg-black/10 transition-colors rounded"
+                                    >
+                                      <Plus className="w-3 h-3 text-black/70" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Cart Footer */}
+                        {cartItems.length > 0 && (
+                          <div className="p-4 border-t" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
+                            <div className="flex items-center justify-between mb-4">
+                              <span className="font-din-arabic text-black">
+                                Total:
+                              </span>
+                              <span className="font-din-arabic text-black font-medium">
+                                ₹{getTotalPrice()}
+                              </span>
+                            </div>
+                            <div className="space-y-2 text-center">
+                              <Link href={"/cart"}>
+                                <button className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide text-center">
+                                  Checkout
+                                </button>
+                              </Link>
+                              <button
+                                onClick={() => setIsCartOpen(false)}
+                                className="w-full font-din-arabic py-2 border text-black hover:bg-black/5 transition-colors tracking-wide text-center"
+                                style={{ borderColor: 'rgba(0, 0, 0, 0.2)' }}
+                              >
+                                Continue Shopping
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
+        </motion.nav>
+      </div>
 
-        {/* Mobile Cart Dropdown - Separate from desktop */}
-        <AnimatePresence>
-          {isCartOpen && (
+      {/* Mobile Menu Drawer */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              className="lg:hidden fixed right-4 top-[90px] w-[calc(100%-2rem)] max-w-sm bg-white border border-black/10 shadow-2xl z-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+              style={{ top: '106px' }}
+            />
+            
+            {/* Menu Content */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed right-0 top-[106px] bottom-0 w-full max-w-sm z-50 overflow-y-auto lg:hidden"
               style={{ backgroundColor: '#e3e3d8' }}
             >
-              {/* Cart Header */}
-              <div className="p-4 border-b border-black/10">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-american-typewriter text-lg text-black">Your Cart</h3>
-                  <button
-                    onClick={() => setIsCartOpen(false)}
-                    className="p-1 hover:bg-black/10 transition-colors rounded"
-                  >
-                    <X className="w-4 h-4 text-black/70" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Cart Content */}
-              <div className="max-h-[60vh] overflow-y-auto">
-                {displayCartItems.length === 0 ? (
-                  // Empty Cart State
-                  <div className="p-8 text-center">
-                    <div className="mb-4">
-                      <ShoppingBag className="w-12 h-12 text-black/30 mx-auto" />
+              <div className="p-6">
+                {/* Mobile Navigation Links */}
+                <nav className="space-y-1">
+                  {menuItems.map((item) => (
+                    <div key={item.name}>
+                      {item.dropdown ? (
+                        <div>
+                          <button
+                            onClick={() => setMobileActiveDropdown(
+                              mobileActiveDropdown === item.name ? null : item.name
+                            )}
+                            className="w-full flex items-center justify-between px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
+                          >
+                            <span>{item.name}</span>
+                            <ChevronDown 
+                              className={`w-4 h-4 transition-transform ${
+                                mobileActiveDropdown === item.name ? 'rotate-180' : ''
+                              }`}
+                            />
+                          </button>
+                          <AnimatePresence>
+                            {mobileActiveDropdown === item.name && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="pl-4 py-2 space-y-1">
+                                  {item.dropdown.map((dropdownItem) => (
+                                    <a
+                                      key={dropdownItem.label}
+                                      href={dropdownItem.href}
+                                      className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
+                                      onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                      {dropdownItem.label}
+                                    </a>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ) : (
+                        <a
+                          href={item.href}
+                          className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          {item.name}
+                        </a>
+                      )}
                     </div>
-                    <p className="font-din-arabic text-black/70 mb-4">Nothing is in your cart</p>
-                    <button
-                      onClick={() => setIsCartOpen(false)}
-                      className="font-din-arabic px-6 py-2 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
-                    >
-                      Continue Shopping
-                    </button>
-                  </div>
-                ) : (
-                  // Cart Items
-                  <div className="p-4 space-y-4">
-                    {displayCartItems.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-3 p-3 bg-white/50 border border-black/5">
-                        {/* Only show image for ritual products */}
-                        {item.isRitualProduct && item.image && (
-                          <img 
-                            src={item.image} 
-                            alt={item.name}
-                            className="w-16 h-16 object-cover"
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-din-arabic text-black font-medium truncate">{item.name}</h4>
-                          <p className="font-din-arabic text-black/70 text-sm">₹{item.price}</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <button 
-                            onClick={() => handleQuantityChange(item.id, -1)}
-                            className="p-1 hover:bg-black/10 transition-colors rounded"
-                          >
-                            <Minus className="w-3 h-3 text-black/70" />
-                          </button>
-                          <span className="font-din-arabic text-black text-sm min-w-[20px] text-center">
-                            {item.quantity}
-                          </span>
-                          <button 
-                            onClick={() => handleQuantityChange(item.id, 1)}
-                            className="p-1 hover:bg-black/10 transition-colors rounded"
-                          >
-                            <Plus className="w-3 h-3 text-black/70" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                  ))}
+                </nav>
 
-              {/* Cart Footer */}
-              {displayCartItems.length > 0 && (
-                <div className="p-4 border-t border-black/10">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-din-arabic text-black">Total:</span>
-                    <span className="font-din-arabic text-black font-medium">₹{getTotalPrice()}</span>
-                  </div>
-                  <div className="space-y-2 text-center">
-                    {/* <Link href={`/${countryCode}/product-checkout`}> */}
-                      <button  onClick={getOrCreateMedusaCart} className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide text-center">
-                        Checkout
-                      </button>
-                    {/* </Link> */}
-                    <button 
-                      onClick={() => setIsCartOpen(false)}
-                      className="w-full font-din-arabic py-2 border border-black/20 text-black hover:bg-black/5 transition-colors tracking-wide text-center"
+                {/* Mobile Search */}
+                <div className="mt-8 pt-6 border-t" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
+                  <form onSubmit={handleSearchSubmit} className="relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search..."
+                      className="w-full px-4 py-3 bg-white/50 border font-din-arabic tracking-wide focus:outline-none focus:border-black transition-colors"
+                      style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}
+                    />
+                    <button
+                      type="submit"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
                     >
-                      Continue Shopping
+                      <Search className="w-5 h-5" />
                     </button>
-                  </div>
+                  </form>
                 </div>
-              )}
+
+                {/* Mobile Quick Actions */}
+                <div className="mt-6 pt-6 border-t space-y-3" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false)
+                      handleHeartClick()
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-3 text-black font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
+                  >
+                    <span>Ledger</span>
+                    <Heart className={`w-5 h-5 text-[#e58a4d]`} />
+                  </button>
+                  <a
+                    href="/account"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-between px-4 py-3 text-black font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
+                  >
+                    <span>My Account</span>
+                    <User className="w-5 h-5" />
+                  </a>
+                </div>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Login Required Dialog */}
+      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-american-typewriter text-xl text-black">
+              Login Required
+            </DialogTitle>
+            <DialogDescription className="font-din-arabic text-black/70 pt-2">
+              You need to login first to access your ledger.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 pt-4">
+            <button
+              onClick={() => {
+                setShowLoginDialog(false)
+                const currentPath = pathname || ''
+                const countryMatch = currentPath.match(/^\/([^\/]+)/)
+                const countryCode = countryMatch ? countryMatch[1] : 'in'
+                router.push(`/${countryCode}/account`)
+              }}
+              className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
+            >
+              Go to Login
+            </button>
+            <button
+              onClick={() => setShowLoginDialog(false)}
+              className="w-full font-din-arabic py-2 border text-black hover:bg-black/5 transition-colors tracking-wide"
+              style={{ borderColor: 'rgba(0, 0, 0, 0.2)' }}
+            >
+              Cancel
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

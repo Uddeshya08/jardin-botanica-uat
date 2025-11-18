@@ -1,7 +1,7 @@
 "use client"
 
 import { RadioGroup } from "@headlessui/react"
-import { isStripe as isStripeFunc, paymentInfoMap, isRazorpay } from "@lib/constants"
+import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { initiatePaymentSession } from "@lib/data/cart"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
 import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
@@ -12,6 +12,49 @@ import PaymentContainer, {
 import Divider from "@modules/common/components/divider"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
+import {
+  CreditCard as CreditCardIcon,
+  Smartphone,
+  Building2,
+  Wallet,
+  Banknote,
+} from "lucide-react"
+
+// Payment type options with icons and descriptions
+const PAYMENT_TYPES = [
+  {
+    id: "card",
+    label: "Credit / Debit Card",
+    description: "Visa, Mastercard, Amex, Rupay",
+    icon: CreditCardIcon,
+  },
+  {
+    id: "upi",
+    label: "UPI",
+    description: "Google Pay, PhonePe, Paytm & more",
+    icon: Smartphone,
+  },
+  {
+    id: "netbanking",
+    label: "Net Banking",
+    description: "All major banks supported",
+    icon: Building2,
+  },
+  {
+    id: "wallet",
+    label: "Wallets",
+    description: "Paytm, Mobikwik, Amazon Pay",
+    icon: Wallet,
+  },
+  {
+    id: "cod",
+    label: "Cash on Delivery",
+    description: "Pay when you receive",
+    icon: Banknote,
+  },
+] as const
+
+type PaymentType = (typeof PAYMENT_TYPES)[number]["id"]
 
 const Payment = ({
   cart,
@@ -28,7 +71,6 @@ const Payment = ({
   const [error, setError] = useState<string | null>(null)
   const [cardBrand, setCardBrand] = useState<string | null>(null)
   const [cardComplete, setCardComplete] = useState(false)
-  const [razorpayMethod, setRazorpayMethod] = useState<string>("upi")
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
     activeSession?.provider_id ?? ""
   )
@@ -38,6 +80,11 @@ const Payment = ({
   const pathname = usePathname()
 
   const isOpen = searchParams.get("step") === "payment"
+
+  // Get payment type from URL or default to 'card'
+  const [selectedPaymentType, setSelectedPaymentType] = useState<PaymentType>(
+    (searchParams.get("paymenttype") as PaymentType) || "card"
+  )
 
   const isStripe = isStripeFunc(selectedPaymentMethod)
 
@@ -67,10 +114,31 @@ const Payment = ({
     [searchParams]
   )
 
+  const updateQueryParams = useCallback(
+    (updates: Record<string, string>) => {
+      const params = new URLSearchParams(searchParams)
+      Object.entries(updates).forEach(([key, value]) => {
+        params.set(key, value)
+      })
+      return params.toString()
+    },
+    [searchParams]
+  )
+
   const handleEdit = () => {
     router.push(pathname + "?" + createQueryString("step", "payment"), {
       scroll: false,
     })
+  }
+
+  const handlePaymentTypeChange = (type: PaymentType) => {
+    setSelectedPaymentType(type)
+    router.push(
+      pathname +
+        "?" +
+        updateQueryParams({ step: "payment", paymenttype: type }),
+      { scroll: false }
+    )
   }
 
   const handleSubmit = async () => {
@@ -89,16 +157,17 @@ const Payment = ({
       }
 
       if (!shouldInputCard) {
-        const params = new URLSearchParams(searchParams)
-        params.set("step", "review")
-        // pass selected razorpay method to review if applicable
-        if (isRazorpay(selectedPaymentMethod)) {
-          params.set("rzpMethod", razorpayMethod)
-        }
-
-        return router.push(pathname + "?" + params.toString(), {
-          scroll: false,
-        })
+        return router.push(
+          pathname +
+            "?" +
+            updateQueryParams({
+              step: "review",
+              paymenttype: selectedPaymentType,
+            }),
+          {
+            scroll: false,
+          }
+        )
       }
     } catch (err: any) {
       setError(err.message)
@@ -111,8 +180,19 @@ const Payment = ({
     setError(null)
   }, [isOpen])
 
+  // Sync payment type from URL
+  useEffect(() => {
+    const urlPaymentType = searchParams.get("paymenttype") as PaymentType
+    if (
+      urlPaymentType &&
+      PAYMENT_TYPES.some((pt) => pt.id === urlPaymentType)
+    ) {
+      setSelectedPaymentType(urlPaymentType)
+    }
+  }, [searchParams])
+
   return (
-    <div className="bg-white">
+    <div className="bg-[#e3e3d8]">
       <div className="flex flex-row items-center justify-between mb-6">
         <Heading
           level="h2"
@@ -141,64 +221,109 @@ const Payment = ({
       </div>
       <div>
         <div className={isOpen ? "block" : "hidden"}>
-          {!paidByGiftcard && availablePaymentMethods?.length && (
+          {!paidByGiftcard && (
             <>
-              <RadioGroup
-                value={selectedPaymentMethod}
-                onChange={(value: string) => setPaymentMethod(value)}
-              >
-                {availablePaymentMethods.map((paymentMethod) => (
-                  <div key={paymentMethod.id}>
-                    {isStripeFunc(paymentMethod.id) ? (
-                      <StripeCardContainer
-                        paymentProviderId={paymentMethod.id}
-                        selectedPaymentOptionId={selectedPaymentMethod}
-                        paymentInfoMap={paymentInfoMap}
-                        setCardBrand={setCardBrand}
-                        setError={setError}
-                        setCardComplete={setCardComplete}
-                      />
-                    ) : (
-                      <PaymentContainer
-                        paymentInfoMap={paymentInfoMap}
-                        paymentProviderId={paymentMethod.id}
-                        selectedPaymentOptionId={selectedPaymentMethod}
-                      >
-                        {selectedPaymentMethod === paymentMethod.id &&
-                          isRazorpay(paymentMethod.id) && (
-                            <div className="mt-4">
-                              <Text className="txt-medium-plus text-ui-fg-base mb-2">
-                                Choose Razorpay method
-                              </Text>
-                              <div className="flex gap-3 flex-wrap">
-                                {[
-                                  { id: "upi", label: "UPI" },
-                                  { id: "card", label: "Card" },
-                                  { id: "netbanking", label: "Netbanking" },
-                                  { id: "wallet", label: "Wallet" },
-                                ].map((opt) => (
-                                  <button
-                                    key={opt.id}
-                                    type="button"
-                                    onClick={() => setRazorpayMethod(opt.id)}
-                                    className={clx(
-                                      "px-3 py-1 rounded-md border text-small-regular",
-                                      razorpayMethod === opt.id
-                                        ? "border-ui-border-interactive bg-ui-bg-base"
-                                        : "border-ui-border-base bg-ui-bg-subtle hover:bg-ui-bg-base"
-                                    )}
-                                  >
-                                    {opt.label}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                      </PaymentContainer>
-                    )}
+              {/* Payment Type Selection */}
+              <div className="mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <CreditCardIcon className="w-5 h-5 text-gray-700" />
                   </div>
-                ))}
-              </RadioGroup>
+                  <div>
+                    <Text className="text-lg font-semibold text-gray-900">
+                      Payment Method
+                    </Text>
+                    <Text className="text-sm text-gray-500">
+                      Choose Your Preferred Payment Option
+                    </Text>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {PAYMENT_TYPES.map((type) => {
+                    const Icon = type.icon
+                    return (
+                      <button
+                        key={type.id}
+                        onClick={() => handlePaymentTypeChange(type.id)}
+                        className={clx(
+                          "flex items-center gap-4 py-4 px-5 rounded-xl border-2 transition-all text-left",
+                          "hover:scale-105",
+                          {
+                            " bg-green-50/50 shadow-sm":
+                              selectedPaymentType === type.id,
+                            " bg-white": selectedPaymentType !== type.id,
+                          }
+                        )}
+                        data-testid={`payment-type-${type.id}`}
+                      >
+                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-6 h-6 text-green-700" />
+                        </div>
+
+                        <div className="flex-1">
+                          <Text className="font-semibold text-gray-900 mb-0.5">
+                            {type.label}
+                          </Text>
+                          <Text className="text-sm text-gray-500">
+                            {type.description}
+                          </Text>
+                        </div>
+
+                        {selectedPaymentType === type.id && (
+                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg
+                              className="w-4 h-4 text-white"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2.5"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path d="M5 13l4 4L19 7"></path>
+                            </svg>
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Payment Method Selection */}
+              {availablePaymentMethods?.length && (
+                <>
+                  <Text className="txt-medium-plus text-ui-fg-base mb-3">
+                    Select Payment Method
+                  </Text>
+                  <RadioGroup
+                    value={selectedPaymentMethod}
+                    onChange={(value: string) => setPaymentMethod(value)}
+                  >
+                    {availablePaymentMethods.map((paymentMethod) => (
+                      <div key={paymentMethod.id}>
+                        {isStripeFunc(paymentMethod.id) ? (
+                          <StripeCardContainer
+                            paymentProviderId={paymentMethod.id}
+                            selectedPaymentOptionId={selectedPaymentMethod}
+                            paymentInfoMap={paymentInfoMap}
+                            setCardBrand={setCardBrand}
+                            setError={setError}
+                            setCardComplete={setCardComplete}
+                          />
+                        ) : (
+                          <PaymentContainer
+                            paymentInfoMap={paymentInfoMap}
+                            paymentProviderId={paymentMethod.id}
+                            selectedPaymentOptionId={selectedPaymentMethod}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </>
+              )}
             </>
           )}
 
@@ -251,6 +376,15 @@ const Payment = ({
                 >
                   {paymentInfoMap[activeSession?.provider_id]?.title ||
                     activeSession?.provider_id}
+                </Text>
+              </div>
+              <div className="flex flex-col w-1/3">
+                <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                  Payment type
+                </Text>
+                <Text className="txt-medium text-ui-fg-subtle">
+                  {PAYMENT_TYPES.find((pt) => pt.id === selectedPaymentType)
+                    ?.label || selectedPaymentType}
                 </Text>
               </div>
               <div className="flex flex-col w-1/3">

@@ -401,7 +401,7 @@ const Product = () => {
             {/* Right - Text (45%) */}
             <div className="space-y-6 bg-[#C5C8B3] w-full h-full pl-6 lg:pl-20 pt-12">
               <h2 style={fontStyles.subsequentHeading} className="px-2">
-                A Forest Reborn
+                A FOREST REBORN
               </h2>
               <p
                 style={{ ...fontStyles.subCopy, lineHeight: "1.8" }}
@@ -636,9 +636,7 @@ const Product = () => {
                 <img
                   src="/Images/Jardinlogo.png"
                   alt="JardinLogo"
-                  width="250"
-                  height="30"
-                  className=""
+                  className="w-48"
                 />
               </div>
             </div>
@@ -703,7 +701,7 @@ const Product = () => {
                   </a>
                 </li>
                 <li>
-                  <a href="/in/help-and-faqs" className="hover:text-white transition-colors">
+                  <a href="#" className="hover:text-white transition-colors">
                     Help & FAQs
                   </a>
                 </li>

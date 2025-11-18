@@ -14,29 +14,31 @@ const Items = ({ order }: ItemsProps) => {
   const items = order.items
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col bg-[#e3e3d8]">
       <Divider className="!mb-0" />
-      <Table>
-        <Table.Body data-testid="products-table">
-          {items?.length
-            ? items
-                .sort((a, b) => {
-                  return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
-                })
-                .map((item) => {
-                  return (
-                    <Item
-                      key={item.id}
-                      item={item}
-                      currencyCode={order.currency_code}
-                    />
-                  )
-                })
-            : repeat(5).map((i) => {
-                return <SkeletonLineItem key={i} />
-              })}
-        </Table.Body>
-      </Table>
+      <div className="px-4 py-2 border text-black font-din-arabic tracking-wide hover:text-white transition-all duration-300 shadow-sm hover:shadow-md rounded-xl overflow-hidden">
+        <Table className="!bg-[#e3e3d8] w-full">
+          <Table.Body className="!bg-[#e3e3d8]" data-testid="products-table">
+            {items?.length
+              ? items
+                  .sort((a, b) => {
+                    return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
+                  })
+                  .map((item) => {
+                    return (
+                      <Item
+                        key={item.id}
+                        item={item}
+                        currencyCode={order.currency_code}
+                      />
+                    )
+                  })
+              : repeat(5).map((i) => {
+                  return <SkeletonLineItem key={i} />
+                })}
+          </Table.Body>
+        </Table>
+      </div>
     </div>
   )
 }

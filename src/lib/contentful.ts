@@ -28,4 +28,3 @@ export function getContentfulClient(): ContentfulClientApi<undefined> {
 
   return contentfulClient
 }
-

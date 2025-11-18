@@ -278,7 +278,7 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.08 }}
               viewport={{ once: true }}
-              className="flex-shrink-0 group cursor-pointer relative w-screen px-6 md:w-[280px] md:px-0 md:mr-8"
+              className="flex-shrink-0 group cursor-pointer relative w-full px-6 md:w-[280px] md:px-0 md:mr-8"
               style={{ 
                 scrollSnapAlign: 'center',
               }}

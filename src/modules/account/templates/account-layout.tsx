@@ -9,66 +9,51 @@ interface AccountLayoutProps {
 }
 
 /**
- * Matches the Auth (Sign In / Create Account) page visuals:
+ * New UI Design:
  * - Background: #e3e3d8
- * - Container: mx-auto with px-6 / lg:px-12
- * - Max width: 6xl
- * - Grid: 2 columns on large screens (nav | content)
- * - Content card: white background, subtle border, generous padding
- * - Typography: use your font utility classes (font-din-arabic / american-typewriter)
+ * - Sidebar on left (desktop) / tabs on top (mobile)
+ * - Content area on right with scroll
+ * - Typography: font-american-typewriter, font-din-arabic
  */
 const AccountLayout: React.FC<AccountLayoutProps> = ({ customer, children }) => {
   return (
     <div
-      className="min-h-screen pt-32 pb-12"
+      className="min-h-screen flex flex-col lg:flex-row pt-32"
       style={{ backgroundColor: "#e3e3d8" }}
       data-testid="account-page"
     >
-      <div className="container mx-auto px-6 lg:px-12">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-16">
-          {/* Left: Account Nav (only when logged in) */}
-          <aside className="hidden lg:block">
-            {customer && <AccountNav customer={customer} />}
-          </aside>
-
-          {/* Right: Main content */}
-          <main>
-            <div
-              className="bg-white border"
-              style={{ borderColor: "#D8D2C7" }}
-            >
-              <div className="p-6 lg:p-10">{children}</div>
-            </div>
-
-            {/* Footer help bar */}
-            <div className="mt-10 pt-8 border-t" style={{ borderColor: "#D8D2C7" }}>
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-                <div>
-                  <h3 className="font-american-typewriter text-xl mb-2 text-black">
-                    Got questions?
-                  </h3>
-                  <p className="font-din-arabic text-sm text-black/80">
-                    You can find frequently asked questions and answers on our
-                    customer service page.
-                  </p>
-                </div>
-                <div>
-                  <UnderlineLink href="/customer-service" className="font-din-arabic underline">
-                    Customer Service
-                  </UnderlineLink>
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-
-        {/* Mobile nav below content (when logged in) */}
-        {customer && (
-          <div className="lg:hidden mt-10">
-            <AccountNav customer={customer} />
+      {/* Mobile Header - Only show on mobile */}
+      {customer && (
+        <div className="lg:hidden px-4 md:px-6 py-6 md:py-8 border-b" style={{ borderColor: "#D8D2C7" }}>
+          <div className="text-center mb-4 md:mb-6">
+            <h2 className="font-american-typewriter text-2xl md:text-3xl text-black tracking-wide">
+              Hello, {customer.first_name || "there"}
+            </h2>
+            <p className="font-din-arabic text-sm text-black/50 tracking-wide mt-1">
+              Manage your account and preferences
+            </p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Sidebar - Hidden on mobile, shown as horizontal tabs */}
+      {customer && (
+        <aside className="hidden lg:block lg:w-96 border-r pr-12 pl-16 py-8" style={{ borderColor: "#D8D2C7" }}>
+          <AccountNav customer={customer} />
+        </aside>
+      )}
+
+      {/* Mobile Tab Navigation */}
+      {customer && (
+        <div className="lg:hidden px-4 py-4 border-b overflow-x-auto" style={{ borderColor: "#D8D2C7" }}>
+          <AccountNav customer={customer} />
+        </div>
+      )}
+
+      {/* Main Content */}
+      <main className="flex-1 py-8 lg:py-12 px-6 lg:pl-16 lg:pr-6 account-content overflow-y-auto">
+        {children}
+      </main>
     </div>
   )
 }

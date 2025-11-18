@@ -514,4 +514,3 @@ function transformFeaturedRitualTwoSectionEntry(
     return null
   }
 }
-

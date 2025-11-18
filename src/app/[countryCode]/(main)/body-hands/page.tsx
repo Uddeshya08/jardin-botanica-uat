@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import { Navigation } from 'app/components/Navigation'
 import { RippleEffect } from 'app/components/RippleEffect'
 import { BodyHandsPage } from 'app/components/BodyHandsPage'
-import { upsertCartItems } from 'lib/util/cart-helpers'
 
 type CartItem = {
   id: string
@@ -26,7 +25,6 @@ export default function BodyHandsRoutePage() {
 
   const handleCartUpdate = (item: CartItem | null) => {
     if (!item) return
-    setCartItems((prev) => upsertCartItems(prev, item))
   }
 
   return (
@@ -35,13 +33,7 @@ export default function BodyHandsRoutePage() {
       <Navigation
         isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} forceWhiteText={true} />
       <div className="h-4" />
-      <BodyHandsPage
-        onAddToCart={(item) => {
-          handleCartUpdate(item)
-        }}
-      />
+      <BodyHandsPage onAddToCart={handleCartUpdate} />
     </div>
   )
 }
-
-

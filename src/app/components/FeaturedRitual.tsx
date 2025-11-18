@@ -1,37 +1,5 @@
 import React from 'react'
 import { motion } from 'motion/react'
-import { ImageWithFallback } from './figma/ImageWithFallback'
-
-// const ritualOptions = [
-//   {
-//     id: 1,
-//     title: "Polish and Veil",
-//     subtitle: "The Complete Hand Care Ritual",
-//     description: "Two steps. One secret. A ritual hidden in plain sight.",
-//     features: [
-//       "Black Tea Hand Wash - Purifying botanical cleanse",
-//       "Soft Orris Hand Lotion - Protective daily nourishment",
-//       "Complete ritual packaging with instruction card"
-//     ],
-//     price: "$85",
-//     imageUrl: handwashImage,
-//     imagePosition: "right"
-//   },
-//   {
-//     id: 2,
-//     title: "Botanical Candles",
-//     subtitle: "Ambient Aromatherapy Collection",
-//     description: "Wax, flame, and something unseen. A sanctuary revealed only in glow.",
-//     features: [
-//       "Garden Mint & Wild Bergamot - Energizing morning blend",
-//       "Evening Jasmine & Cedar - Calming nighttime ritual",
-//       "Clean burning botanical wax with 60-hour burn time"
-//     ],
-//     price: "$95",
-//     imageUrl: candleImage,
-//     imagePosition: "left"
-//   }
-// ];
 
 export function FeaturedRitual() {
   return (

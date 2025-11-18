@@ -178,7 +178,7 @@ export function PeopleAlsoBoughtTwo() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
-            className="flex-shrink-0 w-2/5 flex flex-col justify-center px-4 md:px-16 py-4"
+            className="flex-shrink-0 w-2/5 flex flex-col justify-center px-16 py-4"
             style={{ scrollSnapAlign: 'start', marginTop: "40px" }}
           >
             {/* Main Title - People Also Bought */}

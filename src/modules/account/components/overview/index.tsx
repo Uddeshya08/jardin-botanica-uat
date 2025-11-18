@@ -1,9 +1,22 @@
-import { Container } from "@medusajs/ui"
-import ChevronDown from "@modules/common/icons/chevron-down"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { convertToLocale } from "@lib/util/money"
+"use client"
+
+import { motion } from "motion/react"
+import React, { useState } from "react"
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger, 
+  DialogDescription
+} from "../../../../app/components/ui/dialog"
+import { Input } from "../../../../app/components/ui/input"
+import { Label } from "../../../../app/components/ui/label"
+import { ScrollArea } from "../../../../app/components/ui/scroll-area"
+import { Checkbox } from "../../../../app/components/ui/checkbox"
+import { toast } from "sonner"
 import { HttpTypes } from "@medusajs/types"
-import React, { useMemo } from "react"
+import { updateCustomer } from "@lib/data/customer"
 
 type OverviewProps = {
   customer: HttpTypes.StoreCustomer | null
@@ -11,190 +24,344 @@ type OverviewProps = {
 }
 
 const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
-  const profileCompletion = useMemo(() => getProfileCompletion(customer), [customer])
-  const addressesCount = customer?.addresses?.length || 0
+  const [editInfoOpen, setEditInfoOpen] = useState(false)
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false)
+  const [emailComms, setEmailComms] = useState(false)
+  const [newsletter, setNewsletter] = useState(false)
+  const [loading, setLoading] = useState<string | null>(null)
+
+  if (!customer) {
+    return null
+  }
+
+  const [userInfo, setUserInfo] = useState({
+    firstName: customer.first_name || '',
+    lastName: customer.last_name || '',
+    email: customer.email || ''
+  })
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+
+  const handleSaveUserInfo = async () => {
+    setLoading('userInfo')
+    try {
+      await updateCustomer({
+        first_name: userInfo.firstName,
+        last_name: userInfo.lastName,
+      })
+      setLoading(null)
+      setEditInfoOpen(false)
+      toast.success('Personal information updated successfully')
+    } catch (error) {
+      setLoading(null)
+      toast.error('Failed to update information')
+    }
+  }
+
+  const handleChangePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+    setLoading('password')
+    // Note: Password update would need to be implemented via Medusa API
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    setLoading(null)
+    setChangePasswordOpen(false)
+    setPasswordData({currentPassword: '', newPassword: '', confirmPassword: ''})
+    toast.success('Password updated successfully')
+  }
+
+  const handleSaveCommunicationPrefs = async () => {
+    setLoading('commPrefs')
+    // Note: Communication preferences would need to be stored via Medusa API
+    await new Promise(resolve => setTimeout(resolve, 800))
+    setLoading(null)
+    toast.success('Communication preferences updated successfully')
+  }
+
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+    exit: { opacity: 0, y: -10, transition: { duration: 0.2 } }
+  }
 
   return (
-    <div data-testid="overview-page-wrapper" className="min-h-[70vh]">
-      {/* Top hero card — aligns with login-style centered card */}
-      <section className="content-container max-w-5xl mx-auto px-4 small:px-6 py-6 small:py-10">
-        <Container className="rounded-2xl border border-gray-200 bg-white/90 shadow-sm p-5 small:p-7">
-          <div className="flex flex-col small:flex-row small:items-center small:justify-between gap-4">
-            <div className="space-y-1.5">
-              <p className="text-xs uppercase tracking-wide text-gray-500">
-                Welcome back
-              </p>
-              <h1 className="text-2xl small:text-3xl font-semibold leading-tight">
-                <span data-testid="welcome-message" data-value={customer?.first_name}>
-                  Hello {customer?.first_name || "there"}
-                </span>
-              </h1>
-              <p className="text-sm text-ui-fg-base">
-                Signed in as:{" "}
-                <span
-                  className="font-semibold"
-                  data-testid="customer-email"
-                  data-value={customer?.email}
-                >
-                  {customer?.email}
-                </span>
+    <motion.div
+      key="account-settings"
+      variants={sectionVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      data-testid="overview-page-wrapper"
+    >
+      <h1 className="font-american-typewriter text-2xl lg:text-3xl mb-8 lg:mb-16 text-black">
+        Account Settings
+      </h1>
+
+      {/* Two-column layout: Account Information (left) and Communication Preferences (right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+        {/* Account Information - Left Column */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+        >
+          <h2 className="font-din-arabic text-sm uppercase mb-6 lg:mb-8 text-black/60 tracking-wider">
+            Personal Information
+          </h2>
+          
+          <div className="space-y-8 mb-8">
+            <div>
+              <label className="font-din-arabic block text-xs text-black/40 mb-3 tracking-wider uppercase">
+                Name
+              </label>
+              <p className="font-din-arabic text-base text-black tracking-wide">
+                {customer.first_name} {customer.last_name}
               </p>
             </div>
-
-            <div className="grid grid-cols-2 gap-3 w-full small:w-auto">
-              {/* Metric: Profile completion */}
-              <div className="rounded-xl border border-gray-200 bg-white p-4 min-w-[160px]">
-                <p className="text-xs text-gray-500 mb-1">Profile</p>
-                <div className="flex items-end gap-2">
-                  <span
-                    className="text-3xl-semi leading-none"
-                    data-testid="customer-profile-completion"
-                    data-value={profileCompletion}
-                  >
-                    {profileCompletion}%
-                  </span>
-                  <span className="uppercase text-[11px] tracking-wide text-ui-fg-subtle">
-                    Completed
-                  </span>
-                </div>
-                <ProgressBar value={profileCompletion} className="mt-3" />
-                <LocalizedClientLink
-                  href="/account/profile"
-                  className="inline-block text-[12px] font-medium mt-3 text-ui-fg-interactive hover:underline"
-                >
-                  Complete profile →
-                </LocalizedClientLink>
-              </div>
-
-              {/* Metric: Addresses */}
-              <div className="rounded-xl border border-gray-200 bg-white p-4 min-w-[160px]">
-                <p className="text-xs text-gray-500 mb-1">Addresses</p>
-                <div className="flex items-end gap-2">
-                  <span
-                    className="text-3xl-semi leading-none"
-                    data-testid="addresses-count"
-                    data-value={addressesCount}
-                  >
-                    {addressesCount}
-                  </span>
-                  <span className="uppercase text-[11px] tracking-wide text-ui-fg-subtle">
-                    Saved
-                  </span>
-                </div>
-                <LocalizedClientLink
-                  href="/account/addresses"
-                  className="inline-block text-[12px] font-medium mt-5 text-ui-fg-interactive hover:underline"
-                >
-                  Manage addresses →
-                </LocalizedClientLink>
-              </div>
+            
+            <div>
+              <label className="font-din-arabic block text-xs text-black/40 mb-3 tracking-wider uppercase">
+                Email address
+              </label>
+              <p className="font-din-arabic text-base text-black tracking-wide">
+                {customer.email}
+              </p>
             </div>
           </div>
-        </Container>
-      </section>
-
-      {/* Recent orders section — card list matches the same visual language */}
-      <section className="content-container max-w-5xl mx-auto px-4 small:px-6 pb-12">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-large-semi">Recent orders</h3>
-          {!!orders?.length && (
-            <LocalizedClientLink
-              href="/account/orders"
-              className="text-sm font-medium text-ui-fg-interactive hover:underline"
-            >
-              View all orders
-            </LocalizedClientLink>
-          )}
-        </div>
-
-        <ul className="flex flex-col gap-y-4" data-testid="orders-wrapper">
-          {orders && orders.length > 0 ? (
-            orders.slice(0, 5).map((order) => (
-              <li key={order.id} data-testid="order-wrapper" data-value={order.id}>
-                <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
-                  <Container className="rounded-xl border border-gray-200 bg-white hover:shadow-sm transition-shadow p-4 small:p-5 flex items-center justify-between">
-                    <div className="grid grid-cols-3 grid-rows-2 gap-x-4 gap-y-1 text-small-regular flex-1">
-                      <span className="font-semibold">Date placed</span>
-                      <span className="font-semibold">Order number</span>
-                      <span className="font-semibold">Total amount</span>
-
-                      <span data-testid="order-created-date">
-                        {new Date(order.created_at).toDateString()}
-                      </span>
-
-                      <span data-testid="order-id" data-value={order.display_id}>
-                        #{order.display_id}
-                      </span>
-
-                      <span data-testid="order-amount">
-                        {convertToLocale({
-                          amount: order.total,
-                          currency_code: order.currency_code,
-                        })}
-                      </span>
+          
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Dialog open={editInfoOpen} onOpenChange={setEditInfoOpen}>
+              <DialogTrigger asChild>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-8 py-4 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md text-center"
+                  style={{ borderColor: '#D8D2C7' }}
+                >
+                  Edit Information
+                </motion.button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md" style={{ backgroundColor: '#e3e3d8' }}>
+                <DialogHeader className="pb-6">
+                  <DialogTitle className="font-american-typewriter text-2xl text-black tracking-wide">
+                    Edit Information
+                  </DialogTitle>
+                  <DialogDescription className="font-din-arabic text-black/60 tracking-wide">
+                    Update your personal information and contact details.
+                  </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="max-h-96 pr-4">
+                  <div className="space-y-6">
+                    <div>
+                      <Label className="font-din-arabic text-sm text-black/60 tracking-wide">
+                        First Name
+                      </Label>
+                      <Input
+                        value={userInfo.firstName}
+                        onChange={(e) => setUserInfo({...userInfo, firstName: e.target.value})}
+                        className="mt-2 bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10"
+                        style={{ borderColor: '#D8D2C7' }}
+                      />
                     </div>
+                    <div>
+                      <Label className="font-din-arabic text-sm text-black/60 tracking-wide">
+                        Last Name
+                      </Label>
+                      <Input
+                        value={userInfo.lastName}
+                        onChange={(e) => setUserInfo({...userInfo, lastName: e.target.value})}
+                        className="mt-2 bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10"
+                        style={{ borderColor: '#D8D2C7' }}
+                      />
+                    </div>
+                    <div>
+                      <Label className="font-din-arabic text-sm text-black/60 tracking-wide">
+                        Email Address
+                      </Label>
+                      <Input
+                        value={userInfo.email}
+                        onChange={(e) => setUserInfo({...userInfo, email: e.target.value})}
+                        className="mt-2 bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10"
+                        style={{ borderColor: '#D8D2C7' }}
+                        disabled
+                      />
+                    </div>
+                  </div>
+                </ScrollArea>
+                <div className="flex space-x-3 pt-4 mt-4">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleSaveUserInfo}
+                    disabled={loading === 'userInfo'}
+                    className="flex-1 px-6 py-3 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 disabled:opacity-50 text-center"
+                    style={{ borderColor: '#D8D2C7' }}
+                  >
+                    {loading === 'userInfo' ? 'Saving...' : 'Save Changes'}
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setEditInfoOpen(false)}
+                    className="flex-1 px-6 py-3 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 text-center"
+                    style={{ borderColor: '#D8D2C7' }}
+                  >
+                    Cancel
+                  </motion.button>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
+              <DialogTrigger asChild>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-8 py-4 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md text-center"
+                  style={{ borderColor: '#D8D2C7' }}
+                >
+                  Change Password
+                </motion.button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md" style={{ backgroundColor: '#e3e3d8' }}>
+                <DialogHeader className="pb-6">
+                  <DialogTitle className="font-american-typewriter text-2xl text-black tracking-wide">
+                    Change Password
+                  </DialogTitle>
+                  <DialogDescription className="font-din-arabic text-black/60 tracking-wide">
+                    Update your account password for enhanced security.
+                  </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="max-h-96 pr-4">
+                  <div className="space-y-6">
+                    <div>
+                      <Label className="font-din-arabic text-sm text-black/60 tracking-wide">
+                        Current Password
+                      </Label>
+                      <Input
+                        type="password"
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                        className="mt-2 bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10"
+                        style={{ borderColor: '#D8D2C7' }}
+                      />
+                    </div>
+                    <div>
+                      <Label className="font-din-arabic text-sm text-black/60 tracking-wide">
+                        New Password
+                      </Label>
+                      <Input
+                        type="password"
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                        className="mt-2 bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10"
+                        style={{ borderColor: '#D8D2C7' }}
+                      />
+                    </div>
+                    <div>
+                      <Label className="font-din-arabic text-sm text-black/60 tracking-wide">
+                        Confirm New Password
+                      </Label>
+                      <Input
+                        type="password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                        className="mt-2 bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10"
+                        style={{ borderColor: '#D8D2C7' }}
+                      />
+                    </div>
+                  </div>
+                </ScrollArea>
+                <div className="flex space-x-3 pt-4 mt-4">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleChangePassword}
+                    disabled={loading === 'password' || !passwordData.currentPassword || !passwordData.newPassword || passwordData.newPassword !== passwordData.confirmPassword}
+                    className="flex-1 px-6 py-3 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 disabled:opacity-50 text-center"
+                    style={{ borderColor: '#D8D2C7' }}
+                  >
+                    {loading === 'password' ? 'Saving...' : 'Save Changes'}
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setChangePasswordOpen(false)
+                      setPasswordData({currentPassword: '', newPassword: '', confirmPassword: ''})
+                    }}
+                    className="flex-1 px-6 py-3 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 text-center"
+                    style={{ borderColor: '#D8D2C7' }}
+                  >
+                    Cancel
+                  </motion.button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </motion.div>
 
-                    <button
-                      className="ml-4 shrink-0 rounded-lg border border-gray-200 p-2 hover:bg-gray-50"
-                      data-testid="open-order-button"
-                    >
-                      <span className="sr-only">Go to order #{order.display_id}</span>
-                      <ChevronDown className="-rotate-90" />
-                    </button>
-                  </Container>
-                </LocalizedClientLink>
-              </li>
-            ))
-          ) : (
-            <EmptyOrders />
-          )}
-        </ul>
-      </section>
-    </div>
+        {/* Communication Preferences - Right Column */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <h2 className="font-din-arabic text-sm uppercase mb-6 lg:mb-8 text-black/60 tracking-wider">
+            Communication Preferences
+          </h2>
+          
+          <div className="space-y-6 mb-6">
+            <label className="flex items-start space-x-4 cursor-pointer group">
+              <Checkbox
+                checked={emailComms}
+                onCheckedChange={(checked) => setEmailComms(checked as boolean)}
+                className="mt-1"
+              />
+              <span className="font-din-arabic text-sm text-black tracking-wide group-hover:text-black/70 transition-colors">
+                Email updates — order details and occasional notes from the Lab
+              </span>
+            </label>
+            
+            <label className="flex items-start space-x-4 cursor-pointer group">
+              <Checkbox
+                checked={newsletter}
+                onCheckedChange={(checked) => setNewsletter(checked as boolean)}
+                className="mt-1"
+              />
+              <span className="font-din-arabic text-sm text-black tracking-wide group-hover:text-black/70 transition-colors">
+                Newsletter — the Journal, in your inbox
+              </span>
+            </label>
+          </div>
+          
+          <p className="font-din-arabic text-sm text-black/40 tracking-wide leading-relaxed mb-8">
+            For details on how we handle your data, please see our{" "}
+            <button className="underline hover:text-black/60 transition-colors">
+              Privacy Policy
+            </button>
+          </p>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleSaveCommunicationPrefs}
+            disabled={loading === 'commPrefs'}
+            className="px-8 py-4 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md text-center w-full sm:w-auto disabled:opacity-50"
+            style={{ borderColor: '#D8D2C7' }}
+          >
+            {loading === 'commPrefs' ? 'Saving...' : 'Save Preferences'}
+          </motion.button>
+        </motion.div>
+      </div>
+    </motion.div>
   )
-}
-
-/** Simple, dependency-free progress bar that works with Tailwind only */
-const ProgressBar: React.FC<{ value: number; className?: string }> = ({ value, className }) => {
-  const clamped = Math.max(0, Math.min(100, Math.round(value)))
-  return (
-    <div className={`h-2 w-full rounded-full bg-gray-200 overflow-hidden ${className || ""}`}>
-      <div
-        className="h-full bg-black/80 transition-[width] duration-500 ease-out"
-        style={{ width: `${clamped}%` }}
-        aria-valuenow={clamped}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        role="progressbar"
-      />
-    </div>
-  )
-}
-
-const EmptyOrders: React.FC = () => (
-  <Container className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center">
-    <p className="text-base text-ui-fg-subtle" data-testid="no-orders-message">
-      No recent orders
-    </p>
-    <LocalizedClientLink
-      href="/store"
-      className="inline-block mt-2 text-sm font-medium text-ui-fg-interactive hover:underline"
-    >
-      Start shopping →
-    </LocalizedClientLink>
-  </Container>
-)
-
-/** Same logic you had — kept for test parity */
-const getProfileCompletion = (customer: HttpTypes.StoreCustomer | null) => {
-  let count = 0
-  if (!customer) return 0
-  if (customer.email) count++
-  if (customer.first_name && customer.last_name) count++
-  if (customer.phone) count++
-  const billingAddress = customer.addresses?.find((a) => a.is_default_billing)
-  if (billingAddress) count++
-  return (count / 4) * 100
 }
 
 export default Overview

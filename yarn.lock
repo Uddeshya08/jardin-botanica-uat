@@ -286,9 +286,9 @@
     "@babel/helper-validator-identifier" "^7.27.1"
 
 "@contentful/content-source-maps@^0.11.33":
-  version "0.11.36"
-  resolved "https://registry.npmjs.org/@contentful/content-source-maps/-/content-source-maps-0.11.36.tgz"
-  integrity sha512-J83SuySGJN6WdxBnprfpZRbvZ11q+0CxI7kyjFKC49XN7RzwlACMTIkB4bcKQ9j5sQTrfCoYs7QHiHXBCioyLg==
+  version "0.11.42"
+  resolved "https://registry.npmjs.org/@contentful/content-source-maps/-/content-source-maps-0.11.42.tgz"
+  integrity sha512-dR0bysZJNYSu4NKwce5wY3r5iGS9Qhm7kZsc3JuszmR92AV4euXymV6wzZf67o3mhz5XcCPu7kxJhf4LuV+4Pw==
   dependencies:
     "@vercel/stega" "^0.1.2"
     json-pointer "^0.6.2"
@@ -1317,7 +1317,7 @@
     "@radix-ui/react-context" "1.1.1"
     "@radix-ui/react-primitive" "2.0.1"
 
-"@radix-ui/react-radio-group@^1.2.3":
+"@radix-ui/react-radio-group@^1.3.8":
   version "1.3.8"
   resolved "https://registry.npmjs.org/@radix-ui/react-radio-group/-/react-radio-group-1.3.8.tgz"
   integrity sha512-VBKYIYImA5zsxACdisNQ3BjCBfmbGH3kQlnFVqlWU4tXwjy7cGX8ta80BcrO+WJXIn5iBylEH3K6ZTlee//lgQ==
@@ -3701,9 +3701,9 @@ axe-core@^4.10.0:
   integrity sha512-Xm7bpRXnDSX2YE2YFfBk2FnF0ep6tmG7xPh8iHee8MIcrgq762Nkce856dYtJYLkuIoYZvGfTs/PbZhideTcEg==
 
 axios@^1.12.2:
-  version "1.12.2"
-  resolved "https://registry.npmjs.org/axios/-/axios-1.12.2.tgz"
-  integrity sha512-vMJzPewAlRyOgxV2dU0Cuz2O8zzzx9VYtbJOaBgXFeLc4IV/Eg50n4LowmehOOR61S8ZMpc2K5Sa7g6A4jfkUw==
+  version "1.13.2"
+  resolved "https://registry.npmjs.org/axios/-/axios-1.13.2.tgz"
+  integrity sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==
   dependencies:
     follow-redirects "^1.15.6"
     form-data "^4.0.4"
@@ -3970,10 +3970,10 @@ contentful-sdk-core@^9.0.1:
   optionalDependencies:
     "@rollup/rollup-linux-x64-gnu" "^4.18.0"
 
-contentful@^11.8.5:
-  version "11.8.5"
-  resolved "https://registry.npmjs.org/contentful/-/contentful-11.8.5.tgz"
-  integrity sha512-qJJ41fy05s7tIpM6lLmlsH2z+j2GsWnkJmHFPu68gzLKxzWkwQEU7Bd4vPRKOrO96nRilynajcOAfN/3i8jGdQ==
+contentful@^11.8.13:
+  version "11.8.13"
+  resolved "https://registry.npmjs.org/contentful/-/contentful-11.8.13.tgz"
+  integrity sha512-rNTcjphgHY7buppIkXUHdwUpPg9Sz41IBYJgT7QjqRvSgDMn0+hZRpLXSIaw0zGCgtMXcWWAFOPVYGjLhA2uvg==
   dependencies:
     "@contentful/content-source-maps" "^0.11.33"
     "@contentful/rich-text-types" "^16.6.1"
@@ -5532,10 +5532,10 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
-lucide-react@^0.487.0:
-  version "0.487.0"
-  resolved "https://registry.npmjs.org/lucide-react/-/lucide-react-0.487.0.tgz"
-  integrity sha512-aKqhOQ+YmFnwq8dWgGjOuLc8V1R9/c/yOd+zDY4+ohsR2Jo05lSGc3WsstYPIzcTpeosN7LoCkLReUUITvaIvw==
+lucide-react@^0.536.0:
+  version "0.536.0"
+  resolved "https://registry.npmjs.org/lucide-react/-/lucide-react-0.536.0.tgz"
+  integrity sha512-2PgvNa9v+qz4Jt/ni8vPLt4jwoFybXHuubQT8fv4iCW5TjDxkbZjNZZHa485ad73NSEn/jdsEtU57eE1g+ma8A==
 
 make-dir@^3.0.2, make-dir@^3.1.0:
   version "3.1.0"

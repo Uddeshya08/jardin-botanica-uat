@@ -5,10 +5,10 @@ import { retrieveCustomer } from "@lib/data/customer"
 import { getBaseURL } from "@lib/util/env"
 import { StoreCartShippingOption } from "@medusajs/types"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
-
+import { LedgerProvider } from "app/context/ledger-context"
+import { AuthProvider } from "app/context/auth-context"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 import { Footer } from "app/components/Footer"
-import { LedgerProvider } from "app/context/ledger-context"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -34,6 +34,8 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
 
   return (
     <>
+      {/* <Nav  cartItems={cartItems}
+        /> */}
       {customer && cart && (
         <CartMismatchBanner customer={customer} cart={cart} />
       )}
@@ -45,10 +47,12 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
           shippingOptions={shippingOptions}
         />
       )}
-      <LedgerProvider>
-        {props.children}
-        <Footer />
-      </LedgerProvider>
+      <AuthProvider customer={customer}>
+        <LedgerProvider>
+          {props.children}
+          <Footer />
+        </LedgerProvider>
+      </AuthProvider>
     </>
   )
 }

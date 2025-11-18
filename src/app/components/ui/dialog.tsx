@@ -9,6 +9,18 @@ import { cn } from "./utils";
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
+  // Prevent body scroll when dialog is open
+  React.useEffect(() => {
+    if (props.open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [props.open]);
+
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
@@ -30,44 +42,54 @@ function DialogClose({
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
-function DialogOverlay({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentProps<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => {
   return (
     <DialogPrimitive.Overlay
+      ref={ref}
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[90] bg-black/20 backdrop-blur-sm",
+        "fixed inset-0 z-[200] bg-black/45 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-400 data-[state=closed]:duration-400",
         className,
       )}
+      style={{
+        backdropFilter: 'blur(12px) saturate(120%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(120%)',
+      }}
       {...props}
     />
   );
-}
+});
+DialogOverlay.displayName = "DialogOverlay";
 
 function DialogContent({
   className,
   children,
+  style,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content>) {
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
-      <DialogPrimitive.Content
-        data-slot="dialog-content"
-        className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-1/2 left-1/2 z-[100] grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-lg border p-6 shadow-xl duration-200 sm:max-w-lg focus:outline-none",
-          className,
-        )}
-        {...props}
-      >
+      <div className="fixed inset-0 z-[201] flex items-center justify-center pointer-events-none">
+        <DialogPrimitive.Content
+          data-slot="dialog-content"
+          className={cn(
+            "relative z-[201] grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg sm:max-w-lg bg-background pointer-events-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-100 data-[state=open]:duration-500 data-[state=closed]:duration-500",
+            className,
+          )}
+          style={style}
+          {...props}
+        >
         {children}
-        <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
-          <XIcon />
+        <DialogPrimitive.Close className="absolute top-4 right-4 rounded-sm p-1.5 transition-all duration-200 hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-black/20 disabled:pointer-events-none flex items-center justify-center [&_svg]:pointer-events-none [&_svg]:size-4">
+          <XIcon className="text-black" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
-      </DialogPrimitive.Content>
+        </DialogPrimitive.Content>
+      </div>
     </DialogPortal>
   );
 }
