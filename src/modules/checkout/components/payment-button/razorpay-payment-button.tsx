@@ -151,7 +151,7 @@ export const RazorpayPaymentButton = ({
     cart?.shipping_address?.phone,
     orderData.razorpayOrder.id,
     session.amount,
-    paymentType, // Add paymentType to dependencies
+    paymentType,
   ])
 
   console.log("orderData: " + JSON.stringify(orderData))
