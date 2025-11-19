@@ -3,7 +3,7 @@ import { MapPin, Truck, CreditCard, CheckCircle2, Check } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 
-type CheckoutStep = "address" | "delivery" | "payment" | "review"
+type CheckoutStep = "address" | "payment" | "review"
 
 const CHECKOUT_STEPS: Record<
   CheckoutStep,
@@ -16,10 +16,6 @@ const CHECKOUT_STEPS: Record<
     label: "Shipping",
     icon: MapPin,
   },
-  delivery: {
-    label: "Delivery",
-    icon: Truck,
-  },
   payment: {
     label: "Payment",
     icon: CreditCard,
@@ -30,7 +26,7 @@ const CHECKOUT_STEPS: Record<
   },
 }
 
-const STEP_ORDER: CheckoutStep[] = ["address", "delivery", "payment", "review"]
+const STEP_ORDER: CheckoutStep[] = ["address", "payment", "review"]
 
 export default function CheckoutSteps() {
   const searchParams = useSearchParams()

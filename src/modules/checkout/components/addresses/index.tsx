@@ -1,6 +1,7 @@
 "use client"
 
 import { setAddresses } from "@lib/data/cart"
+import { setShippingMethod } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
 import { CheckCircleSolid } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
@@ -8,7 +9,7 @@ import { Heading, Text, useToggleState } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
@@ -26,18 +27,47 @@ const Addresses = ({
   const pathname = usePathname()
 
   const isOpen = searchParams.get("step") === "address"
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { state: sameAsBilling, toggle: toggleSameAsBilling } = useToggleState(
     cart?.shipping_address && cart?.billing_address
       ? compareAddresses(cart?.shipping_address, cart?.billing_address)
       : true
   )
-console.log("cart => ", cart);
+
+  console.log("cart => ", cart)
+
   const handleEdit = () => {
     router.push(pathname + "?step=address")
   }
 
   const [message, formAction] = useActionState(setAddresses, null)
+
+  const handleFormSubmit = async (formData: FormData) => {
+    setIsSubmitting(true)
+
+    try {
+      // First, set the addresses
+      await formAction(formData)
+
+      // Then automatically set the shipping method to the specific ID
+      const shippingMethodId = "so_01K9QBNYHN1RC19H8JCVSRQ1MZ"
+
+      if (cart?.id) {
+        await setShippingMethod({
+          cartId: cart.id,
+          shippingMethodId: shippingMethodId,
+        })
+
+        // Skip delivery step and go directly to payment
+        router.push(pathname + "?step=payment")
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <div className="bg-[#e3e3d8]">
@@ -62,7 +92,7 @@ console.log("cart => ", cart);
         )}
       </div>
       {isOpen ? (
-        <form action={formAction}>
+        <form action={handleFormSubmit}>
           <div className="pb-8">
             <ShippingAddress
               customer={customer}
@@ -83,8 +113,12 @@ console.log("cart => ", cart);
                 <BillingAddress cart={cart} />
               </div>
             )}
-            <SubmitButton className="mt-6" data-testid="submit-address-button">
-              Continue to delivery
+            <SubmitButton
+              className="mt-6"
+              data-testid="submit-address-button"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Processing..." : "Continue to payment"}
             </SubmitButton>
             <ErrorMessage error={message} data-testid="address-error-message" />
           </div>

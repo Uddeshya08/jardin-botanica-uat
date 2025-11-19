@@ -6,9 +6,6 @@ import { initiatePaymentSession } from "@lib/data/cart"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
 import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
 import ErrorMessage from "@modules/checkout/components/error-message"
-import PaymentContainer, {
-  StripeCardContainer,
-} from "@modules/checkout/components/payment-container"
 import Divider from "@modules/common/components/divider"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
@@ -56,6 +53,8 @@ const PAYMENT_TYPES = [
 
 type PaymentType = (typeof PAYMENT_TYPES)[number]["id"]
 
+const PAYMENT_PROVIDER_ID = "pp_razorpay_razorpay"
+
 const Payment = ({
   cart,
   availablePaymentMethods,
@@ -71,9 +70,8 @@ const Payment = ({
   const [error, setError] = useState<string | null>(null)
   const [cardBrand, setCardBrand] = useState<string | null>(null)
   const [cardComplete, setCardComplete] = useState(false)
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
-    activeSession?.provider_id ?? ""
-  )
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState(PAYMENT_PROVIDER_ID)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -191,6 +189,11 @@ const Payment = ({
     }
   }, [searchParams])
 
+  // Auto-set payment provider on mount
+  useEffect(() => {
+    setPaymentMethod(PAYMENT_PROVIDER_ID)
+  }, [])
+
   return (
     <div className="bg-[#e3e3d8]">
       <div className="flex flex-row items-center justify-between mb-6">
@@ -291,39 +294,7 @@ const Payment = ({
                 </div>
               </div>
 
-              {/* Payment Method Selection */}
-              {availablePaymentMethods?.length && (
-                <>
-                  <Text className="txt-medium-plus text-ui-fg-base mb-3">
-                    Select Payment Method
-                  </Text>
-                  <RadioGroup
-                    value={selectedPaymentMethod}
-                    onChange={(value: string) => setPaymentMethod(value)}
-                  >
-                    {availablePaymentMethods.map((paymentMethod) => (
-                      <div key={paymentMethod.id}>
-                        {isStripeFunc(paymentMethod.id) ? (
-                          <StripeCardContainer
-                            paymentProviderId={paymentMethod.id}
-                            selectedPaymentOptionId={selectedPaymentMethod}
-                            paymentInfoMap={paymentInfoMap}
-                            setCardBrand={setCardBrand}
-                            setError={setError}
-                            setCardComplete={setCardComplete}
-                          />
-                        ) : (
-                          <PaymentContainer
-                            paymentInfoMap={paymentInfoMap}
-                            paymentProviderId={paymentMethod.id}
-                            selectedPaymentOptionId={selectedPaymentMethod}
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </>
-              )}
+              {/* Payment Provider Selection - REMOVED UI, auto-set to pp_razorpay_razorpay */}
             </>
           )}
 
@@ -357,9 +328,7 @@ const Payment = ({
             }
             data-testid="submit-payment-button"
           >
-            {!activeSession && isStripeFunc(selectedPaymentMethod)
-              ? " Enter card details"
-              : "Continue to review"}
+            Continue to review
           </Button>
         </div>
 
