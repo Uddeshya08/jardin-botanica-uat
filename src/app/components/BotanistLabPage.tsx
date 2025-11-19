@@ -18,8 +18,11 @@ const answerPart2 = "The result:\nformulas shaped by climate, chemistry, and car
 const fullAnswerText =
   "We observe, formulate, and reiterate until there's proof. The result: formulas shaped by climate, chemistry, and care."
 
-const OVERLAY_GRADIENT =
-  "absolute inset-0 bg-gradient-to-b from-black/75 via-black/50 to-black/70 pointer-events-none"
+// Overlay gradient - smooth natural gradient from top extending below center
+const OVERLAY_GRADIENT_STYLE = {
+  background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.55) 15%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.08) 65%, rgba(0,0,0,0.03) 75%, transparent 85%)',
+  pointerEvents: 'none' as const
+}
 
 const useTypewriter = (
   text: string,
@@ -170,7 +173,7 @@ function InteractiveLabImage() {
         }}
       >
         <motion.div
-          className="absolute inset-0 overflow-hidden"
+          className="absolute inset-0 overflow-hidden z-0"
           animate={{
             filter: activePoint ? "blur(4px)" : "blur(0px)",
           }}
@@ -181,17 +184,17 @@ function InteractiveLabImage() {
             alt="Botanical Laboratory"
             className="w-full h-full object-cover"
           />
-          <div className={OVERLAY_GRADIENT} />
         </motion.div>
+        {/* Background Overlay - smooth natural gradient from top extending below center */}
+        <div className="absolute inset-0 z-10" style={OVERLAY_GRADIENT_STYLE} />
 
-        <div className="absolute top-0 left-0 right-0 pt-8 sm:pt-12 lg:pt-24 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-16 text-center z-10 relative">
-          <div className={OVERLAY_GRADIENT} />
+        <div className="absolute top-0 left-0 right-0 pt-8 sm:pt-12 lg:pt-24 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-16 text-center z-20">
           <motion.div
             initial={{ opacity: 0, y: -30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative z-10"
+            className="relative z-20"
           >
             <h1
               className="font-american-typewriter text-white mb-4 sm:mb-6 text-xl sm:text-2xl lg:text-3xl"
@@ -851,7 +854,7 @@ export function BotanistLabPage() {
         style={{ opacity, scale }}
       >
         <motion.div
-          className="absolute inset-0"
+          className="absolute inset-0 z-0"
           style={{
             y: useTransform(scrollYProgress, [0, 0.5], [0, 100]),
           }}
@@ -861,10 +864,11 @@ export function BotanistLabPage() {
             alt="Botanical Greenhouse"
             className="w-full h-full object-cover"
           />
-          <div className={OVERLAY_GRADIENT} />
         </motion.div>
+        {/* Background Overlay - smooth natural gradient from top extending below center */}
+        <div className="absolute inset-0 z-10" style={OVERLAY_GRADIENT_STYLE} />
 
-        <div className="relative z-10 text-center px-6 max-w-6xl w-full">
+        <div className="relative z-20 text-center px-6 max-w-6xl w-full">
           <div className="flex flex-col items-center justify-center min-h-[400px]">
             <AnimatePresence mode="wait">
               {phase === 1 && (
