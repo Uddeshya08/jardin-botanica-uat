@@ -33,7 +33,7 @@ export function Footer() {
       links: [
         { name: 'Home Creations', href: `/${countryCode}/home-creations` },
         { name: 'Collections', href: '#' },
-        { name: 'Gift Sets', href: '#' },
+        { name: 'Gift Sets', href: `/${countryCode}/gift-sets` },
       ],
     },
     {
