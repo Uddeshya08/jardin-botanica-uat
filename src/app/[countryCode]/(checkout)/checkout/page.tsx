@@ -1,10 +1,10 @@
 import { retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import PaymentWrapper from "@modules/checkout/components/payment-wrapper"
+import CheckoutHeader from "@modules/checkout/components/checkout-header"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import CheckoutSteps from "@modules/checkout/templates/checkout-form/checkout-steps"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
-import { Package } from "lucide-react"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
@@ -22,18 +22,12 @@ export default async function Checkout() {
   const customer = await retrieveCustomer()
 
   return (
-    <div className="flex flex-col mt-8">
-      <div className="flex flex-col justify-center items-center gap-8">
-        <div className="flex flex-col items-center">
-          <div className="bg-stone-300 rounded-full p-2">
-            <Package className="w-10 h-10" />
-          </div>
-          <h1>Complete Your Order</h1>
-          <p>A few steps away from botanical bliss</p>
-        </div>
+    <div className="max-w-7xl mx-auto px-4 md:px-6">
+      <div className="pt-32 mb-8 lg:mb-12">
+        <CheckoutHeader />
         <CheckoutSteps />
       </div>
-      <div className="grid grid-cols-1 small:grid-cols-[1fr_416px] content-container gap-x-20 py-4">
+      <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
         <PaymentWrapper cart={cart}>
           <CheckoutForm cart={cart} customer={customer} />
         </PaymentWrapper>

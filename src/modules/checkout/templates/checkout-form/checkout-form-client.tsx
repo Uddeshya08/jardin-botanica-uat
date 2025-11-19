@@ -4,9 +4,7 @@ import Addresses from "@modules/checkout/components/addresses"
 import Payment from "@modules/checkout/components/payment"
 import Review from "@modules/checkout/components/review"
 import Shipping from "@modules/checkout/components/shipping"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { Button } from "@medusajs/ui"
-import { ArrowLeftMini } from "@medusajs/icons"
+import { useSearchParams } from "next/navigation"
 import CheckoutSteps from "./checkout-steps"
 
 type CheckoutStep = "address" | "payment" | "review"
@@ -27,35 +25,12 @@ export default function CheckoutFormClient({
   paymentMethods,
 }: CheckoutFormClientProps) {
   const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
 
   const currentStep = (searchParams.get("step") as CheckoutStep) || "address"
-  const currentStepIndex = STEP_ORDER.indexOf(currentStep)
-  const previousStep =
-    currentStepIndex > 0 ? STEP_ORDER[currentStepIndex - 1] : null
-
-  const goToPreviousStep = () => {
-    if (!previousStep) return
-    const params = new URLSearchParams(searchParams)
-    params.set("step", previousStep)
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
-  }
 
   return (
-    <div className="w-full">
-      {previousStep && (
-        <Button
-          variant="transparent"
-          onClick={goToPreviousStep}
-          className="mb-4 text-ui-fg-subtle hover:text-ui-fg-base"
-        >
-          <ArrowLeftMini className="mr-2" />
-          Previous
-        </Button>
-      )}
-
-      <div className="animate-in fade-in duration-300">
+    <div className="lg:col-span-2 space-y-4 lg:space-y-6">
+      <div className="lg:col-span-2 space-y-4 lg:space-y-6 bg-white/60 backdrop-blur-md rounded-2xl md:rounded-3xl p-4 md:p-8 border border-white/80 shadow-xl">
         {currentStep === "address" && (
           <Addresses cart={cart} customer={customer} />
         )}

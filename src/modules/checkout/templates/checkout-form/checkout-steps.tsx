@@ -1,7 +1,8 @@
 "use client"
-import { MapPin, Truck, CreditCard, CheckCircle2, Check } from "lucide-react"
+import { MapPin, CreditCard, Check } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
+import React from "react"
 
 type CheckoutStep = "address" | "payment" | "review"
 
@@ -22,7 +23,7 @@ const CHECKOUT_STEPS: Record<
   },
   review: {
     label: "Review",
-    icon: CheckCircle2,
+    icon: Check,
   },
 }
 
@@ -33,89 +34,110 @@ export default function CheckoutSteps() {
   const currentStep = (searchParams.get("step") as CheckoutStep) || "address"
   const currentStepIndex = STEP_ORDER.indexOf(currentStep)
 
-  return (
-    <div className="flex items-center justify-center gap-4 mb-8">
-      {STEP_ORDER.map((step, index) => {
-        const isActive = step === currentStep
-        const isCompleted = index < currentStepIndex
-        const StepIcon = CHECKOUT_STEPS[step].icon
+  // Convert step to numeric index for comparison (0, 1, 2)
+  const currentStepNumeric = currentStepIndex
 
-        return (
-          <div key={step} className="flex items-center">
-            <div className="flex flex-col items-center">
+  const steps = STEP_ORDER.map((stepId, index) => ({
+    id: index,
+    stepId,
+    name: CHECKOUT_STEPS[stepId].label,
+    icon: CHECKOUT_STEPS[stepId].icon,
+  }))
+
+  return (
+    <div className="max-w-2xl mx-auto px-2 mb-8">
+      <div className="flex items-center justify-between mb-4 relative">
+        {steps.map((step, index) => (
+          <React.Fragment key={step.stepId}>
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: index * 0.1 }}
+              className="flex flex-col items-center flex-1 relative z-10"
+            >
               <motion.div
-                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all border-2 ${
-                  isActive
-                    ? "bg-white text-black border-gray-300"
-                    : isCompleted
-                    ? "bg-black text-white border-black"
-                    : "bg-white text-gray-400 border-gray-300"
-                }`}
-                initial={false}
-                animate={{
-                  scale: isActive ? 1.1 : 1,
-                  boxShadow: isActive
-                    ? "0 4px 12px rgba(0, 0, 0, 0.15)"
-                    : "0 0 0 rgba(0, 0, 0, 0)",
-                }}
-                transition={{
-                  duration: 0.3,
-                  ease: "easeInOut",
-                }}
+                whileHover={{ scale: 1.08 }}
+                transition={{ duration: 0.2 }}
+                className="relative"
               >
+                {/* Pulsing Glow Effect - Only for current step */}
+                {currentStepNumeric === step.id && (
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      background:
+                        "radial-gradient(circle, rgba(0, 0, 0, 0.3) 0%, transparent 70%)",
+                      filter: "blur(8px)",
+                    }}
+                    animate={{
+                      scale: [1, 1.3, 1],
+                      opacity: [0.5, 0.8, 0.5],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                )}
+
                 <motion.div
-                  key={isCompleted ? "check" : "icon"}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
+                  className={`relative w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
+                    currentStepNumeric > step.id
+                      ? "bg-black text-white"
+                      : currentStepNumeric === step.id
+                      ? "bg-white/80 backdrop-blur-sm shadow-lg"
+                      : "bg-white/40 backdrop-blur-sm"
+                  }`}
                 >
-                  {isCompleted ? (
-                    <Check className="w-6 h-6 stroke-[3]" />
+                  {currentStepNumeric > step.id ? (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Check className="w-5 h-5" />
+                    </motion.div>
                   ) : (
-                    <StepIcon className="w-5 h-5" />
+                    <step.icon className="w-4 h-4 md:w-5 md:h-5" />
                   )}
                 </motion.div>
               </motion.div>
-              <motion.span
-                className={`text-xs mt-2 whitespace-nowrap ${
-                  isActive || isCompleted
-                    ? "font-medium text-black"
-                    : "text-gray-400"
+              <span
+                className={`font-din-arabic text-xs mt-2 transition-colors duration-300 hidden sm:block ${
+                  currentStepNumeric >= step.id ? "text-black" : "text-black/40"
                 }`}
-                initial={false}
-                animate={{
-                  y: isActive ? -2 : 0,
-                }}
-                transition={{
-                  duration: 0.3,
-                  ease: "easeInOut",
+              >
+                {step.name}
+              </span>
+            </motion.div>
+
+            {index < steps.length - 1 && (
+              <div 
+                className="flex-1 h-px bg-black/10 mx-auto relative overflow-hidden"
+                style={{ 
+                  marginTop: '-20px',
+                  zIndex: 1
                 }}
               >
-                {CHECKOUT_STEPS[step].label}
-              </motion.span>
-            </div>
-            {index < STEP_ORDER.length - 1 && (
-              <div className="relative w-16 h-[2px] mx-2 mb-6">
-                <div className="absolute inset-0 bg-gray-300" />
+                {/* Background line - always visible */}
+                <div className="flex-1 h-px bg-black/10 mx-20 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-black" style={{ width: "100%" }}></div>
+                </div>
+
                 <motion.div
-                  className="absolute inset-0 bg-black origin-left"
-                  initial={{ scaleX: 0 }}
+                  className="absolute inset-0 bg-black h-full"
+                  initial={{ width: "0%" }}
                   animate={{
-                    scaleX: isCompleted ? 1 : 0,
+                    width: currentStepNumeric > step.id ? "100%" : "0%",
                   }}
-                  transition={{
-                    duration: 0.5,
-                    ease: "easeInOut",
-                    delay: 0.1,
-                  }}
-                  style={{ transformOrigin: "left" }}
+                  transition={{ duration: 0.5 }}
                 />
               </div>
             )}
-          </div>
-        )
-      })}
+          </React.Fragment>
+        ))}
+      </div>
     </div>
   )
 }

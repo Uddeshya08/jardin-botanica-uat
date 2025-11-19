@@ -1,12 +1,15 @@
 "use client"
 
-import { Heading, Text, clx } from "@medusajs/ui"
+import { ArrowLeftMini } from "@medusajs/icons"
+import { Button, Heading, Text, clx } from "@medusajs/ui"
 
 import PaymentButton from "../payment-button"
-import { useSearchParams } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 const Review = ({ cart }: { cart: any }) => {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
 
   const isOpen = searchParams.get("step") === "review"
 
@@ -19,32 +22,44 @@ const Review = ({ cart }: { cart: any }) => {
     (cart.payment_collection || paidByGiftcard)
 
   return (
-    <div className="bg-[#e3e3d8]">
-      <div className="flex flex-row items-center justify-between mb-6">
-        <Heading
-          level="h2"
-          className={clx(
-            "flex flex-row text-3xl-regular gap-x-2 items-baseline",
-            {
-              "opacity-50 pointer-events-none select-none": !isOpen,
-            }
-          )}
+    <div>
+      <div className="flex items-center space-x-3 mb-6 md:mb-8">
+        <div
+          className="w-12 h-12 rounded-2xl flex items-center justify-center"
+          style={{
+            background: "linear-gradient(135deg, rgba(4,120,87,0.2), rgba(4,120,87,0.1))",
+          }}
         >
-          Review
-        </Heading>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-check w-6 h-6"
+            style={{ color: "rgb(4, 120, 87)" }}
+          >
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </div>
+
+        <div>
+          <h2 className="font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide">
+            Review Your Order
+          </h2>
+
+          <p className="font-din-arabic text-xs sm:text-sm text-black/60">
+            Verify Details Before Parcel Dispatch.
+          </p>
+        </div>
       </div>
+
       {isOpen && previousStepsCompleted && (
         <>
-          <div className="flex items-start gap-x-1 w-full mb-6">
-            <div className="w-full">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                By clicking the Place Order button, you confirm that you have
-                read, understand and accept our Terms of Use, Terms of Sale and
-                Returns Policy and acknowledge that you have read Medusa
-                Store&apos;s Privacy Policy.
-              </Text>
-            </div>
-          </div>
           <PaymentButton cart={cart} data-testid="submit-order-button" />
         </>
       )}

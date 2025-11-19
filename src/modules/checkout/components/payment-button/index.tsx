@@ -38,7 +38,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       case isRazorpay(paymentSession?.provider_id):
         return(
           <RazorpayPaymentButton 
-          session={paymentSession}
+           session={paymentSession}
            notReady={notReady}
            cart={cart}
           />
@@ -182,6 +182,7 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
   return (
     <>
       <Button
+        className="ml-auto px-8 py-4 bg-gradient-to-r from-black to-gray-800 text-white rounded-xl font-din-arabic disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl flex items-center space-x-3"
         disabled={notReady}
         isLoading={submitting}
         onClick={handlePayment}
