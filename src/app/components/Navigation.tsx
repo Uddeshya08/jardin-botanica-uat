@@ -24,14 +24,8 @@ import {
   DialogTitle,
 } from "./ui/dialog"
 import { useAuth } from "app/context/auth-context"
-
-interface CartItem {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  image?: string
-}
+import { useCartItemsSafe, CartItem } from "app/context/cart-items-context"
+import { updateLineItem, deleteLineItem } from "@lib/data/cart"
 
 interface DropdownItem {
   label: string
@@ -58,8 +52,8 @@ interface NavigationProps {
 
 export function Navigation({
   isScrolled = false,
-  cartItems = [],
-  onCartUpdate,
+  cartItems: cartItemsProp,
+  onCartUpdate: onCartUpdateProp,
   onDropdownChange,
   disableSticky = false,
   disableAnimations = false,
@@ -69,6 +63,11 @@ export function Navigation({
   const router = useRouter()
   const pathname = usePathname()
   const { isLoggedIn: authIsLoggedIn } = useAuth()
+  
+  // Use context if available, otherwise fall back to props
+  const cartContext = useCartItemsSafe()
+  const cartItems = cartContext?.cartItems ?? cartItemsProp ?? []
+  const onCartUpdate = cartContext?.handleCartUpdate ?? onCartUpdateProp
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
@@ -82,6 +81,7 @@ export function Navigation({
     string | null
   >(null)
   const [showLoginDialog, setShowLoginDialog] = useState(false)
+  const [updatingCartItem, setUpdatingCartItem] = useState<string | null>(null)
   const cartRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -256,14 +256,48 @@ export function Navigation({
     return cartItems.reduce((total, item) => total + item.quantity, 0)
   }
 
-  const handleQuantityChange = (itemId: string, change: number) => {
+  const handleQuantityChange = async (itemId: string, change: number) => {
     const item = cartItems.find((item) => item.id === itemId)
-    if (item && onCartUpdate) {
-      const newQuantity = Math.max(0, item.quantity + change)
-      onCartUpdate({
-        ...item,
-        quantity: newQuantity,
-      })
+    if (!item) return
+
+    setUpdatingCartItem(itemId)
+    const newQuantity = Math.max(0, item.quantity + change)
+
+    try {
+      if (newQuantity === 0) {
+        // Delete the line item if quantity becomes 0
+        await deleteLineItem(itemId)
+      } else {
+        // Update the line item quantity in Medusa
+        await updateLineItem({
+          lineId: itemId,
+          quantity: newQuantity,
+        })
+      }
+
+      // Update local context state
+      if (onCartUpdate) {
+        if (newQuantity === 0) {
+          // Pass the item with quantity 0 to signal deletion
+          onCartUpdate({
+            ...item,
+            quantity: 0,
+          })
+        } else {
+          onCartUpdate({
+            ...item,
+            quantity: newQuantity,
+          })
+        }
+      }
+
+      // Refresh the page to get updated cart data from server
+      router.refresh()
+    } catch (error) {
+      console.error("Failed to update cart item:", error)
+      // You could show an error toast here
+    } finally {
+      setUpdatingCartItem(null)
     }
   }
 
@@ -886,18 +920,20 @@ export function Navigation({
                                       onClick={() =>
                                         handleQuantityChange(item.id, -1)
                                       }
-                                      className="p-1 hover:bg-black/10 transition-colors rounded"
+                                      disabled={updatingCartItem === item.id}
+                                      className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                       <Minus className="w-3 h-3 text-black/70" />
                                     </button>
                                     <span className="font-din-arabic text-black text-sm min-w-[20px] text-center">
-                                      {item.quantity}
+                                      {updatingCartItem === item.id ? "..." : item.quantity}
                                     </span>
                                     <button
                                       onClick={() =>
                                         handleQuantityChange(item.id, 1)
                                       }
-                                      className="p-1 hover:bg-black/10 transition-colors rounded"
+                                      disabled={updatingCartItem === item.id}
+                                      className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                       <Plus className="w-3 h-3 text-black/70" />
                                     </button>
@@ -1180,18 +1216,20 @@ export function Navigation({
                                       onClick={() =>
                                         handleQuantityChange(item.id, -1)
                                       }
-                                      className="p-1 hover:bg-black/10 transition-colors rounded"
+                                      disabled={updatingCartItem === item.id}
+                                      className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                       <Minus className="w-3 h-3 text-black/70" />
                                     </button>
                                     <span className="font-din-arabic text-black text-sm min-w-[20px] text-center">
-                                      {item.quantity}
+                                      {updatingCartItem === item.id ? "..." : item.quantity}
                                     </span>
                                     <button
                                       onClick={() =>
                                         handleQuantityChange(item.id, 1)
                                       }
-                                      className="p-1 hover:bg-black/10 transition-colors rounded"
+                                      disabled={updatingCartItem === item.id}
+                                      className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                       <Plus className="w-3 h-3 text-black/70" />
                                     </button>
@@ -1217,7 +1255,7 @@ export function Navigation({
                               </span>
                             </div>
                             <div className="space-y-2 text-center">
-                              <Link href={"/checkout"}>
+                              <Link href={"/checkout?step=address"}>
                                 <button className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide text-center">
                                   Checkout
                                 </button>

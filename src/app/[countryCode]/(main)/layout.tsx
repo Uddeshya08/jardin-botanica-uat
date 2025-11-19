@@ -7,6 +7,7 @@ import { StoreCartShippingOption } from "@medusajs/types"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 import { LedgerProvider } from "app/context/ledger-context"
 import { AuthProvider } from "app/context/auth-context"
+import { CartItemsProvider } from "app/context/cart-items-context"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 import { Footer } from "app/components/Footer"
 
@@ -49,8 +50,10 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       )}
       <AuthProvider customer={customer}>
         <LedgerProvider>
-          {props.children}
-          <Footer />
+          <CartItemsProvider initialCartItems={cartItems}>
+            {props.children}
+            <Footer />
+          </CartItemsProvider>
         </LedgerProvider>
       </AuthProvider>
     </>
