@@ -9,7 +9,7 @@ import { Button } from "@medusajs/ui"
 import { ArrowLeftMini } from "@medusajs/icons"
 import CheckoutSteps from "./checkout-steps"
 
-type CheckoutStep = "address" | "delivery" | "payment" | "review"
+type CheckoutStep = "address" | "payment" | "review"
 
 interface CheckoutFormClientProps {
   cart: HttpTypes.StoreCart
@@ -18,7 +18,7 @@ interface CheckoutFormClientProps {
   paymentMethods: any[]
 }
 
-const STEP_ORDER: CheckoutStep[] = ["address", "delivery", "payment", "review"]
+const STEP_ORDER: CheckoutStep[] = ["address", "payment", "review"]
 
 export default function CheckoutFormClient({
   cart,
@@ -60,9 +60,9 @@ export default function CheckoutFormClient({
           <Addresses cart={cart} customer={customer} />
         )}
 
-        {currentStep === "delivery" && (
+        {/*{currentStep === "delivery" && (
           <Shipping cart={cart} availableShippingMethods={shippingMethods} />
-        )}
+        )}*/}
 
         {currentStep === "payment" && (
           <Payment cart={cart} availablePaymentMethods={paymentMethods} />

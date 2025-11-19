@@ -1,9 +1,9 @@
 "use client"
-
 import { MapPin, Truck, CreditCard, CheckCircle2, Check } from "lucide-react"
 import { useSearchParams } from "next/navigation"
+import { motion } from "framer-motion"
 
-type CheckoutStep = "address" | "delivery" | "payment" | "review"
+type CheckoutStep = "address" | "payment" | "review"
 
 const CHECKOUT_STEPS: Record<
   CheckoutStep,
@@ -16,10 +16,6 @@ const CHECKOUT_STEPS: Record<
     label: "Shipping",
     icon: MapPin,
   },
-  delivery: {
-    label: "Delivery",
-    icon: Truck,
-  },
   payment: {
     label: "Payment",
     icon: CreditCard,
@@ -30,7 +26,7 @@ const CHECKOUT_STEPS: Record<
   },
 }
 
-const STEP_ORDER: CheckoutStep[] = ["address", "delivery", "payment", "review"]
+const STEP_ORDER: CheckoutStep[] = ["address", "payment", "review"]
 
 export default function CheckoutSteps() {
   const searchParams = useSearchParams()
@@ -47,7 +43,7 @@ export default function CheckoutSteps() {
         return (
           <div key={step} className="flex items-center">
             <div className="flex flex-col items-center">
-              <div
+              <motion.div
                 className={`w-14 h-14 rounded-full flex items-center justify-center transition-all border-2 ${
                   isActive
                     ? "bg-white text-black border-gray-300"
@@ -55,30 +51,67 @@ export default function CheckoutSteps() {
                     ? "bg-black text-white border-black"
                     : "bg-white text-gray-400 border-gray-300"
                 }`}
+                initial={false}
+                animate={{
+                  scale: isActive ? 1.1 : 1,
+                  boxShadow: isActive
+                    ? "0 4px 12px rgba(0, 0, 0, 0.15)"
+                    : "0 0 0 rgba(0, 0, 0, 0)",
+                }}
+                transition={{
+                  duration: 0.3,
+                  ease: "easeInOut",
+                }}
               >
-                {isCompleted ? (
-                  <Check className="w-6 h-6 stroke-[3]" />
-                ) : (
-                  <StepIcon className="w-5 h-5" />
-                )}
-              </div>
-              <span
+                <motion.div
+                  key={isCompleted ? "check" : "icon"}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {isCompleted ? (
+                    <Check className="w-6 h-6 stroke-[3]" />
+                  ) : (
+                    <StepIcon className="w-5 h-5" />
+                  )}
+                </motion.div>
+              </motion.div>
+              <motion.span
                 className={`text-xs mt-2 whitespace-nowrap ${
                   isActive || isCompleted
                     ? "font-medium text-black"
                     : "text-gray-400"
                 }`}
+                initial={false}
+                animate={{
+                  y: isActive ? -2 : 0,
+                }}
+                transition={{
+                  duration: 0.3,
+                  ease: "easeInOut",
+                }}
               >
                 {CHECKOUT_STEPS[step].label}
-              </span>
+              </motion.span>
             </div>
-
             {index < STEP_ORDER.length - 1 && (
-              <div
-                className={`w-16 h-[2px] mx-2 mb-6 transition-all ${
-                  isCompleted ? "bg-black" : "bg-gray-300"
-                }`}
-              />
+              <div className="relative w-16 h-[2px] mx-2 mb-6">
+                <div className="absolute inset-0 bg-gray-300" />
+                <motion.div
+                  className="absolute inset-0 bg-black origin-left"
+                  initial={{ scaleX: 0 }}
+                  animate={{
+                    scaleX: isCompleted ? 1 : 0,
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    ease: "easeInOut",
+                    delay: 0.1,
+                  }}
+                  style={{ transformOrigin: "left" }}
+                />
+              </div>
             )}
           </div>
         )

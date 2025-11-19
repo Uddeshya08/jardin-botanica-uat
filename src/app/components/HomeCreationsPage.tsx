@@ -208,13 +208,14 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
     <div className="min-h-screen" style={{ backgroundColor: "#e3e3d8" }}>
       {/* Hero Banner */}
       <section className="relative h-[60vh] sm:h-[65vh] lg:h-[75vh] overflow-hidden">
-        <motion.div initial={{ scale: 1.1 }} animate={{ scale: 1 }} transition={{ duration: 1.5, ease: "easeOut" }} className="w-full h-full">
+        <motion.div initial={{ scale: 1.1 }} animate={{ scale: 1 }} transition={{ duration: 1.5, ease: "easeOut" }} className="absolute inset-0 w-full h-full z-0">
           <ImageWithFallback src={HERO_IMAGE} alt="Home Creations Collection" className="w-full h-full object-cover" />
         </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-black/50 to-black h-full" />
+        {/* Background Overlay - smooth natural gradient from top extending below center */}
+        <div className="absolute inset-0 z-10" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.55) 15%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.08) 65%, rgba(0,0,0,0.03) 75%, transparent 85%)' }} />
 
         {/* Hero Text */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center z-20">
           <div className="text-center px-4 sm:px-6">
             <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.2 }}>
             <motion.p
@@ -444,12 +445,12 @@ function EditorialBlogSection() {
     >
       <div className="relative h-[60vh] sm:h-[65vh] lg:h-[75vh] overflow-hidden">
         {/* Background Image */}
-        <motion.div initial={{ scale: 1.05 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: "easeOut" }} className="absolute inset-0">
+        <motion.div initial={{ scale: 1.05 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: "easeOut" }} className="absolute inset-0 w-full h-full z-0">
           <ImageWithFallback src={EDITORIAL_IMAGE} alt="Creating atmosphere through fragrance" className="w-full h-full object-cover" />
         </motion.div>
 
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+        {/* Background Overlay - smooth natural gradient from top extending below center */}
+        <div className="absolute inset-0 z-10" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.55) 15%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.08) 65%, rgba(0,0,0,0.03) 75%, transparent 85%)' }} />
 
         {/* Content */}
         <motion.div
@@ -457,7 +458,7 @@ function EditorialBlogSection() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="relative z-10 flex items-center h-[60vh] sm:h-[65vh] lg:h-[75vh] px-6 sm:px-12 lg:px-20 py-12 sm:py-16"
+          className="relative z-20 flex items-center h-[60vh] sm:h-[65vh] lg:h-[75vh] px-6 sm:px-12 lg:px-20 py-12 sm:py-16"
         >
           <div className="max-w-lg">
             <motion.p
