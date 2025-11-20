@@ -3,9 +3,9 @@
 import { setAddresses } from "@lib/data/cart"
 import { setShippingMethod } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
-import { CheckCircleSolid } from "@medusajs/icons"
+import { ArrowLeftMini, CheckCircleSolid } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
-import { Heading, Text, useToggleState } from "@medusajs/ui"
+import { Button, Heading, Text, useToggleState } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
@@ -14,6 +14,7 @@ import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
+import { ChevronLeft } from "lucide-react"
 
 const Addresses = ({
   cart,
@@ -34,8 +35,6 @@ const Addresses = ({
       ? compareAddresses(cart?.shipping_address, cart?.billing_address)
       : true
   )
-
-  console.log("cart => ", cart)
 
   const handleEdit = () => {
     router.push(pathname + "?step=address")
@@ -70,13 +69,14 @@ const Addresses = ({
   }
 
   return (
-    <div className="bg-[#e3e3d8]">
-      <div className="flex flex-row items-center justify-between mb-6">
+    <div>
+      <div className="flex-row items-center justify-between mb-6">
+        <p className="font-din-arabic text-xs text-black/40 mb-2 tracking-wider uppercase">Shipping Information</p>
         <Heading
           level="h2"
-          className="flex flex-row text-3xl-regular gap-x-2 items-baseline"
+          className="flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide"
         >
-          Shipping Address
+          Where Shall We Send Your Order?          
           {!isOpen && <CheckCircleSolid />}
         </Heading>
         {!isOpen && cart?.shipping_address && (
@@ -114,11 +114,12 @@ const Addresses = ({
               </div>
             )}
             <SubmitButton
-              className="mt-6"
+              className="mt-6 ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
               data-testid="submit-address-button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Processing..." : "Continue to payment"}
+              {isSubmitting ? "Processing..." : "Continue"}
+              <ChevronLeft className="w-4 h-4 rotate-180" />
             </SubmitButton>
             <ErrorMessage error={message} data-testid="address-error-message" />
           </div>

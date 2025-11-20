@@ -8,23 +8,23 @@ import Package from "@modules/common/icons/package"
 
 const CheckoutSummary = ({ cart }: { cart: any }) => {
   return (
-    <div className="sticky top-0 flex flex-col-reverse small:flex-col gap-y-8 py-8 small:py-0 ">
-      <div className="w-full bg-[#e3e3d8] flex flex-col gap-4">
-        <div className="flex items-center gap-3 mb-6">
+    <div className="lg:sticky lg:top-28 h-fit bg-white/60 backdrop-blur-md rounded-2xl md:rounded-3xl p-4 md:p-8 border border-white/80 shadow-xl">
+      <div className="flex items-center gap-3 mb-6">
+        <h2 className="font-american-typewriter mb-6 flex items-center space-x-2">
           <Package className="w-5 h-5" />
-          <h2 className="text-lg font-semibold">Order Summary</h2>
-        </div>
-
-        <ItemsPreviewTemplate cart={cart} />
-
-        <div>
-          <DiscountCode cart={cart} />
-        </div>
-
-        <Divider />
-
-        <CartTotals totals={cart} />
+          <span>Order Summary</span>
+        </h2>
       </div>
+
+      <ItemsPreviewTemplate cart={cart} />
+
+      <div>
+        <DiscountCode cart={cart} />
+      </div>
+
+      <Divider />
+
+      <CartTotals totals={cart} />
     </div>
   )
 }

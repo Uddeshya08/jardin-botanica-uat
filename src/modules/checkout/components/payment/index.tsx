@@ -3,7 +3,7 @@
 import { RadioGroup } from "@headlessui/react"
 import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { initiatePaymentSession } from "@lib/data/cart"
-import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
+import { ArrowLeftMini, CheckCircleSolid, CreditCard } from "@medusajs/icons"
 import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import Divider from "@modules/common/components/divider"
@@ -15,7 +15,59 @@ import {
   Building2,
   Wallet,
   Banknote,
+  ChevronLeft,
 } from "lucide-react"
+
+import { Shield, Check } from "lucide-react"
+
+function SecurePaymentCard() {
+  return (
+    <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/80 shadow-xl">
+      <div className="flex items-start space-x-4">
+
+        {/* Icon Circle */}
+        <div
+          className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(5,150,105,0.2), rgba(5,150,105,0.1))",
+          }}
+        >
+          <Shield className="w-6 h-6 text-emerald-600" strokeWidth={2} />
+        </div>
+
+        {/* Text Content */}
+        <div className="flex-1">
+          <h3 className="font-american-typewriter mb-3">
+            Secure Payment Via Razorpay
+          </h3>
+
+          <p className="font-din-arabic text-black/70 mb-4">
+            Your Payment Details Are Encrypted and Processed Safely.
+          </p>
+
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2 text-sm font-din-arabic text-black/60">
+              <Check className="w-4 h-4 text-emerald-600" />
+              <span>256-bit SSL encryption</span>
+            </div>
+
+            <div className="flex items-center space-x-2 text-sm font-din-arabic text-black/60">
+              <Check className="w-4 h-4 text-emerald-600" />
+              <span>PCI DSS compliant</span>
+            </div>
+
+            <div className="flex items-center space-x-2 text-sm font-din-arabic text-black/60">
+              <Check className="w-4 h-4 text-emerald-600" />
+              <span>Your card details are never stored</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 
 // Payment type options with icons and descriptions
 const PAYMENT_TYPES = [
@@ -133,8 +185,8 @@ const Payment = ({
     setSelectedPaymentType(type)
     router.push(
       pathname +
-        "?" +
-        updateQueryParams({ step: "payment", paymenttype: type }),
+      "?" +
+      updateQueryParams({ step: "payment", paymenttype: type }),
       { scroll: false }
     )
   }
@@ -157,11 +209,11 @@ const Payment = ({
       if (!shouldInputCard) {
         return router.push(
           pathname +
-            "?" +
-            updateQueryParams({
-              step: "review",
-              paymenttype: selectedPaymentType,
-            }),
+          "?" +
+          updateQueryParams({
+            step: "review",
+            paymenttype: selectedPaymentType,
+          }),
           {
             scroll: false,
           }
@@ -195,21 +247,8 @@ const Payment = ({
   }, [])
 
   return (
-    <div className="bg-[#e3e3d8]">
+    <div>
       <div className="flex flex-row items-center justify-between mb-6">
-        <Heading
-          level="h2"
-          className={clx(
-            "flex flex-row text-3xl-regular gap-x-2 items-baseline",
-            {
-              "opacity-50 pointer-events-none select-none":
-                !isOpen && !paymentReady,
-            }
-          )}
-        >
-          Payment
-          {!isOpen && paymentReady && <CheckCircleSolid />}
-        </Heading>
         {!isOpen && paymentReady && (
           <Text>
             <button
@@ -227,21 +266,36 @@ const Payment = ({
           {!paidByGiftcard && (
             <>
               {/* Payment Type Selection */}
-              <div className="mb-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                    <CreditCardIcon className="w-5 h-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <Text className="text-lg font-semibold text-gray-900">
-                      Payment Method
-                    </Text>
-                    <Text className="text-sm text-gray-500">
-                      Choose Your Preferred Payment Option
-                    </Text>
-                  </div>
+              <div className="flex items-center space-x-3 mb-6 md:mb-8">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-black/10 to-black/5 flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-lock w-6 h-6"
+                  >
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
                 </div>
 
+                <div>
+                  <h2 className="font-american-typewriter text-xl sm:text-2xl md:text-3xl">
+                    Payment Method
+                  </h2>
+
+                  <p className="font-din-arabic text-xs sm:text-sm text-black/60">
+                    Choose Your Preferred Payment Option
+                  </p>
+                </div>
+              </div>
+              <div className="mb-6">
                 <div className="flex flex-col gap-3">
                   {PAYMENT_TYPES.map((type) => {
                     const Icon = type.icon
@@ -250,8 +304,7 @@ const Payment = ({
                         key={type.id}
                         onClick={() => handlePaymentTypeChange(type.id)}
                         className={clx(
-                          "flex items-center gap-4 py-4 px-5 rounded-xl border-2 transition-all text-left",
-                          "hover:scale-105",
+                          "relative flex items-center space-x-4 p-5 rounded-2xl text-left cursor-pointer transition-all duration-300 overflow-hidden bg-white/40 hover:bg-white/60 hover:shadow-md",
                           {
                             " bg-green-50/50 shadow-sm":
                               selectedPaymentType === type.id,
@@ -260,8 +313,8 @@ const Payment = ({
                         )}
                         data-testid={`payment-type-${type.id}`}
                       >
-                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Icon className="w-6 h-6 text-green-700" />
+                        <div className={`w-12 h-12 ${selectedPaymentType === type.id ? "bg-green-100" : "bg-white"} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`w-6 h-6 ${selectedPaymentType === type.id ? "text-green-700" : "text-black"}`}/>
                         </div>
 
                         <div className="flex-1">
@@ -294,6 +347,8 @@ const Payment = ({
                 </div>
               </div>
 
+              <SecurePaymentCard />
+
               {/* Payment Provider Selection - REMOVED UI, auto-set to pp_razorpay_razorpay */}
             </>
           )}
@@ -317,19 +372,34 @@ const Payment = ({
             data-testid="payment-method-error-message"
           />
 
-          <Button
-            size="large"
-            className="mt-6"
-            onClick={handleSubmit}
-            isLoading={isLoading}
-            disabled={
-              (isStripe && !cardComplete) ||
-              (!selectedPaymentMethod && !paidByGiftcard)
-            }
-            data-testid="submit-payment-button"
-          >
-            Continue to review
-          </Button>
+          <div className="mt-6 flex items-center justify-between gap-4">
+            <Button
+              variant="transparent"
+              onClick={() => {
+                const params = new URLSearchParams(searchParams)
+                params.set("step", "address")
+                router.push(`${pathname}?${params.toString()}`, { scroll: false })
+              }}
+              className="px-8 py-3 bg-white/60 backdrop-blur-sm border-2 border-black/10 hover:border-black/20 rounded-xl font-din-arabic transition-all shadow-sm hover:shadow-md flex items-center space-x-2"
+            >
+              <ArrowLeftMini className="mr-2" />
+              Previous
+            </Button>
+            <Button
+              size="large"
+              className="ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
+              onClick={handleSubmit}
+              isLoading={isLoading}
+              disabled={
+                (isStripe && !cardComplete) ||
+                (!selectedPaymentMethod && !paidByGiftcard)
+              }
+              data-testid="submit-payment-button "
+            >
+              Continue
+              <ChevronLeft className="w-4 h-4 rotate-180" />
+            </Button>
+          </div>
         </div>
 
         <div className={isOpen ? "hidden" : "block"}>

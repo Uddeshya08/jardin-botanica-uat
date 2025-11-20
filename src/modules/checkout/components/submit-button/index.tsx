@@ -19,7 +19,7 @@ export function SubmitButton({
 
   return (
     <Button
-      size="large"
+      size="small"
       className={className}
       type="submit"
       isLoading={pending}

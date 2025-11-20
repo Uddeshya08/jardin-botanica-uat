@@ -1,6 +1,6 @@
 "use client"
 
-import { Badge, Heading, Input, Label, Text, Tooltip } from "@medusajs/ui"
+import { Badge, Divider, Heading, Input, Label, Text, Tooltip } from "@medusajs/ui"
 import React, { useActionState } from "react"
 
 import { applyPromotions, submitPromotionForm } from "@lib/data/cart"
@@ -50,28 +50,28 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   const [message, formAction] = useActionState(submitPromotionForm, null)
 
   return (
-    <div className="w-full bg-[#e3e3d8] flex flex-col">
-      <div className="txt-medium">
+    <div className="w-full pt-8 flex flex-col">
+        <Divider />
+      <div className="flex items-center gap-2 font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 font-din-arabic text-sm text-black/70">
         <form action={(a) => addPromotionCode(a)} className="w-full mb-5">
           <Label className="flex gap-x-1 my-2 items-center gap-2">
             <Tag />
             <Text>Have a coupon code ?</Text>
-
-            {/* <Tooltip content="You can add multiple promotion codes">
-              <InformationCircleSolid color="var(--fg-muted)" />
-            </Tooltip> */}
           </Label>
 
           <div className="flex w-full gap-x-2">
+            <div className="w-full">
             <Input
-              className="size-full"
+              className="p-5"
               id="promotion-input"
               name="code"
               type="text"
               autoFocus={false}
               data-testid="discount-input"
             />
-            <SubmitButton data-testid="discount-apply-button">
+            </div>
+
+            <SubmitButton data-testid="discount-apply-button" className="p-2">
               Apply
             </SubmitButton>
           </div>
