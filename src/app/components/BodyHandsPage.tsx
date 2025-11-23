@@ -124,7 +124,7 @@ export function BodyHandsPage({ onAddToCart }: BodyHandsPageProps) {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#e3e3d8" }}>
       {/* Hero Banner */}
-      <section className="relative h-[60vh] sm:h-[65vh] lg:h-[75vh] overflow-hidden">
+      <section className="relative h-screen sm:h-[65vh] lg:h-[75vh] overflow-hidden">
         <motion.div initial={{ scale: 1.1 }} animate={{ scale: 1 }} transition={{ duration: 1.5, ease: "easeOut" }} className="absolute inset-0 w-full h-full z-0">
           <ImageWithFallback src={HERO_IMAGE} alt="Body & Hands Collection" className="w-full h-full object-cover" />
         </motion.div>

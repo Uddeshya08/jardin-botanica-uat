@@ -26,6 +26,7 @@ import {
 import { useAuth } from "app/context/auth-context"
 import { useCartItemsSafe, CartItem } from "app/context/cart-items-context"
 import { updateLineItem, deleteLineItem } from "@lib/data/cart"
+import { convertToLocale } from "@lib/util/money"
 
 interface DropdownItem {
   label: string
@@ -405,6 +406,12 @@ export function Navigation({
       href: "/body-hands",
       dropdown: [
         {
+          label: "All Products",
+          href: "/body-hands",
+          image:
+            "https://images.unsplash.com/photo-1743597979473-5b1c0cae1bce?auto=format&fit=crop&w=1080&q=80",
+        },
+        {
           label: "Cleansers & Exfoliants",
           href: "/products/tea-exfoliant-rinse",
           image:
@@ -416,12 +423,19 @@ export function Navigation({
           image:
             "https://images.unsplash.com/photo-1660675558428-5a7a1b8546f4?auto=format&fit=crop&w=1080&q=80",
         },
+       
       ],
     },
     {
       name: "HOME CREATIONS",
       href: "/home-creations",
       dropdown: [
+        {
+          label: "All Products",
+          href: "/home-creations",
+          image:
+            "https://images.unsplash.com/photo-1648310379950-2773bb5d2525?auto=format&fit=crop&w=1080&q=80",
+        },
         {
           label: "Candles",
           href: "/products/candles",
@@ -567,8 +581,8 @@ export function Navigation({
             />
           )}
 
-          <div className="px-6 lg:px-12 relative z-20">
-            <div className="flex items-center justify-between py-6 relative">
+          <div className="px-4 lg:px-12 relative z-20">
+            <div className="flex items-center justify-between py-4 relative">
               {/* Logo */}
               <motion.div
                 initial={disableAnimations ? undefined : { opacity: 0 }}
@@ -602,6 +616,11 @@ export function Navigation({
                   <div
                     key={item.name}
                     className="relative"
+                    style={
+                      item.name === "HOME CREATIONS"
+                        ? { marginLeft: "0.5rem" }
+                        : undefined
+                    }
                     onMouseEnter={() =>
                       item.dropdown && handleMouseEnter(item.name)
                     }
@@ -661,28 +680,30 @@ export function Navigation({
                             <div className="flex h-72">
                               {/* Left: Links */}
                               <div className="py-6 w-80 flex flex-col">
-                                {item.dropdown.map((dItem) => (
-                                  <a
-                                    key={dItem.label}
-                                    href={dItem.href}
-                                    className="group/dropdown-item block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150"
-                                    style={{
-                                      color: "#000",
-                                      fontSize: "0.95rem",
-                                    }}
-                                    onMouseEnter={() =>
-                                      handleDropdownItemHover(dItem.label)
-                                    }
-                                  >
-                                    <span className="relative inline-block">
-                                      {dItem.label}
-                                      <span
-                                        className="absolute bottom-[-2px] left-0 w-0 h-[1px] transition-all duration-300 group-hover/dropdown-item:w-full"
-                                        style={{ backgroundColor: "#e58a4d" }}
-                                      />
-                                    </span>
-                                  </a>
-                                ))}
+                                {item.dropdown
+                                  .filter((dItem) => dItem.label !== "All Products")
+                                  .map((dItem) => (
+                                    <a
+                                      key={dItem.label}
+                                      href={dItem.href}
+                                      className="group/dropdown-item block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150"
+                                      style={{
+                                        color: "#000",
+                                        fontSize: "0.95rem",
+                                      }}
+                                      onMouseEnter={() =>
+                                        handleDropdownItemHover(dItem.label)
+                                      }
+                                    >
+                                      <span className="relative inline-block">
+                                        {dItem.label}
+                                        <span
+                                          className="absolute bottom-[-2px] left-0 w-0 h-[1px] transition-all duration-300 group-hover/dropdown-item:w-full"
+                                          style={{ backgroundColor: "#e58a4d" }}
+                                        />
+                                      </span>
+                                    </a>
+                                  ))}
                               </div>
 
                               {/* Right: Image preview */}
@@ -690,26 +711,33 @@ export function Navigation({
                                 className="w-96 h-full overflow-hidden relative p-4"
                                 style={{ backgroundColor: "#e3e3d8" }}
                               >
-                                {item.dropdown.map((dItem) => (
-                                  <img
-                                    key={dItem.label}
-                                    src={dItem.image}
-                                    alt={dItem.label}
-                                    className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
-                                    style={{
-                                      opacity:
-                                        hoveredItem === dItem.label ? 1 : 0,
-                                      transition: "opacity 0.18s ease-out",
-                                      zIndex:
-                                        hoveredItem === dItem.label ? 2 : 1,
-                                    }}
-                                    loading="eager"
-                                  />
-                                ))}
+                                {item.dropdown
+                                  .filter((dItem) => dItem.label !== "All Products")
+                                  .map((dItem) => (
+                                    <img
+                                      key={dItem.label}
+                                      src={dItem.image}
+                                      alt={dItem.label}
+                                      className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                                      style={{
+                                        opacity:
+                                          hoveredItem === dItem.label ? 1 : 0,
+                                        transition: "opacity 0.18s ease-out",
+                                        zIndex:
+                                          hoveredItem === dItem.label ? 2 : 1,
+                                      }}
+                                      loading="eager"
+                                    />
+                                  ))}
                                 {/* fallback/default image */}
-                                {item.dropdown[0]?.image && (
+                                {item.dropdown
+                                  .filter((dItem) => dItem.label !== "All Products")[0]?.image && (
                                   <img
-                                    src={item.dropdown[0].image}
+                                    src={
+                                      item.dropdown.filter(
+                                        (dItem) => dItem.label !== "All Products"
+                                      )[0].image
+                                    }
                                     alt="default"
                                     className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
                                     style={{
@@ -912,7 +940,11 @@ export function Navigation({
                                       {item.name}
                                     </h4>
                                     <p className="font-din-arabic text-black/70 text-sm">
-                                      ₹{item.price}
+                                      {convertToLocale({
+                                        amount: item.price,
+                                        currency_code: "INR",
+                                        maximumFractionDigits: 0,
+                                      })}
                                     </p>
                                   </div>
                                   <div className="flex items-center space-x-2">
@@ -955,7 +987,11 @@ export function Navigation({
                                 Total:
                               </span>
                               <span className="font-din-arabic text-black font-medium">
-                                ₹{getTotalPrice()}
+                                {convertToLocale({
+                                  amount: getTotalPrice(),
+                                  currency_code: "INR",
+                                  maximumFractionDigits: 0,
+                                })}
                               </span>
                             </div>
                             <div className="space-y-2 text-center">
@@ -1208,7 +1244,11 @@ export function Navigation({
                                       {item.name}
                                     </h4>
                                     <p className="font-din-arabic text-black/70 text-sm">
-                                      ₹{item.price}
+                                      {convertToLocale({
+                                        amount: item.price,
+                                        currency_code: "INR",
+                                        maximumFractionDigits: 0,
+                                      })}
                                     </p>
                                   </div>
                                   <div className="flex items-center gap-2">
@@ -1251,7 +1291,11 @@ export function Navigation({
                                 Total:
                               </span>
                               <span className="font-din-arabic text-black font-medium">
-                                ₹{getTotalPrice()}
+                                {convertToLocale({
+                                  amount: getTotalPrice(),
+                                  currency_code: "INR",
+                                  maximumFractionDigits: 0,
+                                })}
                               </span>
                             </div>
                             <div className="space-y-2 text-center">
@@ -1305,6 +1349,29 @@ export function Navigation({
               style={{ backgroundColor: "#e3e3d8" }}
             >
               <div className="p-6">
+                {/* Mobile Search */}
+                <div
+                  className="mb-8 pb-6 border-b"
+                  style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
+                >
+                  <form onSubmit={handleSearchSubmit} className="relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search..."
+                      className="w-full px-4 py-3 bg-white/50 border font-din-arabic tracking-wide focus:outline-none focus:border-black transition-colors"
+                      style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
+                    />
+                    <button
+                      type="submit"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
+                    >
+                      <Search className="w-5 h-5" />
+                    </button>
+                  </form>
+                </div>
+
                 {/* Mobile Navigation Links */}
                 <nav className="space-y-1">
                   {menuItems.map((item) => (
@@ -1367,29 +1434,6 @@ export function Navigation({
                     </div>
                   ))}
                 </nav>
-
-                {/* Mobile Search */}
-                <div
-                  className="mt-8 pt-6 border-t"
-                  style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
-                >
-                  <form onSubmit={handleSearchSubmit} className="relative">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search..."
-                      className="w-full px-4 py-3 bg-white/50 border font-din-arabic tracking-wide focus:outline-none focus:border-black transition-colors"
-                      style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
-                    />
-                    <button
-                      type="submit"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
-                    >
-                      <Search className="w-5 h-5" />
-                    </button>
-                  </form>
-                </div>
 
                 {/* Mobile Quick Actions */}
                 <div

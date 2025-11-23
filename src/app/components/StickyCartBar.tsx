@@ -7,6 +7,8 @@ import type { HttpTypes } from "@medusajs/types"
 import { useParams, useRouter } from "next/navigation"
 import { addToCartAction} from "@lib/data/cart-actions"
 import { emitCartUpdated } from "@lib/util/cart-client"
+import { useCartItemsSafe } from "app/context/cart-items-context"
+import { toast } from "sonner"
 
 type ProductLike = Partial<HttpTypes.StoreProduct> & { metadata?: Record<string, any> }
 
@@ -23,6 +25,7 @@ interface StickyCartBarProps {
   isVisible: boolean
   product?: ProductLike | null
   heroCartItem?: any
+  selectedVariantId?: string | null
   onUpdateHeroQuantity?: (quantity: number) => void
   onCartUpdate?: (item: any | null) => void
   cartItems?: any[]
@@ -60,11 +63,16 @@ export function StickyCartBar({
   isVisible,
   product,
   heroCartItem,
+  selectedVariantId: selectedVariantIdProp,
   onUpdateHeroQuantity,
-  onCartUpdate,
-  cartItems = [],
+  onCartUpdate: onCartUpdateProp,
+  cartItems: cartItemsProp = [],
   ritualProduct,
 }: StickyCartBarProps) {
+  // Use cart context if available, otherwise fall back to props
+  const cartContext = useCartItemsSafe()
+  const cartItems = cartContext?.cartItems ?? cartItemsProp ?? []
+  const onCartUpdate = cartContext?.handleCartUpdate ?? onCartUpdateProp
   const [quantity, setQuantity] = useState(1)
   const [isAddedToCart, setIsAddedToCart] = useState(false)
   const [adding, setAdding] = useState(false)
@@ -82,7 +90,14 @@ export function StickyCartBar({
   const countryCode: string = (params?.countryCode ?? "in").toString().toLowerCase()
   const router = useRouter()
 
-  const variant = useMemo(() => pickVariant(product ?? undefined), [product])
+  // Use selected variant from hero section if provided, otherwise pick default variant
+  const variant = useMemo(() => {
+    if (selectedVariantIdProp && product?.variants) {
+      const selectedVariant = product.variants.find((v: any) => v.id === selectedVariantIdProp)
+      if (selectedVariant) return selectedVariant
+    }
+    return pickVariant(product ?? undefined)
+  }, [product, selectedVariantIdProp])
 
   // Monitor cart changes and update sticky cart bar state accordingly
   useEffect(() => {
@@ -125,7 +140,10 @@ export function StickyCartBar({
     }
 
   }, [cartItems, product, variant, ritualProduct])
-  const minor = useMemo(() => getMinorPrice(variant), [variant])
+  const minor = useMemo(() => {
+    const price = getMinorPrice(variant)
+    return price
+  }, [variant])
   const currency =
     (variant?.calculated_price?.currency_code ??
       (variant as any)?.prices?.[0]?.currency_code ??
@@ -237,15 +255,19 @@ export function StickyCartBar({
       })
     } else {
       // If item doesn't exist, add as new (regular product - no image in nav)
+      // calculated_amount is already in major units (rupees), no conversion needed
+      console.log('🔍 StickyCartBar - Adding item with price:', {
+        minor,
+        calculated_amount: variant?.calculated_price?.calculated_amount,
+        variantId: variant.id
+      })
       onCartUpdate?.({
         id: productId,
-        variant_id: variant.id,
         name,
         price: minor,
         quantity,
-        image,
-        isRitualProduct: false,
-      })
+        image: image ?? undefined,
+      } as any)
     }
     
     emitCartUpdated({ quantityDelta: quantity })
@@ -264,8 +286,24 @@ export function StickyCartBar({
       } catch (e: any) {
         // rollback visual success
         setIsAddedToCart(false)
-        setUiError(e?.message || "Could not add to cart")
+        const errorMessage = e?.message || "Could not add to cart"
+        setUiError(errorMessage)
         console.error("Add to cart failed:", e)
+        
+        // Show toast notification for error
+        // Check for inventory-related errors
+        const errorMsg = String(errorMessage || "").toLowerCase()
+        if (errorMsg.includes("inventory") || errorMsg.includes("required inventory") || errorMsg.includes("stock")) {
+          toast.error("Inventory Error", {
+            description: "This product is currently out of stock or unavailable. Please try again later.",
+            duration: 5000,
+          })
+        } else {
+          toast.error("Failed to add to cart", {
+            description: errorMessage,
+            duration: 4000,
+          })
+        }
       } finally {
         // brief hold to show "Added" then reset visuals
         setTimeout(() => {
@@ -285,38 +323,85 @@ export function StickyCartBar({
 
     const productId = product?.id ?? variant.id
 
-    // Add main product to cart first (no image in nav)
-    onCartUpdate?.({
-      id: productId,
-      variant_id: variant.id,
-      name,
-      price: minor,
-      quantity,
-      image,
-      isRitualProduct: false,
+    // Check if main product already exists in cart by checking both id and variant_id
+    const existingMainProduct = cartItems.find(item => {
+      const itemVariantId = (item as any).variant_id || item.id
+      const matchesId = item.id === productId || item.id === variant.id
+      const matchesVariantId = itemVariantId === variant.id
+      const isNotRitual = !(item as any).isRitualProduct
+      return (matchesId || matchesVariantId) && isNotRitual
     })
 
-    // Then add ritual product to cart (with image in nav)
-    onCartUpdate?.({
-      id: ritualProduct.variantId,
-      variant_id: ritualProduct.variantId,
-      name: ritualProduct.name,
-      price: ritualProduct.price,
-      quantity: ritualQuantity,
-      image: ritualProduct.image,
-      isRitualProduct: true,
+    // DO NOT add main product if it already exists - only add ritual product
+    // The main product was already added when user clicked "Add to Cart" initially
+    if (!existingMainProduct) {
+      console.log('⚠️ Main product not found in cart, adding it')
+      // Only add main product if it somehow doesn't exist (shouldn't happen in normal flow)
+      onCartUpdate?.({
+        id: productId ?? '',
+        name,
+        price: minor,
+        quantity,
+        image: image ?? undefined,
+      } as any)
+    } else {
+      console.log('✅ Main product already in cart, skipping addition')
+    }
+
+    // Check if ritual product already exists in cart
+    const existingRitualProduct = cartItems.find(item => 
+      item.id === ritualProduct.variantId && (item as any).isRitualProduct
+    )
+
+    console.log('🔍 completeRitual - Checking ritual product:', {
+      ritualProductId: ritualProduct.variantId,
+      existingRitualProduct: existingRitualProduct ? { id: existingRitualProduct.id, quantity: existingRitualProduct.quantity } : null
     })
+
+    // DO NOT add to cart context optimistically - wait for Medusa cart success
+    // Only emit cart updated event, actual cart context update will happen after server success
     
-    emitCartUpdated({ quantityDelta: quantity + ritualQuantity })
+    emitCartUpdated({ quantityDelta: ritualQuantity })
 
-    // background network - add both products using optimized ritual action
+    // background network - add ritual product to Medusa cart
     startTransition(async () => {
       try {
-        // await addRitualToCartAction({
-        //   mainProduct: { variantId: variant.id, quantity },
-        //   ritualProduct: { variantId: ritualProduct.variantId, quantity: ritualQuantity },
-        //   countryCode
-        // })
+        // Add ritual product to Medusa cart first
+        await addToCartAction({
+          variantId: ritualProduct.variantId,
+          quantity: ritualQuantity,
+          countryCode
+        })
+        
+        // If main product is not already in cart, add it too
+        if (!existingMainProduct) {
+          await addToCartAction({
+            variantId: variant.id,
+            quantity: quantity,
+            countryCode
+          })
+        }
+        
+        // ONLY after successful Medusa cart addition, update cart context
+        // Add or update ritual product to cart (with image in nav)
+        if (existingRitualProduct) {
+          console.log('✅ Updating existing ritual product quantity in context')
+          // Update existing ritual product quantity
+          onCartUpdate?.({
+            ...existingRitualProduct,
+            quantity: ritualQuantity,
+          } as any)
+        } else {
+          console.log('➕ Adding new ritual product to context after Medusa success')
+          // Add new ritual product
+          onCartUpdate?.({
+            id: ritualProduct.variantId,
+            name: ritualProduct.name,
+            price: ritualProduct.price,
+            quantity: ritualQuantity,
+            image: ritualProduct.image ?? undefined,
+          } as any)
+        }
         
         // Show "Go to Cart" button after successful addition
         setShowGoToCart(true)
@@ -326,8 +411,24 @@ export function StickyCartBar({
       } catch (e: any) {
         // rollback visual success
         setRitualCompleted(false)
-        setUiError(e?.message || "Could not add ritual to cart")
+        const errorMessage = e?.message || "Could not add ritual to cart"
+        setUiError(errorMessage)
         console.error("Ritual cart addition failed:", e)
+        
+        // Show toast notification for error
+        // Check for inventory-related errors
+        const errorMsg = String(errorMessage || "").toLowerCase()
+        if (errorMsg.includes("inventory") || errorMsg.includes("required inventory") || errorMsg.includes("stock") || errorMsg.includes("variant does not have")) {
+          toast.error("Inventory Error", {
+            description: "This product is currently out of stock or unavailable. Please try again later.",
+            duration: 5000,
+          })
+        } else {
+          toast.error("Failed to add ritual product", {
+            description: errorMessage,
+            duration: 4000,
+          })
+        }
       } finally {
         setTimeout(() => {
           setAdding(false)
@@ -470,13 +571,13 @@ export function StickyCartBar({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
-                      router.push(`/${countryCode}/cart`)
+                      router.push(`/${countryCode}/checkout?step=address`)
                     }}
                     className="font-din-arabic px-2.5 md:px-5 py-2 md:py-2.5 bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-all duration-300 rounded-lg md:rounded-xl relative overflow-hidden flex items-center space-x-1 md:space-x-2 whitespace-nowrap text-xs md:text-sm"
                   >
                     <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     <span className="hidden sm:inline">Checkout</span>
-                    <span className="sm:hidden">Cart</span>
+                    <span className="sm:hidden">Checkout</span>
                   </motion.button>
                 ) : ritualProduct && showRitualSuggestion ? (
                   <motion.button

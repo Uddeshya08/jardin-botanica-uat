@@ -188,13 +188,13 @@ function InteractiveLabImage() {
         {/* Background Overlay - smooth natural gradient from top extending below center */}
         <div className="absolute inset-0 z-10" style={OVERLAY_GRADIENT_STYLE} />
 
-        <div className="absolute top-0 left-0 right-0 pt-8 sm:pt-12 lg:pt-24 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-16 text-center z-20">
+        <div className="absolute top-0 left-0 right-0 pt-8 sm:pt-12 lg:pt-24 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-16 text-center z-20 pointer-events-none">
           <motion.div
             initial={{ opacity: 0, y: -30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative z-20"
+            className="relative z-20 pointer-events-none"
           >
             <h1
               className="font-american-typewriter text-white mb-4 sm:mb-6 text-xl sm:text-2xl lg:text-3xl"
@@ -230,9 +230,62 @@ function InteractiveLabImage() {
           </motion.div>
         </div>
 
-        {hotspots.map((hotspot) => (
-          <div key={hotspot.id} className="absolute" style={hotspot.position}>
-            <div className="relative w-12 h-12">
+        {hotspots.map((hotspot) => {
+          // Calculate position adjustment for mobile when popup is open
+          const getMobilePosition = () => {
+            if (!isMobile || !activePoint || activePoint === hotspot.id) {
+              return null
+            }
+            
+            // Get all inactive hotspots
+            const inactiveHotspots = hotspots.filter(h => h.id !== activePoint)
+            const currentIndex = inactiveHotspots.findIndex(h => h.id === hotspot.id)
+            
+            // Distribute inactive numbers on left and right edges
+            // Avoid top corners - start from 35% and space them properly
+            const totalInactive = inactiveHotspots.length
+            const leftCount = Math.ceil(totalInactive / 2)
+            
+            // Calculate available space (from 35% to 85% to avoid top and bottom corners)
+            const startTop = 35 // Start below top area
+            const endTop = 85 // End before bottom area
+            const availableSpace = endTop - startTop
+            const spacing = Math.min(availableSpace / Math.max(leftCount, 1), 20) // Max 20% spacing, ensure no overlap
+            
+            if (currentIndex < leftCount) {
+              // Position on left edge - avoid top corner
+              const topPercent = startTop + (currentIndex * spacing)
+              return {
+                top: `${Math.min(topPercent, endTop)}%`,
+                left: '12px',
+                right: 'auto',
+                bottom: 'auto',
+              }
+            } else {
+              // Position on right edge - avoid top corner
+              const rightIndex = currentIndex - leftCount
+              const topPercent = startTop + (rightIndex * spacing)
+              return {
+                top: `${Math.min(topPercent, endTop)}%`,
+                right: '12px',
+                left: 'auto',
+                bottom: 'auto',
+              }
+            }
+          }
+
+          const mobilePosition = getMobilePosition()
+          const finalPosition = mobilePosition || hotspot.position
+
+          return (
+          <motion.div 
+            key={hotspot.id} 
+            className="absolute z-30" 
+            initial={hotspot.position}
+            animate={finalPosition}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <div className={`relative w-12 h-12 ${isMobile && activePoint && activePoint !== hotspot.id ? 'z-50' : 'z-30'}`}>
               <motion.div
                 className="absolute inset-0 w-full h-full rounded-full pointer-events-none"
                 style={{
@@ -272,7 +325,7 @@ function InteractiveLabImage() {
               )}
 
               <motion.div
-                className="relative z-10 w-full h-full rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center cursor-pointer shadow-lg"
+                className="relative w-full h-full rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center cursor-pointer shadow-lg"
                 whileHover={{ scale: 1.2 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{
@@ -281,6 +334,10 @@ function InteractiveLabImage() {
                 onMouseEnter={() => handleMouseEnter(hotspot.id)}
                 onMouseLeave={handleMouseLeave}
                 onClick={() => handlePointClick(hotspot.id)}
+                style={{
+                  zIndex: isMobile && activePoint && activePoint !== hotspot.id ? 50 : 30,
+                  position: 'relative',
+                }}
               >
                 <span
                   className="font-american-typewriter text-black"
@@ -308,7 +365,7 @@ function InteractiveLabImage() {
                   transition={{ duration: 0.9, type: "spring", stiffness: 100, damping: 28 }}
                   className={`absolute ${
                     hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-4" : "top-full mt-4"
-                  } w-72 sm:w-80 bg-white/95 backdrop-blur-md rounded-sm shadow-2xl p-5 sm:p-6 z-20 max-w-[calc(100vw-2rem)] pointer-events-none`}
+                  } w-72 sm:w-80 bg-white/95 backdrop-blur-md rounded-sm shadow-2xl p-5 sm:p-6 max-w-[calc(100vw-2rem)] pointer-events-none`}
                   style={{
                     left: hotspot.id === 3 ? "0" : hotspot.position.left ? "0" : "auto",
                     right: hotspot.id === 4 ? "0" : hotspot.position.right ? "0" : "auto",
@@ -318,15 +375,19 @@ function InteractiveLabImage() {
                         : hotspot.position.right && hotspot.id !== 3
                         ? "translateX(calc(-100% + 48px))"
                         : "translateX(-24px)",
+                    zIndex: isMobile ? 30 : 20,
                   }}
                 >
                   <div
                     className={`absolute ${
                       hotspot.id === 3 || hotspot.id === 4 ? "-bottom-2" : "-top-2"
-                    } w-4 h-4 bg-white/95 rotate-45 shadow-lg z-30`}
+                    } w-4 h-4 bg-white shadow-xl`}
                     style={{
                       left: hotspot.id === 3 ? "24px" : hotspot.position.left ? "24px" : "auto",
                       right: hotspot.id === 4 ? "24px" : hotspot.position.right ? "24px" : "auto",
+                      transform: "rotate(45deg)",
+                      border: "1px solid rgba(0, 0, 0, 0.05)",
+                      zIndex: 40,
                     }}
                   />
                   {/* Connecting line between hotspot and popup */}
@@ -402,8 +463,9 @@ function InteractiveLabImage() {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-        ))}
+          </motion.div>
+          )
+        })}
 
         <AnimatePresence>
           {!activePoint && (
@@ -452,10 +514,42 @@ function OurWorkSection() {
 
 function OriginStorySection() {
   const [isInView, setIsInView] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
   const { displayedText, isComplete } = useTypewriter("The Idea of a Lab", 80, undefined, isInView)
 
+  // Use IntersectionObserver to detect when section comes into view
+  useEffect(() => {
+    if (!sectionRef.current) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // Only start animation when section is actually in viewport
+          const rect = entry.boundingClientRect
+          const isActuallyInView = rect.top < window.innerHeight * 0.8 && rect.bottom > window.innerHeight * 0.2
+          
+          if (isActuallyInView) {
+            setIsInView(true)
+          }
+        }
+      },
+      {
+        threshold: 0.3,
+        rootMargin: "0px",
+      }
+    )
+
+    observer.observe(sectionRef.current)
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current)
+      }
+    }
+  }, [])
+
   return (
-    <section className="py-16 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-16 overflow-hidden">
+    <section ref={sectionRef} className="py-16 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-16 overflow-hidden">
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
           <motion.div
@@ -463,7 +557,6 @@ function OriginStorySection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            onViewportEnter={() => setIsInView(true)}
           >
             <div className="mb-8">
               <span
@@ -770,7 +863,9 @@ function FounderSection({
 export function BotanistLabPage() {
   const containerRef = useRef<HTMLDivElement>(null)
   const closingRef = useRef<HTMLDivElement>(null)
+  const bannerRef = useRef<HTMLDivElement>(null)
   const [phase, setPhase] = useState(0)
+  const [isBannerInView, setIsBannerInView] = useState(false)
 
   const { countryCode } = useParams() as { countryCode?: string }
   const router = useRouter()
@@ -797,13 +892,79 @@ export function BotanistLabPage() {
     phase === 3
   )
 
+  // Only start animation when user scrolls to banner section (not on initial page load)
   useEffect(() => {
-    const startTimer = setTimeout(() => {
-      setPhase(1)
-    }, 1000)
+    if (!bannerRef.current) return
 
-    return () => clearTimeout(startTimer)
+    let hasStarted = false
+    let maxScrollY = 0
+
+    const handleScroll = () => {
+      if (!bannerRef.current || hasStarted) return
+
+      const scrollY = window.scrollY
+      const rect = bannerRef.current.getBoundingClientRect()
+      
+      // Track maximum scroll position (to know if user has scrolled down)
+      if (scrollY > maxScrollY) {
+        maxScrollY = scrollY
+      }
+
+      // Only start animation if:
+      // 1. User has scrolled down at least 150px (not at top on initial load), AND
+      // 2. Banner is now in viewport
+      if (maxScrollY > 150) {
+        const isInView = rect.top < window.innerHeight * 0.9 && rect.bottom > window.innerHeight * 0.1
+        
+        if (isInView) {
+          hasStarted = true
+          setIsBannerInView(true)
+        }
+      }
+    }
+
+    // Don't add listener immediately - wait to avoid initial load trigger
+    const timeoutId = setTimeout(() => {
+      window.addEventListener("scroll", handleScroll, { passive: true })
+    }, 200)
+
+    // Use IntersectionObserver - only trigger if user has scrolled down
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasStarted) {
+          // Only start if user has scrolled down significantly (not initial load)
+          if (maxScrollY > 150 || window.scrollY > 150) {
+            hasStarted = true
+            setIsBannerInView(true)
+          }
+        }
+      },
+      {
+        threshold: 0.5,
+        rootMargin: "0px",
+      }
+    )
+
+    observer.observe(bannerRef.current)
+
+    return () => {
+      clearTimeout(timeoutId)
+      window.removeEventListener("scroll", handleScroll)
+      if (bannerRef.current) {
+        observer.unobserve(bannerRef.current)
+      }
+    }
   }, [])
+
+  useEffect(() => {
+    if (isBannerInView && phase === 0) {
+      const startTimer = setTimeout(() => {
+        setPhase(1)
+      }, 1000)
+
+      return () => clearTimeout(startTimer)
+    }
+  }, [isBannerInView, phase])
 
   useEffect(() => {
     if (questionComplete && phase === 1) {
@@ -850,6 +1011,7 @@ export function BotanistLabPage() {
       style={{ backgroundColor: "#e3e3d8" }}
     >
       <motion.div
+        ref={bannerRef}
         className="relative h-screen flex items-center justify-center overflow-hidden"
         style={{ opacity, scale }}
       >
