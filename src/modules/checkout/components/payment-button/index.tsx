@@ -6,6 +6,7 @@ import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
 import React, { useState } from "react"
+import { Lock, Sparkles } from "lucide-react"
 import ErrorMessage from "../error-message"
 import {RazorpayPaymentButton} from "./razorpay-payment-button"
 type PaymentButtonProps = {
@@ -36,11 +37,23 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         />
       )
       case isRazorpay(paymentSession?.provider_id):
+        if (!paymentSession) {
+          return (
+            <Button 
+              disabled 
+              className="w-full px-8 py-4 bg-black text-white rounded-xl font-din-arabic disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl flex items-center justify-center space-x-3"
+            >
+              <Lock className="w-5 h-5" />
+              <span>Select a payment method</span>
+            </Button>
+          )
+        }
         return(
           <RazorpayPaymentButton 
            session={paymentSession}
            notReady={notReady}
            cart={cart}
+           data-testid={dataTestId}
           />
         )
     case isManual(paymentSession?.provider_id):
@@ -48,7 +61,15 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         <ManualTestPaymentButton notReady={notReady} data-testid={dataTestId} />
       )
     default:
-      return <Button disabled>Select a payment method</Button>
+      return (
+        <Button 
+          disabled 
+          className="w-full px-8 py-4 bg-black text-white rounded-xl font-din-arabic disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl flex items-center justify-center space-x-3"
+        >
+          <Lock className="w-5 h-5" />
+          <span>Select a payment method</span>
+        </Button>
+      )
   }
 }
 
@@ -148,8 +169,11 @@ const StripePaymentButton = ({
         size="large"
         isLoading={submitting}
         data-testid={dataTestId}
+        className="w-full px-8 py-4 bg-black text-white rounded-xl font-din-arabic disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl flex items-center justify-center space-x-3"
       >
-        Place order
+        <Lock className="w-5 h-5" />
+        <span>{submitting ? "Processing..." : "Place Order"}</span>
+        <Sparkles className="w-5 h-5" />
       </Button>
       <ErrorMessage
         error={errorMessage}
@@ -159,7 +183,7 @@ const StripePaymentButton = ({
   )
 }
 
-const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
+const ManualTestPaymentButton = ({ notReady, "data-testid": dataTestId }: { notReady: boolean; "data-testid"?: string }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -182,14 +206,16 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
   return (
     <>
       <Button
-        className="ml-auto px-8 py-4 bg-gradient-to-r from-black to-gray-800 text-white rounded-xl font-din-arabic disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl flex items-center space-x-3"
+        className="w-full px-8 py-4 bg-black text-white rounded-xl font-din-arabic disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl flex items-center justify-center space-x-3"
         disabled={notReady}
         isLoading={submitting}
         onClick={handlePayment}
         size="large"
-        data-testid="submit-order-button"
+        data-testid={dataTestId || "submit-order-button"}
       >
-        Place order
+        <Lock className="w-5 h-5" />
+        <span>{submitting ? "Processing..." : "Place Order"}</span>
+        <Sparkles className="w-5 h-5" />
       </Button>
       <ErrorMessage
         error={errorMessage}

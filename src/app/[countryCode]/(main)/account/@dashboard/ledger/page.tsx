@@ -229,14 +229,6 @@ export default function LedgerPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center py-24"
         >
-          <motion.div
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-24 h-24 mx-auto mb-8 rounded-sm border-2 flex items-center justify-center"
-            style={{ borderColor: '#8b4513', backgroundColor: '#f8f5f0' }}
-          >
-            <BookOpen className="w-12 h-12" style={{ color: '#8b4513' }} />
-          </motion.div>
           <p className="font-din-arabic text-sm sm:text-base text-black/60 mb-10 max-w-md mx-auto" style={{ letterSpacing: '0.1em' }}>
             No items saved yet. Your ledger awaits specimens from the Lab.
           </p>

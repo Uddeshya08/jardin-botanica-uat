@@ -1,5 +1,4 @@
 import { HttpTypes } from "@medusajs/types"
-import { Text } from "@medusajs/ui"
 
 type OrderDetailsProps = {
   order: HttpTypes.StoreOrder
@@ -13,71 +12,65 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
     return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
   }
 
+  const formattedDate = new Date(order.created_at).toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  })
+
   return (
-    <div className="flex flex-col gap-2">
-      <Text className="text-ui-fg-base">
+    <div className="flex flex-col gap-y-4 font-din-arabic">
+      <p className="text-sm text-black tracking-wide">
         We have sent the order confirmation details to{" "}
         <span
-          className="text-ui-fg-medium-plus font-semibold"
+          className="font-semibold text-black"
           data-testid="order-email"
         >
           {order.email}
         </span>
         .
-      </Text>
-      <Text className="text-ui-fg-subtle">
-        <span className="uppercase tracking-wide text-compact-xsmall mr-1">
-          Order date:
-        </span>
-        <span data-testid="order-date">
-          {new Date(order.created_at).toDateString()}
-        </span>
-      </Text>
-      <Text className="text-ui-fg-base">
-        <span className="uppercase tracking-wide text-compact-xsmall mr-1">
-          Order number:
-        </span>
-        <span className="text-ui-fg-interactive font-medium" data-testid="order-id">
-          {order.display_id}
-        </span>
-      </Text>
+      </p>
+      
+      <div className="flex flex-col gap-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+          <span className="text-xs uppercase tracking-wide text-black/60">
+            Order date:
+          </span>
+          <span className="text-sm text-black tracking-wide" data-testid="order-date">
+            {formattedDate}
+          </span>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+          <span className="text-xs uppercase tracking-wide text-black/60">
+            Order number:
+          </span>
+          <span className="text-sm text-black font-medium tracking-wide" data-testid="order-id">
+            #{order.display_id}
+          </span>
+        </div>
 
-      <div className="flex items-center text-compact-small gap-x-6 mt-3">
         {showStatus && (
-          <>
-            <Text className="text-ui-fg-base">
-              <span className="uppercase tracking-wide text-compact-xsmall mr-1">
-                Order status:
-              </span>
-              <span
-                className="font-medium"
-                data-testid="order-status"
-              >
-                <span
-                  className={
-                    order.fulfillment_status === "fulfilled"
-                      ? "text-green-600"
-                      : order.fulfillment_status === "shipped" ||
-                        order.fulfillment_status === "partially_shipped"
-                      ? "text-blue-600"
-                      : order.fulfillment_status === "canceled"
-                      ? "text-red-600"
-                      : "text-yellow-600"
-                  }
-                >
-                  {formatStatus(order.fulfillment_status)}
-                </span>
-              </span>
-            </Text>
-            <Text className="text-ui-fg-base">
-              <span className="uppercase tracking-wide text-compact-xsmall mr-1">
-                Payment status:
-              </span>
-              <span className="text-ui-fg-subtle" sata-testid="order-payment-status">
-                {formatStatus(order.payment_status)}
-              </span>
-            </Text>
-          </>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+            <span className="text-xs uppercase tracking-wide text-black/60">
+              Order status:
+            </span>
+            <span
+              className={`text-sm font-medium tracking-wide ${
+                order.fulfillment_status === "delivered"
+                  ? "text-green-600"
+                  : order.fulfillment_status === "shipped" ||
+                    order.fulfillment_status === "partially_shipped"
+                  ? "text-blue-600"
+                  : order.fulfillment_status === "canceled"
+                  ? "text-red-600"
+                  : "text-yellow-600"
+              }`}
+              data-testid="order-status"
+            >
+              {formatStatus(order.fulfillment_status || "not_fulfilled")}
+            </span>
+          </div>
         )}
       </div>
     </div>

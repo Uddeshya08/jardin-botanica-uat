@@ -11,11 +11,11 @@ const Help = () => {
           <li>
             <LocalizedClientLink href="/contact">Contact</LocalizedClientLink>
           </li>
-          <li>
+          {/* <li>
             <LocalizedClientLink href="/contact">
               Returns & Exchanges
             </LocalizedClientLink>
-          </li>
+          </li> */}
         </ul>
       </div>
     </div>

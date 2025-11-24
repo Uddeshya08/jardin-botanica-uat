@@ -1433,6 +1433,15 @@ export function Navigation({
                       )}
                     </div>
                   ))}
+                  
+                  {/* Mobile-only: Gift Sets */}
+                  <a
+                    href="/in/gift-sets"
+                    className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    GIFT SETS
+                  </a>
                 </nav>
 
                 {/* Mobile Quick Actions */}
