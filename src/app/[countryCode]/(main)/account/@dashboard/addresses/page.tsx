@@ -25,7 +25,7 @@ export default async function Addresses(props: {
 
   return (
     <div className="w-full" data-testid="addresses-page-wrapper">
-      <h1 className="text-2xl-semi mb-6">Saved Addresses</h1>
+      <h1 className="font-american-typewriter text-2xl lg:text-3xl mb-8 lg:mb-16 text-black ">Saved Addresses</h1>
       <AddressBook customer={customer} region={region} />
     </div>
   )

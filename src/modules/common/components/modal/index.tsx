@@ -84,7 +84,7 @@ const Title: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <Dialog.Title className="flex items-center justify-between">
-      <div className="text-large-semi">{children}</div>
+      <div className="font-din-arabic text-base text-black tracking-wide mb-2">{children}</div>
       <div>
         <button onClick={close} data-testid="close-modal-button">
           <X size={20} />
@@ -96,7 +96,7 @@ const Title: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const Description: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <Dialog.Description className="flex text-small-regular text-ui-fg-base items-center justify-center pt-2 pb-4 h-full">
+    <Dialog.Description className="flex text-small-regular font-din-arabic text-sm text-black/70 tracking-wide items-center justify-center pt-2 pb-4 h-full">
       {children}
     </Dialog.Description>
   )

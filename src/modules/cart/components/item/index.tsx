@@ -64,7 +64,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
 
       <td className="text-left">
         <Text
-          className="txt-medium-plus text-ui-fg-base"
+          className="txt-medium-plus font-din-arabic text-sm text-black/70 tracking-wide"
           data-testid="product-title"
         >
           {item.product_title}

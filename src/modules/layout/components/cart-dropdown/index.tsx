@@ -82,7 +82,7 @@ const CartDropdown = ({
       <Popover className="relative h-full">
         <PopoverButton className="h-full">
           <LocalizedClientLink
-            className="hover:text-ui-fg-base"
+            className="hover:font-din-arabic text-sm text-black/70 tracking-wide"
             href="/cart"
             data-testid="nav-cart-link"
           >{`Cart (${totalItems})`}</LocalizedClientLink>
@@ -99,11 +99,11 @@ const CartDropdown = ({
         >
           <PopoverPanel
             static
-            className="hidden small:block absolute top-[calc(100%+1px)] right-0 bg-white border-x border-b border-gray-200 w-[420px] text-ui-fg-base"
+            className="hidden small:block absolute top-[calc(100%+1px)] right-0 bg-white border-x border-b border-gray-200 w-[420px] font-din-arabic text-sm text-black/70 tracking-wide"
             data-testid="nav-cart-dropdown"
           >
             <div className="p-4 flex items-center justify-center">
-              <h3 className="text-large-semi">Cart</h3>
+              <h3 className="font-din-arabic text-base text-black tracking-wide mb-2">Cart</h3>
             </div>
             {cartState && cartState.items?.length ? (
               <>
@@ -176,12 +176,12 @@ const CartDropdown = ({
                 </div>
                 <div className="p-4 flex flex-col gap-y-4 text-small-regular">
                   <div className="flex items-center justify-between">
-                    <span className="text-ui-fg-base font-semibold">
+                    <span className="font-din-arabic text-sm text-black/70 tracking-wide font-semibold">
                       Subtotal{" "}
                       <span className="font-normal">(excl. taxes)</span>
                     </span>
                     <span
-                      className="text-large-semi"
+                      className="font-din-arabic text-base text-black tracking-wide mb-2"
                       data-testid="cart-subtotal"
                       data-value={subtotal}
                     >

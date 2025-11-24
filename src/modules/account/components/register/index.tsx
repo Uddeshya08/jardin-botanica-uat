@@ -20,10 +20,10 @@ const Register = ({ setCurrentView }: Props) => {
       className="max-w-sm flex flex-col items-center"
       data-testid="register-page"
     >
-      <h1 className="text-large-semi uppercase mb-6">
+      <h1 className="font-din-arabic text-base text-black tracking-wide mb-2 uppercase mb-6">
         Become a Medusa Store Member
       </h1>
-      <p className="text-center text-base-regular text-ui-fg-base mb-4">
+      <p className="text-center text-base-regular font-din-arabic text-sm text-black/70 tracking-wide mb-4">
         Create your Medusa Store Member profile, and get access to an enhanced
         shopping experience.
       </p>
@@ -68,7 +68,7 @@ const Register = ({ setCurrentView }: Props) => {
           />
         </div>
         <ErrorMessage error={message} data-testid="register-error" />
-        <span className="text-center text-ui-fg-base text-small-regular mt-6">
+        <span className="text-center font-din-arabic text-sm text-black/70 tracking-wide text-small-regular mt-6">
           By creating an account, you agree to Medusa Store&apos;s{" "}
           <LocalizedClientLink
             href="/content/privacy-policy"
@@ -89,7 +89,7 @@ const Register = ({ setCurrentView }: Props) => {
           Join
         </SubmitButton>
       </form>
-      <span className="text-center text-ui-fg-base text-small-regular mt-6">
+      <span className="text-center font-din-arabic text-sm text-black/70 tracking-wide text-small-regular mt-6">
         Already a member?{" "}
         <button
           onClick={() => setCurrentView(LOGIN_VIEW.SIGN_IN)}

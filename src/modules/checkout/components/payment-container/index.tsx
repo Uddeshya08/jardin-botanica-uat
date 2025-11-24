@@ -51,7 +51,7 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
             <PaymentTest className="hidden small:block" />
           )}
         </div>
-        <span className="justify-self-end text-ui-fg-base">
+        <span className="justify-self-end font-din-arabic text-sm text-black/70 tracking-wide">
           {paymentInfoMap[paymentProviderId]?.icon}
         </span>
       </div>
@@ -107,7 +107,7 @@ export const StripeCardContainer = ({
       {selectedPaymentOptionId === paymentProviderId &&
         (stripeReady ? (
           <div className="my-4 transition-all duration-150 ease-in-out">
-            <Text className="txt-medium-plus text-ui-fg-base mb-1">
+            <Text className="txt-medium-plus font-din-arabic text-sm text-black/70 tracking-wide mb-1">
               Enter your card details:
             </Text>
             <CardElement

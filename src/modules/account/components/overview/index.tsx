@@ -354,7 +354,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
             onClick={handleSaveCommunicationPrefs}
             disabled={loading === 'commPrefs'}
             className="px-8 py-4 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md text-center w-full sm:w-auto disabled:opacity-50"
-            style={{ borderColor: '#D8D2C7' }}
+            style={{ borderColor: '#D8D2C7',marginTop: '20px' }}
           >
             {loading === 'commPrefs' ? 'Saving...' : 'Save Preferences'}
           </motion.button>

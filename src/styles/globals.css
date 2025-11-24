@@ -5678,6 +5678,23 @@ html {
 
 
 
+@keyframes screen-bounce {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(15px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.screen-bounce {
+  animation: screen-bounce 0.6s ease-in-out;
+  overflow-x: hidden;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* Custom font classes */

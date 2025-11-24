@@ -31,7 +31,7 @@ export default async function OrderCompletedTemplate({ order }: OrderCompletedTe
         >
           {/* Success Message */}
           <div className="text-center mb-4">
-            <Heading level="h1" className="text-3xl font-semibold text-ui-fg-base">
+            <Heading level="h1" className="text-3xl font-semibold font-din-arabic text-sm text-black/70 tracking-wide">
               🎉 Thank you!
             </Heading>
             <p className="text-ui-fg-subtle text-lg mt-2">

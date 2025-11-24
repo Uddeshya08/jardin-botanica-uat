@@ -82,7 +82,7 @@ const AddressSelect = ({
                         {address.first_name} {address.last_name}
                       </span>
                       {address.company && (
-                        <span className="text-small-regular text-ui-fg-base">
+                        <span className="text-small-regular font-din-arabic text-sm text-black/70 tracking-wide">
                           {address.company}
                         </span>
                       )}
