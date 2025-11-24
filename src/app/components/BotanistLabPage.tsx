@@ -24,71 +24,116 @@ const OVERLAY_GRADIENT_STYLE = {
   pointerEvents: 'none' as const
 }
 
-const useTypewriter = (
+// Sound pool for overlapping sounds
+const soundPool: HTMLAudioElement[] = []
+const MAX_POOL_SIZE = 8
+const SOUND_PATH = "/assets/typewriter-typing-68696.mp3"
+let audioUnlocked = false
+// Unlock audio with user interaction
+const unlockAudio = async () => {
+  if (audioUnlocked || typeof window === 'undefined') return
+  
+  try {
+    // Create a temporary audio element to unlock audio
+    const testAudio = new Audio(SOUND_PATH)
+    testAudio.volume = 0.01
+    
+    await testAudio.play()
+    testAudio.pause()
+    testAudio.currentTime = 0
+    audioUnlocked = true
+  } catch (error) {
+    // Audio not unlocked yet, will need user interaction
+  }
+}
+
+// Initialize sound pool
+const initializeSoundPool = () => {
+  if (soundPool.length > 0) return
+  for (let i = 0; i < MAX_POOL_SIZE; i++) {
+    const audio = new Audio(SOUND_PATH)
+    audio.volume = 0.25
+    audio.preload = "auto"
+    soundPool.push(audio)
+  }
+}
+
+// Function to play typing sound
+const playTypingSound = () => {
+  if (!audioUnlocked) return
+  const audio = soundPool.find(a => a.paused || a.ended) ?? soundPool[0]
+  if (!audio) return
+
+  audio.currentTime = 0
+  audio.volume = 0.25
+
+  audio.play().catch(() => {
+    audioUnlocked = false
+  })
+}
+
+const stopAllTypingSound = () => {
+  soundPool.forEach(a => {
+    a.pause()
+    a.currentTime = 0
+  })
+}
+
+export const useTypewriter = (
   text: string,
-  baseSpeed = 100,
+  baseSpeed = 90,
   pauseAt?: number,
-  isActive = true
+  isActive = true,
+  enableSound = false
 ) => {
   const [displayedText, setDisplayedText] = useState("")
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
-  const [isComplete, setIsComplete] = useState(false)
-  const [hasPaused, setHasPaused] = useState(false)
-
-  useEffect(() => {
-    if (isActive) {
-      setDisplayedText("")
-      setCurrentIndex(0)
-      setIsPaused(false)
-      setIsComplete(false)
-      setHasPaused(false)
-    }
-  }, [isActive])
-
+  const [index, setIndex] = useState(0)
+  const [complete, setComplete] = useState(false)
+  
+  // SOUND SLOW FACTOR
+  const playSoundEvery = 2 // ✔ sound har 2 letters me
+  
   useEffect(() => {
     if (!isActive) return
 
-    if (currentIndex < text.length) {
-      if (!isPaused) {
-        const char = text[currentIndex]
-        const prevChar = currentIndex > 0 ? text[currentIndex - 1] : ""
-        let typingDelay = baseSpeed
+    if (index < text.length) {
+      const char = text[index]
+      let delay = baseSpeed + Math.random() * 35
 
-        if (char === ".") {
-          typingDelay = baseSpeed + 800
-        } else if (char === ",") {
-          typingDelay = baseSpeed + 500
-        } else if (char === ":") {
-          typingDelay = baseSpeed + 600
-        } else if (char === " " && prevChar === ".") {
-          typingDelay = baseSpeed + 300
-        } else if (char === " ") {
-          typingDelay = baseSpeed + Math.random() * 60
-        } else {
-          typingDelay = baseSpeed + Math.random() * 40
+      if (".,:" .includes(char)) delay += 400
+
+      const timer = setTimeout(() => {
+        // Play sound only for non-space chars AND slower
+        if (enableSound && char !== " " && index % playSoundEvery === 0) {
+          playTypingSound()
         }
 
-        const timer = setTimeout(() => {
-          setDisplayedText((prev) => prev + text[currentIndex])
-          setCurrentIndex((prev) => prev + 1)
+        setDisplayedText(prev => prev + char)
+        setIndex(prev => prev + 1)
 
-          if (pauseAt !== undefined && currentIndex + 1 === pauseAt && !hasPaused) {
-            setIsPaused(true)
-            setHasPaused(true)
-            setTimeout(() => {
-              setIsPaused(false)
-            }, 1600)
-          }
-        }, typingDelay)
-        return () => clearTimeout(timer)
-      }
-    } else if (isActive) {
-      setIsComplete(true)
+        if (pauseAt && index === pauseAt) {
+          setTimeout(() => {}, 1200)
+        }
+
+      }, delay)
+
+      return () => clearTimeout(timer)
+    } else {
+      setComplete(true)
     }
-  }, [currentIndex, text, baseSpeed, pauseAt, isPaused, hasPaused, isActive])
 
-  return { displayedText, isComplete }
+  }, [index, isActive, text, enableSound])
+
+  // Reset when re-triggered
+  useEffect(() => {
+    if (isActive) {
+      setDisplayedText("")
+      setIndex(0)
+      setComplete(false)
+    }
+  }, [isActive])
+
+  return { displayedText, isComplete: complete }
 }
 
 function InteractiveLabImage() {
@@ -241,19 +286,25 @@ function InteractiveLabImage() {
             const inactiveHotspots = hotspots.filter(h => h.id !== activePoint)
             const currentIndex = inactiveHotspots.findIndex(h => h.id === hotspot.id)
             
+            // Check if active hotspot is at the bottom (3 or 4)
+            const activeHotspot = hotspots.find(h => h.id === activePoint)
+            const isActiveAtBottom = activeHotspot && (activeHotspot.id === 3 || activeHotspot.id === 4)
+            
             // Distribute inactive numbers on left and right edges
-            // Avoid top corners - start from 35% and space them properly
+            // When bottom hotspots are active, we need more space to avoid popup overlap
             const totalInactive = inactiveHotspots.length
             const leftCount = Math.ceil(totalInactive / 2)
             
-            // Calculate available space (from 35% to 85% to avoid top and bottom corners)
-            const startTop = 35 // Start below top area
-            const endTop = 85 // End before bottom area
+            // Calculate available space - adjust based on active hotspot position
+            // If bottom hotspot is active, reduce bottom area significantly to avoid popup
+            const startTop = 30 // Start below top area
+            const endTop = isActiveAtBottom ? 60 : 80 // Reduce bottom space significantly when bottom hotspot is active
             const availableSpace = endTop - startTop
-            const spacing = Math.min(availableSpace / Math.max(leftCount, 1), 20) // Max 20% spacing, ensure no overlap
+            // Increase spacing to prevent overlap - minimum 22% between hotspots for better separation
+            const spacing = Math.max(availableSpace / Math.max(totalInactive, 1), 22)
             
             if (currentIndex < leftCount) {
-              // Position on left edge - avoid top corner
+              // Position on left edge
               const topPercent = startTop + (currentIndex * spacing)
               return {
                 top: `${Math.min(topPercent, endTop)}%`,
@@ -262,7 +313,7 @@ function InteractiveLabImage() {
                 bottom: 'auto',
               }
             } else {
-              // Position on right edge - avoid top corner
+              // Position on right edge
               const rightIndex = currentIndex - leftCount
               const topPercent = startTop + (rightIndex * spacing)
               return {
@@ -280,7 +331,7 @@ function InteractiveLabImage() {
           return (
           <motion.div 
             key={hotspot.id} 
-            className="absolute z-30" 
+            className={`absolute ${isMobile && activePoint && activePoint !== hotspot.id ? 'z-50' : 'z-30'}`}
             initial={hotspot.position}
             animate={finalPosition}
             transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -523,20 +574,9 @@ function OriginStorySection() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          // Only start animation when section is actually in viewport
-          const rect = entry.boundingClientRect
-          const isActuallyInView = rect.top < window.innerHeight * 0.8 && rect.bottom > window.innerHeight * 0.2
-          
-          if (isActuallyInView) {
-            setIsInView(true)
-          }
-        }
+        setIsInView(entry.isIntersecting)
       },
-      {
-        threshold: 0.3,
-        rootMargin: "0px",
-      }
+      { threshold: 0.2 }
     )
 
     observer.observe(sectionRef.current)
@@ -877,83 +917,66 @@ export function BotanistLabPage() {
     questionText,
     90,
     undefined,
-    phase === 1
+    phase === 1,
+    true // Enable sound for banner text
   )
   const { displayedText: displayedPart1, isComplete: part1Complete } = useTypewriter(
     answerPart1,
     90,
     undefined,
-    phase === 2
+    phase === 2,
+    true // Enable sound for banner text
   )
   const { displayedText: displayedPart2, isComplete: part2Complete } = useTypewriter(
     answerPart2,
     90,
     pausePosition,
-    phase === 3
+    phase === 3,
+    true // Enable sound for banner text
   )
 
-  // Only start animation when user scrolls to banner section (not on initial page load)
+  const unlockAudio = () => {
+    if (audioUnlocked) return
+    const test = new Audio(SOUND_PATH)
+    test.volume = 0.01
+    test.play().then(() => {
+      test.pause()
+      audioUnlocked = true
+    }).catch(() => {})
+  }
+
+  // Preload typing sound on component mount and unlock audio
   useEffect(() => {
-    if (!bannerRef.current) return
-
-    let hasStarted = false
-    let maxScrollY = 0
-
-    const handleScroll = () => {
-      if (!bannerRef.current || hasStarted) return
-
-      const scrollY = window.scrollY
-      const rect = bannerRef.current.getBoundingClientRect()
+    if (typeof window !== 'undefined') {
+      initializeSoundPool()
+      // Try to unlock audio immediately
+      unlockAudio()
       
-      // Track maximum scroll position (to know if user has scrolled down)
-      if (scrollY > maxScrollY) {
-        maxScrollY = scrollY
+      // Also try to unlock on any user interaction
+      const handleUserInteraction = () => {
+        unlockAudio()
       }
-
-      // Only start animation if:
-      // 1. User has scrolled down at least 150px (not at top on initial load), AND
-      // 2. Banner is now in viewport
-      if (maxScrollY > 150) {
-        const isInView = rect.top < window.innerHeight * 0.9 && rect.bottom > window.innerHeight * 0.1
-        
-        if (isInView) {
-          hasStarted = true
-          setIsBannerInView(true)
-        }
+      
+      window.addEventListener('click', handleUserInteraction, { once: true })
+      window.addEventListener('touchstart', handleUserInteraction, { once: true })
+      window.addEventListener('keydown', handleUserInteraction, { once: true })
+      
+      return () => {
+        window.removeEventListener('click', handleUserInteraction)
+        window.removeEventListener('touchstart', handleUserInteraction)
+        window.removeEventListener('keydown', handleUserInteraction)
       }
     }
+  }, [])
 
-    // Don't add listener immediately - wait to avoid initial load trigger
-    const timeoutId = setTimeout(() => {
-      window.addEventListener("scroll", handleScroll, { passive: true })
-    }, 200)
+  // Start animation immediately when page loads
+  useEffect(() => {
+    // Start animation on page load with a small delay
+    const timer = setTimeout(() => {
+      setIsBannerInView(true)
+    }, 500)
 
-    // Use IntersectionObserver - only trigger if user has scrolled down
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasStarted) {
-          // Only start if user has scrolled down significantly (not initial load)
-          if (maxScrollY > 150 || window.scrollY > 150) {
-            hasStarted = true
-            setIsBannerInView(true)
-          }
-        }
-      },
-      {
-        threshold: 0.5,
-        rootMargin: "0px",
-      }
-    )
-
-    observer.observe(bannerRef.current)
-
-    return () => {
-      clearTimeout(timeoutId)
-      window.removeEventListener("scroll", handleScroll)
-      if (bannerRef.current) {
-        observer.unobserve(bannerRef.current)
-      }
-    }
+    return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
@@ -992,6 +1015,23 @@ export function BotanistLabPage() {
       return () => clearTimeout(timer)
     }
   }, [part2Complete, phase])
+
+  // Stop sound when banner goes out of view
+  useEffect(() => {
+    if (!bannerRef.current) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) {
+          stopAllTypingSound()
+        }
+      },
+      { threshold: 0.2 }
+    )
+
+    observer.observe(bannerRef.current)
+    return () => observer.disconnect()
+  }, [])
 
   const { scrollYProgress } = useScroll({
     target: containerRef,

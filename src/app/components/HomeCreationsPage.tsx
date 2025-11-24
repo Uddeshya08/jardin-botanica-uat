@@ -225,10 +225,12 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
               className="font-din-arabic text-white/80 text-xs sm:text-sm mb-4 sm:mb-6 tracking-widest"
               style={{ letterSpacing: "0.2em" }}
             >
-              BOTANICAL HOME FRAGRANCE
+              BOTANICAL HOME FRAGRANCES
             </motion.p>
-            <h1 className="font-american-typewriter text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-4 sm:mb-6"
-              style={{ letterSpacing: '0.05em',fontSize:'5rem' }}>
+            <h1
+              className="font-american-typewriter text-white text-3xl sm:text-4xl md:text-5xl lg:text-7xl mb-4 sm:mb-6"
+              style={{ letterSpacing: "0.05em" }}
+            >
               Home Creations
             </h1>
             <p

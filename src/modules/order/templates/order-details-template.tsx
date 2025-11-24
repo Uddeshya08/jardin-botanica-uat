@@ -27,26 +27,27 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
           className="px-3 sm:px-4 py-2 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md flex items-center gap-1 sm:gap-2 whitespace-nowrap text-xs sm:text-sm"
           data-testid="back-to-overview-button"
         >
-          <XMark className="w-4 h-4" /> <span className="hidden sm:inline">Back to </span>Back
+          <XMark className="w-4 h-4" /> <span className="hidden sm:inline">Back to </span>Overview
         </LocalizedClientLink>
       </div>
       <div
         className="flex h-full w-full flex-col divide-y divide-ui-border-base rounded-xl border border-ui-border-base bg-[#e3e3d8]"
         data-testid="order-details-container"
       >
-        <div className="pb-4 md:pb-6">
-          <OrderDetails order={order} showStatus />
-        </div>
-        <div className="py-4 md:py-6">
+          <div className="py-2 md:py-2">
           <Items order={order} />
         </div>
-        <div className="py-4 md:py-6">
+        <div className="pb-3 md:pb-6">
+          <OrderDetails order={order} showStatus />
+        </div>
+      
+        <div className="py-3 md:py-3">
           <ShippingDetails order={order} />
         </div>
-        <div className="py-4 md:py-6">
+        <div className="py-3 md:py-3">
           <OrderSummary order={order} />
         </div>
-        <div className="pt-4 md:pt-6">
+        <div className="pt-3 md:pt-3">
           <Help />
         </div>
       </div>

@@ -132,8 +132,8 @@ const AccountNav = ({
                 <button
                   className={`flex items-center justify-center p-4 rounded-full transition-all duration-300 min-w-[48px] min-h-[48px] ${
                     active
-                      ? 'bg-black text-white shadow-lg'
-                      : 'bg-white/50 text-black hover:bg-black/10'
+                      ? 'bg-black text-white shadow-lg ring-1 ring-[#D8D2C7]'
+                      : 'text-black hover:bg-black/10 ring-1 ring-[#D8D2C7]'
                   }`}
                   title={item.label}
                   aria-label={item.label}

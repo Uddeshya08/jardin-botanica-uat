@@ -10,6 +10,7 @@ import { AuthProvider } from "app/context/auth-context"
 import { CartItemsProvider } from "app/context/cart-items-context"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 import { Footer } from "app/components/Footer"
+import ScrollIndicator from "@modules/common/components/scroll-indicator"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -66,6 +67,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
           <CartItemsProvider initialCartItems={cartItems}>
             {props.children}
             <Footer />
+            <ScrollIndicator />
           </CartItemsProvider>
         </LedgerProvider>
       </AuthProvider>

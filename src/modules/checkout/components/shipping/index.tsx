@@ -185,7 +185,7 @@ const Shipping: React.FC<ShippingProps> = ({
         <>
           <div className="grid">
             <div className="flex flex-col">
-              <span className="font-medium txt-medium text-ui-fg-base">
+              <span className="font-medium txt-medium font-din-arabic text-sm text-black/70 tracking-wide">
                 Shipping method
               </span>
               <span className="mb-4 text-ui-fg-muted txt-medium">
@@ -226,7 +226,7 @@ const Shipping: React.FC<ShippingProps> = ({
                           Pick up your order
                         </span>
                       </div>
-                      <span className="justify-self-end text-ui-fg-base">
+                      <span className="justify-self-end font-din-arabic text-sm text-black/70 tracking-wide">
                         -
                       </span>
                     </Radio>
@@ -266,7 +266,7 @@ const Shipping: React.FC<ShippingProps> = ({
                             {option.name}
                           </span>
                         </div>
-                        <span className="justify-self-end text-ui-fg-base">
+                        <span className="justify-self-end font-din-arabic text-sm text-black/70 tracking-wide">
                           {option.price_type === "flat" ? (
                             convertToLocale({
                               amount: option.amount!,
@@ -294,7 +294,7 @@ const Shipping: React.FC<ShippingProps> = ({
           {showPickupOptions === PICKUP_OPTION_ON && (
             <div className="grid">
               <div className="flex flex-col">
-                <span className="font-medium txt-medium text-ui-fg-base">
+                <span className="font-medium txt-medium font-din-arabic text-sm text-black/70 tracking-wide">
                   Store
                 </span>
                 <span className="mb-4 text-ui-fg-muted txt-medium">
@@ -340,7 +340,7 @@ const Shipping: React.FC<ShippingProps> = ({
                               </span>
                             </div>
                           </div>
-                          <span className="justify-self-end text-ui-fg-base">
+                          <span className="justify-self-end font-din-arabic text-sm text-black/70 tracking-wide">
                             {convertToLocale({
                               amount: option.amount!,
                               currency_code: cart?.currency_code,
@@ -377,7 +377,7 @@ const Shipping: React.FC<ShippingProps> = ({
           <div className="text-small-regular">
             {cart && (cart.shipping_methods?.length ?? 0) > 0 && (
               <div className="flex flex-col w-1/3">
-                <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                <Text className="txt-medium-plus font-din-arabic text-sm text-black/70 tracking-wide mb-1">
                   Method
                 </Text>
                 <Text className="txt-medium text-ui-fg-subtle">

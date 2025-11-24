@@ -20,7 +20,7 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
 
   return (
     <div className="flex flex-col gap-y-4 font-din-arabic">
-      <p className="text-sm text-black tracking-wide">
+      {/* <p className="text-sm text-black tracking-wide">
         We have sent the order confirmation details to{" "}
         <span
           className="font-semibold text-black"
@@ -29,9 +29,9 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
           {order.email}
         </span>
         .
-      </p>
+      </p> */}
       
-      <div className="flex flex-col gap-y-3">
+      <div className="flex flex-col gap-y-3 py-3">
         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
           <span className="text-xs uppercase tracking-wide text-black/60">
             Order date:
