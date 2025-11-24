@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Navigation } from 'app/components/Navigation'
 import { RippleEffect } from 'app/components/RippleEffect'
 import { BodyHandsPage } from 'app/components/BodyHandsPage'
+import { useCartItems } from 'app/context/cart-items-context'
 
 type CartItem = {
   id: string
@@ -15,17 +16,13 @@ type CartItem = {
 
 export default function BodyHandsRoutePage() {
   const [isScrolled, setIsScrolled] = useState(false)
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const { cartItems, handleCartUpdate } = useCartItems()
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 50)
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
-  const handleCartUpdate = (item: CartItem | null) => {
-    if (!item) return
-  }
 
   return (
     <div className="min-h-screen">

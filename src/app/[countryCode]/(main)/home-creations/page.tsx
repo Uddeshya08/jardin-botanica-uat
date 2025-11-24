@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react"
 import { Navigation } from "app/components/Navigation"
 import { RippleEffect } from "app/components/RippleEffect"
 import { HomeCreationsPage } from "app/components/HomeCreationsPage"
-// import { upsertCartItems } from "lib/util/cart-helpers"
+import { useCartItems } from "app/context/cart-items-context"
 
 type CartItem = {
   id: string
@@ -19,18 +19,13 @@ type CartItem = {
 
 export default function HomeCreationsRoutePage() {
   const [isScrolled, setIsScrolled] = useState(false)
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const { cartItems, handleCartUpdate } = useCartItems()
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 50)
     window.addEventListener("scroll", onScroll)
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
-
-  const handleCartUpdate = (item: CartItem | null) => {
-    if (!item) return
-    // setCartItems((prev) => upsertCartItems(prev, item))
-  }
 
   return (
     <div className="min-h-screen">

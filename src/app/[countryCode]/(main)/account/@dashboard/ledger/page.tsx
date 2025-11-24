@@ -8,9 +8,12 @@ import { addToCartAction } from "@lib/data/cart-actions"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { useCartItems } from "app/context/cart-items-context"
+import { listProducts } from "@lib/data/products"
 
 export default function LedgerPage() {
   const { ledger, toggleLedgerItem } = useLedger()
+  const { handleCartUpdate } = useCartItems()
   const { countryCode } = useParams() as { countryCode: string }
   const [isPending, startTransition] = useTransition()
   const [addingItems, setAddingItems] = useState<Set<string>>(new Set())
@@ -21,14 +24,75 @@ export default function LedgerPage() {
     exit: { opacity: 0, y: -10, transition: { duration: 0.2 } }
   }
 
-  const handleAddToCartClick = async (item: LedgerItem) => {
-    // Check if item has variantId (required for adding to cart)
-    if (!item.variantId && !item.variant_id) {
-      toast.error("Unable to add item to cart. Missing product variant information.")
-      return
-    }
+  const findProductVariantId = async (productName: string, itemSize?: string): Promise<string | null> => {
+    try {
+      // Normalize the product name for comparison
+      const normalizedSearchName = productName.toLowerCase().trim()
+      
+      // First, try searching with a higher limit to find matching products
+      const response = await listProducts({
+        countryCode: (countryCode || "in").toLowerCase(),
+        queryParams: {
+          limit: 100, // Search through more products
+        } as any,
+      })
 
-    const variantId = item.variantId || item.variant_id
+      const allProducts = response.response.products || []
+      
+      // Search for product by name (checking title and handle)
+      // Match common product name patterns (e.g., "Tea Exfoliant Rinse" matches "tea exfoliant rinse")
+      const matchingProduct = allProducts.find((prod) => {
+        const prodTitle = prod.title?.toLowerCase().trim() || ""
+        const prodHandle = prod.handle?.toLowerCase().trim() || ""
+        
+        // Check if product name contains key words from search or vice versa
+        const titleWords = normalizedSearchName.split(/\s+/).filter(w => w.length > 2)
+        const titleMatch = titleWords.length > 0 && titleWords.some(word => 
+          prodTitle.includes(word) || prodHandle.includes(word)
+        )
+        
+        // Also check if search name contains product title words
+        const prodTitleWords = prodTitle.split(/\s+/).filter(w => w.length > 2)
+        const reverseMatch = prodTitleWords.length > 0 && prodTitleWords.some(word =>
+          normalizedSearchName.includes(word)
+        )
+        
+        // Direct match
+        const directMatch = prodTitle.includes(normalizedSearchName) || 
+                           normalizedSearchName.includes(prodTitle) ||
+                           prodHandle.includes(normalizedSearchName) ||
+                           normalizedSearchName.includes(prodHandle)
+        
+        return directMatch || titleMatch || reverseMatch
+      })
+
+      if (matchingProduct && matchingProduct.variants && matchingProduct.variants.length > 0) {
+        // Return the first variant ID, or try to match by size if available
+        if (itemSize) {
+          // Try to find variant matching the size
+          const sizeVariant = matchingProduct.variants.find((v: any) => {
+            const variantTitle = (v.title || "").toLowerCase()
+            const sizeLower = itemSize.toLowerCase()
+            return variantTitle.includes(sizeLower) || sizeLower.includes(variantTitle) ||
+                   (v.sku && v.sku.toLowerCase().includes(sizeLower))
+          })
+          if (sizeVariant) {
+            return sizeVariant.id
+          }
+        }
+        // Return the first variant or the one with calculated_price
+        const variantWithPrice = matchingProduct.variants.find((v: any) => v.calculated_price)
+        return variantWithPrice?.id || matchingProduct.variants[0].id
+      }
+
+      return null
+    } catch (error) {
+      console.error("Error searching for product:", error)
+      return null
+    }
+  }
+
+  const handleAddToCartClick = async (item: LedgerItem) => {
     const itemId = item.id
 
     // Prevent duplicate clicks
@@ -36,7 +100,59 @@ export default function LedgerPage() {
       return
     }
 
-    setAddingItems((prev) => new Set(prev).add(itemId))
+    // Check if item has variantId (check multiple possible field names)
+    let variantId = item.variantId || item.variant_id || (item as any).selectedVariantId
+
+    // If variant ID is missing, try to find it by searching for the product
+    if (!variantId) {
+      setAddingItems((prev) => new Set(prev).add(itemId))
+      
+      toast.loading("Finding product variant...", { id: `finding-${itemId}` })
+      
+      try {
+        variantId = await findProductVariantId(item.name, (item as any).size)
+        
+        if (variantId) {
+          // Update the ledger item with the found variant ID
+          const updatedItem = { ...item, variantId, variant_id: variantId }
+          toggleLedgerItem(updatedItem as any)
+          
+          toast.dismiss(`finding-${itemId}`)
+          toast.success("Product found! Adding to cart...", { duration: 1000 })
+        } else {
+          setAddingItems((prev) => {
+            const next = new Set(prev)
+            next.delete(itemId)
+            return next
+          })
+          toast.dismiss(`finding-${itemId}`)
+          toast.error("Unable to find product variant. Please add this item from the product page.")
+          return
+        }
+      } catch (error: any) {
+        setAddingItems((prev) => {
+          const next = new Set(prev)
+          next.delete(itemId)
+          return next
+        })
+        toast.dismiss(`finding-${itemId}`)
+        toast.error("Error searching for product. Please try again.")
+        console.error("Error finding variant:", error)
+        return
+      }
+    } else {
+      setAddingItems((prev) => new Set(prev).add(itemId))
+    }
+
+    // Optimistically update cart context for immediate UI feedback
+    handleCartUpdate({
+      id: variantId as string,
+      name: item.name,
+      price: item.price,
+      quantity: 1,
+      image: item.image,
+      variant_id: variantId as string,
+    } as any)
 
     startTransition(async () => {
       try {
@@ -49,6 +165,11 @@ export default function LedgerPage() {
       } catch (error: any) {
         console.error("Failed to add to cart:", error)
         toast.error(error?.message || "Could not add to cart")
+        // Remove the optimistic update on error
+        handleCartUpdate({
+          id: variantId as string,
+          quantity: 0,
+        } as any)
       } finally {
         setAddingItems((prev) => {
           const next = new Set(prev)
@@ -108,14 +229,6 @@ export default function LedgerPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center py-24"
         >
-          <motion.div
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-24 h-24 mx-auto mb-8 rounded-sm border-2 flex items-center justify-center"
-            style={{ borderColor: '#8b4513', backgroundColor: '#f8f5f0' }}
-          >
-            <BookOpen className="w-12 h-12" style={{ color: '#8b4513' }} />
-          </motion.div>
           <p className="font-din-arabic text-sm sm:text-base text-black/60 mb-10 max-w-md mx-auto" style={{ letterSpacing: '0.1em' }}>
             No items saved yet. Your ledger awaits specimens from the Lab.
           </p>

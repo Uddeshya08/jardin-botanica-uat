@@ -115,7 +115,8 @@ export function ProductHero({
   product,
   countryCode,
   onCartUpdate,
-}: ProductHeroProps) {
+  onVariantChange,
+}: ProductHeroProps & { onVariantChange?: (variantId: string | null) => void }) {
   const [isRitualPanelOpen, setIsRitualPanelOpen] = useState(false)
   const [isActivesPanelOpen, setIsActivesPanelOpen] = useState(false)
   const [isFragranceNotesOpen, setIsFragranceNotesOpen] = useState(false)
@@ -169,9 +170,18 @@ export function ProductHero({
   )
   useEffect(() => {
     setSelectedVariantId(defaultVariantId)
+    // Only call onVariantChange if it's actually different and not undefined
+    if (defaultVariantId !== null && defaultVariantId !== undefined) {
+      onVariantChange?.(defaultVariantId)
+    }
   }, [defaultVariantId])
   const selectedVariant = product.variants?.find((v) => v.id === selectedVariantId) ?? product.variants?.[0]
   const minorAmount = selectedVariant?.calculated_price?.calculated_amount ?? 0
+  console.log('🔍 ProductHero - minorAmount:', {
+    minorAmount,
+    calculated_amount: selectedVariant?.calculated_price?.calculated_amount,
+    variantId: selectedVariantId
+  })
 
   const fallbackImg = product.thumbnail ?? "/assets/productImage.png"
   const imgs = product.images?.map((i) => i.url).filter(Boolean) ?? []
@@ -220,6 +230,12 @@ export function ProductHero({
     setIsAddedToCart(true)
 
     // optimistic nav/sticky updates if parent listens (regular product - no image in nav)
+    // calculated_amount is already in major units (rupees), no conversion needed
+    console.log('🔍 ProductHero - Adding item with price:', {
+      minorAmount,
+      calculated_amount: selectedVariant?.calculated_price?.calculated_amount,
+      variantId: selectedVariantId
+    })
     onCartUpdate?.({
       id: selectedVariantId,
       name: product.title,
@@ -241,8 +257,23 @@ export function ProductHero({
       } catch (e: any) {
         // roll back optimistic message
         setIsAddedToCart(false)
-        setUiError(e?.message || "Could not add to cart")
+        const errorMessage = e?.message || "Could not add to cart"
+        setUiError(errorMessage)
         console.error(e)
+        
+        // Show toast notification for error
+        const errorMsg = String(errorMessage || "").toLowerCase()
+        if (errorMsg.includes("inventory") || errorMsg.includes("required inventory") || errorMsg.includes("stock") || errorMsg.includes("variant does not have")) {
+          toast.error("Inventory Error", {
+            description: "This product is currently out of stock or unavailable. Please try again later.",
+            duration: 5000,
+          })
+        } else {
+          toast.error("Failed to add to cart", {
+            description: errorMessage,
+            duration: 4000,
+          })
+        }
       } finally {
         // keep the checkmark visible briefly, then clear
         setTimeout(() => {
@@ -256,6 +287,7 @@ export function ProductHero({
   const handleQuantityChange = (newQuantity: number) => {
     setQuantity(newQuantity)
     // keep parent UI synced while changing qty (optional)
+    // calculated_amount is already in major units (rupees), no conversion needed
     if (selectedVariantId) {
       onCartUpdate?.({
         id: selectedVariantId,
@@ -392,7 +424,17 @@ export function ProductHero({
               </h3>
               <RadioGroup 
                 value={selectedVariantId ?? ""}
-                onValueChange={(value) => setSelectedVariantId(value)}
+                onValueChange={(value: string) => {
+                  console.log('🔍 RadioGroup - onValueChange called:', { 
+                    newValue: value, 
+                    currentSelected: selectedVariantId,
+                    visibleOptions: visibleSizeOptions.map(o => ({ id: o.id, label: o.label }))
+                  })
+                  if (value && value !== selectedVariantId) {
+                    setSelectedVariantId(value)
+                    onVariantChange?.(value)
+                  }
+                }}
                 className="!flex flex-row gap-6"
               >
                 {visibleSizeOptions.map((opt) => (

@@ -25,13 +25,26 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
 
     shippingOptions = shipping_options
   }
-    const cartItems = cart?.items?.map(item => ({
-    id: item.id,
-    name: item.title,
-    price: item.unit_price / 100, // Convert from cents if needed
-    quantity: item.quantity,
-    image: item.thumbnail
-  })) || []
+    const cartItems = cart?.items?.map(item => {
+      console.log('🔍 Layout - Server cart item unit_price:', {
+        id: item.id,
+        title: item.title,
+        unit_price: item.unit_price,
+        unit_price_type: typeof item.unit_price,
+        total: item.total,
+      })
+      // Check if unit_price is already in major units or minor units
+      // If unit_price > 10000, likely in minor units (paise), divide by 100
+      // Otherwise, it's already in major units (rupees)
+      const price = item.unit_price > 10000 ? item.unit_price / 100 : item.unit_price
+      return {
+        id: item.id,
+        name: item.title,
+        price: price,
+        quantity: item.quantity,
+        image: item.thumbnail
+      }
+    }) || []
 
   return (
     <>

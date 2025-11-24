@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
@@ -14,6 +14,8 @@ import { CustomerTestimonials } from "app/components/CustomerTestimonials"
 import { RippleEffect } from "app/components/RippleEffect"
 import { FeaturedRitualTwo } from "app/components/FeaturedRitualTwo"
 import Featured from "app/components/Featured"
+import { useCartItems } from "app/context/cart-items-context"
+import { CartItem } from "app/context/cart-items-context"
 
 interface RitualProduct {
   variantId: string
@@ -35,14 +37,6 @@ type ProductTemplateProps = {
   ritualProduct?: RitualProduct | null
 }
 
-interface CartItem {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  image?: string
-  isRitualProduct?: boolean
-}
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
   product,
   region,
@@ -57,36 +51,18 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     return notFound()
   }
 
+  // Use cart context instead of local state
+  const { cartItems, handleCartUpdate } = useCartItems()
   const [isScrolled, setIsScrolled] = useState(false)
   const [showStickyCart, setShowStickyCart] = useState(false)
   const [heroCartItem, setHeroCartItem] = useState<CartItem | null>(null)
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
 
-  const handleCartUpdate = (item: CartItem | null) => {
+  // Wrapper function to update both heroCartItem and context
+  const handleCartUpdateWrapper = (item: CartItem | null) => {
     setHeroCartItem(item)
-
-    // Update cartItems array for navigation
-    if (item && item.quantity > 0) {
-      setCartItems((prevItems) => {
-        const existingIndex = prevItems.findIndex(
-          (cartItem) => cartItem.id === item.id
-        )
-        if (existingIndex >= 0) {
-          // Update existing item
-          const updatedItems = [...prevItems]
-          updatedItems[existingIndex] = item
-          return updatedItems
-        } else {
-          // Add new item
-          return [...prevItems, item]
-        }
-      })
-    } else if (item && item.quantity === 0) {
-      // Remove item if quantity is 0
-      setCartItems((prevItems) =>
-        prevItems.filter((cartItem) => cartItem.id !== item.id)
-      )
-    }
+    // Update cart context (this will also update Navigation automatically)
+    handleCartUpdate(item)
   }
 
 
@@ -140,21 +116,25 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         <Navigation
           isScrolled={isScrolled}
           cartItems={cartItems}
-          onCartUpdate={handleCartUpdate}
+          onCartUpdate={handleCartUpdateWrapper}
           forceWhiteText={false}
         />
         <div className="h-4"></div>
         <ProductHero
           product={product as any}
           countryCode={'in'} // e.g. "in"
-          onCartUpdate={handleCartUpdate}
+          onCartUpdate={handleCartUpdateWrapper}
+          onVariantChange={useCallback((variantId: string | null) => {
+            setSelectedVariantId(variantId)
+          }, [])}
         />
 
         <StickyCartBar
           isVisible={showStickyCart}
           product={product as any}
+          selectedVariantId={selectedVariantId}
           onUpdateHeroQuantity={handleHeroQuantityUpdate}
-          onCartUpdate={handleCartUpdate}
+          onCartUpdate={handleCartUpdateWrapper}
           cartItems={cartItems}
           ritualProduct={ritualProductProp}
         />

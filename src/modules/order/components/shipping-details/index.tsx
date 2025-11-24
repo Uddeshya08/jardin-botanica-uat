@@ -11,17 +11,17 @@ type ShippingDetailsProps = {
 const ShippingDetails = ({ order }: ShippingDetailsProps) => {
   return (
     <div>
-      <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
+      {/* <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
         Delivery
-      </Heading>
+      </Heading> */}
       <div className="flex items-start gap-x-8">
         <div
           className="flex flex-col w-1/3"
           data-testid="shipping-address-summary"
         >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1">
+          <h2 className="txt-medium-plus text-base-semi mb-1 ">
             Shipping Address
-          </Text>
+          </h2>
           <Text className="txt-medium text-ui-fg-subtle">
             {order.shipping_address?.first_name}{" "}
             {order.shipping_address?.last_name}
@@ -39,7 +39,7 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
           </Text>
         </div>
 
-        <div
+        {/* <div
           className="flex flex-col w-1/3 "
           data-testid="shipping-contact-summary"
         >
@@ -48,9 +48,9 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
             {order.shipping_address?.phone}
           </Text>
           <Text className="txt-medium text-ui-fg-subtle">{order.email}</Text>
-        </div>
+        </div> */}
 
-        <div
+        {/* <div
           className="flex flex-col w-1/3"
           data-testid="shipping-method-summary"
         >
@@ -65,7 +65,7 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
               .replace(/\./g, ",")}
             )
           </Text>
-        </div>
+        </div> */}
       </div>
       <Divider className="mt-8" />
     </div>

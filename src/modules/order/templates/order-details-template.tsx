@@ -19,19 +19,19 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
 }) => {
   return (
     <div className="flex flex-col justify-center gap-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl-semi tracking-tight">Order Details</h1>
+      <div className="flex flex-row items-center justify-between gap-4 mb-6 lg:mb-8">
+        <h1 className="font-american-typewriter text-xl sm:text-2xl lg:text-3xl text-black">Order Details</h1>
         <LocalizedClientLink
           href="/account/orders"
           aria-label="Back to orders overview"
-          className="px-4 py-2 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md flex items-center gap-2"
+          className="px-3 sm:px-4 py-2 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md flex items-center gap-1 sm:gap-2 whitespace-nowrap text-xs sm:text-sm"
           data-testid="back-to-overview-button"
         >
-          <XMark /> Back to overview
+          <XMark className="w-4 h-4" /> <span className="hidden sm:inline">Back to </span>Back
         </LocalizedClientLink>
       </div>
       <div
-        className="flex h-full w-full flex-col divide-y divide-ui-border-base rounded-xl border border-ui-border-base bg-[#e3e3d8] p-4 md:p-6"
+        className="flex h-full w-full flex-col divide-y divide-ui-border-base rounded-xl border border-ui-border-base bg-[#e3e3d8]"
         data-testid="order-details-container"
       >
         <div className="pb-4 md:pb-6">
