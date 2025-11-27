@@ -107,7 +107,7 @@ export function AccountPage() {
               {/* Forgot password */}
               <div className="text-right">
                 <button type="button" className="font-din-arabic text-sm text-black/70 hover:text-black transition-colors">
-                  Forgot your password?
+                  Forgot your Password?
                 </button>
               </div>
 
@@ -171,7 +171,7 @@ export function AccountPage() {
                   className="font-din-arabic w-full flex items-center px-4 py-3.5 border bg-transparent text-black hover:bg-black/5 transition-all duration-300"
                   style={{ borderColor: '#D8D2C7' }}
                 >
-                  <Smartphone className="w-5 h-5 mr-3 flex-shrink-0" />
+                  {/* <Smartphone className="w-5 h-5 mr-3 flex-shrink-0" /> */}
                   <span className="text-left">Continue with Phone</span>
                 </motion.button>
               </div>

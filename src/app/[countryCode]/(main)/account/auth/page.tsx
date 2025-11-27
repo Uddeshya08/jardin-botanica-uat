@@ -212,7 +212,7 @@ export default function AuthPage() {
                     href="/account/forgot-password"
                     className="font-din-arabic text-sm text-black/70 hover:text-black"
                   >
-                    Forgot your password?
+                    Forgot Your Password?
                   </a>
                 </div>
 
@@ -235,7 +235,7 @@ export default function AuthPage() {
                       className="font-din-arabic text-sm text-black/70 px-4"
                       style={{ backgroundColor: "#e3e3d8" }}
                     >
-                      Or Sign in with
+                      Or Sign In With
                     </span>
                   </div>
                 </div>

@@ -70,7 +70,7 @@ export default function ScrollIndicator() {
             if (Math.abs(finalScrollPosition - lastScrollPositionRef.current) < 5) {
               checkScrollPosition()
             }
-          }, 5000) // 5 seconds delay
+          }, 13000) // 5 seconds delay
         }
       }, 100) // Small delay to detect scroll stop
     }
@@ -121,30 +121,23 @@ export default function ScrollIndicator() {
 
   return (
     <div
-      className={`fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none transition-opacity duration-500 ${
+      className={`fixed bottom-8 right-8 z-50 pointer-events-none ${
         showIndicator ? "opacity-100" : "opacity-0"
       }`}
     >
-      <div className="flex flex-col items-center">
-        <div className="animate-bounce">
-          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full px-4 py-3 shadow-lg border border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col items-center">
-              <span className="text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
-                Scroll
-              </span>
-              <svg
-                className="w-5 h-5 text-gray-700 dark:text-gray-300 animate-pulse"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-              </svg>
-            </div>
-          </div>
+      <div className="flex flex-col items-center animate-[bounce_2s_ease-in-out_infinite]">
+        <div className="flex items-center justify-center backdrop-blur-md bg-white/10 dark:bg-black/20 rounded-full w-14 h-14">
+          <svg
+            className="w-8 h-8 text-gray-600 dark:text-gray-100"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2.5"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+          </svg>
         </div>
       </div>
     </div>
