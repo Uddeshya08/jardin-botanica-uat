@@ -59,7 +59,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
   return (
     <div className="bg-transparent flex flex-col py-5 w-full relative" data-testid="order-card">
       <div className="absolute bottom-0 left-0 right-0 h-px" style={{ backgroundColor: 'rgba(139, 69, 19, 0.15)' }}></div>
-      <div className="flex items-start justify-between gap-4 w-full md:w-[60%]">
+      <div className="flex items-start justify-between gap-4 w-full sm:w-[60%]">
         <div className="flex flex-col">
           <div className="font-din-arabic text-base text-black tracking-wide mb-2">
             #<span data-testid="order-display-id">{order.display_id}</span>
@@ -83,7 +83,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
         </div>
       </div>
 
-      <div className="mt-6 font-din-arabic text-sm text-black/70 tracking-wide w-full md:w-[60%]">
+      <div className="mt-6 font-din-arabic text-sm text-black/70 tracking-wide w-full md:w-[50%]">
         {firstItemTitle && (
           <span className="font-din-arabic text-sm text-black/70 tracking-wide">
             {firstItemTitle} × {numberOfLines}
@@ -91,14 +91,15 @@ const OrderCard = ({ order }: OrderCardProps) => {
         )}
       </div>
 
-      <div className="mt-4 flex justify-end md:justify-start w-full md:w-[60%]">
+      <div className="mt-4 flex justify-end md:justify-start xs:w-full sm:w-[50%]">
         <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
           <button
             data-testid="order-details-link"
             style={{ borderColor: 'rgb(216, 210, 199)', transform: 'none' }} 
-            className="font-din-arabic text-sm text-black/60 hover:!text-black transition-colors"
+            className="font-din-arabic text-sm text-black/60 hover:text-black transition-colors md:px-8 md:py-4 md:border md:text-black md:tracking-wide md:hover:bg-black md:hover:text-white md:transition-all md:duration-300 md:shadow-sm md:hover:shadow-md md:text-center"
           >
-            [{fulfillmentBadge.buttonText}]
+            <span className="md:hidden">[{fulfillmentBadge.buttonText}]</span>
+            <span className="hidden sm:inline">{fulfillmentBadge.buttonText}</span>
           </button>
         </LocalizedClientLink>
       </div>

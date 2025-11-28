@@ -290,31 +290,95 @@ function InteractiveLabImage() {
             const activeHotspot = hotspots.find(h => h.id === activePoint)
             const isActiveAtBottom = activeHotspot && (activeHotspot.id === 3 || activeHotspot.id === 4)
             
+            // Special case: when hotspot 3 is active, hotspot 4 needs to move up significantly
+            // Special case: when hotspot 4 is active, hotspot 3 needs to move up significantly
+            const isSpecialCase = (activePoint === 3 && hotspot.id === 4) || (activePoint === 4 && hotspot.id === 3)
+            
             // Distribute inactive numbers on left and right edges
-            // When bottom hotspots are active, we need more space to avoid popup overlap
             const totalInactive = inactiveHotspots.length
-            const leftCount = Math.ceil(totalInactive / 2)
             
-            // Calculate available space - adjust based on active hotspot position
-            // If bottom hotspot is active, reduce bottom area significantly to avoid popup
-            const startTop = 30 // Start below top area
-            const endTop = isActiveAtBottom ? 60 : 80 // Reduce bottom space significantly when bottom hotspot is active
+            // For special cases, we need to ensure proper distribution
+            // When hotspot 3 is active: 1, 2, 4 are inactive
+            //   - Left: 1 (original position)
+            //   - Right: 2 (original position), 4 (needs to move up to avoid popup)
+            // When hotspot 4 is active: 1, 2, 3 are inactive
+            //   - Left: 1 (original position), 3 (needs to move up to avoid popup)
+            //   - Right: 2 (original position)
+            let leftHotspots: number[] = []
+            let rightHotspots: number[] = []
+            
+            if (activePoint === 3) {
+              // Hotspot 3 active: 1, 2, 4 inactive
+              leftHotspots = [1]
+              rightHotspots = [2, 4] // 4 needs special positioning
+            } else if (activePoint === 4) {
+              // Hotspot 4 active: 1, 2, 3 inactive
+              leftHotspots = [1, 3] // 3 needs special positioning
+              rightHotspots = [2]
+            } else {
+              // Top hotspots (1 or 2) active: distribute evenly
+              const leftCount = Math.ceil(totalInactive / 2)
+              inactiveHotspots.forEach((h, idx) => {
+                if (idx < leftCount) {
+                  leftHotspots.push(h.id)
+                } else {
+                  rightHotspots.push(h.id)
+                }
+              })
+            }
+            
+            // Calculate positions
+            const startTop = 30
+            const endTop = isActiveAtBottom ? 55 : 80 // Reduced for bottom hotspots to avoid popup
             const availableSpace = endTop - startTop
-            // Increase spacing to prevent overlap - minimum 22% between hotspots for better separation
-            const spacing = Math.max(availableSpace / Math.max(totalInactive, 1), 22)
             
-            if (currentIndex < leftCount) {
-              // Position on left edge
-              const topPercent = startTop + (currentIndex * spacing)
+            // Check if current hotspot is in left or right group
+            const isLeft = leftHotspots.includes(hotspot.id)
+            const isRight = rightHotspots.includes(hotspot.id)
+            
+            if (isLeft) {
+              const leftIndex = leftHotspots.indexOf(hotspot.id)
+              const maxLeft = leftHotspots.length
+              
+              // Special handling: if hotspot 4 is active and this is hotspot 3
+              if (isSpecialCase && activePoint === 4 && hotspot.id === 3) {
+                // Position hotspot 3 higher up to avoid popup, with good spacing from hotspot 1
+                // Hotspot 1 should be at ~30%, hotspot 3 should be at ~45-50%
+                return {
+                  top: '45%',
+                  left: '12px',
+                  right: 'auto',
+                  bottom: 'auto',
+                }
+              }
+              
+              // Normal distribution for left side
+              const spacing = Math.max(availableSpace / Math.max(maxLeft, 1), 20)
+              const topPercent = startTop + (leftIndex * spacing)
               return {
                 top: `${Math.min(topPercent, endTop)}%`,
                 left: '12px',
                 right: 'auto',
                 bottom: 'auto',
               }
-            } else {
-              // Position on right edge
-              const rightIndex = currentIndex - leftCount
+            } else if (isRight) {
+              const rightIndex = rightHotspots.indexOf(hotspot.id)
+              const maxRight = rightHotspots.length
+              
+              // Special handling: if hotspot 3 is active and this is hotspot 4
+              if (isSpecialCase && activePoint === 3 && hotspot.id === 4) {
+                // Position hotspot 4 higher up to avoid popup, with good spacing from hotspot 2
+                // Hotspot 2 should be at ~30%, hotspot 4 should be at ~45-50%
+                return {
+                  top: '45%',
+                  right: '12px',
+                  left: 'auto',
+                  bottom: 'auto',
+                }
+              }
+              
+              // Normal distribution for right side
+              const spacing = Math.max(availableSpace / Math.max(maxRight, 1), 20)
               const topPercent = startTop + (rightIndex * spacing)
               return {
                 top: `${Math.min(topPercent, endTop)}%`,
@@ -323,6 +387,9 @@ function InteractiveLabImage() {
                 bottom: 'auto',
               }
             }
+            
+            // Fallback (shouldn't reach here)
+            return null
           }
 
           const mobilePosition = getMobilePosition()
