@@ -1,6 +1,6 @@
 "use client"
 
-import { setAddresses } from "@lib/data/cart"
+import { listCartOptions, setAddresses } from "@lib/data/cart"
 import { setShippingMethod } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
 import { ArrowLeftMini, CheckCircleSolid } from "@medusajs/icons"
@@ -50,12 +50,22 @@ const Addresses = ({
       await formAction(formData)
 
       // Then automatically set the shipping method to the specific ID
-      const shippingMethodId = "so_01K9QBNYHN1RC19H8JCVSRQ1MZ"
+      // const shippingMethodId = "so_01KAP297BN403YN2DSTJW966YJ"
 
       if (cart?.id) {
+        const response = await listCartOptions()
+
+        const surfaceShipping = response.shipping_options.find(
+          (option) => option.data?.shipping_mode === "Surface"
+        )
+
+        if (!surfaceShipping) {
+          throw new Error("No surface shipping option found")
+        }
+
         await setShippingMethod({
           cartId: cart.id,
-          shippingMethodId: shippingMethodId,
+          shippingMethodId: surfaceShipping?.id,
         })
 
         // Skip delivery step and go directly to payment
@@ -71,12 +81,14 @@ const Addresses = ({
   return (
     <div>
       <div className="flex-row items-center justify-between mb-6">
-        <p className="font-din-arabic text-xs text-black/40 mb-2 tracking-wider uppercase">Shipping Information</p>
+        <p className="font-din-arabic text-xs text-black/40 mb-2 tracking-wider uppercase">
+          Shipping Information
+        </p>
         <Heading
           level="h2"
           className="flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide"
         >
-          Where Shall We Send Your Order?          
+          Where Shall We Send Your Order?
           {!isOpen && <CheckCircleSolid />}
         </Heading>
         {!isOpen && cart?.shipping_address && (
