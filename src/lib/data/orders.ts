@@ -34,8 +34,15 @@ export const listOrders = async (
   offset: number = 0,
   filters?: Record<string, any>
 ) => {
+  const authHeaders = await getAuthHeaders()
+
+  // If no auth headers, return empty array (user is not authenticated)
+  if (!authHeaders || Object.keys(authHeaders).length === 0) {
+    return []
+  }
+
   const headers = {
-    ...(await getAuthHeaders()),
+    ...authHeaders,
   }
 
   const next = {
@@ -56,8 +63,8 @@ export const listOrders = async (
       next,
       cache: "force-cache",
     })
-    .then(({ orders }) => orders)
-    .catch((err) => medusaError(err))
+    .then(({ orders }) => orders || [])
+    .catch(() => []) // Return empty array on error (including unauthorized) instead of throwing
 }
 
 export const createTransferRequest = async (

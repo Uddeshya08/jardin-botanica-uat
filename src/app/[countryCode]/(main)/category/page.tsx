@@ -33,6 +33,7 @@ const Category = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [productScrollPosition, setProductScrollPosition] = useState(0)
   const [maxProductScroll, setMaxProductScroll] = useState(0)
+  const [garageSliderIndex, setGarageSliderIndex] = useState(1)
 
   const handleCartUpdate = (item: CartItem | null) => {
     if (!item) return
@@ -121,6 +122,100 @@ const Category = () => {
 
   const canScrollLeft = productScrollPosition > 0
   const canScrollRight = productScrollPosition < maxProductScroll - 10 // Small buffer for smooth scrolling
+
+  // Garage slider items
+  const garageSliderItems = [
+    { 
+      src: "/Images/Crushedpine.jpg", 
+      label: "Cedar Bloom",
+      bgColor: "bg-amber-900/20"
+    },
+    { 
+      src: "/Images/SoftFloral.jpg", 
+      label: "Floral Spice",
+      bgColor: "bg-green-900/30"
+    },
+    { 
+      src: "/Images/warmroots.jpg", 
+      label: "Forest Floor",
+      bgColor: "bg-amber-800/20"
+    },
+    { 
+      src: "/Images/AquaVeil1.jpg", 
+      label: "Water & Wood",
+      bgColor: "bg-blue-900/20"
+    },
+    { 
+      src: "/Images/Pineraw.jpg", 
+      label: "Pine Essence",
+      bgColor: "bg-green-800/20"
+    },
+  ]
+
+  // Track garage slider scroll position
+  useEffect(() => {
+    const garageSlider = document.getElementById('garage-slider')
+    if (!garageSlider) return
+
+    const updateGarageSliderIndex = () => {
+      const scrollLeft = garageSlider.scrollLeft
+      // Card width calculation: calc(100vw - 8rem) with max 500px, min 320px
+      const viewportWidth = window.innerWidth
+      const cardWidth = Math.min(Math.max(viewportWidth - 128, 320), 500)
+      // Gap: gap-6 (24px) on mobile, gap-8 (32px) on desktop
+      const gap = window.innerWidth >= 768 ? 32 : 24
+      // Padding is max(calc(50vw - 250px), 1rem)
+      const paddingLeft = Math.max(viewportWidth / 2 - 250, 16)
+      const adjustedScroll = scrollLeft + paddingLeft
+      const scrollPosition = adjustedScroll / (cardWidth + gap)
+      const currentIndex = Math.round(scrollPosition)
+      setGarageSliderIndex(Math.min(Math.max(currentIndex, 0), garageSliderItems.length - 1))
+    }
+
+    // Initial scroll to center first card
+    const centerFirstCard = () => {
+      // First card should already be centered due to padding, just ensure scroll is at 0
+      garageSlider.scrollLeft = 0
+    }
+
+    // Wait for layout to settle
+    setTimeout(() => {
+      centerFirstCard()
+      updateGarageSliderIndex()
+    }, 100)
+
+    updateGarageSliderIndex()
+    garageSlider.addEventListener('scroll', updateGarageSliderIndex)
+    
+    window.addEventListener('resize', () => {
+      centerFirstCard()
+      updateGarageSliderIndex()
+    })
+    
+    return () => {
+      garageSlider.removeEventListener('scroll', updateGarageSliderIndex)
+      window.removeEventListener('resize', updateGarageSliderIndex)
+    }
+  }, [])
+
+  // Function to scroll garage slider to specific index
+  const goToGarageSlide = (index: number) => {
+    const garageSlider = document.getElementById('garage-slider')
+    if (!garageSlider) return
+
+    const viewportWidth = window.innerWidth
+    const cardWidth = Math.min(Math.max(viewportWidth - 128, 320), 500)
+    const gap = window.innerWidth >= 768 ? 32 : 24
+    // Padding is max(calc(50vw - 250px), 1rem)
+    const paddingLeft = Math.max(viewportWidth / 2 - 250, 16)
+    // Calculate scroll position to center the selected card
+    const scrollPosition = (cardWidth + gap) * index - paddingLeft
+    
+    garageSlider.scrollTo({ 
+      left: Math.max(0, scrollPosition), 
+      behavior: 'smooth' 
+    })
+  }
 
 
   return (
@@ -211,6 +306,135 @@ const Category = () => {
         >
           A Story in Scent
         </motion.h2>
+      </motion.div>
+
+      {/* Garage-style Slider Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+        className="relative w-full py-12 md:py-20 overflow-hidden bg-[#e2e2d8]"
+      >
+        {/* Large Background Text */}
+        <motion.h2
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] md:text-[200px] lg:text-[280px] font-light text-gray-300/30 select-none pointer-events-none z-0 tracking-tight"
+          style={{ 
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontWeight: 300,
+            letterSpacing: '-0.02em'
+          }}
+        >
+          Botanica
+        </motion.h2>
+
+        {/* Slider Container */}
+        <div className="relative z-10">
+          <div 
+            id="garage-slider"
+            className="overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            <div 
+              className="flex gap-6 md:gap-8 items-center" 
+              style={{ 
+                width: 'max-content',
+                paddingLeft: 'max(calc(50vw - 250px), 1rem)',
+                paddingRight: 'max(calc(50vw - 250px), 1rem)'
+              }}
+            >
+              {garageSliderItems.map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="relative flex-shrink-0 snap-center"
+                  style={{ 
+                    width: 'calc(100vw - 8rem)',
+                    maxWidth: '500px',
+                    minWidth: '320px'
+                  }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-lg"
+                  >
+                    {/* Card Image */}
+                    <motion.img
+                      src={item.src}
+                      alt={item.label}
+                      className="w-full h-full object-cover"
+                    />
+                  </motion.div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Text Section Below Slider */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="text-center mt-12 md:mt-16 px-4"
+          >
+            <motion.h3
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              viewport={{ once: true }}
+              className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-1 font-din-arabic tracking-tight"
+            >
+              your product collection
+            </motion.h3>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              viewport={{ once: true }}
+              className="text-xl md:text-2xl font-bold text-black mb-1 font-din-arabic tracking-tight"
+            >
+              is ready
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+              viewport={{ once: true }}
+              className="text-sm md:text-base text-black/60 font-din-arabic font-normal"
+            >
+              explore our botanical collection now
+            </motion.p>
+          </motion.div>
+
+          {/* Pagination Dots */}
+          <div className="flex justify-center items-center gap-2 mt-8">
+            {garageSliderItems.map((_, index) => (
+              <motion.button
+                key={index}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+                viewport={{ once: true }}
+                onClick={() => goToGarageSlide(index)}
+                className={`rounded-full transition-all duration-300 cursor-pointer ${
+                  index === garageSliderIndex 
+                    ? 'bg-gray-800 w-3 h-2' 
+                    : 'bg-gray-300 hover:bg-gray-400 w-2 h-2'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        </div>
       </motion.div>
 
       {/* mid section - product grid with PAB hover effects */}

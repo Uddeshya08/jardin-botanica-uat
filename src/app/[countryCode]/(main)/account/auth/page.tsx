@@ -57,6 +57,9 @@ export default function AuthPage() {
     }
   }, [signupMessage, redirectTo, router])
 
+  // ----- TAB STATE FOR MOBILE -----
+  const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin")
+
   const [isScrolled, setIsScrolled] = useState(false)
   const [showStickyCart, setShowStickyCart] = useState(false)
   const [heroCartItem, setHeroCartItem] = useState<CartItem | null>(null)
@@ -132,6 +135,54 @@ export default function AuthPage() {
 
   return (
     <div>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          /* Date Picker Calendar Popup Styling */
+          input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.6;
+            filter: invert(0);
+          }
+          
+          input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+          }
+          
+          /* For Firefox */
+          input[type="date"] {
+            color-scheme: light;
+          }
+          
+          /* Calendar popup background and text colors (WebKit browsers) */
+          input[type="date"]::-webkit-datetime-edit {
+            color: #000;
+          }
+          
+          input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+            color: #000;
+          }
+          
+          input[type="date"]::-webkit-datetime-edit-text {
+            color: #000;
+          }
+          
+          input[type="date"]::-webkit-datetime-edit-month-field {
+            color: #000;
+          }
+          
+          input[type="date"]::-webkit-datetime-edit-day-field {
+            color: #000;
+          }
+          
+          input[type="date"]::-webkit-datetime-edit-year-field {
+            color: #000;
+          }
+          
+          input[type="date"]::-webkit-inner-spin-button {
+            opacity: 1;
+          }
+        `
+      }} />
       <RippleEffect />
       <Navigation
         isScrolled={isScrolled}
@@ -143,14 +194,48 @@ export default function AuthPage() {
         className="min-h-screen pt-44 pb-12"
         style={{ backgroundColor: "#e3e3d8" }}
       >
-        <div className="container mx-auto px-6 lg:px-12">
+        <div className="container mx-auto px-2 lg:px-12">
+          {/* Mobile Tabs - Only visible on mobile */}
+          <div className="lg:hidden mb-8">
+            <div className="flex border-b border-black/20" style={{ borderColor: "#D8D2C7" }}>
+              <button
+                type="button"
+                onClick={() => setActiveTab("signin")}
+                className={`font-din-arabic flex-1 py-4 text-center transition-all duration-300 ${
+                  activeTab === "signin"
+                    ? "text-black border-b-2 border-black font-medium"
+                    : "text-black/50"
+                }`}
+                style={{
+                  borderBottomColor: activeTab === "signin" ? "#000" : "transparent",
+                }}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("signup")}
+                className={`font-din-arabic flex-1 py-4 text-center transition-all duration-300 ${
+                  activeTab === "signup"
+                    ? "text-black border-b-2 border-black font-medium"
+                    : "text-black/50"
+                }`}
+                style={{
+                  borderBottomColor: activeTab === "signup" ? "#000" : "transparent",
+                }}
+              >
+                Create Account
+              </button>
+            </div>
+          </div>
+
           <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-24">
             {/* Sign In */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="p-8 lg:p-10"
+              className={`p-8 lg:p-10 ${activeTab !== "signin" ? "hidden lg:block" : ""}`}
             >
               <h2 className="font-american-typewriter text-2xl mb-8 text-black text-center">
                 Sign In
@@ -246,7 +331,13 @@ export default function AuthPage() {
                     className="font-din-arabic w-full flex items-center px-4 py-3.5 border bg-transparent text-black hover:bg-black/5 transition-all duration-300"
                     style={{ borderColor: "#D8D2C7" }}
                   >
-                    {/* Replace with real Apple SSO */}
+                    <svg
+                      className="w-5 h-5 mr-3 flex-shrink-0"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+                    </svg>
                     <span className="text-left">Continue with Apple</span>
                   </button>
                   <button
@@ -254,7 +345,16 @@ export default function AuthPage() {
                     className="font-din-arabic w-full flex items-center px-4 py-3.5 border bg-transparent text-black hover:bg-black/5 transition-all duration-300"
                     style={{ borderColor: "#D8D2C7" }}
                   >
-                    {/* Replace with real Google SSO */}
+                    <svg
+                      className="w-5 h-5 mr-3 flex-shrink-0"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                    </svg>
                     <span className="text-left">Continue with Google</span>
                   </button>
                   <button
@@ -274,7 +374,7 @@ export default function AuthPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="p-8 lg:p-10"
+              className={`p-8 lg:p-10 ${activeTab !== "signup" ? "hidden lg:block" : ""}`}
             >
               <h2 className="font-american-typewriter text-2xl mb-8 text-black text-center">
                 Create Account
@@ -355,10 +455,9 @@ export default function AuthPage() {
                     </button>
                   </div>
                 </div>
-
                 <div>
                   <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
-                    Phone (optional)
+                    Phone
                   </label>
                   <input
                     type="tel"
@@ -367,6 +466,18 @@ export default function AuthPage() {
                     className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                     style={{ borderColor: "#D8D2C7" }}
                     placeholder="Enter your phone number"
+                  />
+                </div>
+                <div>
+                  <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
+                    Date of Birth (optional)
+                  </label>
+                  <input
+                    type="date"
+                    name="dob"
+                    autoComplete="bday"
+                    className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
+                    style={{ borderColor: "#D8D2C7" }}
                   />
                 </div>
 

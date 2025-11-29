@@ -24,7 +24,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ customer, children }) => 
     >
       {/* Mobile Header - Only show on mobile */}
       {customer && (
-        <div className="lg:hidden px-4 md:px-6 py-6 md:py-8 border-b" style={{ borderColor: "#D8D2C7" }}>
+        <div className="lg:hidden mx-8 px-4 md:px-6 py-6 md:py-8 border-b" style={{ borderColor: "#D8D2C7" }}>
           <div className="text-center mb-4 md:mb-6">
             <h2 className="font-american-typewriter text-2xl md:text-3xl text-black tracking-wide">
               Hello, {customer.first_name || "there"}
@@ -45,7 +45,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ customer, children }) => 
 
       {/* Mobile Tab Navigation */}
       {customer && (
-        <div className="lg:hidden px-4 py-4 border-b overflow-x-auto" style={{ borderColor: "#D8D2C7" }}>
+        <div className="lg:hidden mx-8 px-4 py-4 border-b overflow-x-auto" style={{ borderColor: "#D8D2C7" }}>
           <AccountNav customer={customer} />
         </div>
       )}

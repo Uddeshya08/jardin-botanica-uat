@@ -438,7 +438,7 @@ export function Navigation({
         },
         {
           label: "Candles",
-          href: "/products/candles",
+          href: "/category",
           image:
             "https://images.unsplash.com/photo-1648310379950-2773bb5d2525?auto=format&fit=crop&w=1080&q=80",
         },
