@@ -3,13 +3,33 @@
 import React from 'react'
 import { motion } from 'motion/react'
 import { Package, Truck, Leaf } from 'lucide-react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 interface OrderConfirmationUIProps {
   orderNumber: string
+  onContinueShopping?: () => void
+  onViewOrders?: () => void
 }
 
-export function OrderConfirmationUI({ orderNumber }: OrderConfirmationUIProps) {
+export function OrderConfirmationUI({ orderNumber, onContinueShopping, onViewOrders }: OrderConfirmationUIProps) {
+  const router = useRouter()
+
+  const handleContinueShopping = () => {
+    if (onContinueShopping) {
+      onContinueShopping()
+    } else {
+      router.push('/')
+    }
+  }
+
+  const handleViewOrders = () => {
+    if (onViewOrders) {
+      onViewOrders()
+    } else {
+      router.push('/account/orders')
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-start px-4 py-8 relative overflow-hidden" style={{ backgroundColor: '#e3e3d8' }}>
       {/* Decorative Background Elements */}
@@ -35,11 +55,11 @@ export function OrderConfirmationUI({ orderNumber }: OrderConfirmationUIProps) {
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
-        className="hidden lg:block absolute right-0 top-0 bottom-0 w-2/5 pointer-events-none"
+        className="hidden lg:block absolute right-0 top-0 bottom-0 w-[45%] pointer-events-none"
       >
         <div className="relative h-full">
           <div 
-            className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent z-10"
+            className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent"
             style={{ 
               backgroundImage: `linear-gradient(to left, rgba(227, 227, 216, 0) 0%, rgba(227, 227, 216, 0.1) 50%, rgba(227, 227, 216, 1) 100%)`
             }}
@@ -100,10 +120,10 @@ export function OrderConfirmationUI({ orderNumber }: OrderConfirmationUIProps) {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          className="flex mb-8"
+          className="flex mb-10"
         >
           <motion.div 
-            className="relative px-6 py-3"
+            className="relative px-5 py-2.5"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.3 }}
           >
@@ -122,10 +142,11 @@ export function OrderConfirmationUI({ orderNumber }: OrderConfirmationUIProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.6 }}
-          className="font-din-arabic text-sm sm:text-base text-black/70 mb-10 leading-relaxed max-w-xl"
-          style={{ letterSpacing: '0.1em' }}
+          className="font-din-arabic text-sm sm:text-base text-black/70 mb-10 leading-relaxed"
+          style={{ letterSpacing: '0.1em', maxWidth: '1100px' }}
         >
-          Your order is being prepared with quiet care and intention. A full summary has been sent to your inbox.
+          <span style={{ whiteSpace: 'nowrap' }}>Your order is being prepared with quiet care and intention. A full summary has been</span> <br />
+          sent to your inbox.
         </motion.p>
 
         {/* Delivery Timeline */}
@@ -133,12 +154,12 @@ export function OrderConfirmationUI({ orderNumber }: OrderConfirmationUIProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.6 }}
-          className="mb-10"
+          className="mb-8"
         >
-          <div className="flex flex-col gap-4 max-w-xl">
+          <div className="flex flex-col sm:flex-row gap-8">
             {/* Dispatch */}
             <motion.div 
-              className="flex items-center gap-4"
+              className="flex items-start gap-4"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7, duration: 0.5 }}
@@ -150,9 +171,9 @@ export function OrderConfirmationUI({ orderNumber }: OrderConfirmationUIProps) {
                   backgroundColor: 'rgba(229, 138, 77, 0.1)'
                 }}
               >
-                <Package className="w-3.5 h-3.5" style={{ color: '#e58a4d' }} />
+                <Package className="w-3 h-3" style={{ color: '#e58a4d' }} />
               </div>
-              <div className="flex items-baseline gap-3">
+              <div className="flex flex-col gap-1">
                 <span 
                   className="font-american-typewriter text-base text-black"
                   style={{ letterSpacing: '0.05em' }}
@@ -170,7 +191,7 @@ export function OrderConfirmationUI({ orderNumber }: OrderConfirmationUIProps) {
 
             {/* Delivery */}
             <motion.div 
-              className="flex items-center gap-4"
+              className="flex items-start gap-4"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.8, duration: 0.5 }}
@@ -182,21 +203,29 @@ export function OrderConfirmationUI({ orderNumber }: OrderConfirmationUIProps) {
                   backgroundColor: 'rgba(229, 138, 77, 0.1)'
                 }}
               >
-                <Truck className="w-3.5 h-3.5" style={{ color: '#e58a4d' }} />
+                <Truck className="w-3 h-3" style={{ color: '#e58a4d' }} />
               </div>
-              <div className="flex items-baseline gap-3">
+              <div className="flex flex-col gap-1">
                 <span 
                   className="font-american-typewriter text-base text-black"
                   style={{ letterSpacing: '0.05em' }}
                 >
                   Delivery
                 </span>
-                <span 
-                  className="font-din-arabic text-sm text-black/60"
-                  style={{ letterSpacing: '0.1em' }}
-                >
-                  2–3 days (expedited) / 3–5 days (standard)
-                </span>
+                <div className="flex flex-col gap-0.5">
+                  <span 
+                    className="font-din-arabic text-sm text-black/60"
+                    style={{ letterSpacing: '0.1em' }}
+                  >
+                    2–3 days (expedited)
+                  </span>
+                  <span 
+                    className="font-din-arabic text-sm text-black/60"
+                    style={{ letterSpacing: '0.1em' }}
+                  >
+                    3–5 days (standard)
+                  </span>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -220,31 +249,23 @@ export function OrderConfirmationUI({ orderNumber }: OrderConfirmationUIProps) {
           transition={{ delay: 1, duration: 0.6 }}
           className="flex flex-col sm:flex-row items-start sm:items-center gap-6"
         >
-          <motion.div
+          <motion.button
+            onClick={handleContinueShopping}
+            className="px-8 py-4 bg-black font-din-arabic tracking-wide text-white hover:bg-black/80 transition-all duration-300 shadow-sm hover:shadow-md text-center w-full sm:w-auto"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Link href="/">
-              <button
-                className="px-8 py-4 bg-black font-din-arabic tracking-wide text-white hover:bg-black/80 transition-all duration-300 shadow-sm hover:shadow-md text-center w-full sm:w-auto"
-              >
-                Continue Shopping
-              </button>
-            </Link>
-          </motion.div>
+            Continue Shopping
+          </motion.button>
           
-          <motion.div
+          <motion.button
+            onClick={handleViewOrders}
+            className="font-din-arabic text-sm text-black/60 hover:!text-black transition-colors duration-300"
+            style={{ letterSpacing: '0.1em' }}
             whileHover={{ x: 4 }}
           >
-            <Link href="/account/orders">
-              <button
-                className="font-din-arabic text-sm text-black/60 hover:!text-black transition-colors duration-300"
-                style={{ letterSpacing: '0.1em' }}
-              >
-                View Orders →
-              </button>
-            </Link>
-          </motion.div>
+            View Orders →
+          </motion.button>
         </motion.div>
       </motion.div>
     </div>
