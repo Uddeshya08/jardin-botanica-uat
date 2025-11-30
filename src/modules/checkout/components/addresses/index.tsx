@@ -9,12 +9,13 @@ import { Button, Heading, Text, useToggleState } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useActionState, useState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
 import { ChevronLeft } from "lucide-react"
+import { checkPincodeServiceability } from "@lib/data/delhivery"
 
 const Addresses = ({
   cart,
@@ -49,11 +50,27 @@ const Addresses = ({
       // First, set the addresses
       await formAction(formData)
 
+      const pincode = formData.get("shipping_address.postal_code") as string
+
+      const serviceability = await checkPincodeServiceability(pincode)
+
+      if (
+        !serviceability.delivery_codes ||
+        serviceability.delivery_codes.length === 0
+      ) {
+        console.error("Not service able to the provided pincode")
+      }
+
       // Then automatically set the shipping method to the specific ID
       // const shippingMethodId = "so_01KAP297BN403YN2DSTJW966YJ"
 
       if (cart?.id) {
         const response = await listCartOptions()
+
+        const isCODAvailable =
+          serviceability.delivery_codes[0].postal_code.cod ?? true
+        const isPrepaidAvailable =
+          serviceability.delivery_codes[0].postal_code.pre_paid ?? true
 
         const surfaceShipping = response.shipping_options.find(
           (option) => option.data?.shipping_mode === "Surface"
@@ -66,6 +83,9 @@ const Addresses = ({
         await setShippingMethod({
           cartId: cart.id,
           shippingMethodId: surfaceShipping?.id,
+          paymentMethod: "PREPAID",
+          cod_available: isCODAvailable,
+          prepaid_available: isPrepaidAvailable,
         })
 
         // Skip delivery step and go directly to payment
@@ -77,6 +97,8 @@ const Addresses = ({
       setIsSubmitting(false)
     }
   }
+
+  useEffect(() => {}, [cart?.shipping_address?.postal_code])
 
   return (
     <div>

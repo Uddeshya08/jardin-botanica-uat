@@ -2,7 +2,7 @@
 
 import { RadioGroup } from "@headlessui/react"
 import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
-import { initiatePaymentSession } from "@lib/data/cart"
+import { initiatePaymentSession, setShippingMethod } from "@lib/data/cart"
 import { ArrowLeftMini, CheckCircleSolid, CreditCard } from "@medusajs/icons"
 import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
 import ErrorMessage from "@modules/checkout/components/error-message"
@@ -24,7 +24,6 @@ function SecurePaymentCard() {
   return (
     <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/80 shadow-xl">
       <div className="flex items-start space-x-4">
-
         {/* Icon Circle */}
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
@@ -68,7 +67,6 @@ function SecurePaymentCard() {
   )
 }
 
-
 // Payment type options with icons and descriptions
 const PAYMENT_TYPES = [
   {
@@ -106,6 +104,8 @@ const PAYMENT_TYPES = [
 type PaymentType = (typeof PAYMENT_TYPES)[number]["id"]
 
 const PAYMENT_PROVIDER_ID = "pp_razorpay_razorpay"
+
+const COD_PROVIDER_ID = "pp_system_default"
 
 const Payment = ({
   cart,
@@ -181,12 +181,35 @@ const Payment = ({
     })
   }
 
-  const handlePaymentTypeChange = (type: PaymentType) => {
+  const handlePaymentTypeChange = async (type: PaymentType) => {
     setSelectedPaymentType(type)
+
+    if (type === "cod") {
+      await setPaymentMethod(COD_PROVIDER_ID)
+    } else {
+      await setPaymentMethod(PAYMENT_PROVIDER_ID)
+    }
+
+    if (type === "cod") {
+      await setShippingMethod({
+        cartId: cart.id,
+        shippingMethodId: cart.shipping_methods[0].shipping_option_id,
+        paymentMethod: "COD",
+        totalAmount: cart.total,
+      })
+    } else {
+      await setShippingMethod({
+        cartId: cart.id,
+        shippingMethodId: cart.shipping_methods[0].shipping_option_id,
+        paymentMethod: "PREPAID",
+        totalAmount: cart.total,
+      })
+    }
+
     router.push(
       pathname +
-      "?" +
-      updateQueryParams({ step: "payment", paymenttype: type }),
+        "?" +
+        updateQueryParams({ step: "payment", paymenttype: type }),
       { scroll: false }
     )
   }
@@ -209,11 +232,11 @@ const Payment = ({
       if (!shouldInputCard) {
         return router.push(
           pathname +
-          "?" +
-          updateQueryParams({
-            step: "review",
-            paymenttype: selectedPaymentType,
-          }),
+            "?" +
+            updateQueryParams({
+              step: "review",
+              paymenttype: selectedPaymentType,
+            }),
           {
             scroll: false,
           }
@@ -280,7 +303,14 @@ const Payment = ({
                     strokeLinejoin="round"
                     className="lucide lucide-lock w-6 h-6"
                   >
-                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                    <rect
+                      width="18"
+                      height="11"
+                      x="3"
+                      y="11"
+                      rx="2"
+                      ry="2"
+                    ></rect>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                   </svg>
                 </div>
@@ -313,8 +343,20 @@ const Payment = ({
                         )}
                         data-testid={`payment-type-${type.id}`}
                       >
-                        <div className={`w-12 h-12 ${selectedPaymentType === type.id ? "bg-green-100" : "bg-white"} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                          <Icon className={`w-6 h-6 ${selectedPaymentType === type.id ? "text-green-700" : "text-black"}`}/>
+                        <div
+                          className={`w-12 h-12 ${
+                            selectedPaymentType === type.id
+                              ? "bg-green-100"
+                              : "bg-white"
+                          } rounded-lg flex items-center justify-center flex-shrink-0`}
+                        >
+                          <Icon
+                            className={`w-6 h-6 ${
+                              selectedPaymentType === type.id
+                                ? "text-green-700"
+                                : "text-black"
+                            }`}
+                          />
                         </div>
 
                         <div className="flex-1">
@@ -378,7 +420,9 @@ const Payment = ({
               onClick={() => {
                 const params = new URLSearchParams(searchParams)
                 params.set("step", "address")
-                router.push(`${pathname}?${params.toString()}`, { scroll: false })
+                router.push(`${pathname}?${params.toString()}`, {
+                  scroll: false,
+                })
               }}
               className="px-8 py-3 bg-white/60 backdrop-blur-sm border-2 border-black/10 hover:border-black/20 rounded-xl font-din-arabic transition-all shadow-sm hover:shadow-md flex items-center space-x-2"
             >
