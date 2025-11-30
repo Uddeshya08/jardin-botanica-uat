@@ -1,4 +1,3 @@
-
 // lib/data/cart.ts
 "use server"
 
@@ -211,16 +210,37 @@ export async function deleteLineItem(lineId: string) {
 export async function setShippingMethod({
   cartId,
   shippingMethodId,
+  paymentMethod,
+  totalAmount,
+  cod_available,
+  prepaid_available,
 }: {
   cartId: string
   shippingMethodId: string
+  paymentMethod?: "COD" | "PREPAID"
+  totalAmount?: number
+  cod_available?: boolean
+  prepaid_available?: boolean
 }) {
   const headers = {
     ...(await getAuthHeaders()),
   }
 
   return sdk.store.cart
-    .addShippingMethod(cartId, { option_id: shippingMethodId }, {}, headers)
+    .addShippingMethod(
+      cartId,
+      {
+        option_id: shippingMethodId,
+        data: {
+          paymentMethod: paymentMethod,
+          totalAmount: totalAmount,
+          cod_available: cod_available,
+          prepaid_available: prepaid_available,
+        },
+      },
+      {},
+      headers
+    )
     .then(async () => {
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)

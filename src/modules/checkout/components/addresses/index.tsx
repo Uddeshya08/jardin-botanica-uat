@@ -1,6 +1,6 @@
 "use client"
 
-import { setAddresses } from "@lib/data/cart"
+import { listCartOptions, setAddresses } from "@lib/data/cart"
 import { setShippingMethod } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
 import { ArrowLeftMini, CheckCircleSolid } from "@medusajs/icons"
@@ -9,12 +9,13 @@ import { Button, Heading, Text, useToggleState } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useActionState, useState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
 import { ChevronLeft } from "lucide-react"
+import { checkPincodeServiceability } from "@lib/data/delhivery"
 
 const Addresses = ({
   cart,
@@ -49,13 +50,42 @@ const Addresses = ({
       // First, set the addresses
       await formAction(formData)
 
+      const pincode = formData.get("shipping_address.postal_code") as string
+
+      const serviceability = await checkPincodeServiceability(pincode)
+
+      if (
+        !serviceability.delivery_codes ||
+        serviceability.delivery_codes.length === 0
+      ) {
+        console.error("Not service able to the provided pincode")
+      }
+
       // Then automatically set the shipping method to the specific ID
-      const shippingMethodId = "so_01K9QBNYHN1RC19H8JCVSRQ1MZ"
+      // const shippingMethodId = "so_01KAP297BN403YN2DSTJW966YJ"
 
       if (cart?.id) {
+        const response = await listCartOptions()
+
+        const isCODAvailable =
+          serviceability.delivery_codes[0].postal_code.cod ?? true
+        const isPrepaidAvailable =
+          serviceability.delivery_codes[0].postal_code.pre_paid ?? true
+
+        const surfaceShipping = response.shipping_options.find(
+          (option) => option.data?.shipping_mode === "Surface"
+        )
+
+        if (!surfaceShipping) {
+          throw new Error("No surface shipping option found")
+        }
+
         await setShippingMethod({
           cartId: cart.id,
-          shippingMethodId: shippingMethodId,
+          shippingMethodId: surfaceShipping?.id,
+          paymentMethod: "PREPAID",
+          cod_available: isCODAvailable,
+          prepaid_available: isPrepaidAvailable,
         })
 
         // Skip delivery step and go directly to payment
@@ -68,15 +98,19 @@ const Addresses = ({
     }
   }
 
+  useEffect(() => {}, [cart?.shipping_address?.postal_code])
+
   return (
     <div>
       <div className="flex-row items-center justify-between mb-6">
-        <p className="font-din-arabic text-xs text-black/40 mb-2 tracking-wider uppercase">Shipping Information</p>
+        <p className="font-din-arabic text-xs text-black/40 mb-2 tracking-wider uppercase">
+          Shipping Information
+        </p>
         <Heading
           level="h2"
           className="flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide"
         >
-          Where Shall We Send Your Order?          
+          Where Shall We Send Your Order?
           {!isOpen && <CheckCircleSolid />}
         </Heading>
         {!isOpen && cart?.shipping_address && (
