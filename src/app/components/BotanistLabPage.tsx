@@ -299,8 +299,8 @@ function InteractiveLabImage() {
             
             // For special cases, we need to ensure proper distribution
             // When hotspot 3 is active: 1, 2, 4 are inactive
-            //   - Left: 1 (original position)
-            //   - Right: 2 (original position), 4 (needs to move up to avoid popup)
+            //   - 01 and 04 should appear at bottom on sides
+            //   - 02 stays at top right
             // When hotspot 4 is active: 1, 2, 3 are inactive
             //   - Left: 1 (original position), 3 (needs to move up to avoid popup)
             //   - Right: 2 (original position)
@@ -309,8 +309,27 @@ function InteractiveLabImage() {
             
             if (activePoint === 3) {
               // Hotspot 3 active: 1, 2, 4 inactive
-              leftHotspots = [1]
-              rightHotspots = [2, 4] // 4 needs special positioning
+              // Special case: 01 stays at top left, 02 and 04 move to bottom sides
+              if (hotspot.id === 1) {
+                // Position 01 stays at top left (use original position)
+                return null // This will use the original hotspot.position
+              } else if (hotspot.id === 2) {
+                // Position 02 at bottom right
+                return {
+                  top: 'auto',
+                  bottom: '20%',
+                  right: '12px',
+                  left: 'auto',
+                }
+              } else if (hotspot.id === 4) {
+                // Position 04 at bottom left
+                return {
+                  top: 'auto',
+                  bottom: '20%',
+                  left: '12px',
+                  right: 'auto',
+                }
+              }
             } else if (activePoint === 4) {
               // Hotspot 4 active: 1, 2, 3 inactive
               leftHotspots = [1, 3] // 3 needs special positioning
@@ -366,16 +385,7 @@ function InteractiveLabImage() {
               const maxRight = rightHotspots.length
               
               // Special handling: if hotspot 3 is active and this is hotspot 4
-              if (isSpecialCase && activePoint === 3 && hotspot.id === 4) {
-                // Position hotspot 4 higher up to avoid popup, with good spacing from hotspot 2
-                // Hotspot 2 should be at ~30%, hotspot 4 should be at ~45-50%
-                return {
-                  top: '45%',
-                  right: '12px',
-                  left: 'auto',
-                  bottom: 'auto',
-                }
-              }
+              // This case is already handled above, so skip here
               
               // Normal distribution for right side
               const spacing = Math.max(availableSpace / Math.max(maxRight, 1), 20)
@@ -398,12 +408,12 @@ function InteractiveLabImage() {
           return (
           <motion.div 
             key={hotspot.id} 
-            className={`absolute ${isMobile && activePoint && activePoint !== hotspot.id ? 'z-50' : 'z-30'}`}
+            className={`absolute z-[5]`}
             initial={hotspot.position}
             animate={finalPosition}
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <div className={`relative w-12 h-12 ${isMobile && activePoint && activePoint !== hotspot.id ? 'z-50' : 'z-30'}`}>
+            <div className={`relative w-12 h-12 z-[5]`}>
               <motion.div
                 className="absolute inset-0 w-full h-full rounded-full pointer-events-none"
                 style={{
@@ -453,7 +463,7 @@ function InteractiveLabImage() {
                 onMouseLeave={handleMouseLeave}
                 onClick={() => handlePointClick(hotspot.id)}
                 style={{
-                  zIndex: isMobile && activePoint && activePoint !== hotspot.id ? 50 : 30,
+                  zIndex: 5,
                   position: 'relative',
                 }}
               >
@@ -493,7 +503,7 @@ function InteractiveLabImage() {
                         : hotspot.position.right && hotspot.id !== 3
                         ? "translateX(calc(-100% + 48px))"
                         : "translateX(-24px)",
-                    zIndex: isMobile ? 30 : 20,
+                    zIndex: 10,
                   }}
                 >
                   <div
@@ -505,7 +515,7 @@ function InteractiveLabImage() {
                       right: hotspot.id === 4 ? "24px" : hotspot.position.right ? "24px" : "auto",
                       transform: "rotate(45deg)",
                       border: "1px solid rgba(0, 0, 0, 0.05)",
-                      zIndex: 40,
+                      zIndex: 30,
                     }}
                   />
                   {/* Connecting line between hotspot and popup */}

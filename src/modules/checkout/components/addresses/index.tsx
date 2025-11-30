@@ -173,7 +173,7 @@ const Addresses = ({
                     className="flex flex-col w-1/3"
                     data-testid="billing-address-summary"
                   >
-                    <Text className="txt-medium-plus font-din-arabic text-sm text-black/70 tracking-wide mb-1">
+                    <Text style={{padding:'2rem 0'}} className="font-medium h2-core flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide">
                       Billing Address
                     </Text>
 
