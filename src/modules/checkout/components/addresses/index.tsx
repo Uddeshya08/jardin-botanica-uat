@@ -30,6 +30,7 @@ const Addresses = ({
 
   const isOpen = searchParams.get("step") === "address"
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isEmailValid, setIsEmailValid] = useState(true)
 
   const { state: sameAsBilling, toggle: toggleSameAsBilling } = useToggleState(
     cart?.shipping_address && cart?.billing_address
@@ -133,24 +134,18 @@ const Addresses = ({
               checked={sameAsBilling}
               onChange={toggleSameAsBilling}
               cart={cart}
+              onEmailValidationChange={setIsEmailValid}
             />
 
             {!sameAsBilling && (
-              <div>
-                <Heading
-                  level="h2"
-                  className="text-3xl-regular gap-x-4 pb-6 pt-8"
-                >
-                  Billing address
-                </Heading>
-
+              <div className="pt-6">
                 <BillingAddress cart={cart} />
               </div>
             )}
             <SubmitButton
-              className="mt-6 ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
+              className="ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="submit-address-button"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !isEmailValid}
             >
               {isSubmitting ? "Processing..." : "Continue"}
               <ChevronLeft className="w-4 h-4 rotate-180" />

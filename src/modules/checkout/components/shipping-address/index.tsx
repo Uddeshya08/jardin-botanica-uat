@@ -3,7 +3,7 @@ import { Container } from "@medusajs/ui"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import { mapKeys } from "lodash"
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState, useCallback } from "react"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
 import { motion, AnimatePresence } from "motion/react"
@@ -85,6 +85,35 @@ const indianCities = [
   "Chandigarh",
 ]
 
+// Valid email providers - only well-known legitimate email providers
+const validEmailProviders = [
+  "gmail.com",
+  "yahoo.com",
+  "yahoo.co.in",
+  "yahoo.in",
+  "outlook.com",
+  "hotmail.com",
+  "hotmail.co.in",
+  "msn.com",
+  "live.com",
+  "icloud.com",
+  "me.com",
+  "mac.com",
+  "protonmail.com",
+  "proton.me",
+  "rediffmail.com",
+  "rediff.com",
+  "zoho.com",
+  "zoho.in",
+  "aol.com",
+  "mail.com",
+  "gmx.com",
+  "yandex.com",
+  "inbox.com",
+  "fastmail.com",
+  "tutanota.com",
+]
+
 interface SavedAddress {
   id: string
   name: string
@@ -103,11 +132,13 @@ const ShippingAddress = ({
   cart,
   checked,
   onChange,
+  onEmailValidationChange,
 }: {
   customer: HttpTypes.StoreCustomer | null
   cart: HttpTypes.StoreCart | null
   checked: boolean
   onChange: () => void
+  onEmailValidationChange?: (isValid: boolean) => void
 }) => {
   const [formData, setFormData] = useState<Record<string, any>>({
     "shipping_address.first_name": cart?.shipping_address?.first_name || "",
@@ -139,6 +170,8 @@ const ShippingAddress = ({
     label: "Home",
     isDefault: false,
   })
+  const [emailError, setEmailError] = useState<string>("")
+  const [emailTouched, setEmailTouched] = useState<boolean>(false)
 
   const countriesInRegion = useMemo(
     () => cart?.region?.countries?.map((c) => c.iso_2),
@@ -211,6 +244,84 @@ const ShippingAddress = ({
     }
   }, [cart]) // Add cart as a dependency
 
+  // Validate email when formData.email changes (but not on every render)
+  // This handles initial load and programmatic changes
+  useEffect(() => {
+    if (formData.email && formData.email.trim() !== "") {
+      // Defer validation to next tick to ensure validateEmail is available
+      const timer = setTimeout(() => {
+        // Re-use the validation logic by triggering a synthetic validation
+        // We'll validate directly here to avoid dependency issues
+        const email = formData.email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(email)) {
+          setEmailError("Please enter a valid email address")
+          return
+        }
+
+        const domain = email.split("@")[1]?.toLowerCase()
+        if (!domain) {
+          setEmailError("Please enter a valid email address")
+          return
+        }
+
+        const exactMatch = validEmailProviders.some((provider) => domain === provider)
+        if (exactMatch) {
+          setEmailError("")
+          return
+        }
+
+        const subdomainMatch = validEmailProviders.some((provider) => domain.endsWith(`.${provider}`))
+        if (subdomainMatch) {
+          setEmailError("")
+          return
+        }
+
+        const corporateTlds = ["com", "co", "org", "edu", "gov", "net", "in"]
+        const domainParts = domain.split(".")
+        if (domainParts.length >= 2) {
+          const tld = domainParts[domainParts.length - 1]
+          if (corporateTlds.includes(tld)) {
+            const secondLevelDomain = domainParts[domainParts.length - 2]
+            if (
+              secondLevelDomain &&
+              secondLevelDomain.length >= 2 &&
+              /^[a-z0-9-]+$/.test(secondLevelDomain) &&
+              /[a-z]/.test(secondLevelDomain)
+            ) {
+              setEmailError("")
+              return
+            }
+          }
+        }
+
+        setEmailError("Please use a valid email provider (Gmail, Yahoo, Outlook, etc.) or a corporate email address")
+      }, 100)
+
+      return () => clearTimeout(timer)
+    } else if (!formData.email || formData.email.trim() === "") {
+      // Email is required, but only show error if field has been touched
+      if (emailTouched) {
+        setEmailError("Email address is required")
+      } else {
+        // Don't show error visually, but validation will still fail (button disabled)
+        setEmailError("")
+      }
+    }
+  }, [formData.email, emailTouched]) // Validate when email changes
+
+  // Notify parent component about email validation status
+  useEffect(() => {
+    if (onEmailValidationChange) {
+      // Email is invalid if there's an error OR if email is empty (required field)
+      // emailError is a string, so check if it's truthy (non-empty)
+      const hasError = emailError && emailError.trim() !== ""
+      const hasEmail = formData.email && formData.email.trim() !== ""
+      const isValid = !hasError && hasEmail
+      onEmailValidationChange(isValid)
+    }
+  }, [emailError, formData.email, onEmailValidationChange])
+
   const populateAddressFields = (address: SavedAddress) => {
     const [firstName, ...lastNameParts] = address.name.split(" ")
     const lastName = lastNameParts.join(" ") || ""
@@ -244,15 +355,99 @@ const ShippingAddress = ({
     setShowAddressForm(true)
   }
 
+  const validateEmail = (email: string, showRequiredError: boolean = true): boolean => {
+    // Check if email is required and empty
+    if (!email || email.trim() === "") {
+      // Show required error only if field has been touched (user interacted with it)
+      if (emailTouched && showRequiredError) {
+        setEmailError("Email address is required")
+      } else {
+        // Don't show error visually, but still return false to disable button
+        setEmailError("")
+      }
+      return false
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address")
+      return false
+    }
+
+    // Extract domain from email
+    const domain = email.split("@")[1]?.toLowerCase()
+    if (!domain) {
+      setEmailError("Please enter a valid email address")
+      return false
+    }
+
+    // Check if domain matches any valid provider exactly
+    const exactMatch = validEmailProviders.some((provider) => domain === provider)
+    if (exactMatch) {
+      setEmailError("")
+      return true
+    }
+
+    // Check if domain ends with a valid provider (e.g., "mail.gmail.com")
+    const subdomainMatch = validEmailProviders.some((provider) => {
+      return domain.endsWith(`.${provider}`)
+    })
+    if (subdomainMatch) {
+      setEmailError("")
+      return true
+    }
+
+    // Allow corporate/educational domains with common TLDs (.com, .co, .org, .edu, .gov, .net, .in)
+    // but only if the domain looks legitimate (not random strings)
+    const corporateTlds = ["com", "co", "org", "edu", "gov", "net", "in"]
+    const domainParts = domain.split(".")
+    if (domainParts.length >= 2) {
+      const tld = domainParts[domainParts.length - 1]
+      if (corporateTlds.includes(tld)) {
+        const secondLevelDomain = domainParts[domainParts.length - 2]
+        // Allow if second level domain looks legitimate (at least 2 characters, contains letters)
+        if (
+          secondLevelDomain &&
+          secondLevelDomain.length >= 2 &&
+          /^[a-z0-9-]+$/.test(secondLevelDomain) &&
+          /[a-z]/.test(secondLevelDomain)
+        ) {
+          setEmailError("")
+          return true
+        }
+      }
+    }
+
+    setEmailError("Please use a valid email provider (Gmail, Yahoo, Outlook, etc.) or a corporate email address")
+    return false
+  }
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLInputElement | HTMLSelectElement
     >
   ) => {
+    const value = e.target.value
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: value,
     })
+
+    // Validate email in real-time
+    if (e.target.name === "email") {
+      // Mark field as touched when user starts typing
+      if (!emailTouched) {
+        setEmailTouched(true)
+      }
+      validateEmail(value)
+    }
+  }
+
+  const handleEmailBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Mark field as touched when user leaves the field
+    setEmailTouched(true)
+    validateEmail(e.target.value, true)
   }
 
   return (
@@ -702,7 +897,9 @@ const ShippingAddress = ({
             Contact Information
           </h3>
           <div>
-          <label data-slot="label" className="items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 font-din-arabic mb-2 block" htmlFor="email">Email Address</label>
+          <label data-slot="label" className="items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 font-din-arabic mb-2 block" htmlFor="email">
+            Email Address <span className="text-red-500">*</span>
+          </label>
             <Input
               id="email"
               label=""
@@ -710,10 +907,20 @@ const ShippingAddress = ({
               type="email"
               value={formData.email}
               onChange={handleChange}
-              className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-white/80 transition-all duration-300 border-black/10 focus:border-black/30"
-              required
+              onBlur={handleEmailBlur}
+              className={`file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-white/80 transition-all duration-300 ${
+                emailError
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-black/10 focus:border-black/30"
+              }`}
+              aria-invalid={emailError ? "true" : "false"}
               data-testid="shipping-email-input"
             />
+            {emailError && (
+              <p className="mt-1.5 text-sm text-red-500 font-din-arabic">
+                {emailError}
+              </p>
+            )}
           </div>
         </motion.div>
       )}
@@ -722,13 +929,16 @@ const ShippingAddress = ({
       {!showAddressForm && (
         <div className="pt-6 border-t border-black/10">
           <div className="py-2">
-            <Checkbox
-              label="Billing address same as shipping address"
-              name="same_as_billing"
-              checked={checked}
-              onChange={onChange}
-              data-testid="billing-address-checkbox"
-            />
+            <label className="flex items-center space-x-3 cursor-pointer group">
+              <ShadcnCheckbox
+                checked={checked}
+                onCheckedChange={() => onChange()}
+                data-testid="billing-address-checkbox"
+              />
+              <span className="font-din-arabic text-black/80 group-hover:text-black transition-colors">
+              Use a different billing address
+              </span>
+            </label>
           </div>
         </div>
       )}
