@@ -142,6 +142,12 @@ const Addresses = ({
                 <BillingAddress cart={cart} />
               </div>
             )}
+            {/* Hidden input to indicate if billing address is same as shipping */}
+            <input
+              type="hidden"
+              name="same_as_billing"
+              value={sameAsBilling ? "on" : ""}
+            />
             <SubmitButton
               className="ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="submit-address-button"
