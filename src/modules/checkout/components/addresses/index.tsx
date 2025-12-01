@@ -1,6 +1,6 @@
 "use client"
 
-import { setAddresses } from "@lib/data/cart"
+import { listCartOptions, setAddresses } from "@lib/data/cart"
 import { setShippingMethod } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
 import { ArrowLeftMini, CheckCircleSolid } from "@medusajs/icons"
@@ -9,12 +9,13 @@ import { Button, Heading, Text, useToggleState } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useActionState, useState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
 import { ChevronLeft } from "lucide-react"
+import { checkPincodeServiceability } from "@lib/data/delhivery"
 
 const Addresses = ({
   cart,
@@ -29,6 +30,7 @@ const Addresses = ({
 
   const isOpen = searchParams.get("step") === "address"
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isEmailValid, setIsEmailValid] = useState(true)
 
   const { state: sameAsBilling, toggle: toggleSameAsBilling } = useToggleState(
     cart?.shipping_address && cart?.billing_address
@@ -49,13 +51,42 @@ const Addresses = ({
       // First, set the addresses
       await formAction(formData)
 
+      const pincode = formData.get("shipping_address.postal_code") as string
+
+      const serviceability = await checkPincodeServiceability(pincode)
+
+      if (
+        !serviceability.delivery_codes ||
+        serviceability.delivery_codes.length === 0
+      ) {
+        console.error("Not service able to the provided pincode")
+      }
+
       // Then automatically set the shipping method to the specific ID
-      const shippingMethodId = "so_01K9QBNYHN1RC19H8JCVSRQ1MZ"
+      // const shippingMethodId = "so_01KAP297BN403YN2DSTJW966YJ"
 
       if (cart?.id) {
+        const response = await listCartOptions()
+
+        const isCODAvailable =
+          serviceability.delivery_codes[0].postal_code.cod ?? true
+        const isPrepaidAvailable =
+          serviceability.delivery_codes[0].postal_code.pre_paid ?? true
+
+        const surfaceShipping = response.shipping_options.find(
+          (option) => option.data?.shipping_mode === "Surface"
+        )
+
+        if (!surfaceShipping) {
+          throw new Error("No surface shipping option found")
+        }
+
         await setShippingMethod({
           cartId: cart.id,
-          shippingMethodId: shippingMethodId,
+          shippingMethodId: surfaceShipping?.id,
+          paymentMethod: "PREPAID",
+          cod_available: isCODAvailable,
+          prepaid_available: isPrepaidAvailable,
         })
 
         // Skip delivery step and go directly to payment
@@ -68,15 +99,19 @@ const Addresses = ({
     }
   }
 
+  useEffect(() => {}, [cart?.shipping_address?.postal_code])
+
   return (
     <div>
       <div className="flex-row items-center justify-between mb-6">
-        <p className="font-din-arabic text-xs text-black/40 mb-2 tracking-wider uppercase">Shipping Information</p>
+        <p className="font-din-arabic text-xs text-black/40 mb-2 tracking-wider uppercase">
+          Shipping Information
+        </p>
         <Heading
           level="h2"
           className="flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide"
         >
-          Where Shall We Send Your Order?          
+          Where Shall We Send Your Order?
           {!isOpen && <CheckCircleSolid />}
         </Heading>
         {!isOpen && cart?.shipping_address && (
@@ -99,24 +134,24 @@ const Addresses = ({
               checked={sameAsBilling}
               onChange={toggleSameAsBilling}
               cart={cart}
+              onEmailValidationChange={setIsEmailValid}
             />
 
             {!sameAsBilling && (
-              <div>
-                <Heading
-                  level="h2"
-                  className="text-3xl-regular gap-x-4 pb-6 pt-8"
-                >
-                  Billing address
-                </Heading>
-
+              <div className="pt-6">
                 <BillingAddress cart={cart} />
               </div>
             )}
+            {/* Hidden input to indicate if billing address is same as shipping */}
+            <input
+              type="hidden"
+              name="same_as_billing"
+              value={sameAsBilling ? "on" : ""}
+            />
             <SubmitButton
-              className="mt-6 ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
+              className="ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="submit-address-button"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !isEmailValid}
             >
               {isSubmitting ? "Processing..." : "Continue"}
               <ChevronLeft className="w-4 h-4 rotate-180" />
@@ -173,7 +208,7 @@ const Addresses = ({
                     className="flex flex-col w-1/3"
                     data-testid="billing-address-summary"
                   >
-                    <Text className="txt-medium-plus font-din-arabic text-sm text-black/70 tracking-wide mb-1">
+                    <Text style={{padding:'2rem 0'}} className="font-medium h2-core flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide">
                       Billing Address
                     </Text>
 

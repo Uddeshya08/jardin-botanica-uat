@@ -995,7 +995,7 @@ export function Navigation({
                               </span>
                             </div>
                             <div className="space-y-2 text-center">
-                              <Link href={"/cart"}>
+                              <Link href={"/checkout?step=address"}>
                                 <button
                                   onClick={() => setIsCartOpen(false)}
                                   className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"

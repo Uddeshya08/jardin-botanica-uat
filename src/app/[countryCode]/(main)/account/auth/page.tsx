@@ -414,6 +414,33 @@ export default function AuthPage() {
 
                 <div>
                   <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    name="dob"
+                    autoComplete="bday"
+                    className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
+                    style={{ borderColor: "#D8D2C7" }}
+                  />
+                </div>
+                <div>
+                  <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    autoComplete="tel"
+                    className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
+                    style={{ borderColor: "#D8D2C7" }}
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+              
+
+                <div>
+                  <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
                     Email Address*
                   </label>
                   <input
@@ -426,6 +453,7 @@ export default function AuthPage() {
                     required
                   />
                 </div>
+                
 
                 <div>
                   <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
@@ -455,31 +483,7 @@ export default function AuthPage() {
                     </button>
                   </div>
                 </div>
-                <div>
-                  <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    autoComplete="tel"
-                    className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
-                    style={{ borderColor: "#D8D2C7" }}
-                    placeholder="Enter your phone number"
-                  />
-                </div>
-                <div>
-                  <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
-                    Date of Birth (optional)
-                  </label>
-                  <input
-                    type="date"
-                    name="dob"
-                    autoComplete="bday"
-                    className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
-                    style={{ borderColor: "#D8D2C7" }}
-                  />
-                </div>
+             
 
                 <ErrorText
                   error={

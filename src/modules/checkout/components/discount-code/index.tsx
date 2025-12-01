@@ -1,6 +1,6 @@
 "use client"
 
-import { Badge, Divider, Heading, Input, Label, Text, Tooltip } from "@medusajs/ui"
+import { Badge, Divider, Heading, Label, Text, Tooltip } from "@medusajs/ui"
 import React, { useActionState } from "react"
 
 import { applyPromotions, submitPromotionForm } from "@lib/data/cart"
@@ -10,6 +10,7 @@ import { HttpTypes } from "@medusajs/types"
 import Trash from "@modules/common/icons/trash"
 import ErrorMessage from "../error-message"
 import { SubmitButton } from "../submit-button"
+import { Input } from "../../../../app/components/ui/input"
 
 type DiscountCodeProps = {
   cart: HttpTypes.StoreCart & {
@@ -59,19 +60,17 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
             <Text>Have a coupon code ?</Text>
           </Label>
 
-          <div className="flex w-full gap-x-2">
-            <div className="w-full">
+          <div className="flex space-x-2">
             <Input
-              className="p-5"
+              className="flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30"
               id="promotion-input"
               name="code"
               type="text"
+              placeholder="Enter code"
               autoFocus={false}
               data-testid="discount-input"
             />
-            </div>
-
-            <SubmitButton data-testid="discount-apply-button" className="p-2">
+            <SubmitButton data-testid="discount-apply-button" className="px-6 py-2 bg-black text-white rounded-lg font-din-arabic text-sm hover:bg-black/90 transition-colors">
               Apply
             </SubmitButton>
           </div>

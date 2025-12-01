@@ -1,4 +1,3 @@
-
 // lib/data/cart.ts
 "use server"
 
@@ -211,16 +210,37 @@ export async function deleteLineItem(lineId: string) {
 export async function setShippingMethod({
   cartId,
   shippingMethodId,
+  paymentMethod,
+  totalAmount,
+  cod_available,
+  prepaid_available,
 }: {
   cartId: string
   shippingMethodId: string
+  paymentMethod?: "COD" | "PREPAID"
+  totalAmount?: number
+  cod_available?: boolean
+  prepaid_available?: boolean
 }) {
   const headers = {
     ...(await getAuthHeaders()),
   }
 
   return sdk.store.cart
-    .addShippingMethod(cartId, { option_id: shippingMethodId }, {}, headers)
+    .addShippingMethod(
+      cartId,
+      {
+        option_id: shippingMethodId,
+        data: {
+          paymentMethod: paymentMethod,
+          totalAmount: totalAmount,
+          cod_available: cod_available,
+          prepaid_available: prepaid_available,
+        },
+      },
+      {},
+      headers
+    )
     .then(async () => {
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
@@ -337,36 +357,37 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
 
     const data = {
       shipping_address: {
-        first_name: formData.get("shipping_address.first_name"),
-        last_name: formData.get("shipping_address.last_name"),
-        address_1: formData.get("shipping_address.address_1"),
+        first_name: formData.get("shipping_address.first_name")?.toString() || "",
+        last_name: formData.get("shipping_address.last_name")?.toString() || "",
+        address_1: formData.get("shipping_address.address_1")?.toString() || "",
         address_2: "",
-        company: formData.get("shipping_address.company"),
-        postal_code: formData.get("shipping_address.postal_code"),
-        city: formData.get("shipping_address.city"),
-        country_code: formData.get("shipping_address.country_code"),
-        province: formData.get("shipping_address.province"),
-        phone: formData.get("shipping_address.phone"),
+        company: formData.get("shipping_address.company")?.toString() || "",
+        postal_code: formData.get("shipping_address.postal_code")?.toString() || "",
+        city: formData.get("shipping_address.city")?.toString() || "",
+        country_code: formData.get("shipping_address.country_code")?.toString() || "",
+        province: formData.get("shipping_address.province")?.toString() || "",
+        phone: formData.get("shipping_address.phone")?.toString() || "",
       },
-      email: formData.get("email"),
+      email: formData.get("email")?.toString() || "",
     } as any
 
     const sameAsBilling = formData.get("same_as_billing")
-    if (sameAsBilling === "on") data.billing_address = data.shipping_address
-
-    if (sameAsBilling !== "on")
+    if (sameAsBilling === "on") {
+      data.billing_address = data.shipping_address
+    } else {
       data.billing_address = {
-        first_name: formData.get("billing_address.first_name"),
-        last_name: formData.get("billing_address.last_name"),
-        address_1: formData.get("billing_address.address_1"),
+        first_name: formData.get("billing_address.first_name")?.toString() || "",
+        last_name: formData.get("billing_address.last_name")?.toString() || "",
+        address_1: formData.get("billing_address.address_1")?.toString() || "",
         address_2: "",
-        company: formData.get("billing_address.company"),
-        postal_code: formData.get("billing_address.postal_code"),
-        city: formData.get("billing_address.city"),
-        country_code: formData.get("billing_address.country_code"),
-        province: formData.get("billing_address.province"),
-        phone: formData.get("billing_address.phone"),
+        company: formData.get("billing_address.company")?.toString() || "",
+        postal_code: formData.get("billing_address.postal_code")?.toString() || "",
+        city: formData.get("billing_address.city")?.toString() || "",
+        country_code: formData.get("billing_address.country_code")?.toString() || "",
+        province: formData.get("billing_address.province")?.toString() || "",
+        phone: formData.get("billing_address.phone")?.toString() || "",
       }
+    }
     await updateCart(data)
   } catch (e: any) {
     return e.message

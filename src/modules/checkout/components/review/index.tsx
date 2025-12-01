@@ -218,7 +218,7 @@ const Review = ({ cart }: { cart: any }) => {
           <div className="flex justify-between items-center gap-4 mt-6">
             <button
               onClick={handlePrevious}
-              className="px-8 py-3 bg-white/60 backdrop-blur-sm border-2 border-black/10 hover:border-black/20 rounded-xl font-din-arabic transition-all shadow-sm hover:shadow-md flex items-center space-x-2 text-black/70 hover:text-black whitespace-nowrap"
+              className="px-6 py-3 bg-white/60 backdrop-blur-sm border-2 border-black/10 hover:border-black/20 rounded-xl font-din-arabic transition-all shadow-sm hover:shadow-md flex items-center space-x-2"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Previous</span>
