@@ -8,14 +8,14 @@ export function SubmitButton({
   children,
   variant = "primary",
   className,
+  disabled: externalDisabled,
   "data-testid": dataTestId,
-  disabled,
 }: {
   children: React.ReactNode
   variant?: "primary" | "secondary" | "transparent" | "danger" | null
   className?: string
-  "data-testid"?: string
   disabled?: boolean
+  "data-testid"?: string
 }) {
   const { pending } = useFormStatus()
 
@@ -28,15 +28,15 @@ export function SubmitButton({
     "default"
 
   return (
-    <Button
-      size="md"
-      className={className}
+    <button
+      size="lg"
+      className={'ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2'}
       type="submit"
-      disabled={pending || disabled}
+      disabled={pending || externalDisabled}
       variant={themeVariant}
       data-testid={dataTestId}
     >
       {children}
-    </Button>
+    </button>
   )
 }

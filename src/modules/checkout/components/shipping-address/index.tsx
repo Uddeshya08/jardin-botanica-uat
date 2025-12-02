@@ -947,6 +947,13 @@ const ShippingAddress = ({
       <div className="hidden">
         <Input
           label=""
+          name="email"
+          type="email"
+          value={formData.email || ""}
+          onChange={handleChange}
+        />
+        <Input
+          label=""
           name="shipping_address.first_name"
           value={formData["shipping_address.first_name"]}
           onChange={handleChange}
