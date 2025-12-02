@@ -150,7 +150,7 @@ const Shipping: React.FC<ShippingProps> = ({
 
   return (
     <div className="bg-[#e3e3d8]">
-      <div className="flex flex-row items-center justify-between mb-6">
+      <div className="flex flex-row items-center justify-between">
         <Heading
           level="h2"
           className={clx(
@@ -383,7 +383,7 @@ const Shipping: React.FC<ShippingProps> = ({
                 <Text className="txt-medium text-ui-fg-subtle">
                   {cart.shipping_methods?.at(-1)?.name}{" "}
                   {convertToLocale({
-                    amount: cart.shipping_methods.at(-1)?.amount!,
+                    amount: cart.shipping_methods?.at(-1)?.amount!,
                     currency_code: cart?.currency_code,
                   })}
                 </Text>

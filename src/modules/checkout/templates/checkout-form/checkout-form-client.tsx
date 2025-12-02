@@ -30,7 +30,7 @@ export default function CheckoutFormClient({
 
   return (
     <div className="lg:col-span-2 space-y-4 lg:space-y-6">
-      <div className="lg:col-span-2 space-y-4 lg:space-y-6 bg-white/60 backdrop-blur-md rounded-2xl md:rounded-3xl p-4 md:p-8 border border-white/80 shadow-xl">
+      <div>
         {currentStep === "address" && (
           <Addresses cart={cart} customer={customer} />
         )}
