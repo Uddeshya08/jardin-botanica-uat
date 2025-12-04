@@ -228,6 +228,7 @@ const Addresses = ({
             <SubmitButton
               data-testid="submit-address-button"
               disabled={!isEmailValid}
+              className="ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
             >
               {isSubmitting ? "Processing..." : "Continue"}
               <ChevronLeft className="w-4 h-4 rotate-180" />
