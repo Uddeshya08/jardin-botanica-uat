@@ -19,21 +19,11 @@ export function SubmitButton({
 }) {
   const { pending } = useFormStatus()
 
-  // Map Medusa variants to theme variants
-  const themeVariant = 
-    variant === "primary" ? "default" :
-    variant === "secondary" ? "secondary" :
-    variant === "danger" ? "destructive" :
-    variant === "transparent" ? "ghost" :
-    "default"
-
   return (
     <button
-      size="lg"
-      className={'ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2'}
+      className={'ml-auto px-8 py-2 bg-black text-white rounded-lg font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2'}
       type="submit"
       disabled={pending || externalDisabled}
-      variant={themeVariant}
       data-testid={dataTestId}
     >
       {children}

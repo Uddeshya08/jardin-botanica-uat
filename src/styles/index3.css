@@ -2105,8 +2105,11 @@
   }
 
   .bg-input-background {
-    background-color: var(--input-background);
+    background-color: #fafaf9;
   }
+  /* .bg-input-background {
+    background-color: var(--input-background);
+  } */
 
   .bg-muted {
     background-color: var(--muted);
@@ -2126,13 +2129,20 @@
     background-color: var(--popover);
   }
 
-  .bg-primary {
+  /* .bg-primary {
     background-color: var(--primary);
+  } */
+  .bg-primary {
+    background-color: #fafaf9;
   }
 
+
   .bg-primary\/20 {
-    background-color: var(--primary);
+    background-color: #fafaf9;
   }
+  /* .bg-primary\/20 {
+    background-color: var(--primary);
+  } */
 
   @supports (color: color-mix(in lab, red, red)) {
     .bg-primary\/20 {
