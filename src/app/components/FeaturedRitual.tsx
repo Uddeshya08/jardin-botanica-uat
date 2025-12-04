@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'motion/react'
 
 export function FeaturedRitual() {
+  const [isPressed, setIsPressed] = useState(false);
+  
   return (
     <section className="py-8 md:py-12 lg:py-20" style={{ backgroundColor: '#e3e3d8' }}>
       <div className="flex flex-col md:flex-row">
@@ -79,7 +81,11 @@ export function FeaturedRitual() {
               alt="Jardin Botanica handwash with natural bristle brush"
               className="w-full h-full object-cover"
               whileHover={{ scale: 1.03 }}
+              animate={{ scale: isPressed ? 1.03 : 1 }}
               transition={{ duration: 0.9, ease: 'easeOut' }}
+              onTouchStart={() => setIsPressed(true)}
+              onTouchEnd={() => setIsPressed(false)}
+              onTouchCancel={() => setIsPressed(false)}
             />
           </div>
         </motion.div>
