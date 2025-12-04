@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 export function DesignPhilosophy() {
+  const [isPressed, setIsPressed] = useState(false);
+  
   return (
     <section 
       className="py-20 lg:py-32"
@@ -21,7 +23,11 @@ export function DesignPhilosophy() {
             <div className="aspect-[4/3] overflow-hidden relative rounded-none md:rounded-sm">
               <motion.div
                 whileHover={{ scale: 1.05 }}
+                animate={{ scale: isPressed ? 1.05 : 1 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
+                onTouchStart={() => setIsPressed(true)}
+                onTouchEnd={() => setIsPressed(false)}
+                onTouchCancel={() => setIsPressed(false)}
                 className="w-full h-full"
               >
                 <img

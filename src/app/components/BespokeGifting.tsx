@@ -1,8 +1,10 @@
 "use client"
-import React from "react"
+import React, { useState } from "react"
 import { motion } from "motion/react"
 
 export function BespokeGifting() {
+  const [isPressed, setIsPressed] = useState(false);
+  
   return (
     <section className="pt-8 md:pt-12 lg:pt-20 pb-0" style={{ backgroundColor: "#e3e3d8" }}>
       <div className="flex flex-col-reverse md:flex-row">
@@ -17,7 +19,11 @@ export function BespokeGifting() {
           <motion.div className="h-[40vh] md:h-[60vh] lg:h-[70vh] overflow-hidden">
             <motion.div
               whileHover={{ scale: 1.03 }}
+              animate={{ scale: isPressed ? 1.03 : 1 }}
               transition={{ duration: 0.9 }}
+              onTouchStart={() => setIsPressed(true)}
+              onTouchEnd={() => setIsPressed(false)}
+              onTouchCancel={() => setIsPressed(false)}
             >
               <img
                 src="/assets/first.png"

@@ -1,21 +1,19 @@
 "use client"
 
-import { listCartOptions, setAddresses } from "@lib/data/cart"
-import { setShippingMethod } from "@lib/data/cart"
+import { listCartOptions, setShippingMethod, updateCart } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
-import { ArrowLeftMini, CheckCircleSolid } from "@medusajs/icons"
+import { CheckCircleSolid } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
-import { Button, Heading, Text, useToggleState } from "@medusajs/ui"
+import { Heading, Text, useToggleState } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
+import { ChevronLeft } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useActionState, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
-import { ChevronLeft } from "lucide-react"
-import { checkPincodeServiceability } from "@lib/data/delhivery"
 
 const Addresses = ({
   cart,
@@ -42,59 +40,120 @@ const Addresses = ({
     router.push(pathname + "?step=address")
   }
 
-  const [message, formAction] = useActionState(setAddresses, null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
-  const handleFormSubmit = async (formData: FormData) => {
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     setIsSubmitting(true)
+    setSubmitError(null)
 
     try {
-      // First, set the addresses
-      await formAction(formData)
+      const formData = new FormData(e.currentTarget)
 
-      const pincode = formData.get("shipping_address.postal_code") as string
-
-      const serviceability = await checkPincodeServiceability(pincode)
-
-      if (
-        !serviceability.delivery_codes ||
-        serviceability.delivery_codes.length === 0
-      ) {
-        console.error("Not service able to the provided pincode")
+      // Validate email before submission
+      const email = formData.get("email") as string
+      if (!email || !email.trim()) {
+        setSubmitError("Email is required")
+        setIsSubmitting(false)
+        return
       }
 
-      // Then automatically set the shipping method to the specific ID
-      // const shippingMethodId = "so_01KAP297BN403YN2DSTJW966YJ"
+      const trimmedEmail = email.trim()
 
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(trimmedEmail)) {
+        setSubmitError("Please enter a valid email address")
+        setIsSubmitting(false)
+        return
+      }
+
+      // Step 1: Set addresses first using updateCart (without redirect)
+      const addressData = {
+        shipping_address: {
+          first_name:
+            formData.get("shipping_address.first_name")?.toString() || "",
+          last_name:
+            formData.get("shipping_address.last_name")?.toString() || "",
+          address_1:
+            formData.get("shipping_address.address_1")?.toString() || "",
+          address_2: "",
+          company: formData.get("shipping_address.company")?.toString() || "",
+          postal_code:
+            formData.get("shipping_address.postal_code")?.toString() || "",
+          city: formData.get("shipping_address.city")?.toString() || "",
+          country_code:
+            formData.get("shipping_address.country_code")?.toString() || "",
+          province: formData.get("shipping_address.province")?.toString() || "",
+          phone: formData.get("shipping_address.phone")?.toString() || "",
+        },
+        email: trimmedEmail,
+      } as any
+
+      const sameAsBilling = formData.get("same_as_billing")
+      if (sameAsBilling === "on") {
+        addressData.billing_address = addressData.shipping_address
+      } else {
+        addressData.billing_address = {
+          first_name:
+            formData.get("billing_address.first_name")?.toString() || "",
+          last_name:
+            formData.get("billing_address.last_name")?.toString() || "",
+          address_1:
+            formData.get("billing_address.address_1")?.toString() || "",
+          address_2: "",
+          company: formData.get("billing_address.company")?.toString() || "",
+          postal_code:
+            formData.get("billing_address.postal_code")?.toString() || "",
+          city: formData.get("billing_address.city")?.toString() || "",
+          country_code:
+            formData.get("billing_address.country_code")?.toString() || "",
+          province: formData.get("billing_address.province")?.toString() || "",
+          phone: formData.get("billing_address.phone")?.toString() || "",
+        }
+      }
+
+      await updateCart(addressData)
+
+      // Step 2: Check serviceability
+      const pincode = formData.get("shipping_address.postal_code") as string
+
+      if (!pincode) {
+        setSubmitError("Postal code is required")
+        setIsSubmitting(false)
+        return
+      }
+
+      // Step 3: Set shipping method
       if (cart?.id) {
         const response = await listCartOptions()
-
-        const isCODAvailable =
-          serviceability.delivery_codes[0].postal_code.cod ?? true
-        const isPrepaidAvailable =
-          serviceability.delivery_codes[0].postal_code.pre_paid ?? true
 
         const surfaceShipping = response.shipping_options.find(
           (option) => option.data?.shipping_mode === "Surface"
         )
 
         if (!surfaceShipping) {
-          throw new Error("No surface shipping option found")
+          setSubmitError("No surface shipping option found")
+          setIsSubmitting(false)
+          return
         }
 
         await setShippingMethod({
           cartId: cart.id,
           shippingMethodId: surfaceShipping?.id,
-          paymentMethod: "PREPAID",
-          cod_available: isCODAvailable,
-          prepaid_available: isPrepaidAvailable,
         })
 
-        // Skip delivery step and go directly to payment
+        // Step 4: Redirect to payment step
         router.push(pathname + "?step=payment")
+        setIsSubmitting(false)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting form:", error)
-    } finally {
+      const errorMessage =
+        error?.message ||
+        error?.toString() ||
+        "An error occurred. Please try again."
+      setSubmitError(errorMessage)
       setIsSubmitting(false)
     }
   }
@@ -103,32 +162,33 @@ const Addresses = ({
 
   return (
     <div>
-      <div className="flex-row items-center justify-between mb-6">
-        <p className="font-din-arabic text-xs text-black/40 mb-2 tracking-wider uppercase">
-          Shipping Information
-        </p>
-        <Heading
-          level="h2"
-          className="flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide"
-        >
-          Where Shall We Send Your Order?
-          {!isOpen && <CheckCircleSolid />}
-        </Heading>
-        {!isOpen && cart?.shipping_address && (
-          <Text>
-            <button
-              onClick={handleEdit}
-              className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
-              data-testid="edit-address-button"
-            >
-              Edit
-            </button>
-          </Text>
-        )}
-      </div>
       {isOpen ? (
-        <form action={handleFormSubmit}>
-          <div className="pb-8">
+        <form onSubmit={handleFormSubmit}>
+          <div className="pb-8 lg:col-span-2 space-y-4 lg:space-y-6 bg-white/60 backdrop-blur-md rounded-2xl md:rounded-3xl p-4 md:p-8 border border-white/80 shadow-xl">
+            <div className="flex-row items-center justify-between mb-6">
+              <p className="font-din-arabic text-xs text-black/40 mb-2 tracking-wider uppercase">
+                Shipping Information
+              </p>
+              <Heading
+                level="h2"
+                className="flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide"
+              >
+                Where Shall We Send Your Order?
+                {!isOpen && <CheckCircleSolid />}
+              </Heading>
+              {!isOpen && cart?.shipping_address && (
+                <Text>
+                  <button
+                    onClick={handleEdit}
+                    className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+                    data-testid="edit-address-button"
+                  >
+                    Edit
+                  </button>
+                </Text>
+              )}
+            </div>
+
             <ShippingAddress
               customer={customer}
               checked={sameAsBilling}
@@ -148,15 +208,20 @@ const Addresses = ({
               name="same_as_billing"
               value={sameAsBilling ? "on" : ""}
             />
+            <ErrorMessage
+              error={submitError}
+              data-testid="address-error-message"
+            />
+          </div>
+          <div className="flex items-center justify-between pt-4">
             <SubmitButton
-              className="ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="submit-address-button"
-              disabled={isSubmitting || !isEmailValid}
+              disabled={!isEmailValid}
+              className="ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
             >
               {isSubmitting ? "Processing..." : "Continue"}
               <ChevronLeft className="w-4 h-4 rotate-180" />
             </SubmitButton>
-            <ErrorMessage error={message} data-testid="address-error-message" />
           </div>
         </form>
       ) : (
@@ -208,7 +273,10 @@ const Addresses = ({
                     className="flex flex-col w-1/3"
                     data-testid="billing-address-summary"
                   >
-                    <Text style={{padding:'2rem 0'}} className="font-medium h2-core flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide">
+                    <Text
+                      style={{ padding: "2rem 0" }}
+                      className="font-medium h2-core flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide"
+                    >
                       Billing Address
                     </Text>
 

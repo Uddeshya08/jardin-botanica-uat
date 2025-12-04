@@ -408,12 +408,12 @@ function InteractiveLabImage() {
           return (
           <motion.div 
             key={hotspot.id} 
-            className={`absolute z-[5]`}
+            className={`absolute z-30`}
             initial={hotspot.position}
             animate={finalPosition}
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <div className={`relative w-12 h-12 z-[5]`}>
+            <div className={`relative w-12 h-12 z-30`}>
               <motion.div
                 className="absolute inset-0 w-full h-full rounded-full pointer-events-none"
                 style={{
@@ -463,7 +463,7 @@ function InteractiveLabImage() {
                 onMouseLeave={handleMouseLeave}
                 onClick={() => handlePointClick(hotspot.id)}
                 style={{
-                  zIndex: 5,
+                  zIndex: 40,
                   position: 'relative',
                 }}
               >
@@ -503,7 +503,7 @@ function InteractiveLabImage() {
                         : hotspot.position.right && hotspot.id !== 3
                         ? "translateX(calc(-100% + 48px))"
                         : "translateX(-24px)",
-                    zIndex: 10,
+                    zIndex: 50,
                   }}
                 >
                   <div
@@ -515,7 +515,7 @@ function InteractiveLabImage() {
                       right: hotspot.id === 4 ? "24px" : hotspot.position.right ? "24px" : "auto",
                       transform: "rotate(45deg)",
                       border: "1px solid rgba(0, 0, 0, 0.05)",
-                      zIndex: 30,
+                      zIndex: 60,
                     }}
                   />
                   {/* Connecting line between hotspot and popup */}
@@ -602,7 +602,7 @@ function InteractiveLabImage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className="absolute inset-x-0 bottom-16 sm:bottom-24 lg:bottom-32 px-4 sm:px-6 flex justify-center"
+              className="absolute inset-x-0 bottom-16 sm:bottom-24 lg:bottom-32 px-4 sm:px-6 flex justify-center z-30"
             >
               <div className="bg-white/90 backdrop-blur-sm px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg">
                 <p
@@ -995,56 +995,23 @@ export function BotanistLabPage() {
     90,
     undefined,
     phase === 1,
-    true // Enable sound for banner text
+    false // Sound disabled
   )
   const { displayedText: displayedPart1, isComplete: part1Complete } = useTypewriter(
     answerPart1,
     90,
     undefined,
     phase === 2,
-    true // Enable sound for banner text
+    false // Sound disabled
   )
   const { displayedText: displayedPart2, isComplete: part2Complete } = useTypewriter(
     answerPart2,
     90,
     pausePosition,
     phase === 3,
-    true // Enable sound for banner text
+    false // Sound disabled
   )
 
-  const unlockAudio = () => {
-    if (audioUnlocked) return
-    const test = new Audio(SOUND_PATH)
-    test.volume = 0.01
-    test.play().then(() => {
-      test.pause()
-      audioUnlocked = true
-    }).catch(() => {})
-  }
-
-  // Preload typing sound on component mount and unlock audio
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      initializeSoundPool()
-      // Try to unlock audio immediately
-      unlockAudio()
-      
-      // Also try to unlock on any user interaction
-      const handleUserInteraction = () => {
-        unlockAudio()
-      }
-      
-      window.addEventListener('click', handleUserInteraction, { once: true })
-      window.addEventListener('touchstart', handleUserInteraction, { once: true })
-      window.addEventListener('keydown', handleUserInteraction, { once: true })
-      
-      return () => {
-        window.removeEventListener('click', handleUserInteraction)
-        window.removeEventListener('touchstart', handleUserInteraction)
-        window.removeEventListener('keydown', handleUserInteraction)
-      }
-    }
-  }, [])
 
   // Start animation immediately when page loads
   useEffect(() => {
@@ -1093,22 +1060,6 @@ export function BotanistLabPage() {
     }
   }, [part2Complete, phase])
 
-  // Stop sound when banner goes out of view
-  useEffect(() => {
-    if (!bannerRef.current) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) {
-          stopAllTypingSound()
-        }
-      },
-      { threshold: 0.2 }
-    )
-
-    observer.observe(bannerRef.current)
-    return () => observer.disconnect()
-  }, [])
 
   const { scrollYProgress } = useScroll({
     target: containerRef,

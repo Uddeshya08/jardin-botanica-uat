@@ -8,35 +8,25 @@ export function SubmitButton({
   children,
   variant = "primary",
   className,
+  disabled: externalDisabled,
   "data-testid": dataTestId,
-  disabled,
 }: {
   children: React.ReactNode
   variant?: "primary" | "secondary" | "transparent" | "danger" | null
   className?: string
-  "data-testid"?: string
   disabled?: boolean
+  "data-testid"?: string
 }) {
   const { pending } = useFormStatus()
 
-  // Map Medusa variants to theme variants
-  const themeVariant = 
-    variant === "primary" ? "default" :
-    variant === "secondary" ? "secondary" :
-    variant === "danger" ? "destructive" :
-    variant === "transparent" ? "ghost" :
-    "default"
-
   return (
-    <Button
-      size="md"
+    <button
       className={className}
       type="submit"
-      disabled={pending || disabled}
-      variant={themeVariant}
+      disabled={pending || externalDisabled}
       data-testid={dataTestId}
     >
       {children}
-    </Button>
+    </button>
   )
 }
