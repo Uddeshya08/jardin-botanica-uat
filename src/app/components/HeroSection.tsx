@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
@@ -58,6 +58,10 @@ const heroPanels: HeroPanel[] = [
 export function HeroSection() {
   const [activePanel, setActivePanel] = useState(1);
   const [videoError, setVideoError] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
 
   useEffect(() => {
     setActivePanel(1);
@@ -65,8 +69,67 @@ export function HeroSection() {
 
   const currentPanel = heroPanels.find(p => p.id === activePanel) || heroPanels[0];
 
+  // Minimum swipe distance (in pixels) to trigger panel change
+  const minSwipeDistance = 80;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchEndX.current = null;
+    touchStartX.current = e.targetTouches[0].clientX;
+    setIsSwiping(true);
+    setSwipeOffset(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartX.current) return;
+    
+    const currentX = e.targetTouches[0].clientX;
+    touchEndX.current = currentX;
+    
+    // Calculate swipe offset for visual feedback
+    const offset = currentX - touchStartX.current;
+    setSwipeOffset(offset);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) {
+      setIsSwiping(false);
+      setSwipeOffset(0);
+      return;
+    }
+    
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > minSwipeDistance; // Finger moved left = next panel
+    const isRightSwipe = distance < -minSwipeDistance; // Finger moved right = previous panel
+
+    if (isLeftSwipe) {
+      // Swipe left (finger moved left) - go to next panel
+      const currentIndex = heroPanels.findIndex(p => p.id === activePanel);
+      const nextIndex = (currentIndex + 1) % heroPanels.length;
+      setActivePanel(heroPanels[nextIndex].id);
+      setVideoError(false);
+    } else if (isRightSwipe) {
+      // Swipe right (finger moved right) - go to previous panel
+      const currentIndex = heroPanels.findIndex(p => p.id === activePanel);
+      const prevIndex = (currentIndex - 1 + heroPanels.length) % heroPanels.length;
+      setActivePanel(heroPanels[prevIndex].id);
+      setVideoError(false);
+    }
+    
+    // Reset swipe state
+    setIsSwiping(false);
+    setSwipeOffset(0);
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden" style={{ paddingTop: '40px' }}>
+    <div 
+      className="relative w-full h-screen bg-black overflow-hidden" 
+      style={{ paddingTop: '40px' }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       
       {/* ✅ Background Video/Image Section */}
       <div className="absolute inset-0 z-0">
@@ -74,7 +137,10 @@ export function HeroSection() {
           <motion.div
             key={activePanel}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={{ 
+              opacity: 1,
+              x: isSwiping ? swipeOffset * 0.3 : 0
+            }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
             className="absolute inset-0"
@@ -109,7 +175,14 @@ export function HeroSection() {
       {/* ✅ Content Overlay */}
       <div className="absolute inset-0 z-20">
         <div className="container mx-auto px-6 lg:px-12 h-full flex items-center">
-          <div className="max-w-2xl text-white">
+          <motion.div 
+            className="max-w-2xl text-white"
+            animate={{
+              x: isSwiping ? swipeOffset * 0.2 : 0,
+              opacity: isSwiping ? 1 - Math.abs(swipeOffset) / 300 : 1
+            }}
+            transition={{ duration: 0.1 }}
+          >
             
             <div className="min-h-[200px] md:min-h-[250px] lg:min-h-[300px]">
               <AnimatePresence mode="wait">
@@ -168,7 +241,7 @@ export function HeroSection() {
                 </motion.button>
               </AnimatePresence>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -195,14 +268,6 @@ export function HeroSection() {
                   }}
                 >
                   {panel.title.toUpperCase()}
-                  {activePanel === panel.id && (
-                    <motion.div
-                      className="absolute -bottom-0.5 sm:-bottom-1 left-1/2 w-1 h-1 bg-white rounded-full"
-                      initial={{ scale: 0, x: '-50%' }}
-                      animate={{ scale: 1, x: '-50%' }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  )}
                 </button>
               ))}
             </div>

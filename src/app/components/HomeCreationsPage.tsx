@@ -212,7 +212,8 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
           <ImageWithFallback src={HERO_IMAGE} alt="Home Creations Collection" className="w-full h-full object-cover" />
         </motion.div>
         {/* Background Overlay - smooth natural gradient from top extending below center */}
-        <div className="absolute inset-0 z-10" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.55) 15%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.08) 65%, rgba(0,0,0,0.03) 75%, transparent 85%)' }} />
+        <div className="absolute inset-0 z-10" 
+       style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.02) 85%, transparent 95%)' }}/>
 
         {/* Hero Text */}
         <div className="absolute inset-0 flex items-center justify-center z-20">
@@ -452,7 +453,8 @@ function EditorialBlogSection() {
         </motion.div>
 
         {/* Background Overlay - smooth natural gradient from top extending below center */}
-        <div className="absolute inset-0 z-10" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.55) 15%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.08) 65%, rgba(0,0,0,0.03) 75%, transparent 85%)' }} />
+        <div className="absolute inset-0 z-10" 
+        style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.02) 85%, transparent 95%)' }} />
 
         {/* Content */}
         <motion.div
@@ -683,23 +685,22 @@ function HomeFragranceRitualSection() {
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.8, delay: 0.3 }}
           className="mt-16 lg:mt-20 relative"
         >
           <div className="relative aspect-[16/9] lg:aspect-[21/9] overflow-hidden">
-            <motion.div initial={{ scale: 1.1 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: "easeOut" }}>
+            <motion.div initial={{ scale: 1.1 }} whileInView={{ scale: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 1.2, ease: "easeOut" }}>
               <ImageWithFallback src={EDITORIAL_IMAGE} alt="Home fragrance ritual" className="w-full h-full object-cover" />
             </motion.div>
 
             {/* Overlay Text */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent p-8 lg:p-12">
+            <div className="absolute inset-0 z-10 p-8 lg:p-12" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.22) 55%, rgba(0,0,0,0.12) 65%, rgba(0,0,0,0.05) 75%, transparent 85%)' }}>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.7, delay: 0.4 }}
-                className="font-din-arabic text-white/80 text-xs absolute top-8 right-8 lg:top-12 lg:right-12"
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 1.1 }}
+                className="font-din-arabic text-white/80 text-xs absolute top-8 right-8 lg:top-12 lg:right-12 z-20"
                 style={{ letterSpacing: "0.2em" }}
               >
                 NOTE FROM THE BOTANIST'S LAB
@@ -707,10 +708,9 @@ function HomeFragranceRitualSection() {
               <div className="flex items-center justify-center h-full">
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.7, delay: 0.5 }}
-                  className="font-american-typewriter text-white text-xl lg:text-3xl text-center max-w-3xl"
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 1.2 }}
+                  className="font-american-typewriter text-white/95 text-xl lg:text-3xl text-center max-w-3xl z-20"
                   style={{ letterSpacing: "0.05em" }}
                 >
                   "Fragrance is the invisible architecture of memory and emotion."

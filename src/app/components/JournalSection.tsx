@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 // import sensoralistImage from 'figma:asset/71a3ed929884384aa6617c6ae2f40a7724e33026.png';
@@ -48,7 +48,10 @@ export function JournalSection() {
 
         <div className="max-w-8xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {journalPosts.map((post, index) => (
+            {journalPosts.map((post, index) => {
+              const [isPressed, setIsPressed] = useState(false);
+              
+              return (
               <motion.article
                 key={post.id}
                 initial={{ opacity: 0, y: 50 }}
@@ -63,8 +66,12 @@ export function JournalSection() {
   className="aspect-[3/4] overflow-hidden mb-6"
 >
   <motion.div
-    whileHover={{ scale: 1.1 }} // smooth zoom only
-    transition={{ duration: 0.6, ease: "easeOut" }}
+    whileHover={{ scale: 1.1 }} // desktop hover zoom
+    animate={{ scale: isPressed ? 1.1 : 1 }} // mobile press zoom
+    transition={{ duration: 1.2, ease: "easeOut" }}
+    onTouchStart={() => setIsPressed(true)}
+    onTouchEnd={() => setIsPressed(false)}
+    onTouchCancel={() => setIsPressed(false)}
     className="w-full h-full"
   >
     <ImageWithFallback
@@ -118,7 +125,8 @@ export function JournalSection() {
                   </motion.p>
                 </motion.div>
               </motion.article>
-            ))}
+              );
+            })}
           </div>
           
           {/* View All Button */}
