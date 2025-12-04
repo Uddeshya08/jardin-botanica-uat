@@ -21,7 +21,7 @@ export function SubmitButton({
 
   return (
     <button
-      className={'ml-auto px-8 py-2 bg-black text-white rounded-lg font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2'}
+      className={className}
       type="submit"
       disabled={pending || externalDisabled}
       data-testid={dataTestId}
