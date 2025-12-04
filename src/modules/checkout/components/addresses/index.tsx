@@ -1,21 +1,19 @@
 "use client"
 
-import { listCartOptions, setAddresses, updateCart } from "@lib/data/cart"
-import { setShippingMethod } from "@lib/data/cart"
+import { listCartOptions, setShippingMethod, updateCart } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
-import { ArrowLeftMini, CheckCircleSolid } from "@medusajs/icons"
+import { CheckCircleSolid } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
-import { Button, Heading, Text, useToggleState } from "@medusajs/ui"
+import { Heading, Text, useToggleState } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
+import { ChevronLeft } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
-import { ChevronLeft } from "lucide-react"
-import { checkPincodeServiceability } from "@lib/data/delhivery"
 
 const Addresses = ({
   cart,
@@ -73,14 +71,19 @@ const Addresses = ({
       // Step 1: Set addresses first using updateCart (without redirect)
       const addressData = {
         shipping_address: {
-          first_name: formData.get("shipping_address.first_name")?.toString() || "",
-          last_name: formData.get("shipping_address.last_name")?.toString() || "",
-          address_1: formData.get("shipping_address.address_1")?.toString() || "",
+          first_name:
+            formData.get("shipping_address.first_name")?.toString() || "",
+          last_name:
+            formData.get("shipping_address.last_name")?.toString() || "",
+          address_1:
+            formData.get("shipping_address.address_1")?.toString() || "",
           address_2: "",
           company: formData.get("shipping_address.company")?.toString() || "",
-          postal_code: formData.get("shipping_address.postal_code")?.toString() || "",
+          postal_code:
+            formData.get("shipping_address.postal_code")?.toString() || "",
           city: formData.get("shipping_address.city")?.toString() || "",
-          country_code: formData.get("shipping_address.country_code")?.toString() || "",
+          country_code:
+            formData.get("shipping_address.country_code")?.toString() || "",
           province: formData.get("shipping_address.province")?.toString() || "",
           phone: formData.get("shipping_address.phone")?.toString() || "",
         },
@@ -92,14 +95,19 @@ const Addresses = ({
         addressData.billing_address = addressData.shipping_address
       } else {
         addressData.billing_address = {
-          first_name: formData.get("billing_address.first_name")?.toString() || "",
-          last_name: formData.get("billing_address.last_name")?.toString() || "",
-          address_1: formData.get("billing_address.address_1")?.toString() || "",
+          first_name:
+            formData.get("billing_address.first_name")?.toString() || "",
+          last_name:
+            formData.get("billing_address.last_name")?.toString() || "",
+          address_1:
+            formData.get("billing_address.address_1")?.toString() || "",
           address_2: "",
           company: formData.get("billing_address.company")?.toString() || "",
-          postal_code: formData.get("billing_address.postal_code")?.toString() || "",
+          postal_code:
+            formData.get("billing_address.postal_code")?.toString() || "",
           city: formData.get("billing_address.city")?.toString() || "",
-          country_code: formData.get("billing_address.country_code")?.toString() || "",
+          country_code:
+            formData.get("billing_address.country_code")?.toString() || "",
           province: formData.get("billing_address.province")?.toString() || "",
           phone: formData.get("billing_address.phone")?.toString() || "",
         }
@@ -116,31 +124,9 @@ const Addresses = ({
         return
       }
 
-      const serviceability = await checkPincodeServiceability(pincode) as any
-
-      if (
-        !serviceability ||
-        !serviceability.delivery_codes ||
-        serviceability.delivery_codes.length === 0
-      ) {
-        console.error("Not serviceable to the provided pincode")
-        setSubmitError("Not serviceable to the provided pincode")
-        setIsSubmitting(false)
-        return
-      }
-
       // Step 3: Set shipping method
       if (cart?.id) {
         const response = await listCartOptions()
-
-        // Add proper null checks for serviceability response
-        const deliveryCode = serviceability.delivery_codes?.[0]
-        const postalCodeData = deliveryCode?.postal_code
-        
-        const isCODAvailable =
-          postalCodeData?.cod ?? true
-        const isPrepaidAvailable =
-          postalCodeData?.pre_paid ?? true
 
         const surfaceShipping = response.shipping_options.find(
           (option) => option.data?.shipping_mode === "Surface"
@@ -155,9 +141,6 @@ const Addresses = ({
         await setShippingMethod({
           cartId: cart.id,
           shippingMethodId: surfaceShipping?.id,
-          paymentMethod: "PREPAID",
-          cod_available: isCODAvailable,
-          prepaid_available: isPrepaidAvailable,
         })
 
         // Step 4: Redirect to payment step
@@ -166,7 +149,10 @@ const Addresses = ({
       }
     } catch (error: any) {
       console.error("Error submitting form:", error)
-      const errorMessage = error?.message || error?.toString() || "An error occurred. Please try again."
+      const errorMessage =
+        error?.message ||
+        error?.toString() ||
+        "An error occurred. Please try again."
       setSubmitError(errorMessage)
       setIsSubmitting(false)
     }
@@ -222,7 +208,10 @@ const Addresses = ({
               name="same_as_billing"
               value={sameAsBilling ? "on" : ""}
             />
-            <ErrorMessage error={submitError} data-testid="address-error-message" />
+            <ErrorMessage
+              error={submitError}
+              data-testid="address-error-message"
+            />
           </div>
           <div className="flex items-center justify-between pt-4">
             <SubmitButton
@@ -234,7 +223,6 @@ const Addresses = ({
               <ChevronLeft className="w-4 h-4 rotate-180" />
             </SubmitButton>
           </div>
-
         </form>
       ) : (
         <div>
@@ -285,7 +273,10 @@ const Addresses = ({
                     className="flex flex-col w-1/3"
                     data-testid="billing-address-summary"
                   >
-                    <Text style={{padding:'2rem 0'}} className="font-medium h2-core flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide">
+                    <Text
+                      style={{ padding: "2rem 0" }}
+                      className="font-medium h2-core flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide"
+                    >
                       Billing Address
                     </Text>
 

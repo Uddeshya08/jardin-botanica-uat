@@ -77,24 +77,27 @@ function CashOnDeliveryCard() {
             <Banknote className="w-5 h-5" />
             <span>Cash on Delivery</span>
           </h3>
-          
+
           <p className="font-din-arabic text-black/70 mb-4">
-            Pay with cash when your order is delivered. Please keep exact change ready.
+            Pay with cash when your order is delivered. Please keep exact change
+            ready.
           </p>
-          
-          <div 
+
+          <div
             className="p-4 rounded-xl backdrop-blur-sm border"
             style={{
               backgroundColor: "rgb(249, 239, 216)",
-              borderColor: "rgb(232, 223, 196)"
+              borderColor: "rgb(232, 223, 196)",
             }}
           >
-            <p 
+            <p
               className="font-din-arabic text-sm flex items-start space-x-2"
               style={{ color: "rgb(107, 93, 71)" }}
             >
               <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span>Additional ₹50 COD handling charges will be added to your order.</span>
+              <span>
+                Additional ₹50 COD handling charges will be added to your order.
+              </span>
             </p>
           </div>
         </div>
@@ -226,22 +229,6 @@ const Payment = ({
       await setPaymentMethod(PAYMENT_PROVIDER_ID)
     }
 
-    if (type === "cod") {
-      await setShippingMethod({
-        cartId: cart.id,
-        shippingMethodId: cart.shipping_methods[0].shipping_option_id,
-        paymentMethod: "COD",
-        totalAmount: cart.total,
-      })
-    } else {
-      await setShippingMethod({
-        cartId: cart.id,
-        shippingMethodId: cart.shipping_methods[0].shipping_option_id,
-        paymentMethod: "PREPAID",
-        totalAmount: cart.total,
-      })
-    }
-
     router.push(
       pathname +
         "?" +
@@ -253,6 +240,22 @@ const Payment = ({
   const handleSubmit = async () => {
     setIsLoading(true)
     try {
+      if (selectedPaymentType === "cod") {
+        await setShippingMethod({
+          cartId: cart.id,
+          shippingMethodId: cart.shipping_methods[0].shipping_option_id,
+          paymentMethod: "COD",
+          totalAmount: cart.total,
+        })
+      } else {
+        await setShippingMethod({
+          cartId: cart.id,
+          shippingMethodId: cart.shipping_methods[0].shipping_option_id,
+          paymentMethod: "PREPAID",
+          totalAmount: cart.total,
+        })
+      }
+
       const shouldInputCard =
         isStripeFunc(selectedPaymentMethod) && !activeSession
 
@@ -326,41 +329,41 @@ const Payment = ({
             <>
               <div className="mb-6 bg-white/60 backdrop-blur-md rounded-2xl md:rounded-3xl p-4 md:p-8 border border-white/80 shadow-xl">
                 <div className="flex items-center space-x-3 mb-6 md:mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-black/10 to-black/5 flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="lucide lucide-lock w-6 h-6"
-                  >
-                    <rect
-                      width="18"
-                      height="11"
-                      x="3"
-                      y="11"
-                      rx="2"
-                      ry="2"
-                    ></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                  </svg>
-                </div>
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-black/10 to-black/5 flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-lock w-6 h-6"
+                    >
+                      <rect
+                        width="18"
+                        height="11"
+                        x="3"
+                        y="11"
+                        rx="2"
+                        ry="2"
+                      ></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                  </div>
 
-                <div>
-                  <h2 className="font-american-typewriter text-xl sm:text-2xl md:text-3xl">
-                    Payment Method
-                  </h2>
+                  <div>
+                    <h2 className="font-american-typewriter text-xl sm:text-2xl md:text-3xl">
+                      Payment Method
+                    </h2>
 
-                  <p className="font-din-arabic text-xs sm:text-sm text-black/60">
-                    Choose Your Preferred Payment Option
-                  </p>
+                    <p className="font-din-arabic text-xs sm:text-sm text-black/60">
+                      Choose Your Preferred Payment Option
+                    </p>
+                  </div>
                 </div>
-              </div>
                 <div className="flex flex-col gap-3">
                   {PAYMENT_TYPES.map((type) => {
                     const Icon = type.icon
