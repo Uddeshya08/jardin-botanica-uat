@@ -143,7 +143,7 @@ export function OrderConfirmationUI({ orderNumber, onContinueShopping, onViewOrd
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.6 }}
           className="font-din-arabic text-sm sm:text-base text-black/70 mb-10 leading-relaxed"
-          style={{ letterSpacing: '0.1em', maxWidth: '1100px' }}
+          style={{ letterSpacing: '0.1em', maxWidth: '1100px',fontSize: '16px' }}
         >
           <span style={{ whiteSpace: 'nowrap' }}>Your order is being prepared with quiet care and intention. A full summary has been</span> <br />
           sent to your inbox.
@@ -176,7 +176,7 @@ export function OrderConfirmationUI({ orderNumber, onContinueShopping, onViewOrd
               <div className="flex flex-col gap-1">
                 <span 
                   className="font-american-typewriter text-base text-black"
-                  style={{ letterSpacing: '0.05em' }}
+                  style={{ letterSpacing: '0.05em',fontSize: '14px' }}
                 >
                   Dispatch
                 </span>
@@ -208,7 +208,7 @@ export function OrderConfirmationUI({ orderNumber, onContinueShopping, onViewOrd
               <div className="flex flex-col gap-1">
                 <span 
                   className="font-american-typewriter text-base text-black"
-                  style={{ letterSpacing: '0.05em' }}
+                  style={{ letterSpacing: '0.05em',fontSize: '14px' }}
                 >
                   Delivery
                 </span>
@@ -237,7 +237,7 @@ export function OrderConfirmationUI({ orderNumber, onContinueShopping, onViewOrd
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9, duration: 0.6 }}
           className="font-din-arabic text-sm sm:text-base text-black/70 mb-12 leading-relaxed max-w-xl"
-          style={{ letterSpacing: '0.1em' }}
+          style={{ letterSpacing: '0.1em',fontSize: '16px' }}
         >
           We'll notify you the moment your parcel leaves the studio.
         </motion.p>
@@ -261,7 +261,7 @@ export function OrderConfirmationUI({ orderNumber, onContinueShopping, onViewOrd
           <motion.button
             onClick={handleViewOrders}
             className="font-din-arabic text-sm text-black/60 hover:!text-black transition-colors duration-300"
-            style={{ letterSpacing: '0.1em' }}
+            style={{ letterSpacing: '0.1em',fontSize: '14px' }}
             whileHover={{ x: 4 }}
           >
             View Orders →
