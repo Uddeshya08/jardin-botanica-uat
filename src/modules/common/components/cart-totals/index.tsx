@@ -7,6 +7,7 @@ type CartTotalsProps = {
   totals: {
     total?: number | null
     subtotal?: number | null
+    item_total?: number | null
     tax_total?: number | null
     shipping_total?: number | null
     discount_total?: number | null
@@ -21,6 +22,7 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
     currency_code,
     total,
     subtotal,
+    item_total,
     tax_total,
     discount_total,
     gift_card_total,
@@ -35,7 +37,7 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
             Subtotal (excl. shipping and taxes)
           </span>
           <span data-testid="cart-subtotal" data-value={subtotal || 0}>
-            {convertToLocale({ amount: subtotal ?? 0, currency_code })}
+            {convertToLocale({ amount: item_total ?? 0, currency_code })}
           </span>
         </div>
         {!!discount_total && (
