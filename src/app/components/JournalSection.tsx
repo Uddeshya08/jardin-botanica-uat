@@ -30,9 +30,86 @@ const journalPosts = [
   }
 ];
 
+function JournalPostCard({ post, index }: { post: typeof journalPosts[0], index: number }) {
+  const [isPressed, setIsPressed] = useState(false);
+  
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: index * 0.2 }}
+      viewport={{ once: true }}
+      className="group cursor-pointer flex flex-col"
+    >
+      {/* Content - First on mobile, second on desktop */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: index * 0.2 + 0.3 }}
+        viewport={{ once: true }}
+        className="space-y-4 px-6 order-1 md:order-2 pb-10 md:pb-0"
+      >
+        {/* Category */}
+        <motion.span 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: index * 0.2 + 0.4 }}
+          viewport={{ once: true }}
+          className="font-din-arabic text-sm text-black/60 tracking-wide"
+        >
+          {post.category}
+        </motion.span>
+        
+        {/* Title */}
+        <motion.h3 
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: index * 0.2 + 0.5 }}
+          viewport={{ once: true }}
+          className="font-american-typewriter text-xl leading-tight text-black group-hover:text-black/70 transition-colors duration-300"
+        >
+          {post.title}
+        </motion.h3>
+        
+        {/* Date/Read time */}
+        <motion.p 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: index * 0.2 + 0.6 }}
+          viewport={{ once: true }}
+          className="font-din-arabic text-sm text-black/50"
+        >
+          {post.date}
+        </motion.p>
+      </motion.div>
+
+      {/* Image - Second on mobile, first on desktop */}
+      <motion.div
+        className="aspect-[3/4] overflow-hidden mb-6 order-2 md:order-1"
+      >
+        <motion.div
+          whileHover={{ scale: 1.1 }} // desktop hover zoom
+          animate={{ scale: isPressed ? 1.1 : 1 }} // mobile press zoom
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          onTouchStart={() => setIsPressed(true)}
+          onTouchEnd={() => setIsPressed(false)}
+          onTouchCancel={() => setIsPressed(false)}
+          className="w-full h-full"
+        >
+          <ImageWithFallback
+            src={post.imageUrl}
+            alt={post.title}
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
+      </motion.div>
+    </motion.article>
+  );
+}
+
 export function JournalSection() {
   return (
-    <section className="md:py-20 py-10" style={{ backgroundColor: '#e3e3d8' }}>
+    <section className="md:py-20 pb-10" style={{ backgroundColor: '#e3e3d8' }}>
       <div className="w-full md:container md:mx-auto px-0 md:px-6 lg:px-12">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -49,82 +126,8 @@ export function JournalSection() {
         <div className="max-w-8xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {journalPosts.map((post, index) => {
-              const [isPressed, setIsPressed] = useState(false);
-              
               return (
-              <motion.article
-                key={post.id}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.2 }}
-                viewport={{ once: true }}
-                className="group cursor-pointer"
-              >
-                {/* Image */}
-              {/* Image */}
-<motion.div
-  className="aspect-[3/4] overflow-hidden mb-6"
->
-  <motion.div
-    whileHover={{ scale: 1.1 }} // desktop hover zoom
-    animate={{ scale: isPressed ? 1.1 : 1 }} // mobile press zoom
-    transition={{ duration: 1.2, ease: "easeOut" }}
-    onTouchStart={() => setIsPressed(true)}
-    onTouchEnd={() => setIsPressed(false)}
-    onTouchCancel={() => setIsPressed(false)}
-    className="w-full h-full"
-  >
-    <ImageWithFallback
-      src={post.imageUrl}
-      alt={post.title}
-      className="w-full h-full object-cover"
-    />
-  </motion.div>
-</motion.div>
-
-                
-                {/* Content */}
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.2 + 0.3 }}
-                  viewport={{ once: true }}
-                  className="space-y-4 px-6"
-                >
-                  {/* Category */}
-                  <motion.span 
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ duration: 0.4, delay: index * 0.2 + 0.4 }}
-                    viewport={{ once: true }}
-                    className="font-din-arabic text-sm text-black/60 tracking-wide"
-                  >
-                    {post.category}
-                  </motion.span>
-                  
-                  {/* Title */}
-                  <motion.h3 
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.2 + 0.5 }}
-                    viewport={{ once: true }}
-                    className="font-american-typewriter text-xl leading-tight text-black group-hover:text-black/70 transition-colors duration-300"
-                  >
-                    {post.title}
-                  </motion.h3>
-                  
-                  {/* Date/Read time */}
-                  <motion.p 
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ duration: 0.4, delay: index * 0.2 + 0.6 }}
-                    viewport={{ once: true }}
-                    className="font-din-arabic text-sm text-black/50"
-                  >
-                    {post.date}
-                  </motion.p>
-                </motion.div>
-              </motion.article>
+              <JournalPostCard key={post.id} post={post} index={index} />
               );
             })}
           </div>
