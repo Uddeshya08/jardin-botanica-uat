@@ -10,6 +10,7 @@ import { Eye, EyeOff, Smartphone } from "lucide-react"
 import { login, signup } from "@lib/data/customer"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
+import { DatePicker } from "app/components/ui/date-picker"
 
 interface CartItem {
   id: string
@@ -48,6 +49,7 @@ export default function AuthPage() {
   // ----- SIGN UP -----
   const [signupMessage, signupAction] = useActionState(signup, null)
   const [showCreatePassword, setShowCreatePassword] = useState(false)
+  const [dateValue, setDateValue] = useState<Date | undefined>(undefined)
 
   useEffect(() => {
     if (signupMessage === null) return
@@ -135,54 +137,6 @@ export default function AuthPage() {
 
   return (
     <div>
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          /* Date Picker Calendar Popup Styling */
-          input[type="date"]::-webkit-calendar-picker-indicator {
-            cursor: pointer;
-            opacity: 0.6;
-            filter: invert(0);
-          }
-          
-          input[type="date"]::-webkit-calendar-picker-indicator:hover {
-            opacity: 1;
-          }
-          
-          /* For Firefox */
-          input[type="date"] {
-            color-scheme: light;
-          }
-          
-          /* Calendar popup background and text colors (WebKit browsers) */
-          input[type="date"]::-webkit-datetime-edit {
-            color: #000;
-          }
-          
-          input[type="date"]::-webkit-datetime-edit-fields-wrapper {
-            color: #000;
-          }
-          
-          input[type="date"]::-webkit-datetime-edit-text {
-            color: #000;
-          }
-          
-          input[type="date"]::-webkit-datetime-edit-month-field {
-            color: #000;
-          }
-          
-          input[type="date"]::-webkit-datetime-edit-day-field {
-            color: #000;
-          }
-          
-          input[type="date"]::-webkit-datetime-edit-year-field {
-            color: #000;
-          }
-          
-          input[type="date"]::-webkit-inner-spin-button {
-            opacity: 1;
-          }
-        `
-      }} />
       <RippleEffect />
       <Navigation
         isScrolled={isScrolled}
@@ -416,12 +370,17 @@ export default function AuthPage() {
                   <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
                     Date of Birth
                   </label>
+                  <DatePicker
+                    value={dateValue}
+                    onChange={setDateValue}
+                    placeholder="Select date of birth"
+                  />
+                  {/* Hidden input for form submission */}
                   <input
-                    type="date"
+                    type="hidden"
                     name="dob"
+                    value={dateValue ? dateValue.toISOString().split('T')[0] : ''}
                     autoComplete="bday"
-                    className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
-                    style={{ borderColor: "#D8D2C7" }}
                   />
                 </div>
                 <div>

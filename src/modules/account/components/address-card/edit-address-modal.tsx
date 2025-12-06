@@ -71,7 +71,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
     <>
       <div
         className={clx(
-          "border rounded-rounded p-5 h-full w-full flex flex-col gap-3 transition-colors",
+          "border p-5 h-full sm:w-[50%] w-full flex flex-col gap-3 transition-colors",
           {
             "border-gray-900": isActive,
           }
@@ -80,7 +80,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-base-semi">
+            <span className="font-din-arabic">
               {address.company || "Home"}
             </span>
           </div>
@@ -104,18 +104,18 @@ const EditAddress: React.FC<EditAddressProps> = ({
           </div>
         </div>
         {address.is_default_shipping && (
-          <span className="text-xxs tracking-wide text-ui-fg-subtle uppercase">
+          <span className="text-sm tracking-wide text-ui-fg-subtle uppercase">
             Default Address
           </span>
         )}
         <div className="flex flex-col">
           <Heading
-            className="text-left text-base-semi"
+            className="text-left text-md font-din-arabic"
             data-testid="address-name"
           >
             {address.first_name} {address.last_name}
           </Heading>
-          <Text className="flex flex-col text-left text-base-regular mt-2">
+          <Text className="flex flex-col text-left font-din-arabic mt-2">
             <span data-testid="address-address">
               {address.address_1}
               {address.address_2 && <span>, {address.address_2}</span>}
