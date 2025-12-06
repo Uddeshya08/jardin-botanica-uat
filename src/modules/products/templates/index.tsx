@@ -135,7 +135,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           selectedVariantId={selectedVariantId}
           onUpdateHeroQuantity={handleHeroQuantityUpdate}
           onCartUpdate={handleCartUpdateWrapper}
-          cartItems={cartItems}
           ritualProduct={ritualProductProp}
         />
 

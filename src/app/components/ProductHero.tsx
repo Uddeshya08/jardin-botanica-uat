@@ -243,7 +243,8 @@ export function ProductHero({
       quantity,
       image: fallbackImg,
       isRitualProduct: false,
-    })
+      variant_id: selectedVariantId,
+    } as any)
     emitCartUpdated({ quantityDelta: quantity })
 
     // network in the background
@@ -296,7 +297,8 @@ export function ProductHero({
         quantity: newQuantity,
         image: fallbackImg,
         isRitualProduct: false,
-      })
+        variant_id: selectedVariantId,
+      } as any)
     }
   }
 

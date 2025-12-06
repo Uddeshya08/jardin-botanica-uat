@@ -104,26 +104,45 @@ export function StickyCartBar({
     if (!product || !variant?.id) return
 
     const productId = product.id ?? variant.id
-    const mainProductInCart = cartItems.find(item => 
-      (item.id === productId || item.variant_id === variant.id) && !item.isRitualProduct
-    )
+    // Match main product: check by product ID, variant ID, or item.id (which might be variant ID from ProductHero)
+    const mainProductInCart = cartItems.find(item => {
+      const itemVariantId = (item as any).variant_id || item.id
+      const isNotRitual = !(item as any).isRitualProduct
+      // Match if: item.id matches productId, item.id matches variant.id, or variant_id matches variant.id
+      // Also check if item name matches product title (fallback for edge cases)
+      const nameMatch = item.name === product.title || item.name === (product as any).title
+      return (item.id === productId || item.id === variant.id || itemVariantId === variant.id || nameMatch) && isNotRitual
+    })
     const ritualProductInCart = cartItems.find(item => 
-      ritualProduct && item.id === ritualProduct.variantId && item.isRitualProduct
+      ritualProduct && item.id === ritualProduct.variantId && (item as any).isRitualProduct
     )
+
+    console.log('🔍 StickyCartBar - Cart sync check:', {
+      productId,
+      variantId: variant.id,
+      cartItemsCount: cartItems.length,
+      cartItems: cartItems.map(i => ({ id: i.id, name: i.name, isRitual: (i as any).isRitualProduct })),
+      mainProductInCart: mainProductInCart ? { id: mainProductInCart.id, name: mainProductInCart.name } : null,
+      ritualProduct: ritualProduct ? { variantId: ritualProduct.variantId, name: ritualProduct.name } : null,
+      ritualProductInCart: ritualProductInCart ? { id: ritualProductInCart.id, name: ritualProductInCart.name } : null,
+    })
 
     // Update ritual completion state based on cart contents
     if (ritualProduct && mainProductInCart && ritualProductInCart) {
       // Both products are in cart - ritual is completed
+      console.log('✅ Ritual completed - both products in cart')
       setRitualCompleted(true)
       setShowGoToCart(true)
       setShowRitualSuggestion(false)
     } else if (ritualProduct && mainProductInCart && !ritualProductInCart) {
       // Only main product is in cart - show ritual suggestion
+      console.log('💡 Showing ritual suggestion - main product in cart, ritual product not in cart')
       setRitualCompleted(false)
       setShowGoToCart(false)
       setShowRitualSuggestion(true)
     } else {
       // No products in cart or only ritual product - reset states
+      console.log('🔄 Resetting ritual states')
       setRitualCompleted(false)
       setShowGoToCart(false)
       setShowRitualSuggestion(false)
