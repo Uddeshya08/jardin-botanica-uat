@@ -86,7 +86,7 @@ const AddressSelect = ({
                           {address.company}
                         </span>
                       )}
-                      <div className="flex flex-col text-left text-base-regular mt-2">
+                      <div className="flex flex-col text-left font-din-arabic text-black/50 mt-2">
                         <span>
                           {address.address_1}
                           {address.address_2 && (

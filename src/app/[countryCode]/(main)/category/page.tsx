@@ -33,7 +33,8 @@ const Category = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [productScrollPosition, setProductScrollPosition] = useState(0)
   const [maxProductScroll, setMaxProductScroll] = useState(0)
-  const [garageSliderIndex, setGarageSliderIndex] = useState(1)
+  const [garageSliderIndex, setGarageSliderIndex] = useState(2)
+  const [centerCardIndex, setCenterCardIndex] = useState(2)
 
   const handleCartUpdate = (item: CartItem | null) => {
     if (!item) return
@@ -159,28 +160,34 @@ const Category = () => {
 
     const updateGarageSliderIndex = () => {
       const scrollLeft = garageSlider.scrollLeft
-      // Card width calculation: calc(100vw - 8rem) with max 500px, min 320px
       const viewportWidth = window.innerWidth
-      const cardWidth = Math.min(Math.max(viewportWidth - 128, 320), 500)
-      // Gap: gap-6 (24px) on mobile, gap-8 (32px) on desktop
-      const gap = window.innerWidth >= 768 ? 32 : 24
-      // Padding is max(calc(50vw - 250px), 1rem)
-      const paddingLeft = Math.max(viewportWidth / 2 - 250, 16)
+      // Center card width: 75% of viewport, side cards: 62% of viewport
+      // Average for calculation: ~68% of viewport
+      const avgCardWidth = viewportWidth * 0.68
+      const gap = 16 // gap-4 = 16px
+      const paddingLeft = viewportWidth * 0.19 // 19% padding on each side
       const adjustedScroll = scrollLeft + paddingLeft
-      const scrollPosition = adjustedScroll / (cardWidth + gap)
+      const scrollPosition = adjustedScroll / (avgCardWidth + gap)
       const currentIndex = Math.round(scrollPosition)
-      setGarageSliderIndex(Math.min(Math.max(currentIndex, 0), garageSliderItems.length - 1))
+      const newIndex = Math.min(Math.max(currentIndex, 0), garageSliderItems.length - 1)
+      setGarageSliderIndex(newIndex)
+      setCenterCardIndex(newIndex)
     }
 
-    // Initial scroll to center first card
-    const centerFirstCard = () => {
-      // First card should already be centered due to padding, just ensure scroll is at 0
-      garageSlider.scrollLeft = 0
+    // Initial scroll to center card at index 2
+    const centerInitialCard = () => {
+      const viewportWidth = window.innerWidth
+      const avgCardWidth = viewportWidth * 0.68
+      const gap = 16
+      const paddingLeft = viewportWidth * 0.19
+      const initialIndex = 2
+      const scrollPosition = (avgCardWidth + gap) * initialIndex - paddingLeft
+      garageSlider.scrollLeft = Math.max(0, scrollPosition)
     }
 
     // Wait for layout to settle
     setTimeout(() => {
-      centerFirstCard()
+      centerInitialCard()
       updateGarageSliderIndex()
     }, 100)
 
@@ -188,7 +195,7 @@ const Category = () => {
     garageSlider.addEventListener('scroll', updateGarageSliderIndex)
     
     window.addEventListener('resize', () => {
-      centerFirstCard()
+      centerInitialCard()
       updateGarageSliderIndex()
     })
     
@@ -204,12 +211,11 @@ const Category = () => {
     if (!garageSlider) return
 
     const viewportWidth = window.innerWidth
-    const cardWidth = Math.min(Math.max(viewportWidth - 128, 320), 500)
-    const gap = window.innerWidth >= 768 ? 32 : 24
-    // Padding is max(calc(50vw - 250px), 1rem)
-    const paddingLeft = Math.max(viewportWidth / 2 - 250, 16)
+    const avgCardWidth = viewportWidth * 0.68
+    const gap = 16
+    const paddingLeft = viewportWidth * 0.19
     // Calculate scroll position to center the selected card
-    const scrollPosition = (cardWidth + gap) * index - paddingLeft
+    const scrollPosition = (avgCardWidth + gap) * index - paddingLeft
     
     garageSlider.scrollTo({ 
       left: Math.max(0, scrollPosition), 
@@ -289,34 +295,14 @@ const Category = () => {
         </motion.div>
       </motion.div>
 
-      {/* second section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-        className="py-4 md:py-12 text-left"
-      >
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-          className="text-2xl md:text-3xl lg:text-4xl px-6 md:px-10 lg:px-16 tracking-tight opacity-[50%] font-american-typewriter"
-        >
-          A Story in Scent
-        </motion.h2>
-      </motion.div>
-
-      {/* Garage-style Slider Section */}
+      {/* Garage-style Slider Section - Mobile Only */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="relative w-full py-12 md:py-20 overflow-hidden bg-[#e2e2d8]"
+        className="md:hidden relative w-full py-12 overflow-hidden bg-[#e2e2d8]"
       >
-        {/* Large Background Text */}
         <motion.h2
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -332,7 +318,6 @@ const Category = () => {
           Botanica
         </motion.h2>
 
-        {/* Slider Container */}
         <div className="relative z-10">
           <div 
             id="garage-slider"
@@ -340,45 +325,58 @@ const Category = () => {
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             <div 
-              className="flex gap-6 md:gap-8 items-center" 
+              className="flex gap-4 items-center h-full" 
               style={{ 
                 width: 'max-content',
-                paddingLeft: 'max(calc(50vw - 250px), 1rem)',
-                paddingRight: 'max(calc(50vw - 250px), 1rem)'
+                paddingLeft: '19vw',
+                paddingRight: '19vw'
               }}
             >
-              {garageSliderItems.map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="relative flex-shrink-0 snap-center"
-                  style={{ 
-                    width: 'calc(100vw - 8rem)',
-                    maxWidth: '500px',
-                    minWidth: '320px'
-                  }}
-                >
+              {garageSliderItems.map((item, index) => {
+                const isCenter = index === centerCardIndex
+                return (
                   <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    transition={{ duration: 0.3 }}
-                    className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-lg"
+                    key={index}
+                    initial={{ opacity: 0 }}
+                    animate={{ 
+                      opacity: 1,
+                      scale: isCenter ? 1 : 0.85
+                    }}
+                    transition={{ duration: 0.4 }}
+                    className="relative flex-shrink-0 snap-center"
+                    style={{ 
+                      width: isCenter ? '75vw' : '62vw',
+                      minWidth: isCenter ? '75vw' : '62vw'
+                    }}
                   >
-                    {/* Card Image */}
-                    <motion.img
-                      src={item.src}
-                      alt={item.label}
-                      className="w-full h-full object-cover"
-                    />
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                      className={`relative aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-lg ${
+                        isCenter ? 'mx-2' : 'mx-1'
+                      }`}
+                    >
+                      <motion.img
+                        src={item.src}
+                        alt={item.label}
+                        className="w-full h-full object-cover"
+                      />
+                    </motion.div>
+                    {/* Product Name below image */}
+                    <motion.p
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.2 }}
+                      className="text-black text-lg font-bold tracking-wide font-din-arabic text-center mt-3"
+                    >
+                      {item.label}
+                    </motion.p>
                   </motion.div>
-                </motion.div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
-          {/* Text Section Below Slider */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -415,7 +413,6 @@ const Category = () => {
             </motion.p>
           </motion.div>
 
-          {/* Pagination Dots */}
           <div className="flex justify-center items-center gap-2 mt-8">
             {garageSliderItems.map((_, index) => (
               <motion.button
@@ -437,105 +434,16 @@ const Category = () => {
         </div>
       </motion.div>
 
-      {/* mid section - product grid with PAB hover effects */}
+      {/* mid section - product grid with PAB hover effects - Desktop Only */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="w-full"
+        className="hidden md:block w-full md:pt-12 lg:pt-16"
       >
-        {/* Mobile view - horizontal scroll with 2 images per row */}
-        <div className="md:hidden relative py-4">
-          {/* Left Arrow - only show if can scroll left */}
-          {canScrollLeft && (
-            <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20">
-              <motion.button
-                onClick={() => scrollProducts('left')}
-                whileHover={{ scale: 1.05, x: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="group relative w-10 h-10 rounded-full backdrop-blur-md transition-all duration-500 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl overflow-hidden"
-                aria-label="Scroll left"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ChevronLeft className="w-4 h-4 text-white group-hover:text-white transition-all duration-300" />
-                </div>
-                <div className="absolute inset-0 rounded-full ring-1 ring-white/30 group-hover:ring-white/50 transition-all duration-300" />
-              </motion.button>
-            </div>
-          )}
-          
-          {/* Right Arrow - only show if can scroll right */}
-          {canScrollRight && (
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20">
-              <motion.button
-                onClick={() => scrollProducts('right')}
-                whileHover={{ scale: 1.05, x: 2 }}
-                whileTap={{ scale: 0.95 }}
-                className="group relative w-10 h-10 rounded-full backdrop-blur-md transition-all duration-500 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl overflow-hidden"
-                aria-label="Scroll right"
-              >
-                <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ChevronRight className="w-4 h-4 text-white group-hover:text-white transition-all duration-300" />
-                </div>
-                <div className="absolute inset-0 rounded-full ring-1 ring-white/30 group-hover:ring-white/50 transition-all duration-300" />
-              </motion.button>
-            </div>
-          )}
-
-          <div id="product-slider" className="overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory">
-            <div className="flex gap-4 pl-4">
-              {products.map(({ src, label, hoverSrc }, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
-                  viewport={{ once: true }}
-                  className="relative flex-shrink-0 group cursor-pointer w-[calc((100vw-2rem)/2-0.5rem)] snap-center"
-                  onMouseEnter={() => setHoveredProductIndex(i)}
-                  onMouseLeave={() => setHoveredProductIndex(null)}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.03 }}
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="aspect-square overflow-hidden rounded-lg shadow-lg relative mb-3"
-                  >
-                    {/* Base Image */}
-                    <motion.img
-                      src={src}
-                      alt={label}
-                      className="w-full h-full object-cover absolute inset-0"
-                      initial={{ opacity: 1 }}
-                      animate={{ opacity: hoveredProductIndex === i ? 0 : 1 }}
-                      transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    />
-                    {/* Hover Image */}
-                    <motion.img
-                      src={hoverSrc}
-                      alt={`${label} hover`}
-                      className="w-full h-full object-cover absolute inset-0"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
-                      transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    />
-                  </motion.div>
-                  {/* Text below image for mobile */}
-                  <p className="text-black text-lg font-bold tracking-wide font-din-arabic text-center">
-                    {label}
-                  </p>
-                </motion.div>
-              ))}
-              {/* Extra spacing at the end to ensure last view has right padding equal to left padding */}
-              <div className="flex-shrink-0 w-1" />
-            </div>
-          </div>
-        </div>
-
         {/* Desktop view - original layout */}
-        <div className="hidden md:flex md:flex-row w-full gap-4 px-10 lg:px-16">
+        <div className="flex flex-row w-full gap-4 px-10 lg:px-16">
           {products.map(({ src, label, hoverSrc }, i) => (
             <motion.div
               key={i}
@@ -570,12 +478,15 @@ const Category = () => {
                   animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
                   transition={{ duration: 0.3, ease: 'easeInOut' }}
                 />
-                {/* Black Overlay - Only on hover */}
+                {/* Black Overlay - Only on hover with gradient from top to bottom */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="absolute inset-0 bg-black bg-opacity-20 rounded-lg"
+                  className="absolute inset-0 rounded-lg"
+                  style={{
+                    background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.45) 100%)'
+                  }}
                 />
                 
                 {/* Text - Always visible */}

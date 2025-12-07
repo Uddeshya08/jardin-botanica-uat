@@ -11,14 +11,38 @@ export function DesignPhilosophy() {
       style={{ backgroundColor: '#edede2' }}
     >
       <div className="w-full md:container md:mx-auto px-0 md:px-8 lg:px-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Image on Left */}
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+          {/* Heading Section - First on mobile */}
+          <div className="space-y-10 px-8 md:px-0 order-1 lg:hidden pb-8 md:pb-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <p className="font-din-arabic text-sm tracking-widest text-black/50 uppercase">
+                Design Philosophy
+              </p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="font-american-typewriter text-3xl lg:text-4xl tracking-tight text-black leading-tight">
+                From Kyoto's moss gardens to Kew's glasshouses
+              </h2>
+            </motion.div>
+          </div>
+
+          {/* Image - Second on mobile (between heading and description), First column on desktop */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="relative group cursor-pointer"
+            className="relative group cursor-pointer order-2 lg:order-1 w-full"
           >
             <div className="aspect-[4/3] overflow-hidden relative rounded-none md:rounded-sm">
               <motion.div
@@ -55,32 +79,34 @@ export function DesignPhilosophy() {
             </div>
           </motion.div>
 
-          {/* Content on Right */}
+          {/* Content Section - Third on mobile (description + button), Second column on desktop (heading + description + button) */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
-            className="space-y-10 px-8 md:px-0"
+            className="space-y-10 px-8 md:px-0 order-3 lg:order-2"
           >
-            {/* Small Label */}
+            {/* Small Label - Hidden on mobile, shown on desktop */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
+              className="hidden lg:block"
             >
               <p className="font-din-arabic text-sm tracking-widest text-black/50 uppercase">
                 Design Philosophy
               </p>
             </motion.div>
 
-            {/* Main Heading */}
+            {/* Main Heading - Hidden on mobile, shown on desktop */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
               viewport={{ once: true }}
+              className="hidden lg:block"
             >
               <h2 className="font-american-typewriter text-3xl lg:text-4xl tracking-tight text-black leading-tight">
                 From Kyoto's moss gardens to Kew's glasshouses

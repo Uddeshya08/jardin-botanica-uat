@@ -37,6 +37,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
     // Map Medusa fulfillment statuses to UI labels/colors
     switch (status) {
       case "fulfilled":
+      return { label: "SHIPPED", className: "text-blue-600", buttonText: "View Details" }
       case "delivered":
         return { label: "DELIVERED", className: "text-green-600", buttonText: "View Details" }
       case "shipped":
