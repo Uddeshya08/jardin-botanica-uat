@@ -13,6 +13,14 @@ import {
   TestimonialItem,
   ContentfulFeaturedRitualTwo,
   FeaturedRitualTwoSection,
+  ContentfulAfterlifeSection,
+  AfterlifeSection,
+  AfterlifeItem,
+  ContentfulProductInfoPanels,
+  ProductInfoPanels,
+  ActiveItem,
+  FragranceNote,
+  DynamicPanel,
 } from "../../types/contentful"
 import { Entry } from "contentful"
 
@@ -511,6 +519,235 @@ function transformFeaturedRitualTwoSectionEntry(
     }
   } catch (error) {
     console.error("Error transforming Contentful featured ritual two section entry:", error)
+    return null
+  }
+}
+
+
+/**
+ * Fetch afterlife section from Contentful by product handle
+ * @param productHandle - The handle/slug of the product in Medusa
+ * @returns AfterlifeSection or null if not found
+ */
+export async function getAfterlifeSectionByProductHandle(
+  productHandle: string
+): Promise<AfterlifeSection | null> {
+  try {
+    const client = getContentfulClient()
+
+    const response = await client.getEntries({
+      content_type: "afterlifeSection",
+      "fields.productHandle": productHandle,
+      "fields.isActive": true,
+      limit: 1,
+    })
+
+    if (!response.items || response.items.length === 0) {
+      return null
+    }
+
+    const entry = response.items[0] as unknown as Entry<ContentfulAfterlifeSection>
+    return transformAfterlifeSectionEntry(entry)
+  } catch (error) {
+    console.error("Error fetching afterlife section from Contentful:", error)
+    return null
+  }
+}
+
+/**
+ * Fetch afterlife section from Contentful by section key
+ * @param sectionKey - The section key identifier
+ * @returns AfterlifeSection or null if not found
+ */
+export async function getAfterlifeSectionByKey(
+  sectionKey: string
+): Promise<AfterlifeSection | null> {
+  try {
+    const client = getContentfulClient()
+
+    const response = await client.getEntries({
+      content_type: "afterlifeSection",
+      "fields.sectionKey": sectionKey,
+      "fields.isActive": true,
+      limit: 1,
+    })
+
+    if (!response.items || response.items.length === 0) {
+      return null
+    }
+
+    const entry = response.items[0] as unknown as Entry<ContentfulAfterlifeSection>
+    return transformAfterlifeSectionEntry(entry)
+  } catch (error) {
+    console.error("Error fetching afterlife section from Contentful:", error)
+    return null
+  }
+}
+
+/**
+ * Transform Contentful afterlife section entry to simplified AfterlifeSection type
+ */
+function transformAfterlifeSectionEntry(
+  entry: Entry<ContentfulAfterlifeSection>
+): AfterlifeSection | null {
+  try {
+    const fields = entry.fields as any
+
+    // Transform items array
+    const itemsSrc = Array.isArray(fields.items) ? fields.items : []
+    const items: AfterlifeItem[] = itemsSrc.map((it: any): AfterlifeItem => {
+      let icon: string | { src: string; alt: string } | undefined = undefined
+      
+      if (it?.icon) {
+        if (typeof it.icon === "string" && (it.icon === "recycle" || it.icon === "refresh" || it.icon === "leaf")) {
+          icon = it.icon
+        } else if (typeof it.icon === "object" && it.icon.src && it.icon.alt) {
+          icon = { src: it.icon.src, alt: it.icon.alt }
+        }
+      }
+      
+      return {
+        icon,
+        title: typeof it?.title === "string" ? it.title : undefined,
+        text: typeof it?.text === "string" ? it.text : "",
+      }
+    })
+
+    return {
+      title: fields.title || "",
+      sectionKey: fields.sectionKey || "",
+      productHandle: fields.productHandle || undefined,
+      heading: fields.heading || "Afterlife",
+      backgroundColor: fields.backgroundColor || "#EBEBE1",
+      items,
+      isActive: fields.isActive ?? true,
+    }
+  } catch (error) {
+    console.error("Error transforming afterlife section entry:", error)
+    return null
+  }
+}
+
+/**
+ * Fetch product info panels from Contentful by product handle
+ * @param productHandle - The handle/slug of the product in Medusa
+ * @returns ProductInfoPanels or null if not found
+ */
+export async function getProductInfoPanelsByHandle(
+  productHandle: string
+): Promise<ProductInfoPanels | null> {
+  try {
+    const client = getContentfulClient()
+
+    const response = await client.getEntries({
+      content_type: "productInfoPanels",
+      "fields.productHandle": productHandle,
+      "fields.isActive": true,
+      limit: 1,
+    })
+
+    if (!response.items || response.items.length === 0) {
+      return null
+    }
+
+    const entry = response.items[0] as unknown as Entry<ContentfulProductInfoPanels>
+    return transformProductInfoPanelsEntry(entry)
+  } catch (error) {
+    console.error("Error fetching product info panels from Contentful:", error)
+    return null
+  }
+}
+
+/**
+ * Transform Contentful product info panels entry to simplified ProductInfoPanels type
+ */
+function transformProductInfoPanelsEntry(
+  entry: Entry<ContentfulProductInfoPanels>
+): ProductInfoPanels | null {
+  try {
+    const fields = entry.fields as any
+
+    // Transform actives array
+    const activesSrc = Array.isArray(fields.actives) ? fields.actives : []
+    const actives: ActiveItem[] = activesSrc.map((item: any): ActiveItem => {
+      // Handle both JSON objects and stringified JSON
+      const active = typeof item === 'string' ? JSON.parse(item) : item
+      return {
+        name: active?.name || "",
+        description: active?.description || "",
+      }
+    })
+
+    // Transform fragrance notes array
+    const fragranceNotesSrc = Array.isArray(fields.fragranceNotes) ? fields.fragranceNotes : []
+    const fragranceNotes: FragranceNote[] = fragranceNotesSrc.map((item: any): FragranceNote => {
+      // Handle both JSON objects and stringified JSON
+      const note = typeof item === 'string' ? JSON.parse(item) : item
+      return {
+        type: note?.type || "",
+        description: note?.description || "",
+      }
+    })
+
+    // Transform dynamic panels array (for future extensibility)
+    const panelsSrc = Array.isArray(fields.panels) ? fields.panels : []
+    const panels: DynamicPanel[] = panelsSrc
+      .map((item: any, index: number): DynamicPanel | null => {
+        try {
+          // Handle both JSON objects and stringified JSON
+          const panel = typeof item === 'string' ? JSON.parse(item) : item
+          
+          if (!panel || !panel.title || !panel.type) {
+            return null
+          }
+
+          // Transform content based on type
+          let content: any = panel.content || ""
+          
+          if (panel.type === "actives" && Array.isArray(panel.content)) {
+            content = panel.content.map((c: any) => ({
+              name: c?.name || "",
+              description: c?.description || "",
+            }))
+          } else if (panel.type === "fragrance" && Array.isArray(panel.content)) {
+            content = panel.content.map((c: any) => ({
+              type: c?.type || "",
+              description: c?.description || "",
+            }))
+          }
+
+          return {
+            id: panel.id || `panel-${index}`,
+            title: panel.title,
+            type: panel.type as any,
+            content,
+            isVisible: panel.isVisible ?? true,
+            order: panel.order ?? index,
+          }
+        } catch (error) {
+          console.error("Error parsing panel:", error)
+          return null
+        }
+      })
+      .filter((panel: any): panel is DynamicPanel => panel !== null)
+      .sort((a: DynamicPanel, b: DynamicPanel) => (a.order ?? 0) - (b.order ?? 0))
+
+    return {
+      title: fields.title || "",
+      productHandle: fields.productHandle || "",
+      ritualInPractice: fields.ritualInPractice || "",
+      actives,
+      fragranceNotes,
+      fullIngredients: fields.fullIngredients || "",
+      showRitualInPractice: fields.showRitualInPractice ?? true,
+      showActives: fields.showActives ?? true,
+      showFragranceNotes: fields.showFragranceNotes ?? true,
+      showFullIngredients: fields.showFullIngredients ?? true,
+      panels, // Dynamic panels array
+      isActive: fields.isActive ?? true,
+    }
+  } catch (error) {
+    console.error("Error transforming product info panels entry:", error)
     return null
   }
 }

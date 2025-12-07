@@ -8,7 +8,10 @@ import {
   getTestimonialsSectionByKey,
   getTestimonialsSectionByProductHandle,
   getFeaturedRitualTwoSectionByKey,
-  getFeaturedRitualTwoSectionByProductHandle
+  getFeaturedRitualTwoSectionByProductHandle,
+  getAfterlifeSectionByProductHandle,
+  getAfterlifeSectionByKey,
+  getProductInfoPanelsByHandle
 } from "@lib/data/contentful"
 import ProductTemplate from "@modules/products/templates"
 
@@ -242,6 +245,16 @@ export default async function ProductPage(props: Props) {
     }
   }
 
+
+  let afterlifeContent = await getAfterlifeSectionByProductHandle(params.handle)
+
+  if (!afterlifeContent) {
+    afterlifeContent = await getAfterlifeSectionByKey("afterlife-default")
+  }
+
+  // Fetch product info panels from Contentful
+  const productInfoPanels = await getProductInfoPanelsByHandle(params.handle)
+
   return (
     <ProductTemplate
       product={pricedProduct}
@@ -249,9 +262,11 @@ export default async function ProductPage(props: Props) {
       countryCode={params.countryCode}
       productContent={productContent}
       featuredContent={featuredContent}
+      afterlifeContent={afterlifeContent}
       testimonialsContent={testimonialsContent}
       featuredRitualTwoContent={featuredRitualTwoContent}
       ritualProduct={ritualProduct}
+      productInfoPanels={productInfoPanels}
     />
   )
 }
