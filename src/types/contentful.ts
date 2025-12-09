@@ -181,3 +181,107 @@ export interface FeaturedRitualTwoSection {
   imagePosition: 'left' | 'right'
   active: boolean
 }
+
+// Afterlife Section Content Types
+export interface AfterlifeItem {
+  icon?: string | {
+    src: string
+    alt: string
+  }
+  title?: string
+  text: string
+}
+
+export interface AfterlifeSectionFields {
+  title: string
+  sectionKey: string
+  productHandle?: string // Optional: Medusa product handle for reference
+  heading?: string
+  backgroundColor?: string
+  items?: any[] // JSON objects from Contentful
+  isActive: boolean
+}
+
+export interface ContentfulAfterlifeSection extends EntrySkeletonType {
+  contentTypeId: "afterlifeSection"
+  fields: AfterlifeSectionFields
+}
+
+// Simplified type for use in components (matches the exported AfterlifeContent from Afterlife.tsx)
+export interface AfterlifeSection {
+  title: string
+  sectionKey: string
+  productHandle?: string
+  heading: string
+  backgroundColor: string
+  items: AfterlifeItem[]
+  isActive: boolean
+}
+
+// Product Info Panels Content Types
+export interface ActiveItem {
+  name: string
+  description: string
+}
+
+export interface FragranceNote {
+  type: string // "Top Notes", "Heart Notes", "Base Notes"
+  description: string
+}
+
+// Dynamic Panel Types - for future extensibility
+export type PanelContentType = 
+  | "text"           // Simple text content
+  | "actives"        // List of active items with name/description
+  | "fragrance"      // Fragrance notes
+  | "ingredients"    // Ingredients list
+  | "structured"      // Custom structured content (JSON)
+
+export interface DynamicPanel {
+  id: string // Unique identifier for the panel
+  title: string // Panel title (e.g., "Ritual in Practice", "How to Use", "Benefits", etc.)
+  type: PanelContentType
+  content: string | ActiveItem[] | FragranceNote[] | any // Content based on type
+  isVisible: boolean // Whether to show this panel
+  order?: number // Display order (lower numbers appear first)
+}
+
+export interface ProductInfoPanelsFields {
+  title: string
+  productHandle: string
+  // Legacy fields (for backward compatibility)
+  ritualInPractice?: string
+  actives?: any[]
+  fragranceNotes?: any[]
+  fullIngredients?: string
+  showRitualInPractice?: boolean
+  showActives?: boolean
+  showFragranceNotes?: boolean
+  showFullIngredients?: boolean
+  // New dynamic panels array (for future extensibility)
+  panels?: any[] // JSON array of DynamicPanel objects
+  isActive: boolean
+}
+
+export interface ContentfulProductInfoPanels extends EntrySkeletonType {
+  contentTypeId: "productInfoPanels"
+  fields: ProductInfoPanelsFields
+}
+
+// Simplified type for use in components
+export interface ProductInfoPanels {
+  title: string
+  productHandle: string
+  // Legacy fields (for backward compatibility)
+  ritualInPractice: string
+  actives: ActiveItem[]
+  fragranceNotes: FragranceNote[]
+  fullIngredients: string
+  showRitualInPractice: boolean
+  showActives: boolean
+  showFragranceNotes: boolean
+  showFullIngredients: boolean
+  // New dynamic panels array
+  panels: DynamicPanel[]
+  isActive: boolean
+}

@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
 import { Label } from "./ui/label"
 import { useLedger, LedgerItem } from "app/context/ledger-context"
 import { toast } from "sonner"
+import { ProductInfoPanels, DynamicPanel } from "../../types/contentful"
 
 import {
   Breadcrumb,
@@ -57,6 +58,7 @@ interface ProductHeroProps {
   }
   countryCode: string
   onCartUpdate?: (item: CartItem | null) => void
+  productInfoPanels?: ProductInfoPanels | null
 }
 
 const extractNumericSize = (label: string) => {
@@ -116,11 +118,15 @@ export function ProductHero({
   countryCode,
   onCartUpdate,
   onVariantChange,
+  productInfoPanels,
 }: ProductHeroProps & { onVariantChange?: (variantId: string | null) => void }) {
   const [isRitualPanelOpen, setIsRitualPanelOpen] = useState(false)
   const [isActivesPanelOpen, setIsActivesPanelOpen] = useState(false)
   const [isFragranceNotesOpen, setIsFragranceNotesOpen] = useState(false)
   const [isIngredientsPanelOpen, setIsIngredientsPanelOpen] = useState(false)
+  
+  // Dynamic panel states - for future extensibility
+  const [openPanelId, setOpenPanelId] = useState<string | null>(null)
 
   const router = useRouter()
   const [quantity, setQuantity] = useState(1)
@@ -215,6 +221,43 @@ export function ProductHero({
 
     return canSeeActives && !isExcluded
   }
+
+  // Check if using dynamic panels (new approach) or legacy fields (backward compatibility)
+  const useDynamicPanels = productInfoPanels?.panels && productInfoPanels.panels.length > 0
+
+  // Use Contentful data if available, otherwise use defaults
+  const shouldShowRitual = productInfoPanels?.showRitualInPractice ?? isCleanserOrExfoliant()
+  const shouldShowActives = productInfoPanels?.showActives ?? isCleanserOrExfoliant()
+  const shouldShowFragrance = productInfoPanels?.showFragranceNotes ?? true
+  const shouldShowIngredients = productInfoPanels?.showFullIngredients ?? isCleanserOrExfoliant()
+
+  // Default content (for legacy approach)
+  const defaultRitualInPractice = "Dispense a measured amount. Work slowly into damp hands, letting the exfoliating texture and black tea notes awaken the senses. Rinse away — hands refreshed, reset, and primed."
+  const defaultActives = [
+    { name: "Black Tea Extract —", description: "antioxidant-rich, energizing." },
+    { name: "Colloidal Oats —", description: "natural scrubbing agent that lifts impurities gently." },
+    { name: "Panthenol (Pro-Vitamin B5) —", description: "hydrates and supports skin barrier." },
+    { name: "Aloe Leaf Water —", description: "refreshing, helps soothe after exfoliation." },
+    { name: "Glycerin —", description: "draws in and holds moisture." },
+  ]
+  const defaultFragranceNotes = [
+    { type: "Top Notes —", description: "Fresh Pine" },
+    { type: "Heart Notes —", description: "Resinous Balsam" },
+    { type: "Base Notes —", description: "Grounded Cedarwood" },
+  ]
+  const defaultFullIngredients = "Water, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Black Tea Extract (Camellia Sinensis), Colloidal Oatmeal, Panthenol (Pro-Vitamin B5), Aloe Barbadensis Leaf Juice, Glycerin, Sodium Chloride, Citric Acid, Phenoxyethanol, Ethylhexylglycerin, Natural Fragrance, Tocopherol (Vitamin E)."
+
+  const ritualInPractice = productInfoPanels?.ritualInPractice || defaultRitualInPractice
+  const actives = productInfoPanels?.actives && productInfoPanels.actives.length > 0 
+    ? productInfoPanels.actives 
+    : defaultActives
+  const fragranceNotes = productInfoPanels?.fragranceNotes && productInfoPanels.fragranceNotes.length > 0
+    ? productInfoPanels.fragranceNotes
+    : defaultFragranceNotes
+  const fullIngredients = productInfoPanels?.fullIngredients || defaultFullIngredients
+
+  // Dynamic panels (for future extensibility)
+  const dynamicPanels = productInfoPanels?.panels || []
 
   // Dynamic breadcrumb label based on product type
   const breadcrumbLeafLabel = isCleanserOrExfoliant()
@@ -555,7 +598,7 @@ export function ProductHero({
           )}
 
           {/* Separator line before Ritual in Practice */}
-          {isCleanserOrExfoliant() && (<motion.div
+          {shouldShowRitual && (<motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ duration: 0.6, delay: 0.9 }}
@@ -564,7 +607,7 @@ export function ProductHero({
           />)}
 
           {/* Collapsible Ritual in Practice */}
-          {isCleanserOrExfoliant() && (<motion.div
+          {shouldShowRitual && (<motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.0 }}
@@ -593,7 +636,7 @@ export function ProductHero({
           </motion.div>)}
 
           {/* Separator line before Actives & Key Botanicals */}
-          {isCleanserOrExfoliant() && (
+          {shouldShowActives && (
             <motion.div
               initial={{ opacity: 0, scaleX: 0 }}
               animate={{ opacity: 1, scaleX: 1 }}
@@ -602,8 +645,8 @@ export function ProductHero({
               style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
             />)}
 
-          {/* Collapsible Actives & Key Botanicals - Only show for cleansers and exfoliants */}
-          {isCleanserOrExfoliant() && (
+          {/* Collapsible Actives & Key Botanicals */}
+          {shouldShowActives && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -634,7 +677,7 @@ export function ProductHero({
           )}
 
           {/* Separator line before Fragrance Notes */}
-          {isCleanserOrExfoliant() && (<motion.div
+          {shouldShowFragrance && (<motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ duration: 0.6, delay: 1.3 }}
@@ -643,7 +686,7 @@ export function ProductHero({
           />)}
 
           {/* Collapsible Fragrance Notes */}
-          <motion.div
+          {shouldShowFragrance && (<motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.4 }}
@@ -669,19 +712,19 @@ export function ProductHero({
                 />
               </motion.div>
             </button>
-          </motion.div>
+          </motion.div>)}
 
           {/* Separator line before Full Ingredients */}
-          <motion.div
+          {shouldShowIngredients && (<motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ duration: 0.6, delay: 1.5 }}
             className="w-full h-px origin-left"
             style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
-          />
+          />)}
 
           {/* Collapsible Full Ingredients */}
-          {isCleanserOrExfoliant() && (<motion.div
+          {shouldShowIngredients && (<motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.6 }}
@@ -708,6 +751,53 @@ export function ProductHero({
               </motion.div>
             </button>
           </motion.div>)}
+
+          {/* Dynamic Panel Buttons - render if using dynamic panels (new approach) */}
+          {useDynamicPanels && dynamicPanels.map((panel, index) => {
+            if (!panel.isVisible) return null
+            
+            return (
+              <React.Fragment key={panel.id}>
+                {/* Separator line */}
+                <motion.div
+                  initial={{ opacity: 0, scaleX: 0 }}
+                  animate={{ opacity: 1, scaleX: 1 }}
+                  transition={{ duration: 0.6, delay: 1.7 + index * 0.1 }}
+                  className="w-full h-px origin-left"
+                  style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
+                />
+                
+                {/* Panel Button */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1.8 + index * 0.1 }}
+                  className="space-y-1"
+                >
+                  <button
+                    onClick={() => setOpenPanelId(panel.id)}
+                    className="flex items-center justify-between w-full py-1 text-left group"
+                  >
+                    <span
+                      className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
+                      style={{ color: "#a28b6f" }}
+                    >
+                      {panel.title}
+                    </span>
+                    <motion.div
+                      whileHover={{ rotate: 90 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                      <Plus
+                        className="w-4 h-4 transition-colors duration-300"
+                        style={{ color: "#a28b6f" }}
+                      />
+                    </motion.div>
+                  </button>
+                </motion.div>
+              </React.Fragment>
+            )
+          })}
         </div>
       </motion.div>
 
@@ -837,9 +927,7 @@ export function ProductHero({
         title="Ritual in Practice"
       >
         <p className="font-din-arabic text-black/80 leading-relaxed">
-          Dispense a measured amount. Work slowly into damp hands, letting the
-          exfoliating texture and black tea notes awaken the senses. Rinse away
-          — hands refreshed, reset, and primed.
+          {ritualInPractice}
         </p>
       </InfoPanel>
       <InfoPanel
@@ -848,46 +936,16 @@ export function ProductHero({
         title="Actives & Key Botanicals"
       >
         <div className="space-y-4">
-          <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Black Tea Extract —{" "}
-            </span>
-            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-              antioxidant-rich, energizing.
-            </span>
-          </div>
-          <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Colloidal Oats —{" "}
-            </span>
-            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-              natural scrubbing agent that lifts impurities gently.
-            </span>
-          </div>
-          <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Panthenol (Pro-Vitamin B5) —{" "}
-            </span>
-            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-              hydrates and supports skin barrier.
-            </span>
-          </div>
-          <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Aloe Leaf Water —{" "}
-            </span>
-            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-              refreshing, helps soothe after exfoliation.
-            </span>
-          </div>
-          <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Glycerin —{" "}
-            </span>
-            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-              draws in and holds moisture.
-            </span>
-          </div>
+          {actives.map((active, index) => (
+            <div key={index} className="group">
+              <span className="font-din-arabic text-black inline">
+                {active.name}{" "}
+              </span>
+              <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
+                {active.description}
+              </span>
+            </div>
+          ))}
         </div>
       </InfoPanel>
       <InfoPanel
@@ -896,30 +954,16 @@ export function ProductHero({
         title="Fragrance Profile"
       >
         <div className="space-y-4">
-          <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Top Notes —{" "}
-            </span>
-            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-              Fresh Pine
-            </span>
-          </div>
-          <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Heart Notes —{" "}
-            </span>
-            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-              Resinous Balsam
-            </span>
-          </div>
-          <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Base Notes —{" "}
-            </span>
-            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-              Grounded Cedarwood
-            </span>
-          </div>
+          {fragranceNotes.map((note, index) => (
+            <div key={index} className="group">
+              <span className="font-din-arabic text-black inline">
+                {note.type}{" "}
+              </span>
+              <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
+                {note.description}
+              </span>
+            </div>
+          ))}
         </div>
       </InfoPanel>
       <InfoPanel
@@ -928,13 +972,88 @@ export function ProductHero({
         title="Full Ingredients"
       >
         <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
-          Water, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Black Tea
-          Extract (Camellia Sinensis), Colloidal Oatmeal, Panthenol (Pro-Vitamin
-          B5), Aloe Barbadensis Leaf Juice, Glycerin, Sodium Chloride, Citric
-          Acid, Phenoxyethanol, Ethylhexylglycerin, Natural Fragrance,
-          Tocopherol (Vitamin E).
+          {fullIngredients}
         </p>
       </InfoPanel>
+
+      {/* Dynamic Panels - for future extensibility */}
+      {useDynamicPanels && dynamicPanels.map((panel) => {
+        if (!panel.isVisible) return null
+        
+        const renderPanelContent = () => {
+          switch (panel.type) {
+            case "text":
+              return (
+                <p className="font-din-arabic text-black/80 leading-relaxed">
+                  {typeof panel.content === "string" ? panel.content : ""}
+                </p>
+              )
+            case "actives":
+              return (
+                <div className="space-y-4">
+                  {Array.isArray(panel.content) && panel.content.map((active: any, index: number) => (
+                    <div key={index} className="group">
+                      <span className="font-din-arabic text-black inline">
+                        {active.name}{" "}
+                      </span>
+                      <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
+                        {active.description}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )
+            case "fragrance":
+              return (
+                <div className="space-y-4">
+                  {Array.isArray(panel.content) && panel.content.map((note: any, index: number) => (
+                    <div key={index} className="group">
+                      <span className="font-din-arabic text-black inline">
+                        {note.type}{" "}
+                      </span>
+                      <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
+                        {note.description}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )
+            case "ingredients":
+              return (
+                <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
+                  {typeof panel.content === "string" ? panel.content : ""}
+                </p>
+              )
+            case "structured":
+              // For custom structured content, render as JSON or custom format
+              return (
+                <div className="font-din-arabic text-black/80 leading-relaxed">
+                  {typeof panel.content === "string" 
+                    ? panel.content 
+                    : JSON.stringify(panel.content, null, 2)}
+                </div>
+              )
+            default:
+              return (
+                <p className="font-din-arabic text-black/80 leading-relaxed">
+                  {typeof panel.content === "string" ? panel.content : ""}
+                </p>
+              )
+          }
+        }
+
+        return (
+          <InfoPanel
+            key={panel.id}
+            isOpen={openPanelId === panel.id}
+            onClose={() => setOpenPanelId(null)}
+            title={panel.title}
+          >
+            {renderPanelContent()}
+          </InfoPanel>
+        )
+      })}
+
     </div>
   )
 }

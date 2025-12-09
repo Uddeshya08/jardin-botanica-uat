@@ -2,83 +2,10 @@ import React from "react"
 import { motion } from "motion/react"
 import Image from "next/image"
 import { Recycle, RefreshCw, Leaf } from "lucide-react"
-import type { HttpTypes } from "@medusajs/types"
+import { AfterlifeSection, AfterlifeItem } from "../../types/contentful"
 
-type AfterlifeItem = {
-  icon?: string | {
-    src: string
-    alt: string
-  }
-  title?: string
-  text: string
-}
-
-type AfterlifeContent = {
-  heading?: string
-  bg?: string           
-  items?: AfterlifeItem[]
-}
-
-type ProductLike = {
-  title?: string
-  handle?: string
-  metadata?: Record<string, any>
-} & Partial<HttpTypes.StoreProduct>
-
-function safeParseOnce(v: any) {
-  if (typeof v !== "string") return v
-  try { return JSON.parse(v) } catch { return v }
-}
-function safeParseTwice(v: any) {
-  const once = safeParseOnce(v)
-  return typeof once === "string" ? safeParseOnce(once) : once
-}
-function getAfterlifeContent(product?: ProductLike): AfterlifeContent {
-  const defaults: AfterlifeContent = {
-    heading: "Afterlife",
-    bg: "#EBEBE1",
-    items: [
-      { icon: "recycle", title: "Glass Vessels", text: "Our amber glass bottles are designed for recycling and reuse — they can be rinsed, refilled, or even reimagined as planters." },
-      { icon: "refresh", title: "Pump Systems", text: "Pumps are a mix of metal and plastic. We encourage reusing them across bottles until their natural end." },
-      { icon: "leaf",    title: "Mindful End",   text: "When the pump no longer functions, please discard thoughtfully. Every choice matters to the gardens we're preserving." }
-    ],
-  }
-
-  if (!product?.metadata) return defaults
-
-  const raw = product.metadata.afterlife ?? product.metadata.sections?.afterlife
-
-  if (!raw) return defaults
-
-  const parsed: any = safeParseTwice(raw)
-  if (!parsed || typeof parsed !== "object") return defaults
-
-  const itemsSrc = Array.isArray(parsed.items) ? parsed.items : []
-  const items = itemsSrc.length
-    ? itemsSrc.map((it: any): AfterlifeItem => {
-        let icon: string | { src: string; alt: string } | undefined = undefined
-        
-        if (it?.icon) {
-          if (typeof it.icon === "string" && (it.icon === "recycle" || it.icon === "refresh" || it.icon === "leaf")) {
-            icon = it.icon
-          } else if (typeof it.icon === "object" && it.icon.src && it.icon.alt) {
-            icon = { src: it.icon.src, alt: it.icon.alt }
-          }
-        }
-        
-        return {
-          icon,
-          title: typeof it?.title === "string" ? it.title : "",
-          text: typeof it?.text === "string" ? it.text : "",
-        }
-      })
-    : defaults.items
-
-  return {
-    heading: typeof parsed.heading === "string" ? parsed.heading : defaults.heading,
-    bg: typeof parsed.bg === "string" ? parsed.bg : defaults.bg,
-    items,
-  }
+type AfterlifeProps = {
+  afterlifeContent?: AfterlifeSection | null
 }
 function normalizeIconPath(iconSrc: string): string {
   const filename = iconSrc.split('/').pop()?.toLowerCase() || ''
@@ -99,10 +26,28 @@ const lucideIconMap = {
   leaf: Leaf,
 }
 
-export function Afterlife({ product }: { product?: ProductLike }) {
-  const content = getAfterlifeContent(product)
-  const { heading, bg, items = [] } = content
-//  console.log("heading = ", heading)
+export function Afterlife({ afterlifeContent }: AfterlifeProps) {
+  // Default values if no Contentful data is provided
+  const defaults: AfterlifeSection = {
+    title: "",
+    sectionKey: "",
+    heading: "Afterlife",
+    backgroundColor: "#EBEBE1",
+    items: [
+      { icon: "recycle", title: "Glass Vessels", text: "Our amber glass bottles are designed for recycling and reuse — they can be rinsed, refilled, or even reimagined as planters." },
+      { icon: "refresh", title: "Pump Systems", text: "Pumps are a mix of metal and plastic. We encourage reusing them across bottles until their natural end." },
+      { icon: "leaf",    title: "Mindful End",   text: "When the pump no longer functions, please discard thoughtfully. Every choice matters to the gardens we're preserving." }
+    ],
+    isActive: true,
+  }
+
+  const content = afterlifeContent || defaults
+  const { heading, backgroundColor: bg, items = [] } = content
+
+  // Don't render if Contentful data exists but is inactive
+  if (afterlifeContent && !afterlifeContent.isActive) {
+    return null
+  }
   return (
     <section className="py-16 lg:py-20" style={{ backgroundColor: bg ?? "#EBEBE1" }}>
       <div className="container mx-auto px-4 md:px-8 lg:px-16">

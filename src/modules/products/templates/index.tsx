@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from "react"
 
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
-import { ProductContent, FeaturedSection, TestimonialsSection, FeaturedRitualTwoSection } from "../../../types/contentful"
+import { ProductContent, FeaturedSection, TestimonialsSection, FeaturedRitualTwoSection, AfterlifeSection, ProductInfoPanels } from "../../../types/contentful"
 import { Navigation } from "app/components/Navigation"
 import { ProductHero } from "app/components/ProductHero"
 import { StickyCartBar } from "app/components/StickyCartBar"
@@ -32,9 +32,11 @@ type ProductTemplateProps = {
   countryCode: string
   productContent?: ProductContent | null
   featuredContent?: FeaturedSection | null
+  afterlifeContent?: AfterlifeSection | null
   testimonialsContent?: TestimonialsSection | null
   featuredRitualTwoContent?: FeaturedRitualTwoSection | null
   ritualProduct?: RitualProduct | null
+  productInfoPanels?: ProductInfoPanels | null
 }
 
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
@@ -43,9 +45,11 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   countryCode,
   productContent,
   featuredContent,
+  afterlifeContent,
   testimonialsContent,
   featuredRitualTwoContent,
   ritualProduct: ritualProductProp,
+  productInfoPanels,
 }) => {
   if (!product || !product.id) {
     return notFound()
@@ -127,6 +131,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           onVariantChange={useCallback((variantId: string | null) => {
             setSelectedVariantId(variantId)
           }, [])}
+          productInfoPanels={productInfoPanels}
         />
 
         <StickyCartBar
@@ -138,7 +143,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           ritualProduct={ritualProductProp}
         />
 
-        <Afterlife product={product as any} />
+        <Afterlife afterlifeContent={afterlifeContent} />
         <PeopleAlsoBought product={product as any} />
         <FeaturedRitualTwo 
           key={featuredRitualTwoContent?.productHandle || featuredRitualTwoContent?.sectionKey || 'default'} 
