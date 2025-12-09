@@ -11,7 +11,9 @@ import {
   getFeaturedRitualTwoSectionByProductHandle,
   getAfterlifeSectionByProductHandle,
   getAfterlifeSectionByKey,
-  getProductInfoPanelsByHandle
+  getProductInfoPanelsByHandle,
+  getFromTheLabSectionByProductHandle,
+  getFromTheLabSectionByKey
 } from "@lib/data/contentful"
 import ProductTemplate from "@modules/products/templates"
 
@@ -255,6 +257,21 @@ export default async function ProductPage(props: Props) {
   // Fetch product info panels from Contentful
   const productInfoPanels = await getProductInfoPanelsByHandle(params.handle)
 
+  // Fetch "From the Lab" section content from Contentful
+  // Try product-specific "From the Lab" by productHandle first
+  let fromTheLabContent = await getFromTheLabSectionByProductHandle(params.handle)
+  
+  // Fall back to section key approach if product handle search doesn't find anything
+  if (!fromTheLabContent) {
+    const productFromTheLabKey = `${params.handle}-from-the-lab`
+    fromTheLabContent = await getFromTheLabSectionByKey(productFromTheLabKey)
+  }
+  
+  // Final fallback to generic PDP "From the Lab" if product-specific not found
+  if (!fromTheLabContent) {
+    fromTheLabContent = await getFromTheLabSectionByKey("pdp-from-the-lab")
+  }
+
   return (
     <ProductTemplate
       product={pricedProduct}
@@ -267,6 +284,7 @@ export default async function ProductPage(props: Props) {
       featuredRitualTwoContent={featuredRitualTwoContent}
       ritualProduct={ritualProduct}
       productInfoPanels={productInfoPanels}
+      fromTheLabContent={fromTheLabContent}
     />
   )
 }

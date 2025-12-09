@@ -285,3 +285,72 @@ export interface ProductInfoPanels {
   panels: DynamicPanel[]
   isActive: boolean
 }
+
+// From the Lab Section Content Types
+export interface FromTheLabProduct {
+  id?: string | number
+  name: string
+  price?: number
+  currency?: string
+  image?: string
+  hoverImage?: string
+  description?: string
+  badge?: string
+  url?: string
+  variantId?: string // Optional: For direct cart addition
+}
+
+export interface FromTheLabProductFields {
+  id?: string | number
+  name: string
+  price?: number
+  currency?: string
+  image?: string | ContentfulAsset // Can be URL string or Contentful Asset
+  hoverImage?: string | ContentfulAsset // Can be URL string or Contentful Asset
+  description?: string
+  badge?: string
+  url?: string
+}
+
+// ProductCard Content Type (Referenced from FromTheLabSection)
+export interface ProductCardFields {
+  name: string
+  price?: number
+  currency?: string
+  image?: ContentfulAsset // Media field
+  hoverImage?: ContentfulAsset // Media field
+  description?: string
+  badge?: string
+  url?: string
+  variantId?: string // Optional: For direct cart addition
+}
+
+export interface ContentfulProductCard extends EntrySkeletonType {
+  contentTypeId: "productCard"
+  fields: ProductCardFields
+}
+
+// FromTheLabSection Content Type (matches user's Contentful structure)
+export interface FromTheLabSectionFields {
+  heading?: string
+  subheading?: string
+  backgroundColor?: string
+  isActive: boolean
+  products?: ContentfulProductCard[] // Array of references to ProductCard
+  productHandle?: string // Optional: For product-specific filtering
+  sectionKey?: string // Optional: For section-specific filtering
+}
+
+export interface ContentfulFromTheLabSection extends EntrySkeletonType {
+  contentTypeId: "fromTheLabSection" // Matches Contentful content type ID
+  fields: FromTheLabSectionFields
+}
+
+// Simplified type for use in components
+export interface FromTheLabSection {
+  heading: string
+  subheading: string
+  backgroundColor: string
+  products: FromTheLabProduct[]
+  isActive: boolean
+}

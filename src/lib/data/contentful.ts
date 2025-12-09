@@ -21,6 +21,10 @@ import {
   ActiveItem,
   FragranceNote,
   DynamicPanel,
+  ContentfulFromTheLabSection,
+  FromTheLabSection,
+  FromTheLabProduct,
+  ContentfulProductCard,
 } from "../../types/contentful"
 import { Entry } from "contentful"
 
@@ -748,6 +752,211 @@ function transformProductInfoPanelsEntry(
     }
   } catch (error) {
     console.error("Error transforming product info panels entry:", error)
+    return null
+  }
+}
+
+/**
+ * Fetch "From the Lab" section content from Contentful by product handle
+ * @param productHandle - The product handle to filter by
+ * @returns FromTheLabSection or null if not found
+ */
+export async function getFromTheLabSectionByProductHandle(
+  productHandle: string
+): Promise<FromTheLabSection | null> {
+  try {
+    const client = getContentfulClient()
+
+    // First try to find by productHandle field (if it exists in Contentful)
+    const response = await client.getEntries({
+      content_type: "fromTheLabSection",
+      "fields.productHandle": productHandle,
+      "fields.isActive": true,
+      include: 2, // Include linked ProductCard entries
+      limit: 1,
+    })
+
+    if (response.items && response.items.length > 0) {
+      const entry = response.items[0] as unknown as Entry<ContentfulFromTheLabSection>
+      return transformFromTheLabSectionEntry(entry)
+    }
+
+    // Fallback: Try sectionKey pattern matching
+    const sectionKey = `${productHandle}-from-the-lab`
+    return await getFromTheLabSectionByKey(sectionKey)
+  } catch (error) {
+    console.error("Error fetching From the Lab section from Contentful:", error)
+    return null
+  }
+}
+
+/**
+ * Fetch "From the Lab" section content from Contentful by section key
+ * @param sectionKey - The unique key for the section (e.g., "pdp-from-the-lab", "default-from-the-lab")
+ * @returns FromTheLabSection or null if not found
+ */
+export async function getFromTheLabSectionByKey(
+  sectionKey: string
+): Promise<FromTheLabSection | null> {
+  try {
+    const client = getContentfulClient()
+
+    // Query Contentful for entries with matching sectionKey
+    // Include linked ProductCard entries (depth: 2 to get all nested references)
+    const response = await client.getEntries({
+      content_type: "fromTheLabSection",
+      "fields.sectionKey": sectionKey,
+      "fields.isActive": true, // Only fetch active sections
+      include: 2, // Include linked ProductCard entries
+      limit: 1,
+    })
+
+    if (!response.items || response.items.length === 0) {
+      console.warn(`No From the Lab section found for key: ${sectionKey}`)
+      return null
+    }
+
+    const entry = response.items[0] as unknown as Entry<ContentfulFromTheLabSection>
+    return transformFromTheLabSectionEntry(entry)
+  } catch (error) {
+    console.error("Error fetching From the Lab section from Contentful:", error)
+    return null
+  }
+}
+
+/**
+ * Fetch all active "From the Lab" sections from Contentful
+ * @returns Array of FromTheLabSection
+ */
+export async function getAllFromTheLabSections(): Promise<FromTheLabSection[]> {
+  try {
+    const client = getContentfulClient()
+
+    // Include linked ProductCard entries (depth: 2 to get all nested references)
+    const response = await client.getEntries({
+      content_type: "fromTheLabSection",
+      "fields.isActive": true,
+      include: 2, // Include linked ProductCard entries
+      limit: 100,
+    })
+
+    if (!response.items || response.items.length === 0) {
+      return []
+    }
+
+    return response.items
+      .map((item) => transformFromTheLabSectionEntry(item as unknown as Entry<ContentfulFromTheLabSection>))
+      .filter((item): item is FromTheLabSection => item !== null)
+  } catch (error) {
+    console.error("Error fetching all From the Lab sections from Contentful:", error)
+    return []
+  }
+}
+
+/**
+ * Transform Contentful "From the Lab" section entry to simplified FromTheLabSection type
+ */
+function transformFromTheLabSectionEntry(
+  entry: Entry<ContentfulFromTheLabSection>
+): FromTheLabSection | null {
+  try {
+    const fields = entry.fields as any
+
+    // Helper function to extract image URL from Contentful Asset or string
+    const getImageUrl = (img: any): string | undefined => {
+      if (!img) return undefined
+      
+      // If it's already a string URL, return it
+      if (typeof img === 'string') return img
+      
+      // If it's a Contentful Asset object (from References or nested)
+      if (img.fields && img.fields.file && img.fields.file.url) {
+        const url = img.fields.file.url
+        return url.startsWith('//') ? `https:${url}` : url
+      }
+      
+      // If it's a nested object with url property
+      if (img.url) {
+        return typeof img.url === 'string' ? img.url : undefined
+      }
+      
+      return undefined
+    }
+
+    // Helper function to transform ProductCard entry (from References field)
+    const transformProductCard = (p: any, index: number): FromTheLabProduct => {
+      // If it's a Contentful ProductCard entry (from References field)
+      // Contentful returns linked entries in the includes or directly in fields
+      if (p.fields) {
+        // Direct ProductCard entry with fields
+        return {
+          id: p.sys?.id || `product-${index}`,
+          name: p.fields.name || "",
+          price: typeof p.fields.price === 'number' ? p.fields.price : undefined,
+          currency: typeof p.fields.currency === 'string' ? p.fields.currency : undefined,
+          image: getImageUrl(p.fields.image),
+          hoverImage: getImageUrl(p.fields.hoverImage),
+          description: typeof p.fields.description === 'string' ? p.fields.description : undefined,
+          badge: typeof p.fields.badge === 'string' ? p.fields.badge : undefined,
+          url: typeof p.fields.url === 'string' ? p.fields.url : undefined,
+          variantId: typeof p.fields.variantId === 'string' ? p.fields.variantId : undefined,
+        }
+      }
+      
+      // If it's a link object (sys.type === 'Link'), we need to resolve it from includes
+      // This shouldn't happen with include: 2, but handle it just in case
+      if (p.sys && p.sys.type === 'Link' && p.sys.linkType === 'Entry') {
+        console.warn('ProductCard entry not resolved, may need to check includes')
+        return {
+          id: p.sys.id || `product-${index}`,
+          name: "",
+          price: undefined,
+          currency: undefined,
+          image: undefined,
+          hoverImage: undefined,
+          description: undefined,
+          badge: undefined,
+          url: undefined,
+        }
+      }
+      
+      // Fallback: If it's a JSON object (backward compatibility for old entries)
+      const product = typeof p === 'string' ? JSON.parse(p) : p
+      
+      return {
+        id: product?.id ?? index + 1,
+        name: product?.name || "",
+        price: typeof product?.price === 'number' ? product.price : undefined,
+        currency: typeof product?.currency === 'string' ? product.currency : undefined,
+        image: getImageUrl(product?.image),
+        hoverImage: getImageUrl(product?.hoverImage),
+        description: typeof product?.description === 'string' ? product.description : undefined,
+        badge: typeof product?.badge === 'string' ? product.badge : undefined,
+        url: typeof product?.url === 'string' ? product.url : undefined,
+        variantId: typeof product?.variantId === 'string' ? product.variantId : undefined,
+      }
+    }
+
+    // Parse products - Array of references to ProductCard entries
+    let products: FromTheLabProduct[] = []
+    
+    if (Array.isArray(fields.products)) {
+      products = fields.products.map(transformProductCard)
+    } else if (fields.products && fields.products.fields) {
+      // Handle single product entry (shouldn't happen but handle it)
+      products = [transformProductCard(fields.products, 0)]
+    }
+
+    // Provide defaults for optional fields
+    return {
+      heading: fields.heading || "From the Lab",
+      subheading: fields.subheading || "Formulations most often paired in practice.",
+      backgroundColor: fields.backgroundColor || "#e3e3d8",
+      products,
+      isActive: fields.isActive ?? true,
+    }
+  } catch (error) {
+    console.error("Error transforming From the Lab section entry:", error)
     return null
   }
 }
