@@ -148,11 +148,11 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         <Afterlife afterlifeContent={afterlifeContent} />
         <PeopleAlsoBought product={product as any} fromTheLabContent={fromTheLabContent} />
         <FeaturedRitualTwo 
-          key={featuredRitualTwoContent?.productHandle || featuredRitualTwoContent?.sectionKey || 'default'} 
+          key={`featured-ritual-two-${featuredRitualTwoContent?.productHandle || featuredRitualTwoContent?.sectionKey || 'default'}`} 
           featuredRitualTwoContent={featuredRitualTwoContent} 
         />
         <CustomerTestimonials 
-          key={testimonialsContent?.productHandle || testimonialsContent?.sectionKey || 'default'} 
+          key={`customer-testimonials-${testimonialsContent?.productHandle || testimonialsContent?.sectionKey || 'default'}`} 
           testimonialsContent={testimonialsContent} 
         />
         <Featured featuredContent={featuredContent} />
