@@ -2,6 +2,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useTransition } from 'react'
+import { toast } from 'sonner'
+import { addToCartAction } from '@lib/data/cart-actions'
+import { useCartItemsSafe } from 'app/context/cart-items-context'
+import { emitCartUpdated } from '@lib/util/cart-client'
+import { FromTheLabSection } from '../../types/contentful'
 
 type ProductLike = { metadata?: Record<string, any> }
 
@@ -15,6 +22,7 @@ type Card = {
   description?: string
   badge?: string
   url?: string
+  variantId?: string       // Optional: For direct cart addition
 }
 
 type MetaShape = {
@@ -39,67 +47,47 @@ function parseTwice(v: any) {
 }
 
 // Auto-detect units:
-// - if currency provided => assume MINOR units and format via Intl
+// - if currency provided:
+//   - if price < 10000 => treat as rupees (direct value)
+//   - else => treat as paise (divide by 100)
 // - else if price >= 1000 and divisible by 100 => treat as paise -> ₹(price/100)
 // - else treat as rupees
 function formatPrice(price?: number, currency?: string) {
   if (typeof price !== 'number') return ''
   if (currency) {
-    // assume minor units when currency is present
-    const value = price / 100
+    // Smart detection: if price is less than 10000, treat as rupees (direct value)
+    // Otherwise, treat as paise (divide by 100)
+    // This handles both cases: 1800 (rupees) and 180000 (paise)
+    const value = price < 10000 ? price : price / 100
     try {
       return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value)
     } catch {
-      return `$${Math.round(value)}`
+      // Fallback formatting
+      const formattedValue = Math.round(value).toLocaleString()
+      return currency === 'INR' ? `₹${formattedValue}` : `${currency} ${formattedValue}`
     }
   }
   if (price >= 1000 && price % 100 === 0) return `$${Math.round(price / 100)}`
   return `$${Math.round(price)}`
 }
 
-const products = [
-  {
-    id: 1,
-    name: "Body Floral",
-    price: 1800,
-    image: '/assets/handLotion.png',
-    hoverImage: "https://images.unsplash.com/photo-1729603370129-4816f7021a8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBoYW5kJTIwY3JlYW0lMjBib3RhbmljYWx8ZW58MXx8fHwxNzU3NjE0NDk2fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    description: "Delicate blooms, lingering scents",
-    badge: "BEST SELLER"
-  },
-  {
-    id: 2,
-    name: "Warm Roots",
-    price: 2200,
-    image: '/assets/crushedPineCandle.png',
-    hoverImage: "https://images.unsplash.com/photo-1611643380829-8f9b66da7e6f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBjYW5kbGUlMjBuYXR1cmFsfGVufDF8fHx8MTc1NzYxNDQ5OHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    description: "Grounded in earth, rooted warmth",
-    badge: "NEW"
-  },
-  {
-    id: 3,
-    name: "Aqua Vitei",
-    price: 1900,
-    image: '/assets/scentedCandle.png',
-    hoverImage: "https://images.unsplash.com/photo-1596642748852-5596416147ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvcmdhbmljJTIwc2tpbmNhcmUlMjBib3R0bGV8ZW58MXx8fHwxNzU3NjE0NTAzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    description: "Fresh as the tide, crisp notes",
-    badge: "POPULAR"
-  },
-  {
-    id: 4,
-    name: "Rose Garden",
-    price: 2100,
-    image: '/assets/handLotion.png',
-    hoverImage: "https://images.unsplash.com/photo-1624372635277-283042097f31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXR1cmFsJTIwc29hcCUyMGJvdGFuaWNhbHxlbnwxfHx8fDE3NTc2MTQ1MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    description: "Petals and morning dew",
-    badge: "LIMITED"
-  }
-];
+const products: Card[] = [];
 
-export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
+export function PeopleAlsoBought({ 
+  product, 
+  fromTheLabContent 
+}: { 
+  product?: ProductLike
+  fromTheLabContent?: FromTheLabSection | null
+}) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const cartContext = useCartItemsSafe()
+  const handleCartUpdate = cartContext?.handleCartUpdate
   const [hoveredId, setHoveredId] = useState<string | number | null>(null)
-  const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
+  const [hoveredProduct, setHoveredProduct] = useState<string | number | null>(null);
   const [addedToCart, setAddedToCart] = useState<string | number | null>(null)
+  const [adding, setAdding] = useState<string | number | null>(null)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
@@ -107,8 +95,18 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const scrollBarRef = useRef<HTMLDivElement>(null)
+  
+  // Get country code from current path or default to 'in'
+  const getCountryCode = () => {
+    if (typeof window !== 'undefined') {
+      const pathParts = window.location.pathname.split('/')
+      const countryCode = pathParts[1]
+      return countryCode && countryCode.length === 2 ? countryCode : 'in'
+    }
+    return 'in'
+  }
 
-  // ------- READ METADATA (key: peopleAlsoBought) -------
+  // ------- READ CONTENT FROM CONTENTFUL OR METADATA -------
   const meta: Required<MetaShape> = useMemo(() => {
     const defaults: Required<MetaShape> = {
       heading: 'From the Lab',
@@ -116,33 +114,73 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
       bg: '#e3e3d8',
       products: [],
     }
-    const raw = product?.metadata?.peopleAlsoBought
-    // console.log("raw = ", raw)
-    if (!raw) return defaults
-    const parsed: any = parseTwice(raw)
-    if (!parsed || typeof parsed !== 'object') return defaults
 
-    const products: Card[] = Array.isArray(parsed.products)
-      ? parsed.products.map((p: any, i: number): Card => ({
-          id: p?.id ?? i + 1,
-          name: String(p?.name ?? ''),
-          price: typeof p?.price === 'number' ? p.price : undefined,
-          currency: typeof p?.currency === 'string' ? p.currency : undefined,
-          image: typeof p?.image === 'string' ? p.image : undefined,
-          hoverImage: typeof p?.hoverImage === 'string' ? p.hoverImage : undefined,
-          description: typeof p?.description === 'string' ? p.description : undefined,
-          badge: typeof p?.badge === 'string' ? p.badge : undefined,
-          url: typeof p?.url === 'string' ? p.url : undefined,
-        }))
-      : defaults.products
+    // Priority 1: Use Contentful content if available
+    if (fromTheLabContent && fromTheLabContent.isActive) {
+      const products: Card[] = fromTheLabContent.products.map((p): Card => ({
+        id: p.id ?? undefined,
+        name: p.name,
+        price: p.price,
+        currency: p.currency,
+        image: p.image,
+        hoverImage: p.hoverImage,
+        description: p.description,
+        badge: p.badge,
+        url: p.url,
+        variantId: p.variantId,
+      }))
 
-    return {
-      heading: typeof parsed.heading === 'string' ? parsed.heading : defaults.heading,
-      subheading: typeof parsed.subheading === 'string' ? parsed.subheading : defaults.subheading,
-      bg: typeof parsed.bg === 'string' ? parsed.bg : defaults.bg,
-      products,
+      return {
+        heading: fromTheLabContent.heading || defaults.heading,
+        subheading: fromTheLabContent.subheading || defaults.subheading,
+        bg: fromTheLabContent.backgroundColor || defaults.bg,
+        products: products.length > 0 ? products : defaults.products,
+      }
     }
-  }, [product])
+
+    // Priority 2: Fall back to product metadata
+    const raw = product?.metadata?.peopleAlsoBought
+    if (raw) {
+      const parsed: any = parseTwice(raw)
+      if (parsed && typeof parsed === 'object') {
+        const products: Card[] = Array.isArray(parsed.products)
+          ? parsed.products.map((p: any, i: number): Card => ({
+              id: p?.id ?? i + 1,
+              name: String(p?.name ?? ''),
+              price: typeof p?.price === 'number' ? p.price : undefined,
+              currency: typeof p?.currency === 'string' ? p.currency : undefined,
+              image: typeof p?.image === 'string' ? p.image : undefined,
+              hoverImage: typeof p?.hoverImage === 'string' ? p.hoverImage : undefined,
+              description: typeof p?.description === 'string' ? p.description : undefined,
+              badge: typeof p?.badge === 'string' ? p.badge : undefined,
+              url: typeof p?.url === 'string' ? p.url : undefined,
+              variantId: typeof p?.variantId === 'string' ? p.variantId : undefined,
+            }))
+          : defaults.products
+
+        return {
+          heading: typeof parsed.heading === 'string' ? parsed.heading : defaults.heading,
+          subheading: typeof parsed.subheading === 'string' ? parsed.subheading : defaults.subheading,
+          bg: typeof parsed.bg === 'string' ? parsed.bg : defaults.bg,
+          products,
+        }
+      }
+    }
+
+    // Priority 3: Use hardcoded products as final fallback
+    return {
+      ...defaults,
+      products: products.map((p): Card => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        image: p.image,
+        hoverImage: p.hoverImage,
+        description: p.description,
+        badge: p.badge,
+      })),
+    }
+  }, [product, fromTheLabContent])
 
   const { heading, subheading, bg, products: cards } = meta
 
@@ -201,9 +239,125 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
     }
   }, [isDragging])
 
-  const handleAddToCart = (id: string | number) => {
-    setAddedToCart(id)
-    setTimeout(() => setAddedToCart(null), 2000)
+  const handleAddToCart = async (productCard: Card) => {
+    // Check if product has variantId (if added to Contentful ProductCard)
+    const variantId = productCard.variantId || (productCard as any).variant_id
+    
+    // Prevent duplicate clicks
+    if (!variantId || adding === productCard.id || isPending) {
+      return
+    }
+    
+    if (variantId) {
+      // Set loading state
+      setAdding(productCard.id ?? null)
+      setAddedToCart(productCard.id ?? null)
+      
+      // Calculate price in minor units (paise) for cart
+      // If price < 10000, it's already in rupees, convert to paise
+      // Otherwise, it's already in paise
+      const priceInPaise = productCard.price && productCard.price < 10000 
+        ? Math.round(productCard.price * 100) 
+        : productCard.price || 0
+      
+      // Optimistic UI update - update cart context immediately (like ProductHero)
+      if (handleCartUpdate) {
+        handleCartUpdate({
+          id: String(variantId),
+          name: productCard.name,
+          price: priceInPaise,
+          quantity: 1,
+          image: productCard.image,
+          variant_id: String(variantId),
+        } as any)
+      }
+      
+      // Emit cart updated event for other components
+      emitCartUpdated({ quantityDelta: 1 })
+      
+      // Add to server cart in background (like ProductHero)
+      startTransition(async () => {
+        try {
+          const countryCode = getCountryCode()
+          console.log('Adding to cart:', { variantId, countryCode, productName: productCard.name })
+          
+          await addToCartAction({
+            variantId: String(variantId),
+            quantity: 1,
+            countryCode,
+          })
+          
+          console.log('Successfully added to cart')
+          toast.success(`${productCard.name} added to cart`, { duration: 2000 })
+          
+          // Keep feedback visible briefly, then clear
+          setTimeout(() => {
+            setAdding(null)
+            setAddedToCart(null)
+          }, 900)
+        } catch (error: any) {
+          console.error('Error adding to cart:', error)
+          setAdding(null)
+          setAddedToCart(null)
+          
+          // Remove from cart context on error
+          if (handleCartUpdate) {
+            handleCartUpdate({
+              id: String(variantId),
+              quantity: 0,
+            } as any)
+          }
+          
+          // Show toast notification for error (like ProductHero)
+          const errorMessage = error?.message || 'Unable to add to cart. Please try again.'
+          const errorMsg = String(errorMessage || "").toLowerCase()
+          
+          if (errorMsg.includes("inventory") || errorMsg.includes("required inventory") || errorMsg.includes("stock") || errorMsg.includes("variant does not have")) {
+            toast.error("Inventory Error", {
+              description: "This product is currently out of stock or unavailable. Please try again later.",
+              duration: 5000,
+            })
+          } else {
+            toast.error("Failed to add to cart", {
+              description: errorMessage,
+              duration: 4000,
+            })
+          }
+        }
+      })
+    } else if (productCard.url && productCard.url.trim() !== '' && productCard.url !== '/') {
+      // If no variantId, navigate to product page (only if URL is valid)
+      if (productCard.id !== undefined) {
+        setAddedToCart(productCard.id)
+        setTimeout(() => setAddedToCart(null), 2000)
+      }
+      
+      try {
+        const urlPath = productCard.url.startsWith('/') 
+          ? productCard.url 
+          : (productCard.url.startsWith('http://') || productCard.url.startsWith('https://'))
+            ? new URL(productCard.url).pathname
+            : `/${productCard.url}` // If it's just a path without leading slash
+        
+        // Only redirect if path is not empty or "/"
+        if (urlPath && urlPath.trim() !== '' && urlPath !== '/') {
+          router.push(urlPath)
+        } else {
+          alert('Product URL is invalid. Please add variantId in Contentful to enable direct cart addition.')
+        }
+      } catch (urlError) {
+        console.error('Invalid URL:', productCard.url, urlError)
+        alert('Product URL is invalid. Please add variantId in Contentful to enable direct cart addition.')
+      }
+    } else {
+      // If no URL and no variantId, show error
+      console.warn('Product has no URL or variantId, cannot add to cart')
+      alert('This product is not available. Please contact support.')
+      if (productCard.id !== undefined) {
+        setAddedToCart(productCard.id)
+        setTimeout(() => setAddedToCart(null), 2000)
+      }
+    }
   }
 
   return (
@@ -271,9 +425,9 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
           )}
         </motion.div>
        
-       {products.map((product, index) => (
+       {cards.map((product, index) => (
             <motion.div
-              key={product.id}
+              key={`product-${product.id ?? index}-${index}`}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.08 }}
@@ -282,7 +436,7 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
               style={{ 
                 scrollSnapAlign: 'center',
               }}
-              onMouseEnter={() => setHoveredProduct(product.id)}
+              onMouseEnter={() => setHoveredProduct(product.id ?? null)}
               onMouseLeave={() => setHoveredProduct(null)}
             >
               <div className="max-w-[340px] mx-auto md:max-w-none md:w-full">
@@ -294,24 +448,32 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
                       className="relative h-[280px] md:h-[320px]"
                     >
                       {/* Base Image */}
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-opacity duration-300"
-                        style={{
-                          opacity: hoveredProduct === product.id ? 0 : 1
-                        }}
-                      />
+                      {product.image ? (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover transition-opacity duration-300"
+                          style={{
+                            opacity: hoveredProduct === product.id ? 0 : 1
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-400 text-sm">No image</span>
+                        </div>
+                      )}
                       
                       {/* Hover Image */}
-                      <img
-                        src={product.hoverImage}
-                        alt={`${product.name} alternative view`}
-                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
-                        style={{
-                          opacity: hoveredProduct === product.id ? 1 : 0
-                        }}
-                      />
+                      {product.hoverImage && (
+                        <img
+                          src={product.hoverImage}
+                          alt={`${product.name} alternative view`}
+                          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                          style={{
+                            opacity: hoveredProduct === product.id ? 1 : 0
+                          }}
+                        />
+                      )}
 
                       {/* Badge */}
                       {product.badge && (
@@ -342,12 +504,14 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
                         {product.name}
                       </h3>
                       
-                      <span 
-                        className="font-din-arabic text-black flex-shrink-0 group-hover:text-black/80 transition-colors duration-200 text-sm md:text-base"
-                        style={{ lineHeight: '1.3', letterSpacing: '0.1em' }}
-                      >
-                        ${(product.price / 100).toFixed(0)}
-                      </span>
+                      {product.price && (
+                        <span 
+                          className="font-din-arabic text-black flex-shrink-0 group-hover:text-black/80 transition-colors duration-200 text-sm md:text-base"
+                          style={{ lineHeight: '1.3', letterSpacing: '0.1em' }}
+                        >
+                          {formatPrice(product.price, product.currency)}
+                        </span>
+                      )}
                     </div>
 
                     {/* Product Description */}
@@ -364,11 +528,16 @@ export function PeopleAlsoBought({ product }: { product?: ProductLike }) {
                       whileTap={{ scale: 0.98 }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleAddToCart(product.id);
+                        handleAddToCart(product);
                       }}
-                      className="w-full mt-3 md:mt-4 px-3 md:px-4 py-2 bg-transparent border border-black/20 text-black hover:bg-black hover:text-white transition-all duration-300 font-din-arabic text-xs md:text-sm tracking-wide opacity-0 md:group-hover:opacity-100 text-center"
+                      className="w-full mt-3 md:mt-4 px-3 md:px-4 py-2 bg-transparent border border-black/20 text-black hover:bg-black hover:text-white transition-all duration-300 font-din-arabic text-xs md:text-sm tracking-wide opacity-0 md:group-hover:opacity-100 text-center disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={(adding === product.id || isPending) && !product.variantId}
                     >
-                      {addedToCart === product.id ? '✓ Added' : 'Quick Add'}
+                      {adding === product.id || (isPending && addedToCart === product.id)
+                        ? 'Adding...' 
+                        : addedToCart === product.id 
+                        ? '✓ Added' 
+                        : 'Quick Add'}
                     </motion.button>
                   </div>
                 </div>

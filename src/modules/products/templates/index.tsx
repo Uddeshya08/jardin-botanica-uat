@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from "react"
 
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
-import { ProductContent, FeaturedSection, TestimonialsSection, FeaturedRitualTwoSection, AfterlifeSection, ProductInfoPanels } from "../../../types/contentful"
+   import { ProductContent, FeaturedSection, TestimonialsSection, FeaturedRitualTwoSection, AfterlifeSection, ProductInfoPanels, FromTheLabSection } from "../../../types/contentful"
 import { Navigation } from "app/components/Navigation"
 import { ProductHero } from "app/components/ProductHero"
 import { StickyCartBar } from "app/components/StickyCartBar"
@@ -37,6 +37,7 @@ type ProductTemplateProps = {
   featuredRitualTwoContent?: FeaturedRitualTwoSection | null
   ritualProduct?: RitualProduct | null
   productInfoPanels?: ProductInfoPanels | null
+  fromTheLabContent?: FromTheLabSection | null
 }
 
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
@@ -50,6 +51,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   featuredRitualTwoContent,
   ritualProduct: ritualProductProp,
   productInfoPanels,
+  fromTheLabContent,
 }) => {
   if (!product || !product.id) {
     return notFound()
@@ -144,7 +146,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         />
 
         <Afterlife afterlifeContent={afterlifeContent} />
-        <PeopleAlsoBought product={product as any} />
+        <PeopleAlsoBought product={product as any} fromTheLabContent={fromTheLabContent} />
         <FeaturedRitualTwo 
           key={featuredRitualTwoContent?.productHandle || featuredRitualTwoContent?.sectionKey || 'default'} 
           featuredRitualTwoContent={featuredRitualTwoContent} 
