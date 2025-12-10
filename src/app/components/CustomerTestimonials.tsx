@@ -116,7 +116,7 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
           </motion.div>
 
           <h2 className="font-american-typewriter text-2xl md:text-3xl tracking-tight text-black mb-3 md:mb-4">
-            {heading}
+            {typeof heading === 'string' ? heading : String(heading)}
           </h2>
 
           {subheading && (
@@ -127,7 +127,7 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
               viewport={{ once: true }}
               className="font-din-arabic text-sm md:text-base text-black/70 max-w-2xl mx-auto mb-4 md:mb-6"
             >
-              {subheading}
+              {typeof subheading === 'string' ? subheading : String(subheading)}
             </motion.p>
           )}
 

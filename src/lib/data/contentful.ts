@@ -29,6 +29,38 @@ import {
 import { Entry } from "contentful"
 
 /**
+ * Helper function to extract plain text from Contentful rich text fields
+ * Handles both plain strings and rich text document objects
+ */
+function extractTextFromRichText(value: any): string {
+  if (!value) return ""
+  
+  // If it's already a string, return it
+  if (typeof value === "string") return value
+  
+  // If it's a rich text document object
+  if (value && typeof value === "object" && value.nodeType === "document" && Array.isArray(value.content)) {
+    const extractText = (node: any): string => {
+      if (node.nodeType === "text" && node.value) {
+        return node.value
+      }
+      if (node.content && Array.isArray(node.content)) {
+        return node.content.map(extractText).join("")
+      }
+      return ""
+    }
+    return value.content.map(extractText).join(" ").trim()
+  }
+  
+  // Fallback: try to stringify if it's an object
+  if (typeof value === "object") {
+    return JSON.stringify(value)
+  }
+  
+  return String(value)
+}
+
+/**
  * Fetch product content from Contentful by product handle
  * @param productHandle - The handle/slug of the product in Medusa
  * @returns ProductContent or null if not found
@@ -215,8 +247,8 @@ function transformFeaturedSectionEntry(
     return {
       title: fields.title || "",
       sectionKey: fields.sectionKey || "",
-      heading: fields.heading || "Cultivate Your Ritu",
-      subheading: fields.subheading || "Subscribe to receive hand care wisdom, botanical insights, and early access to our latest concoctions.",
+      heading: extractTextFromRichText(fields.heading) || "Cultivate Your Ritu",
+      subheading: extractTextFromRichText(fields.subheading) || "Subscribe to receive hand care wisdom, botanical insights, and early access to our latest concoctions.",
       backgroundColor: fields.backgroundColor || "#e3e3d8",
       inputPlaceholder: fields.inputPlaceholder || "Enter your email",
       ctaLabel: fields.ctaLabel || "Subscribe",
@@ -365,8 +397,8 @@ function transformTestimonialsSectionEntry(
       title: fields.title || "",
       sectionKey: fields.sectionKey || "",
       productHandle: fields.productHandle || undefined,
-      heading: fields.heading || "Loved By Our Customers",
-      subheading: fields.subheading || "Real experiences from those who've made our product part of their daily ritual.",
+      heading: extractTextFromRichText(fields.heading) || "Loved By Our Customers",
+      subheading: extractTextFromRichText(fields.subheading) || "Real experiences from those who've made our product part of their daily ritual.",
       backgroundColor: fields.backgroundColor || "#e3e3d8",
       cta: {
         showMore: fields.showMoreText || "View All Reviews",
@@ -509,8 +541,8 @@ function transformFeaturedRitualTwoSectionEntry(
       title: fields.title || "",
       sectionKey: fields.sectionKey || "",
       productHandle: fields.productHandle || undefined,
-      heading: fields.heading || "Hand Care Elevated",
-      subheading: fields.subheading || "A refreshing blend of tea antioxidants and gentle exfoliants, this handwash keeps your hands healthy, glowing, and nourished.",
+      heading: extractTextFromRichText(fields.heading) || "Hand Care Elevated",
+      subheading: extractTextFromRichText(fields.subheading) || "A refreshing blend of tea antioxidants and gentle exfoliants, this handwash keeps your hands healthy, glowing, and nourished.",
       backgroundColor: fields.backgroundColor || "#e3e3d8",
       imageUrl: imageUrl,
       imageAlt: fields.imageAlt || "Jardin Botanica Tea Exfoliant Rinse with hands and botanical elements",
@@ -621,7 +653,7 @@ function transformAfterlifeSectionEntry(
       title: fields.title || "",
       sectionKey: fields.sectionKey || "",
       productHandle: fields.productHandle || undefined,
-      heading: fields.heading || "Afterlife",
+      heading: extractTextFromRichText(fields.heading) || "Afterlife",
       backgroundColor: fields.backgroundColor || "#EBEBE1",
       items,
       isActive: fields.isActive ?? true,
@@ -949,8 +981,8 @@ function transformFromTheLabSectionEntry(
 
     // Provide defaults for optional fields
     return {
-      heading: fields.heading || "From the Lab",
-      subheading: fields.subheading || "Formulations most often paired in practice.",
+      heading: extractTextFromRichText(fields.heading) || "From the Lab",
+      subheading: extractTextFromRichText(fields.subheading) || "Formulations most often paired in practice.",
       backgroundColor: fields.backgroundColor || "#e3e3d8",
       products,
       isActive: fields.isActive ?? true,
