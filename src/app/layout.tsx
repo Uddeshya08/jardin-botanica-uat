@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" data-mode="light" className="overflow-x-hidden">
+      <link rel="stylesheet" href="https://use.typekit.net/zud1nbn.css" />
       <body className="overflow-x-hidden">
         <main className="relative">{props.children}</main>
         <Toaster />
