@@ -419,7 +419,7 @@ export function Navigation({
         },
         {
           label: "Lotions & Moisturisers",
-          href: "/products/cedarbloom",
+          href: "#",
           image:
             "https://images.unsplash.com/photo-1660675558428-5a7a1b8546f4?auto=format&fit=crop&w=1080&q=80",
         },
@@ -438,7 +438,7 @@ export function Navigation({
         },
         {
           label: "Candles",
-          href: "/category",
+          href: "/candles",
           image:
             "https://images.unsplash.com/photo-1648310379950-2773bb5d2525?auto=format&fit=crop&w=1080&q=80",
         },
