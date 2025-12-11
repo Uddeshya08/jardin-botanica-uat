@@ -458,13 +458,24 @@ export function Navigation({
   // Determine navigation background and text styling
   const getNavStyles = () => {
     if (isHomePage || forceWhiteText) {
-      // Home page or forced white text: always transparent with white text, glassy on scroll/hover
-      if (isScrolled || isNavHovered) {
+      // Home page or forced white text: transparent by default, black on hover (only if not scrolled), glassy on scroll
+      if (isScrolled) {
+        // Scrolled: glassy background with white text (stays glassy even on hover)
         return {
           backgroundColor: "rgba(0, 0, 0, 0.65)",
           backdropFilter: "blur(12px) saturate(200%)",
           WebkitBackdropFilter: "blur(12px) saturate(200%)",
           borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+          textColor: "white",
+          logoSrc: "/assets/Jardinlogo.svg",
+        }
+      } else if (isNavHovered) {
+        // Hovered (when not scrolled): pure black background with white text
+        return {
+          backgroundColor: "#000000",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
           textColor: "white",
           logoSrc: "/assets/Jardinlogo.svg",
         }
@@ -479,23 +490,23 @@ export function Navigation({
       }
     } else {
       // Non-home pages
-      if (isNavHovered) {
-        // Hovered: pure black background with white text (takes priority over scroll)
-        return {
-          backgroundColor: "#000000",
-          backdropFilter: "none",
-          WebkitBackdropFilter: "none",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-          textColor: "white",
-          logoSrc: "/assets/Jardinlogo.svg",
-        }
-      } else if (isScrolled) {
-        // Scrolled: glassy background with white text
+      if (isScrolled) {
+        // Scrolled: glassy background with white text (stays glassy even on hover)
         return {
           backgroundColor: "rgba(0, 0, 0, 0.65)",
           backdropFilter: "blur(12px) saturate(200%)",
           WebkitBackdropFilter: "blur(12px) saturate(200%)",
           borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+          textColor: "white",
+          logoSrc: "/assets/Jardinlogo.svg",
+        }
+      } else if (isNavHovered) {
+        // Hovered (when not scrolled): pure black background with white text
+        return {
+          backgroundColor: "#000000",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
           textColor: "white",
           logoSrc: "/assets/Jardinlogo.svg",
         }

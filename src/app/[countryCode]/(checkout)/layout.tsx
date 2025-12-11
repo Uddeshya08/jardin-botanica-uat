@@ -1,44 +1,46 @@
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import ChevronDown from "@modules/common/icons/chevron-down"
-import MedusaCTA from "@modules/layout/components/medusa-cta"
+import { retrieveCart } from "@lib/data/cart"
+import { retrieveCustomer } from "@lib/data/customer"
+import { AuthProvider } from "app/context/auth-context"
+import { CartItemsProvider } from "app/context/cart-items-context"
+import { LedgerProvider } from "app/context/ledger-context"
+import CheckoutNavigation from "./components/checkout-navigation"
 
-export default function CheckoutLayout({
+export default async function CheckoutLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <div className="w-full bg-[#e3e3d8] relative small:min-h-screen">
-      <div className="h-16 bg-[#e3e3d8] border-b ">
-        <nav className="flex h-full items-center content-container justify-between">
-          <LocalizedClientLink
-            href="/"
-            className="text-small-semi font-din-arabic text-sm text-black/70 tracking-wide flex items-center gap-x-2 uppercase flex-1 basis-0"
-            data-testid="back-to-cart-link"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-chevron-left w-5 h-5 group-hover:-translate-x-1 transition-transform"
-            >
-              <path d="m15 18-6-6 6-6" />
-            </svg>
+  const customer = await retrieveCustomer()
+  const cart = await retrieveCart()
 
-            <span className="font-din-arabic">Continue Shopping</span>
-          </LocalizedClientLink>
-          <div className="flex-1 basis-0" />
-        </nav>
-      </div>
-      <div className="relative" data-testid="checkout-container">
-        {children}
-      </div>
-    </div>
+  // Transform cart items to the format expected by Navigation
+  const cartItems =
+    cart?.items?.map((item) => {
+      // Check if unit_price is already in major units or minor units
+      // If unit_price > 10000, likely in minor units (paise), divide by 100
+      // Otherwise, it's already in major units (rupees)
+      const price = item.unit_price > 10000 ? item.unit_price / 100 : item.unit_price
+      return {
+        id: item.id,
+        name: item.title,
+        price: price,
+        quantity: item.quantity,
+        image: item.thumbnail,
+      }
+    }) || []
+
+  return (
+    <AuthProvider customer={customer}>
+      <LedgerProvider>
+        <CartItemsProvider initialCartItems={cartItems}>
+          <div className="w-full bg-[#e3e3d8] relative small:min-h-screen">
+            <CheckoutNavigation />
+            <div className="relative pt-[106px]" data-testid="checkout-container">
+              {children}
+            </div>
+          </div>
+        </CartItemsProvider>
+      </LedgerProvider>
+    </AuthProvider>
   )
 }

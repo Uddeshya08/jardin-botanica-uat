@@ -23,7 +23,7 @@ const Addresses = ({
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
 }) => {
-  const items = cart.items
+  const items = cart?.items
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -199,11 +199,7 @@ const Addresses = ({
               onEmailValidationChange={setIsEmailValid}
             />
 
-            {!sameAsBilling && (
-              <div className="pt-6">
-                <BillingAddress cart={cart} />
-              </div>
-            )}
+            {!sameAsBilling && <BillingAddress cart={cart} />}
             {/* Hidden input to indicate if billing address is same as shipping */}
             <input
               type="hidden"
@@ -216,7 +212,7 @@ const Addresses = ({
             />
           </div>
           <div className="flex items-center justify-between pt-4">
-            {items?.length > 0 ? (
+            {items && items.length > 0 ? (
               <SubmitButton
                 data-testid="submit-address-button"
                 disabled={!isEmailValid}
