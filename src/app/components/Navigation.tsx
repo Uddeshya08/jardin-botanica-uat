@@ -418,7 +418,7 @@ export function Navigation({
             "https://images.unsplash.com/photo-1743597979473-5b1c0cae1bce?auto=format&fit=crop&w=1080&q=80",
         },
         {
-          label: "Lotions & Moisturisers",
+          label: "Lotions & Moisturizer",
           href: "#",
           image:
             "https://images.unsplash.com/photo-1660675558428-5a7a1b8546f4?auto=format&fit=crop&w=1080&q=80",
