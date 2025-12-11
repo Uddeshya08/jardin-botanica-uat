@@ -295,7 +295,7 @@ const ShippingAddress = ({
           }
         }
 
-        setEmailError("Please use a valid email provider (Gmail, Yahoo, Outlook, etc.) or a corporate email address")
+        setEmailError("Please use a valid email address")
       }, 100)
 
       return () => clearTimeout(timer)
@@ -585,6 +585,7 @@ const ShippingAddress = ({
                 </Label>
                 <Input
                   id="newName"
+                  placeholder="Enter full name"
                   label=""
                   name="newName"
                   value={newAddressData.name}
@@ -605,6 +606,7 @@ const ShippingAddress = ({
                   <Input
                     id="newPhone"
                     label=""
+                    placeholder="XXXXX XXXXX"
                     name="newPhone"
                     type="tel"
                     value={newAddressData.phone}
@@ -627,6 +629,7 @@ const ShippingAddress = ({
               <Input
                 id="newAddress1"
                 label=""
+                placeholder="House no., Street Locality"
                 name="newAddress1"
                 value={newAddressData.addressLine1}
                 onChange={(e) =>
@@ -644,7 +647,8 @@ const ShippingAddress = ({
               </Label>
               <Input
                 id="newAddress2"
-               label=""
+                label=""
+                placeholder="Apartment, suite, etc."
                 name="newAddress2"
                 value={newAddressData.addressLine2}
                 onChange={(e) =>
@@ -710,6 +714,7 @@ const ShippingAddress = ({
                 <Input
                   id="newPincode"
                   label=""
+                  placeholder="Enter 6-digit PIN"
                   name="newPincode"
                   value={newAddressData.pincode}
                   onChange={(e) =>
@@ -931,12 +936,12 @@ const ShippingAddress = ({
           <div className="py-2">
             <label className="flex items-center space-x-3 cursor-pointer group">
               <ShadcnCheckbox
-                checked={checked}
+                checked={!checked}
                 onCheckedChange={() => onChange()}
                 data-testid="billing-address-checkbox"
               />
               <span className="font-din-arabic text-black/80 group-hover:text-black transition-colors">
-              Use a same billing address
+              Use a different billing address
               </span>
             </label>
           </div>

@@ -23,7 +23,7 @@ export default async function Checkout() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-6">
-      <div className="pt-20 mb-8 lg:mb-12">
+      <div className="pt-8 mb-8 lg:mb-12">
         <CheckoutHeader />
         <CheckoutSteps />
       </div>

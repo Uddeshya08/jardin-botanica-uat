@@ -262,7 +262,7 @@ export function ProductHero({
   // Dynamic breadcrumb label based on product type
   const breadcrumbLeafLabel = isCleanserOrExfoliant()
     ? "Cleansers & Exfoliants"
-    : "Lotions & Moisturisers"
+    : "Lotions & Moisturizer"
 
   const handleAddToCart = () => {
     if (!selectedVariantId || adding || isPending) return
