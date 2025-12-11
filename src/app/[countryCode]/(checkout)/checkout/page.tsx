@@ -27,11 +27,15 @@ export default async function Checkout() {
         <CheckoutHeader />
         <CheckoutSteps />
       </div>
-      <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
-        <PaymentWrapper cart={cart}>
-          <CheckoutForm cart={cart} customer={customer} />
-        </PaymentWrapper>
-        <CheckoutSummary cart={cart} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="order-2 lg:order-1 lg:col-span-2">
+          <PaymentWrapper cart={cart}>
+            <CheckoutForm cart={cart} customer={customer} />
+          </PaymentWrapper>
+        </div>
+        <div className="order-1 lg:order-2 lg:col-span-1">
+          <CheckoutSummary cart={cart} />
+        </div>
       </div>
     </div>
   )

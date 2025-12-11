@@ -1,102 +1,99 @@
-'use client'
-import React from 'react'
-import { motion, AnimatePresence } from 'motion/react'
-import {
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react'
+"use client"
+import React from "react"
+import { motion, AnimatePresence } from "motion/react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 const SingleBlogPage = () => {
   // Custom styles object - copied from your blogs page
   const styles = {
     bannerHeading: {
       fontFamily: '"American Typewriter"',
-      fontSize: '42px',
-      letterSpacing: '5px',
-      color: '#4f5864',
+      fontSize: "42px",
+      letterSpacing: "5px",
+      color: "#4f5864",
     },
     subCopy: {
       fontFamily: '"DIN Next LT Arabic Light"',
-      fontSize: '16px',
-      letterSpacing: '1px',
-      color: '#626262',
+      fontSize: "16px",
+      letterSpacing: "1px",
+      color: "#626262",
     },
     subsequentHeading: {
       fontFamily: '"American Typewriter"',
-      fontSize: '24px',
-      letterSpacing: '2px',
-      color: '#626262',
+      fontSize: "24px",
+      letterSpacing: "2px",
+      color: "#626262",
     },
     subsequentHeading3: {
       fontFamily: '"American Typewriter"',
-      fontSize: '16px',
-      letterSpacing: '2px',
-      color: '#626262',
+      fontSize: "16px",
+      letterSpacing: "2px",
+      color: "#626262",
     },
     subsequentHeading2: {
       fontFamily: '"font-dinBold"',
-      fontSize: '20px',
-      letterSpacing: '1px',
-      color: '#403F3F',
+      fontSize: "20px",
+      letterSpacing: "1px",
+      color: "#403F3F",
     },
     newspaperSerif: {
       fontFamily: '"American Typewriter"',
-      fontSize: '24px',
-      letterSpacing: '5px',
-      color: '#4f5864',
+      fontSize: "24px",
+      letterSpacing: "5px",
+      color: "#4f5864",
     },
     newspaperSpacing: {
-      lineHeight: '1.6',
+      lineHeight: "1.6",
     },
     tightSpacing: {
-      lineHeight: '1.3',
+      lineHeight: "1.3",
     },
     trackingNewspaper: {
       fontFamily: '"DIN Arabic Regular"',
-      letterSpacing: '0.1em',
+      letterSpacing: "0.1em",
     },
     trackingWideNewspaper: {
       fontFamily: '"DIN Arabic Regular"',
-      letterSpacing: '0.15em',
+      letterSpacing: "0.15em",
     },
   }
 
   const latestArticles = [
-    'The Longform Guide to Surfing: Great Stories About Big Waves',
+    "The Longform Guide to Surfing: Great Stories About Big Waves",
     "The Ultimate Guide to New York's Favorite Food",
-    'Salty Peanut-Pretzel Ice Cream Cake',
-    'A Cool Solution for Hot Summer Nights',
-    'Full Irish Breakfast In Manhattan',
-    'Overcoming Your Fear Of The Kitchen',
-    'Want to Make Creamed Corn Into a Meal? Add Shrimp',
+    "Salty Peanut-Pretzel Ice Cream Cake",
+    "A Cool Solution for Hot Summer Nights",
+    "Full Irish Breakfast In Manhattan",
+    "Overcoming Your Fear Of The Kitchen",
+    "Want to Make Creamed Corn Into a Meal? Add Shrimp",
     "Why Healthy Eating Doesn't Mean Dieting",
-    'A Quick, Satisfying Fix for Weeknight Chicken',
-    'Fresh Food on TV: Weekend Edition',
+    "A Quick, Satisfying Fix for Weeknight Chicken",
+    "Fresh Food on TV: Weekend Edition",
   ]
 
   const topSearches = [
-    'Art & Design',
-    'Blog',
-    'Business',
-    'Culture',
-    'Economy',
-    'Health',
-    'Lifestyle',
-    'Movies',
-    'NY',
-    'Newspaper',
-    'Obituaries',
-    'Photos',
-    'Politics',
-    'Post',
-    'Science',
-    'Sports',
-    'Tech',
+    "Art & Design",
+    "Blog",
+    "Business",
+    "Culture",
+    "Economy",
+    "Health",
+    "Lifestyle",
+    "Movies",
+    "NY",
+    "Newspaper",
+    "Obituaries",
+    "Photos",
+    "Politics",
+    "Post",
+    "Science",
+    "Sports",
+    "Tech",
     "Today's Arts",
-    'Travel',
-    'U.S.',
-    'Videos',
-    'World',
+    "Travel",
+    "U.S.",
+    "Videos",
+    "World",
   ]
 
   const containerVariants = {
@@ -125,7 +122,7 @@ const SingleBlogPage = () => {
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { duration: 0.6, ease: 'easeOut' },
+      transition: { duration: 0.6, ease: "easeOut" },
     },
     hover: {
       scale: 1.05,
@@ -164,13 +161,13 @@ const SingleBlogPage = () => {
     <div className="bg-[#FEFDF3] min-h-screen">
       <div
         className="max-w-7xl mx-auto py-12 px-4 md:px-6"
-        style={{  marginTop: '70px' }}
+        style={{ marginTop: "70px" }}
       >
         <div className="flex flex-col md:flex-row gap-6 md:gap-16">
           {/* Main Content - Left Side */}
           <div
             className="flex-1 max-w-4xl px-4 md:px-12"
-            style={{ borderRight: '0 md:2px solid #000' }}
+            style={{ borderRight: "0 md:2px solid #000" }}
           >
             {/* Sports Category */}
             <motion.div
@@ -182,9 +179,9 @@ const SingleBlogPage = () => {
                 className="text-sm mb-6 uppercase"
                 style={{
                   ...styles.trackingNewspaper,
-                  fontSize: '12px',
-                  color: '#999',
-                  letterSpacing: '2px',
+                  fontSize: "12px",
+                  color: "#999",
+                  letterSpacing: "2px",
                 }}
               >
                 SPORTS
@@ -196,11 +193,11 @@ const SingleBlogPage = () => {
               className="mb-8"
               style={{
                 fontFamily: '"American Typewriter"',
-                fontSize: '40px',
-                lineHeight: '1.1',
-                color: '#000',
-                fontWeight: 'normal',
-                fontStyle: 'italic',
+                fontSize: "40px",
+                lineHeight: "1.1",
+                color: "#000",
+                fontWeight: "normal",
+                fontStyle: "italic",
               }}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -212,7 +209,7 @@ const SingleBlogPage = () => {
             {/* Date, Author and Comment Count */}
             <motion.div
               className="flex items-center gap-6 mb-8 pb-6"
-              style={{ borderBottom: '1px solid #ddd' }}
+              style={{ borderBottom: "1px solid #ddd" }}
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
@@ -220,9 +217,9 @@ const SingleBlogPage = () => {
               <span
                 style={{
                   fontFamily: '"American Typewriter"',
-                  fontSize: '12px',
-                  color: '#999',
-                  letterSpacing: '1px',
+                  fontSize: "12px",
+                  color: "#999",
+                  letterSpacing: "1px",
                 }}
               >
                 MAY 15, 2017
@@ -230,9 +227,9 @@ const SingleBlogPage = () => {
               <span
                 style={{
                   fontFamily: '"American Typewriter"',
-                  fontSize: '12px',
-                  color: '#999',
-                  letterSpacing: '1px',
+                  fontSize: "12px",
+                  color: "#999",
+                  letterSpacing: "1px",
                 }}
               >
                 BY CMSMASTERS
@@ -241,8 +238,8 @@ const SingleBlogPage = () => {
                 <span
                   style={{
                     fontFamily: '"American Typewriter"',
-                    fontSize: '12px',
-                    color: '#999',
+                    fontSize: "12px",
+                    color: "#999",
                   }}
                 >
                   💬 14
@@ -261,7 +258,7 @@ const SingleBlogPage = () => {
                 src="/assets/football.jpg"
                 alt="Soccer player with ball"
                 className="w-full h-auto object-cover"
-                style={{ filter: 'grayscale(100%)' }}
+                style={{ filter: "grayscale(100%)" }}
               />
             </motion.div>
 
@@ -272,13 +269,13 @@ const SingleBlogPage = () => {
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.6 }}
             >
-              <div className="w-32 gap-8 " style={{ marginRight: '5px' }}>
+              <div className="w-32 gap-8 " style={{ marginRight: "5px" }}>
                 <p
                   style={{
                     fontFamily: '"American Typewriter "',
-                    fontSize: '14px',
-                    color: '#999',
-                    marginBottom: '12px',
+                    fontSize: "14px",
+                    color: "#999",
+                    marginBottom: "12px",
                   }}
                 >
                   SHARE THIS POST?
@@ -287,9 +284,9 @@ const SingleBlogPage = () => {
                   <motion.p
                     style={{
                       fontFamily: '"American Typewriter"',
-                      fontSize: '14px',
-                      color: '#999',
-                      fontStyle: 'italic',
+                      fontSize: "14px",
+                      color: "#999",
+                      fontStyle: "italic",
                     }}
                     initial={{ x: -10, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -300,9 +297,9 @@ const SingleBlogPage = () => {
                   <motion.p
                     style={{
                       fontFamily: '"American Typewriter"',
-                      fontSize: '14px',
-                      color: '#999',
-                      fontStyle: 'italic',
+                      fontSize: "14px",
+                      color: "#999",
+                      fontStyle: "italic",
                     }}
                     initial={{ x: -10, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -313,9 +310,9 @@ const SingleBlogPage = () => {
                   <motion.p
                     style={{
                       fontFamily: '"American Typewriter"',
-                      fontSize: '14px',
-                      color: '#999',
-                      fontStyle: 'italic',
+                      fontSize: "14px",
+                      color: "#999",
+                      fontStyle: "italic",
                     }}
                     initial={{ x: -10, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -333,15 +330,15 @@ const SingleBlogPage = () => {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 1.0, duration: 0.8 }}
                 style={{
-                  borderLeft: '2px solid #D3D2CA',
+                  borderLeft: "2px solid #D3D2CA",
                 }}
               >
                 <motion.p
                   style={{
-                    fontFamily: 'Georgia, serif',
-                    fontSize: '16px',
-                    lineHeight: '1.8',
-                    color: '#333',
+                    fontFamily: "Georgia, serif",
+                    fontSize: "16px",
+                    lineHeight: "1.8",
+                    color: "#333",
                   }}
                   initial={{ y: 15, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -364,10 +361,10 @@ const SingleBlogPage = () => {
 
                 <motion.p
                   style={{
-                    fontFamily: 'Georgia, serif',
-                    fontSize: '16px',
-                    lineHeight: '1.8',
-                    color: '#333',
+                    fontFamily: "Georgia, serif",
+                    fontSize: "16px",
+                    lineHeight: "1.8",
+                    color: "#333",
                   }}
                   initial={{ y: 15, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -384,10 +381,10 @@ const SingleBlogPage = () => {
 
                 <motion.p
                   style={{
-                    fontFamily: 'Georgia, serif',
-                    fontSize: '16px',
-                    lineHeight: '1.8',
-                    color: '#333',
+                    fontFamily: "Georgia, serif",
+                    fontSize: "16px",
+                    lineHeight: "1.8",
+                    color: "#333",
                   }}
                   initial={{ y: 15, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -404,10 +401,10 @@ const SingleBlogPage = () => {
 
                 <motion.p
                   style={{
-                    fontFamily: 'Georgia, serif',
-                    fontSize: '16px',
-                    lineHeight: '1.8',
-                    color: '#333',
+                    fontFamily: "Georgia, serif",
+                    fontSize: "16px",
+                    lineHeight: "1.8",
+                    color: "#333",
                   }}
                   initial={{ y: 15, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -436,10 +433,10 @@ const SingleBlogPage = () => {
                 >
                   <p
                     style={{
-                      fontFamily: 'Georgia, serif',
-                      fontSize: '14px',
-                      color: '#999',
-                      fontStyle: 'italic',
+                      fontFamily: "Georgia, serif",
+                      fontSize: "14px",
+                      color: "#999",
+                      fontStyle: "italic",
                     }}
                   >
                     Blog, Lifestyle, Sports
@@ -452,9 +449,9 @@ const SingleBlogPage = () => {
             <motion.div
               className="pt-8 mb-8"
               style={{
-                borderTop: '2px solid #000',
-                borderBottom: '2px solid #000',
-                paddingBottom: '15px',
+                borderTop: "2px solid #000",
+                borderBottom: "2px solid #000",
+                paddingBottom: "15px",
               }}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -470,9 +467,9 @@ const SingleBlogPage = () => {
                   <p
                     style={{
                       fontFamily: '"American Typewriter"',
-                      fontSize: '12px',
-                      color: '#999',
-                      marginBottom: '8px',
+                      fontSize: "12px",
+                      color: "#999",
+                      marginBottom: "8px",
                     }}
                   >
                     PREVIOUS POST
@@ -480,9 +477,9 @@ const SingleBlogPage = () => {
                   <h4
                     style={{
                       fontFamily: '"American Typewriter"',
-                      fontSize: '18px',
-                      color: '#333',
-                      lineHeight: '1.3',
+                      fontSize: "18px",
+                      color: "#333",
+                      lineHeight: "1.3",
                     }}
                   >
                     Get the Best Catering for Your Summer Wedding in Philly
@@ -497,9 +494,9 @@ const SingleBlogPage = () => {
                   <p
                     style={{
                       fontFamily: '"American Typewriter"',
-                      fontSize: '12px',
-                      color: '#999',
-                      marginBottom: '8px',
+                      fontSize: "12px",
+                      color: "#999",
+                      marginBottom: "8px",
                     }}
                   >
                     NEXT POST
@@ -507,9 +504,9 @@ const SingleBlogPage = () => {
                   <h4
                     style={{
                       fontFamily: '"American Typewriter"',
-                      fontSize: '18px',
-                      color: '#333',
-                      lineHeight: '1.3',
+                      fontSize: "18px",
+                      color: "#333",
+                      lineHeight: "1.3",
                     }}
                   >
                     Why Some Say the Eclipse Is Best Experienced in a Crowd
@@ -522,8 +519,8 @@ const SingleBlogPage = () => {
             <div
               className=""
               style={{
-                borderBottom: '2px solid #000',
-                paddingBottom: '15px',
+                borderBottom: "2px solid #000",
+                paddingBottom: "15px",
               }}
             >
               <div>
@@ -557,7 +554,7 @@ const SingleBlogPage = () => {
             </div>
 
             {/* More post */}
-            <div className="mt-20" style={{ marginTop: '30px' }}>
+            <div className="mt-20" style={{ marginTop: "30px" }}>
               <div>
                 <h2 style={styles.subsequentHeading}>More posts</h2>
               </div>
@@ -565,7 +562,7 @@ const SingleBlogPage = () => {
               {/* blogs */}
               <div
                 className="flex justify-between gap-4"
-                style={{ marginTop: '20px' }}
+                style={{ marginTop: "20px" }}
               >
                 {/* first */}
                 <div className="flex flex-col gap-4">
@@ -624,7 +621,7 @@ const SingleBlogPage = () => {
             initial="hidden"
             animate="visible"
           >
-            <div className="p-6" style={{width:'300px'}}>
+            <div className="p-6" style={{ width: "300px" }}>
               {/* Latest Articles Section */}
               <motion.div variants={itemVariants}>
                 <h2 style={styles.subsequentHeading} className=" mb-4 pt-4">
@@ -645,7 +642,7 @@ const SingleBlogPage = () => {
                         <motion.a
                           href="#"
                           className=" leading-relaxed"
-                          whileHover={{ color: '#111827' }}
+                          whileHover={{ color: "#111827" }}
                           style={styles.subCopy}
                         >
                           {article}
@@ -696,7 +693,7 @@ const SingleBlogPage = () => {
                       className="text-sm font-medium text-gray-800 leading-relaxed"
                       variants={textHoverVariants}
                       whileHover="hover"
-                      style={{marginTop: "5px"}}
+                      style={{ marginTop: "5px" }}
                     >
                       6 Books About The Best Bridges You Should Read
                     </motion.h3>
@@ -705,7 +702,11 @@ const SingleBlogPage = () => {
               </motion.div>
 
               {/* Top Searches Section */}
-              <motion.div className="mt-12" variants={itemVariants} style={{marginTop: "10px"}}>
+              <motion.div
+                className="mt-12"
+                variants={itemVariants}
+                style={{ marginTop: "10px" }}
+              >
                 <h2 style={styles.subsequentHeading3} className=" mb-4">
                   TOP SEARCHES
                 </h2>
@@ -718,7 +719,7 @@ const SingleBlogPage = () => {
                       variants={itemVariants}
                       whileHover={{
                         scale: 1.05,
-                        color: '#111827',
+                        color: "#111827",
                         transition: { duration: 0.2 },
                       }}
                       whileTap={{ scale: 0.95 }}
@@ -741,7 +742,7 @@ const SingleBlogPage = () => {
       <motion.div
         className="w-full h-2 bg-gray-900 mt-16"
         initial={{ width: 0 }}
-        animate={{ width: '100%' }}
+        animate={{ width: "100%" }}
         transition={{ delay: 4.5, duration: 1.0 }}
       />
     </div>
