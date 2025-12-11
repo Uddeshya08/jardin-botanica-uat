@@ -4,7 +4,7 @@ import { listCartOptions, setShippingMethod, updateCart } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
 import { CheckCircleSolid } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
-import { Heading, Text, useToggleState } from "@medusajs/ui"
+import { Button, Heading, Text, useToggleState } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
 import { ChevronLeft } from "lucide-react"
@@ -14,6 +14,7 @@ import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
+import Link from "next/link"
 
 const Addresses = ({
   cart,
@@ -22,6 +23,7 @@ const Addresses = ({
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
 }) => {
+  const items = cart.items
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -214,14 +216,24 @@ const Addresses = ({
             />
           </div>
           <div className="flex items-center justify-between pt-4">
-            <SubmitButton
-              data-testid="submit-address-button"
-              disabled={!isEmailValid}
-              className="ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
-            >
-              {isSubmitting ? "Processing..." : "Continue"}
-              <ChevronLeft className="w-4 h-4 rotate-180" />
-            </SubmitButton>
+            {items?.length > 0 ? (
+              <SubmitButton
+                data-testid="submit-address-button"
+                disabled={!isEmailValid}
+                className="ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
+              >
+                {isSubmitting ? "Processing..." : "Continue"}
+                <ChevronLeft className="w-4 h-4 rotate-180" />
+              </SubmitButton>
+            ) : (
+              <div className="ml-auto">
+                <Link href="/">
+                  <button className="px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2">
+                    Continue Shopping
+                  </button>
+                </Link>
+              </div>
+            )}
           </div>
         </form>
       ) : (

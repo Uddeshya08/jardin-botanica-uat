@@ -13,6 +13,14 @@ type ItemsTemplateProps = {
 const ItemsPreviewTemplate = ({ cart }: ItemsTemplateProps) => {
   const items = cart.items
 
+  if (items?.length == 0) {
+    return (
+      <p>
+        No items here at the moment. Head back to the garden to discover more.
+      </p>
+    )
+  }
+
   return (
     <div className="space-y-4" data-testid="items-table">
       {items
