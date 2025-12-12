@@ -65,7 +65,7 @@ const Addresses = ({
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(trimmedEmail)) {
-        setSubmitError("Please enter a valid email address")
+        setSubmitError("Please use a valid email address")
         setIsSubmitting(false)
         return
       }
