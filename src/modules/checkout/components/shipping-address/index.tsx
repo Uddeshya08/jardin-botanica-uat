@@ -255,13 +255,13 @@ const ShippingAddress = ({
         const email = formData.email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         if (!emailRegex.test(email)) {
-          setEmailError("Please enter a valid email address")
+          setEmailError("Please use a valid email address")
           return
         }
 
         const domain = email.split("@")[1]?.toLowerCase()
         if (!domain) {
-          setEmailError("Please enter a valid email address")
+          setEmailError("Please use a valid email address")
           return
         }
 
@@ -371,14 +371,14 @@ const ShippingAddress = ({
     // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      setEmailError("Please enter a valid email address")
+      setEmailError("Please use a valid email address")
       return false
     }
 
     // Extract domain from email
     const domain = email.split("@")[1]?.toLowerCase()
     if (!domain) {
-      setEmailError("Please enter a valid email address")
+      setEmailError("Please use a valid email address")
       return false
     }
 
@@ -419,7 +419,7 @@ const ShippingAddress = ({
       }
     }
 
-    setEmailError("Please use a valid email provider (Gmail, Yahoo, Outlook, etc.) or a corporate email address")
+    setEmailError("Please use a valid email address")
     return false
   }
 
@@ -467,7 +467,7 @@ const ShippingAddress = ({
                 className={`cursor-pointer rounded-2xl p-5 transition-all duration-300 relative ${
                   selectedAddressId === address.id
                     ? "bg-white/60 border-2 border-black/20 shadow-lg shadow-black/10"
-                    : "bg-white/40 border border-white/60 hover:bg-white/60 hover:shadow-md"
+                    : "bg-white/40 border border-white/60 hover:bg-white/60 shadow-md"
                 }`}
               >
                 {/* Edit Icon */}
@@ -526,7 +526,7 @@ const ShippingAddress = ({
                   isDefault: false,
                 })
               }}
-              className="cursor-pointer rounded-2xl p-5 bg-white/40 border border-white/60 hover:bg-white/60 hover:shadow-md transition-all duration-300 flex items-center justify-center"
+              className="cursor-pointer rounded-2xl p-5 bg-white/40 border border-white/60 hover:bg-white/60 shadow-md transition-all duration-300 flex items-center justify-center"
             >
               <div className="flex items-center space-x-2 text-black/60">
                 <Plus className="w-5 h-5" />
@@ -606,7 +606,7 @@ const ShippingAddress = ({
                   <Input
                     id="newPhone"
                     label=""
-                    placeholder="XXXXX XXXXX"
+                    placeholder="Enter 10 digit number"
                     name="newPhone"
                     type="tel"
                     value={newAddressData.phone}
@@ -629,7 +629,7 @@ const ShippingAddress = ({
               <Input
                 id="newAddress1"
                 label=""
-                placeholder="House no., Street Locality"
+                placeholder="House no., street, locality"
                 name="newAddress1"
                 value={newAddressData.addressLine1}
                 onChange={(e) =>
@@ -661,28 +661,27 @@ const ShippingAddress = ({
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="newCity" className="font-din-arabic mb-2 block">
-                  City
+            <div>
+                <Label htmlFor="newPincode" className="font-din-arabic mb-2 block">
+                  PIN Code
                 </Label>
-                <Select
-                  value={newAddressData.city}
-                  onValueChange={(value: string) =>
-                    setNewAddressData({ ...newAddressData, city: value })
+                <Input
+                  id="newPincode"
+                  label=""
+                  placeholder="Enter 6-digit PIN"
+                  name="newPincode"
+                  value={newAddressData.pincode}
+                  onChange={(e) =>
+                    setNewAddressData({
+                      ...newAddressData,
+                      pincode: e.target.value,
+                    })
                   }
-                >
-                  <SelectTrigger className="bg-white/80 border-black/10 focus:border-black/30 font-din-arabic h-11">
-                    <SelectValue placeholder="Select city" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    {indianCities.map((city) => (
-                      <SelectItem key={city} value={city} className="font-din-arabic">
-                        {city}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30"
+                  maxLength={6}
+                />
               </div>
+            
               <div>
                 <Label htmlFor="newState" className="font-din-arabic mb-2 block">
                   State
@@ -708,24 +707,26 @@ const ShippingAddress = ({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="newPincode" className="font-din-arabic mb-2 block">
-                  PIN Code
+                <Label htmlFor="newCity" className="font-din-arabic mb-2 block">
+                  City
                 </Label>
-                <Input
-                  id="newPincode"
-                  label=""
-                  placeholder="Enter 6-digit PIN"
-                  name="newPincode"
-                  value={newAddressData.pincode}
-                  onChange={(e) =>
-                    setNewAddressData({
-                      ...newAddressData,
-                      pincode: e.target.value,
-                    })
+                <Select
+                  value={newAddressData.city}
+                  onValueChange={(value: string) =>
+                    setNewAddressData({ ...newAddressData, city: value })
                   }
-                  className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30"
-                  maxLength={6}
-                />
+                >
+                  <SelectTrigger className="bg-white/80 border-black/10 focus:border-black/30 font-din-arabic h-11">
+                    <SelectValue placeholder="Select city" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {indianCities.map((city) => (
+                      <SelectItem key={city} value={city} className="font-din-arabic">
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="newLabel" className="font-din-arabic mb-2 block">

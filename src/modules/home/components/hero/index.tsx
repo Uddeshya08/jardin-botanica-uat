@@ -8,6 +8,7 @@ import { BespokeGifting } from "app/components/BespokeGifting"
 import { JournalSection } from "app/components/JournalSection"
 import { RippleEffect } from "app/components/RippleEffect"
 import Newsletter from "app/components/Newsletter"
+import { ProductCarousel } from "../product-carousel"
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -30,6 +31,7 @@ export default function Home() {
 
       {/* Bottom Fold Sections */}
       <DesignPhilosophy />
+      <ProductCarousel />
       <FeaturedRitual />
       <BespokeGifting />
       <JournalSection />

@@ -2,6 +2,7 @@
 
 import repeat from "@lib/util/repeat"
 import { HttpTypes } from "@medusajs/types"
+import { Quote } from "lucide-react"
 
 import Item from "@modules/cart/components/item"
 import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
@@ -10,14 +11,41 @@ type ItemsTemplateProps = {
   cart: HttpTypes.StoreCart
 }
 
+export const QuoteStart = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    {...props}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
+    <path d="M9 5H5L3 11v8h8V11H7l2-6zm12 0h-4l-2 6v8h8V11h-4l2-6z" />
+  </svg>
+);
+
+
+
 const ItemsPreviewTemplate = ({ cart }: ItemsTemplateProps) => {
   const items = cart.items
 
   if (items?.length == 0) {
     return (
-      <p>
-        No items here at the moment. Head back to the garden to discover more.
-      </p>
+      <div className="flex items-start space-x-4 p-4 bg-white/60 rounded-xl border border-white/80 group shadow-lg transition-all duration-300">
+        {/* <blockquote>
+          <p className="font-din-arabic text-sm text-black/60">
+          <QuoteStart className="w-4 h-4 text-black/60 inline-block mr-2" />
+
+          No items here at the moment. Head back to the garden to discover more.
+          </p>
+        </blockquote> */}
+
+        <figure className="max-w-screen-md mx-auto text-center">
+        <QuoteStart className="w-4 h-4 text-black/60 inline-block mr-2" />
+              <blockquote>
+        <p className="font-din-arabic text-sm text-black/60">
+          No items here at the moment. Head back to the garden to discover more.</p>
+            </blockquote>
+        </figure>
+
+      </div>
     )
   }
 

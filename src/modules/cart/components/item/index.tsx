@@ -54,7 +54,7 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="flex items-start space-x-4 p-4 bg-white/60 rounded-xl border border-white/80 group hover:shadow-lg transition-all duration-300"
+      className="flex items-start space-x-4 p-4 bg-white/60 rounded-xl border border-white/80 group shadow-lg transition-all duration-300"
       data-testid="product-row"
     >
       <LocalizedClientLink
