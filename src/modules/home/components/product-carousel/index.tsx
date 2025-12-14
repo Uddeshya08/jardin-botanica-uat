@@ -98,12 +98,12 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <div
       className="group flex flex-col w-full mx-auto h-full"
-      style={{ minHeight: "600px", maxWidth: "480px" }}
+      style={{ minHeight: "500px", maxWidth: "480px" }}
     >
       {/* Product Image */}
       <div
         className="relative w-full overflow-hidden cursor-pointer"
-        style={{ aspectRatio: "2/4", marginBottom: "1.5rem" }}
+        style={{ aspectRatio: "3/4", marginBottom: "1.5rem" }}
         onMouseEnter={() => setIsImageHovered(true)}
         onMouseLeave={() => setIsImageHovered(false)}
       >
@@ -205,6 +205,18 @@ export function ProductCarousel() {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [scrollProgress, setScrollProgress] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 750)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     if (!api) return
@@ -225,18 +237,24 @@ export function ProductCarousel() {
     api?.scrollTo(index)
   }
 
-  // Calculate progress percentage based on scroll position
-  const progressPercentage = scrollProgress * 100
+  // Calculate progress percentage based on current slide position
+  const totalSlides = products.length
+  const normalizedIndex = totalSlides > 0 ? ((current % totalSlides) + totalSlides) % totalSlides : 0
+  const progressPercentage = totalSlides > 0 ? ((normalizedIndex + 1) / totalSlides) * 100 : 0
 
   const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation()
     const rect = e.currentTarget.getBoundingClientRect()
     const clickX = e.clientX - rect.left
-    const percentage = clickX / rect.width
+    const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
     
     if (api) {
       const scrollSnaps = api.scrollSnapList()
-      const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
-      api.scrollTo(targetIndex)
+      if (scrollSnaps.length > 0) {
+        // Calculate target index based on percentage
+        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
+        api.scrollTo(targetIndex)
+      }
     }
   }
 
@@ -255,8 +273,8 @@ export function ProductCarousel() {
       <style dangerouslySetInnerHTML={{
         __html: `
           .product-carousel-item {
-            width: calc((100vw - 64px) * 0.82) !important;
-            flex-basis: calc((100vw - 64px) * 0.82) !important;
+            width: calc((100vw - 64px) * 0.70) !important;
+            flex-basis: calc((100vw - 64px) * 0.70) !important;
             flex-grow: 0 !important;
             flex-shrink: 0 !important;
             box-sizing: border-box !important;
@@ -270,18 +288,17 @@ export function ProductCarousel() {
           .product-carousel-content {
             user-select: none !important;
             -webkit-user-select: none !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-          }
-          @media (min-width: 750px) {
-            .product-carousel-content {
-              margin-left: -1rem !important;
-            }
+            padding-left: calc((100vw - 64px) * 0.15) !important;
+            padding-right: calc((100vw - 64px) * 0.15) !important;
           }
           @media (min-width: 750px) {
             .product-carousel-item {
               width: calc((100vw - 100px) * 1 / 2.5) !important;
               flex-basis: calc((100vw - 100px) * 1 / 2.5) !important;
+            }
+            .product-carousel-content {
+              padding-left: 0 !important;
+              padding-right: 0 !important;
             }
           }
           @media (min-width: 990px) {
@@ -292,18 +309,18 @@ export function ProductCarousel() {
           }
           @media (min-width: 1200px) {
             .product-carousel-item {
-              width: calc((min(1440px, 100vw) - 148px) * 1 / 4.6) !important;
-              flex-basis: calc((min(1440px, 100vw) - 148px) * 1 / 4.6) !important;
+              width: calc((min(1440px, 100vw) - 148px) * 1 / 4) !important;
+              flex-basis: calc((min(1440px, 100vw) - 148px) * 1 / 4) !important;
             }
           }
         `
       }} />
       <div className="py-16 sm:py-16 lg:py-16">
-        <div className="max-w-[120rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-10 2xl:px-15">
+        <div className="m-w-[180rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-10 2xl:px-15">
           <Carousel
             setApi={setApi}
             opts={{
-              align: "center",
+              align: isMobile ? "center" : "start",
               loop: true,
               dragFree: false,
               containScroll: "trimSnaps",
@@ -314,31 +331,28 @@ export function ProductCarousel() {
               {products.map((product) => (
                 <CarouselItem
                   key={product.id}
-                  className="pl-2 md:pl-4 product-carousel-item"
+                  className="pl-2 pr-2 md:pl-5 md:pr-4 product-carousel-item"
                 >
                   <ProductCard product={product} />
                 </CarouselItem>
               ))}
             </CarouselContent>
           </Carousel>
-          
-          {/* Progress Bar - Web and Mobile */}
-          <div className="px-4 md:px-6 lg:px-12 relative" style={{ paddingTop: "24px", paddingBottom: "20px" }}>
-            <div className="w-full space-y-3">
-              <div
-                className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full overflow-hidden cursor-pointer group select-none mx-auto"
-                onClick={handleProgressBarClick}
-              >
-                <div
-                  className="h-full rounded-full cursor-grab active:cursor-grabbing transition-all duration-200 group-hover:h-1 select-none absolute"
-                  style={{
-                    background: "#a28b6f",
-                    width: `${progressPercentage}%`,
-                    left: "0%"
-                  }}
-                />
-              </div>
-            </div>
+        </div>
+        
+        {/* Progress Bar - Web and Mobile - Centered */}
+        <div className="flex justify-center items-center w-full" style={{ paddingTop: "24px", paddingBottom: "20px" }}>
+          <div 
+            className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full overflow-hidden cursor-pointer group select-none"
+            onClick={handleProgressBarClick}
+          >
+            <div
+              className="h-full rounded-full transition-all duration-200 group-hover:h-1 select-none"
+              style={{
+                background: "#a28b6f",
+                width: `${progressPercentage}%`
+              }}
+            />
           </div>
         </div>
       </div>
