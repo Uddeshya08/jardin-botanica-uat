@@ -453,9 +453,9 @@ const Candles = () => {
                 {/* Text - Always visible with opacity change on hover */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <motion.p
-                    className="text-white text-2xl font-bold tracking-wide font-din-arabic drop-shadow-lg"
-                    initial={{ opacity: 0.3 }}
-                    animate={{ opacity: hoveredProductIndex === i ? 1 : 0.3 }}
+                    className="text-white text-2xl tracking-wide font-din-arabic drop-shadow-lg"
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: hoveredProductIndex === i ? 1 : 1 }}
                     transition={{ duration: 0.3 }}
                   >
                     {label && label.trim() ? label : "Product Name"}
