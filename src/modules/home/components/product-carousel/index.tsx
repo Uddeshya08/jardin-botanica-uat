@@ -205,6 +205,18 @@ export function ProductCarousel() {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [scrollProgress, setScrollProgress] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 750)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     if (!api) return
@@ -261,8 +273,8 @@ export function ProductCarousel() {
       <style dangerouslySetInnerHTML={{
         __html: `
           .product-carousel-item {
-            width: calc((100vw - 64px) * 0.82) !important;
-            flex-basis: calc((100vw - 64px) * 0.82) !important;
+            width: calc((100vw - 64px) * 0.70) !important;
+            flex-basis: calc((100vw - 64px) * 0.70) !important;
             flex-grow: 0 !important;
             flex-shrink: 0 !important;
             box-sizing: border-box !important;
@@ -276,13 +288,17 @@ export function ProductCarousel() {
           .product-carousel-content {
             user-select: none !important;
             -webkit-user-select: none !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
+            padding-left: calc((100vw - 64px) * 0.15) !important;
+            padding-right: calc((100vw - 64px) * 0.15) !important;
           }
           @media (min-width: 750px) {
             .product-carousel-item {
               width: calc((100vw - 100px) * 1 / 2.5) !important;
               flex-basis: calc((100vw - 100px) * 1 / 2.5) !important;
+            }
+            .product-carousel-content {
+              padding-left: 0 !important;
+              padding-right: 0 !important;
             }
           }
           @media (min-width: 990px) {
@@ -304,7 +320,7 @@ export function ProductCarousel() {
           <Carousel
             setApi={setApi}
             opts={{
-              align: "start",
+              align: isMobile ? "center" : "start",
               loop: true,
               dragFree: false,
               containScroll: "trimSnaps",
@@ -315,7 +331,7 @@ export function ProductCarousel() {
               {products.map((product) => (
                 <CarouselItem
                   key={product.id}
-                  className="pl-5 pr-2 md:pr-4 product-carousel-item"
+                  className="pl-2 pr-2 md:pl-5 md:pr-4 product-carousel-item"
                 >
                   <ProductCard product={product} />
                 </CarouselItem>
