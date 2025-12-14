@@ -315,6 +315,7 @@ export interface FromTheLabProductFields {
 // ProductCard Content Type (Referenced from FromTheLabSection)
 export interface ProductCardFields {
   name: string
+  label?: string // Optional label field (used in candles collection)
   price?: number
   currency?: string
   image?: ContentfulAsset // Media field
@@ -353,4 +354,77 @@ export interface FromTheLabSection {
   backgroundColor: string
   products: FromTheLabProduct[]
   isActive: boolean
+}
+
+// Generic Page Banner Content Types (Reusable for any page)
+export interface PageBannerFields {
+  title: string
+  description: string
+  mediaType: "video" | "image" 
+  video?: ContentfulAsset 
+  image?: ContentfulAsset 
+  fallbackImage?: ContentfulAsset
+  isActive: boolean
+  pageKey: string // Required: Identifies which page this banner is for (e.g., "candles", "home", "about", "hand-care")
+}
+
+export interface ContentfulPageBanner extends EntrySkeletonType {
+  contentTypeId: "pageBanner" // Generic content type name in Contentful
+  fields: PageBannerFields
+}
+
+// Simplified type for use in components
+export interface PageBanner {
+  title: string
+  description: string
+  mediaType: "video" | "image"
+  videoUrl?: string 
+  imageUrl?: string 
+  fallbackImageUrl?: string 
+  isActive: boolean
+  pageKey: string
+}
+
+// Legacy type alias for backward compatibility (deprecated - use PageBanner instead)
+/** @deprecated Use PageBanner instead */
+export type CandlesPageBanner = PageBanner
+
+// Candles Collection Section Content Types (uses ProductCard references)
+export interface CandlesCollectionSectionFields {
+  sectionKey?: string // Optional: For filtering specific sections
+  isActive: boolean
+  products?: ContentfulProductCard[] // Array of references to ProductCard entries
+  order?: number // Display order for items within the section
+}
+
+export interface ContentfulCandlesCollectionSection extends EntrySkeletonType {
+  contentTypeId: "candlesCollectionSection"
+  fields: CandlesCollectionSectionFields
+}
+
+// Simplified type for use in components (maps ProductCard to candles collection format)
+export interface CandlesCollectionItem {
+  label: string
+  src: string // Image URL
+  hoverSrc?: string // Optional hover image URL
+  url?: string // URL to navigate to when clicked
+  order: number
+  isActive: boolean
+}
+
+// Legacy type - kept for backward compatibility but deprecated
+/** @deprecated Use CandlesCollectionSection with ProductCard references instead */
+export interface CandlesCollectionItemFields {
+  label: string
+  image: ContentfulAsset
+  hoverImage?: ContentfulAsset
+  url?: string
+  order?: number
+  isActive: boolean
+}
+
+/** @deprecated Use ContentfulCandlesCollectionSection instead */
+export interface ContentfulCandlesCollectionItem extends EntrySkeletonType {
+  contentTypeId: "candlesCollectionItem"
+  fields: CandlesCollectionItemFields
 }

@@ -25,6 +25,12 @@ import {
   FromTheLabSection,
   FromTheLabProduct,
   ContentfulProductCard,
+  ContentfulPageBanner,
+  PageBanner,
+  CandlesPageBanner, // For backward compatibility
+  ContentfulCandlesCollectionItem,
+  ContentfulCandlesCollectionSection,
+  CandlesCollectionItem,
 } from "../../types/contentful"
 import { Entry } from "contentful"
 
@@ -989,6 +995,425 @@ function transformFromTheLabSectionEntry(
     }
   } catch (error) {
     console.error("Error transforming From the Lab section entry:", error)
+    return null
+  }
+}
+
+/**
+ * Helper function to extract URL from Contentful Asset
+ */
+function getAssetUrl(asset: any): string | undefined {
+  if (!asset || !asset.fields || !asset.fields.file) {
+    return undefined
+  }
+  const url = asset.fields.file.url
+  return url.startsWith("//") ? `https:${url}` : url
+}
+
+/**
+ * Fetch page banner from Contentful by page key (Generic function for any page)
+ * 
+ * @param pageKey - Required: The page identifier (e.g., "candles", "home", "about", "hand-care")
+ * 
+ * @returns PageBanner or null if not found
+ * 
+ * @example
+ * // Get banner for candles page
+ * const banner = await getPageBanner("candles")
+ * 
+ * @example
+ * // Get banner for home page
+ * const homeBanner = await getPageBanner("home")
+ */
+export async function getPageBanner(
+  pageKey: string
+): Promise<PageBanner | null> {
+  try {
+    const client = getContentfulClient()
+
+    const query: any = {
+      content_type: "candlesPageBanner",
+      "fields.pageKey": pageKey,
+      "fields.isActive": true,
+      limit: 1,
+    }
+
+
+    let response
+    try {
+      response = await client.getEntries(query)
+    } catch (apiError: any) {
+      // Handle Contentful API errors gracefully
+      const errorMessage = apiError?.message || String(apiError)
+      const errorSysId = apiError?.sys?.id
+      const errorDetails = apiError?.details?.errors || []
+      
+      console.error(`[ERROR] Contentful API Error:`, {
+        message: errorMessage,
+        sysId: errorSysId,
+        status: apiError?.status,
+        statusText: apiError?.statusText,
+        details: errorDetails,
+        fullError: apiError,
+      })
+
+      // Most common error: Content Type doesn't exist
+      if (errorMessage?.toLowerCase().includes("not found") || 
+          errorSysId === "NotFound" ||
+          errorMessage?.includes("Resource not found")) {
+        console.error(
+          `\n[SOLUTION] ❌ Content Type "pageBanner" not found in Contentful!\n` +
+          `Please create a content type with:\n` +
+          `- Content Type ID (API Identifier): "pageBanner"\n` +
+          `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey\n\n`
+        )
+        return null // Return null instead of throwing
+      }
+      
+      // Field not found error
+      if (errorMessage?.includes("InvalidQuery") || 
+          errorMessage?.includes("UnknownField") ||
+          errorDetails.some((e: any) => e?.name === "pageKey")) {
+        console.error(
+          `\n[SOLUTION] ❌ Field "pageKey" not found in "pageBanner" content type!\n` +
+          `Please add a field with:\n` +
+          `- Field ID: "pageKey"\n` +
+          `- Field Type: Short text\n\n`
+        )
+        return null
+      }
+
+      // For other errors, log and return null
+      console.error(`[ERROR] Unknown Contentful error. Please check your Contentful configuration.`)
+      return null
+    }
+
+    console.log(`[DEBUG] Response items count: ${response.items?.length || 0}`)
+
+    if (!response.items || response.items.length === 0) {
+      // Try to fetch all pageBanner entries to see what's available
+      try {
+        const allEntries = await client.getEntries({
+          content_type: "pageBanner",
+          limit: 10,
+        })
+        console.warn(`[DEBUG] Available pageBanner entries:`, allEntries.items.map((item: any) => ({
+          id: item.sys.id,
+          pageKey: item.fields?.pageKey || item.fields?.page_key || 'NOT FOUND',
+          isActive: item.fields?.isActive ?? item.fields?.is_active ?? 'NOT FOUND',
+          title: item.fields?.title || 'NO TITLE'
+        })))
+      } catch (debugError) {
+        console.error(`[DEBUG] Error fetching all entries:`, debugError)
+      }
+
+      console.warn(
+        `No active page banner found for pageKey: "${pageKey}". ` +
+        `Make sure you have an active banner entry with pageKey="${pageKey}" in Contentful. ` +
+        `Content Type ID should be "pageBanner" and field should be "pageKey" (camelCase).`
+      )
+      return null
+    }
+
+    const entry = response.items[0] as unknown as Entry<ContentfulPageBanner>
+    console.log(`[DEBUG] Found entry:`, {
+      id: entry.sys.id,
+      pageKey: (entry.fields as any)?.pageKey,
+      title: (entry.fields as any)?.title
+    })
+    
+    return transformPageBannerEntry(entry)
+  } catch (error: any) {
+    console.error(`[ERROR] Error fetching page banner for pageKey "${pageKey}" from Contentful:`)
+    console.error(`[ERROR] Error type:`, error?.constructor?.name)
+    console.error(`[ERROR] Error message:`, error?.message)
+    console.error(`[ERROR] Full error:`, error)
+    
+    // More helpful error messages
+    if (error?.message?.includes("not found") || error?.sys?.id === "NotFound") {
+      console.error(
+        `\n[SOLUTION] Content Type "pageBanner" doesn't exist in Contentful.\n` +
+        `Please create it with:\n` +
+        `- Content Type ID: "pageBanner"\n` +
+        `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey`
+      )
+    }
+
+    return null
+  }
+}
+
+/**
+ * Fetch candles page banner from Contentful (Legacy function - uses pageKey "candles")
+ * @deprecated Use getPageBanner("candles") instead
+ */
+export async function getCandlesPageBanner(): Promise<PageBanner | null> {
+  return getPageBanner("candles")
+}
+
+/**
+ * Fetch all active page banners from Contentful
+ * @returns Array of PageBanner
+ */
+export async function getAllPageBanners(): Promise<PageBanner[]> {
+  try {
+    const client = getContentfulClient()
+
+    const response = await client.getEntries({
+      content_type: "pageBanner",
+      "fields.isActive": true,
+      limit: 100,
+    })
+
+    if (!response.items || response.items.length === 0) {
+      return []
+    }
+
+    return response.items
+      .map((item) => transformPageBannerEntry(item as unknown as Entry<ContentfulPageBanner>))
+      .filter((item): item is PageBanner => item !== null)
+  } catch (error) {
+    console.error("Error fetching all page banners from Contentful:", error)
+    return []
+  }
+}
+
+/**
+ * Fetch all active candles page banners from Contentful (Legacy function)
+ * @deprecated Use getAllPageBanners() and filter by pageKey instead
+ */
+export async function getAllCandlesPageBanners(): Promise<PageBanner[]> {
+  const allBanners = await getAllPageBanners()
+  return allBanners.filter(banner => banner.pageKey === "candles")
+}
+
+/**
+ * Transform Contentful page banner entry to simplified PageBanner type
+ */
+function transformPageBannerEntry(
+  entry: Entry<ContentfulPageBanner>
+): PageBanner | null {
+  try {
+    const fields = entry.fields as any
+
+    // Determine media type (default to "image" if not specified)
+    const mediaType = fields.mediaType === "video" ? "video" : "image"
+
+    // Process video asset if mediaType is video
+    let videoUrl: string | undefined
+    if (mediaType === "video" && fields.video) {
+      videoUrl = getAssetUrl(fields.video)
+    }
+
+    // Process image asset (used for image type or as fallback)
+    let imageUrl: string | undefined
+    if (fields.image) {
+      imageUrl = getAssetUrl(fields.image)
+    }
+
+    // Process fallback image asset
+    let fallbackImageUrl: string | undefined
+    if (fields.fallbackImage) {
+      fallbackImageUrl = getAssetUrl(fields.fallbackImage)
+    }
+
+    console.log(`[DEBUG] Transforming entry fields:`, {
+      title: fields.title,
+      pageKey: fields.pageKey || fields.page_key,
+      mediaType: fields.mediaType,
+      hasVideo: !!fields.video,
+      hasImage: !!fields.image,
+      isActive: fields.isActive
+    })
+
+    const result: PageBanner = {
+      title: extractTextFromRichText(fields.title) || "",
+      description: extractTextFromRichText(fields.description) || "",
+      mediaType: mediaType as "video" | "image",
+      videoUrl: videoUrl,
+      imageUrl: imageUrl,
+      fallbackImageUrl: fallbackImageUrl,
+      isActive: fields.isActive ?? true,
+      pageKey: fields.pageKey || fields.page_key || "", // Support both camelCase and snake_case
+    }
+
+    console.log(`[DEBUG] Transformed result:`, result)
+    return result
+  } catch (error) {
+    console.error("Error transforming Contentful page banner entry:", error)
+    console.error("Entry fields:", (entry.fields as any))
+    return null
+  }
+}
+
+/**
+ * Fetch candles collection from Contentful using section with ProductCard references
+ * @param sectionKey - Optional section key to filter by (defaults to "candles" if not provided)
+ * @returns Array of CandlesCollectionItem sorted by order
+ */
+export async function getCandlesCollection(sectionKey: string = "candles"): Promise<CandlesCollectionItem[]> {
+  try {
+    const client = getContentfulClient()
+
+    // First try to fetch from candlesCollectionSection (new approach with ProductCard references)
+    const sectionQuery: any = {
+      content_type: "candlesCollectionSection",
+      "fields.isActive": true,
+      include: 2, // Include linked ProductCard entries
+      limit: 1,
+    }
+
+    if (sectionKey) {
+      sectionQuery["fields.sectionKey"] = sectionKey
+    }
+
+    let sectionResponse
+    try {
+      sectionResponse = await client.getEntries(sectionQuery)
+    } catch (apiError: any) {
+      console.error("[getCandlesCollection] Contentful API error:", apiError?.message)
+    }
+
+    // If section found with ProductCard references, use that
+    if (sectionResponse && sectionResponse.items && sectionResponse.items.length > 0) {
+      const section = transformCandlesCollectionSectionEntry(
+        sectionResponse.items[0] as unknown as Entry<ContentfulCandlesCollectionSection>
+      )
+      if (section && section.length > 0) {
+        return section
+      }
+    }
+
+    // Fallback to old candlesCollectionItem approach for backward compatibility
+    const itemQuery: any = {
+      content_type: "candlesCollectionItem",
+      "fields.isActive": true,
+      order: "fields.order",
+      limit: 100,
+    }
+
+    let itemResponse
+    try {
+      itemResponse = await client.getEntries(itemQuery)
+    } catch (apiError: any) {
+      console.error("[getCandlesCollection] Contentful API error:", apiError?.message)
+      return []
+    }
+
+    if (!itemResponse.items || itemResponse.items.length === 0) {
+      return []
+    }
+
+    const items = itemResponse.items
+      .map((entry) => transformCandlesCollectionItemEntry(entry as unknown as Entry<ContentfulCandlesCollectionItem>))
+      .filter((item): item is CandlesCollectionItem => item !== null)
+      .sort((a, b) => a.order - b.order)
+
+    return items
+  } catch (error) {
+    console.error("[getCandlesCollection] Error fetching candles collection from Contentful:", error)
+    return []
+  }
+}
+
+/**
+ * Transform Contentful candles collection section entry to array of CandlesCollectionItem
+ * Uses ProductCard references (new approach)
+ */
+function transformCandlesCollectionSectionEntry(
+  entry: Entry<ContentfulCandlesCollectionSection>
+): CandlesCollectionItem[] {
+  try {
+    const fields = entry.fields as any
+
+    if (!fields.products || !Array.isArray(fields.products) || fields.products.length === 0) {
+      return []
+    }
+
+    const getImageUrl = (asset: any): string | undefined => {
+      if (!asset) return undefined
+      return getAssetUrl(asset)
+    }
+
+    // Transform ProductCard entries to CandlesCollectionItem format
+    const items: CandlesCollectionItem[] = fields.products.map((product: any, index: number) => {
+      // Handle ProductCard entry (from References field)
+      if (product.fields) {
+        const imageUrl = getImageUrl(product.fields.image)
+        const hoverImageUrl = getImageUrl(product.fields.hoverImage)
+
+        if (!imageUrl) {
+          console.warn(`[transformCandlesCollectionSectionEntry] ProductCard "${product.fields.name}" missing image`)
+          return null
+        }
+
+        return {
+          label: product.fields.label || product.fields.name || "",
+          src: imageUrl,
+          hoverSrc: hoverImageUrl,
+          url: product.fields.url || undefined,
+          order: fields.order ?? index,
+          isActive: true,
+        }
+      }
+
+      // Fallback handling
+      return null
+    }).filter((item: CandlesCollectionItem | null): item is CandlesCollectionItem => item !== null)
+
+    // Sort by order
+    return items.sort((a, b) => a.order - b.order)
+  } catch (error) {
+    console.error("Error transforming candles collection section entry:", error)
+    return []
+  }
+}
+
+/**
+ * Transform Contentful candles collection item entry to simplified CandlesCollectionItem type
+ * (Legacy function for backward compatibility)
+ * Handles order field as both number and string (since Contentful might store it as Short text)
+ */
+function transformCandlesCollectionItemEntry(
+  entry: Entry<ContentfulCandlesCollectionItem>
+): CandlesCollectionItem | null {
+  try {
+    const fields = entry.fields as any
+
+    if (!fields.image || !fields.image.fields || !fields.image.fields.file) {
+      console.warn("[transformCandlesCollectionItemEntry] Missing image field")
+      return null
+    }
+
+    const imageUrl = getAssetUrl(fields.image)
+    if (!imageUrl) {
+      console.warn("[transformCandlesCollectionItemEntry] Could not extract image URL")
+      return null
+    }
+
+    const hoverImageUrl = fields.hoverImage ? getAssetUrl(fields.hoverImage) : undefined
+
+    // Handle order field - can be number or string (since it's Short text in Contentful)
+    let orderValue = 0
+    if (fields.order !== undefined && fields.order !== null) {
+      if (typeof fields.order === 'number') {
+        orderValue = fields.order
+      } else if (typeof fields.order === 'string') {
+        const parsed = parseInt(fields.order, 10)
+        orderValue = isNaN(parsed) ? 0 : parsed
+      }
+    }
+
+    return {
+      label: fields.label || "",
+      src: imageUrl,
+      hoverSrc: hoverImageUrl,
+      url: fields.url || undefined,
+      order: orderValue,
+      isActive: fields.isActive ?? true,
+    }
+  } catch (error) {
+    console.error("Error transforming candles collection item entry:", error)
     return null
   }
 }
