@@ -7,6 +7,10 @@ import { motion } from "motion/react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
+import { PageBanner } from "app/components/PageBanner"
+import { getCandlesCollection } from "@lib/data/contentful"
+import { CandlesCollectionItem } from "../../../../types/contentful"
+import { useRouter } from "next/navigation"
 
 interface CartItem {
   id: string
@@ -17,6 +21,8 @@ interface CartItem {
 }
 
 const Candles = () => {
+  const router = useRouter()
+  
   const carouselImages = [
     "/Images/Insta1.jpg",
     "/Images/Insta2.jpg",
@@ -29,12 +35,13 @@ const Candles = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isScrolled, setIsScrolled] = useState(false)
   const [hoveredProductIndex, setHoveredProductIndex] = useState<number | null>(null)
-  const [videoError, setVideoError] = useState(false)
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [productScrollPosition, setProductScrollPosition] = useState(0)
   const [maxProductScroll, setMaxProductScroll] = useState(0)
   const [garageSliderIndex, setGarageSliderIndex] = useState(2)
   const [centerCardIndex, setCenterCardIndex] = useState(2)
+  const [candlesCollection, setCandlesCollection] = useState<CandlesCollectionItem[]>([])
+  const [isLoadingCollection, setIsLoadingCollection] = useState(true)
 
   const handleCartUpdate = (item: CartItem | null) => {
     if (!item) return
@@ -70,12 +77,51 @@ const Candles = () => {
     return visible
   }
 
-  const products = [
-    { src: "/Images/SoftFloral.jpg", label: "Floral Spice", hoverSrc: "/Images/SoftFloral.jpg" },
-    { src: "/Images/Crushedpine.jpg", label: "Cedar Bloom", hoverSrc: "/Images/Crushedpine.jpg" },
-    { src: "/Images/warmroots.jpg", label: "Forest Floor", hoverSrc: "/Images/warmroots.jpg" },
-    { src: "/Images/AquaVeil1.jpg", label: "Water & Wood", hoverSrc: "/Images/AquaVeil1.jpg" },
-  ]
+  // Fetch candles collection from Contentful
+  useEffect(() => {
+    const fetchCandlesCollection = async () => {
+      setIsLoadingCollection(true)
+      try {
+        const collection = await getCandlesCollection()
+        setCandlesCollection(collection)
+        // Set initial center index based on collection length (middle item, or second item if < 3)
+        if (collection.length > 0) {
+          const initialIndex = Math.min(2, Math.floor(collection.length / 2))
+          setGarageSliderIndex(initialIndex)
+          setCenterCardIndex(initialIndex)
+        }
+      } catch (error) {
+        console.error("Error fetching candles collection:", error)
+      } finally {
+        setIsLoadingCollection(false)
+      }
+    }
+    fetchCandlesCollection()
+  }, [])
+
+  // Transform collection items for desktop products view (with hover images)
+  const products = candlesCollection.map((item) => ({
+    src: item.src,
+    label: item.label,
+    hoverSrc: item.hoverSrc || item.src, // Fallback to main image if no hover image
+    url: item.url,
+  }))
+  
+  // Handler for navigation
+  const handleItemClick = (url?: string) => {
+    if (url && url.trim() !== '') {
+      // Handle both relative and absolute URLs
+      const urlPath = url.startsWith('/') 
+        ? url 
+        : (url.startsWith('http://') || url.startsWith('https://'))
+          ? new URL(url).pathname
+          : `/${url}`
+      
+      if (urlPath && urlPath.trim() !== '' && urlPath !== '/') {
+        router.push(urlPath)
+      }
+    }
+  }
 
   const scrollProducts = (direction: 'left' | 'right') => {
     const scrollContainer = document.getElementById('product-slider')
@@ -124,48 +170,27 @@ const Candles = () => {
   const canScrollLeft = productScrollPosition > 0
   const canScrollRight = productScrollPosition < maxProductScroll - 10 // Small buffer for smooth scrolling
 
-  // Garage slider items
-  const garageSliderItems = [
-    { 
-      src: "/Images/Crushedpine.jpg", 
-      label: "Cedar Bloom",
-      bgColor: "bg-amber-900/20"
-    },
-    { 
-      src: "/Images/SoftFloral.jpg", 
-      label: "Floral Spice",
-      bgColor: "bg-green-900/30"
-    },
-    { 
-      src: "/Images/warmroots.jpg", 
-      label: "Forest Floor",
-      bgColor: "bg-amber-800/20"
-    },
-    { 
-      src: "/Images/AquaVeil1.jpg", 
-      label: "Water & Wood",
-      bgColor: "bg-blue-900/20"
-    },
-    { 
-      src: "/Images/Pineraw.jpg", 
-      label: "Pine Essence",
-      bgColor: "bg-green-800/20"
-    },
-  ]
+  // Garage slider items - use Contentful data
+  const garageSliderItems = candlesCollection.map((item) => ({
+    src: item.src,
+    label: item.label,
+    url: item.url,
+    bgColor: "bg-amber-900/20", // Optional styling, can be removed or made dynamic
+  }))
 
   // Track garage slider scroll position
   useEffect(() => {
+    if (garageSliderItems.length === 0) return
+    
     const garageSlider = document.getElementById('garage-slider')
     if (!garageSlider) return
 
     const updateGarageSliderIndex = () => {
       const scrollLeft = garageSlider.scrollLeft
       const viewportWidth = window.innerWidth
-      // Center card width: 75% of viewport, side cards: 62% of viewport
-      // Average for calculation: ~68% of viewport
       const avgCardWidth = viewportWidth * 0.68
-      const gap = 16 // gap-4 = 16px
-      const paddingLeft = viewportWidth * 0.19 // 19% padding on each side
+      const gap = 16 
+      const paddingLeft = viewportWidth * 0.19
       const adjustedScroll = scrollLeft + paddingLeft
       const scrollPosition = adjustedScroll / (avgCardWidth + gap)
       const currentIndex = Math.round(scrollPosition)
@@ -174,14 +199,15 @@ const Candles = () => {
       setCenterCardIndex(newIndex)
     }
 
-    // Initial scroll to center card at index 2
+    // Initial scroll to center card
     const centerInitialCard = () => {
       const viewportWidth = window.innerWidth
       const avgCardWidth = viewportWidth * 0.68
       const gap = 16
       const paddingLeft = viewportWidth * 0.19
-      const initialIndex = 2
-      const scrollPosition = (avgCardWidth + gap) * initialIndex - paddingLeft
+      // Use the current centerCardIndex state
+      const currentCenterIndex = Math.min(centerCardIndex, garageSliderItems.length - 1)
+      const scrollPosition = (avgCardWidth + gap) * currentCenterIndex - paddingLeft
       garageSlider.scrollLeft = Math.max(0, scrollPosition)
     }
 
@@ -194,16 +220,17 @@ const Candles = () => {
     updateGarageSliderIndex()
     garageSlider.addEventListener('scroll', updateGarageSliderIndex)
     
-    window.addEventListener('resize', () => {
+    const handleResize = () => {
       centerInitialCard()
       updateGarageSliderIndex()
-    })
+    }
+    window.addEventListener('resize', handleResize)
     
     return () => {
       garageSlider.removeEventListener('scroll', updateGarageSliderIndex)
-      window.removeEventListener('resize', updateGarageSliderIndex)
+      window.removeEventListener('resize', handleResize)
     }
-  }, [])
+  }, [garageSliderItems.length])
 
   // Function to scroll garage slider to specific index
   const goToGarageSlide = (index: number) => {
@@ -234,68 +261,10 @@ const Candles = () => {
         forceWhiteText={true}
       />
       
-      {/* first section */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-        className="relative w-full h-screen md:h-[570px] overflow-hidden"
-      >
-        {!videoError ? (
-          <motion.video
-            initial={{ scale: 1.1, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1.2 }}
-            viewport={{ once: true }}
-            src="/assets/video-banner.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-            onError={() => setVideoError(true)}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <motion.img
-            initial={{ scale: 1.1, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1.2 }}
-            viewport={{ once: true }}
-            src="/Images/TopBanner.jpg"
-            alt="Topbanner"
-            className="w-full h-full object-cover"
-          />
-        )}
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          viewport={{ once: true }}
-          className="absolute top-[37%] md:top-1/2 left-8 md:left-[63px] md:-translate-y-1/2 max-w-xs md:max-w-md"
-        >
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="text-white font-medium mb-6 md:mb-8 tracking-tight font-american-typewriter text-5xl md:text-6xl lg:text-7xl"
-          >
-            Candles
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            viewport={{ once: true }}
-            className="font-din-arabic text-base md:text-lg text-white/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-4 md:px-0"
-          >
-            Inspired by ancient stargazers, these candles fill your space with soft, lingering scent bringing calm, beauty, and a touch of the cosmos to your everyday moments.
-          </motion.p>
-        </motion.div>
-      </motion.div>
+      <PageBanner pageKey="candles" />
 
       {/* Garage-style Slider Section - Mobile Only */}
+      {!isLoadingCollection && garageSliderItems.length > 0 && (
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -352,9 +321,10 @@ const Candles = () => {
                     <motion.div
                       whileHover={{ scale: 1.02 }}
                       transition={{ duration: 0.3 }}
-                      className={`relative aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-lg ${
+                      onClick={() => handleItemClick(item.url)}
+                      className={`relative aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-lg cursor-pointer ${
                         isCenter ? 'mx-2' : 'mx-1'
-                      }`}
+                      } ${item.url ? 'hover:shadow-xl transition-shadow duration-300' : ''}`}
                     >
                       <motion.img
                         src={item.src}
@@ -369,7 +339,7 @@ const Candles = () => {
                       transition={{ duration: 0.4, delay: 0.2 }}
                       className="text-black text-lg font-bold tracking-wide font-din-arabic text-center mt-3"
                     >
-                      {item.label}
+                      {item.label && item.label.trim() ? item.label : "Product Name"}
                     </motion.p>
                   </motion.div>
                 )
@@ -433,8 +403,10 @@ const Candles = () => {
           </div>
         </div>
       </motion.div>
+      )}
 
       {/* mid section - product grid with PAB hover effects - Desktop Only */}
+      {!isLoadingCollection && products.length > 0 && (
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -444,7 +416,7 @@ const Candles = () => {
       >
         {/* Desktop view - original layout */}
         <div className="flex flex-row w-full gap-4 px-10 lg:px-16">
-          {products.map(({ src, label, hoverSrc }, i) => (
+          {products.map(({ src, label, hoverSrc, url }, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 30 }}
@@ -454,6 +426,7 @@ const Candles = () => {
               className="relative w-1/4 group cursor-pointer"
               onMouseEnter={() => setHoveredProductIndex(i)}
               onMouseLeave={() => setHoveredProductIndex(null)}
+              onClick={() => handleItemClick(url)}
             >
               <motion.div
                 whileHover={{ scale: 1.03 }}
@@ -461,22 +434,10 @@ const Candles = () => {
                 className="aspect-square overflow-hidden rounded-lg shadow-lg relative"
               >
                 {/* Base Image */}
-                <motion.img
+                <img
                   src={src}
                   alt={label}
-                  className="w-full h-full object-cover absolute inset-0"
-                  initial={{ opacity: 1 }}
-                  animate={{ opacity: hoveredProductIndex === i ? 0 : 1 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
-                />
-                {/* Hover Image */}
-                <motion.img
-                  src={hoverSrc}
-                  alt={`${label} hover`}
-                  className="w-full h-full object-cover absolute inset-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  className="w-full h-full object-cover"
                 />
                 {/* Black Overlay - Only on hover with gradient from top to bottom */}
                 <motion.div
@@ -489,19 +450,23 @@ const Candles = () => {
                   }}
                 />
                 
-                {/* Text - Always visible */}
+                {/* Text - Always visible with opacity change on hover */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <p className="text-white text-2xl font-bold tracking-wide font-din-arabic drop-shadow-lg">
-                    {label}
-                  </p>
+                  <motion.p
+                    className="text-white text-2xl tracking-wide font-din-arabic drop-shadow-lg"
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: hoveredProductIndex === i ? 1 : 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {label && label.trim() ? label : "Product Name"}
+                  </motion.p>
                 </div>
               </motion.div>
             </motion.div>
           ))}
         </div>
       </motion.div>
-
-      {/* Need a Hand Choosing Section */}
+      )}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -818,3 +783,4 @@ const Candles = () => {
 }
 
 export default Candles
+

@@ -29,22 +29,13 @@ const ItemsPreviewTemplate = ({ cart }: ItemsTemplateProps) => {
   if (items?.length == 0) {
     return (
       <div className="flex items-start space-x-4 p-4 bg-white/60 rounded-xl border border-white/80 group shadow-lg transition-all duration-300">
-        {/* <blockquote>
+        <blockquote>
           <p className="font-din-arabic text-sm text-black/60">
           <QuoteStart className="w-4 h-4 text-black/60 inline-block mr-2" />
 
           No items here at the moment. Head back to the garden to discover more.
           </p>
-        </blockquote> */}
-
-        <figure className="max-w-screen-md mx-auto text-center">
-        <QuoteStart className="w-4 h-4 text-black/60 inline-block mr-2" />
-              <blockquote>
-        <p className="font-din-arabic text-sm text-black/60">
-          No items here at the moment. Head back to the garden to discover more.</p>
-            </blockquote>
-        </figure>
-
+        </blockquote>
       </div>
     )
   }
