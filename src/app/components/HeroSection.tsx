@@ -246,7 +246,7 @@ export function HeroSection() {
       </div>
 
       {/* ✅ Bottom Navigation */}
-      <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 z-30">
+      <div className="absolute bottom-[6rem] sm:bottom-6 left-0 right-0 z-30">
         <div className="container mx-auto px-2 sm:px-4 md:px-6 lg:px-12">
           <div className="flex justify-center">
             <div className="flex bg-black/20 backdrop-blur-md rounded-full px-1 sm:px-1.5 md:px-2 py-1 sm:py-1.5 md:py-2 gap-0.5 sm:gap-1">

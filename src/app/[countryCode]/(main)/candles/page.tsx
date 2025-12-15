@@ -346,7 +346,7 @@ const Candles = () => {
               })}
             </div>
           </div>
-
+{/* 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -381,7 +381,7 @@ const Candles = () => {
             >
               explore our botanical collection now
             </motion.p>
-          </motion.div>
+          </motion.div> */}
 
           <div className="flex justify-center items-center gap-2 mt-8">
             {garageSliderItems.map((_, index) => (
@@ -414,6 +414,26 @@ const Candles = () => {
         viewport={{ once: true }}
         className="hidden md:block w-full md:pt-12 lg:pt-16"
       >
+         <div className="pl-[4rem] pb-8">
+         <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter"
+          >
+            A story in every scent.
+          </motion.h2>
+          {/* <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            viewport={{ once: true }}
+            className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl  mb-2 md:mb-4 px-4 md:px-0"
+          >
+            Choose yours
+          </motion.p> */}
+         </div>
         {/* Desktop view - original layout */}
         <div className="flex flex-row w-full gap-4 px-10 lg:px-16">
           {products.map(({ src, label, hoverSrc, url }, i) => (
