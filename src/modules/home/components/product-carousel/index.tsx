@@ -102,8 +102,8 @@ function ProductCard({ product }: { product: Product }) {
     >
       {/* Product Image */}
       <div
-        className="relative w-full overflow-hidden cursor-pointer"
-        style={{ aspectRatio: "3/4", marginBottom: "1.5rem" }}
+        className="relative w-full overflow-hidden cursor-pointer aspect-[3/5] md:aspect-[3/4]"
+        style={{ marginBottom: "1.5rem" }}
         onMouseEnter={() => setIsImageHovered(true)}
         onMouseLeave={() => setIsImageHovered(false)}
       >
@@ -144,37 +144,35 @@ function ProductCard({ product }: { product: Product }) {
       </div>
 
       {/* Product Info */}
-      <div className="flex flex-col flex-grow min-h-0">
-        <div className="flex justify-between items-flex-start">
-          <h3
-            className="font-american-typewriter text-xl mb-1"
-            style={{ letterSpacing: "0.05em" }}
-          >
-            {product.name}
-          </h3>
-          <p
-            className="font-din-arabic text-black/60 text-sm mb-2 mt-1"
-            style={{ letterSpacing: "0.1em" }}
-          >
-            {product.size}
-          </p>
+      <div className="flex flex-col flex-grow min-h-0 md:justify-between">
+        <div>
+          <div className="flex justify-start items-center py-1 md:py-2">
+            <h3
+              className="font-american-typewriter text-xl mb-0.5 md:mb-1"
+              style={{ letterSpacing: "0.05em" }}
+            >
+              {product.name}
+            </h3>
+          </div>
+
+        
         </div>
-
-        {/* <p
-          className="font-din-arabic text-black/70 leading-relaxed mt-3"
-          style={{ letterSpacing: "0.1em" }}
-        >
-          {product.description}
-        </p> */}
-
-        <div className="mt-auto pt-4">
-          <p
-            className="font-din-arabic text-black text-sm mb-4"
-            style={{ letterSpacing: "0.1em" }}
-          >
-            ₹{product.price.toLocaleString()}
-          </p>
-
+        {/* Price, Size and Add to Cart Button - Combined for better mobile spacing */}
+        <div className="flex flex-col gap-2 md:gap-4 flex-grow justify-end">
+          <div className="flex justify-between items-center">
+            <p
+              className="font-din-arabic text-black text-sm"
+              style={{ letterSpacing: "0.1em" }}
+            >
+              ₹{product.price.toLocaleString()}
+            </p>
+            <p
+              className="font-din-arabic text-black/60 text-sm"
+              style={{ letterSpacing: "0.1em" }}
+            >
+              {product.size}
+            </p>
+          </div>
           {/* Add to Cart Button */}
           <div className="group/btn-wrapper flex items-center justify-center font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 hover:bg-black transition-all duration-300 tracking-wide text-sm md:text-base">
             <button
@@ -183,7 +181,7 @@ function ProductCard({ product }: { product: Product }) {
               className="relative inline-flex items-center gap-2 pb-0.5"
             >
               <span
-                className="font-din-arabic text-black group-hover/btn-wrapper:text-white text-xs transition-colors duration-300"
+                className="font-din-arabic text-black group-hover/btn-wrapper:text-white text-base transition-colors duration-300"
                 style={{ letterSpacing: "0.12em" }}
               >
                 Add to cart
@@ -206,6 +204,8 @@ export function ProductCarousel() {
   const [current, setCurrent] = useState(0)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const sliderRef = React.useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const checkMobile = () => {
@@ -237,12 +237,13 @@ export function ProductCarousel() {
     api?.scrollTo(index)
   }
 
-  // Calculate progress percentage based on current slide position
+  // Calculate slider position based on current slide position
   const totalSlides = products.length
   const normalizedIndex = totalSlides > 0 ? ((current % totalSlides) + totalSlides) % totalSlides : 0
-  const progressPercentage = totalSlides > 0 ? ((normalizedIndex + 1) / totalSlides) * 100 : 0
+  const sliderPercentage = totalSlides > 0 ? (normalizedIndex / (totalSlides - 1)) * 100 : 0
 
-  const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleSliderClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isDragging) return
     e.stopPropagation()
     const rect = e.currentTarget.getBoundingClientRect()
     const clickX = e.clientX - rect.left
@@ -251,11 +252,67 @@ export function ProductCarousel() {
     if (api) {
       const scrollSnaps = api.scrollSnapList()
       if (scrollSnaps.length > 0) {
-        // Calculate target index based on percentage
         const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
         api.scrollTo(targetIndex)
       }
     }
+  }
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!sliderRef.current || !api) return
+      const rect = sliderRef.current.getBoundingClientRect()
+      const clickX = e.clientX - rect.left
+      const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
+      
+      const scrollSnaps = api.scrollSnapList()
+      if (scrollSnaps.length > 0) {
+        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
+        api.scrollTo(targetIndex)
+      }
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+    
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!sliderRef.current || !api) return
+      const rect = sliderRef.current.getBoundingClientRect()
+      const touch = e.touches[0]
+      const clickX = touch.clientX - rect.left
+      const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
+      
+      const scrollSnaps = api.scrollSnapList()
+      if (scrollSnaps.length > 0) {
+        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
+        api.scrollTo(targetIndex)
+      }
+    }
+
+    const handleTouchEnd = () => {
+      setIsDragging(false)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+    }
+
+    document.addEventListener('touchmove', handleTouchMove)
+    document.addEventListener('touchend', handleTouchEnd)
   }
 
   return (
@@ -273,8 +330,8 @@ export function ProductCarousel() {
       <style dangerouslySetInnerHTML={{
         __html: `
           .product-carousel-item {
-            width: calc((100vw - 64px) * 0.70) !important;
-            flex-basis: calc((100vw - 64px) * 0.70) !important;
+            width: calc((100vw - 64px) * 0.80) !important;
+            flex-basis: calc((100vw - 64px) * 0.80) !important;
             flex-grow: 0 !important;
             flex-shrink: 0 !important;
             box-sizing: border-box !important;
@@ -288,8 +345,8 @@ export function ProductCarousel() {
           .product-carousel-content {
             user-select: none !important;
             -webkit-user-select: none !important;
-            padding-left: calc((100vw - 64px) * 0.15) !important;
-            padding-right: calc((100vw - 64px) * 0.15) !important;
+            padding-left: calc((100vw - 64px) * 0.10) !important;
+            padding-right: calc((100vw - 64px) * 0.10) !important;
           }
           @media (min-width: 750px) {
             .product-carousel-item {
@@ -340,17 +397,29 @@ export function ProductCarousel() {
           </Carousel>
         </div>
         
-        {/* Progress Bar - Web and Mobile - Centered */}
-        <div className="flex justify-center items-center w-full" style={{ paddingTop: "24px", paddingBottom: "20px" }}>
+        {/* Slider Bar - Web and Mobile - Centered */}
+        <div className="flex justify-center items-center w-full pt-3" style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}>
           <div 
-            className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full overflow-hidden cursor-pointer group select-none"
-            onClick={handleProgressBarClick}
+            ref={sliderRef}
+            className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
+            onClick={handleSliderClick}
           >
+            {/* Slider Thumb */}
             <div
-              className="h-full rounded-full transition-all duration-200 group-hover:h-1 select-none"
+              className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
               style={{
-                background: "#a28b6f",
-                width: `${progressPercentage}%`
+                left: `calc(${sliderPercentage}% - 16px)`,
+                transform: 'translateY(-50%)'
+              }}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                handleMouseDown(e)
+              }}
+              onTouchStart={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                handleTouchStart(e)
               }}
             />
           </div>

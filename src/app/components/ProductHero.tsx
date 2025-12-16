@@ -202,6 +202,18 @@ export function ProductHero({
     visibleSizeOptions.length > 1 &&
     uniqueSizeLabels.every(isRecognizedSizeLabel)
 
+  // Check if the product is a candle
+  const isCandle = () => {
+    const title = product.title?.toLowerCase() || ""
+    const handle = (product as any).handle?.toLowerCase() || ""
+
+    // Check for candle keywords
+    const candleKeywords = ["candle", "candles"]
+    return candleKeywords.some(keyword =>
+      title.includes(keyword) || handle.includes(keyword)
+    )
+  }
+
   // Check if the product is a cleanser or exfoliant
   const isCleanserOrExfoliant = () => {
     const title = product.title?.toLowerCase() || ""
@@ -260,9 +272,16 @@ export function ProductHero({
   const dynamicPanels = productInfoPanels?.panels || []
 
   // Dynamic breadcrumb label based on product type
-  const breadcrumbLeafLabel = isCleanserOrExfoliant()
+  const breadcrumbLeafLabel = isCandle()
+    ? "Candles"
+    : isCleanserOrExfoliant()
     ? "Cleansers & Exfoliants"
-    : "Lotions & Moisturizer"
+    : "Body & Hands"
+
+  // Dynamic parent breadcrumb based on leaf label
+  const breadcrumbParent = breadcrumbLeafLabel === "Candles"
+    ? { label: "Home Creations", href: `/${countryCode}/home-creations` }
+    : { label: "Body & Hands", href: `/${countryCode}/body-hands` }
 
   const handleAddToCart = () => {
     if (!selectedVariantId || adding || isPending) return
@@ -409,8 +428,8 @@ export function ProductHero({
                   <BreadcrumbChevron className="w-3 h-3" style={{ color: '#a28b6f' }} />
                 </BreadcrumbSeparator>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="#" className="font-din-arabic text-xs tracking-wide" style={{ color: '#a28b6f' }}>
-                    Body & Hands
+                  <BreadcrumbLink href={breadcrumbParent.href} className="font-din-arabic text-xs tracking-wide" style={{ color: '#a28b6f' }}>
+                    {breadcrumbParent.label}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator>

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+import { ChevronsDown } from "lucide-react"
 
 export default function ScrollIndicator() {
   const [showIndicator, setShowIndicator] = useState(false)
@@ -127,17 +128,7 @@ export default function ScrollIndicator() {
     >
       <div className="flex flex-col items-center animate-[bounce_2s_ease-in-out_infinite]">
         <div className="flex items-center justify-center backdrop-blur-md bg-white/10 dark:bg-black/20 rounded-full w-14 h-14">
-          <svg
-            className="w-8 h-8 text-gray-600 dark:text-gray-100"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2.5"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-          </svg>
+          <ChevronsDown className="w-8 h-8 text-gray-400 dark:text-gray-100" />
         </div>
       </div>
     </div>
