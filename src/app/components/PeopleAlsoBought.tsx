@@ -222,9 +222,18 @@ export function PeopleAlsoBought({
   useEffect(() => {
     const sc = scrollContainerRef.current
     if (!sc) return
-    sc.addEventListener('scroll', updateScrollProgress)
+    
+    const handleScroll = (e: Event) => {
+      e.stopPropagation() // Prevent scroll event from bubbling up
+      updateScrollProgress()
+    }
+    
+    sc.addEventListener('scroll', handleScroll, { passive: true })
     updateScrollProgress()
-    return () => sc.removeEventListener('scroll', updateScrollProgress)
+    
+    return () => {
+      sc.removeEventListener('scroll', handleScroll)
+    }
   }, [])
   useEffect(() => {
     const up = () => setIsDragging(false)
@@ -238,6 +247,7 @@ export function PeopleAlsoBought({
       document.removeEventListener('mousemove', move)
     }
   }, [isDragging])
+
 
   const handleAddToCart = async (productCard: Card) => {
     // Check if product has variantId (if added to Contentful ProductCard)
@@ -361,7 +371,13 @@ export function PeopleAlsoBought({
   }
 
   return (
-    <section className="pt-8 lg:pt-12 relative" style={{ backgroundColor: bg }}>
+    <section 
+      className="pt-8 lg:pt-12 relative" 
+      style={{ 
+        backgroundColor: bg,
+        overflow: 'visible', // Ensure section doesn't create scroll container
+      }}
+    >
       {/* Heading and Subheading - Centered on Mobile, Part of Scroll on Desktop */}
       <div className="lg:hidden px-4 md:px-8 text-center py-6">
         <motion.h2
@@ -392,6 +408,9 @@ export function PeopleAlsoBought({
         style={{ 
           scrollSnapType: 'x mandatory', 
           WebkitOverflowScrolling: 'touch',
+          overscrollBehaviorX: 'contain', // Prevent horizontal scroll chaining
+          overscrollBehaviorY: 'auto', // Allow vertical scroll to pass through to page
+          overflowY: 'hidden', // Explicitly prevent vertical scroll in this container
         }}
       >
         {/* Left intro column - Hidden on Mobile, Visible on Desktop */}
@@ -454,8 +473,11 @@ export function PeopleAlsoBought({
                           alt={product.name}
                           className="w-full h-full object-cover transition-opacity duration-300"
                           style={{
-                            opacity: hoveredProduct === product.id ? 0 : 1
+                            opacity: hoveredProduct === product.id ? 0 : 1,
+                            userSelect: 'none', // Prevent text selection
+                            WebkitUserSelect: 'none',
                           }}
+                          draggable={false} // Prevent image dragging
                         />
                       ) : (
                         <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -470,8 +492,11 @@ export function PeopleAlsoBought({
                           alt={`${product.name} alternative view`}
                           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
                           style={{
-                            opacity: hoveredProduct === product.id ? 1 : 0
+                            opacity: hoveredProduct === product.id ? 1 : 0,
+                            userSelect: 'none',
+                            WebkitUserSelect: 'none',
                           }}
+                          draggable={false} // Prevent image dragging
                         />
                       )}
 

@@ -88,12 +88,6 @@ const AddAddress = ({
                   data-testid="last-name-input"
                 />
               </div>
-              {/* <Input
-                label="Company"
-                name="company"
-                autoComplete="organization"
-                data-testid="company-input"
-              /> */}
               <Input
                 label="Address"
                 name="address_1"

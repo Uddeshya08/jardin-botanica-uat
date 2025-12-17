@@ -23,8 +23,17 @@ interface CartItem {
 // Simple error renderer (or reuse @modules/checkout/components/error-message)
 function ErrorText({ error }: { error: string | null }) {
   if (!error) return null
-  return <p className="mt-2 text-sm text-rose-600">{error}</p>
+
+  // "Error:" prefix remove
+  const cleanError = error.replace(/^Error:\s*/i, "").replace(/^Invalid request:\s*/i, "")
+
+  return (
+    <p className="mt-2 text-sm text-rose-600">
+      {cleanError}
+    </p>
+  )
 }
+
 
 export default function AuthPage() {
   const router = useRouter()

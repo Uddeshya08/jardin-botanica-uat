@@ -288,6 +288,18 @@ const Candles = () => {
         </motion.h2>
 
         <div className="relative z-10">
+          {/* Mobile Heading */}
+          <div className="pl-6 pb-6">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter text-center"
+            >
+              A story in every scent.
+            </motion.h2>
+          </div>
           <div 
             id="garage-slider"
             className="overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory"
@@ -314,8 +326,8 @@ const Candles = () => {
                     transition={{ duration: 0.4 }}
                     className="relative flex-shrink-0 snap-center"
                     style={{ 
-                      width: isCenter ? '75vw' : '62vw',
-                      minWidth: isCenter ? '75vw' : '62vw'
+                      width: isCenter ? '85vw' : '70vw',
+                      minWidth: isCenter ? '85vw' : '70vw'
                     }}
                   >
                     <motion.div
@@ -424,15 +436,6 @@ const Candles = () => {
           >
             A story in every scent.
           </motion.h2>
-          {/* <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            viewport={{ once: true }}
-            className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl  mb-2 md:mb-4 px-4 md:px-0"
-          >
-            Choose yours
-          </motion.p> */}
          </div>
         {/* Desktop view - original layout */}
         <div className="flex flex-row w-full gap-4 px-10 lg:px-16">

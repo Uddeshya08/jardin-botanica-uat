@@ -330,14 +330,20 @@ export function ProductCarousel() {
       <style dangerouslySetInnerHTML={{
         __html: `
           .product-carousel-item {
-            width: calc((100vw - 64px) * 0.80) !important;
-            flex-basis: calc((100vw - 64px) * 0.80) !important;
+            width: calc((100vw - 64px) * 0.90) !important;
+            flex-basis: calc((100vw - 64px) * 0.90) !important;
             flex-grow: 0 !important;
             flex-shrink: 0 !important;
             box-sizing: border-box !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-left: 1rem !important;
+            margin-right: 1rem !important;
           }
           [data-slot="carousel-content"] {
             cursor: grab !important;
+            -webkit-overflow-scrolling: touch !important;
+            scroll-behavior: smooth !important;
           }
           [data-slot="carousel-content"]:active {
             cursor: grabbing !important;
@@ -345,13 +351,19 @@ export function ProductCarousel() {
           .product-carousel-content {
             user-select: none !important;
             -webkit-user-select: none !important;
-            padding-left: calc((100vw - 64px) * 0.10) !important;
-            padding-right: calc((100vw - 64px) * 0.10) !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+          .product-carousel-content > div {
+            margin-left: 0 !important;
+            gap: 0 !important;
           }
           @media (min-width: 750px) {
             .product-carousel-item {
               width: calc((100vw - 100px) * 1 / 2.5) !important;
               flex-basis: calc((100vw - 100px) * 1 / 2.5) !important;
+              margin-left: 1rem !important;
+              margin-right: 1rem !important;
             }
             .product-carousel-content {
               padding-left: 0 !important;
@@ -362,12 +374,24 @@ export function ProductCarousel() {
             .product-carousel-item {
               width: calc((100vw - 124px) * 1 / 3) !important;
               flex-basis: calc((100vw - 124px) * 1 / 3) !important;
+              margin-left: 1rem !important;
+              margin-right: 1rem !important;
+            }
+            .product-carousel-content {
+              padding-left: 0 !important;
+              padding-right: 0 !important;
             }
           }
           @media (min-width: 1200px) {
             .product-carousel-item {
               width: calc((min(1440px, 100vw) - 148px) * 1 / 4) !important;
               flex-basis: calc((min(1440px, 100vw) - 148px) * 1 / 4) !important;
+              margin-left: 1rem !important;
+              margin-right: 1rem !important;
+            }
+            .product-carousel-content {
+              padding-left: 0 !important;
+              padding-right: 0 !important;
             }
           }
         `
@@ -379,8 +403,9 @@ export function ProductCarousel() {
             opts={{
               align: isMobile ? "center" : "start",
               loop: true,
-              dragFree: false,
+              dragFree: true,
               containScroll: "trimSnaps",
+              watchDrag: true,
             }}
             className="w-full"
           >
@@ -388,7 +413,7 @@ export function ProductCarousel() {
               {products.map((product) => (
                 <CarouselItem
                   key={product.id}
-                  className="pl-2 pr-2 md:pl-5 md:pr-4 product-carousel-item"
+                  className="product-carousel-item"
                 >
                   <ProductCard product={product} />
                 </CarouselItem>
