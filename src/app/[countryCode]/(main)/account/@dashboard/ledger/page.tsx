@@ -5,7 +5,7 @@ import { BookOpen } from "lucide-react"
 import { useLedger, LedgerItem } from "app/context/ledger-context"
 import { useParams } from "next/navigation"
 import { addToCartAction } from "@lib/data/cart-actions"
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect, useRef } from "react"
 import { toast } from "sonner"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useCartItems } from "app/context/cart-items-context"
@@ -17,11 +17,142 @@ export default function LedgerPage() {
   const { countryCode } = useParams() as { countryCode: string }
   const [isPending, startTransition] = useTransition()
   const [addingItems, setAddingItems] = useState<Set<string>>(new Set())
+  const [productHandles, setProductHandles] = useState<{ [key: string]: string }>({})
+  const loadedHandlesRef = useRef<Set<string>>(new Set())
+
+  // Load product handles for all ledger items
+  useEffect(() => {
+    const loadHandles = async () => {
+      const handlesToLoad: { [key: string]: Promise<string | null> } = {}
+      const handles: { [key: string]: string } = {}
+      
+      // Get current handles state using functional update
+      let currentHandles: { [key: string]: string } = {}
+      setProductHandles((prev) => {
+        currentHandles = prev
+        return prev
+      })
+      
+      for (const item of ledger) {
+        // Skip if already processed in this run
+        if (loadedHandlesRef.current.has(item.id)) {
+          continue
+        }
+        
+        // Mark as processed to avoid duplicate fetches
+        loadedHandlesRef.current.add(item.id)
+        
+        // Check if handle already exists in item data
+        if ((item as any).handle) {
+          handles[item.id] = (item as any).handle
+        } else if (currentHandles[item.id]) {
+          // Already have handle in state, no need to fetch
+          continue
+        } else {
+          // Need to fetch handle
+          handlesToLoad[item.id] = findProductHandle(item.name)
+        }
+      }
+      
+      // Wait for all handle fetches to complete
+      if (Object.keys(handlesToLoad).length > 0) {
+        const results = await Promise.all(
+          Object.entries(handlesToLoad).map(async ([id, promise]) => {
+            const handle = await promise
+            return handle ? { id, handle } : null
+          })
+        )
+        
+        // Add fetched handles
+        results.forEach((result) => {
+          if (result) {
+            handles[result.id] = result.handle
+          }
+        })
+      }
+      
+      // Update state with all handles (only if we have new ones)
+      if (Object.keys(handles).length > 0) {
+        setProductHandles((prev) => {
+          const newHandles = { ...prev }
+          let hasUpdates = false
+          Object.entries(handles).forEach(([id, handle]) => {
+            if (prev[id] !== handle) {
+              newHandles[id] = handle
+              hasUpdates = true
+            }
+          })
+          return hasUpdates ? newHandles : prev
+        })
+      }
+    }
+    
+    // Reset ref when ledger changes (items added/removed)
+    loadedHandlesRef.current.clear()
+    
+    if (ledger.length > 0) {
+      loadHandles()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ledger])
 
   const sectionVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
     exit: { opacity: 0, y: -10, transition: { duration: 0.2 } }
+  }
+
+  const findProductHandle = async (productName: string): Promise<string | null> => {
+    try {
+      // Normalize the product name for comparison
+      const normalizedSearchName = productName.toLowerCase().trim()
+      
+      // First, try searching with a higher limit to find matching products
+      const response = await listProducts({
+        countryCode: (countryCode || "in").toLowerCase(),
+        queryParams: {
+          limit: 100, // Search through more products
+        } as any,
+      })
+
+      const allProducts = response.response.products || []
+      
+      // Search for product by name (checking title and handle)
+      // Match common product name patterns (e.g., "Tea Exfoliant Rinse" matches "tea exfoliant rinse")
+      const matchingProduct = allProducts.find((prod) => {
+        const prodTitle = prod.title?.toLowerCase().trim() || ""
+        const prodHandle = prod.handle?.toLowerCase().trim() || ""
+        
+        // Check if product name contains key words from search or vice versa
+        const titleWords = normalizedSearchName.split(/\s+/).filter(w => w.length > 2)
+        const titleMatch = titleWords.length > 0 && titleWords.some(word => 
+          prodTitle.includes(word) || prodHandle.includes(word)
+        )
+        
+        // Also check if search name contains product title words
+        const prodTitleWords = prodTitle.split(/\s+/).filter(w => w.length > 2)
+        const reverseMatch = prodTitleWords.length > 0 && prodTitleWords.some(word =>
+          normalizedSearchName.includes(word)
+        )
+        
+        // Direct match
+        const directMatch = prodTitle.includes(normalizedSearchName) || 
+                           normalizedSearchName.includes(prodTitle) ||
+                           prodHandle.includes(normalizedSearchName) ||
+                           normalizedSearchName.includes(prodHandle)
+        
+        return directMatch || titleMatch || reverseMatch
+      })
+
+      if (matchingProduct && matchingProduct.handle) {
+        return matchingProduct.handle
+      }
+
+      return null
+    } catch (error) {
+      console.error("Error searching for product handle:", error)
+      return null
+    }
   }
 
   const findProductVariantId = async (productName: string, itemSize?: string): Promise<string | null> => {
@@ -301,54 +432,108 @@ export default function LedgerPage() {
 
                       {/* Specimen Details */}
                       <div className="col-span-11 md:col-span-5">
-                        <div className="flex items-start space-x-5">
-                          {/* Thumbnail */}
-                          <div className="relative w-32 h-32 flex-shrink-0 rounded-sm overflow-hidden border z-10" style={{ borderColor: 'rgba(139, 69, 19, 0.3)' }}>
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          
-                          {/* Details */}
-                          <div className="flex-1 min-w-0 relative z-10 pt-1">
-                            <h3 className="font-american-typewriter mb-3 text-sm sm:text-base leading-snug text-black/60 transition-colors duration-300 group-hover:text-black" style={{ letterSpacing: '0.03em' }}>
-                              {item.name}
-                            </h3>
-                            {(item.batchNo || item.origin || item.primaryNote) && (
-                              <p className="font-din-arabic text-xs sm:text-sm text-black/40 mb-2 leading-relaxed" style={{ letterSpacing: '0.05em' }}>
-                                {item.batchNo && (
-                                  <>
-                                    <span>Batch No. </span>
-                                    <span className="transition-colors duration-300 group-hover:text-black">{item.batchNo}</span>
-                                  </>
-                                )}
-                                {item.origin && (
-                                  <>
-                                    <span> · Origin: </span>
-                                    <span className="transition-colors duration-300 group-hover:text-black">{item.origin}</span>
-                                  </>
-                                )}
-                                {item.primaryNote && (
-                                  <>
-                                    <span> · Primary {item.category === 'candle' ? 'Note' : 'Extract'}: </span>
-                                    <span className="transition-colors duration-300 group-hover:text-black">{item.primaryNote}</span>
-                                  </>
-                                )}
+                        {productHandles[item.id] ? (
+                          <LocalizedClientLink 
+                            href={`/products/${productHandles[item.id]}`}
+                            className="flex items-start space-x-5 cursor-pointer hover:opacity-90 transition-opacity"
+                          >
+                            {/* Thumbnail */}
+                            <div className="relative w-32 h-32 flex-shrink-0 rounded-sm overflow-hidden border z-10" style={{ borderColor: 'rgba(139, 69, 19, 0.3)' }}>
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            
+                            {/* Details */}
+                            <div className="flex-1 min-w-0 relative z-10 pt-1">
+                              <h3 className="font-american-typewriter mb-3 text-sm sm:text-base leading-snug text-black/60 transition-colors duration-300 group-hover:text-black" style={{ letterSpacing: '0.03em' }}>
+                                {item.name}
+                              </h3>
+                              {(item.batchNo || item.origin || item.primaryNote) && (
+                                <p className="font-din-arabic text-xs sm:text-sm text-black/40 mb-2 leading-relaxed" style={{ letterSpacing: '0.05em' }}>
+                                  {item.batchNo && (
+                                    <>
+                                      <span>Batch No. </span>
+                                      <span className="transition-colors duration-300 group-hover:text-black">{item.batchNo}</span>
+                                    </>
+                                  )}
+                                  {item.origin && (
+                                    <>
+                                      <span> · Origin: </span>
+                                      <span className="transition-colors duration-300 group-hover:text-black">{item.origin}</span>
+                                    </>
+                                  )}
+                                  {item.primaryNote && (
+                                    <>
+                                      <span> · Primary {item.category === 'candle' ? 'Note' : 'Extract'}: </span>
+                                      <span className="transition-colors duration-300 group-hover:text-black">{item.primaryNote}</span>
+                                    </>
+                                  )}
+                                </p>
+                              )}
+                              {item.description && (
+                                <p className="font-din-arabic text-xs sm:text-sm text-black/40 line-clamp-2 leading-relaxed" style={{ letterSpacing: '0.05em' }}>
+                                  {highlightBotanicalTerms(item.description)}
+                                </p>
+                              )}
+                              {/* Mobile Price */}
+                              <p className="md:hidden font-din-arabic mt-3 tracking-wider text-sm text-black/60 transition-colors duration-300 group-hover:text-black">
+                                ₹{item.price.toLocaleString()}
                               </p>
-                            )}
-                            {item.description && (
-                              <p className="font-din-arabic text-xs sm:text-sm text-black/40 line-clamp-2 leading-relaxed" style={{ letterSpacing: '0.05em' }}>
-                                {highlightBotanicalTerms(item.description)}
+                            </div>
+                          </LocalizedClientLink>
+                        ) : (
+                          <div className="flex items-start space-x-5">
+                            {/* Thumbnail */}
+                            <div className="relative w-32 h-32 flex-shrink-0 rounded-sm overflow-hidden border z-10" style={{ borderColor: 'rgba(139, 69, 19, 0.3)' }}>
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            
+                            {/* Details */}
+                            <div className="flex-1 min-w-0 relative z-10 pt-1">
+                              <h3 className="font-american-typewriter mb-3 text-sm sm:text-base leading-snug text-black/60 transition-colors duration-300 group-hover:text-black" style={{ letterSpacing: '0.03em' }}>
+                                {item.name}
+                              </h3>
+                              {(item.batchNo || item.origin || item.primaryNote) && (
+                                <p className="font-din-arabic text-xs sm:text-sm text-black/40 mb-2 leading-relaxed" style={{ letterSpacing: '0.05em' }}>
+                                  {item.batchNo && (
+                                    <>
+                                      <span>Batch No. </span>
+                                      <span className="transition-colors duration-300 group-hover:text-black">{item.batchNo}</span>
+                                    </>
+                                  )}
+                                  {item.origin && (
+                                    <>
+                                      <span> · Origin: </span>
+                                      <span className="transition-colors duration-300 group-hover:text-black">{item.origin}</span>
+                                    </>
+                                  )}
+                                  {item.primaryNote && (
+                                    <>
+                                      <span> · Primary {item.category === 'candle' ? 'Note' : 'Extract'}: </span>
+                                      <span className="transition-colors duration-300 group-hover:text-black">{item.primaryNote}</span>
+                                    </>
+                                  )}
+                                </p>
+                              )}
+                              {item.description && (
+                                <p className="font-din-arabic text-xs sm:text-sm text-black/40 line-clamp-2 leading-relaxed" style={{ letterSpacing: '0.05em' }}>
+                                  {highlightBotanicalTerms(item.description)}
+                                </p>
+                              )}
+                              {/* Mobile Price */}
+                              <p className="md:hidden font-din-arabic mt-3 tracking-wider text-sm text-black/60 transition-colors duration-300 group-hover:text-black">
+                                ₹{item.price.toLocaleString()}
                               </p>
-                            )}
-                            {/* Mobile Price */}
-                            <p className="md:hidden font-din-arabic mt-3 tracking-wider text-sm text-black/60 transition-colors duration-300 group-hover:text-black">
-                              ₹{item.price.toLocaleString()}
-                            </p>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
 
                       {/* Value - Desktop */}

@@ -726,7 +726,10 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
                   initial={{ opacity: 0 }}
 
-                  animate={{ opacity: 1, scale: hoveredProduct === product.id ? 1.1 : 1 }}
+                  animate={{ 
+                    opacity: hoveredProduct === product.id ? 1 : 0.75, 
+                    scale: hoveredProduct === product.id ? 1.1 : 1 
+                  }}
 
                   exit={{ opacity: 0 }}
 

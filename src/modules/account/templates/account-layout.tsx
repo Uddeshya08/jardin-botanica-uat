@@ -16,6 +16,15 @@ interface AccountLayoutProps {
  * - Typography: font-american-typewriter, font-din-arabic
  */
 const AccountLayout: React.FC<AccountLayoutProps> = ({ customer, children }) => {
+  const toTitleCase = (text: string) => {
+    return text
+      .toLowerCase()
+      .split(" ")
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
+  }
+  
   return (
     <div
       className="min-h-screen flex flex-col lg:flex-row pt-32"
@@ -26,9 +35,10 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ customer, children }) => 
       {customer && (
         <div className="lg:hidden mx-8 px-4 md:px-6 py-6 md:py-8 border-b" style={{ borderColor: "#D8D2C7" }}>
           <div className="text-center mb-4 md:mb-6">
-            <h2 className="font-american-typewriter text-2xl md:text-3xl text-black tracking-wide">
-              Hello, {customer.first_name || "there"}
-            </h2>
+          <h2 className="font-american-typewriter text-2xl md:text-3xl text-black tracking-wide">
+  Hello, {toTitleCase(customer.first_name || "there")}
+</h2>
+
             <p className="font-din-arabic text-sm text-black/50 tracking-wide mt-1">
               Manage your account and preferences
             </p>

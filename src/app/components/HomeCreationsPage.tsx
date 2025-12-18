@@ -5,6 +5,7 @@ import { motion } from "motion/react"
 import { Heart } from "lucide-react"
 import { toast } from "sonner"
 import { useSearchParams } from "next/navigation"
+import Link from "next/link"
 
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 import { useLedger, LedgerItem } from "app/context/ledger-context"
@@ -147,6 +148,14 @@ const fullWidthFeatures: FullWidthFeature[] = [
     imagePosition: "left",
   },
 ]
+
+// Helper function to convert product name to URL slug
+function getProductSlug(productName: string): string {
+  return productName
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+}
 
 export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
   const [selectedFilter, setSelectedFilter] = useState<"all" | "candle" | "diffuser">("all")
@@ -344,6 +353,7 @@ interface ProductCardProps {
 function ProductCard({ product, index, isInLedger, handleToggleLedger, handleAddToCart }: ProductCardProps) {
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
+  const productSlug = getProductSlug(product.name)
 
   return (
     <motion.div
@@ -355,12 +365,13 @@ function ProductCard({ product, index, isInLedger, handleToggleLedger, handleAdd
       style={{ minHeight: "600px", maxWidth: "420px" }}
     >
       {/* Product Image */}
-      <div
-        className="relative w-full overflow-hidden cursor-pointer"
-        style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
-        onMouseEnter={() => setIsImageHovered(true)}
-        onMouseLeave={() => setIsImageHovered(false)}
-      >
+      <Link href={`/products/${productSlug}`}>
+        <div
+          className="relative w-full overflow-hidden cursor-pointer"
+          style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
+          onMouseEnter={() => setIsImageHovered(true)}
+          onMouseLeave={() => setIsImageHovered(false)}
+        >
         {/* Hover Image - Behind */}
         {product.hoverImage && (
           <div className="absolute inset-0">
@@ -379,8 +390,12 @@ function ProductCard({ product, index, isInLedger, handleToggleLedger, handleAdd
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => handleToggleLedger(product)}
-          className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 ${
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            handleToggleLedger(product)
+          }}
+          className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
             isInLedger(product.id) ? "bg-white/20 border border-white/30" : "bg-white/20 border border-white/30 hover:bg-white/30"
           }`}
           aria-label={`${isInLedger(product.id) ? "Remove from" : "Add to"} ledger`}
@@ -388,17 +403,20 @@ function ProductCard({ product, index, isInLedger, handleToggleLedger, handleAdd
           <Heart size={18} className={`transition-colors duration-300 ${isInLedger(product.id) ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"}`} />
         </motion.button>
       </div>
+      </Link>
 
       {/* Product Info */}
       <div className="flex flex-col flex-grow">
-        <div>
-          <h3 className="font-american-typewriter text-xl mb-1" style={{ letterSpacing: "0.05em" }}>
-            {product.name}
-          </h3>
-          <p className="font-din-arabic text-black/60 text-sm mb-2" style={{ letterSpacing: "0.1em" }}>
-            {product.size}
-          </p>
-        </div>
+        <Link href={`/products/${productSlug}`}>
+          <div>
+            <h3 className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer" style={{ letterSpacing: "0.05em" }}>
+              {product.name}
+            </h3>
+            <p className="font-din-arabic text-black/60 text-sm mb-2" style={{ letterSpacing: "0.1em" }}>
+              {product.size}
+            </p>
+          </div>
+        </Link>
 
         <p className="font-din-arabic text-black/70 leading-relaxed mt-3" style={{ letterSpacing: "0.1em" }}>
           {product.description}
@@ -417,10 +435,10 @@ function ProductCard({ product, index, isInLedger, handleToggleLedger, handleAdd
               onMouseLeave={() => setIsButtonHovered(false)}
               className="group/btn relative inline-flex items-center gap-2 pb-0.5"
             >
-              <span className="font-din-arabic text-black text-xs" style={{ letterSpacing: "0.12em" }}>
+              <span className="font-din-arabic text-black text-base sm:text-sm" style={{ letterSpacing: "0.12em" }}>
                 Add to cart
               </span>
-              <span className="text-black text-xs">→</span>
+              <span className="text-black text-base sm:text-sm">→</span>
 
               {/* Animated underline */}
               <motion.span

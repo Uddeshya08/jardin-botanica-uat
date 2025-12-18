@@ -58,8 +58,10 @@ const heroPanels: HeroPanel[] = [
 export function HeroSection() {
   const [activePanel, setActivePanel] = useState(1);
   const [videoError, setVideoError] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
 
@@ -68,6 +70,44 @@ export function HeroSection() {
   }, []);
 
   const currentPanel = heroPanels.find(p => p.id === activePanel) || heroPanels[0];
+
+  // Reset transitioning state when panel changes and handle video cleanup
+  useEffect(() => {
+    setIsTransitioning(false);
+    setVideoError(false);
+    
+    // Play video when panel changes (if video exists)
+    const panel = heroPanels.find(p => p.id === activePanel);
+    if (videoRef.current && panel?.videoUrl) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {
+        // Handle autoplay restrictions gracefully
+        setVideoError(true);
+      });
+    }
+  }, [activePanel]);
+
+  // Function to transition to next panel with smooth delay
+  const goToNextPanel = () => {
+    if (isTransitioning) return; // Prevent multiple transitions
+    
+    setIsTransitioning(true);
+    
+    // Small delay to allow video's last frame to render smoothly
+    setTimeout(() => {
+      const currentIndex = heroPanels.findIndex(p => p.id === activePanel);
+      const nextIndex = (currentIndex + 1) % heroPanels.length;
+      setActivePanel(heroPanels[nextIndex].id);
+    }, 300); // 300ms delay for smooth transition
+  };
+
+  // Handle video end - pause on last frame (no auto-transition)
+  const handleVideoEnd = () => {
+    if (videoRef.current) {
+      // Pause on last frame - user must manually navigate
+      videoRef.current.pause();
+    }
+  };
 
   // Minimum swipe distance (in pixels) to trigger panel change
   const minSwipeDistance = 80;
@@ -103,10 +143,7 @@ export function HeroSection() {
 
     if (isLeftSwipe) {
       // Swipe left (finger moved left) - go to next panel
-      const currentIndex = heroPanels.findIndex(p => p.id === activePanel);
-      const nextIndex = (currentIndex + 1) % heroPanels.length;
-      setActivePanel(heroPanels[nextIndex].id);
-      setVideoError(false);
+      goToNextPanel();
     } else if (isRightSwipe) {
       // Swipe right (finger moved right) - go to previous panel
       const currentIndex = heroPanels.findIndex(p => p.id === activePanel);
@@ -139,31 +176,53 @@ export function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ 
               opacity: 1,
-              x: isSwiping ? swipeOffset * 0.3 : 0
+              x: isSwiping ? swipeOffset * 0.3 : 0,
+              scale: isTransitioning ? 1.02 : 1
             }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
+            exit={{ 
+              opacity: 0,
+              scale: 0.98
+            }}
+            transition={{ 
+              duration: 0.7, 
+              ease: [0.4, 0, 0.2, 1] // Custom easing for smoother transitions
+            }}
             className="absolute inset-0"
           >
             <div className="w-full h-full relative overflow-hidden">
               {!videoError && currentPanel.videoUrl ? (
                 <video
+                  ref={videoRef}
                   key={`video-${activePanel}`}
                   src={currentPanel.videoUrl}
                   autoPlay
-                  loop
                   muted
                   playsInline
+                  preload="auto"
+                  onEnded={handleVideoEnd}
                   onError={() => setVideoError(true)}
-                  className="w-full h-full object-cover"
-                  style={{ minHeight: '100vh' }}
+                  onLoadedData={() => {
+                    // Ensure smooth playback start
+                    if (videoRef.current) {
+                      videoRef.current.currentTime = 0;
+                      videoRef.current.play();
+                    }
+                  }}
+                  className="w-full h-full object-cover transition-opacity duration-500"
+                  style={{ 
+                    minHeight: '100vh',
+                    opacity: isTransitioning ? 0.8 : 1
+                  }}
                 />
               ) : (
                 <ImageWithFallback
                   src={currentPanel.imageUrl}
                   alt={currentPanel.title}
-                  className="w-full h-full object-cover"
-                  style={{ minHeight: '100vh' }}
+                  className="w-full h-full object-cover transition-opacity duration-500"
+                  style={{ 
+                    minHeight: '100vh',
+                    opacity: isTransitioning ? 0.8 : 1
+                  }}
                 />
               )}
             </div>
@@ -179,9 +238,9 @@ export function HeroSection() {
             className="max-w-2xl text-white"
             animate={{
               x: isSwiping ? swipeOffset * 0.2 : 0,
-              opacity: isSwiping ? 1 - Math.abs(swipeOffset) / 300 : 1
+              opacity: isSwiping ? 1 - Math.abs(swipeOffset) / 300 : (isTransitioning ? 0.8 : 1)
             }}
-            transition={{ duration: 0.1 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           >
             
             <div className="min-h-[200px] md:min-h-[250px] lg:min-h-[300px]">
@@ -190,9 +249,9 @@ export function HeroSection() {
                   key={`title-${activePanel}`}
                   className="font-american-typewriter text-5xl md:text-6xl lg:text-7xl mb-6 tracking-tight"
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  animate={{ opacity: isTransitioning ? 0.7 : 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
                 >
                   {currentPanel.subtitle}
                 </motion.h1>
@@ -206,9 +265,9 @@ export function HeroSection() {
                       key={`description-${activePanel}`}
                       className="font-din-arabic text-xl md:text-2xl text-white/90 leading-relaxed"
                       initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      animate={{ opacity: isTransitioning ? 0.7 : 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.4, ease: "easeInOut", delay: 0.1 }}
+                      transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1], delay: 0.1 }}
                     >
                       {currentPanel.description.split('\n').map((line, i) => (
                         <span key={i}>
@@ -233,9 +292,9 @@ export function HeroSection() {
                       : 'text-white border border-white/30 hover:bg-white hover:text-black'
                   }`}
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  animate={{ opacity: isTransitioning ? 0.7 : 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                  transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
                 >
                   {currentPanel.cta}
                 </motion.button>

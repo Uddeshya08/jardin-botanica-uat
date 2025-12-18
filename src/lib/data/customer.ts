@@ -168,7 +168,7 @@ export const addCustomerAddress = async (
   const address = {
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
-    company: formData.get("company") as string,
+    company: (formData.get("company") as string) || "",
     address_1: formData.get("address_1") as string,
     address_2: formData.get("address_2") as string,
     city: formData.get("city") as string,
@@ -229,7 +229,7 @@ export const updateCustomerAddress = async (
   const address = {
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
-    company: formData.get("company") as string,
+    company: (formData.get("company") as string) || "",
     address_1: formData.get("address_1") as string,
     address_2: formData.get("address_2") as string,
     city: formData.get("city") as string,
