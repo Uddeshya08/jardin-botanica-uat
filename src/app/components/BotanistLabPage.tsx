@@ -179,7 +179,7 @@ function InteractiveLabImage() {
     },
     {
       id: 2,
-      position: { top: "35%", right: "20%" },
+      position: { top: "32%", right: "20%" },
       number: "02",
       title: "Design",
       description: "Science informs every ratio, but design completes the equation.",
@@ -187,7 +187,7 @@ function InteractiveLabImage() {
     },
     {
       id: 3,
-      position: { bottom: "28%", left: "35%" },
+      position: { bottom: "18%", left: "27%" },
       number: "03",
       title: "Materials",
       description: "Packaging is treated as part of the formula.",
@@ -195,7 +195,7 @@ function InteractiveLabImage() {
     },
     {
       id: 4,
-      position: { bottom: "35%", right: "15%" },
+      position: { bottom: "18%", right: "15%" },
       number: "04",
       title: "Refinement",
       description: "Each batch is observed, logged, and tested for stability and delight.",
@@ -1059,6 +1059,14 @@ export function BotanistLabPage() {
       return () => clearTimeout(timer)
     }
   }, [part2Complete, phase])
+
+  // Dispatch event when typing animation completes
+  useEffect(() => {
+    if (phase === 4) {
+      // Dispatch custom event to notify ScrollIndicator
+      window.dispatchEvent(new CustomEvent('botanist-typing-complete'))
+    }
+  }, [phase])
 
 
   const { scrollYProgress } = useScroll({

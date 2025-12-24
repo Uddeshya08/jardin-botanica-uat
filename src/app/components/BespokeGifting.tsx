@@ -4,6 +4,12 @@ import { motion } from "motion/react"
 
 export function BespokeGifting() {
   const [isPressed, setIsPressed] = useState(false);
+
+  const handleBeginConsultation = () => {
+    const email = 'hello@jardinbotanica.com';
+    const subject = 'Business Enquiry';
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
+  };
   
   return (
     <section className="pt-8 md:pt-12 lg:pt-20 pb-0" style={{ backgroundColor: "#e3e3d8" }}>
@@ -87,6 +93,7 @@ export function BespokeGifting() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={handleBeginConsultation}
               className="font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide text-sm md:text-base"
             >
               Begin Consultation

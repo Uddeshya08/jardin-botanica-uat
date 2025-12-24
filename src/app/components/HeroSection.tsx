@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { useRouter } from 'next/navigation';
 
 interface HeroPanel {
   id: number;
@@ -56,6 +57,7 @@ const heroPanels: HeroPanel[] = [
 ];
 
 export function HeroSection() {
+  const router = useRouter();
   const [activePanel, setActivePanel] = useState(1);
   const [videoError, setVideoError] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -64,6 +66,8 @@ export function HeroSection() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
     setActivePanel(1);
@@ -75,7 +79,11 @@ export function HeroSection() {
   useEffect(() => {
     setIsTransitioning(false);
     setVideoError(false);
-    
+
+    // Reset email form when switching panels
+    setShowEmailForm(false);
+    setEmail('');
+
     // Play video when panel changes (if video exists)
     const panel = heroPanels.find(p => p.id === activePanel);
     if (videoRef.current && panel?.videoUrl) {
@@ -111,6 +119,32 @@ export function HeroSection() {
 
   // Minimum swipe distance (in pixels) to trigger panel change
   const minSwipeDistance = 80;
+
+  // Handle CTA button clicks
+  const handleCTAClick = (panelId: number) => {
+    switch (panelId) {
+      case 1: // Rituals - Build Your Set
+        router.push('/body-hands');
+        break;
+      case 2: // Atmosphere - Shop Candles
+        router.push('/candles');
+        break;
+      case 3: // The Lab - Enter The Lab
+        router.push('/the-lab');
+        break;
+      case 4: // Circle - Join the Circle
+        setShowEmailForm(true);
+        break;
+    }
+  };
+
+  // Handle email subscription
+  const handleEmailSubscription = () => {
+    // TODO: Implement email subscription logic
+    console.log('Email subscription:', email);
+    setEmail('');
+    setShowEmailForm(false);
+  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchEndX.current = null;
@@ -160,13 +194,25 @@ export function HeroSection() {
   };
 
   return (
-    <div 
-      className="relative w-full h-screen bg-black overflow-hidden" 
+    <div
+      className="relative w-full h-screen bg-black overflow-hidden"
       style={{ paddingTop: '40px' }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
+      {/* Disable hover effects on touch devices */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @media (hover: none) and (pointer: coarse) {
+            .hero-cta-button:hover,
+            .hero-nav-dot:hover {
+              background-color: inherit !important;
+              color: inherit !important;
+            }
+          }
+        `
+      }} />
       
       {/* ✅ Background Video/Image Section */}
       <div className="absolute inset-0 z-0">
@@ -281,23 +327,70 @@ export function HeroSection() {
               </div>
             </div>
 
-            {/* CTA Button */}
+            {/* CTA Button with Email Form */}
             <div className="mt-4">
               <AnimatePresence mode="wait">
-                <motion.button
-                  key={`cta-${activePanel}`}
-                  className={`font-din-arabic inline-flex items-center px-8 py-3 transition-all duration-300 tracking-wide ${
-                    currentPanel.isSpecial
-                      ? 'bg-white text-black hover:bg-white/90'
-                      : 'text-white border border-white/30 hover:bg-white hover:text-black'
-                  }`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: isTransitioning ? 0.7 : 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                >
-                  {currentPanel.cta}
-                </motion.button>
+                {activePanel === 4 && showEmailForm ? (
+                  /* Email Form - Shows after clicking Join the Circle */
+                  <motion.div
+                    key="email-form"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                    className="flex items-center gap-4"
+                  >
+                    <motion.input
+                      initial={{ x: -50, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      className="font-din-arabic px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white focus:bg-white/20 transition-all duration-300 rounded-none"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && email.trim()) {
+                          handleEmailSubscription();
+                        }
+                      }}
+                      autoFocus
+                    />
+                    <motion.button
+                      initial={{ x: 50, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                      className="font-din-arabic inline-flex items-center px-8 py-3 bg-white text-black hover:bg-white/90 transition-all duration-300 tracking-wide"
+                      onClick={handleEmailSubscription}
+                      disabled={!email.trim()}
+                    >
+                      Subscribe
+                    </motion.button>
+                  </motion.div>
+                ) : (
+                  /* Regular CTA Button */
+                  <motion.button
+                    key={`cta-${activePanel}`}
+                    className={`font-din-arabic inline-flex items-center px-8 py-3 transition-all duration-300 tracking-wide touch-manipulation ${
+                      currentPanel.isSpecial
+                        ? 'bg-white text-black'
+                        : 'text-white border border-white/30'
+                    }`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: isTransitioning ? 0.7 : 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                    onClick={() => handleCTAClick(activePanel)}
+                    style={{
+                      WebkitTapHighlightColor: 'transparent',
+                      WebkitTouchCallout: 'none',
+                      WebkitUserSelect: 'none',
+                      userSelect: 'none'
+                    }}
+                  >
+                    {currentPanel.cta}
+                  </motion.button>
+                )}
               </AnimatePresence>
             </div>
           </motion.div>
@@ -312,11 +405,14 @@ export function HeroSection() {
               {heroPanels.map(panel => (
                 <button
                   key={panel.id}
-                  className={`relative px-2.5 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-2.5 md:py-3 text-[10px] sm:text-xs font-din-arabic tracking-wide sm:tracking-wider transition-all duration-300 rounded-full whitespace-nowrap ${
+                  className={`relative px-2.5 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-2.5 md:py-3 text-[10px] sm:text-xs font-din-arabic tracking-wide sm:tracking-wider transition-all duration-300 rounded-full whitespace-nowrap touch-manipulation ${
                     activePanel === panel.id
                       ? 'bg-white/20 text-white'
-                      : 'text-white/60 hover:text-white/80 hover:bg-white/10'
+                      : 'text-white/60'
                   }`}
+                  style={{
+                    WebkitTapHighlightColor: 'transparent'
+                  }}
                   onMouseEnter={() => {
                     setVideoError(false);
                     setActivePanel(panel.id);
@@ -333,6 +429,7 @@ export function HeroSection() {
           </div>
         </div>
       </div>
+
     </div>
   );
 }

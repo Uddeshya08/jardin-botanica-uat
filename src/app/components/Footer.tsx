@@ -23,7 +23,7 @@ export function Footer() {
     {
       title: 'About Us',
       links: [
-        { name: 'Brand', href: '#' },
+        { name: 'Brand', href: `/${countryCode}/the-lab` },
         { name: 'Journal', href: `/${countryCode}/blogs` },
         { name: 'Careers', href: `/${countryCode}/careers` },
       ],
@@ -31,15 +31,16 @@ export function Footer() {
     {
       title: 'Shop',
       links: [
+        { name: 'Body Hands', href: `/${countryCode}/body-hands` },
         { name: 'Home Creations', href: `/${countryCode}/home-creations` },
-        { name: 'Collections', href: '#' },
+        
         { name: 'Gift Sets', href: `/${countryCode}/gift-sets` },
       ],
     },
     {
       title: 'Orders and Support',
       links: [
-        { name: 'Order History', href: `/${countryCode}/account` },
+        { name: 'Order History', href: '/account/orders' },
         { name: 'Track Your Order', href: '#' },
         { name: 'Help & FAQs', href: `/${countryCode}/help-and-faqs` },
         { name: 'Returns & Exchanges', href: `/${countryCode}/returns-and-exchanges` },

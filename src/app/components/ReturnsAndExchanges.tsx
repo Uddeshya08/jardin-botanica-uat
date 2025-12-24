@@ -170,7 +170,7 @@ export function ReturnsAndExchanges() {
         >
           <div className="text-center">
             <p className="font-din-arabic text-black/40">
-              Thank you for choosing Jardin Botanica
+            Thank you for choosing us
             </p>
           </div>
         </motion.div>

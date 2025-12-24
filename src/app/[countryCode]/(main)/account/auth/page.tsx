@@ -71,6 +71,16 @@ export default function AuthPage() {
   // ----- TAB STATE FOR MOBILE -----
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin")
 
+  // Set initial tab based on URL parameter
+  useEffect(() => {
+    const tabParam = params.get("tab")
+    if (tabParam === "signup") {
+      setActiveTab("signup")
+    } else if (tabParam === "signin") {
+      setActiveTab("signin")
+    }
+  }, [params])
+
   const [isScrolled, setIsScrolled] = useState(false)
   const [showStickyCart, setShowStickyCart] = useState(false)
   const [heroCartItem, setHeroCartItem] = useState<CartItem | null>(null)

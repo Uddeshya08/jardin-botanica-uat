@@ -1,9 +1,19 @@
 import React, { useState } from 'react'
 import { motion } from 'motion/react'
+import { useRouter } from 'next/navigation'
 
 export function FeaturedRitual() {
+  const router = useRouter()
   const [isPressed, setIsPressed] = useState(false);
-  
+
+  const handleBuildRitual = () => {
+    router.push('/in/body-hands')
+  }
+
+  const handleShopSet = () => {
+    router.push('in/gift-sets')
+  }
+
   return (
     <section className="py-8 md:py-12 lg:py-20" style={{ backgroundColor: '#e3e3d8' }}>
       <div className="flex flex-col md:flex-row">
@@ -51,6 +61,7 @@ export function FeaturedRitual() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={handleBuildRitual}
               className="font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide text-sm md:text-base"
             >
               Build Your Ritual
@@ -58,6 +69,7 @@ export function FeaturedRitual() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={handleShopSet}
               className="font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide text-sm md:text-base"
             >
               Shop the Set
