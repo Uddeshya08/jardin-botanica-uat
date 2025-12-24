@@ -10,6 +10,10 @@ import {
   type CarouselApi,
 } from "app/components/ui/carousel"
 import { motion } from "framer-motion"
+import { useRouter } from "next/navigation"
+import { useCartItems } from "app/context/cart-items-context"
+import { useLedger, LedgerItem } from "app/context/ledger-context"
+import { toast } from "sonner"
 
 interface Product {
   id: string
@@ -90,20 +94,28 @@ const products: Product[] = [
   },
 ]
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, onAddToCart, onToggleLedger, isAddedToCart, isInLedger }: {
+  product: Product,
+  onAddToCart: () => void,
+  onToggleLedger: () => void,
+  isAddedToCart: boolean,
+  isInLedger: boolean
+}) {
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
-  const [isInLedger, setIsInLedger] = useState(false)
 
   return (
     <div
       className="group flex flex-col w-full mx-auto h-full"
-      style={{ minHeight: "500px", maxWidth: "480px" }}
+      style={{
+        minHeight: "460px",
+        maxWidth: "480px"
+      }}
     >
       {/* Product Image */}
       <div
-        className="relative w-full overflow-hidden cursor-pointer aspect-[3/5] md:aspect-[3/4]"
-        style={{ marginBottom: "1.5rem" }}
+        className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] sm:aspect-[3/4]"
+        style={{ marginBottom: "2.5rem" }}
         onMouseEnter={() => setIsImageHovered(true)}
         onMouseLeave={() => setIsImageHovered(false)}
       >
@@ -131,8 +143,8 @@ function ProductCard({ product }: { product: Product }) {
         {/* Ledger Icon */}
         <button
           className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 bg-white/20 border border-white/30 hover:bg-white/30"
-          aria-label="Add to ledger"
-          onClick={() => setIsInLedger(!isInLedger)}
+          aria-label={`${isInLedger ? "Remove from" : "Add to"} ledger`}
+          onClick={onToggleLedger}
         >
           <Heart
             size={18}
@@ -178,13 +190,15 @@ function ProductCard({ product }: { product: Product }) {
             <button
               onMouseEnter={() => setIsButtonHovered(true)}
               onMouseLeave={() => setIsButtonHovered(false)}
+              onClick={onAddToCart}
+              disabled={isAddedToCart}
               className="relative inline-flex items-center gap-2 pb-0.5"
             >
               <span
                 className="font-din-arabic text-black group-hover/btn-wrapper:text-white text-base transition-colors duration-300"
                 style={{ letterSpacing: "0.12em" }}
               >
-                Add to cart
+                {isAddedToCart ? "Added to cart" : "Add to cart"}
               </span>
               <span className="text-black group-hover/btn-wrapper:text-white text-xs transition-colors duration-300">→</span>
               <span
@@ -200,11 +214,15 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 export function ProductCarousel() {
+  const router = useRouter()
+  const { cartItems, handleCartUpdate } = useCartItems()
+  const { toggleLedgerItem, isInLedger } = useLedger()
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null)
   const sliderRef = React.useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -235,6 +253,51 @@ export function ProductCarousel() {
 
   const scrollTo = (index: number) => {
     api?.scrollTo(index)
+  }
+
+  const handleAddToCart = (product: Product) => {
+    // Check if item already exists in cart
+    const existingItem = cartItems.find(item => item.id === product.id)
+    const isExisting = !!existingItem
+
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: isExisting ? (existingItem!.quantity + 1) : 1,
+      image: product.image,
+      size: product.size
+    }
+
+    handleCartUpdate(cartItem)
+
+    // Show appropriate message
+    const message = isExisting
+      ? `Quantity increased: ${product.name}`
+      : `Added to cart: ${product.name}`
+
+    toast.success(message, { duration: 2000 })
+
+    // Show temporary message on the button
+    setAddedToCartMessage(product.id)
+    setTimeout(() => setAddedToCartMessage(null), 2000)
+  }
+
+  const handleToggleLedger = (product: Product) => {
+    const alreadyInLedger = isInLedger(product.id)
+    const ledgerItem: LedgerItem = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      description: product.description,
+      category: "From the Lab"
+    }
+
+    toggleLedgerItem(ledgerItem)
+    toast.success(`${product.name} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+      duration: 2000
+    })
   }
 
   // Calculate slider position based on current slide position
@@ -324,7 +387,7 @@ export function ProductCarousel() {
               viewport={{ once: true }}
             >
               <h2 className="pt-16 text-center font-american-typewriter text-3xl lg:text-4xl tracking-tight text-black leading-tight">
-                From the lab
+                From the Lab
               </h2>
             </motion.div>
       <style dangerouslySetInnerHTML={{
@@ -396,7 +459,7 @@ export function ProductCarousel() {
           }
         `
       }} />
-      <div className="py-16 sm:py-16 lg:py-16">
+      <div className="pt-16 pb-0 sm:py-16 lg:py-16">
         <div className="m-w-[180rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-10 2xl:px-15">
           <Carousel
             setApi={setApi}
@@ -406,6 +469,7 @@ export function ProductCarousel() {
               dragFree: true,
               containScroll: "trimSnaps",
               watchDrag: true,
+              duration: 40, // Slow down scroll speed (milliseconds)
             }}
             className="w-full"
           >
@@ -415,7 +479,13 @@ export function ProductCarousel() {
                   key={product.id}
                   className="product-carousel-item"
                 >
-                  <ProductCard product={product} />
+                  <ProductCard
+                    product={product}
+                    onAddToCart={() => handleAddToCart(product)}
+                    onToggleLedger={() => handleToggleLedger(product)}
+                    isAddedToCart={addedToCartMessage === product.id}
+                    isInLedger={isInLedger(product.id)}
+                  />
                 </CarouselItem>
               ))}
             </CarouselContent>

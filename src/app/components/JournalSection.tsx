@@ -16,7 +16,7 @@ const journalPosts = [
     id: 2,
     title: "The story of Geranium Leaf Body Care",
     excerpt: "How our vintage laboratory equipment continues to shape contemporary fragrance making in an age of mass production.",
-    category: "Lessons from the lab",
+    category: "Lessons From The Lab",
     date: "Five-minute read",
     imageUrl: "https://images.unsplash.com/photo-1601601319316-bace8ae2b548?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBwcm9kdWN0cyUyMGxhYm9yYXRvcnklMjBncmVlbnxlbnwxfHx8fDE3NTY4OTUxMjB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
   },

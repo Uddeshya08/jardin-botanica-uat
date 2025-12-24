@@ -9,6 +9,7 @@ import Link from "next/link"
 
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 import { useLedger, LedgerItem } from "app/context/ledger-context"
+import { useCartItems } from "app/context/cart-items-context"
 
 interface Product {
   id: string
@@ -159,8 +160,10 @@ function getProductSlug(productName: string): string {
 
 export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
   const [selectedFilter, setSelectedFilter] = useState<"all" | "candle" | "diffuser">("all")
+  const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
   const searchParams = useSearchParams()
   const { toggleLedgerItem, isInLedger } = useLedger()
+  const { cartItems } = useCartItems()
 
   useEffect(() => {
     const filter = searchParams?.get("filter")
@@ -198,19 +201,55 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
   }
 
   const handleAddToCart = (product: Product) => {
-    const item = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      size: product.size,
-      quantity: 1,
-      image: product.image,
-      category: product.category,
+    const itemId = product.id
+
+    // Check if item already exists in cart
+    const existingItem = cartItems.find(cartItem => cartItem.id === itemId)
+
+    let item
+    if (existingItem) {
+      // Increase quantity of existing item
+      item = {
+        id: itemId,
+        name: product.name,
+        price: product.price,
+        size: product.size,
+        quantity: existingItem.quantity + 1,
+        image: product.image,
+        category: product.category,
+      }
+      toast.success(`Quantity updated: ${product.name}`, {
+        duration: 2000,
+      })
+    } else {
+      // Add new item
+      item = {
+        id: itemId,
+        name: product.name,
+        price: product.price,
+        size: product.size,
+        quantity: 1,
+        image: product.image,
+        category: product.category,
+      }
+      toast.success(`${product.name} Added To Cart`, {
+        duration: 2000,
+      })
     }
+
+    // Add to recently added products for UI state
+    setRecentlyAddedProducts(prev => new Set(prev).add(itemId))
+
+    // Reset the button state after 3 seconds
+    setTimeout(() => {
+      setRecentlyAddedProducts(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(itemId)
+        return newSet
+      })
+    }, 3000)
+
     onAddToCart(item)
-    toast.success(`${product.name} Added To Cart`, {
-      duration: 2000,
-    })
   }
 
   return (
@@ -281,12 +320,24 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
       </section>
 
       {/* Products Grid - First Set */}
-      <section className="py-12 sm:py-16 lg:py-24">
+      <section className="py-10 sm:py-14 lg:py-20">
         <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 sm:gap-y-16 lg:gap-y-20 mb-16 sm:mb-24 lg:mb-32 justify-items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 sm:gap-y-16 lg:gap-y-20  justify-items-center">
             {filteredProducts.slice(0, 3).map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} isInLedger={isInLedger} handleToggleLedger={handleToggleLedger} handleAddToCart={handleAddToCart} />
+              <ProductCard key={product.id} product={product} index={index} isInLedger={isInLedger} handleToggleLedger={handleToggleLedger} handleAddToCart={handleAddToCart} recentlyAddedProducts={recentlyAddedProducts} />
             ))}
+
+{filteredProducts.slice(3, 6).map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  index={index + 3}
+                  isInLedger={isInLedger}
+                  handleToggleLedger={handleToggleLedger}
+                  handleAddToCart={handleAddToCart}
+                  recentlyAddedProducts={recentlyAddedProducts}
+                />
+              ))}
           </div>
         </div>
       </section>
@@ -298,17 +349,8 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
       {filteredProducts.length > 3 && (
         <section className="py-0">
           <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 sm:gap-y-16 lg:gap-y-20 mb-16 sm:mb-24 lg:mb-32 justify-items-center">
-              {filteredProducts.slice(3, 6).map((product, index) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={index + 3}
-                  isInLedger={isInLedger}
-                  handleToggleLedger={handleToggleLedger}
-                  handleAddToCart={handleAddToCart}
-                />
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 sm:gap-y-16 lg:gap-y-20 mb-5 justify-items-center">
+         
             </div>
 
             {/* First Feature Section */}
@@ -325,6 +367,7 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
                     isInLedger={isInLedger}
                     handleToggleLedger={handleToggleLedger}
                     handleAddToCart={handleAddToCart}
+                    recentlyAddedProducts={recentlyAddedProducts}
                   />
                 ))}
               </div>
@@ -348,10 +391,12 @@ interface ProductCardProps {
   isInLedger: (id: string) => boolean
   handleToggleLedger: (product: Product) => void
   handleAddToCart: (product: Product) => void
+  recentlyAddedProducts: Set<string>
 }
 
-function ProductCard({ product, index, isInLedger, handleToggleLedger, handleAddToCart }: ProductCardProps) {
+function ProductCard({ product, index, isInLedger, handleToggleLedger, handleAddToCart, recentlyAddedProducts }: ProductCardProps) {
   const [isImageHovered, setIsImageHovered] = useState(false)
+  const isRecentlyAdded = recentlyAddedProducts.has(product.id)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const productSlug = getProductSlug(product.name)
 
@@ -436,9 +481,9 @@ function ProductCard({ product, index, isInLedger, handleToggleLedger, handleAdd
               className="group/btn relative inline-flex items-center gap-2 pb-0.5"
             >
               <span className="font-din-arabic text-black text-base sm:text-sm" style={{ letterSpacing: "0.12em" }}>
-                Add to cart
+                {isRecentlyAdded ? "Added to cart" : "Add to cart"}
               </span>
-              <span className="text-black text-base sm:text-sm">→</span>
+              <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
 
               {/* Animated underline */}
               <motion.span

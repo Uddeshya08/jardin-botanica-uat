@@ -1490,10 +1490,10 @@ export function Navigation({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-american-typewriter text-xl text-black">
-              Login Required
+            Open Your Ledger
             </DialogTitle>
             <DialogDescription className="font-din-arabic text-black/70 pt-2">
-              You need to login first to access your ledger.
+            Sign in to view and save your favourites.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 pt-4">
@@ -1503,18 +1503,32 @@ export function Navigation({
                 const currentPath = pathname || ""
                 const countryMatch = currentPath.match(/^\/([^\/]+)/)
                 const countryCode = countryMatch ? countryMatch[1] : "in"
-                router.push(`/${countryCode}/account`)
+                router.push(`/${countryCode}/account?tab=signin`)
               }}
               className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
             >
-              Go to Login
+              Sign In
             </button>
             <button
               onClick={() => setShowLoginDialog(false)}
               className="w-full font-din-arabic py-2 border text-black hover:bg-black/5 transition-colors tracking-wide"
               style={{ borderColor: "rgba(0, 0, 0, 0.2)" }}
             >
-              Cancel
+              Keep Browsing
+            </button>
+          </div>
+          <div className="pt-4 text-center">
+            <button
+              onClick={() => {
+                setShowLoginDialog(false)
+                const currentPath = pathname || ""
+                const countryMatch = currentPath.match(/^\/([^\/]+)/)
+                const countryCode = countryMatch ? countryMatch[1] : "in"
+                router.push(`/${countryCode}/account?tab=signup`)
+              }}
+              className="font-din-arabic text-sm text-black/70 hover:text-black transition-colors underline decoration-black/20 hover:decoration-black/60"
+            >
+              New here? Create an account
             </button>
           </div>
         </DialogContent>

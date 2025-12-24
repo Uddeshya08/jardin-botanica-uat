@@ -470,7 +470,7 @@ export function StickyCartBar({
           className="fixed bottom-3 md:bottom-6 left-1/2 transform -translate-x-1/2 z-40 bg-white/50 backdrop-blur-3xl border border-white/30 rounded-2xl md:rounded-3xl shadow-2xl shadow-black/10 max-w-4xl w-[calc(100%-32px)] md:w-full md:mx-6"
           style={{ pointerEvents: 'auto' }}
         >
-          <div className="px-3 md:px-6 py-2 md:py-3 relative">
+          <div className="px-3 md:px-6 py-3 md:py-3 relative">
             <div className="flex items-center justify-between">
               {/* Product Info */}
               <div className="flex items-center space-x-2 md:space-x-3 flex-shrink min-w-0">

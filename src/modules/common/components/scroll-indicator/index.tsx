@@ -1,7 +1,9 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+import { usePathname } from "next/navigation"
 import { ChevronsDown } from "lucide-react"
+import { useIsMobile } from "../../../../app/components/ui/use-mobile"
 
 export default function ScrollIndicator() {
   const [showIndicator, setShowIndicator] = useState(false)
@@ -10,7 +12,61 @@ export default function ScrollIndicator() {
   const lastScrollPositionRef = useRef<number>(0)
   const scrollStopTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
+  const pathname = usePathname()
+  const isMobile = useIsMobile()
+
+  // Define pages where scroll indicator should appear
+  const isBannerPage = pathname === "/" ||
+    pathname === "/in" ||
+    pathname?.endsWith("/the-lab") ||
+    pathname?.includes("/in/the-lab") ||
+    pathname?.endsWith("/body-hands") ||
+    pathname?.includes("/in/body-hands") ||
+    pathname?.endsWith("/home-creations") ||
+    pathname?.includes("/in/home-creations")
+
+  // Check if we're on the BotanistLabPage
+  const isBotanistLabPage = pathname?.includes("/the-lab")
+
+  // Exclude account settings and checkout pages
+  const isExcludedPage = pathname?.includes("/account") ||
+    pathname?.includes("/checkout") ||
+    pathname?.includes("/cart") ||
+    pathname?.includes("/order")
+
+  // Track if typing animation is complete on BotanistLabPage
+  const [typingComplete, setTypingComplete] = useState(false)
+
+  // Listen for typing completion event from BotanistLabPage
   useEffect(() => {
+    const handleTypingComplete = () => {
+      setTypingComplete(true)
+    }
+
+    if (isBotanistLabPage) {
+      window.addEventListener('botanist-typing-complete', handleTypingComplete)
+
+      return () => {
+        window.removeEventListener('botanist-typing-complete', handleTypingComplete)
+      }
+    } else {
+      setTypingComplete(false)
+    }
+  }, [isBotanistLabPage])
+
+  useEffect(() => {
+    // Don't show scroll indicator on mobile or excluded pages
+    if (isMobile || isExcludedPage || !isBannerPage) {
+      setShowIndicator(false)
+      return
+    }
+
+    // For BotanistLabPage, only show after typing completes
+    if (isBotanistLabPage && !typingComplete) {
+      setShowIndicator(false)
+      return
+    }
+
     const checkScrollPosition = () => {
       const windowHeight = window.innerHeight
       const documentHeight = document.documentElement.scrollHeight

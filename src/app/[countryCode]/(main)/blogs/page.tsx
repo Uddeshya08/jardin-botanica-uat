@@ -1172,8 +1172,16 @@ const Home = () => {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
             > 
-              Sign up for the Spotlight Newsletter:
+              The Botanist’s Circle
             </motion.h2>
+            <motion.p
+              className="font-din-arabic text-black/70 mb-8 leading-relaxed text-lg"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            > 
+              Newsletter dispatches from the lab — when there’s something worth sharing.
+            </motion.p>
 
             {/* Email Form */}
             <motion.form
@@ -1198,9 +1206,7 @@ const Home = () => {
               <button
                 type="submit"
                 className="w-full sm:w-auto px-8 py-3 bg-black text-white font-american-typewriter font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors"
-              >
-                SIGN UP
-              </button>
+              >Join the Circle              </button>
             </motion.form>
           </motion.div>
         </div>

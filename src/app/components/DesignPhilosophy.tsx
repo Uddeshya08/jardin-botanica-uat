@@ -31,7 +31,7 @@ export function DesignPhilosophy() {
               viewport={{ once: true }}
             >
               <h2 className="font-american-typewriter text-3xl lg:text-4xl tracking-tight text-black leading-tight">
-                From Kyoto's moss gardens to Kew's glasshouses
+              From Kyoto’s Moss Gardens to Kew’s Glasshouses
               </h2>
             </motion.div>
           </div>
@@ -109,7 +109,7 @@ export function DesignPhilosophy() {
               className="hidden lg:block"
             >
               <h2 className="font-american-typewriter text-3xl lg:text-4xl tracking-tight text-black leading-tight">
-                From Kyoto's moss gardens to Kew's glasshouses
+              From Kyoto’s Moss Gardens to Kew’s Glasshouses
               </h2>
             </motion.div>
 

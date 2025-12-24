@@ -149,7 +149,7 @@ export function TermsAndConditions() {
               <div className="h-px w-12 bg-black/8"></div>
             </div>
             <p className="font-din-arabic text-black/40 tracking-wide text-sm">
-              Thank you for choosing Jardin Botanica
+             Thank you for choosing us
             </p>
           </div>
         </motion.div>
