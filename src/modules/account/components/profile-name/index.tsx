@@ -15,6 +15,17 @@ type MyInformationProps = {
 const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
   const [successState, setSuccessState] = React.useState(false)
 
+  // Utility function to convert text to title case
+  const toTitleCase = (text: string) => {
+    if (!text) return ''
+    return text
+      .toLowerCase()
+      .split(' ')
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
+
   const updateCustomerName = async (
     _currentState: Record<string, unknown>,
     formData: FormData
@@ -49,7 +60,7 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
     <form action={formAction} className="w-full overflow-visible">
       <AccountInfo
         label="Name"
-        currentInfo={`${customer.first_name} ${customer.last_name}`}
+        currentInfo={`${toTitleCase(customer.first_name || '')} ${toTitleCase(customer.last_name || '')}`}
         isSuccess={successState}
         isError={!!state?.error}
         clearState={clearState}

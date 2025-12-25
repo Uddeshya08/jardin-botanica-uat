@@ -24,6 +24,17 @@ const AccountNav = ({
   const route = usePathname()
   const { countryCode } = useParams() as { countryCode: string }
 
+  // Utility function to convert text to title case
+  const toTitleCase = (text: string) => {
+    if (!text) return ''
+    return text
+      .toLowerCase()
+      .split(' ')
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
+
   const handleLogout = async () => {
     await signout(countryCode)
   }
@@ -57,7 +68,7 @@ const AccountNav = ({
         >
           <div className="space-y-2 text-center">
             <h2 className="font-american-typewriter text-3xl text-black tracking-wide">
-              Hello, {customer?.first_name || "there"}
+              Hello, {toTitleCase(customer?.first_name || "there")}
             </h2>
             <p className="font-din-arabic text-sm text-black/50 tracking-wide">
               Manage your account and preferences

@@ -30,6 +30,17 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
   const [newsletter, setNewsletter] = useState(false)
   const [loading, setLoading] = useState<string | null>(null)
 
+  // Utility function to convert text to title case
+  const toTitleCase = (text: string) => {
+    if (!text) return ''
+    return text
+      .toLowerCase()
+      .split(' ')
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
+
   if (!customer) {
     return null
   }
@@ -121,7 +132,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                 Name
               </label>
               <p className="font-din-arabic text-base text-black tracking-wide">
-                {customer.first_name} {customer.last_name}
+                {toTitleCase(customer.first_name || '')} {toTitleCase(customer.last_name || '')}
               </p>
             </div>
             

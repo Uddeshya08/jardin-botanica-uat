@@ -27,6 +27,10 @@ const AddAddress = ({
 }) => {
   const [successState, setSuccessState] = useState(false)
   const { state, open, close: closeModal } = useToggleState(false)
+  const [postalCode, setPostalCode] = useState('')
+  const [city, setCity] = useState('')
+  const [province, setProvince] = useState('')
+  const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
 
   const [formState, formAction] = useActionState(addCustomerAddress, {
     isDefaultShipping: addresses.length === 0,
@@ -36,7 +40,35 @@ const AddAddress = ({
 
   const close = () => {
     setSuccessState(false)
+    setPostalCode('')
+    setCity('')
+    setProvince('')
     closeModal()
+  }
+
+  // Function to fetch city and state from postal code
+  const fetchPostalData = async (pincode: string) => {
+    if (pincode.length === 6) {
+      setIsLoadingPostalData(true)
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`)
+        const data = await response.json()
+        
+        if (data && data[0]?.Status === 'Success' && data[0]?.PostOffice?.length > 0) {
+          const postOffice = data[0].PostOffice[0]
+          setCity(postOffice.District || postOffice.Name || '')
+          setProvince(postOffice.State || '')
+        } else {
+          // Reset if postal code not found
+          setCity('')
+          setProvince('')
+        }
+      } catch (error) {
+        console.error('Error fetching postal code data:', error)
+      } finally {
+        setIsLoadingPostalData(false)
+      }
+    }
   }
 
   useEffect(() => {
@@ -51,6 +83,13 @@ const AddAddress = ({
       setSuccessState(true)
     }
   }, [formState])
+
+  // Fetch postal data when postal code changes
+  useEffect(() => {
+    if (postalCode.length === 6) {
+      fetchPostalData(postalCode)
+    }
+  }, [postalCode])
 
   return (
     <>
@@ -108,6 +147,8 @@ const AddAddress = ({
                   required
                   autoComplete="postal-code"
                   data-testid="postal-code-input"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
                 />
                 <Input
                   label="City"
@@ -115,6 +156,8 @@ const AddAddress = ({
                   required
                   autoComplete="locality"
                   data-testid="city-input"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
                 />
               </div>
               <Input
@@ -122,6 +165,8 @@ const AddAddress = ({
                 name="province"
                 autoComplete="address-level1"
                 data-testid="state-input"
+                value={province}
+                onChange={(e) => setProvince(e.target.value)}
               />
               <CountrySelect
                 region={region}

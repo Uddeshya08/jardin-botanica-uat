@@ -36,6 +36,10 @@ const EditAddress: React.FC<EditAddressProps> = ({
   const [removing, setRemoving] = useState(false)
   const [successState, setSuccessState] = useState(false)
   const { state, open, close: closeModal } = useToggleState(false)
+  const [postalCode, setPostalCode] = useState(address.postal_code || '')
+  const [city, setCity] = useState(address.city || '')
+  const [province, setProvince] = useState(address.province || '')
+  const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
 
   const [formState, formAction] = useActionState(updateCustomerAddress, {
     success: false,
@@ -45,7 +49,32 @@ const EditAddress: React.FC<EditAddressProps> = ({
 
   const close = () => {
     setSuccessState(false)
+    // Reset to original values when closing
+    setPostalCode(address.postal_code || '')
+    setCity(address.city || '')
+    setProvince(address.province || '')
     closeModal()
+  }
+
+  // Function to fetch city and state from postal code
+  const fetchPostalData = async (pincode: string) => {
+    if (pincode.length === 6) {
+      setIsLoadingPostalData(true)
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`)
+        const data = await response.json()
+        
+        if (data && data[0]?.Status === 'Success' && data[0]?.PostOffice?.length > 0) {
+          const postOffice = data[0].PostOffice[0]
+          setCity(postOffice.District || postOffice.Name || '')
+          setProvince(postOffice.State || '')
+        }
+      } catch (error) {
+        console.error('Error fetching postal code data:', error)
+      } finally {
+        setIsLoadingPostalData(false)
+      }
+    }
   }
 
   useEffect(() => {
@@ -60,6 +89,20 @@ const EditAddress: React.FC<EditAddressProps> = ({
       setSuccessState(true)
     }
   }, [formState])
+
+  // Fetch postal data when postal code changes (only if it's different from original)
+  useEffect(() => {
+    if (postalCode.length === 6 && postalCode !== address.postal_code) {
+      fetchPostalData(postalCode)
+    }
+  }, [postalCode, address.postal_code])
+
+  // Reset form fields when address changes (e.g., when opening modal for different address)
+  useEffect(() => {
+    setPostalCode(address.postal_code || '')
+    setCity(address.city || '')
+    setProvince(address.province || '')
+  }, [address])
 
   const removeAddress = async () => {
     setRemoving(true)
@@ -192,24 +235,27 @@ const EditAddress: React.FC<EditAddressProps> = ({
                   name="postal_code"
                   required
                   autoComplete="postal-code"
-                  defaultValue={address.postal_code || undefined}
                   data-testid="postal-code-input"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
                 />
                 <Input
                   label="City"
                   name="city"
                   required
                   autoComplete="locality"
-                  defaultValue={address.city || undefined}
                   data-testid="city-input"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
                 />
               </div>
               <Input
                 label="Province / State"
                 name="province"
                 autoComplete="address-level1"
-                defaultValue={address.province || undefined}
                 data-testid="state-input"
+                value={province}
+                onChange={(e) => setProvince(e.target.value)}
               />
               <CountrySelect
                 name="country_code"
