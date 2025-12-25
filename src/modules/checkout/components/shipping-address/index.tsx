@@ -172,6 +172,7 @@ const ShippingAddress = ({
   })
   const [emailError, setEmailError] = useState<string>("")
   const [emailTouched, setEmailTouched] = useState<boolean>(false)
+  const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
 
   const countriesInRegion = useMemo(
     () => cart?.region?.countries?.map((c) => c.iso_2),
@@ -335,6 +336,7 @@ const ShippingAddress = ({
       "shipping_address.province": address.state,
       "shipping_address.postal_code": address.pincode,
       "shipping_address.phone": address.phone,
+      "shipping_address.country_code": "in",
     }))
   }
 
@@ -354,6 +356,37 @@ const ShippingAddress = ({
     setEditingAddressId(address.id)
     setShowAddressForm(true)
   }
+
+  // Function to fetch city and state from postal code
+  const fetchPostalData = async (pincode: string) => {
+    if (pincode.length === 6) {
+      setIsLoadingPostalData(true)
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`)
+        const data = await response.json()
+        
+        if (data && data[0]?.Status === 'Success' && data[0]?.PostOffice?.length > 0) {
+          const postOffice = data[0].PostOffice[0]
+          setNewAddressData(prev => ({
+            ...prev,
+            city: postOffice.District || postOffice.Name || prev.city,
+            state: postOffice.State || prev.state
+          }))
+        }
+      } catch (error) {
+        console.error('Error fetching postal code data:', error)
+      } finally {
+        setIsLoadingPostalData(false)
+      }
+    }
+  }
+
+  // Auto-fill city and state when pincode changes
+  useEffect(() => {
+    if (newAddressData.pincode.length === 6) {
+      fetchPostalData(newAddressData.pincode)
+    }
+  }, [newAddressData.pincode])
 
   const validateEmail = (email: string, showRequiredError: boolean = true): boolean => {
     // Check if email is required and empty

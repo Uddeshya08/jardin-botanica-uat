@@ -97,6 +97,8 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
     fullName: getFullName(),
   })
 
+  const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
+
   useEffect(() => {
     if (cart?.billing_address) {
       const firstName = cart.billing_address.first_name || ""
@@ -115,6 +117,38 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
       })
     }
   }, [cart?.billing_address])
+
+  // Function to fetch city and state from postal code
+  const fetchPostalData = async (pincode: string) => {
+    if (pincode.length === 6) {
+      setIsLoadingPostalData(true)
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`)
+        const data = await response.json()
+        
+        if (data && data[0]?.Status === 'Success' && data[0]?.PostOffice?.length > 0) {
+          const postOffice = data[0].PostOffice[0]
+          setFormData((prev: any) => ({
+            ...prev,
+            "billing_address.city": postOffice.District || postOffice.Name || prev["billing_address.city"],
+            "billing_address.province": postOffice.State || prev["billing_address.province"]
+          }))
+        }
+      } catch (error) {
+        console.error('Error fetching postal code data:', error)
+      } finally {
+        setIsLoadingPostalData(false)
+      }
+    }
+  }
+
+  // Auto-fill city and state when postal code changes
+  useEffect(() => {
+    const postalCode = formData["billing_address.postal_code"]
+    if (postalCode && postalCode.length === 6) {
+      fetchPostalData(postalCode)
+    }
+  }, [formData["billing_address.postal_code"]])
 
   const handleChange = (
     e: React.ChangeEvent<

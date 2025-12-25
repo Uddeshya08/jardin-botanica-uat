@@ -27,6 +27,8 @@ import { useAuth } from "app/context/auth-context"
 import { useCartItemsSafe, CartItem } from "app/context/cart-items-context"
 import { updateLineItem, deleteLineItem } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
+import { SearchMegaMenu } from "./SearchMegaMenu"
+import { HttpTypes } from "@medusajs/types"
 
 interface DropdownItem {
   label: string
@@ -75,6 +77,7 @@ export function Navigation({
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [isNavHovered, setIsNavHovered] = useState(false)
+  const [region, setRegion] = useState<HttpTypes.StoreRegion | null>(null)
   const [mounted, setMounted] = useState(false)
   const [isHomePage, setIsHomePage] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -84,8 +87,6 @@ export function Navigation({
   const [showLoginDialog, setShowLoginDialog] = useState(false)
   const [updatingCartItem, setUpdatingCartItem] = useState<string | null>(null)
   const cartRef = useRef<HTMLDivElement>(null)
-  const searchRef = useRef<HTMLDivElement>(null)
-  const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Determine if user is logged in - prioritize prop, then context, then fallback to false
   const userIsLoggedIn = isLoggedIn !== false ? isLoggedIn : authIsLoggedIn
@@ -225,12 +226,6 @@ export function Navigation({
     }
   }, [isMobileMenuOpen])
 
-  // Focus search input when opened
-  useEffect(() => {
-    if (isSearchOpen && searchInputRef.current) {
-      searchInputRef.current.focus()
-    }
-  }, [isSearchOpen])
 
   // Preload dropdown images
   useEffect(() => {
@@ -306,6 +301,7 @@ export function Navigation({
     setIsSearchOpen(!isSearchOpen)
     setIsCartOpen(false) // Close cart when opening search
     setIsMobileMenuOpen(false) // Close mobile menu when opening search
+    setActiveDropdown(null) // Close mega menu when opening search
     if (isSearchOpen) {
       setSearchQuery("")
     }
@@ -325,10 +321,14 @@ export function Navigation({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (searchQuery.trim()) {
-      console.log("Searching for:", searchQuery)
-      // Add your search logic here
-    }
+    // Not used anymore, search happens in SearchMegaMenu
+  }
+
+  // Get country code from current path
+  const getCountryCode = () => {
+    const currentPath = pathname || ""
+    const countryMatch = currentPath.match(/^\/([^\/]+)/)
+    return countryMatch ? countryMatch[1] : "in"
   }
 
   const handleHeartClick = () => {
@@ -779,70 +779,46 @@ export function Navigation({
                 className="lg:hidden flex items-center space-x-1 z-10"
               >
                 {/* Mobile Search */}
-                <div className="relative -mr-1" ref={searchRef}>
+                <div className="relative flex items-center">
+                  <AnimatePresence>
+                    {isSearchOpen ? (
+                      <motion.div
+                        initial={{ width: 0, opacity: 0 }}
+                        animate={{ width: "auto", opacity: 1 }}
+                        exit={{ width: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="mr-2 overflow-hidden"
+                      >
+                        <input
+                          type="text"
+                          placeholder="Search..."
+                          className="px-3 py-2 w-[150px] bg-transparent border-b border-opacity-30 transition-all duration-300 focus:outline-none placeholder-opacity-70 font-din-arabic text-sm"
+                          style={{
+                            color: navStyles.textColor,
+                            borderColor:
+                              navStyles.textColor === "white"
+                                ? "rgba(255,255,255,0.3)"
+                                : "rgba(0,0,0,0.3)",
+                          }}
+                          autoFocus
+                        />
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
                   <motion.button
                     whileHover={disableAnimations ? {} : { scale: 1.1 }}
                     whileTap={disableAnimations ? {} : { scale: 0.9 }}
                     onClick={handleSearchToggle}
-                    className="p-2 transition-all duration-300"
+                    className="p-2 transition-all duration-300 -mr-1"
                     style={{ color: navStyles.textColor }}
-                    aria-label="Search"
+                    aria-label={isSearchOpen ? "Close search" : "Search"}
                   >
-                    <Search className="w-5 h-5" />
-                  </motion.button>
-                  {/* Mobile Search Dropdown */}
-                  <AnimatePresence>
-                    {isSearchOpen && (
-                      <motion.div
-                        initial={
-                          disableAnimations
-                            ? undefined
-                            : { opacity: 0, y: -10, scale: 0.95 }
-                        }
-                        animate={
-                          disableAnimations
-                            ? undefined
-                            : { opacity: 1, y: 0, scale: 1 }
-                        }
-                        exit={
-                          disableAnimations
-                            ? undefined
-                            : { opacity: 0, y: -10, scale: 0.95 }
-                        }
-                        transition={
-                          disableAnimations ? undefined : { duration: 0.2 }
-                        }
-                        className="fixed left-4 right-4 top-[110px] max-w-md mx-auto border shadow-2xl z-[100]"
-                        style={{
-                          backgroundColor: "#e3e3d8",
-                          borderColor: "rgba(0, 0, 0, 0.1)",
-                        }}
-                      >
-                        <div className="p-4">
-                          <form
-                            onSubmit={handleSearchSubmit}
-                            className="relative"
-                          >
-                            <input
-                              ref={searchInputRef}
-                              type="text"
-                              value={searchQuery}
-                              onChange={(e) => setSearchQuery(e.target.value)}
-                              placeholder="Search products..."
-                              className="w-full px-4 py-3 bg-white/60 border font-din-arabic tracking-wide focus:outline-none focus:border-black transition-colors rounded-lg"
-                              style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
-                            />
-                            <button
-                              type="submit"
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
-                            >
-                              <Search className="w-5 h-5" />
-                            </button>
-                          </form>
-                        </div>
-                      </motion.div>
+                    {isSearchOpen ? (
+                      <X className="w-5 h-5" />
+                    ) : (
+                      <Search className="w-5 h-5" />
                     )}
-                  </AnimatePresence>
+                  </motion.button>
                 </div>
 
                 {/* Mobile Cart */}
@@ -1055,71 +1031,47 @@ export function Navigation({
                 className="hidden lg:flex items-center gap-6"
               >
                 {/* Search Section */}
-                <div className="relative flex items-center" ref={searchRef}>
+                <div className="relative flex items-center">
                   <AnimatePresence>
-                    {isSearchOpen && (
-                      <motion.form
-                        initial={
-                          disableAnimations
-                            ? undefined
-                            : { width: 0, opacity: 0 }
-                        }
-                        animate={
-                          disableAnimations
-                            ? undefined
-                            : { width: "auto", opacity: 1 }
-                        }
-                        exit={
-                          disableAnimations
-                            ? undefined
-                            : { width: 0, opacity: 0 }
-                        }
-                        transition={
-                          disableAnimations
-                            ? undefined
-                            : { duration: 0.3, ease: "easeInOut" }
-                        }
-                        onSubmit={handleSearchSubmit}
+                    {isSearchOpen ? (
+                      <motion.div
+                        initial={{ width: 0, opacity: 0 }}
+                        animate={{ width: "auto", opacity: 1 }}
+                        exit={{ width: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
                         className="mr-3 overflow-hidden"
                       >
-                        <motion.input
-                          ref={searchInputRef}
-                          initial={disableAnimations ? undefined : { width: 0 }}
-                          animate={
-                            disableAnimations ? undefined : { width: 200 }
-                          }
-                          exit={disableAnimations ? undefined : { width: 0 }}
-                          transition={
-                            disableAnimations
-                              ? undefined
-                              : { duration: 0.3, ease: "easeInOut" }
-                          }
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Search..."
-                          className="px-3 py-2 bg-transparent border-b border-opacity-30 transition-all duration-300 focus:outline-none placeholder-opacity-70 font-light"
-                          style={{
-                            color: navStyles.textColor,
-                            borderColor:
-                              navStyles.textColor === "white"
-                                ? "rgba(255,255,255,0.3)"
-                                : "rgba(0,0,0,0.3)",
-                          }}
-                        />
-                      </motion.form>
-                    )}
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Search..."
+                            className="px-4 py-2 w-[200px] bg-transparent border-b border-opacity-30 transition-all duration-300 focus:outline-none placeholder-opacity-70 font-din-arabic text-sm"
+                            style={{
+                              color: navStyles.textColor,
+                              borderColor:
+                                navStyles.textColor === "white"
+                                  ? "rgba(255,255,255,0.3)"
+                                  : "rgba(0,0,0,0.3)",
+                            }}
+                            autoFocus
+                          />
+                        </div>
+                      </motion.div>
+                    ) : null}
                   </AnimatePresence>
-
                   <motion.button
                     whileHover={disableAnimations ? {} : { scale: 1.1 }}
                     whileTap={disableAnimations ? {} : { scale: 0.9 }}
                     onClick={handleSearchToggle}
                     className="p-2 transition-all duration-300"
                     style={{ color: navStyles.textColor }}
-                    aria-label="Search"
+                    aria-label={isSearchOpen ? "Close search" : "Search"}
                   >
-                    <Search className="w-5 h-5" />
+                    {isSearchOpen ? (
+                      <X className="w-5 h-5" />
+                    ) : (
+                      <Search className="w-5 h-5" />
+                    )}
                   </motion.button>
                 </div>
 
@@ -1533,6 +1485,14 @@ export function Navigation({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Search Mega Menu */}
+      <SearchMegaMenu
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        countryCode={getCountryCode()}
+        region={region}
+      />
     </>
   )
 }

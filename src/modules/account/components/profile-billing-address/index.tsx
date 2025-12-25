@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useMemo, useActionState } from "react"
+import React, { useEffect, useMemo, useActionState, useState } from "react"
 
 import Input from "@modules/common/components/input"
 import NativeSelect from "@modules/common/components/native-select"
@@ -37,6 +37,11 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
     (addr) => addr.is_default_billing
   )
 
+  const [postalCode, setPostalCode] = useState(billingAddress?.postal_code || '')
+  const [city, setCity] = useState(billingAddress?.city || '')
+  const [province, setProvince] = useState(billingAddress?.province || '')
+  const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
+
   const initialState: Record<string, any> = {
     isDefaultBilling: true,
     isDefaultShipping: false,
@@ -55,11 +60,50 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
 
   const clearState = () => {
     setSuccessState(false)
+    // Reset to original values
+    setPostalCode(billingAddress?.postal_code || '')
+    setCity(billingAddress?.city || '')
+    setProvince(billingAddress?.province || '')
+  }
+
+  // Function to fetch city and state from postal code
+  const fetchPostalData = async (pincode: string) => {
+    if (pincode.length === 6) {
+      setIsLoadingPostalData(true)
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`)
+        const data = await response.json()
+        
+        if (data && data[0]?.Status === 'Success' && data[0]?.PostOffice?.length > 0) {
+          const postOffice = data[0].PostOffice[0]
+          setCity(postOffice.District || postOffice.Name || '')
+          setProvince(postOffice.State || '')
+        }
+      } catch (error) {
+        console.error('Error fetching postal code data:', error)
+      } finally {
+        setIsLoadingPostalData(false)
+      }
+    }
   }
 
   useEffect(() => {
     setSuccessState(state.success)
   }, [state])
+
+  // Fetch postal data when postal code changes
+  useEffect(() => {
+    if (postalCode.length === 6 && postalCode !== billingAddress?.postal_code) {
+      fetchPostalData(postalCode)
+    }
+  }, [postalCode, billingAddress?.postal_code])
+
+  // Reset form fields when billing address changes
+  useEffect(() => {
+    setPostalCode(billingAddress?.postal_code || '')
+    setCity(billingAddress?.city || '')
+    setProvince(billingAddress?.province || '')
+  }, [billingAddress])
 
   const currentInfo = useMemo(() => {
     if (!billingAddress) {
@@ -140,23 +184,26 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
             <Input
               label="Postal code"
               name="postal_code"
-              defaultValue={billingAddress?.postal_code || undefined}
               required
               data-testid="billing-postcal-code-input"
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value)}
             />
             <Input
               label="City"
               name="city"
-              defaultValue={billingAddress?.city || undefined}
               required
               data-testid="billing-city-input"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
             />
           </div>
           <Input
             label="Province"
             name="province"
-            defaultValue={billingAddress?.province || undefined}
             data-testid="billing-province-input"
+            value={province}
+            onChange={(e) => setProvince(e.target.value)}
           />
           <NativeSelect
             name="country_code"
