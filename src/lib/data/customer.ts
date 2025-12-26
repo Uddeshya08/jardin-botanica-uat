@@ -143,6 +143,74 @@ export async function signout(countryCode: string) {
   redirect(`/${countryCode}/account`)
 }
 
+export async function requestPasswordReset(_currentState: unknown, formData: FormData) {
+  const email = formData.get("email") as string
+
+  if (!email) {
+    return { success: false, error: "Email is required" }
+  }
+
+  try {
+    // Use Medusa SDK to request password reset
+    // This will trigger the auth.password_reset event that our subscriber handles
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+    })
+    
+    // The API returns a successful response always, even if the customer's email doesn't exist
+    // This ensures that customer emails that don't exist are not exposed
+    return { success: true, error: null }
+  } catch (error: any) {
+    console.error("Password reset request error:", error)
+    return { success: false, error: error.message || error.toString() }
+  }
+}
+
+export async function resetPassword(_currentState: unknown, formData: FormData) {
+  const email = formData.get("email") as string
+  const password = formData.get("password") as string
+  const token = formData.get("token") as string
+
+  if (!email || !password || !token) {
+    return { success: false, message: "Email, password, and token are required" }
+  }
+
+  try {
+    // Use Medusa SDK to update the password with the reset token
+    // The token is passed in the Authorization: Bearer header by the SDK
+    await sdk.auth.updateProvider("customer", "emailpass", {
+      email,
+      password,
+    }, token)
+    
+    // Automatically login after successful password reset
+    const loginToken = await sdk.auth.login("customer", "emailpass", {
+      email,
+      password,
+    })
+    
+    // Set the auth token in cookies
+    await setAuthToken(loginToken as string)
+    
+    // Revalidate customer cache
+    const customerCacheTag = await getCacheTag("customers")
+    revalidateTag(customerCacheTag)
+    
+    // Transfer cart if exists
+    try {
+      await transferCart()
+    } catch (cartError) {
+      console.error("Cart transfer error:", cartError)
+      // Don't fail password reset if cart transfer fails
+    }
+    
+    return { success: true, message: "" }
+  } catch (error: any) {
+    console.error("Password reset error:", error)
+    return { success: false, message: error.message || error.toString() }
+  }
+}
+
 export async function transferCart() {
   const cartId = await getCartId()
 

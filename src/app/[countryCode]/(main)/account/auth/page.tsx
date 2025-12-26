@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from "react"
 import { useActionState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, useParams } from "next/navigation"
 import { motion } from "motion/react"
 import { Eye, EyeOff, Smartphone } from "lucide-react"
 
@@ -38,7 +38,27 @@ function ErrorText({ error }: { error: string | null }) {
 export default function AuthPage() {
   const router = useRouter()
   const params = useSearchParams()
+  const routeParams = useParams()
+  const countryCode = routeParams?.countryCode as string || 'us'
   const redirectTo = params.get("redirect") || "/account"
+
+  // Check for stored order email and redirect path
+  const [orderEmail, setOrderEmail] = useState("")
+  const [actualRedirectPath, setActualRedirectPath] = useState(redirectTo)
+
+  useEffect(() => {
+    // Check if there's a stored email and redirect path from order confirmation
+    const storedEmail = sessionStorage.getItem('jardinBotanica_orderEmail')
+    const storedRedirect = sessionStorage.getItem('jardinBotanica_redirectAfterLogin')
+    
+    if (storedEmail) {
+      setOrderEmail(storedEmail)
+    }
+    
+    if (storedRedirect) {
+      setActualRedirectPath(storedRedirect)
+    }
+  }, [])
 
   // ----- SIGN IN -----
   const [signinMessage, signinAction] = useActionState(login, null)
@@ -49,11 +69,15 @@ export default function AuthPage() {
     // If your login action returns structured state, adjust accordingly.
     if (signinMessage === null) return
     if (signinMessage === "") {
-      // Convention: empty string => success (adjust to your action’s return)
-      router.replace(redirectTo)
+      // Convention: empty string => success (adjust to your action's return)
+      // Clear session storage after successful login
+      sessionStorage.removeItem('jardinBotanica_orderEmail')
+      sessionStorage.removeItem('jardinBotanica_redirectAfterLogin')
+      
+      router.replace(actualRedirectPath)
       router.refresh()
     }
-  }, [signinMessage, redirectTo, router])
+  }, [signinMessage, actualRedirectPath, router])
 
   // ----- SIGN UP -----
   const [signupMessage, signupAction] = useActionState(signup, null)
@@ -63,10 +87,14 @@ export default function AuthPage() {
   useEffect(() => {
     if (signupMessage === null) return
     if (signupMessage === "") {
-      router.replace(redirectTo)
+      // Clear session storage after successful signup
+      sessionStorage.removeItem('jardinBotanica_orderEmail')
+      sessionStorage.removeItem('jardinBotanica_redirectAfterLogin')
+      
+      router.replace(actualRedirectPath)
       router.refresh()
     }
-  }, [signupMessage, redirectTo, router])
+  }, [signupMessage, actualRedirectPath, router])
 
   // ----- TAB STATE FOR MOBILE -----
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin")
@@ -226,6 +254,7 @@ export default function AuthPage() {
                     className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                     style={{ borderColor: "#D8D2C7" }}
                     placeholder="Enter your email address"
+                    defaultValue={orderEmail}
                     required
                   />
                 </div>
@@ -267,7 +296,7 @@ export default function AuthPage() {
                 <div className="text-right">
                   {/* Optional: route this to your reset flow */}
                   <a
-                    href="/account/forgot-password"
+                    href={`/${countryCode}/forgot-password`}
                     className="font-din-arabic text-sm text-black/70 hover:text-black"
                   >
                     Forgot Your Password?
@@ -428,8 +457,14 @@ export default function AuthPage() {
                     className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                     style={{ borderColor: "#D8D2C7" }}
                     placeholder="Enter your email address"
+                    defaultValue={orderEmail}
                     required
                   />
+                  {orderEmail && (
+                    <p className="mt-2 text-sm text-black/60 font-din-arabic">
+                      Using email from your recent order. Create an account to view your order history.
+                    </p>
+                  )}
                 </div>
                 
 
