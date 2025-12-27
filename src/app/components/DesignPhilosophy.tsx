@@ -30,7 +30,7 @@ export function DesignPhilosophy() {
               transition={{ duration: 0.8, delay: 0.4 }}
               viewport={{ once: true }}
             >
-              <h2 className="font-american-typewriter text-3xl lg:text-4xl tracking-tight text-black leading-tight">
+              <h2 className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 md:mb-8 text-black leading-tight">
               From Kyoto’s Moss Gardens to Kew’s Glasshouses
               </h2>
             </motion.div>
@@ -108,7 +108,7 @@ export function DesignPhilosophy() {
               viewport={{ once: true }}
               className="hidden lg:block"
             >
-              <h2 className="font-american-typewriter text-3xl lg:text-4xl tracking-tight text-black leading-tight">
+              <h2 className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 md:mb-8 text-black leading-tight">
               From Kyoto’s Moss Gardens to Kew’s Glasshouses
               </h2>
             </motion.div>

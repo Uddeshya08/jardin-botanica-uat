@@ -87,6 +87,7 @@ export function Navigation({
   const [showLoginDialog, setShowLoginDialog] = useState(false)
   const [updatingCartItem, setUpdatingCartItem] = useState<string | null>(null)
   const cartRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLDivElement>(null)
 
   // Determine if user is logged in - prioritize prop, then context, then fallback to false
   const userIsLoggedIn = isLoggedIn !== false ? isLoggedIn : authIsLoggedIn
@@ -1031,7 +1032,7 @@ export function Navigation({
                 className="hidden lg:flex items-center gap-6"
               >
                 {/* Search Section */}
-                <div className="relative flex items-center">
+                <div className="relative flex items-center" ref={searchRef}>
                   <AnimatePresence>
                     {isSearchOpen ? (
                       <motion.div
