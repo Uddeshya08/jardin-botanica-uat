@@ -178,7 +178,7 @@ export default function ScrollIndicator() {
 
   return (
     <div
-      className={`fixed bottom-8 right-8 z-50 pointer-events-none ${
+      className={`fixed bottom-4 right-6 z-50 pointer-events-none ${
         showIndicator ? "opacity-100" : "opacity-0"
       }`}
     >

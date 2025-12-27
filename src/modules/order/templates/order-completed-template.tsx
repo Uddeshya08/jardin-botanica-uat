@@ -6,9 +6,10 @@ import { OrderConfirmationUI } from "@modules/order/components/order-confirmatio
 
 type OrderCompletedTemplateProps = {
   order: HttpTypes.StoreOrder
+  customer: HttpTypes.StoreCustomer | null
 }
 
-export default async function OrderCompletedTemplate({ order }: OrderCompletedTemplateProps) {
+export default async function OrderCompletedTemplate({ order, customer }: OrderCompletedTemplateProps) {
   const cookies = await nextCookies()
   const isOnboarding = cookies.get("_medusa_onboarding")?.value === "true"
   const orderNumber = `#JB${order.display_id}`
@@ -16,7 +17,11 @@ export default async function OrderCompletedTemplate({ order }: OrderCompletedTe
   return (
     <div data-testid="order-complete-container">
       {isOnboarding && <OnboardingCta orderId={order.id} />}
-      <OrderConfirmationUI orderNumber={orderNumber} />
+      <OrderConfirmationUI 
+        orderNumber={orderNumber} 
+        isAuthenticated={!!customer}
+        orderEmail={order.email}
+      />
     </div>
   )
 }

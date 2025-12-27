@@ -386,8 +386,8 @@ export function ProductCarousel() {
               transition={{ duration: 0.8, delay: 0.4 }}
               viewport={{ once: true }}
             >
-              <h2 className="pt-16 text-center font-american-typewriter text-3xl lg:text-4xl tracking-tight text-black leading-tight">
-                From the Lab
+              <h2 className="pt-16 text-center font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 md:mb-8 text-black leading-tight">
+              From the Botanist’s Lab
               </h2>
             </motion.div>
       <style dangerouslySetInnerHTML={{

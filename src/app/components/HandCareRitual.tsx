@@ -24,7 +24,7 @@ export function HandCareRitualSection() {
       step: "03",
       title: "Nourish",
       description:
-        "Follow with the Soft Orris Hand Lotion. Massage from fingertips to wrists, focusing on knuckles and dry areas. The orris root and mango butter infusion in our blend promises lasting softness — no matter how dry the hands.",
+        "Follow with the Soft Orris Hand Veil. Massage from fingertips to wrists, focusing on knuckles and dry areas. The orris root and mango butter infusion in our blend promises lasting softness — no matter how dry the hands.",
       botanical: "",
     },
     {

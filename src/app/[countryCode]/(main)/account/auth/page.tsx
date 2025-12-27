@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from "react"
 import { useActionState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, useParams } from "next/navigation"
 import { motion } from "motion/react"
 import { Eye, EyeOff, Smartphone } from "lucide-react"
 
@@ -25,20 +25,37 @@ function ErrorText({ error }: { error: string | null }) {
   if (!error) return null
 
   // "Error:" prefix remove
-  const cleanError = error.replace(/^Error:\s*/i, "").replace(/^Invalid request:\s*/i, "")
+  const cleanError = error
+    .replace(/^Error:\s*/i, "")
+    .replace(/^Invalid request:\s*/i, "")
 
-  return (
-    <p className="mt-2 text-sm text-rose-600">
-      {cleanError}
-    </p>
-  )
+  return <p className="mt-2 text-sm text-rose-600">{cleanError}</p>
 }
-
 
 export default function AuthPage() {
   const router = useRouter()
   const params = useSearchParams()
+  const routeParams = useParams()
+  const countryCode = routeParams?.countryCode as string || 'us'
   const redirectTo = params.get("redirect") || "/account"
+
+  // Check for stored order email and redirect path
+  const [orderEmail, setOrderEmail] = useState("")
+  const [actualRedirectPath, setActualRedirectPath] = useState(redirectTo)
+
+  useEffect(() => {
+    // Check if there's a stored email and redirect path from order confirmation
+    const storedEmail = sessionStorage.getItem('jardinBotanica_orderEmail')
+    const storedRedirect = sessionStorage.getItem('jardinBotanica_redirectAfterLogin')
+    
+    if (storedEmail) {
+      setOrderEmail(storedEmail)
+    }
+    
+    if (storedRedirect) {
+      setActualRedirectPath(storedRedirect)
+    }
+  }, [])
 
   // ----- SIGN IN -----
   const [signinMessage, signinAction] = useActionState(login, null)
@@ -49,11 +66,15 @@ export default function AuthPage() {
     // If your login action returns structured state, adjust accordingly.
     if (signinMessage === null) return
     if (signinMessage === "") {
-      // Convention: empty string => success (adjust to your action’s return)
-      router.replace(redirectTo)
+      // Convention: empty string => success (adjust to your action's return)
+      // Clear session storage after successful login
+      sessionStorage.removeItem('jardinBotanica_orderEmail')
+      sessionStorage.removeItem('jardinBotanica_redirectAfterLogin')
+      
+      router.replace(actualRedirectPath)
       router.refresh()
     }
-  }, [signinMessage, redirectTo, router])
+  }, [signinMessage, actualRedirectPath, router])
 
   // ----- SIGN UP -----
   const [signupMessage, signupAction] = useActionState(signup, null)
@@ -63,10 +84,14 @@ export default function AuthPage() {
   useEffect(() => {
     if (signupMessage === null) return
     if (signupMessage === "") {
-      router.replace(redirectTo)
+      // Clear session storage after successful signup
+      sessionStorage.removeItem('jardinBotanica_orderEmail')
+      sessionStorage.removeItem('jardinBotanica_redirectAfterLogin')
+      
+      router.replace(actualRedirectPath)
       router.refresh()
     }
-  }, [signupMessage, redirectTo, router])
+  }, [signupMessage, actualRedirectPath, router])
 
   // ----- TAB STATE FOR MOBILE -----
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin")
@@ -154,6 +179,8 @@ export default function AuthPage() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  const loginWithGoogle = async () => {}
+
   return (
     <div>
       <RippleEffect />
@@ -170,7 +197,10 @@ export default function AuthPage() {
         <div className="container mx-auto px-2 lg:px-12">
           {/* Mobile Tabs - Only visible on mobile */}
           <div className="lg:hidden mb-8">
-            <div className="flex border-b border-black/20" style={{ borderColor: "#D8D2C7" }}>
+            <div
+              className="flex border-b border-black/20"
+              style={{ borderColor: "#D8D2C7" }}
+            >
               <button
                 type="button"
                 onClick={() => setActiveTab("signin")}
@@ -180,7 +210,8 @@ export default function AuthPage() {
                     : "text-black/50"
                 }`}
                 style={{
-                  borderBottomColor: activeTab === "signin" ? "#000" : "transparent",
+                  borderBottomColor:
+                    activeTab === "signin" ? "#000" : "transparent",
                 }}
               >
                 Sign In
@@ -194,7 +225,8 @@ export default function AuthPage() {
                     : "text-black/50"
                 }`}
                 style={{
-                  borderBottomColor: activeTab === "signup" ? "#000" : "transparent",
+                  borderBottomColor:
+                    activeTab === "signup" ? "#000" : "transparent",
                 }}
               >
                 Create Account
@@ -208,7 +240,9 @@ export default function AuthPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className={`p-8 lg:p-10 ${activeTab !== "signin" ? "hidden lg:block" : ""}`}
+              className={`p-8 lg:p-10 ${
+                activeTab !== "signin" ? "hidden lg:block" : ""
+              }`}
             >
               <h2 className="font-american-typewriter text-2xl mb-8 text-black text-center">
                 Sign In
@@ -226,6 +260,7 @@ export default function AuthPage() {
                     className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                     style={{ borderColor: "#D8D2C7" }}
                     placeholder="Enter your email address"
+                    defaultValue={orderEmail}
                     required
                   />
                 </div>
@@ -267,7 +302,7 @@ export default function AuthPage() {
                 <div className="text-right">
                   {/* Optional: route this to your reset flow */}
                   <a
-                    href="/account/forgot-password"
+                    href={`/${countryCode}/forgot-password`}
                     className="font-din-arabic text-sm text-black/70 hover:text-black"
                   >
                     Forgot Your Password?
@@ -317,16 +352,29 @@ export default function AuthPage() {
                     type="button"
                     className="font-din-arabic w-full flex items-center px-4 py-3.5 border bg-transparent text-black hover:bg-black/5 transition-all duration-300"
                     style={{ borderColor: "#D8D2C7" }}
+                    onClick={loginWithGoogle}
                   >
                     <svg
                       className="w-5 h-5 mr-3 flex-shrink-0"
                       viewBox="0 0 24 24"
                       fill="currentColor"
                     >
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                      <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        fill="#4285F4"
+                      />
+                      <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="#34A853"
+                      />
+                      <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        fill="#FBBC05"
+                      />
+                      <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="#EA4335"
+                      />
                     </svg>
                     <span className="text-left">Continue with Google</span>
                   </button>
@@ -347,7 +395,9 @@ export default function AuthPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className={`p-8 lg:p-10 ${activeTab !== "signup" ? "hidden lg:block" : ""}`}
+              className={`p-8 lg:p-10 ${
+                activeTab !== "signup" ? "hidden lg:block" : ""
+              }`}
             >
               <h2 className="font-american-typewriter text-2xl mb-8 text-black text-center">
                 Create Account
@@ -398,7 +448,9 @@ export default function AuthPage() {
                   <input
                     type="hidden"
                     name="dob"
-                    value={dateValue ? dateValue.toISOString().split('T')[0] : ''}
+                    value={
+                      dateValue ? dateValue.toISOString().split("T")[0] : ""
+                    }
                     autoComplete="bday"
                   />
                 </div>
@@ -415,7 +467,6 @@ export default function AuthPage() {
                     placeholder="Enter your phone number"
                   />
                 </div>
-              
 
                 <div>
                   <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
@@ -428,10 +479,15 @@ export default function AuthPage() {
                     className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                     style={{ borderColor: "#D8D2C7" }}
                     placeholder="Enter your email address"
+                    defaultValue={orderEmail}
                     required
                   />
+                  {orderEmail && (
+                    <p className="mt-2 text-sm text-black/60 font-din-arabic">
+                      Using email from your recent order. Create an account to view your order history.
+                    </p>
+                  )}
                 </div>
-                
 
                 <div>
                   <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
@@ -461,7 +517,6 @@ export default function AuthPage() {
                     </button>
                   </div>
                 </div>
-             
 
                 <ErrorText
                   error={

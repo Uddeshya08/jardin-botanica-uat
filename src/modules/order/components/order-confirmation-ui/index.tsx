@@ -3,22 +3,32 @@
 import React from 'react'
 import { motion } from 'motion/react'
 import { Package, Truck, Leaf } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 
 interface OrderConfirmationUIProps {
   orderNumber: string
+  isAuthenticated: boolean
+  orderEmail?: string
   onContinueShopping?: () => void
   onViewOrders?: () => void
 }
 
-export function OrderConfirmationUI({ orderNumber, onContinueShopping, onViewOrders }: OrderConfirmationUIProps) {
+export function OrderConfirmationUI({ 
+  orderNumber, 
+  isAuthenticated, 
+  orderEmail,
+  onContinueShopping, 
+  onViewOrders 
+}: OrderConfirmationUIProps) {
   const router = useRouter()
+  const params = useParams()
+  const countryCode = params?.countryCode as string || 'us'
 
   const handleContinueShopping = () => {
     if (onContinueShopping) {
       onContinueShopping()
     } else {
-      router.push('/')
+      router.push(`/${countryCode}`)
     }
   }
 
@@ -26,7 +36,18 @@ export function OrderConfirmationUI({ orderNumber, onContinueShopping, onViewOrd
     if (onViewOrders) {
       onViewOrders()
     } else {
-      router.push('/account/orders')
+      if (isAuthenticated) {
+        // User is logged in, redirect to orders page
+        router.push(`/${countryCode}/account/orders`)
+      } else {
+        // User is not logged in, redirect to account page (login/register)
+        // Store the order email in session storage to help with account creation
+        if (orderEmail) {
+          sessionStorage.setItem('jardinBotanica_orderEmail', orderEmail)
+          sessionStorage.setItem('jardinBotanica_redirectAfterLogin', `/${countryCode}/account/orders`)
+        }
+        router.push(`/${countryCode}/account`)
+      }
     }
   }
 

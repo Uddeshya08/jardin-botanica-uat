@@ -143,6 +143,88 @@ export async function signout(countryCode: string) {
   redirect(`/${countryCode}/account`)
 }
 
+export async function requestPasswordReset(
+  _currentState: unknown,
+  formData: FormData
+) {
+  const email = formData.get("email") as string
+
+  if (!email) {
+    return { success: false, error: "Email is required" }
+  }
+
+  try {
+    // Use Medusa SDK to request password reset
+    // This will trigger the auth.password_reset event that our subscriber handles
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+    })
+
+    // The API returns a successful response always, even if the customer's email doesn't exist
+    // This ensures that customer emails that don't exist are not exposed
+    return { success: true, error: null }
+  } catch (error: any) {
+    console.error("Password reset request error:", error)
+    return { success: false, error: error.message || error.toString() }
+  }
+}
+
+export async function resetPassword(
+  _currentState: unknown,
+  formData: FormData
+) {
+  const email = formData.get("email") as string
+  const password = formData.get("password") as string
+  const token = formData.get("token") as string
+
+  if (!email || !password || !token) {
+    return {
+      success: false,
+      message: "Email, password, and token are required",
+    }
+  }
+
+  try {
+    // Use Medusa SDK to update the password with the reset token
+    // The token is passed in the Authorization: Bearer header by the SDK
+    await sdk.auth.updateProvider(
+      "customer",
+      "emailpass",
+      {
+        email,
+        password,
+      },
+      token
+    )
+
+    // Automatically login after successful password reset
+    const loginToken = await sdk.auth.login("customer", "emailpass", {
+      email,
+      password,
+    })
+
+    // Set the auth token in cookies
+    await setAuthToken(loginToken as string)
+
+    // Revalidate customer cache
+    const customerCacheTag = await getCacheTag("customers")
+    revalidateTag(customerCacheTag)
+
+    // Transfer cart if exists
+    try {
+      await transferCart()
+    } catch (cartError) {
+      console.error("Cart transfer error:", cartError)
+      // Don't fail password reset if cart transfer fails
+    }
+
+    return { success: true, message: "" }
+  } catch (error: any) {
+    console.error("Password reset error:", error)
+    return { success: false, message: error.message || error.toString() }
+  }
+}
+
 export async function transferCart() {
   const cartId = await getCartId()
 
@@ -258,4 +340,125 @@ export const updateCustomerAddress = async (
     .catch((err) => {
       return { success: false, error: err.toString() }
     })
+}
+
+/**
+ * Request email update - sends verification email with password reset link
+ */
+export const requestEmailUpdate = async (data: {
+  current_password: string
+  new_email: string
+}): Promise<{ success: boolean; message: string; error?: string }> => {
+  try {
+    const authHeaders = await getAuthHeaders()
+
+    if (!authHeaders || !("authorization" in authHeaders)) {
+      return {
+        success: false,
+        message: "Not authenticated",
+        error: "NOT_AUTHENTICATED",
+      }
+    }
+
+    const headers = {
+      "Content-Type": "application/json",
+      "x-publishable-api-key":
+        process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+      ...authHeaders,
+    }
+
+    // Call Medusa backend to request email update
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/store/custom/email/req-email`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          current_password: data.current_password,
+          new_email: data.new_email,
+        }),
+      }
+    )
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result.message || "Failed to send verification email",
+        error: result.type || "REQUEST_FAILED",
+      }
+    }
+
+    return {
+      success: true,
+      message: result.message || "Verification email sent successfully",
+    }
+  } catch (error: any) {
+    console.error("Email update request error:", error)
+    return {
+      success: false,
+      message: error.message || "An error occurred",
+      error: "UNKNOWN_ERROR",
+    }
+  }
+}
+
+/**
+ * Verify email and set new password
+ */
+export const verifyEmailAndSetPassword = async (data: {
+  token: string
+  new_password: string
+  new_email?: string
+}): Promise<{
+  success: boolean
+  message: string
+  new_email?: string
+}> => {
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      "x-publishable-api-key":
+        process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+    }
+
+    // Call Medusa backend to verify and update
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/store/custom/email/verify`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          token: data.token,
+          new_password: data.new_password,
+        }),
+      }
+    )
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result.message || "Verification failed",
+      }
+    }
+
+    // Revalidate customer cache
+    const customerCacheTag = await getCacheTag("customers")
+    revalidateTag(customerCacheTag)
+
+    return {
+      success: true,
+      message: result.message || "Email and password updated successfully",
+      new_email: result.new_email,
+    }
+  } catch (error: any) {
+    console.error("Email verification error:", error)
+    return {
+      success: false,
+      message: error.message || "Verification failed",
+    }
+  }
 }

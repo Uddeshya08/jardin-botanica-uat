@@ -87,6 +87,7 @@ export function Navigation({
   const [showLoginDialog, setShowLoginDialog] = useState(false)
   const [updatingCartItem, setUpdatingCartItem] = useState<string | null>(null)
   const cartRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLDivElement>(null)
 
   // Determine if user is logged in - prioritize prop, then context, then fallback to false
   const userIsLoggedIn = isLoggedIn !== false ? isLoggedIn : authIsLoggedIn
@@ -1031,7 +1032,7 @@ export function Navigation({
                 className="hidden lg:flex items-center gap-6"
               >
                 {/* Search Section */}
-                <div className="relative flex items-center">
+                <div className="relative flex items-center" ref={searchRef}>
                   <AnimatePresence>
                     {isSearchOpen ? (
                       <motion.div
@@ -1478,9 +1479,9 @@ export function Navigation({
                 const countryCode = countryMatch ? countryMatch[1] : "in"
                 router.push(`/${countryCode}/account?tab=signup`)
               }}
-              className="font-din-arabic text-sm text-black/70 hover:text-black transition-colors underline decoration-black/20 hover:decoration-black/60"
+              className="font-din-arabic text-sm text-black/70 hover:text-black transition-colors"
             >
-              New here? Create an account
+              New here? <span className="underline decoration-black/20 hover:decoration-black/60">Create an account</span>
             </button>
           </div>
         </DialogContent>
