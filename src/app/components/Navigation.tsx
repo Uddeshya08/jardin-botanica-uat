@@ -1478,9 +1478,9 @@ export function Navigation({
                 const countryCode = countryMatch ? countryMatch[1] : "in"
                 router.push(`/${countryCode}/account?tab=signup`)
               }}
-              className="font-din-arabic text-sm text-black/70 hover:text-black transition-colors underline decoration-black/20 hover:decoration-black/60"
+              className="font-din-arabic text-sm text-black/70 hover:text-black transition-colors"
             >
-              New here? Create an account
+              New here? <span className="underline decoration-black/20 hover:decoration-black/60">Create an account</span>
             </button>
           </div>
         </DialogContent>
