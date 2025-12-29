@@ -459,7 +459,7 @@ export function ProductCarousel() {
           }
         `
       }} />
-      <div className="pt-16 pb-0 sm:py-16 lg:py-16">
+      <div className="pt-10 pb-0 sm:py-16 lg:py-16">
         <div className="m-w-[180rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-10 2xl:px-15">
           <Carousel
             setApi={setApi}

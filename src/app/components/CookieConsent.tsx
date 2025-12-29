@@ -3,20 +3,33 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { Cookie, X } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const pathname = usePathname()
+
+  // Get country code from pathname
+  const getCountryCode = () => {
+    if (pathname) {
+      const pathParts = pathname.split('/')
+      return pathParts[1] || 'in'
+    }
+    return 'in'
+  }
+
+  const countryCode = getCountryCode()
 
   useEffect(() => {
     // Check if user has already given consent
     const consent = localStorage.getItem("jardinBotanica_cookieConsent")
     if (!consent) {
-      // Delay showing the banner slightly for better UX
+      // Delay showing the banner for 10 seconds for better UX
       setTimeout(() => {
         setShowBanner(true)
         setTimeout(() => setIsVisible(true), 100)
-      }, 1000)
+      }, 10000)
     }
   }, [])
 
@@ -58,8 +71,8 @@ export default function CookieConsent() {
           >
             <div className="max-w-6xl mx-auto">
               <div
-                className="relative bg-white/95 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl border border-black/10 p-6 md:p-8"
-                style={{ backgroundColor: "rgba(255, 255, 255, 0.98)" }}
+                className="relative bg-white/40 backdrop-blur-2xl rounded-2xl md:rounded-3xl shadow-2xl border border-white/20 p-6 md:p-8"
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.3)" }}
               >
                 {/* Close button */}
                 <button
@@ -88,7 +101,7 @@ export default function CookieConsent() {
                       and analyze our traffic. By clicking "Accept All", you consent to our use of cookies. 
                       You can manage your preferences or learn more in our{" "}
                       <a
-                        href="/privacy-policy"
+                        href={`/${countryCode}/privacy-policy`}
                         className="underline hover:text-black transition-colors"
                       >
                         Privacy Policy

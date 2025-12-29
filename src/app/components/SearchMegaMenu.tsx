@@ -60,6 +60,18 @@ export function SearchMegaMenu({
     }
   }, [isOpen])
 
+  // Prevent body scroll when search menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [isOpen])
+
   // Perform search with debounce
   useEffect(() => {
     if (debounceTimeout.current) {
