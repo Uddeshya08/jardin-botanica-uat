@@ -3,10 +3,23 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { Cookie, X } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const pathname = usePathname()
+
+  // Get country code from pathname
+  const getCountryCode = () => {
+    if (pathname) {
+      const pathParts = pathname.split('/')
+      return pathParts[1] || 'in'
+    }
+    return 'in'
+  }
+
+  const countryCode = getCountryCode()
 
   useEffect(() => {
     // Check if user has already given consent
@@ -88,7 +101,7 @@ export default function CookieConsent() {
                       and analyze our traffic. By clicking "Accept All", you consent to our use of cookies. 
                       You can manage your preferences or learn more in our{" "}
                       <a
-                        href="/privacy-policy"
+                        href={`/${countryCode}/privacy-policy`}
                         className="underline hover:text-black transition-colors"
                       >
                         Privacy Policy

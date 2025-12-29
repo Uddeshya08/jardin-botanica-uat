@@ -45,6 +45,7 @@ export function Footer() {
         { name: 'Help & FAQs', href: `/${countryCode}/help-and-faqs` },
         { name: 'Returns & Exchanges', href: `/${countryCode}/returns-and-exchanges` },
         { name: 'Terms & Conditions', href: `/${countryCode}/terms-and-conditions` },
+        { name: 'Privacy Policy', href: `/${countryCode}/privacy-policy` },
       ],
     },
     {

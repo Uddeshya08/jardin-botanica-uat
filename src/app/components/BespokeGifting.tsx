@@ -20,7 +20,7 @@ export function BespokeGifting() {
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="w-full md:w-3/5 relative"
+          className="w-full md:w-3/5 relative pb-12"
         >
           <motion.div className="h-[40vh] md:h-[60vh] lg:h-[70vh] overflow-hidden">
             <motion.div
@@ -46,7 +46,7 @@ export function BespokeGifting() {
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="w-full md:w-2/5 flex flex-col justify-center px-6 py-8 md:px-12 md:py-12"
+          className="w-full md:w-2/5 flex flex-col justify-center px-6 pt-10 pb-16 md:px-12 md:py-12"
         >
           {/* Main Title */}
           <motion.h2

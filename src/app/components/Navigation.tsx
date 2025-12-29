@@ -770,7 +770,7 @@ export function Navigation({
                 ))}
               </motion.div>
 
-              {/* Mobile Menu Toggle - Search, Cart, and Hamburger */}
+              {/* Mobile Menu Toggle - Cart and Hamburger */}
               <motion.div
                 initial={disableAnimations ? undefined : { opacity: 0 }}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
@@ -779,48 +779,6 @@ export function Navigation({
                 }
                 className="lg:hidden flex items-center space-x-1 z-10"
               >
-                {/* Mobile Search */}
-                <div className="relative flex items-center">
-                  <AnimatePresence>
-                    {isSearchOpen ? (
-                      <motion.div
-                        initial={{ width: 0, opacity: 0 }}
-                        animate={{ width: "auto", opacity: 1 }}
-                        exit={{ width: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="mr-2 overflow-hidden"
-                      >
-                        <input
-                          type="text"
-                          placeholder="Search..."
-                          className="px-3 py-2 w-[150px] bg-transparent border-b border-opacity-30 transition-all duration-300 focus:outline-none placeholder-opacity-70 font-din-arabic text-sm"
-                          style={{
-                            color: navStyles.textColor,
-                            borderColor:
-                              navStyles.textColor === "white"
-                                ? "rgba(255,255,255,0.3)"
-                                : "rgba(0,0,0,0.3)",
-                          }}
-                          autoFocus
-                        />
-                      </motion.div>
-                    ) : null}
-                  </AnimatePresence>
-                  <motion.button
-                    whileHover={disableAnimations ? {} : { scale: 1.1 }}
-                    whileTap={disableAnimations ? {} : { scale: 0.9 }}
-                    onClick={handleSearchToggle}
-                    className="p-2 transition-all duration-300 -mr-1"
-                    style={{ color: navStyles.textColor }}
-                    aria-label={isSearchOpen ? "Close search" : "Search"}
-                  >
-                    {isSearchOpen ? (
-                      <X className="w-5 h-5" />
-                    ) : (
-                      <Search className="w-5 h-5" />
-                    )}
-                  </motion.button>
-                </div>
 
                 {/* Mobile Cart */}
                 <div className="relative" ref={cartRef}>
@@ -1031,50 +989,21 @@ export function Navigation({
                 }
                 className="hidden lg:flex items-center gap-6"
               >
-                {/* Search Section */}
-                <div className="relative flex items-center" ref={searchRef}>
-                  <AnimatePresence>
-                    {isSearchOpen ? (
-                      <motion.div
-                        initial={{ width: 0, opacity: 0 }}
-                        animate={{ width: "auto", opacity: 1 }}
-                        exit={{ width: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="mr-3 overflow-hidden"
-                      >
-                        <div className="relative">
-                          <input
-                            type="text"
-                            placeholder="Search..."
-                            className="px-4 py-2 w-[200px] bg-transparent border-b border-opacity-30 transition-all duration-300 focus:outline-none placeholder-opacity-70 font-din-arabic text-sm"
-                            style={{
-                              color: navStyles.textColor,
-                              borderColor:
-                                navStyles.textColor === "white"
-                                  ? "rgba(255,255,255,0.3)"
-                                  : "rgba(0,0,0,0.3)",
-                            }}
-                            autoFocus
-                          />
-                        </div>
-                      </motion.div>
-                    ) : null}
-                  </AnimatePresence>
-                  <motion.button
-                    whileHover={disableAnimations ? {} : { scale: 1.1 }}
-                    whileTap={disableAnimations ? {} : { scale: 0.9 }}
-                    onClick={handleSearchToggle}
-                    className="p-2 transition-all duration-300"
-                    style={{ color: navStyles.textColor }}
-                    aria-label={isSearchOpen ? "Close search" : "Search"}
-                  >
-                    {isSearchOpen ? (
-                      <X className="w-5 h-5" />
-                    ) : (
+                {/* Search Section - Hidden when SearchMegaMenu is open */}
+                {!isSearchOpen && (
+                  <div className="relative flex items-center" ref={searchRef}>
+                    <motion.button
+                      whileHover={disableAnimations ? {} : { scale: 1.1 }}
+                      whileTap={disableAnimations ? {} : { scale: 0.9 }}
+                      onClick={handleSearchToggle}
+                      className="p-2 transition-all duration-300"
+                      style={{ color: navStyles.textColor }}
+                      aria-label="Search"
+                    >
                       <Search className="w-5 h-5" />
-                    )}
-                  </motion.button>
-                </div>
+                    </motion.button>
+                  </div>
+                )}
 
                 <motion.button
                   whileHover={disableAnimations ? {} : { scale: 1.1 }}
@@ -1313,27 +1242,22 @@ export function Navigation({
               style={{ backgroundColor: "#e3e3d8" }}
             >
               <div className="p-6">
-                {/* Mobile Search */}
+                {/* Mobile Search Button */}
                 <div
-                  className="mb-8 pb-6 border-b"
+                  className="mb-6 pb-6 border-b"
                   style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
                 >
-                  <form onSubmit={handleSearchSubmit} className="relative">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search..."
-                      className="w-full px-4 py-3 bg-white/50 border font-din-arabic tracking-wide focus:outline-none focus:border-black transition-colors"
-                      style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
-                    />
-                    <button
-                      type="submit"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
-                    >
-                      <Search className="w-5 h-5" />
-                    </button>
-                  </form>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false)
+                      setIsSearchOpen(true)
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors bg-white/50 border"
+                    style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
+                  >
+                    <span>Search Products</span>
+                    <Search className="w-5 h-5" />
+                  </button>
                 </div>
 
                 {/* Mobile Navigation Links */}

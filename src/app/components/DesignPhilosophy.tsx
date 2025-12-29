@@ -13,7 +13,7 @@ export function DesignPhilosophy() {
       <div className="w-full md:container md:mx-auto px-0 md:px-8 lg:px-16">
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Heading Section - First on mobile */}
-          <div className="space-y-10 px-8 md:px-0 order-1 lg:hidden pb-8 md:pb-0">
+          <div className="space-y-10 px-8 md:px-0 order-1 lg:hidden pb-4 md:pb-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
