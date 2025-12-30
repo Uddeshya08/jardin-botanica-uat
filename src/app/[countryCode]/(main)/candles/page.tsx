@@ -2,15 +2,25 @@
 "use client"
 import { Github } from "@medusajs/icons"
 import { Heading } from "@medusajs/ui"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { motion } from "motion/react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
 import { PageBanner } from "app/components/PageBanner"
 import { getCandlesCollection } from "@lib/data/contentful"
 import { CandlesCollectionItem } from "../../../../types/contentful"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { ImageWithFallback } from "app/components/figma/ImageWithFallback"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "app/components/ui/carousel"
+import { useLedger, LedgerItem } from "app/context/ledger-context"
+import { toast } from "sonner"
 
 interface CartItem {
   id: string
@@ -42,6 +52,13 @@ const Candles = () => {
   const [centerCardIndex, setCenterCardIndex] = useState(2)
   const [candlesCollection, setCandlesCollection] = useState<CandlesCollectionItem[]>([])
   const [isLoadingCollection, setIsLoadingCollection] = useState(true)
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>()
+  const [isMobile, setIsMobile] = useState(false)
+  const [current, setCurrent] = useState(0)
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const sliderRef = useRef<HTMLDivElement>(null)
+  const { toggleLedgerItem, isInLedger } = useLedger()
 
   const handleCartUpdate = (item: CartItem | null) => {
     if (!item) return
@@ -55,6 +72,106 @@ const Candles = () => {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  useEffect(() => {
+    if (!carouselApi) return
+
+    setCurrent(carouselApi.selectedScrollSnap())
+    setScrollProgress(carouselApi.scrollProgress())
+
+    carouselApi.on("select", () => {
+      setCurrent(carouselApi.selectedScrollSnap())
+    })
+
+    carouselApi.on("scroll", () => {
+      setScrollProgress(carouselApi.scrollProgress())
+      setCurrent(carouselApi.selectedScrollSnap())
+    })
+  }, [carouselApi])
+
+  const handleSliderClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isDragging) return
+    e.stopPropagation()
+    const rect = e.currentTarget.getBoundingClientRect()
+    const clickX = e.clientX - rect.left
+    const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
+    
+    if (carouselApi) {
+      const scrollSnaps = carouselApi.scrollSnapList()
+      if (scrollSnaps.length > 0) {
+        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
+        carouselApi.scrollTo(targetIndex)
+      }
+    }
+  }
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!sliderRef.current || !carouselApi) return
+      const rect = sliderRef.current.getBoundingClientRect()
+      const clickX = e.clientX - rect.left
+      const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
+      
+      const scrollSnaps = carouselApi.scrollSnapList()
+      if (scrollSnaps.length > 0) {
+        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
+        carouselApi.scrollTo(targetIndex)
+      }
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+    
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!sliderRef.current || !carouselApi) return
+      const rect = sliderRef.current.getBoundingClientRect()
+      const touch = e.touches[0]
+      const clickX = touch.clientX - rect.left
+      const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
+      
+      const scrollSnaps = carouselApi.scrollSnapList()
+      if (scrollSnaps.length > 0) {
+        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
+        carouselApi.scrollTo(targetIndex)
+      }
+    }
+
+    const handleTouchEnd = () => {
+      setIsDragging(false)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+    }
+
+    document.addEventListener('touchmove', handleTouchMove)
+    document.addEventListener('touchend', handleTouchEnd)
+  }
 
   const nextImages = () => {
     setCurrentImageIndex((prevIndex) =>
@@ -106,7 +223,139 @@ const Candles = () => {
     hoverSrc: item.hoverSrc || item.src, // Fallback to main image if no hover image
     url: item.url,
   }))
-  
+
+  // Calculate slider position based on scroll progress
+  const sliderPercentage = scrollProgress * 100
+
+  // Helper function to convert product name to URL slug
+  function getProductSlug(productName: string): string {
+    return productName
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+  }
+
+  // Product Card Component - HomeCreationsPage Style
+  function ProductCard({ src, label, hoverSrc, url, index, productId }: { src: string; label: string; hoverSrc: string; url?: string; index: number; productId: string }) {
+    const [isImageHovered, setIsImageHovered] = useState(false)
+    const isItemInLedger = isInLedger(productId)
+
+    const handleToggleLedger = (e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      
+      const alreadyInLedger = isItemInLedger
+      const ledgerItem: LedgerItem = {
+        id: productId,
+        name: label,
+        price: 0, // You may want to get actual price from your data
+        image: src,
+        description: label,
+        category: "Candles"
+      }
+
+      toggleLedgerItem(ledgerItem)
+      toast.success(`${label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+        duration: 2000
+      })
+    }
+    
+    return (
+      <div
+        className="group flex flex-col w-full mx-auto"
+        style={{ minHeight: "600px", maxWidth: "420px" }}
+      >
+        {/* Product Image */}
+        {url ? (
+          <Link href={url.startsWith('/') ? url : `/${url}`}>
+            <div
+              className="relative w-full overflow-hidden cursor-pointer"
+              style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
+              onMouseEnter={() => setIsImageHovered(true)}
+              onMouseLeave={() => setIsImageHovered(false)}
+            >
+              {/* Hover Image - Behind */}
+              {hoverSrc && (
+                <div className="absolute inset-0">
+                  <ImageWithFallback src={hoverSrc} alt={`${label} alternate view`} className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              {/* Main Image - On Top */}
+              <div className="absolute inset-0 transition-opacity duration-700 ease-in-out" style={{ opacity: isImageHovered ? 0 : 1 }}>
+                <ImageWithFallback 
+                  src={src} 
+                  alt={label || "Product"} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Heart Icon - Always Visible */}
+              <button
+                onClick={handleToggleLedger}
+                className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 bg-white/20 border border-white/30 hover:bg-white/30"
+                aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
+              >
+                <Heart size={18} className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"}`} />
+              </button>
+            </div>
+          </Link>
+        ) : (
+          <div
+            className="relative w-full overflow-hidden cursor-pointer"
+            style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
+            onMouseEnter={() => setIsImageHovered(true)}
+            onMouseLeave={() => setIsImageHovered(false)}
+          >
+            {/* Hover Image - Behind */}
+            {hoverSrc && (
+              <div className="absolute inset-0">
+                <ImageWithFallback src={hoverSrc} alt={`${label} alternate view`} className="w-full h-full object-cover" />
+              </div>
+            )}
+
+            {/* Main Image - On Top */}
+            <div className="absolute inset-0 transition-opacity duration-700 ease-in-out" style={{ opacity: isImageHovered ? 0 : 1 }}>
+              <ImageWithFallback 
+                src={src} 
+                alt={label || "Product"} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+              {/* Heart Icon - Always Visible */}
+              <button
+                onClick={handleToggleLedger}
+                className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 bg-white/20 border border-white/30 hover:bg-white/30"
+                aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
+              >
+                <Heart size={18} className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"}`} />
+              </button>
+          </div>
+        )}
+
+        {/* Product Info */}
+        <div className="flex flex-col flex-grow">
+          {url ? (
+            <Link href={url.startsWith('/') ? url : `/${url}`}>
+              <div>
+                <h3 className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer" style={{ letterSpacing: "0.05em" }}>
+                  {label && label.trim() ? label : "Product Name"}
+                </h3>
+              </div>
+            </Link>
+          ) : (
+            <div>
+              <h3 className="font-american-typewriter text-xl mb-1" style={{ letterSpacing: "0.05em" }}>
+                {label && label.trim() ? label : "Product Name"}
+              </h3>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   // Handler for navigation
   const handleItemClick = (url?: string) => {
     if (url && url.trim() !== '') {
@@ -420,13 +669,12 @@ const Candles = () => {
       {/* mid section - product grid with PAB hover effects - Desktop Only */}
       {!isLoadingCollection && products.length > 0 && (
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
         className="hidden md:block w-full md:pt-12 lg:pt-16"
       >
-         <div className="pl-[4rem] pb-8">
+         <div className="pl-[4rem] pb-4">
          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -437,56 +685,125 @@ const Candles = () => {
             A story in every scent.
           </motion.h2>
          </div>
-        {/* Desktop view - original layout */}
-        <div className="flex flex-row w-full gap-4 px-10 lg:px-16">
-          {products.map(({ src, label, hoverSrc, url }, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              viewport={{ once: true }}
-              className="relative w-1/4 group cursor-pointer"
-              onMouseEnter={() => setHoveredProductIndex(i)}
-              onMouseLeave={() => setHoveredProductIndex(null)}
-              onClick={() => handleItemClick(url)}
+        {/* Desktop view - HomeCreationsPage Style Carousel */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .candles-carousel-item {
+              width: calc((100vw - 8rem - 4rem) / 3) !important;
+              max-width: 420px !important;
+              flex-basis: calc((100vw - 8rem - 4rem) / 3) !important;
+              flex-grow: 0 !important;
+              flex-shrink: 0 !important;
+              box-sizing: border-box !important;
+              padding-left: 0 !important;
+              padding-right: 0 !important;
+              margin-right: 2rem !important;
+            }
+            .candles-carousel-item:last-child {
+              margin-right: 0 !important;
+            }
+            @media (min-width: 1440px) {
+              .candles-carousel-item {
+                width: 420px !important;
+                flex-basis: 420px !important;
+              }
+            }
+            .candles-carousel-content {
+              user-select: none !important;
+              -webkit-user-select: none !important;
+              padding-left: 0 !important;
+              padding-right: 0 !important;
+            }
+            .candles-carousel-content > div {
+              margin-left: 0 !important;
+              gap: 0 !important;
+            }
+            .candles-carousel-wrapper [data-slot="carousel-content"] {
+              cursor: grab !important;
+              -webkit-overflow-scrolling: touch !important;
+              scroll-behavior: smooth !important;
+              scrollbar-width: none !important;
+              -ms-overflow-style: none !important;
+              overflow-x: auto !important;
+            }
+            .candles-carousel-wrapper [data-slot="carousel-content"]::-webkit-scrollbar {
+              display: none !important;
+            }
+            .candles-carousel-wrapper [data-slot="carousel-content"]:active {
+              cursor: grabbing !important;
+            }
+            .candles-carousel-wrapper [data-slot="carousel-content"] * {
+              -webkit-transform: translateZ(0) !important;
+              transform: translateZ(0) !important;
+              will-change: transform !important;
+            }
+          `
+        }} />
+        <div className="pt-10 pb-0 sm:py-10 lg:py-10">
+          <div className="pl-[4rem] pr-[4rem] candles-carousel-wrapper">
+            <Carousel
+              setApi={setCarouselApi}
+              opts={{
+                align: "start",
+                loop: false,
+                dragFree: true,
+                containScroll: "trimSnaps",
+                watchDrag: true,
+                duration: 50,
+                slidesToScroll: 1,
+              }}
+              className="w-full"
             >
-              <motion.div
-                whileHover={{ scale: 1.03 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="aspect-square overflow-hidden rounded-lg shadow-lg relative"
-              >
-                {/* Base Image */}
-                <img
-                  src={src}
-                  alt={label}
-                  className="w-full h-full object-cover"
-                />
-                {/* Black Overlay - Only on hover with gradient from top to bottom */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="absolute inset-0 rounded-lg"
-                  style={{
-                    background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.45) 100%)'
-                  }}
-                />
-                
-                {/* Text - Always visible with opacity change on hover */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <motion.p
-                    className="text-white text-2xl tracking-wide font-din-arabic drop-shadow-lg"
-                    initial={{ opacity: 1 }}
-                    animate={{ opacity: hoveredProductIndex === i ? 1 : 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {label && label.trim() ? label : "Product Name"}
-                  </motion.p>
-                </div>
-              </motion.div>
-            </motion.div>
-          ))}
+              <CarouselContent className="candles-carousel-content -ml-0">
+                {products.map(({ src, label, hoverSrc, url }, i) => {
+                  const productId = url || label.toLowerCase().replace(/\s+/g, '-')
+                  return (
+                    <CarouselItem
+                      key={i}
+                      className="candles-carousel-item pl-0"
+                    >
+                      <ProductCard
+                        index={i}
+                        src={src}
+                        label={label}
+                        hoverSrc={hoverSrc}
+                        url={url}
+                        productId={productId}
+                      />
+                    </CarouselItem>
+                  )
+                })}
+              </CarouselContent>
+            </Carousel>
+          </div>
+          
+          {/* Progress Scroll Bar - Slider Style */}
+          <div className="flex justify-center items-center w-full pt-3" style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}>
+            <div 
+              ref={sliderRef}
+              className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
+              onClick={handleSliderClick}
+            >
+              {/* Slider Thumb - Moves left/right based on scroll */}
+              <div
+                className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
+                style={{
+                  left: `calc(${Math.max(0, Math.min(100, sliderPercentage))}% - 16px)`,
+                  transform: 'translateY(-50%)'
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleMouseDown(e)
+                }}
+                onTouchStart={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleTouchStart(e)
+                }}
+              />
+            </div>
+          </div>
         </div>
       </motion.div>
       )}

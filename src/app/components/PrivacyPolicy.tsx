@@ -156,7 +156,7 @@ export function PrivacyPolicy() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.05 }}
-              className={`group relative border-b border-black/10 ${index === PRIVACY_SECTIONS.length - 1 ? 'border-b-0 py-10 pb-0' : 'py-10'}`}
+              className={`group relative  border-black/10 ${index === PRIVACY_SECTIONS.length - 1 ? 'border-b-0 py-10 pb-0' : 'py-10'}`}
             >
               <div className="flex gap-6 md:gap-10 items-start">
                 {/* Number */}
@@ -216,7 +216,7 @@ export function PrivacyPolicy() {
 
         {/* Footer Note */}
         <motion.div 
-          className="mt-32 pt-16 border-t border-black/8"
+          className="pt-10 border-black/8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.8 }}
