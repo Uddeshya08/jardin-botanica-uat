@@ -11,7 +11,6 @@ import { login, signup } from "@lib/data/customer"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
 import { DatePicker } from "app/components/ui/date-picker"
-import { sdk } from "@lib/config"
 
 interface CartItem {
   id: string
@@ -37,7 +36,7 @@ export default function AuthPage() {
   const router = useRouter()
   const params = useSearchParams()
   const routeParams = useParams()
-  const countryCode = (routeParams?.countryCode as string) || "us"
+  const countryCode = routeParams?.countryCode as string || 'us'
   const redirectTo = params.get("redirect") || "/account"
 
   // Check for stored order email and redirect path
@@ -46,15 +45,13 @@ export default function AuthPage() {
 
   useEffect(() => {
     // Check if there's a stored email and redirect path from order confirmation
-    const storedEmail = sessionStorage.getItem("jardinBotanica_orderEmail")
-    const storedRedirect = sessionStorage.getItem(
-      "jardinBotanica_redirectAfterLogin"
-    )
-
+    const storedEmail = sessionStorage.getItem('jardinBotanica_orderEmail')
+    const storedRedirect = sessionStorage.getItem('jardinBotanica_redirectAfterLogin')
+    
     if (storedEmail) {
       setOrderEmail(storedEmail)
     }
-
+    
     if (storedRedirect) {
       setActualRedirectPath(storedRedirect)
     }
@@ -71,9 +68,9 @@ export default function AuthPage() {
     if (signinMessage === "") {
       // Convention: empty string => success (adjust to your action's return)
       // Clear session storage after successful login
-      sessionStorage.removeItem("jardinBotanica_orderEmail")
-      sessionStorage.removeItem("jardinBotanica_redirectAfterLogin")
-
+      sessionStorage.removeItem('jardinBotanica_orderEmail')
+      sessionStorage.removeItem('jardinBotanica_redirectAfterLogin')
+      
       router.replace(actualRedirectPath)
       router.refresh()
     }
@@ -88,9 +85,9 @@ export default function AuthPage() {
     if (signupMessage === null) return
     if (signupMessage === "") {
       // Clear session storage after successful signup
-      sessionStorage.removeItem("jardinBotanica_orderEmail")
-      sessionStorage.removeItem("jardinBotanica_redirectAfterLogin")
-
+      sessionStorage.removeItem('jardinBotanica_orderEmail')
+      sessionStorage.removeItem('jardinBotanica_redirectAfterLogin')
+      
       router.replace(actualRedirectPath)
       router.refresh()
     }
@@ -182,21 +179,7 @@ export default function AuthPage() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const loginWithGoogle = async () => {
-    const result = await sdk.auth.login("customer", "google", {})
-    if (typeof result === "object" && result.location) {
-      window.location.href = result.location
-      return
-    }
-
-    if (typeof result !== "string") {
-      alert("Authentication failed")
-      return
-    }
-
-    const { customer } = await sdk.store.customer.retrieve()
-    console.log(customer)
-  }
+  const loginWithGoogle = async () => {}
 
   return (
     <div>
@@ -501,8 +484,7 @@ export default function AuthPage() {
                   />
                   {orderEmail && (
                     <p className="mt-2 text-sm text-black/60 font-din-arabic">
-                      Using email from your recent order. Create an account to
-                      view your order history.
+                      Using email from your recent order. Create an account to view your order history.
                     </p>
                   )}
                 </div>

@@ -5,8 +5,8 @@ import React, { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { verifyEmailAndSetPassword } from "@lib/data/customer"
-import { Eye, EyeOff, CheckCircle2 } from "lucide-react"
-import { Label } from "@medusajs/ui"
+import { Eye, EyeOff, CheckCircle2, AlertTriangle } from "lucide-react"
+import { Input, Label } from "@medusajs/ui"
 
 const VerifyEmailUpdate = () => {
   const searchParams = useSearchParams()
@@ -144,11 +144,11 @@ const VerifyEmailUpdate = () => {
                 New Password
               </Label>
               <div className="relative mt-2">
-                <input
+                <Input
                   type={showPassword ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10 pr-10 px-3 py-2 rounded-md focus:outline-none"
+                  className="bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10 pr-10"
                   style={{ borderColor: "#D8D2C7" }}
                   placeholder="Enter new password"
                   disabled={loading}
@@ -184,11 +184,11 @@ const VerifyEmailUpdate = () => {
                 Confirm New Password
               </Label>
               <div className="relative mt-2">
-                <input
+                <Input
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10 pr-10 px-3 py-2 rounded-md focus:outline-none"
+                  className="bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10 pr-10"
                   style={{ borderColor: "#D8D2C7" }}
                   placeholder="Confirm new password"
                   disabled={loading}
@@ -206,8 +206,9 @@ const VerifyEmailUpdate = () => {
                 </button>
               </div>
               {confirmPassword && newPassword !== confirmPassword && (
-                <p className="font-din-arabic text-xs text-red-600 mt-2 tracking-wide">
-                  ✗ Passwords do not match
+                <p className="font-din-arabic text-xs text-red-600 mt-2 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  Passwords do not match
                 </p>
               )}
             </div>
