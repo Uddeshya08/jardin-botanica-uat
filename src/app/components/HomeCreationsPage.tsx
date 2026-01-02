@@ -555,7 +555,7 @@ function EditorialBlogSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: 0.6 }}
-              className="font-din-arabic text-white/95 text-sm sm:text-base leading-relaxed mb-8 sm:mb-12"
+              className="font-din-arabic text-white/95 text-sm sm:text-base md:text-lg leading-relaxed mb-8 sm:mb-12"
               style={{ letterSpacing: "0.1em" }}
             >
               Each scent tells a story — of sandalwood in summer light, oud drifting through mist and rain, and saffron fields at dusk. These memories of places and seasons shape

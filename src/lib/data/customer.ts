@@ -104,9 +104,52 @@ export async function signup(_currentState: unknown, formData: FormData) {
   }
 }
 
+/**
+ * Verify Google reCAPTCHA v3 token (works for v2 as well)
+ */
+async function verifyRecaptchaToken(token: string): Promise<boolean> {
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY || ''
+  
+  if (!secretKey) {
+    console.warn("RECAPTCHA_SECRET_KEY not set, skipping verification")
+    return true // Allow login if secret key is not configured
+  }
+
+  try {
+    const response = await fetch(
+      "https://www.google.com/recaptcha/api/siteverify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          secret: secretKey,
+          response: token,
+        }),
+      }
+    )
+
+    const data = await response.json()
+    return data.success === true
+  } catch (error) {
+    console.error("reCAPTCHA verification error:", error)
+    return false
+  }
+}
+
 export async function login(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
+  const recaptchaToken = formData.get("g-recaptcha-response") as string | null
+
+  // If reCAPTCHA token is provided, verify it
+  if (recaptchaToken && recaptchaToken.trim() !== "") {
+    const isValid = await verifyRecaptchaToken(recaptchaToken)
+    if (!isValid) {
+      return "Verification failed. Please complete the security check and try again."
+    }
+  }
 
   try {
     await sdk.auth

@@ -593,8 +593,8 @@ export function Navigation({
             />
           )}
 
-          <div className="px-4 lg:px-12 relative z-20">
-            <div className="flex items-center justify-between py-4 relative">
+          <div className="px-2 md:px-4 lg:px-12 relative z-20">
+            <div className="flex items-center justify-between py-4 px-0 md:px-4 relative">
               {/* Logo */}
               <motion.div
                 initial={disableAnimations ? undefined : { opacity: 0 }}

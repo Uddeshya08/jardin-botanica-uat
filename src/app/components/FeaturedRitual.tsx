@@ -23,7 +23,7 @@ export function FeaturedRitual() {
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="w-full md:w-2/5 flex flex-col justify-center px-6 py-8 md:px-16 md:py-17"
+          className="w-full md:w-2/5 flex flex-col justify-center px-6 py-8 md:pl-20 md:pr-16 md:py-17"
         >
           {/* Main Title - The Botanist's Hand Ritual */}
           <motion.h2

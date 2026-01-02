@@ -18,6 +18,7 @@ import { toast } from "sonner"
 interface Product {
   id: string
   name: string
+  slug: string
   size: string
   description: string
   price: number
@@ -29,6 +30,7 @@ const products: Product[] = [
   {
     id: "1",
     name: "Saffron Jasmine Amberwood",
+    slug: "in/products/saffron-jasmine-amberwood",
     size: "250g",
     description: "Hand-poured soy candle with saffron, jasmine and amberwood",
     price: 3200,
@@ -40,6 +42,7 @@ const products: Product[] = [
   {
     id: "2",
     name: "Oud Waters",
+    slug: "in/products/oud-waters",
     size: "250g",
     description: "Hand-poured soy candle with rare oud and aquatic notes",
     price: 3400,
@@ -51,6 +54,7 @@ const products: Product[] = [
   {
     id: "3",
     name: "Cedarwood Rose",
+    slug: "/in/products/cedarwood-rose",
     size: "300g",
     description: "Hand-poured soy candle with cedarwood and damask rose",
     price: 3400,
@@ -62,6 +66,7 @@ const products: Product[] = [
   {
     id: "4",
     name: "Saffron Jasmine Amberwood",
+    slug: "in/products/saffron-jasmine-amberwood",
     size: "250g",
     description: "Hand-poured soy candle with saffron, jasmine and amberwood",
     price: 3200,
@@ -73,22 +78,12 @@ const products: Product[] = [
   {
     id: "5",
     name: "Oud Waters",
+    slug: "in/products/oud-waters",
     size: "250g",
     description: "Hand-poured soy candle with rare oud and aquatic notes",
     price: 3400,
     image:
       "https://images.unsplash.com/photo-1522033048162-a492b7a1bead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXZlbmRlciUyMGZpZWxkJTIwYm90YW5pY2FsfGVufDF8fHx8MTc2MTk5MTU3OXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1621494042364-e0e6ba89c21d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYm90YW5pY2FsJTIwY2FuZGxlfGVufDF8fHx8MTc2MjAwOTQyNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-  },
-  {
-    id: "6",
-    name: "Cedarwood Rose",
-    size: "300g",
-    description: "Hand-poured soy candle with cedarwood and damask rose",
-    price: 3400,
-    image:
-      "https://images.unsplash.com/photo-1584283626804-30ba59e636fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyb3NlJTIwc2tpbmNhcmUlMjBib3RhbmljYWx8ZW58MXx8fHwxNzYxOTkwNjgzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     hoverImage:
       "https://images.unsplash.com/photo-1621494042364-e0e6ba89c21d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYm90YW5pY2FsJTIwY2FuZGxlfGVufDF8fHx8MTc2MjAwOTQyNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
   },
@@ -101,8 +96,16 @@ function ProductCard({ product, onAddToCart, onToggleLedger, isAddedToCart, isIn
   isAddedToCart: boolean,
   isInLedger: boolean
 }) {
+  const router = useRouter()
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
+
+
+  const handleProductClick = () => {
+    // Normalize slug to ensure it starts with /
+    const normalizedSlug = product.slug.startsWith('/') ? product.slug : `/${product.slug}`
+    router.push(normalizedSlug)
+  }
 
   return (
     <div
@@ -118,6 +121,7 @@ function ProductCard({ product, onAddToCart, onToggleLedger, isAddedToCart, isIn
         style={{ marginBottom: "2.5rem" }}
         onMouseEnter={() => setIsImageHovered(true)}
         onMouseLeave={() => setIsImageHovered(false)}
+        onClick={handleProductClick}
       >
         {/* Hover Image - Behind */}
         <div className="absolute inset-0">
@@ -144,7 +148,10 @@ function ProductCard({ product, onAddToCart, onToggleLedger, isAddedToCart, isIn
         <button
           className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 bg-white/20 border border-white/30 hover:bg-white/30"
           aria-label={`${isInLedger ? "Remove from" : "Add to"} ledger`}
-          onClick={onToggleLedger}
+          onClick={(e) => {
+            e.stopPropagation()
+            onToggleLedger()
+          }}
         >
           <Heart
             size={18}
@@ -160,8 +167,9 @@ function ProductCard({ product, onAddToCart, onToggleLedger, isAddedToCart, isIn
         <div>
           <div className="flex justify-start items-center py-1 md:py-2">
             <h3
-              className="font-american-typewriter text-xl mb-0.5 md:mb-1"
+              className="font-american-typewriter text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity"
               style={{ letterSpacing: "0.05em" }}
+              onClick={handleProductClick}
             >
               {product.name}
             </h3>
@@ -190,7 +198,10 @@ function ProductCard({ product, onAddToCart, onToggleLedger, isAddedToCart, isIn
             <button
               onMouseEnter={() => setIsButtonHovered(true)}
               onMouseLeave={() => setIsButtonHovered(false)}
-              onClick={onAddToCart}
+              onClick={(e) => {
+                e.stopPropagation()
+                onAddToCart()
+              }}
               disabled={isAddedToCart}
               className="relative inline-flex items-center gap-2 pb-0.5"
             >
@@ -249,6 +260,23 @@ export function ProductCarousel() {
     api.on("scroll", () => {
       setScrollProgress(api.scrollProgress())
     })
+
+    // Ensure carousel starts at the beginning on mount (especially for mobile)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 750
+    if (isMobile) {
+      setTimeout(() => {
+        api.scrollTo(0, true)
+        // Force scroll to start position
+        const content = document.querySelector('.product-carousel-content')
+        if (content) {
+          content.scrollLeft = 0
+        }
+      }, 200)
+    } else {
+      setTimeout(() => {
+        api.scrollTo(0, true)
+      }, 100)
+    }
   }, [api])
 
   const scrollTo = (index: number) => {
@@ -302,6 +330,10 @@ export function ProductCarousel() {
 
   // Calculate slider position based on current slide position
   const totalSlides = products.length
+
+  console.log(products,'products----');
+  console.log(totalSlides,'totalSlides----');
+
   const normalizedIndex = totalSlides > 0 ? ((current % totalSlides) + totalSlides) % totalSlides : 0
   const sliderPercentage = totalSlides > 0 ? (normalizedIndex / (totalSlides - 1)) * 100 : 0
 
@@ -403,6 +435,9 @@ export function ProductCarousel() {
             margin-left: 1rem !important;
             margin-right: 1rem !important;
           }
+          .product-carousel-item:first-child {
+            margin-left: 0 !important;
+          }
           [data-slot="carousel-content"] {
             cursor: grab !important;
             -webkit-overflow-scrolling: touch !important;
@@ -414,12 +449,27 @@ export function ProductCarousel() {
           .product-carousel-content {
             user-select: none !important;
             -webkit-user-select: none !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
           }
           .product-carousel-content > div {
             margin-left: 0 !important;
             gap: 0 !important;
+          }
+          @media (max-width: 749px) {
+            .product-carousel-content {
+              padding-left: 2rem !important;
+              padding-right: 1rem !important;
+            }
+            .product-carousel-content > div {
+              margin-left: 0 !important;
+            }
+            .product-carousel-item:first-child {
+              margin-left: 0 !important;
+            }
+          }
+          .product-carousel-item:first-child {
+            margin-left: 0 !important;
           }
           @media (min-width: 750px) {
             .product-carousel-item {
@@ -429,7 +479,7 @@ export function ProductCarousel() {
               margin-right: 1rem !important;
             }
             .product-carousel-content {
-              padding-left: 0 !important;
+              padding-left: 2rem !important;
               padding-right: 0 !important;
             }
           }
@@ -441,7 +491,7 @@ export function ProductCarousel() {
               margin-right: 1rem !important;
             }
             .product-carousel-content {
-              padding-left: 0 !important;
+              padding-left: 2rem !important;
               padding-right: 0 !important;
             }
           }
@@ -453,7 +503,7 @@ export function ProductCarousel() {
               margin-right: 1rem !important;
             }
             .product-carousel-content {
-              padding-left: 0 !important;
+              padding-left: 2rem !important;
               padding-right: 0 !important;
             }
           }
@@ -464,12 +514,13 @@ export function ProductCarousel() {
           <Carousel
             setApi={setApi}
             opts={{
-              align: isMobile ? "center" : "start",
+              align: "start",
               loop: true,
               dragFree: true,
               containScroll: "trimSnaps",
               watchDrag: true,
               duration: 40, // Slow down scroll speed (milliseconds)
+              startIndex: 0,
             }}
             className="w-full"
           >
