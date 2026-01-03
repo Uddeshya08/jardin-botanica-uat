@@ -776,7 +776,7 @@ const Candles = () => {
         transition={{ duration: 0.3 }}
         className="hidden md:block w-full md:pt-12 lg:pt-16"
       >
-         <div className="pl-[4rem] pb-4">
+         <div className="pl-[5rem] pb-4">
          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
