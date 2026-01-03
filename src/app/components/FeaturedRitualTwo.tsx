@@ -48,7 +48,7 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
       whileInView={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.8, delay: 0.2 }}
       viewport={{ once: true }}
-      className="w-full lg:w-2/5 flex flex-col justify-center px-4 md:px-10 lg:px-16 py-6 md:py-12 lg:py-16"
+      className="w-full lg:w-2/5 flex flex-col justify-center pl-8 pr-4 md:px-10 lg:px-16 py-6 md:py-12 lg:py-16"
     >
       <motion.h2
         initial={{ opacity: 0, y: 20 }}

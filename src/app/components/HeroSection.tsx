@@ -279,7 +279,7 @@ export function HeroSection() {
 
       {/* ✅ Content Overlay */}
       <div className="absolute inset-0 z-20">
-        <div className="container mx-auto px-6 lg:px-12 h-full flex items-center">
+        <div className="px-6 md:pl-20 h-full flex items-center">
           <motion.div 
             className="max-w-2xl text-white"
             animate={{

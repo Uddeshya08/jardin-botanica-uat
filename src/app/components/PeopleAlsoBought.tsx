@@ -419,7 +419,7 @@ export function PeopleAlsoBought({
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="hidden lg:flex flex-shrink-0 w-2/5 flex-col px-8 lg:px-16"
+          className="hidden lg:flex flex-shrink-0 w-2/5 flex-col px-8 lg:pl-20 lg:pr-16"
           style={{ scrollSnapAlign: 'start', paddingTop: '60px' }}
         >
           <motion.h2

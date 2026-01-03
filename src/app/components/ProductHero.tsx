@@ -406,10 +406,10 @@ export function ProductHero({
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full lg:w-[40%] flex items-center py-8 md:py-12 px-4 md:px-0 relative overflow-hidden"
+        className="w-full lg:w-[40%] flex items-center py-8 md:py-12 px-4 md:px-4 relative overflow-hidden"
         style={{ backgroundColor: "#e3e3d8" }}
       >
-        <div className="space-y-6 max-w-lg relative z-10">
+        <div className="space-y-6 px-4 md:pl-2 md:pr-12 relative z-10">
           {/* Breadcrumbs */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -884,7 +884,7 @@ export function ProductHero({
         </motion.button>
 
         {/* Product Image - Static & Bigger */}
-        <div className="relative max-w-4xl mx-auto">
+        <div className="relative max-w-4xl mx-auto py-4 md:py-4">
           <img
             src={productImages[currentImageIndex]}
             alt="Jardin Botanica Tea Exfoliant Rinse"

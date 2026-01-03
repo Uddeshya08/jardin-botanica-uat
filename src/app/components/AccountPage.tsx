@@ -5,6 +5,7 @@ import { Eye, EyeOff, Smartphone, Phone } from 'lucide-react';
 export function AccountPage() {
   const [showSignInPassword, setShowSignInPassword] = useState(false);
   const [showCreatePassword, setShowCreatePassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   
   const [signInData, setSignInData] = useState({
     email: '',
@@ -34,6 +35,11 @@ export function AccountPage() {
       ...createAccountData,
       [name]: value
     });
+    if (name === 'password') {
+      if (passwordError && value.length >= 15) {
+        setPasswordError(null);
+      }
+    }
   };
 
   const handleSignInSubmit = (e: React.FormEvent) => {
@@ -43,6 +49,11 @@ export function AccountPage() {
 
   const handleCreateAccountSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (createAccountData.password.length < 15) {
+      setPasswordError('Password must be at least 15 characters long');
+      return;
+    }
+    setPasswordError(null);
     console.log('Create account submitted:', createAccountData);
   };
 
@@ -265,10 +276,14 @@ export function AccountPage() {
                     name="password"
                     value={createAccountData.password}
                     onChange={handleCreateAccountChange}
+                    onBlur={() => {
+                      if (createAccountData.password.length > 0 && createAccountData.password.length < 15) {
+                        setPasswordError('Password must be at least 15 characters long');
+                      }
+                    }}
                     className="font-din-arabic w-full px-4 py-3.5 pr-12 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
-                    style={{ borderColor: '#D8D2C7' }}
-                    placeholder="Create a secure password"
-                    required
+                    style={{ borderColor: passwordError ? '#ef4444' : '#D8D2C7' }}
+                    placeholder="Create a secure password (15+)"
                   />
                   <button
                     type="button"
@@ -277,7 +292,21 @@ export function AccountPage() {
                   >
                     {showCreatePassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
+                  {createAccountData.password.length > 0 && (
+                    <span className="absolute right-3 top-1/2 transform translate-y-2 font-din-arabic text-xs text-black/60">
+                      {createAccountData.password.length >= 15 ? (
+                        <span className="text-green-600">15+ ✓</span>
+                      ) : (
+                        `${createAccountData.password.length}/15`
+                      )}
+                    </span>
+                  )}
                 </div>
+                {passwordError && (
+                  <p className="mt-2 text-sm text-rose-600 font-din-arabic">
+                    {passwordError}
+                  </p>
+                )}
               </div>
 
               {/* Phone Number */}

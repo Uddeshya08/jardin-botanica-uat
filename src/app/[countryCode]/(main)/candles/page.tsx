@@ -20,6 +20,7 @@ import {
   type CarouselApi,
 } from "app/components/ui/carousel"
 import { useLedger, LedgerItem } from "app/context/ledger-context"
+import { useCartItems } from "app/context/cart-items-context"
 import { toast } from "sonner"
 
 interface CartItem {
@@ -45,11 +46,8 @@ const Candles = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isScrolled, setIsScrolled] = useState(false)
   const [hoveredProductIndex, setHoveredProductIndex] = useState<number | null>(null)
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [productScrollPosition, setProductScrollPosition] = useState(0)
   const [maxProductScroll, setMaxProductScroll] = useState(0)
-  const [garageSliderIndex, setGarageSliderIndex] = useState(2)
-  const [centerCardIndex, setCenterCardIndex] = useState(2)
   const [candlesCollection, setCandlesCollection] = useState<CandlesCollectionItem[]>([])
   const [isLoadingCollection, setIsLoadingCollection] = useState(true)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
@@ -58,11 +56,14 @@ const Candles = () => {
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const sliderRef = useRef<HTMLDivElement>(null)
+  const mobileSliderRef = useRef<HTMLDivElement>(null)
   const { toggleLedgerItem, isInLedger } = useLedger()
-
-  const handleCartUpdate = (item: CartItem | null) => {
-    if (!item) return
-  }
+  const { cartItems, handleCartUpdate } = useCartItems()
+  const [mobileCarouselApi, setMobileCarouselApi] = useState<CarouselApi>()
+  const [mobileCurrent, setMobileCurrent] = useState(0)
+  const [mobileScrollProgress, setMobileScrollProgress] = useState(0)
+  const [isMobileDragging, setIsMobileDragging] = useState(false)
+  const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -99,6 +100,22 @@ const Candles = () => {
       setCurrent(carouselApi.selectedScrollSnap())
     })
   }, [carouselApi])
+
+  useEffect(() => {
+    if (!mobileCarouselApi) return
+
+    setMobileCurrent(mobileCarouselApi.selectedScrollSnap())
+    setMobileScrollProgress(mobileCarouselApi.scrollProgress())
+
+    mobileCarouselApi.on("select", () => {
+      setMobileCurrent(mobileCarouselApi.selectedScrollSnap())
+    })
+
+    mobileCarouselApi.on("scroll", () => {
+      setMobileScrollProgress(mobileCarouselApi.scrollProgress())
+      setMobileCurrent(mobileCarouselApi.selectedScrollSnap())
+    })
+  }, [mobileCarouselApi])
 
   const handleSliderClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isDragging) return
@@ -201,12 +218,6 @@ const Candles = () => {
       try {
         const collection = await getCandlesCollection()
         setCandlesCollection(collection)
-        // Set initial center index based on collection length (middle item, or second item if < 3)
-        if (collection.length > 0) {
-          const initialIndex = Math.min(2, Math.floor(collection.length / 2))
-          setGarageSliderIndex(initialIndex)
-          setCenterCardIndex(initialIndex)
-        }
       } catch (error) {
         console.error("Error fetching candles collection:", error)
       } finally {
@@ -233,6 +244,110 @@ const Candles = () => {
       .toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '')
+  }
+
+  // Mobile Product Card Component - ProductCarousel Style
+  function MobileProductCard({ item, productId }: { item: CandlesCollectionItem; productId: string }) {
+    const [isImageHovered, setIsImageHovered] = useState(false)
+    const isItemInLedger = isInLedger(productId)
+
+    const handleProductClick = () => {
+      if (item.url) {
+        const normalizedUrl = item.url.startsWith('/') ? item.url : `/${item.url}`
+        router.push(normalizedUrl)
+      }
+    }
+
+    const handleToggleLedger = (e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      
+      const alreadyInLedger = isItemInLedger
+      const ledgerItem: LedgerItem = {
+        id: productId,
+        name: item.label,
+        price: 0, // Price not available in CandlesCollectionItem
+        image: item.src,
+        description: item.label,
+        category: "Candles"
+      }
+
+      toggleLedgerItem(ledgerItem)
+      toast.success(`${item.label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+        duration: 2000
+      })
+    }
+
+    return (
+      <div
+        className="group flex flex-col w-full mx-auto h-full"
+        style={{
+          minHeight: "460px",
+          maxWidth: "480px"
+        }}
+      >
+        {/* Product Image */}
+        <div
+          className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] sm:aspect-[3/4]"
+          style={{ marginBottom: "2.5rem" }}
+          onMouseEnter={() => setIsImageHovered(true)}
+          onMouseLeave={() => setIsImageHovered(false)}
+          onClick={handleProductClick}
+        >
+          {/* Hover Image - Behind */}
+          {item.hoverSrc && (
+            <div className="absolute inset-0">
+              <ImageWithFallback
+                src={item.hoverSrc}
+                alt={`${item.label} alternate view`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          {/* Main Image - On Top */}
+          <div
+            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+            style={{ opacity: isImageHovered && item.hoverSrc ? 0 : 1 }}
+          >
+            <ImageWithFallback
+              src={item.src}
+              alt={item.label}
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Ledger Icon */}
+          <button
+            className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 bg-white/20 border border-white/30 hover:bg-white/30"
+            aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
+            onClick={handleToggleLedger}
+          >
+            <Heart
+              size={18}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Product Info */}
+        <div className="flex flex-col flex-grow min-h-0 md:justify-between">
+          <div>
+            <div className="flex justify-start items-center py-1 md:py-2">
+              <h3
+                className="font-american-typewriter text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity"
+                style={{ letterSpacing: "0.05em" }}
+                onClick={handleProductClick}
+              >
+                {item.label}
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // Product Card Component - HomeCreationsPage Style
@@ -419,85 +534,84 @@ const Candles = () => {
   const canScrollLeft = productScrollPosition > 0
   const canScrollRight = productScrollPosition < maxProductScroll - 10 // Small buffer for smooth scrolling
 
-  // Garage slider items - use Contentful data
-  const garageSliderItems = candlesCollection.map((item) => ({
-    src: item.src,
-    label: item.label,
-    url: item.url,
-    bgColor: "bg-amber-900/20", // Optional styling, can be removed or made dynamic
-  }))
-
-  // Track garage slider scroll position
-  useEffect(() => {
-    if (garageSliderItems.length === 0) return
+  // Mobile slider handlers
+  const handleMobileSliderClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isMobileDragging) return
+    e.stopPropagation()
+    const rect = e.currentTarget.getBoundingClientRect()
+    const clickX = e.clientX - rect.left
+    const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
     
-    const garageSlider = document.getElementById('garage-slider')
-    if (!garageSlider) return
-
-    const updateGarageSliderIndex = () => {
-      const scrollLeft = garageSlider.scrollLeft
-      const viewportWidth = window.innerWidth
-      const avgCardWidth = viewportWidth * 0.68
-      const gap = 16 
-      const paddingLeft = viewportWidth * 0.19
-      const adjustedScroll = scrollLeft + paddingLeft
-      const scrollPosition = adjustedScroll / (avgCardWidth + gap)
-      const currentIndex = Math.round(scrollPosition)
-      const newIndex = Math.min(Math.max(currentIndex, 0), garageSliderItems.length - 1)
-      setGarageSliderIndex(newIndex)
-      setCenterCardIndex(newIndex)
+    if (mobileCarouselApi) {
+      const scrollSnaps = mobileCarouselApi.scrollSnapList()
+      if (scrollSnaps.length > 0) {
+        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
+        mobileCarouselApi.scrollTo(targetIndex)
+      }
     }
-
-    // Initial scroll to center card
-    const centerInitialCard = () => {
-      const viewportWidth = window.innerWidth
-      const avgCardWidth = viewportWidth * 0.68
-      const gap = 16
-      const paddingLeft = viewportWidth * 0.19
-      // Use the current centerCardIndex state
-      const currentCenterIndex = Math.min(centerCardIndex, garageSliderItems.length - 1)
-      const scrollPosition = (avgCardWidth + gap) * currentCenterIndex - paddingLeft
-      garageSlider.scrollLeft = Math.max(0, scrollPosition)
-    }
-
-    // Wait for layout to settle
-    setTimeout(() => {
-      centerInitialCard()
-      updateGarageSliderIndex()
-    }, 100)
-
-    updateGarageSliderIndex()
-    garageSlider.addEventListener('scroll', updateGarageSliderIndex)
-    
-    const handleResize = () => {
-      centerInitialCard()
-      updateGarageSliderIndex()
-    }
-    window.addEventListener('resize', handleResize)
-    
-    return () => {
-      garageSlider.removeEventListener('scroll', updateGarageSliderIndex)
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [garageSliderItems.length])
-
-  // Function to scroll garage slider to specific index
-  const goToGarageSlide = (index: number) => {
-    const garageSlider = document.getElementById('garage-slider')
-    if (!garageSlider) return
-
-    const viewportWidth = window.innerWidth
-    const avgCardWidth = viewportWidth * 0.68
-    const gap = 16
-    const paddingLeft = viewportWidth * 0.19
-    // Calculate scroll position to center the selected card
-    const scrollPosition = (avgCardWidth + gap) * index - paddingLeft
-    
-    garageSlider.scrollTo({ 
-      left: Math.max(0, scrollPosition), 
-      behavior: 'smooth' 
-    })
   }
+
+  const handleMobileMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsMobileDragging(true)
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!mobileSliderRef.current || !mobileCarouselApi) return
+      const rect = mobileSliderRef.current.getBoundingClientRect()
+      const clickX = e.clientX - rect.left
+      const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
+      
+      const scrollSnaps = mobileCarouselApi.scrollSnapList()
+      if (scrollSnaps.length > 0) {
+        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
+        mobileCarouselApi.scrollTo(targetIndex)
+      }
+    }
+
+    const handleMouseUp = () => {
+      setIsMobileDragging(false)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
+
+  const handleMobileTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsMobileDragging(true)
+    
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!mobileSliderRef.current || !mobileCarouselApi) return
+      const rect = mobileSliderRef.current.getBoundingClientRect()
+      const touch = e.touches[0]
+      const clickX = touch.clientX - rect.left
+      const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
+      
+      const scrollSnaps = mobileCarouselApi.scrollSnapList()
+      if (scrollSnaps.length > 0) {
+        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
+        mobileCarouselApi.scrollTo(targetIndex)
+      }
+    }
+
+    const handleTouchEnd = () => {
+      setIsMobileDragging(false)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+    }
+
+    document.addEventListener('touchmove', handleTouchMove)
+    document.addEventListener('touchend', handleTouchEnd)
+  }
+
+  // Calculate mobile slider position
+  const mobileSliderPercentage = candlesCollection.length > 0 
+    ? (mobileCurrent / (candlesCollection.length - 1)) * 100 
+    : 0
 
 
   return (
@@ -512,8 +626,8 @@ const Candles = () => {
       
       <PageBanner pageKey="candles" />
 
-      {/* Garage-style Slider Section - Mobile Only */}
-      {!isLoadingCollection && garageSliderItems.length > 0 && (
+      {/* Mobile Product Carousel Section - Mobile Only */}
+      {!isLoadingCollection && candlesCollection.length > 0 && (
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -549,118 +663,106 @@ const Candles = () => {
               A story in every scent.
             </motion.h2>
           </div>
-          <div 
-            id="garage-slider"
-            className="overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            <div 
-              className="flex gap-4 items-center h-full" 
-              style={{ 
-                width: 'max-content',
-                paddingLeft: '19vw',
-                paddingRight: '19vw'
-              }}
-            >
-              {garageSliderItems.map((item, index) => {
-                const isCenter = index === centerCardIndex
-                return (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0 }}
-                    animate={{ 
-                      opacity: 1,
-                      scale: isCenter ? 1 : 0.85
-                    }}
-                    transition={{ duration: 0.4 }}
-                    className="relative flex-shrink-0 snap-center"
-                    style={{ 
-                      width: isCenter ? '85vw' : '70vw',
-                      minWidth: isCenter ? '85vw' : '70vw'
-                    }}
-                  >
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      transition={{ duration: 0.3 }}
-                      onClick={() => handleItemClick(item.url)}
-                      className={`relative aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-lg cursor-pointer ${
-                        isCenter ? 'mx-2' : 'mx-1'
-                      } ${item.url ? 'hover:shadow-xl transition-shadow duration-300' : ''}`}
-                    >
-                      <motion.img
-                        src={item.src}
-                        alt={item.label}
-                        className="w-full h-full object-cover"
-                      />
-                    </motion.div>
-                    {/* Product Name below image */}
-                    <motion.p
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.2 }}
-                      className="text-black text-lg font-bold tracking-wide font-din-arabic text-center mt-3"
-                    >
-                      {item.label && item.label.trim() ? item.label : "Product Name"}
-                    </motion.p>
-                  </motion.div>
-                )
-              })}
+          
+          {/* Mobile Carousel */}
+          <style dangerouslySetInnerHTML={{
+            __html: `
+              .mobile-candles-carousel-item {
+                width: calc((100vw - 64px) * 0.90) !important;
+                flex-basis: calc((100vw - 64px) * 0.90) !important;
+                flex-grow: 0 !important;
+                flex-shrink: 0 !important;
+                box-sizing: border-box !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                margin-left: 1rem !important;
+                margin-right: 1rem !important;
+              }
+              .mobile-candles-carousel-content {
+                user-select: none !important;
+                -webkit-user-select: none !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+              }
+              .mobile-candles-carousel-content > div {
+                margin-left: 0 !important;
+                gap: 0 !important;
+              }
+              .mobile-candles-carousel-wrapper [data-slot="carousel-content"] {
+                cursor: grab !important;
+                -webkit-overflow-scrolling: touch !important;
+                scroll-behavior: smooth !important;
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
+                overflow-x: auto !important;
+              }
+              .mobile-candles-carousel-wrapper [data-slot="carousel-content"]::-webkit-scrollbar {
+                display: none !important;
+              }
+              .mobile-candles-carousel-wrapper [data-slot="carousel-content"]:active {
+                cursor: grabbing !important;
+              }
+            `
+          }} />
+          <div className="pt-10 pb-0">
+            <div className="px-4 mobile-candles-carousel-wrapper">
+              <Carousel
+                setApi={setMobileCarouselApi}
+                opts={{
+                  align: "center",
+                  loop: false,
+                  dragFree: true,
+                  containScroll: "trimSnaps",
+                  watchDrag: true,
+                  duration: 40,
+                }}
+                className="w-full"
+              >
+                <CarouselContent className="mobile-candles-carousel-content">
+                  {candlesCollection.map((item, i) => {
+                    const productId = item.url || item.label.toLowerCase().replace(/\s+/g, '-')
+                    return (
+                      <CarouselItem
+                        key={i}
+                        className="mobile-candles-carousel-item"
+                      >
+                        <MobileProductCard
+                          item={item}
+                          productId={productId}
+                        />
+                      </CarouselItem>
+                    )
+                  })}
+                </CarouselContent>
+              </Carousel>
             </div>
-          </div>
-{/* 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="text-center mt-12 md:mt-16 px-4"
-          >
-            <motion.h3
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              viewport={{ once: true }}
-              className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-1 font-din-arabic tracking-tight"
-            >
-              your product collection
-            </motion.h3>
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              viewport={{ once: true }}
-              className="text-xl md:text-2xl font-bold text-black mb-1 font-din-arabic tracking-tight"
-            >
-              is ready
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-              viewport={{ once: true }}
-              className="text-sm md:text-base text-black/60 font-din-arabic font-normal"
-            >
-              explore our botanical collection now
-            </motion.p>
-          </motion.div> */}
-
-          <div className="flex justify-center items-center gap-2 mt-8">
-            {garageSliderItems.map((_, index) => (
-              <motion.button
-                key={index}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
-                viewport={{ once: true }}
-                onClick={() => goToGarageSlide(index)}
-                className={`rounded-full transition-all duration-300 cursor-pointer ${
-                  index === garageSliderIndex 
-                    ? 'bg-gray-800 w-3 h-2' 
-                    : 'bg-gray-300 hover:bg-gray-400 w-2 h-2'
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
+            
+            {/* Mobile Slider Bar */}
+            <div className="flex justify-center items-center w-full pt-3" style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}>
+              <div 
+                ref={mobileSliderRef}
+                className="relative w-1/2 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
+                onClick={handleMobileSliderClick}
+              >
+                <div
+                  className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
+                  style={{
+                    left: `calc(${Math.max(0, Math.min(100, mobileSliderPercentage))}% - 16px)`,
+                    transform: 'translateY(-50%)'
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleMobileMouseDown(e)
+                  }}
+                  onTouchStart={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleMobileTouchStart(e)
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -812,7 +914,7 @@ const Candles = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="py-12 md:py-20 px-4 md:px-12"
+        className="py-2 pb-12 md:py-20 px-4 md:px-12"
       >
         <div className="max-w-4xl mx-auto text-center">
           <motion.h2
