@@ -226,6 +226,13 @@ const Category = () => {
 
   return (
     <div className="bg-[#e2e2d8]">
+      <style dangerouslySetInnerHTML={{__html: `
+        @media (min-width: 768px) {
+          .md-pl-custom {
+            padding-left: 2.2rem !important;
+          }
+        }
+      `}} />
       <RippleEffect />
       <Navigation
         isScrolled={isScrolled}
@@ -627,7 +634,7 @@ const Category = () => {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               viewport={{ once: true }}
-              className="w-full relative md:w-1/2 md:pr-12 mt-[4%] pl-4 md:pl-0"
+              className="w-full relative md:w-1/2 md:pr-12 mt-[4%] pl-4 md-pl-custom"
             >
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}

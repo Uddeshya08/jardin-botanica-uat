@@ -3,7 +3,7 @@
 import { Github } from "@medusajs/icons"
 import { Heading } from "@medusajs/ui"
 import { useEffect, useState, useRef } from "react"
-import { motion } from "motion/react"
+import { motion, useScroll, useTransform, useSpring } from "motion/react"
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
 import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
@@ -57,6 +57,7 @@ const Candles = () => {
   const [isDragging, setIsDragging] = useState(false)
   const sliderRef = useRef<HTMLDivElement>(null)
   const mobileSliderRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const { toggleLedgerItem, isInLedger } = useLedger()
   const { cartItems, handleCartUpdate } = useCartItems()
   const [mobileCarouselApi, setMobileCarouselApi] = useState<CarouselApi>()
@@ -64,6 +65,21 @@ const Candles = () => {
   const [mobileScrollProgress, setMobileScrollProgress] = useState(0)
   const [isMobileDragging, setIsMobileDragging] = useState(false)
   const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null)
+
+  // Smooth scroll animations
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  })
+  
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  })
+
+  // Smooth easing function for all animations
+  const smoothEase = [0.25, 0.46, 0.45, 0.94] as const
 
   useEffect(() => {
     const handleScroll = () => {
@@ -283,7 +299,8 @@ const Candles = () => {
         className="group flex flex-col w-full mx-auto h-full"
         style={{
           minHeight: "460px",
-          maxWidth: "480px"
+          maxWidth: "480px",
+          paddingLeft: "1.5rem",
         }}
       >
         {/* Product Image */}
@@ -615,7 +632,19 @@ const Candles = () => {
 
 
   return (
-    <div className="bg-[#e2e2d8]">
+    <div ref={containerRef} className="bg-[#e2e2d8]">
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          html {
+            scroll-behavior: smooth;
+          }
+          @media (prefers-reduced-motion: no-preference) {
+            html {
+              scroll-behavior: smooth;
+            }
+          }
+        `
+      }} />
       <RippleEffect />
       <Navigation
         isScrolled={isScrolled}
@@ -631,21 +660,21 @@ const Candles = () => {
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
+        transition={{ duration: 1, ease: smoothEase }}
+        viewport={{ once: true, amount: 0.2 }}
         className="md:hidden relative w-full py-12 overflow-hidden bg-[#e2e2d8]"
       >
         <motion.h2
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.2, ease: smoothEase }}
           viewport={{ once: true }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] md:text-[200px] lg:text-[280px] font-light text-gray-300/30 select-none pointer-events-none z-0 tracking-tight"
           style={{ 
             fontFamily: 'system-ui, -apple-system, sans-serif',
             fontWeight: 300,
             letterSpacing: '-0.02em'
           }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] md:text-[200px] lg:text-[280px] font-light text-gray-300/30 select-none pointer-events-none z-0 tracking-tight"
         >
           Botanica
         </motion.h2>
@@ -656,8 +685,8 @@ const Candles = () => {
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2, ease: smoothEase }}
+              viewport={{ once: true, amount: 0.3 }}
               className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter text-center"
             >
               A story in every scent.
@@ -772,16 +801,17 @@ const Candles = () => {
       {!isLoadingCollection && products.length > 0 && (
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: smoothEase }}
+        viewport={{ once: true, amount: 0.1 }}
         className="hidden md:block w-full md:pt-12 lg:pt-16"
       >
-         <div className="pl-[4rem] pb-4">
+         <div className="pl-[5rem] pb-4">
          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2, ease: smoothEase }}
+            viewport={{ once: true, amount: 0.3 }}
             className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter"
           >
             A story in every scent.
@@ -842,7 +872,7 @@ const Candles = () => {
           `
         }} />
         <div className="pt-10 pb-0 sm:py-10 lg:py-10">
-          <div className="pl-[4rem] pr-[4rem] candles-carousel-wrapper">
+          <div className="pl-[5rem] pr-[4rem] candles-carousel-wrapper">
             <Carousel
               setApi={setCarouselApi}
               opts={{
@@ -912,16 +942,16 @@ const Candles = () => {
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
+        transition={{ duration: 1, ease: smoothEase }}
+        viewport={{ once: true, amount: 0.2 }}
         className="py-2 pb-12 md:py-20 px-4 md:px-12"
       >
         <div className="max-w-4xl mx-auto text-center">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2, ease: smoothEase }}
+            viewport={{ once: true, amount: 0.3 }}
             className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter"
           >
             Need a Hand Choosing?
@@ -929,19 +959,19 @@ const Candles = () => {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
+            viewport={{ once: true, amount: 0.3 }}
             className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-4 md:px-0"
           >
             Connect with one of our experts for personalized guidance and thoughtful product recommendations-crafted just for your skin, your rituals, your glow.
           </motion.p>
           <motion.button
-            initial={{ opacity: 0, y: 0 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.5, ease: smoothEase }}
+            viewport={{ once: true, amount: 0.3 }}
             className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base"
           >
             Speak With Us
@@ -953,21 +983,21 @@ const Candles = () => {
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
+        transition={{ duration: 1, ease: smoothEase }}
+        viewport={{ once: true, amount: 0.1 }}
         className="py-4 md:py-8"
       >
         <div className="flex flex-col md:flex-row px-0 md:px-0">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
+            transition={{ duration: 1, ease: smoothEase }}
+            viewport={{ once: true, amount: 0.2 }}
             className="w-full md:w-[68%] h-[300px] md:h-[600px] overflow-hidden mb-6 md:mb-0 object-cover"
           >
             <motion.img
               whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.6, ease: smoothEase }}
               src="/Images/Blog.jpg"
               alt="Soft Orris"
               className="w-full h-full object-cover"
@@ -976,16 +1006,16 @@ const Candles = () => {
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.2, ease: smoothEase }}
+            viewport={{ once: true, amount: 0.2 }}
             className="w-full md:w-[45%] relative md:-ml-44 z-10 md:mt-10 px-6 md:px-0"
           >
             <div className="">
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
+                viewport={{ once: true, amount: 0.3 }}
                 className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-4 md:mb-6 tracking-tight leading-tight font-american-typewriter"
               >
                 Soft Orris - The Scent of Stillness
@@ -993,8 +1023,8 @@ const Candles = () => {
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.4, ease: smoothEase }}
+                viewport={{ once: true, amount: 0.3 }}
                 className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-6 md:mb-4 pr-4 line-clamp-2 md:line-clamp-none"
               >
                 Powdery, elegant, and quietly floral-Soft Orris wraps your space in a gentle hug. Perfect for slow mornings, self-care rituals, or unwinding at dusk. It's calm, bottled in wax.
@@ -1002,13 +1032,14 @@ const Candles = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.5, ease: smoothEase }}
+                viewport={{ once: true, amount: 0.3 }}
                 className="text-center md:text-right md:mr-12"
               >
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.3, ease: smoothEase }}
                   className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base"
                 >
                   Read More
@@ -1023,8 +1054,8 @@ const Candles = () => {
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
+        transition={{ duration: 1, ease: smoothEase }}
+        viewport={{ once: true, amount: 0.2 }}
         className="py-12 md:py-10 px-4 md:px-12"
       >
         <div className="pb-4">
@@ -1032,15 +1063,15 @@ const Candles = () => {
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 0.2, ease: smoothEase }}
+              viewport={{ once: true, amount: 0.2 }}
               className="w-full relative md:w-1/2 md:pr-12 mt-[4%] pl-4 md:pl-0"
             >
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
+                viewport={{ once: true, amount: 0.3 }}
                 className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-4 tracking-tight font-american-typewriter"
               >
                 Let's Stay in Touch
@@ -1048,8 +1079,8 @@ const Candles = () => {
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.4, ease: smoothEase }}
+                viewport={{ once: true, amount: 0.3 }}
                 className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed"
               >
                 Follow us on Instagram and Facebook for moments of calm,
@@ -1057,8 +1088,8 @@ const Candles = () => {
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.5, ease: smoothEase }}
+                viewport={{ once: true, amount: 0.3 }}
                 className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed"
               >
                 candlelight rituals, and a peek behind the scenes{" "}
@@ -1071,13 +1102,13 @@ const Candles = () => {
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
+              transition={{ duration: 1, ease: smoothEase }}
+              viewport={{ once: true, amount: 0.2 }}
               className="w-full md:w-[60%] relative mt-8 md:mt-0"
             >
               <div className="flex gap-2 md:gap-4 overflow-hidden relative px-2 md:px-12">
                 {/* Left Navigation Button */}
-                <div className="absolute left-0 md:left-4 top-1/2 -translate-y-1/2 mt-8 z-20">
+                <div className="hidden md:block absolute left-0 md:left-4 top-1/2 -translate-y-1/2 mt-8 z-20">
                   <motion.button
                     whileHover={{ scale: 1.05, x: -2 }}
                     whileTap={{ scale: 0.95 }}
@@ -1098,13 +1129,13 @@ const Candles = () => {
                       key={`${currentImageIndex}-${index}`}
                       initial={{ opacity: 0, scale: 0.9 }}
                       whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, delay: index * 0.1, ease: smoothEase }}
+                      viewport={{ once: true, amount: 0.2 }}
                       className="w-full h-auto aspect-square overflow-hidden rounded-lg relative"
                     >
                       <motion.img
                         whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.4, ease: smoothEase }}
                         src={imageSrc}
                         alt={`Instagram post ${index + 1}`}
                         className="w-full h-full object-cover"
@@ -1117,7 +1148,7 @@ const Candles = () => {
                   ))}
                 </div>
                 {/* Right Navigation Button */}
-                <div className="absolute right-0 md:right-4 top-1/2 -translate-y-1/2 mt-8 z-20">
+                <div className="hidden md:block absolute right-0 md:right-4 top-1/2 -translate-y-1/2 mt-8 z-20">
                   <motion.button
                     whileHover={{ scale: 1.05, x: 2 }}
                     whileTap={{ scale: 0.95 }}
@@ -1180,8 +1211,8 @@ const Candles = () => {
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: smoothEase }}
+              viewport={{ once: true, amount: 0.3 }}
               className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 text-black"
             >
               Join the Circle
@@ -1189,8 +1220,8 @@ const Candles = () => {
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2, ease: smoothEase }}
+              viewport={{ once: true, amount: 0.3 }}
               className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8"
             >
               Be the first to discover new blends, exclusive rituals, and
@@ -1199,12 +1230,13 @@ const Candles = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.4, ease: smoothEase }}
+              viewport={{ once: true, amount: 0.3 }}
               className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
             >
               <motion.input
                 whileFocus={{ scale: 1.02 }}
+                transition={{ duration: 0.3, ease: smoothEase }}
                 type="email"
                 placeholder="Enter your email"
                 className="font-din-arabic flex-1 px-4 py-3 bg-transparent border border-black/30 text-black placeholder-black/60 focus:outline-none focus:border-black transition-all duration-300"
@@ -1212,6 +1244,7 @@ const Candles = () => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.3, ease: smoothEase }}
                 className="font-din-arabic px-8 py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
               >
                 Subscribe

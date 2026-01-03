@@ -18,7 +18,7 @@ export function PageBanner({
   className = "relative w-full h-screen md:h-[570px] overflow-hidden",
   titleClassName = "text-white font-medium mb-6 md:mb-8 tracking-tight font-american-typewriter text-5xl md:text-6xl lg:text-7xl",
   descriptionClassName = "font-din-arabic text-base md:text-lg text-white/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-2 md:px-0",
-  containerClassName = "absolute top-[37%] md:top-1/2 left-8 md:left-[63px] md:-translate-y-1/2 max-w-xs md:max-w-md",
+  containerClassName = "absolute top-[37%] md:top-1/2 left-8 md:left-[70px] md:-translate-y-1/2 max-w-xs md:max-w-md",
 }: PageBannerProps) {
   const [bannerData, setBannerData] = useState<PageBannerType | null>(null)
   const [videoError, setVideoError] = useState(false)

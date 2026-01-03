@@ -111,8 +111,9 @@ function ProductCard({ product, onAddToCart, onToggleLedger, isAddedToCart, isIn
     <div
       className="group flex flex-col w-full mx-auto h-full"
       style={{
-        minHeight: "460px",
-        maxWidth: "480px"
+        minHeight: "480px",
+        maxWidth: "480px",
+        paddingLeft: "1.5rem",
       }}
     >
       {/* Product Image */}
@@ -264,14 +265,23 @@ export function ProductCarousel() {
     // Ensure carousel starts at the beginning on mount (especially for mobile)
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 750
     if (isMobile) {
-      setTimeout(() => {
+      // Multiple attempts to ensure proper scroll position on mobile
+      const scrollToStart = () => {
         api.scrollTo(0, true)
         // Force scroll to start position
-        const content = document.querySelector('.product-carousel-content')
+        const content = document.querySelector('[data-slot="carousel-content"]') as HTMLElement
         if (content) {
           content.scrollLeft = 0
         }
-      }, 200)
+      }
+      // Initial scroll
+      setTimeout(scrollToStart, 100)
+      // Additional scroll after layout settles
+      setTimeout(scrollToStart, 300)
+      // Final scroll after everything is rendered
+      requestAnimationFrame(() => {
+        setTimeout(scrollToStart, 100)
+      })
     } else {
       setTimeout(() => {
         api.scrollTo(0, true)
@@ -442,6 +452,7 @@ export function ProductCarousel() {
             cursor: grab !important;
             -webkit-overflow-scrolling: touch !important;
             scroll-behavior: smooth !important;
+            scroll-snap-type: x mandatory !important;
           }
           [data-slot="carousel-content"]:active {
             cursor: grabbing !important;
@@ -458,8 +469,11 @@ export function ProductCarousel() {
           }
           @media (max-width: 749px) {
             .product-carousel-content {
-              padding-left: 2rem !important;
+              padding-left: 0 !important;
               padding-right: 1rem !important;
+            }
+            [data-slot="carousel-content"] {
+              scroll-padding-left: 0 !important;
             }
             .product-carousel-content > div {
               margin-left: 0 !important;
