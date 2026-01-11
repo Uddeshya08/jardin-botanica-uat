@@ -65,6 +65,8 @@ const Candles = () => {
   const [mobileScrollProgress, setMobileScrollProgress] = useState(0)
   const [isMobileDragging, setIsMobileDragging] = useState(false)
   const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null)
+  const [bannerCarouselApi, setBannerCarouselApi] = useState<CarouselApi>()
+  const [bannerCurrent, setBannerCurrent] = useState(0)
 
   // Smooth scroll animations
   const { scrollYProgress } = useScroll({
@@ -131,6 +133,17 @@ const Candles = () => {
       setMobileScrollProgress(mobileCarouselApi.scrollProgress())
       setMobileCurrent(mobileCarouselApi.selectedScrollSnap())
     })
+
+    // Ensure carousel starts at the beginning on mount for mobile
+    const scrollToStart = () => {
+      mobileCarouselApi.scrollTo(0, true)
+      const content = document.querySelector('.mobile-candles-carousel-wrapper [data-slot="carousel-content"]') as HTMLElement
+      if (content) {
+        content.scrollLeft = 0
+      }
+    }
+    setTimeout(scrollToStart, 100)
+    setTimeout(scrollToStart, 300)
   }, [mobileCarouselApi])
 
   const handleSliderClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -300,7 +313,6 @@ const Candles = () => {
         style={{
           minHeight: "460px",
           maxWidth: "480px",
-          paddingLeft: "1.5rem",
         }}
       >
         {/* Product Image */}
@@ -395,7 +407,7 @@ const Candles = () => {
     return (
       <div
         className="group flex flex-col w-full mx-auto"
-        style={{ minHeight: "600px", maxWidth: "420px" }}
+        style={{ width: "364px", minHeight: "455px" }}
       >
         {/* Product Image */}
         {url ? (
@@ -630,6 +642,126 @@ const Candles = () => {
     ? (mobileCurrent / (candlesCollection.length - 1)) * 100 
     : 0
 
+  // Banner carousel handlers
+  useEffect(() => {
+    if (!bannerCarouselApi) return
+
+    setBannerCurrent(bannerCarouselApi.selectedScrollSnap())
+
+    bannerCarouselApi.on("select", () => {
+      setBannerCurrent(bannerCarouselApi.selectedScrollSnap())
+    })
+
+    bannerCarouselApi.on("scroll", () => {
+      setBannerCurrent(bannerCarouselApi.selectedScrollSnap())
+    })
+  }, [bannerCarouselApi])
+
+  // Banner Product Card Component - Banner Style
+  function BannerProductCard({ item, index }: { item: CandlesCollectionItem; index: number }) {
+    const [isHovered, setIsHovered] = useState(false)
+    
+    const handleProductClick = () => {
+      if (item.url) {
+        const normalizedUrl = item.url.startsWith('/') ? item.url : `/${item.url}`
+        router.push(normalizedUrl)
+      }
+    }
+
+    // Group products into sets of 3 for banner display
+    const bannerIndex = Math.floor(index / 3)
+    const positionInGroup = index % 3
+    
+    // Background colors/styles for each position (optional)
+    const backgroundStyles = [
+      { background: 'linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.5))' }, // Dark
+      { background: 'linear-gradient(135deg, rgba(200,150,150,0.2), rgba(180,100,100,0.3))' }, // Warm pinkish
+      { background: 'linear-gradient(135deg, rgba(150,150,150,0.3), rgba(100,100,100,0.4))' }, // Grey
+    ]
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: index * 0.1 }}
+        viewport={{ once: true }}
+        className="relative flex flex-col justify-between w-full h-full min-h-[400px] md:min-h-[450px] lg:min-h-[550px] cursor-pointer group overflow-hidden"
+        onClick={handleProductClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 overflow-hidden">
+          <motion.div
+            className="w-full h-full"
+            animate={{ scale: isHovered ? 1.1 : 1 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            style={{ willChange: "transform" }}
+          >
+            <ImageWithFallback
+              src={item.src}
+              alt={item.label}
+              className="w-full h-full object-cover"
+            />
+          </motion.div>
+          <div 
+            className="absolute inset-0 opacity-80 transition-opacity duration-700 ease-in-out group-hover:opacity-70 pointer-events-none"
+            style={backgroundStyles[positionInGroup]}
+          />
+        </div>
+
+        {/* Content Overlay */}
+        <div className="relative z-10 flex flex-col justify-between h-full p-6 md:p-8 lg:p-12 text-white">
+          {/* Top Text Section */}
+          <div className="mt-auto mb-6 md:mb-8">
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-xs md:text-sm font-normal mb-2 md:mb-3 tracking-wide opacity-90 uppercase"
+              style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.05em', fontSize: '8px' }}
+            >
+              {positionInGroup === 0 ? "MODERN LIGHTING" : positionInGroup === 1 ? "CANDLES & REED DIFFUSERS" : "GLOBALLY AWARDED"}
+            </motion.p>
+            
+            <motion.h3
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              style={{fontSize: '1.5rem'}}
+              className="text-xl md:text-2xl lg:text-3xl font-normal tracking-tight leading-tight font-american-typewriter"
+            >
+              {item.label}
+            </motion.h3>
+          </div>
+
+          {/* View Products Button */}
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.02, backgroundColor: '#000', color: '#fff' }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="bg-white/5 text-white px-4 py-2 md:px-6 md:py-2.5 font-normal tracking-wide transition-all duration-300 hover:bg-black hover:text-white border border-white/20 w-fit text-sm md:text-sm"
+            style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.05em' }}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleProductClick()
+            }}
+          >
+            Explore
+          </motion.button>
+        </div>
+      </motion.div>
+    )
+  }
+
+  // Group products for banner display (3 per banner)
+  const bannerGroups: CandlesCollectionItem[][] = []
+  for (let i = 0; i < candlesCollection.length; i += 3) {
+    bannerGroups.push(candlesCollection.slice(i, i + 3))
+  }
+
 
   return (
     <div ref={containerRef} className="bg-[#e2e2d8]">
@@ -707,11 +839,14 @@ const Candles = () => {
                 margin-left: 1rem !important;
                 margin-right: 1rem !important;
               }
+              .mobile-candles-carousel-item:first-child {
+                margin-left: 14px !important;
+              }
               .mobile-candles-carousel-content {
                 user-select: none !important;
                 -webkit-user-select: none !important;
                 padding-left: 0 !important;
-                padding-right: 0 !important;
+                padding-right: 1rem !important;
               }
               .mobile-candles-carousel-content > div {
                 margin-left: 0 !important;
@@ -721,9 +856,11 @@ const Candles = () => {
                 cursor: grab !important;
                 -webkit-overflow-scrolling: touch !important;
                 scroll-behavior: smooth !important;
+                scroll-snap-type: x mandatory !important;
                 scrollbar-width: none !important;
                 -ms-overflow-style: none !important;
                 overflow-x: auto !important;
+                scroll-padding-left: 0 !important;
               }
               .mobile-candles-carousel-wrapper [data-slot="carousel-content"]::-webkit-scrollbar {
                 display: none !important;
@@ -738,12 +875,13 @@ const Candles = () => {
               <Carousel
                 setApi={setMobileCarouselApi}
                 opts={{
-                  align: "center",
+                  align: "start",
                   loop: false,
                   dragFree: true,
                   containScroll: "trimSnaps",
                   watchDrag: true,
                   duration: 40,
+                  startIndex: 0,
                 }}
                 className="w-full"
               >
@@ -767,7 +905,7 @@ const Candles = () => {
             </div>
             
             {/* Mobile Slider Bar */}
-            <div className="flex justify-center items-center w-full pt-3" style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}>
+            <div className="flex justify-center items-center w-full" style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}>
               <div 
                 ref={mobileSliderRef}
                 className="relative w-1/2 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
@@ -806,13 +944,13 @@ const Candles = () => {
         viewport={{ once: true, amount: 0.1 }}
         className="hidden md:block w-full md:pt-12 lg:pt-16"
       >
-         <div className="pl-[5rem] pb-4">
+         <div className="pb-4">
          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: smoothEase }}
             viewport={{ once: true, amount: 0.3 }}
-            className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter"
+            className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter md:pl-[5rem]"
           >
             A story in every scent.
           </motion.h2>
@@ -821,34 +959,55 @@ const Candles = () => {
         <style dangerouslySetInnerHTML={{
           __html: `
             .candles-carousel-item {
-              width: calc((100vw - 8rem - 4rem) / 3) !important;
-              max-width: 420px !important;
-              flex-basis: calc((100vw - 8rem - 4rem) / 3) !important;
+              width: 364px !important;
+              min-width: 364px !important;
+              flex-basis: 364px !important;
               flex-grow: 0 !important;
               flex-shrink: 0 !important;
               box-sizing: border-box !important;
               padding-left: 0 !important;
               padding-right: 0 !important;
-              margin-right: 2rem !important;
+              margin-left: 1rem !important;
+              margin-right: 1rem !important;
             }
-            .candles-carousel-item:last-child {
-              margin-right: 0 !important;
-            }
-            @media (min-width: 1440px) {
-              .candles-carousel-item {
-                width: 420px !important;
-                flex-basis: 420px !important;
-              }
+            .candles-carousel-item:first-child {
+              margin-left: 0 !important;
             }
             .candles-carousel-content {
               user-select: none !important;
               -webkit-user-select: none !important;
-              padding-left: 0 !important;
-              padding-right: 0 !important;
+              padding-left: 2rem !important;
+              padding-right: 2rem !important;
             }
             .candles-carousel-content > div {
               margin-left: 0 !important;
               gap: 0 !important;
+            }
+            @media (min-width: 990px) {
+              .candles-carousel-item {
+                width: 364px !important;
+                min-width: 364px !important;
+                flex-basis: 364px !important;
+                margin-left: 1rem !important;
+                margin-right: 1rem !important;
+              }
+              .candles-carousel-content {
+                padding-left: 2rem !important;
+                padding-right: 2rem !important;
+              }
+            }
+            @media (min-width: 1200px) {
+              .candles-carousel-item {
+                width: 364px !important;
+                min-width: 364px !important;
+                flex-basis: 364px !important;
+                margin-left: 1rem !important;
+                margin-right: 1rem !important;
+              }
+              .candles-carousel-content {
+                padding-left: 2rem !important;
+                padding-right: 2rem !important;
+              }
             }
             .candles-carousel-wrapper [data-slot="carousel-content"] {
               cursor: grab !important;
@@ -871,22 +1030,23 @@ const Candles = () => {
             }
           `
         }} />
-        <div className="pt-10 pb-0 sm:py-10 lg:py-10">
-          <div className="pl-[5rem] pr-[4rem] candles-carousel-wrapper">
-            <Carousel
-              setApi={setCarouselApi}
-              opts={{
-                align: "start",
-                loop: false,
-                dragFree: true,
-                containScroll: "trimSnaps",
-                watchDrag: true,
-                duration: 50,
-                slidesToScroll: 1,
-              }}
-              className="w-full"
-            >
-              <CarouselContent className="candles-carousel-content -ml-0">
+        <div className="pt-10 pb-0 sm:py-8 lg:py-8">
+          <div className="mx-auto px-4 sm:px-6 lg:px-12">
+            <div className="candles-carousel-wrapper">
+              <Carousel
+                setApi={setCarouselApi}
+                opts={{
+                  align: "start",
+                  loop: false,
+                  dragFree: true,
+                  containScroll: "trimSnaps",
+                  watchDrag: true,
+                  duration: 50,
+                  slidesToScroll: 1,
+                }}
+                className="w-full"
+              >
+                <CarouselContent className="candles-carousel-content -ml-0">
                 {products.map(({ src, label, hoverSrc, url }, i) => {
                   const productId = url || label.toLowerCase().replace(/\s+/g, '-')
                   return (
@@ -905,12 +1065,13 @@ const Candles = () => {
                     </CarouselItem>
                   )
                 })}
-              </CarouselContent>
-            </Carousel>
+                </CarouselContent>
+              </Carousel>
+            </div>
           </div>
           
           {/* Progress Scroll Bar - Slider Style */}
-          <div className="flex justify-center items-center w-full pt-3" style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}>
+          <div className="flex justify-center items-center w-full" style={{ paddingTop: "3.5rem", paddingBottom: "20px" }}>
             <div 
               ref={sliderRef}
               className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
@@ -939,6 +1100,180 @@ const Candles = () => {
         </div>
       </motion.div>
       )}
+
+      {/* Banner Carousel Section - Shows 3 products side by side */}
+      {!isLoadingCollection && candlesCollection.length > 0 && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: smoothEase }}
+        viewport={{ once: true, amount: 0.1 }}
+        className="w-full py-8 md:py-12 lg:py-16 overflow-hidden"
+      >
+        <div className="relative">
+          {/* Banner Carousel */}
+          <style dangerouslySetInnerHTML={{
+            __html: `
+              .banner-carousel-item {
+                width: 100% !important;
+                min-width: 100% !important;
+                flex-basis: 100% !important;
+                flex-grow: 0 !important;
+                flex-shrink: 0 !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+              }
+              .banner-carousel-content {
+                user-select: none !important;
+                -webkit-user-select: none !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+              }
+              .banner-carousel-wrapper [data-slot="carousel-content"] {
+                cursor: grab !important;
+                scroll-behavior: smooth !important;
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
+                overflow-x: auto !important;
+                scroll-snap-type: x mandatory !important;
+              }
+              .banner-carousel-wrapper [data-slot="carousel-content"]::-webkit-scrollbar {
+                display: none !important;
+              }
+              .banner-carousel-wrapper [data-slot="carousel-content"]:active {
+                cursor: grabbing !important;
+              }
+              @media (max-width: 767px) {
+                .banner-carousel-item {
+                  width: calc(100vw - 20px) !important;
+                  min-width: calc(100vw - 20px) !important;
+                  flex-basis: calc(100vw - 32px) !important;
+                  padding-left: 0px !important;
+                }
+                .banner-carousel-content {
+                  padding-left: 0 !important;
+                  padding-right: 16px !important;
+                }
+                .banner-carousel-content > div {
+                  margin-left: 0 !important;
+                  gap: 0 !important;
+                }
+              }
+            `
+          }} />
+          
+          <div className="banner-carousel-wrapper">
+            <Carousel
+              setApi={setBannerCarouselApi}
+              opts={{
+                align: "start",
+                loop: false,
+                dragFree: true,
+                containScroll: "trimSnaps",
+                watchDrag: true,
+                duration: 50,
+                slidesToScroll: 1,
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="banner-carousel-content">
+                {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
+                {isMobile ? (
+                  // Mobile: One product per slide
+                  candlesCollection.map((item, index) => (
+                    <CarouselItem key={index} className="banner-carousel-item">
+                      <BannerProductCard
+                        item={item}
+                        index={index}
+                      />
+                    </CarouselItem>
+                  ))
+                ) : (
+                  // Desktop: Groups of 3 products
+                  bannerGroups.map((group, groupIndex) => (
+                    <CarouselItem key={groupIndex} className="banner-carousel-item">
+                      <div className="flex flex-row gap-0 w-full h-auto">
+                        {group.map((item, itemIndex) => {
+                          const globalIndex = groupIndex * 3 + itemIndex
+                          return (
+                            <div key={globalIndex} className="flex-1 w-1/3">
+                              <BannerProductCard
+                                item={item}
+                                index={globalIndex}
+                              />
+                            </div>
+                          )
+                        })}
+
+                        
+                        {/* Fill remaining slots if group has less than 3 items */}
+                        {group.length < 3 && Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                          <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                        ))}
+                      </div>
+                    </CarouselItem>
+                  ))
+                )}
+              </CarouselContent>
+            </Carousel>
+            <div className="flex justify-center items-center w-full" style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}>
+              <div 
+                ref={mobileSliderRef}
+                className="relative w-1/2 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
+                onClick={handleMobileSliderClick}
+              >
+                <div
+                  className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
+                  style={{
+                    left: `calc(${Math.max(0, Math.min(100, mobileSliderPercentage))}% - 16px)`,
+                    transform: 'translateY(-50%)'
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleMobileMouseDown(e)
+                  }}
+                  onTouchStart={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleMobileTouchStart(e)
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Arrow - Right (White Circular Button) - Always visible */}
+          {bannerCarouselApi && (
+            (isMobile ? bannerCurrent < candlesCollection.length - 1 : bannerCurrent < bannerGroups.length - 1) && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                onClick={() => bannerCarouselApi.scrollNext()}
+                className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full bg-white hover:bg-white/95 border border-black/10 flex items-center justify-center transition-colors duration-300 shadow-md"
+                aria-label="Next"
+              >
+                <ChevronRight className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-black" strokeWidth={1.5} />
+              </motion.button>
+            )
+          )}
+
+          {/* Navigation Arrow - Left (White Circular Button) - Always visible */}
+          {bannerCarouselApi && bannerCurrent > 0 && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={() => bannerCarouselApi.scrollPrev()}
+              className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full bg-white hover:bg-white/95 border border-black/10 flex items-center justify-center transition-colors duration-300 shadow-md"
+              aria-label="Previous"
+            >
+              <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-black" strokeWidth={1.5} />
+            </motion.button>
+          )}
+        </div>
+      </motion.div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}

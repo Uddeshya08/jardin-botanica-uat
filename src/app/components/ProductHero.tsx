@@ -2,7 +2,7 @@
 
 import React, { useTransition, useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
-import { ChevronLeft, ChevronRight, Star, Heart, Share2, Plus, Minus, Home, ChevronRight as BreadcrumbChevron } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star, Heart, Share2, Plus, Minus, Home, ChevronRight as BreadcrumbChevron, X } from 'lucide-react';
 
 import { IoIosArrowDown } from "react-icons/io";
 import { InfoPanel } from "./InfoPanel"
@@ -127,6 +127,21 @@ export function ProductHero({
   
   // Dynamic panel states - for future extensibility
   const [openPanelId, setOpenPanelId] = useState<string | null>(null)
+  
+  // Accordion states for mobile
+  const [openAccordionId, setOpenAccordionId] = useState<string | null>(null)
+  
+  // Track if we're on mobile (below lg breakpoint - 1024px)
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const router = useRouter()
   const [quantity, setQuantity] = useState(1)
@@ -633,7 +648,14 @@ export function ProductHero({
             className="space-y-1"
           >
             <button
-              onClick={() => setIsRitualPanelOpen(true)}
+              onClick={() => {
+                // On mobile (below lg), use accordion; on desktop, use drawer
+                if (isMobile) {
+                  setOpenAccordionId(openAccordionId === 'ritual' ? null : 'ritual')
+                } else {
+                  setIsRitualPanelOpen(true)
+                }
+              }}
               className="flex items-center justify-between w-full py-1 text-left group"
             >
               <span
@@ -643,15 +665,35 @@ export function ProductHero({
                 Ritual in Practice
               </span>
               <motion.div
+                animate={{ rotate: openAccordionId === 'ritual' ? 45 : 0 }}
                 whileHover={{ rotate: 90 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                <Plus
-                  className="w-4 h-4 transition-colors duration-300"
-                  style={{ color: "#a28b6f" }}
-                />
+                {openAccordionId === 'ritual' ? (
+                  <X className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
+                ) : (
+                  <Plus className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
+                )}
               </motion.div>
             </button>
+            {/* Accordion Content - Mobile Only */}
+            <AnimatePresence>
+              {openAccordionId === 'ritual' && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden lg:hidden"
+                >
+                  <div className="pt-3 pb-2">
+                    <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
+                      {ritualInPractice}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>)}
 
           {/* Separator line before Actives & Key Botanicals */}
@@ -673,7 +715,14 @@ export function ProductHero({
               className="space-y-1"
             >
               <button
-                onClick={() => setIsActivesPanelOpen(true)}
+                onClick={() => {
+                  // On mobile (below lg), use accordion; on desktop, use drawer
+                  if (isMobile) {
+                    setOpenAccordionId(openAccordionId === 'actives' ? null : 'actives')
+                  } else {
+                    setIsActivesPanelOpen(true)
+                  }
+                }}
                 className="flex items-center justify-between w-full py-1 text-left group"
               >
                 <span
@@ -683,15 +732,42 @@ export function ProductHero({
                   Actives & Key Botanicals
                 </span>
                 <motion.div
+                  animate={{ rotate: openAccordionId === 'actives' ? 45 : 0 }}
                   whileHover={{ rotate: 90 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
-                  <Plus
-                    className="w-4 h-4 transition-colors duration-300"
-                    style={{ color: "#a28b6f" }}
-                  />
+                  {openAccordionId === 'actives' ? (
+                    <X className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
+                  ) : (
+                    <Plus className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
+                  )}
                 </motion.div>
               </button>
+              {/* Accordion Content - Mobile Only */}
+              <AnimatePresence>
+                {openAccordionId === 'actives' && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden lg:hidden"
+                  >
+                    <div className="pt-3 pb-2 space-y-4">
+                      {actives.map((active, index) => (
+                        <div key={index} className="group">
+                          <span className="font-din-arabic text-black inline text-sm">
+                            {active.name}{" "}
+                          </span>
+                          <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
+                            {active.description}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
 
@@ -712,7 +788,14 @@ export function ProductHero({
             className="space-y-1"
           >
             <button
-              onClick={() => setIsFragranceNotesOpen(true)}
+              onClick={() => {
+                // On mobile (below lg), use accordion; on desktop, use drawer
+                if (isMobile) {
+                  setOpenAccordionId(openAccordionId === 'fragrance' ? null : 'fragrance')
+                } else {
+                  setIsFragranceNotesOpen(true)
+                }
+              }}
               className="flex items-center justify-between w-full py-1 text-left group"
             >
               <span
@@ -722,15 +805,42 @@ export function ProductHero({
                 Fragrance Profile
               </span>
               <motion.div
+                animate={{ rotate: openAccordionId === 'fragrance' ? 45 : 0 }}
                 whileHover={{ rotate: 90 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                <Plus
-                  className="w-4 h-4 transition-colors duration-300"
-                  style={{ color: "#a28b6f" }}
-                />
+                {openAccordionId === 'fragrance' ? (
+                  <X className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
+                ) : (
+                  <Plus className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
+                )}
               </motion.div>
             </button>
+            {/* Accordion Content - Mobile Only */}
+            <AnimatePresence>
+              {openAccordionId === 'fragrance' && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden lg:hidden"
+                >
+                  <div className="pt-3 pb-2 space-y-4">
+                    {fragranceNotes.map((note, index) => (
+                      <div key={index} className="group">
+                        <span className="font-din-arabic text-black inline text-sm">
+                          {note.type}{" "}
+                        </span>
+                        <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
+                          {note.description}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>)}
 
           {/* Separator line before Full Ingredients */}
@@ -750,7 +860,14 @@ export function ProductHero({
             className="space-y-1"
           >
             <button
-              onClick={() => setIsIngredientsPanelOpen(true)}
+              onClick={() => {
+                // On mobile (below lg), use accordion; on desktop, use drawer
+                if (isMobile) {
+                  setOpenAccordionId(openAccordionId === 'ingredients' ? null : 'ingredients')
+                } else {
+                  setIsIngredientsPanelOpen(true)
+                }
+              }}
               className="flex items-center justify-between w-full py-1 text-left group"
             >
               <span
@@ -760,15 +877,35 @@ export function ProductHero({
                 Full Ingredients
               </span>
               <motion.div
+                animate={{ rotate: openAccordionId === 'ingredients' ? 45 : 0 }}
                 whileHover={{ rotate: 90 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                <Plus
-                  className="w-4 h-4 transition-colors duration-300"
-                  style={{ color: "#a28b6f" }}
-                />
+                {openAccordionId === 'ingredients' ? (
+                  <X className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
+                ) : (
+                  <Plus className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
+                )}
               </motion.div>
             </button>
+            {/* Accordion Content - Mobile Only */}
+            <AnimatePresence>
+              {openAccordionId === 'ingredients' && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden lg:hidden"
+                >
+                  <div className="pt-3 pb-2">
+                    <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
+                      {fullIngredients}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>)}
 
           {/* Dynamic Panel Buttons - render if using dynamic panels (new approach) */}
@@ -794,7 +931,14 @@ export function ProductHero({
                   className="space-y-1"
                 >
                   <button
-                    onClick={() => setOpenPanelId(panel.id)}
+                    onClick={() => {
+                      // On mobile (below lg), use accordion; on desktop, use drawer
+                      if (isMobile) {
+                        setOpenAccordionId(openAccordionId === panel.id ? null : panel.id)
+                      } else {
+                        setOpenPanelId(panel.id)
+                      }
+                    }}
                     className="flex items-center justify-between w-full py-1 text-left group"
                   >
                     <span
@@ -804,15 +948,84 @@ export function ProductHero({
                       {panel.title}
                     </span>
                     <motion.div
+                      animate={{ rotate: openAccordionId === panel.id ? 45 : 0 }}
                       whileHover={{ rotate: 90 }}
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
-                      <Plus
-                        className="w-4 h-4 transition-colors duration-300"
-                        style={{ color: "#a28b6f" }}
-                      />
+                      {openAccordionId === panel.id ? (
+                        <X className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
+                      ) : (
+                        <Plus className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
+                      )}
                     </motion.div>
                   </button>
+                  {/* Accordion Content - Mobile Only */}
+                  <AnimatePresence>
+                    {openAccordionId === panel.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden lg:hidden"
+                      >
+                        <div className="pt-3 pb-2">
+                          {(() => {
+                            switch (panel.type) {
+                              case "text":
+                                return (
+                                  <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
+                                    {typeof panel.content === "string" ? panel.content : ""}
+                                  </p>
+                                )
+                              case "actives":
+                                return (
+                                  <div className="space-y-4">
+                                    {Array.isArray(panel.content) && panel.content.map((active: any, idx: number) => (
+                                      <div key={idx} className="group">
+                                        <span className="font-din-arabic text-black inline text-sm">
+                                          {active.name}{" "}
+                                        </span>
+                                        <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
+                                          {active.description}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )
+                              case "fragrance":
+                                return (
+                                  <div className="space-y-4">
+                                    {Array.isArray(panel.content) && panel.content.map((note: any, idx: number) => (
+                                      <div key={idx} className="group">
+                                        <span className="font-din-arabic text-black inline text-sm">
+                                          {note.type}{" "}
+                                        </span>
+                                        <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
+                                          {note.description}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )
+                              case "ingredients":
+                                return (
+                                  <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
+                                    {typeof panel.content === "string" ? panel.content : ""}
+                                  </p>
+                                )
+                              default:
+                                return (
+                                  <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
+                                    {typeof panel.content === "string" ? panel.content : ""}
+                                  </p>
+                                )
+                            }
+                          })()}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               </React.Fragment>
             )
