@@ -18,6 +18,7 @@ const SKIN_CARE_IMAGE =
 interface Product {
   id: string
   name: string
+  slug: string
   category: "lotion" | "wash"
   price: number
   price250ml?: number
@@ -48,6 +49,7 @@ const products: Product[] = [
   {
     id: "1",
     name: "Soft Orris Hand Lotion",
+    slug: "soft-orris",
     category: "lotion",
     price: 2850,
     price250ml: 1850,
@@ -65,6 +67,7 @@ const products: Product[] = [
   {
     id: "2",
     name: "Black Tea Hand Wash",
+    slug: "black-tea-hand-wash",
     category: "wash",
     price: 2650,
     price250ml: 1750,
@@ -349,7 +352,7 @@ function ProductCard({
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const [selectedSize, setSelectedSize] = useState(product.size)
   const isHovered = hoveredProduct === product.id
-  const productSlug = getProductSlug(product.name)
+  const productSlug = getProductSlug(product.slug)
   const itemId = `${product.id}-${selectedSize}`
   const isRecentlyAdded = recentlyAddedProducts.has(itemId)
 
