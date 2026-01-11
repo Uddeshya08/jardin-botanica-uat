@@ -8,6 +8,8 @@ export interface CartItem {
   price: number
   quantity: number
   image?: string
+  product_id?: string
+  variant_id?: string
 }
 
 interface CartItemsContextValue {
@@ -45,7 +47,7 @@ export function CartItemsProvider({
         fullItem: item
       })
     }
-    
+
     // Update cartItems array for navigation
     if (item && item.quantity > 0) {
       setCartItems((prevItems) => {
@@ -55,30 +57,30 @@ export function CartItemsProvider({
           const cartItemVariantId = (cartItem as any).variant_id
           const itemIsRitual = (item as any).isRitualProduct
           const cartItemIsRitual = (cartItem as any).isRitualProduct
-          
+
           // Match by exact ID
           if (cartItem.id === item.id) return true
-          
+
           // Match by variant_id if present (for main products)
           if (!itemIsRitual && !cartItemIsRitual && itemVariantId && cartItemVariantId) {
             if (itemVariantId === cartItemVariantId || cartItem.id === itemVariantId || item.id === cartItemVariantId) {
               return true
             }
           }
-          
+
           // Match by name for ritual products
           if (itemIsRitual && cartItemIsRitual && cartItem.name === item.name) {
             return true
           }
-          
+
           // Match by name for main products (fallback)
           if (!itemIsRitual && !cartItemIsRitual && cartItem.name === item.name && !itemVariantId && !cartItemVariantId) {
             return true
           }
-          
+
           return false
         })
-        
+
         if (existingIndex >= 0) {
           // Update existing item
           const updatedItems = [...prevItems]
@@ -124,7 +126,7 @@ export function CartItemsProvider({
 
   console.log('🔍 Current cart items:', cartItems)
   console.log('🔍 Cart Items Context Value:', value)
-  
+
   return (
     <CartItemsContext.Provider value={value}>
       {children}
@@ -144,4 +146,3 @@ export function useCartItems() {
 export function useCartItemsSafe() {
   return useContext(CartItemsContext)
 }
-
