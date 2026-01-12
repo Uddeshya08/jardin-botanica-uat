@@ -3,7 +3,15 @@ import React, { useEffect, useState, useCallback } from "react"
 
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
-   import { ProductContent, FeaturedSection, TestimonialsSection, FeaturedRitualTwoSection, AfterlifeSection, ProductInfoPanels, FromTheLabSection } from "../../../types/contentful"
+import {
+  ProductContent,
+  FeaturedSection,
+  TestimonialsSection,
+  FeaturedRitualTwoSection,
+  AfterlifeSection,
+  ProductInfoPanels,
+  FromTheLabSection,
+} from "../../../types/contentful"
 import { Navigation } from "app/components/Navigation"
 import { ProductHero } from "app/components/ProductHero"
 import { StickyCartBar } from "app/components/StickyCartBar"
@@ -62,7 +70,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   const [isScrolled, setIsScrolled] = useState(false)
   const [showStickyCart, setShowStickyCart] = useState(false)
   const [heroCartItem, setHeroCartItem] = useState<CartItem | null>(null)
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
+    null
+  )
 
   // Wrapper function to update both heroCartItem and context
   const handleCartUpdateWrapper = (item: CartItem | null) => {
@@ -70,7 +80,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     // Update cart context (this will also update Navigation automatically)
     handleCartUpdate(item)
   }
-
 
   const handleHeroQuantityUpdate = (quantity: number) => {
     if (heroCartItem) {
@@ -113,7 +122,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     return () => window.removeEventListener("scroll", handleScroll)
   }, [heroCartItem])
 
-
   return (
     <>
       {/* my new code tamplate */}
@@ -127,13 +135,11 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         />
         <div className="h-4"></div>
         <ProductHero
-          product={product as any}
-          countryCode={'in'} // e.g. "in"
+          product={product}
+          selectedVariantId={selectedVariantId}
+          onUpdateHeroQuantity={handleHeroQuantityUpdate}
           onCartUpdate={handleCartUpdateWrapper}
-          onVariantChange={useCallback((variantId: string | null) => {
-            setSelectedVariantId(variantId)
-          }, [])}
-          productInfoPanels={productInfoPanels}
+          ritualProduct={ritualProductProp}
         />
 
         <StickyCartBar
@@ -146,14 +152,25 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         />
 
         <Afterlife afterlifeContent={afterlifeContent} />
-        <PeopleAlsoBought product={product as any} fromTheLabContent={fromTheLabContent} />
-        <FeaturedRitualTwo 
-          key={`featured-ritual-two-${featuredRitualTwoContent?.productHandle || featuredRitualTwoContent?.sectionKey || 'default'}`} 
-          featuredRitualTwoContent={featuredRitualTwoContent} 
+        <PeopleAlsoBought
+          product={product as any}
+          fromTheLabContent={fromTheLabContent}
         />
-        <CustomerTestimonials 
-          key={`customer-testimonials-${testimonialsContent?.productHandle || testimonialsContent?.sectionKey || 'default'}`} 
-          testimonialsContent={testimonialsContent} 
+        <FeaturedRitualTwo
+          key={`featured-ritual-two-${
+            featuredRitualTwoContent?.productHandle ||
+            featuredRitualTwoContent?.sectionKey ||
+            "default"
+          }`}
+          featuredRitualTwoContent={featuredRitualTwoContent}
+        />
+        <CustomerTestimonials
+          key={`customer-testimonials-${
+            testimonialsContent?.productHandle ||
+            testimonialsContent?.sectionKey ||
+            "default"
+          }`}
+          testimonialsContent={testimonialsContent}
         />
         <Featured featuredContent={featuredContent} />
       </div>

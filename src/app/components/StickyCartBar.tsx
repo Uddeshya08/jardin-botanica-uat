@@ -88,6 +88,7 @@ export function StickyCartBar({
   const [showGoToCart, setShowGoToCart] = useState(false)
   const [showRitualSuggestion, setShowRitualSuggestion] = useState(false)
   const [ritualQuantity, setRitualQuantity] = useState(1)
+  const [ritualJustCompleted, setRitualJustCompleted] = useState(false)
 
   // read /[countryCode]/... from route, fallback to "in"
   const params = useParams() as any
@@ -156,6 +157,9 @@ export function StickyCartBar({
     })
 
     // Update ritual completion state based on cart contents
+    // Don't override states if ritual was just completed (to allow cart sync)
+    if (ritualJustCompleted) return
+
     if (ritualProduct && mainProductInCart && ritualProductInCart) {
       // Both products are in cart - ritual is completed
       console.log("✅ Ritual completed - both products in cart")
@@ -338,6 +342,7 @@ export function StickyCartBar({
           }, 1000) // Show ritual suggestion after 1 second
         }
       } catch (e: any) {
+        console.error(e)
         // rollback visual success
         setIsAddedToCart(false)
         const errorMessage = e?.message || "Could not add to cart"
@@ -481,8 +486,10 @@ export function StickyCartBar({
         // Show "Go to Cart" button after successful addition
         setShowGoToCart(true)
         setShowRitualSuggestion(false) // Hide ritual suggestion
+        setRitualJustCompleted(true)
         setJustUnlocked(true)
         setTimeout(() => setJustUnlocked(false), 3000)
+        setTimeout(() => setRitualJustCompleted(false), 5000) // Reset after 5 seconds to allow cart sync
       } catch (e: any) {
         // rollback visual success
         setRitualCompleted(false)
@@ -535,136 +542,167 @@ export function StickyCartBar({
           <div className="px-3 md:px-6 py-3 md:py-3 relative">
             <div className="flex items-center justify-between">
               {/* Product Info */}
-              <div className="flex items-center space-x-2 md:space-x-3 flex-shrink min-w-0">
-                <div className="w-8 h-8 md:w-10 md:h-10 bg-black/10 backdrop-blur-sm rounded-lg md:rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {ritualProduct && showRitualSuggestion && !showGoToCart ? (
-                    ritualProduct.image ? (
+              {!showGoToCart ? (
+                <div className="flex items-center space-x-2 md:space-x-3 flex-shrink min-w-0">
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-black/10 backdrop-blur-sm rounded-lg md:rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {ritualProduct && showRitualSuggestion && !showGoToCart ? (
+                      ritualProduct.image ? (
+                        <img
+                          src={ritualProduct.image}
+                          alt={ritualProduct.name}
+                          className="w-8 h-8 md:w-10 md:h-10 object-cover rounded-lg md:rounded-xl"
+                        />
+                      ) : (
+                        <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-black/70" />
+                      )
+                    ) : image ? (
                       <img
-                        src={ritualProduct.image}
-                        alt={ritualProduct.name}
+                        src={image}
+                        alt={name}
                         className="w-8 h-8 md:w-10 md:h-10 object-cover rounded-lg md:rounded-xl"
                       />
                     ) : (
                       <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-black/70" />
-                    )
-                  ) : image ? (
-                    <img
-                      src={image}
-                      alt={name}
-                      className="w-8 h-8 md:w-10 md:h-10 object-cover rounded-lg md:rounded-xl"
-                    />
-                  ) : (
-                    <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-black/70" />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-american-typewriter text-black/90 text-xs md:text-sm truncate">
-                    {ritualProduct && showRitualSuggestion && !showGoToCart
-                      ? ritualProduct.name
-                      : `${name}${variant?.title ? ` • ${variant.title}` : ""}`}
-                  </h3>
-                  <div className="flex items-center space-x-1 overflow-hidden">
-                    <p className="font-din-arabic-bold text-xs md:text-sm text-black/70 whitespace-nowrap">
-                      {ritualProduct && showRitualSuggestion && !showGoToCart
-                        ? formatMinor(
-                            ritualProduct.price,
-                            ritualProduct.currency
-                          )
-                        : formatMinor(minor, currency)}
-                    </p>
-                    {qualifiesShipping && (
-                      <motion.p
-                        key="qualifies"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="font-din-arabic text-[10px] md:text-xs truncate"
-                        style={{
-                          color: showGoToCart ? "#f97316" : "#545d4a",
-                        }}
-                      >
-                        {showRitualSuggestion && !ritualCompleted
-                          ? "Complete Your Ritual"
-                          : showGoToCart
-                          ? "Order Qualifies For Complimentary Shipping"
-                          : "Order Qualifies For Complimentary Shipping"}
-                      </motion.p>
                     )}
                   </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-american-typewriter text-black/90 text-xs md:text-sm truncate">
+                      {ritualProduct && showRitualSuggestion && !showGoToCart
+                        ? ritualProduct.name
+                        : `${name}${
+                            variant?.title ? ` • ${variant.title}` : ""
+                          }`}
+                    </h3>
+                    <div className="flex items-center space-x-1 overflow-hidden">
+                      <p className="font-din-arabic-bold text-xs md:text-sm text-black/70 whitespace-nowrap">
+                        {ritualProduct && showRitualSuggestion && !showGoToCart
+                          ? formatMinor(
+                              ritualProduct.price,
+                              ritualProduct.currency
+                            )
+                          : formatMinor(minor, currency)}
+                      </p>
+                      {qualifiesShipping && (
+                        <motion.p
+                          key="qualifies"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="font-din-arabic text-[10px] md:text-xs truncate"
+                          style={{
+                            color: showGoToCart ? "#f97316" : "#545d4a",
+                          }}
+                        >
+                          {showRitualSuggestion && !ritualCompleted
+                            ? "Complete Your Ritual"
+                            : showGoToCart
+                            ? "Order Qualifies For Complimentary Shipping"
+                            : "Order Qualifies For Complimentary Shipping"}
+                        </motion.p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                  <div className="flex items-center space-x-2 text-[#545d4a]">
+                    <div className="bg-[#545d4a]/10 p-1 rounded-full">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                    </div>
+                    <span className="font-din-arabic text-sm text-black/80">
+                      Ritual Completed & Added to Cart
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Controls + Add to Cart */}
               <div className="flex items-center space-x-1.5 md:space-x-3 flex-shrink-0">
                 {/* Qty */}
-                <div className="flex items-center space-x-0.5 md:space-x-2">
-                  <span className="font-din-arabic text-xs text-black/60 uppercase hidden md:block">
-                    QTY
-                  </span>
-                  <div className="flex items-center bg-black/10 backdrop-blur-sm rounded-lg">
-                    <motion.button
-                      type="button"
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        if (
-                          ritualProduct &&
-                          showRitualSuggestion &&
-                          !showGoToCart
-                        ) {
-                          handleRitualQuantityChange(-1)
-                        } else {
-                          handleQuantityChange(-1)
-                        }
-                      }}
-                      className="p-1 md:p-1.5 hover:bg-black/10 transition-colors rounded-l-lg"
-                      disabled={
-                        ritualProduct && showRitualSuggestion && !showGoToCart
-                          ? ritualQuantity <= 1
-                          : quantity <= 1
-                      }
-                    >
-                      <Minus className="w-3 h-3 text-black/70" />
-                    </motion.button>
-                    <span className="font-din-arabic px-1.5 md:px-3 py-1 md:py-1.5 text-black text-xs md:text-sm min-w-[25px] md:min-w-[35px] text-center">
-                      {ritualProduct && showRitualSuggestion && !showGoToCart
-                        ? ritualQuantity
-                        : quantity}
+                {!showGoToCart && (
+                  <div className="flex items-center space-x-0.5 md:space-x-2">
+                    <span className="font-din-arabic text-xs text-black/60 uppercase hidden md:block">
+                      QTY
                     </span>
-                    <motion.button
-                      type="button"
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        if (
-                          ritualProduct &&
-                          showRitualSuggestion &&
-                          !showGoToCart
-                        ) {
-                          handleRitualQuantityChange(1)
-                        } else {
-                          handleQuantityChange(1)
+                    <div className="flex items-center bg-black/10 backdrop-blur-sm rounded-lg">
+                      <motion.button
+                        type="button"
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          if (
+                            ritualProduct &&
+                            showRitualSuggestion &&
+                            !showGoToCart
+                          ) {
+                            handleRitualQuantityChange(-1)
+                          } else {
+                            handleQuantityChange(-1)
+                          }
+                        }}
+                        className="p-1 md:p-1.5 hover:bg-black/10 transition-colors rounded-l-lg"
+                        disabled={
+                          ritualProduct && showRitualSuggestion && !showGoToCart
+                            ? ritualQuantity <= 1
+                            : quantity <= 1
                         }
-                      }}
-                      className="p-1 md:p-1.5 hover:bg-black/10 transition-colors rounded-r-lg"
-                      disabled={
-                        ritualProduct && showRitualSuggestion && !showGoToCart
-                          ? ritualQuantity >= 10
-                          : quantity >= 10
-                      }
-                    >
-                      <Plus className="w-3 h-3 text-black/70" />
-                    </motion.button>
+                      >
+                        <Minus className="w-3 h-3 text-black/70" />
+                      </motion.button>
+                      <span className="font-din-arabic px-1.5 md:px-3 py-1 md:py-1.5 text-black text-xs md:text-sm min-w-[25px] md:min-w-[35px] text-center">
+                        {ritualProduct && showRitualSuggestion && !showGoToCart
+                          ? ritualQuantity
+                          : quantity}
+                      </span>
+                      <motion.button
+                        type="button"
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          if (
+                            ritualProduct &&
+                            showRitualSuggestion &&
+                            !showGoToCart
+                          ) {
+                            handleRitualQuantityChange(1)
+                          } else {
+                            handleQuantityChange(1)
+                          }
+                        }}
+                        className="p-1 md:p-1.5 hover:bg-black/10 transition-colors rounded-r-lg"
+                        disabled={
+                          ritualProduct && showRitualSuggestion && !showGoToCart
+                            ? ritualQuantity >= 10
+                            : quantity >= 10
+                        }
+                      >
+                        <Plus className="w-3 h-3 text-black/70" />
+                      </motion.button>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Total */}
-                <div className="hidden lg:block text-center">
-                  <p className="font-din-arabic text-xs text-black/60 uppercase whitespace-nowrap">
-                    TOTAL
-                  </p>
-                  <p className="font-din-arabic-bold text-black/90 whitespace-nowrap">
-                    {formatMinor(currentTotalMinor, currency)}
-                  </p>
-                </div>
+                {!showGoToCart && (
+                  <div className="hidden lg:block text-center">
+                    <p className="font-din-arabic text-xs text-black/60 uppercase whitespace-nowrap">
+                      TOTAL
+                    </p>
+                    <p className="font-din-arabic-bold text-black/90 whitespace-nowrap">
+                      {formatMinor(currentTotalMinor, currency)}
+                    </p>
+                  </div>
+                )}
 
                 {/* Action buttons: Add to Cart, Complete Ritual, or Go to Cart */}
                 {showGoToCart ? (
