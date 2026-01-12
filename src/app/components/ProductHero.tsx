@@ -2,9 +2,20 @@
 
 import React, { useTransition, useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
-import { ChevronLeft, ChevronRight, Star, Heart, Share2, Plus, Minus, Home, ChevronRight as BreadcrumbChevron, X } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Star,
+  Heart,
+  Share2,
+  Plus,
+  Minus,
+  Home,
+  ChevronRight as BreadcrumbChevron,
+  X,
+} from "lucide-react"
 
-import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowDown } from "react-icons/io"
 import { InfoPanel } from "./InfoPanel"
 import { addToCartAction } from "@lib/data/cart-actions"
 import { useRouter } from "next/navigation"
@@ -14,6 +25,7 @@ import { Label } from "./ui/label"
 import { useLedger, LedgerItem } from "app/context/ledger-context"
 import { toast } from "sonner"
 import { ProductInfoPanels, DynamicPanel } from "../../types/contentful"
+import { HttpTypes } from "@medusajs/types"
 
 import {
   Breadcrumb,
@@ -23,39 +35,20 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "./ui/breadcrumb";
+} from "./ui/breadcrumb"
 
 interface CartItem {
   id: string
   name: string
-  price: number // minor units
+  price: number
   quantity: number
-  image?: string
+  image: string
   isRitualProduct?: boolean
+  variant_id?: string
 }
 
 interface ProductHeroProps {
-  product: {
-    id: string
-    title: string
-    subtitle?: string
-    description?: string
-    thumbnail?: string
-    images?: { url: string }[]
-    options?: Array<{
-      id: string
-      title?: string
-    }>
-    variants: Array<{
-      id: string
-      title?: string
-      calculated_price?: { calculated_amount?: number; currency_code?: string }
-      options?: Array<{
-        option_id: string
-        value: string
-      }>
-    }>
-  }
+  product: HttpTypes.StoreProduct
   countryCode: string
   onCartUpdate?: (item: CartItem | null) => void
   productInfoPanels?: ProductInfoPanels | null
@@ -92,12 +85,11 @@ const buildSizeOptions = (
   return (product.variants || [])
     .map((variant) => {
       const label = sizeOptionId
-        ? variant?.options?.find((opt) => opt.option_id === sizeOptionId)?.value ??
+        ? variant?.options?.find((opt) => opt.option_id === sizeOptionId)
+            ?.value ??
           variant?.title ??
           ""
-        : variant?.title ??
-          variant?.options?.[0]?.value ??
-          ""
+        : variant?.title ?? variant?.options?.[0]?.value ?? ""
 
       return label
         ? {
@@ -106,7 +98,9 @@ const buildSizeOptions = (
           }
         : null
     })
-    .filter((option): option is { id: string; label: string } => Boolean(option))
+    .filter((option): option is { id: string; label: string } =>
+      Boolean(option)
+    )
     .sort((a, b) => extractNumericSize(a.label) - extractNumericSize(b.label))
 }
 
@@ -119,28 +113,30 @@ export function ProductHero({
   onCartUpdate,
   onVariantChange,
   productInfoPanels,
-}: ProductHeroProps & { onVariantChange?: (variantId: string | null) => void }) {
+}: ProductHeroProps & {
+  onVariantChange?: (variantId: string | null) => void
+}) {
   const [isRitualPanelOpen, setIsRitualPanelOpen] = useState(false)
   const [isActivesPanelOpen, setIsActivesPanelOpen] = useState(false)
   const [isFragranceNotesOpen, setIsFragranceNotesOpen] = useState(false)
   const [isIngredientsPanelOpen, setIsIngredientsPanelOpen] = useState(false)
-  
+
   // Dynamic panel states - for future extensibility
   const [openPanelId, setOpenPanelId] = useState<string | null>(null)
-  
+
   // Accordion states for mobile
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null)
-  
+
   // Track if we're on mobile (below lg breakpoint - 1024px)
   const [isMobile, setIsMobile] = useState(false)
-  
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024)
     }
     checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
   const router = useRouter()
@@ -196,21 +192,28 @@ export function ProductHero({
       onVariantChange?.(defaultVariantId)
     }
   }, [defaultVariantId])
-  const selectedVariant = product.variants?.find((v) => v.id === selectedVariantId) ?? product.variants?.[0]
+  const selectedVariant =
+    product.variants?.find((v) => v.id === selectedVariantId) ??
+    product.variants?.[0]
   const minorAmount = selectedVariant?.calculated_price?.calculated_amount ?? 0
-  console.log('🔍 ProductHero - minorAmount:', {
+  console.log("🔍 ProductHero - minorAmount:", {
     minorAmount,
     calculated_amount: selectedVariant?.calculated_price?.calculated_amount,
-    variantId: selectedVariantId
+    variantId: selectedVariantId,
   })
 
   const fallbackImg = product.thumbnail ?? "/assets/productImage.png"
   const imgs = product.images?.map((i) => i.url).filter(Boolean) ?? []
   const productImages = imgs.length ? imgs : [fallbackImg]
 
-  const selectedSizeLabel = visibleSizeOptions.find((opt) => opt.id === selectedVariantId)?.label
+  const selectedSizeLabel = visibleSizeOptions.find(
+    (opt) => opt.id === selectedVariantId
+  )?.label
   const uniqueSizeLabels = useMemo(
-    () => Array.from(new Set(visibleSizeOptions.map((option) => option.label.toLowerCase()))),
+    () =>
+      Array.from(
+        new Set(visibleSizeOptions.map((option) => option.label.toLowerCase()))
+      ),
     [visibleSizeOptions]
   )
   const shouldShowSizeOptions =
@@ -224,8 +227,8 @@ export function ProductHero({
 
     // Check for candle keywords
     const candleKeywords = ["candle", "candles"]
-    return candleKeywords.some(keyword =>
-      title.includes(keyword) || handle.includes(keyword)
+    return candleKeywords.some(
+      (keyword) => title.includes(keyword) || handle.includes(keyword)
     )
   }
 
@@ -235,36 +238,60 @@ export function ProductHero({
     const handle = (product as any).handle?.toLowerCase() || ""
 
     // Check for cleanser/exfoliant keywords
-    const keywords = ["cleanser", "exfoliant", "hand wash", "handwash", "scrub", "cleansing"]
-    const canSeeActives = keywords.some(keyword =>
-      title.includes(keyword) || handle.includes(keyword)
+    const keywords = [
+      "cleanser",
+      "exfoliant",
+      "hand wash",
+      "handwash",
+      "scrub",
+      "cleansing",
+    ]
+    const canSeeActives = keywords.some(
+      (keyword) => title.includes(keyword) || handle.includes(keyword)
     )
 
     // Exclude candles and fragrances
     const excludeKeywords = ["candle", "fragrance", "scent", "bloom", "cedar"]
-    const isExcluded = excludeKeywords.some(keyword =>
-      title.includes(keyword) || handle.includes(keyword)
+    const isExcluded = excludeKeywords.some(
+      (keyword) => title.includes(keyword) || handle.includes(keyword)
     )
 
     return canSeeActives && !isExcluded
   }
 
   // Check if using dynamic panels (new approach) or legacy fields (backward compatibility)
-  const useDynamicPanels = productInfoPanels?.panels && productInfoPanels.panels.length > 0
+  const useDynamicPanels =
+    productInfoPanels?.panels && productInfoPanels.panels.length > 0
 
   // Use Contentful data if available, otherwise use defaults
-  const shouldShowRitual = productInfoPanels?.showRitualInPractice ?? isCleanserOrExfoliant()
-  const shouldShowActives = productInfoPanels?.showActives ?? isCleanserOrExfoliant()
+  const shouldShowRitual =
+    productInfoPanels?.showRitualInPractice ?? isCleanserOrExfoliant()
+  const shouldShowActives =
+    productInfoPanels?.showActives ?? isCleanserOrExfoliant()
   const shouldShowFragrance = productInfoPanels?.showFragranceNotes ?? true
-  const shouldShowIngredients = productInfoPanels?.showFullIngredients ?? isCleanserOrExfoliant()
+  const shouldShowIngredients =
+    productInfoPanels?.showFullIngredients ?? isCleanserOrExfoliant()
 
   // Default content (for legacy approach)
-  const defaultRitualInPractice = "Dispense a measured amount. Work slowly into damp hands, letting the exfoliating texture and black tea notes awaken the senses. Rinse away — hands refreshed, reset, and primed."
+  const defaultRitualInPractice =
+    "Dispense a measured amount. Work slowly into damp hands, letting the exfoliating texture and black tea notes awaken the senses. Rinse away — hands refreshed, reset, and primed."
   const defaultActives = [
-    { name: "Black Tea Extract —", description: "antioxidant-rich, energizing." },
-    { name: "Colloidal Oats —", description: "natural scrubbing agent that lifts impurities gently." },
-    { name: "Panthenol (Pro-Vitamin B5) —", description: "hydrates and supports skin barrier." },
-    { name: "Aloe Leaf Water —", description: "refreshing, helps soothe after exfoliation." },
+    {
+      name: "Black Tea Extract —",
+      description: "antioxidant-rich, energizing.",
+    },
+    {
+      name: "Colloidal Oats —",
+      description: "natural scrubbing agent that lifts impurities gently.",
+    },
+    {
+      name: "Panthenol (Pro-Vitamin B5) —",
+      description: "hydrates and supports skin barrier.",
+    },
+    {
+      name: "Aloe Leaf Water —",
+      description: "refreshing, helps soothe after exfoliation.",
+    },
     { name: "Glycerin —", description: "draws in and holds moisture." },
   ]
   const defaultFragranceNotes = [
@@ -272,31 +299,29 @@ export function ProductHero({
     { type: "Heart Notes —", description: "Resinous Balsam" },
     { type: "Base Notes —", description: "Grounded Cedarwood" },
   ]
-  const defaultFullIngredients = "Water, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Black Tea Extract (Camellia Sinensis), Colloidal Oatmeal, Panthenol (Pro-Vitamin B5), Aloe Barbadensis Leaf Juice, Glycerin, Sodium Chloride, Citric Acid, Phenoxyethanol, Ethylhexylglycerin, Natural Fragrance, Tocopherol (Vitamin E)."
+  const defaultFullIngredients =
+    "Water, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Black Tea Extract (Camellia Sinensis), Colloidal Oatmeal, Panthenol (Pro-Vitamin B5), Aloe Barbadensis Leaf Juice, Glycerin, Sodium Chloride, Citric Acid, Phenoxyethanol, Ethylhexylglycerin, Natural Fragrance, Tocopherol (Vitamin E)."
 
-  const ritualInPractice = productInfoPanels?.ritualInPractice || defaultRitualInPractice
-  const actives = productInfoPanels?.actives && productInfoPanels.actives.length > 0 
-    ? productInfoPanels.actives 
-    : defaultActives
-  const fragranceNotes = productInfoPanels?.fragranceNotes && productInfoPanels.fragranceNotes.length > 0
-    ? productInfoPanels.fragranceNotes
-    : defaultFragranceNotes
-  const fullIngredients = productInfoPanels?.fullIngredients || defaultFullIngredients
+  const ritualInPractice =
+    productInfoPanels?.ritualInPractice || defaultRitualInPractice
+  const actives =
+    productInfoPanels?.actives && productInfoPanels.actives.length > 0
+      ? productInfoPanels.actives
+      : defaultActives
+  const fragranceNotes =
+    productInfoPanels?.fragranceNotes &&
+    productInfoPanels.fragranceNotes.length > 0
+      ? productInfoPanels.fragranceNotes
+      : defaultFragranceNotes
+  const fullIngredients =
+    productInfoPanels?.fullIngredients || defaultFullIngredients
 
   // Dynamic panels (for future extensibility)
   const dynamicPanels = productInfoPanels?.panels || []
 
-  // Dynamic breadcrumb label based on product type
-  const breadcrumbLeafLabel = isCandle()
-    ? "Candles"
-    : isCleanserOrExfoliant()
-    ? "Cleansers & Exfoliants"
-    : "Body & Hands"
-
-  // Dynamic parent breadcrumb based on leaf label
-  const breadcrumbParent = breadcrumbLeafLabel === "Candles"
-    ? { label: "Home Creations", href: `/${countryCode}/home-creations` }
-    : { label: "Body & Hands", href: `/${countryCode}/body-hands` }
+  // Category-based breadcrumb logic using product.categories[0].name
+  const breadcrumbCategory = product.categories?.[0]?.name || "Uncategorized"
+  const breadcrumbProduct = product.title || "Product"
 
   const handleAddToCart = () => {
     if (!selectedVariantId || adding || isPending) return
@@ -308,10 +333,10 @@ export function ProductHero({
 
     // optimistic nav/sticky updates if parent listens (regular product - no image in nav)
     // calculated_amount is already in major units (rupees), no conversion needed
-    console.log('🔍 ProductHero - Adding item with price:', {
+    console.log("🔍 ProductHero - Adding item with price:", {
       minorAmount,
       calculated_amount: selectedVariant?.calculated_price?.calculated_amount,
-      variantId: selectedVariantId
+      variantId: selectedVariantId,
     })
     onCartUpdate?.({
       id: selectedVariantId,
@@ -338,12 +363,18 @@ export function ProductHero({
         const errorMessage = e?.message || "Could not add to cart"
         setUiError(errorMessage)
         console.error(e)
-        
+
         // Show toast notification for error
         const errorMsg = String(errorMessage || "").toLowerCase()
-        if (errorMsg.includes("inventory") || errorMsg.includes("required inventory") || errorMsg.includes("stock") || errorMsg.includes("variant does not have")) {
+        if (
+          errorMsg.includes("inventory") ||
+          errorMsg.includes("required inventory") ||
+          errorMsg.includes("stock") ||
+          errorMsg.includes("variant does not have")
+        ) {
           toast.error("Inventory Error", {
-            description: "This product is currently out of stock or unavailable. Please try again later.",
+            description:
+              "This product is currently out of stock or unavailable. Please try again later.",
             duration: 5000,
           })
         } else {
@@ -406,16 +437,23 @@ export function ProductHero({
     }
 
     toggleLedgerItem(ledgerItem)
-    toast.success(`${product.title} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
-      duration: 2000,
-    })
+    toast.success(
+      `${product.title} ${
+        alreadyInLedger ? "Removed From" : "Added To"
+      } Ledger`,
+      {
+        duration: 2000,
+      }
+    )
   }
 
   const isProductInLedger = isInLedger(product.id)
 
-
   return (
-    <div className="flex flex-col-reverse lg:flex-row pl-0 md:pl-8 lg:pl-16 xl:pl-15 relative overflow-hidden" style={{ paddingTop: "80px", minHeight: "35vh" }}>
+    <div
+      className="flex flex-col-reverse lg:flex-row pl-0 md:pl-8 lg:pl-16 xl:pl-15 relative overflow-hidden"
+      style={{ paddingTop: "80px", minHeight: "35vh" }}
+    >
       {/* LEFT: (content) */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
@@ -434,25 +472,35 @@ export function ProductHero({
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href={`/${countryCode}`} className="font-din-arabic text-xs tracking-wide flex items-center" style={{ color: '#a28b6f' }}>
+                  <BreadcrumbLink
+                    href={`/${countryCode}`}
+                    className="font-din-arabic text-xs tracking-wide flex items-center"
+                    style={{ color: "#a28b6f" }}
+                  >
                     <Home className="w-3 h-3 mr-1" />
                     Home
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator>
-                  <BreadcrumbChevron className="w-3 h-3" style={{ color: '#a28b6f' }} />
-                </BreadcrumbSeparator>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href={breadcrumbParent.href} className="font-din-arabic text-xs tracking-wide" style={{ color: '#a28b6f' }}>
-                    {breadcrumbParent.label}
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator>
-                  <BreadcrumbChevron className="w-3 h-3" style={{ color: '#a28b6f' }} />
+                  <BreadcrumbChevron
+                    className="w-3 h-3"
+                    style={{ color: "#a28b6f" }}
+                  />
                 </BreadcrumbSeparator>
                 <BreadcrumbItem>
                   <BreadcrumbPage className="font-din-arabic text-xs tracking-wide text-black/80">
-                    {breadcrumbLeafLabel}
+                    {breadcrumbCategory}
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <BreadcrumbChevron
+                    className="w-3 h-3"
+                    style={{ color: "#a28b6f" }}
+                  />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="font-din-arabic text-xs tracking-wide text-black/80">
+                    {breadcrumbProduct}
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
@@ -498,16 +546,22 @@ export function ProductHero({
               transition={{ duration: 0.6, delay: 0.5 }}
               className="space-y-3 pb-0 pt-3"
             >
-              <h3 className="font-din-arabic text-sm tracking-wider uppercase" style={{ color: '#a28b6f' }}>
+              <h3
+                className="font-din-arabic text-sm tracking-wider uppercase"
+                style={{ color: "#a28b6f" }}
+              >
                 SIZE
               </h3>
-              <RadioGroup 
+              <RadioGroup
                 value={selectedVariantId ?? ""}
                 onValueChange={(value: string) => {
-                  console.log('🔍 RadioGroup - onValueChange called:', { 
-                    newValue: value, 
+                  console.log("🔍 RadioGroup - onValueChange called:", {
+                    newValue: value,
                     currentSelected: selectedVariantId,
-                    visibleOptions: visibleSizeOptions.map(o => ({ id: o.id, label: o.label }))
+                    visibleOptions: visibleSizeOptions.map((o) => ({
+                      id: o.id,
+                      label: o.label,
+                    })),
                   })
                   if (value && value !== selectedVariantId) {
                     setSelectedVariantId(value)
@@ -632,69 +686,81 @@ export function ProductHero({
           )}
 
           {/* Separator line before Ritual in Practice */}
-          {shouldShowRitual && (<motion.div
-            initial={{ opacity: 0, scaleX: 0 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ duration: 0.6, delay: 0.9 }}
-            className="w-full h-px origin-left"
-            style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
-          />)}
+          {shouldShowRitual && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ duration: 0.6, delay: 0.9 }}
+              className="w-full h-px origin-left"
+              style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
+            />
+          )}
 
           {/* Collapsible Ritual in Practice */}
-          {shouldShowRitual && (<motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.0 }}
-            className="space-y-1"
-          >
-            <button
-              onClick={() => {
-                // On mobile (below lg), use accordion; on desktop, use drawer
-                if (isMobile) {
-                  setOpenAccordionId(openAccordionId === 'ritual' ? null : 'ritual')
-                } else {
-                  setIsRitualPanelOpen(true)
-                }
-              }}
-              className="flex items-center justify-between w-full py-1 text-left group"
+          {shouldShowRitual && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.0 }}
+              className="space-y-1"
             >
-              <span
-                className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
-                style={{ color: "#a28b6f" }}
+              <button
+                onClick={() => {
+                  // On mobile (below lg), use accordion; on desktop, use drawer
+                  if (isMobile) {
+                    setOpenAccordionId(
+                      openAccordionId === "ritual" ? null : "ritual"
+                    )
+                  } else {
+                    setIsRitualPanelOpen(true)
+                  }
+                }}
+                className="flex items-center justify-between w-full py-1 text-left group"
               >
-                Ritual in Practice
-              </span>
-              <motion.div
-                animate={{ rotate: openAccordionId === 'ritual' ? 45 : 0 }}
-                whileHover={{ rotate: 90 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                {openAccordionId === 'ritual' ? (
-                  <X className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
-                ) : (
-                  <Plus className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
-                )}
-              </motion.div>
-            </button>
-            {/* Accordion Content - Mobile Only */}
-            <AnimatePresence>
-              {openAccordionId === 'ritual' && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="overflow-hidden lg:hidden"
+                <span
+                  className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
+                  style={{ color: "#a28b6f" }}
                 >
-                  <div className="pt-3 pb-2">
-                    <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
-                      {ritualInPractice}
-                    </p>
-                  </div>
+                  Ritual in Practice
+                </span>
+                <motion.div
+                  animate={{ rotate: openAccordionId === "ritual" ? 45 : 0 }}
+                  whileHover={{ rotate: 90 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  {openAccordionId === "ritual" ? (
+                    <X
+                      className="w-4 h-4 transition-colors duration-300"
+                      style={{ color: "#a28b6f" }}
+                    />
+                  ) : (
+                    <Plus
+                      className="w-4 h-4 transition-colors duration-300"
+                      style={{ color: "#a28b6f" }}
+                    />
+                  )}
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>)}
+              </button>
+              {/* Accordion Content - Mobile Only */}
+              <AnimatePresence>
+                {openAccordionId === "ritual" && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden lg:hidden"
+                  >
+                    <div className="pt-3 pb-2">
+                      <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
+                        {ritualInPractice}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
 
           {/* Separator line before Actives & Key Botanicals */}
           {shouldShowActives && (
@@ -704,7 +770,8 @@ export function ProductHero({
               transition={{ duration: 0.6, delay: 1.1 }}
               className="w-full h-px origin-left"
               style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
-            />)}
+            />
+          )}
 
           {/* Collapsible Actives & Key Botanicals */}
           {shouldShowActives && (
@@ -718,7 +785,9 @@ export function ProductHero({
                 onClick={() => {
                   // On mobile (below lg), use accordion; on desktop, use drawer
                   if (isMobile) {
-                    setOpenAccordionId(openAccordionId === 'actives' ? null : 'actives')
+                    setOpenAccordionId(
+                      openAccordionId === "actives" ? null : "actives"
+                    )
                   } else {
                     setIsActivesPanelOpen(true)
                   }
@@ -732,23 +801,29 @@ export function ProductHero({
                   Actives & Key Botanicals
                 </span>
                 <motion.div
-                  animate={{ rotate: openAccordionId === 'actives' ? 45 : 0 }}
+                  animate={{ rotate: openAccordionId === "actives" ? 45 : 0 }}
                   whileHover={{ rotate: 90 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
-                  {openAccordionId === 'actives' ? (
-                    <X className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
+                  {openAccordionId === "actives" ? (
+                    <X
+                      className="w-4 h-4 transition-colors duration-300"
+                      style={{ color: "#a28b6f" }}
+                    />
                   ) : (
-                    <Plus className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
+                    <Plus
+                      className="w-4 h-4 transition-colors duration-300"
+                      style={{ color: "#a28b6f" }}
+                    />
                   )}
                 </motion.div>
               </button>
               {/* Accordion Content - Mobile Only */}
               <AnimatePresence>
-                {openAccordionId === 'actives' && (
+                {openAccordionId === "actives" && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
+                    animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="overflow-hidden lg:hidden"
@@ -772,264 +847,313 @@ export function ProductHero({
           )}
 
           {/* Separator line before Fragrance Notes */}
-          {shouldShowFragrance && (<motion.div
-            initial={{ opacity: 0, scaleX: 0 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ duration: 0.6, delay: 1.3 }}
-            className="w-full h-px origin-left"
-            style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
-          />)}
+          {shouldShowFragrance && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ duration: 0.6, delay: 1.3 }}
+              className="w-full h-px origin-left"
+              style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
+            />
+          )}
 
           {/* Collapsible Fragrance Notes */}
-          {shouldShowFragrance && (<motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.4 }}
-            className="space-y-1"
-          >
-            <button
-              onClick={() => {
-                // On mobile (below lg), use accordion; on desktop, use drawer
-                if (isMobile) {
-                  setOpenAccordionId(openAccordionId === 'fragrance' ? null : 'fragrance')
-                } else {
-                  setIsFragranceNotesOpen(true)
-                }
-              }}
-              className="flex items-center justify-between w-full py-1 text-left group"
+          {shouldShowFragrance && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.4 }}
+              className="space-y-1"
             >
-              <span
-                className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
-                style={{ color: "#a28b6f" }}
+              <button
+                onClick={() => {
+                  // On mobile (below lg), use accordion; on desktop, use drawer
+                  if (isMobile) {
+                    setOpenAccordionId(
+                      openAccordionId === "fragrance" ? null : "fragrance"
+                    )
+                  } else {
+                    setIsFragranceNotesOpen(true)
+                  }
+                }}
+                className="flex items-center justify-between w-full py-1 text-left group"
               >
-                Fragrance Profile
-              </span>
-              <motion.div
-                animate={{ rotate: openAccordionId === 'fragrance' ? 45 : 0 }}
-                whileHover={{ rotate: 90 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                {openAccordionId === 'fragrance' ? (
-                  <X className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
-                ) : (
-                  <Plus className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
-                )}
-              </motion.div>
-            </button>
-            {/* Accordion Content - Mobile Only */}
-            <AnimatePresence>
-              {openAccordionId === 'fragrance' && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="overflow-hidden lg:hidden"
+                <span
+                  className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
+                  style={{ color: "#a28b6f" }}
                 >
-                  <div className="pt-3 pb-2 space-y-4">
-                    {fragranceNotes.map((note, index) => (
-                      <div key={index} className="group">
-                        <span className="font-din-arabic text-black inline text-sm">
-                          {note.type}{" "}
-                        </span>
-                        <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
-                          {note.description}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  Fragrance Profile
+                </span>
+                <motion.div
+                  animate={{ rotate: openAccordionId === "fragrance" ? 45 : 0 }}
+                  whileHover={{ rotate: 90 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  {openAccordionId === "fragrance" ? (
+                    <X
+                      className="w-4 h-4 transition-colors duration-300"
+                      style={{ color: "#a28b6f" }}
+                    />
+                  ) : (
+                    <Plus
+                      className="w-4 h-4 transition-colors duration-300"
+                      style={{ color: "#a28b6f" }}
+                    />
+                  )}
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>)}
+              </button>
+              {/* Accordion Content - Mobile Only */}
+              <AnimatePresence>
+                {openAccordionId === "fragrance" && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden lg:hidden"
+                  >
+                    <div className="pt-3 pb-2 space-y-4">
+                      {fragranceNotes.map((note, index) => (
+                        <div key={index} className="group">
+                          <span className="font-din-arabic text-black inline text-sm">
+                            {note.type}{" "}
+                          </span>
+                          <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
+                            {note.description}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
 
           {/* Separator line before Full Ingredients */}
-          {shouldShowIngredients && (<motion.div
-            initial={{ opacity: 0, scaleX: 0 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ duration: 0.6, delay: 1.5 }}
-            className="w-full h-px origin-left"
-            style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
-          />)}
+          {shouldShowIngredients && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ duration: 0.6, delay: 1.5 }}
+              className="w-full h-px origin-left"
+              style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
+            />
+          )}
 
           {/* Collapsible Full Ingredients */}
-          {shouldShowIngredients && (<motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.6 }}
-            className="space-y-1"
-          >
-            <button
-              onClick={() => {
-                // On mobile (below lg), use accordion; on desktop, use drawer
-                if (isMobile) {
-                  setOpenAccordionId(openAccordionId === 'ingredients' ? null : 'ingredients')
-                } else {
-                  setIsIngredientsPanelOpen(true)
-                }
-              }}
-              className="flex items-center justify-between w-full py-1 text-left group"
+          {shouldShowIngredients && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.6 }}
+              className="space-y-1"
             >
-              <span
-                className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
-                style={{ color: "#a28b6f" }}
+              <button
+                onClick={() => {
+                  // On mobile (below lg), use accordion; on desktop, use drawer
+                  if (isMobile) {
+                    setOpenAccordionId(
+                      openAccordionId === "ingredients" ? null : "ingredients"
+                    )
+                  } else {
+                    setIsIngredientsPanelOpen(true)
+                  }
+                }}
+                className="flex items-center justify-between w-full py-1 text-left group"
               >
-                Full Ingredients
-              </span>
-              <motion.div
-                animate={{ rotate: openAccordionId === 'ingredients' ? 45 : 0 }}
-                whileHover={{ rotate: 90 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                {openAccordionId === 'ingredients' ? (
-                  <X className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
-                ) : (
-                  <Plus className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
-                )}
-              </motion.div>
-            </button>
-            {/* Accordion Content - Mobile Only */}
-            <AnimatePresence>
-              {openAccordionId === 'ingredients' && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="overflow-hidden lg:hidden"
+                <span
+                  className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
+                  style={{ color: "#a28b6f" }}
                 >
-                  <div className="pt-3 pb-2">
-                    <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
-                      {fullIngredients}
-                    </p>
-                  </div>
+                  Full Ingredients
+                </span>
+                <motion.div
+                  animate={{
+                    rotate: openAccordionId === "ingredients" ? 45 : 0,
+                  }}
+                  whileHover={{ rotate: 90 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  {openAccordionId === "ingredients" ? (
+                    <X
+                      className="w-4 h-4 transition-colors duration-300"
+                      style={{ color: "#a28b6f" }}
+                    />
+                  ) : (
+                    <Plus
+                      className="w-4 h-4 transition-colors duration-300"
+                      style={{ color: "#a28b6f" }}
+                    />
+                  )}
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>)}
+              </button>
+              {/* Accordion Content - Mobile Only */}
+              <AnimatePresence>
+                {openAccordionId === "ingredients" && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden lg:hidden"
+                  >
+                    <div className="pt-3 pb-2">
+                      <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
+                        {fullIngredients}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
 
           {/* Dynamic Panel Buttons - render if using dynamic panels (new approach) */}
-          {useDynamicPanels && dynamicPanels.map((panel, index) => {
-            if (!panel.isVisible) return null
-            
-            return (
-              <React.Fragment key={panel.id}>
-                {/* Separator line */}
-                <motion.div
-                  initial={{ opacity: 0, scaleX: 0 }}
-                  animate={{ opacity: 1, scaleX: 1 }}
-                  transition={{ duration: 0.6, delay: 1.7 + index * 0.1 }}
-                  className="w-full h-px origin-left"
-                  style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
-                />
-                
-                {/* Panel Button */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 1.8 + index * 0.1 }}
-                  className="space-y-1"
-                >
-                  <button
-                    onClick={() => {
-                      // On mobile (below lg), use accordion; on desktop, use drawer
-                      if (isMobile) {
-                        setOpenAccordionId(openAccordionId === panel.id ? null : panel.id)
-                      } else {
-                        setOpenPanelId(panel.id)
-                      }
-                    }}
-                    className="flex items-center justify-between w-full py-1 text-left group"
+          {useDynamicPanels &&
+            dynamicPanels.map((panel, index) => {
+              if (!panel.isVisible) return null
+
+              return (
+                <React.Fragment key={panel.id}>
+                  {/* Separator line */}
+                  <motion.div
+                    initial={{ opacity: 0, scaleX: 0 }}
+                    animate={{ opacity: 1, scaleX: 1 }}
+                    transition={{ duration: 0.6, delay: 1.7 + index * 0.1 }}
+                    className="w-full h-px origin-left"
+                    style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
+                  />
+
+                  {/* Panel Button */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 1.8 + index * 0.1 }}
+                    className="space-y-1"
                   >
-                    <span
-                      className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
-                      style={{ color: "#a28b6f" }}
+                    <button
+                      onClick={() => {
+                        // On mobile (below lg), use accordion; on desktop, use drawer
+                        if (isMobile) {
+                          setOpenAccordionId(
+                            openAccordionId === panel.id ? null : panel.id
+                          )
+                        } else {
+                          setOpenPanelId(panel.id)
+                        }
+                      }}
+                      className="flex items-center justify-between w-full py-1 text-left group"
                     >
-                      {panel.title}
-                    </span>
-                    <motion.div
-                      animate={{ rotate: openAccordionId === panel.id ? 45 : 0 }}
-                      whileHover={{ rotate: 90 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                      {openAccordionId === panel.id ? (
-                        <X className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
-                      ) : (
-                        <Plus className="w-4 h-4 transition-colors duration-300" style={{ color: "#a28b6f" }} />
-                      )}
-                    </motion.div>
-                  </button>
-                  {/* Accordion Content - Mobile Only */}
-                  <AnimatePresence>
-                    {openAccordionId === panel.id && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="overflow-hidden lg:hidden"
+                      <span
+                        className="font-din-arabic text-sm tracking-wider uppercase transition-colors duration-300"
+                        style={{ color: "#a28b6f" }}
                       >
-                        <div className="pt-3 pb-2">
-                          {(() => {
-                            switch (panel.type) {
-                              case "text":
-                                return (
-                                  <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
-                                    {typeof panel.content === "string" ? panel.content : ""}
-                                  </p>
-                                )
-                              case "actives":
-                                return (
-                                  <div className="space-y-4">
-                                    {Array.isArray(panel.content) && panel.content.map((active: any, idx: number) => (
-                                      <div key={idx} className="group">
-                                        <span className="font-din-arabic text-black inline text-sm">
-                                          {active.name}{" "}
-                                        </span>
-                                        <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
-                                          {active.description}
-                                        </span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )
-                              case "fragrance":
-                                return (
-                                  <div className="space-y-4">
-                                    {Array.isArray(panel.content) && panel.content.map((note: any, idx: number) => (
-                                      <div key={idx} className="group">
-                                        <span className="font-din-arabic text-black inline text-sm">
-                                          {note.type}{" "}
-                                        </span>
-                                        <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
-                                          {note.description}
-                                        </span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )
-                              case "ingredients":
-                                return (
-                                  <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
-                                    {typeof panel.content === "string" ? panel.content : ""}
-                                  </p>
-                                )
-                              default:
-                                return (
-                                  <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
-                                    {typeof panel.content === "string" ? panel.content : ""}
-                                  </p>
-                                )
-                            }
-                          })()}
-                        </div>
+                        {panel.title}
+                      </span>
+                      <motion.div
+                        animate={{
+                          rotate: openAccordionId === panel.id ? 45 : 0,
+                        }}
+                        whileHover={{ rotate: 90 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                      >
+                        {openAccordionId === panel.id ? (
+                          <X
+                            className="w-4 h-4 transition-colors duration-300"
+                            style={{ color: "#a28b6f" }}
+                          />
+                        ) : (
+                          <Plus
+                            className="w-4 h-4 transition-colors duration-300"
+                            style={{ color: "#a28b6f" }}
+                          />
+                        )}
                       </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              </React.Fragment>
-            )
-          })}
+                    </button>
+                    {/* Accordion Content - Mobile Only */}
+                    <AnimatePresence>
+                      {openAccordionId === panel.id && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                          className="overflow-hidden lg:hidden"
+                        >
+                          <div className="pt-3 pb-2">
+                            {(() => {
+                              switch (panel.type) {
+                                case "text":
+                                  return (
+                                    <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
+                                      {typeof panel.content === "string"
+                                        ? panel.content
+                                        : ""}
+                                    </p>
+                                  )
+                                case "actives":
+                                  return (
+                                    <div className="space-y-4">
+                                      {Array.isArray(panel.content) &&
+                                        panel.content.map(
+                                          (active: any, idx: number) => (
+                                            <div key={idx} className="group">
+                                              <span className="font-din-arabic text-black inline text-sm">
+                                                {active.name}{" "}
+                                              </span>
+                                              <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
+                                                {active.description}
+                                              </span>
+                                            </div>
+                                          )
+                                        )}
+                                    </div>
+                                  )
+                                case "fragrance":
+                                  return (
+                                    <div className="space-y-4">
+                                      {Array.isArray(panel.content) &&
+                                        panel.content.map(
+                                          (note: any, idx: number) => (
+                                            <div key={idx} className="group">
+                                              <span className="font-din-arabic text-black inline text-sm">
+                                                {note.type}{" "}
+                                              </span>
+                                              <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
+                                                {note.description}
+                                              </span>
+                                            </div>
+                                          )
+                                        )}
+                                    </div>
+                                  )
+                                case "ingredients":
+                                  return (
+                                    <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
+                                      {typeof panel.content === "string"
+                                        ? panel.content
+                                        : ""}
+                                    </p>
+                                  )
+                                default:
+                                  return (
+                                    <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
+                                      {typeof panel.content === "string"
+                                        ? panel.content
+                                        : ""}
+                                    </p>
+                                  )
+                              }
+                            })()}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                </React.Fragment>
+              )
+            })}
         </div>
       </motion.div>
 
@@ -1038,7 +1162,7 @@ export function ProductHero({
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="w-full lg:w-[60%] relative flex items-center justify-center py-6 overflow-hidden"
-        style={{ backgroundColor: '#d6d6c6' }}
+        style={{ backgroundColor: "#d6d6c6" }}
       >
         {/* Botanical Blend Badge - Top Left */}
         <motion.div
@@ -1048,8 +1172,13 @@ export function ProductHero({
           className="absolute top-8 left-8 z-20"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
-            <Star className="w-3 h-3" style={{ color: '#a28b6f' }} />
-            <span className="font-din-arabic text-xs tracking-wide" style={{ color: '#a28b6f' }}>BOTANICAL BLEND</span>
+            <Star className="w-3 h-3" style={{ color: "#a28b6f" }} />
+            <span
+              className="font-din-arabic text-xs tracking-wide"
+              style={{ color: "#a28b6f" }}
+            >
+              BOTANICAL BLEND
+            </span>
           </div>
         </motion.div>
 
@@ -1065,10 +1194,22 @@ export function ProductHero({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleToggleLedger}
-            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"}`}
-            aria-label={isProductInLedger ? "Remove from ledger" : "Add to ledger"}
+            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${
+              isProductInLedger
+                ? "text-[#e58a4d]"
+                : "text-black/60 hover:text-black"
+            }`}
+            aria-label={
+              isProductInLedger ? "Remove from ledger" : "Add to ledger"
+            }
           >
-            <Heart className={`w-5 h-5 transition-colors ${isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"}`} />
+            <Heart
+              className={`w-5 h-5 transition-colors ${
+                isProductInLedger
+                  ? "fill-[#e58a4d] stroke-[#e58a4d]"
+                  : "stroke-current"
+              }`}
+            />
           </motion.button>
 
           {/* Share Icon */}
@@ -1081,12 +1222,11 @@ export function ProductHero({
           </motion.button>
         </motion.div>
 
-
         {/* Enhanced Previous Arrow */}
         <motion.button
           whileHover={{
             scale: 1.1,
-            backgroundColor: 'rgba(162, 139, 111, 0.1)'
+            backgroundColor: "rgba(162, 139, 111, 0.1)",
           }}
           whileTap={{ scale: 0.9 }}
           onClick={handlePrevImage}
@@ -1103,8 +1243,8 @@ export function ProductHero({
             alt="Jardin Botanica Tea Exfoliant Rinse"
             className="w-full h-auto object-contain mx-auto relative z-10"
             style={{
-              maxHeight: '500px', // Reduced for more compact hero section
-              filter: 'drop-shadow(0 20px 45px rgba(0, 0, 0, 0.15))'
+              maxHeight: "500px", // Reduced for more compact hero section
+              filter: "drop-shadow(0 20px 45px rgba(0, 0, 0, 0.15))",
             }}
           />
 
@@ -1112,8 +1252,9 @@ export function ProductHero({
           <div
             className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-8 w-3/4 h-10 rounded-full blur-2xl"
             style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.18)',
-              background: 'radial-gradient(ellipse, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.12) 50%, transparent 100%)'
+              backgroundColor: "rgba(0, 0, 0, 0.18)",
+              background:
+                "radial-gradient(ellipse, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.12) 50%, transparent 100%)",
             }}
           />
         </div>
@@ -1122,7 +1263,7 @@ export function ProductHero({
         <motion.button
           whileHover={{
             scale: 1.1,
-            backgroundColor: 'rgba(162, 139, 111, 0.1)'
+            backgroundColor: "rgba(162, 139, 111, 0.1)",
           }}
           whileTap={{ scale: 0.9 }}
           onClick={handleNextImage}
@@ -1140,17 +1281,19 @@ export function ProductHero({
               onClick={() => setCurrentImageIndex(index)}
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${currentImageIndex === index ? 'w-8' : ''
-                }`}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                currentImageIndex === index ? "w-8" : ""
+              }`}
               style={{
-                backgroundColor: currentImageIndex === index ? '#a28b6f' : 'rgba(0, 0, 0, 0.3)'
+                backgroundColor:
+                  currentImageIndex === index
+                    ? "#a28b6f"
+                    : "rgba(0, 0, 0, 0.3)",
               }}
               aria-label={`View image ${index + 1}`}
             />
           ))}
         </div>
-
-
       </motion.div>
       {/* Panels */}
       <InfoPanel
@@ -1209,83 +1352,85 @@ export function ProductHero({
       </InfoPanel>
 
       {/* Dynamic Panels - for future extensibility */}
-      {useDynamicPanels && dynamicPanels.map((panel) => {
-        if (!panel.isVisible) return null
-        
-        const renderPanelContent = () => {
-          switch (panel.type) {
-            case "text":
-              return (
-                <p className="font-din-arabic text-black/80 leading-relaxed">
-                  {typeof panel.content === "string" ? panel.content : ""}
-                </p>
-              )
-            case "actives":
-              return (
-                <div className="space-y-4">
-                  {Array.isArray(panel.content) && panel.content.map((active: any, index: number) => (
-                    <div key={index} className="group">
-                      <span className="font-din-arabic text-black inline">
-                        {active.name}{" "}
-                      </span>
-                      <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-                        {active.description}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )
-            case "fragrance":
-              return (
-                <div className="space-y-4">
-                  {Array.isArray(panel.content) && panel.content.map((note: any, index: number) => (
-                    <div key={index} className="group">
-                      <span className="font-din-arabic text-black inline">
-                        {note.type}{" "}
-                      </span>
-                      <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
-                        {note.description}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )
-            case "ingredients":
-              return (
-                <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
-                  {typeof panel.content === "string" ? panel.content : ""}
-                </p>
-              )
-            case "structured":
-              // For custom structured content, render as JSON or custom format
-              return (
-                <div className="font-din-arabic text-black/80 leading-relaxed">
-                  {typeof panel.content === "string" 
-                    ? panel.content 
-                    : JSON.stringify(panel.content, null, 2)}
-                </div>
-              )
-            default:
-              return (
-                <p className="font-din-arabic text-black/80 leading-relaxed">
-                  {typeof panel.content === "string" ? panel.content : ""}
-                </p>
-              )
+      {useDynamicPanels &&
+        dynamicPanels.map((panel) => {
+          if (!panel.isVisible) return null
+
+          const renderPanelContent = () => {
+            switch (panel.type) {
+              case "text":
+                return (
+                  <p className="font-din-arabic text-black/80 leading-relaxed">
+                    {typeof panel.content === "string" ? panel.content : ""}
+                  </p>
+                )
+              case "actives":
+                return (
+                  <div className="space-y-4">
+                    {Array.isArray(panel.content) &&
+                      panel.content.map((active: any, index: number) => (
+                        <div key={index} className="group">
+                          <span className="font-din-arabic text-black inline">
+                            {active.name}{" "}
+                          </span>
+                          <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
+                            {active.description}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                )
+              case "fragrance":
+                return (
+                  <div className="space-y-4">
+                    {Array.isArray(panel.content) &&
+                      panel.content.map((note: any, index: number) => (
+                        <div key={index} className="group">
+                          <span className="font-din-arabic text-black inline">
+                            {note.type}{" "}
+                          </span>
+                          <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
+                            {note.description}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                )
+              case "ingredients":
+                return (
+                  <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
+                    {typeof panel.content === "string" ? panel.content : ""}
+                  </p>
+                )
+              case "structured":
+                // For custom structured content, render as JSON or custom format
+                return (
+                  <div className="font-din-arabic text-black/80 leading-relaxed">
+                    {typeof panel.content === "string"
+                      ? panel.content
+                      : JSON.stringify(panel.content, null, 2)}
+                  </div>
+                )
+              default:
+                return (
+                  <p className="font-din-arabic text-black/80 leading-relaxed">
+                    {typeof panel.content === "string" ? panel.content : ""}
+                  </p>
+                )
+            }
           }
-        }
 
-        return (
-          <InfoPanel
-            key={panel.id}
-            isOpen={openPanelId === panel.id}
-            onClose={() => setOpenPanelId(null)}
-            title={panel.title}
-          >
-            {renderPanelContent()}
-          </InfoPanel>
-        )
-      })}
-
+          return (
+            <InfoPanel
+              key={panel.id}
+              isOpen={openPanelId === panel.id}
+              onClose={() => setOpenPanelId(null)}
+              title={panel.title}
+            >
+              {renderPanelContent()}
+            </InfoPanel>
+          )
+        })}
     </div>
   )
 }

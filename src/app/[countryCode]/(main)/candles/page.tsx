@@ -45,10 +45,14 @@ const Candles = () => {
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [hoveredProductIndex, setHoveredProductIndex] = useState<number | null>(null)
+  const [hoveredProductIndex, setHoveredProductIndex] = useState<number | null>(
+    null
+  )
   const [productScrollPosition, setProductScrollPosition] = useState(0)
   const [maxProductScroll, setMaxProductScroll] = useState(0)
-  const [candlesCollection, setCandlesCollection] = useState<CandlesCollectionItem[]>([])
+  const [candlesCollection, setCandlesCollection] = useState<
+    CandlesCollectionItem[]
+  >([])
   const [isLoadingCollection, setIsLoadingCollection] = useState(true)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [isMobile, setIsMobile] = useState(false)
@@ -64,20 +68,22 @@ const Candles = () => {
   const [mobileCurrent, setMobileCurrent] = useState(0)
   const [mobileScrollProgress, setMobileScrollProgress] = useState(0)
   const [isMobileDragging, setIsMobileDragging] = useState(false)
-  const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null)
+  const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(
+    null
+  )
   const [bannerCarouselApi, setBannerCarouselApi] = useState<CarouselApi>()
   const [bannerCurrent, setBannerCurrent] = useState(0)
 
   // Smooth scroll animations
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end end"]
+    offset: ["start start", "end end"],
   })
 
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
-    restDelta: 0.001
+    restDelta: 0.001,
   })
 
   // Smooth easing function for all animations
@@ -98,9 +104,9 @@ const Candles = () => {
     }
 
     checkMobile()
-    window.addEventListener('resize', checkMobile)
+    window.addEventListener("resize", checkMobile)
 
-    return () => window.removeEventListener('resize', checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
   useEffect(() => {
@@ -137,7 +143,9 @@ const Candles = () => {
     // Ensure carousel starts at the beginning on mount for mobile
     const scrollToStart = () => {
       mobileCarouselApi.scrollTo(0, true)
-      const content = document.querySelector('.mobile-candles-carousel-wrapper [data-slot="carousel-content"]') as HTMLElement
+      const content = document.querySelector(
+        '.mobile-candles-carousel-wrapper [data-slot="carousel-content"]'
+      ) as HTMLElement
       if (content) {
         content.scrollLeft = 0
       }
@@ -182,12 +190,12 @@ const Candles = () => {
 
     const handleMouseUp = () => {
       setIsDragging(false)
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
     }
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
   }
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -211,12 +219,12 @@ const Candles = () => {
 
     const handleTouchEnd = () => {
       setIsDragging(false)
-      document.removeEventListener('touchmove', handleTouchMove)
-      document.removeEventListener('touchend', handleTouchEnd)
+      document.removeEventListener("touchmove", handleTouchMove)
+      document.removeEventListener("touchend", handleTouchEnd)
     }
 
-    document.addEventListener('touchmove', handleTouchMove)
-    document.addEventListener('touchend', handleTouchEnd)
+    document.addEventListener("touchmove", handleTouchMove)
+    document.addEventListener("touchend", handleTouchEnd)
   }
 
   const nextImages = () => {
@@ -271,18 +279,26 @@ const Candles = () => {
   function getProductSlug(productName: string): string {
     return productName
       .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '')
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
   }
 
   // Mobile Product Card Component - ProductCarousel Style
-  function MobileProductCard({ item, productId }: { item: CandlesCollectionItem; productId: string }) {
+  function MobileProductCard({
+    item,
+    productId,
+  }: {
+    item: CandlesCollectionItem
+    productId: string
+  }) {
     const [isImageHovered, setIsImageHovered] = useState(false)
     const isItemInLedger = isInLedger(productId)
 
     const handleProductClick = () => {
       if (item.url) {
-        const normalizedUrl = item.url.startsWith('/') ? item.url : `/${item.url}`
+        const normalizedUrl = item.url.startsWith("/")
+          ? item.url
+          : `/${item.url}`
         router.push(normalizedUrl)
       }
     }
@@ -298,13 +314,16 @@ const Candles = () => {
         price: 0, // Price not available in CandlesCollectionItem
         image: item.src,
         description: item.label,
-        category: "Candles"
+        category: "Candles",
       }
 
       toggleLedgerItem(ledgerItem)
-      toast.success(`${item.label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
-        duration: 2000
-      })
+      toast.success(
+        `${item.label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`,
+        {
+          duration: 2000,
+        }
+      )
     }
 
     return (
@@ -354,8 +373,11 @@ const Candles = () => {
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger
+                  ? "fill-[#e58a4d] stroke-[#e58a4d]"
+                  : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -379,7 +401,21 @@ const Candles = () => {
   }
 
   // Product Card Component - HomeCreationsPage Style
-  function ProductCard({ src, label, hoverSrc, url, index, productId }: { src: string; label: string; hoverSrc: string; url?: string; index: number; productId: string }) {
+  function ProductCard({
+    src,
+    label,
+    hoverSrc,
+    url,
+    index,
+    productId,
+  }: {
+    src: string
+    label: string
+    hoverSrc: string
+    url?: string
+    index: number
+    productId: string
+  }) {
     const [isImageHovered, setIsImageHovered] = useState(false)
     const isItemInLedger = isInLedger(productId)
 
@@ -394,13 +430,16 @@ const Candles = () => {
         price: 0, // You may want to get actual price from your data
         image: src,
         description: label,
-        category: "Candles"
+        category: "Candles",
       }
 
       toggleLedgerItem(ledgerItem)
-      toast.success(`${label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
-        duration: 2000
-      })
+      toast.success(
+        `${label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`,
+        {
+          duration: 2000,
+        }
+      )
     }
 
     return (
@@ -410,7 +449,7 @@ const Candles = () => {
       >
         {/* Product Image */}
         {url ? (
-          <Link href={url.startsWith('/') ? url : `/${url}`}>
+          <Link href={url.startsWith("/") ? url : `/${url}`}>
             <div
               className="relative w-full overflow-hidden cursor-pointer"
               style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
@@ -420,12 +459,19 @@ const Candles = () => {
               {/* Hover Image - Behind */}
               {hoverSrc && (
                 <div className="absolute inset-0">
-                  <ImageWithFallback src={hoverSrc} alt={`${label} alternate view`} className="w-full h-full object-cover" />
+                  <ImageWithFallback
+                    src={hoverSrc}
+                    alt={`${label} alternate view`}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               )}
 
               {/* Main Image - On Top */}
-              <div className="absolute inset-0 transition-opacity duration-700 ease-in-out" style={{ opacity: isImageHovered ? 0 : 1 }}>
+              <div
+                className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+                style={{ opacity: isImageHovered ? 0 : 1 }}
+              >
                 <ImageWithFallback
                   src={src}
                   alt={label || "Product"}
@@ -437,9 +483,18 @@ const Candles = () => {
               <button
                 onClick={handleToggleLedger}
                 className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 bg-white/20 border border-white/30 hover:bg-white/30"
-                aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
+                aria-label={`${
+                  isItemInLedger ? "Remove from" : "Add to"
+                } ledger`}
               >
-                <Heart size={18} className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"}`} />
+                <Heart
+                  size={18}
+                  className={`transition-colors duration-300 ${
+                    isItemInLedger
+                      ? "fill-[#e58a4d] stroke-[#e58a4d]"
+                      : "stroke-white fill-none"
+                  }`}
+                />
               </button>
             </div>
           </Link>
@@ -453,12 +508,19 @@ const Candles = () => {
             {/* Hover Image - Behind */}
             {hoverSrc && (
               <div className="absolute inset-0">
-                <ImageWithFallback src={hoverSrc} alt={`${label} alternate view`} className="w-full h-full object-cover" />
+                <ImageWithFallback
+                  src={hoverSrc}
+                  alt={`${label} alternate view`}
+                  className="w-full h-full object-cover"
+                />
               </div>
             )}
 
             {/* Main Image - On Top */}
-            <div className="absolute inset-0 transition-opacity duration-700 ease-in-out" style={{ opacity: isImageHovered ? 0 : 1 }}>
+            <div
+              className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+              style={{ opacity: isImageHovered ? 0 : 1 }}
+            >
               <ImageWithFallback
                 src={src}
                 alt={label || "Product"}
@@ -472,7 +534,14 @@ const Candles = () => {
               className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 bg-white/20 border border-white/30 hover:bg-white/30"
               aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
             >
-              <Heart size={18} className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"}`} />
+              <Heart
+                size={18}
+                className={`transition-colors duration-300 ${
+                  isItemInLedger
+                    ? "fill-[#e58a4d] stroke-[#e58a4d]"
+                    : "stroke-white fill-none"
+                }`}
+              />
             </button>
           </div>
         )}
@@ -480,16 +549,22 @@ const Candles = () => {
         {/* Product Info */}
         <div className="flex flex-col flex-grow">
           {url ? (
-            <Link href={url.startsWith('/') ? url : `/${url}`}>
+            <Link href={url.startsWith("/") ? url : `/${url}`}>
               <div>
-                <h3 className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer" style={{ letterSpacing: "0.05em" }}>
+                <h3
+                  className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer"
+                  style={{ letterSpacing: "0.05em" }}
+                >
                   {label && label.trim() ? label : "Product Name"}
                 </h3>
               </div>
             </Link>
           ) : (
             <div>
-              <h3 className="font-american-typewriter text-xl mb-1" style={{ letterSpacing: "0.05em" }}>
+              <h3
+                className="font-american-typewriter text-xl mb-1"
+                style={{ letterSpacing: "0.05em" }}
+              >
                 {label && label.trim() ? label : "Product Name"}
               </h3>
             </div>
@@ -501,61 +576,64 @@ const Candles = () => {
 
   // Handler for navigation
   const handleItemClick = (url?: string) => {
-    if (url && url.trim() !== '') {
+    if (url && url.trim() !== "") {
       // Handle both relative and absolute URLs
-      const urlPath = url.startsWith('/')
+      const urlPath = url.startsWith("/")
         ? url
-        : (url.startsWith('http://') || url.startsWith('https://'))
-          ? new URL(url).pathname
-          : `/${url}`
+        : url.startsWith("http://") || url.startsWith("https://")
+        ? new URL(url).pathname
+        : `/${url}`
 
-      if (urlPath && urlPath.trim() !== '' && urlPath !== '/') {
+      if (urlPath && urlPath.trim() !== "" && urlPath !== "/") {
         router.push(urlPath)
       }
     }
   }
 
-  const scrollProducts = (direction: 'left' | 'right') => {
-    const scrollContainer = document.getElementById('product-slider')
+  const scrollProducts = (direction: "left" | "right") => {
+    const scrollContainer = document.getElementById("product-slider")
     if (scrollContainer) {
       // Calculate scroll amount: 2 items + gap
       // Item width: (100vw - 2rem) / 2 - 0.5rem
       // Gap: 1rem = 16px
       const containerWidth = scrollContainer.clientWidth
       const itemWidth = (containerWidth - 32 - 16) / 2 // Account for px-4 (32px) and gap
-      const scrollAmount = (itemWidth * 2) + 16 // Two images + gap
+      const scrollAmount = itemWidth * 2 + 16 // Two images + gap
 
       const currentScroll = scrollContainer.scrollLeft
-      const newPosition = direction === 'right'
-        ? currentScroll + scrollAmount
-        : Math.max(0, currentScroll - scrollAmount)
+      const newPosition =
+        direction === "right"
+          ? currentScroll + scrollAmount
+          : Math.max(0, currentScroll - scrollAmount)
 
       scrollContainer.scrollTo({
         left: newPosition,
-        behavior: 'smooth'
+        behavior: "smooth",
       })
       setProductScrollPosition(newPosition)
     }
   }
 
   useEffect(() => {
-    const scrollContainer = document.getElementById('product-slider')
+    const scrollContainer = document.getElementById("product-slider")
     if (!scrollContainer) return
 
     const updateScrollInfo = () => {
       setProductScrollPosition(scrollContainer.scrollLeft)
-      setMaxProductScroll(scrollContainer.scrollWidth - scrollContainer.clientWidth)
+      setMaxProductScroll(
+        scrollContainer.scrollWidth - scrollContainer.clientWidth
+      )
     }
 
     updateScrollInfo()
-    scrollContainer.addEventListener('scroll', updateScrollInfo)
+    scrollContainer.addEventListener("scroll", updateScrollInfo)
 
     // Recalculate on resize
-    window.addEventListener('resize', updateScrollInfo)
+    window.addEventListener("resize", updateScrollInfo)
 
     return () => {
-      scrollContainer.removeEventListener('scroll', updateScrollInfo)
-      window.removeEventListener('resize', updateScrollInfo)
+      scrollContainer.removeEventListener("scroll", updateScrollInfo)
+      window.removeEventListener("resize", updateScrollInfo)
     }
   }, [])
 
@@ -599,12 +677,12 @@ const Candles = () => {
 
     const handleMouseUp = () => {
       setIsMobileDragging(false)
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
     }
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
   }
 
   const handleMobileTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -628,18 +706,19 @@ const Candles = () => {
 
     const handleTouchEnd = () => {
       setIsMobileDragging(false)
-      document.removeEventListener('touchmove', handleTouchMove)
-      document.removeEventListener('touchend', handleTouchEnd)
+      document.removeEventListener("touchmove", handleTouchMove)
+      document.removeEventListener("touchend", handleTouchEnd)
     }
 
-    document.addEventListener('touchmove', handleTouchMove)
-    document.addEventListener('touchend', handleTouchEnd)
+    document.addEventListener("touchmove", handleTouchMove)
+    document.addEventListener("touchend", handleTouchEnd)
   }
 
   // Calculate mobile slider position
-  const mobileSliderPercentage = candlesCollection.length > 0
-    ? (mobileCurrent / (candlesCollection.length - 1)) * 100
-    : 0
+  const mobileSliderPercentage =
+    candlesCollection.length > 0
+      ? (mobileCurrent / (candlesCollection.length - 1)) * 100
+      : 0
 
   // Banner carousel handlers
   useEffect(() => {
@@ -657,12 +736,20 @@ const Candles = () => {
   }, [bannerCarouselApi])
 
   // Banner Product Card Component - Banner Style
-  function BannerProductCard({ item, index }: { item: CandlesCollectionItem; index: number }) {
+  function BannerProductCard({
+    item,
+    index,
+  }: {
+    item: CandlesCollectionItem
+    index: number
+  }) {
     const [isHovered, setIsHovered] = useState(false)
 
     const handleProductClick = () => {
       if (item.url) {
-        const normalizedUrl = item.url.startsWith('/') ? item.url : `/${item.url}`
+        const normalizedUrl = item.url.startsWith("/")
+          ? item.url
+          : `/${item.url}`
         router.push(normalizedUrl)
       }
     }
@@ -673,9 +760,17 @@ const Candles = () => {
 
     // Background colors/styles for each position (optional)
     const backgroundStyles = [
-      { background: 'linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.5))' }, // Dark
-      { background: 'linear-gradient(135deg, rgba(200,150,150,0.2), rgba(180,100,100,0.3))' }, // Warm pinkish
-      { background: 'linear-gradient(135deg, rgba(150,150,150,0.3), rgba(100,100,100,0.4))' }, // Grey
+      {
+        background: "linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.5))",
+      }, // Dark
+      {
+        background:
+          "linear-gradient(135deg, rgba(200,150,150,0.2), rgba(180,100,100,0.3))",
+      }, // Warm pinkish
+      {
+        background:
+          "linear-gradient(135deg, rgba(150,150,150,0.3), rgba(100,100,100,0.4))",
+      }, // Grey
     ]
 
     return (
@@ -718,16 +813,24 @@ const Candles = () => {
               whileInView={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-xs md:text-sm font-normal mb-2 md:mb-3 tracking-wide opacity-90 uppercase"
-              style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.05em', fontSize: '8px' }}
+              style={{
+                fontFamily: "system-ui, -apple-system, sans-serif",
+                letterSpacing: "0.05em",
+                fontSize: "8px",
+              }}
             >
-              {positionInGroup === 0 ? "MODERN LIGHTING" : positionInGroup === 1 ? "CANDLES & REED DIFFUSERS" : "GLOBALLY AWARDED"}
+              {positionInGroup === 0
+                ? "MODERN LIGHTING"
+                : positionInGroup === 1
+                ? "CANDLES & REED DIFFUSERS"
+                : "GLOBALLY AWARDED"}
             </motion.p>
 
             <motion.h3
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              style={{ fontSize: '1.5rem' }}
+              style={{ fontSize: "1.5rem" }}
               className="text-xl md:text-2xl lg:text-3xl font-normal tracking-tight leading-tight font-american-typewriter"
             >
               {item.label}
@@ -738,11 +841,14 @@ const Candles = () => {
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            whileHover={{ scale: 1.02, backgroundColor: '#000', color: '#fff' }}
+            whileHover={{ scale: 1.02, backgroundColor: "#000", color: "#fff" }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             className="bg-white/5 text-white px-4 py-2 md:px-6 md:py-2.5 font-normal tracking-wide transition-all duration-300 hover:bg-black hover:text-white border border-white/20 w-fit text-sm md:text-sm"
-            style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.05em' }}
+            style={{
+              fontFamily: "system-ui, -apple-system, sans-serif",
+              letterSpacing: "0.05em",
+            }}
             onClick={(e) => {
               e.stopPropagation()
               handleProductClick()
@@ -761,11 +867,11 @@ const Candles = () => {
     bannerGroups.push(candlesCollection.slice(i, i + 3))
   }
 
-
   return (
     <div ref={containerRef} className="bg-[#e2e2d8]">
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           html {
             scroll-behavior: smooth;
           }
@@ -774,8 +880,9 @@ const Candles = () => {
               scroll-behavior: smooth;
             }
           }
-        `
-      }} />
+        `,
+        }}
+      />
       <RippleEffect />
       <Navigation
         isScrolled={isScrolled}
@@ -801,9 +908,9 @@ const Candles = () => {
             transition={{ duration: 1.2, ease: smoothEase }}
             viewport={{ once: true }}
             style={{
-              fontFamily: 'system-ui, -apple-system, sans-serif',
+              fontFamily: "system-ui, -apple-system, sans-serif",
               fontWeight: 300,
-              letterSpacing: '-0.02em'
+              letterSpacing: "-0.02em",
             }}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] md:text-[200px] lg:text-[280px] font-light text-gray-300/30 select-none pointer-events-none z-0 tracking-tight"
           >
@@ -825,8 +932,9 @@ const Candles = () => {
             </div>
 
             {/* Mobile Carousel */}
-            <style dangerouslySetInnerHTML={{
-              __html: `
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `
               .mobile-candles-carousel-item {
                 width: calc((100vw - 64px) * 0.90) !important;
                 flex-basis: calc((100vw - 64px) * 0.90) !important;
@@ -867,8 +975,9 @@ const Candles = () => {
               .mobile-candles-carousel-wrapper [data-slot="carousel-content"]:active {
                 cursor: grabbing !important;
               }
-            `
-            }} />
+            `,
+              }}
+            />
             <div className="pt-10 pb-0">
               <div className="px-4 mobile-candles-carousel-wrapper">
                 <Carousel
@@ -885,7 +994,9 @@ const Candles = () => {
                 >
                   <CarouselContent className="mobile-candles-carousel-content">
                     {candlesCollection.map((item, i) => {
-                      const productId = item.url || item.label.toLowerCase().replace(/\s+/g, '-')
+                      const productId =
+                        item.url ||
+                        item.label.toLowerCase().replace(/\s+/g, "-")
                       return (
                         <CarouselItem
                           key={i}
@@ -903,7 +1014,10 @@ const Candles = () => {
               </div>
 
               {/* Mobile Slider Bar */}
-              <div className="flex justify-center items-center w-full pt-3" style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}>
+              <div
+                className="flex justify-center items-center w-full pt-3"
+                style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}
+              >
                 <div
                   ref={mobileSliderRef}
                   className="relative w-1/2 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
@@ -912,8 +1026,11 @@ const Candles = () => {
                   <div
                     className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
                     style={{
-                      left: `calc(${Math.max(0, Math.min(100, mobileSliderPercentage))}% - 16px)`,
-                      transform: 'translateY(-50%)'
+                      left: `calc(${Math.max(
+                        0,
+                        Math.min(100, mobileSliderPercentage)
+                      )}% - 16px)`,
+                      transform: "translateY(-50%)",
                     }}
                     onMouseDown={(e) => {
                       e.preventDefault()
@@ -954,8 +1071,9 @@ const Candles = () => {
             </motion.h2>
           </div>
           {/* Desktop view - HomeCreationsPage Style Carousel */}
-          <style dangerouslySetInnerHTML={{
-            __html: `
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
             .candles-carousel-item {
               width: 364px !important;
               min-width: 364px !important;
@@ -1026,8 +1144,9 @@ const Candles = () => {
               transform: translateZ(0) !important;
               will-change: transform !important;
             }
-          `
-          }} />
+          `,
+            }}
+          />
           <div className="pt-10 pb-0 sm:py-10 lg:py-10">
             <div className="pl-[5rem] pr-[4rem] candles-carousel-wrapper">
               <Carousel
@@ -1045,7 +1164,8 @@ const Candles = () => {
               >
                 <CarouselContent className="candles-carousel-content -ml-0">
                   {products.map(({ src, label, hoverSrc, url }, i) => {
-                    const productId = url || label.toLowerCase().replace(/\s+/g, '-')
+                    const productId =
+                      url || label.toLowerCase().replace(/\s+/g, "-")
                     return (
                       <CarouselItem
                         key={i}
@@ -1067,7 +1187,10 @@ const Candles = () => {
             </div>
 
             {/* Progress Scroll Bar - Slider Style */}
-            <div className="flex justify-center items-center w-full pt-3" style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}>
+            <div
+              className="flex justify-center items-center w-full pt-3"
+              style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}
+            >
               <div
                 ref={sliderRef}
                 className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
@@ -1077,8 +1200,11 @@ const Candles = () => {
                 <div
                   className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
                   style={{
-                    left: `calc(${Math.max(0, Math.min(100, sliderPercentage))}% - 16px)`,
-                    transform: 'translateY(-50%)'
+                    left: `calc(${Math.max(
+                      0,
+                      Math.min(100, sliderPercentage)
+                    )}% - 16px)`,
+                    transform: "translateY(-50%)",
                   }}
                   onMouseDown={(e) => {
                     e.preventDefault()
@@ -1108,8 +1234,9 @@ const Candles = () => {
         >
           <div className="relative">
             {/* Banner Carousel */}
-            <style dangerouslySetInnerHTML={{
-              __html: `
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `
               .banner-carousel-item {
                 width: 100% !important;
                 min-width: 100% !important;
@@ -1155,8 +1282,9 @@ const Candles = () => {
                   gap: 0 !important;
                 }
               }
-            `
-            }} />
+            `,
+              }}
+            />
 
             <div className="banner-carousel-wrapper">
               <Carousel
@@ -1174,45 +1302,54 @@ const Candles = () => {
               >
                 <CarouselContent className="banner-carousel-content">
                   {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
-                  {isMobile ? (
-                    // Mobile: One product per slide
-                    candlesCollection.map((item, index) => (
-                      <CarouselItem key={index} className="banner-carousel-item">
-                        <BannerProductCard
-                          item={item}
-                          index={index}
-                        />
-                      </CarouselItem>
-                    ))
-                  ) : (
-                    // Desktop: Groups of 3 products
-                    bannerGroups.map((group, groupIndex) => (
-                      <CarouselItem key={groupIndex} className="banner-carousel-item">
-                        <div className="flex flex-row gap-0 w-full h-auto">
-                          {group.map((item, itemIndex) => {
-                            const globalIndex = groupIndex * 3 + itemIndex
-                            return (
-                              <div key={globalIndex} className="flex-1 w-1/3">
-                                <BannerProductCard
-                                  item={item}
-                                  index={globalIndex}
-                                />
-                              </div>
-                            )
-                          })}
+                  {isMobile
+                    ? // Mobile: One product per slide
+                      candlesCollection.map((item, index) => (
+                        <CarouselItem
+                          key={index}
+                          className="banner-carousel-item"
+                        >
+                          <BannerProductCard item={item} index={index} />
+                        </CarouselItem>
+                      ))
+                    : // Desktop: Groups of 3 products
+                      bannerGroups.map((group, groupIndex) => (
+                        <CarouselItem
+                          key={groupIndex}
+                          className="banner-carousel-item"
+                        >
+                          <div className="flex flex-row gap-0 w-full h-auto">
+                            {group.map((item, itemIndex) => {
+                              const globalIndex = groupIndex * 3 + itemIndex
+                              return (
+                                <div key={globalIndex} className="flex-1 w-1/3">
+                                  <BannerProductCard
+                                    item={item}
+                                    index={globalIndex}
+                                  />
+                                </div>
+                              )
+                            })}
 
-
-                          {/* Fill remaining slots if group has less than 3 items */}
-                          {group.length < 3 && Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
-                            <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
-                          ))}
-                        </div>
-                      </CarouselItem>
-                    ))
-                  )}
+                            {/* Fill remaining slots if group has less than 3 items */}
+                            {group.length < 3 &&
+                              Array.from({ length: 3 - group.length }).map(
+                                (_, fillIndex) => (
+                                  <div
+                                    key={`fill-${fillIndex}`}
+                                    className="flex-1 w-1/3"
+                                  />
+                                )
+                              )}
+                          </div>
+                        </CarouselItem>
+                      ))}
                 </CarouselContent>
               </Carousel>
-              <div className="flex justify-center items-center w-full" style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}>
+              <div
+                className="flex justify-center items-center w-full"
+                style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}
+              >
                 <div
                   ref={mobileSliderRef}
                   className="relative w-1/2 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
@@ -1221,8 +1358,11 @@ const Candles = () => {
                   <div
                     className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
                     style={{
-                      left: `calc(${Math.max(0, Math.min(100, mobileSliderPercentage))}% - 16px)`,
-                      transform: 'translateY(-50%)'
+                      left: `calc(${Math.max(
+                        0,
+                        Math.min(100, mobileSliderPercentage)
+                      )}% - 16px)`,
+                      transform: "translateY(-50%)",
                     }}
                     onMouseDown={(e) => {
                       e.preventDefault()
@@ -1240,8 +1380,10 @@ const Candles = () => {
             </div>
 
             {/* Navigation Arrow - Right (White Circular Button) - Always visible */}
-            {bannerCarouselApi && (
-              (isMobile ? bannerCurrent < candlesCollection.length - 1 : bannerCurrent < bannerGroups.length - 1) && (
+            {bannerCarouselApi &&
+              (isMobile
+                ? bannerCurrent < candlesCollection.length - 1
+                : bannerCurrent < bannerGroups.length - 1) && (
                 <motion.button
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -1249,10 +1391,12 @@ const Candles = () => {
                   className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full bg-white hover:bg-white/95 border border-black/10 flex items-center justify-center transition-colors duration-300 shadow-md"
                   aria-label="Next"
                 >
-                  <ChevronRight className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-black" strokeWidth={1.5} />
+                  <ChevronRight
+                    className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-black"
+                    strokeWidth={1.5}
+                  />
                 </motion.button>
-              )
-            )}
+              )}
 
             {/* Navigation Arrow - Left (White Circular Button) - Always visible */}
             {bannerCarouselApi && bannerCurrent > 0 && (
@@ -1263,7 +1407,10 @@ const Candles = () => {
                 className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full bg-white hover:bg-white/95 border border-black/10 flex items-center justify-center transition-colors duration-300 shadow-md"
                 aria-label="Previous"
               >
-                <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-black" strokeWidth={1.5} />
+                <ChevronLeft
+                  className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-black"
+                  strokeWidth={1.5}
+                />
               </motion.button>
             )}
           </div>
@@ -1294,7 +1441,9 @@ const Candles = () => {
             viewport={{ once: true, amount: 0.3 }}
             className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-4 md:px-0"
           >
-            Connect with one of our experts for personalized guidance and thoughtful product recommendations-crafted just for your skin, your rituals, your glow.
+            Connect with one of our experts for personalized guidance and
+            thoughtful product recommendations-crafted just for your skin, your
+            rituals, your glow.
           </motion.p>
           <motion.button
             initial={{ opacity: 0, y: 10 }}
@@ -1318,13 +1467,13 @@ const Candles = () => {
         viewport={{ once: true, amount: 0.1 }}
         className="py-4 md:py-8"
       >
-        <div className="flex flex-col md:flex-row px-0 md:px-0 items-center">
+        <div className="flex flex-col md:flex-row px-0 md:px-0">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, ease: smoothEase }}
             viewport={{ once: true, amount: 0.2 }}
-            className="w-full md:w-[55%] h-[300px] md:h-[600px] overflow-hidden mb-6 md:mb-0 object-cover"
+            className="w-full md:w-[68%] h-[300px] md:h-[600px] overflow-hidden mb-6 md:mb-0 object-cover"
           >
             <motion.img
               whileHover={{ scale: 1.03 }}
@@ -1339,7 +1488,7 @@ const Candles = () => {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.2, ease: smoothEase }}
             viewport={{ once: true, amount: 0.2 }}
-            className="w-full md:w-[45%] relative z-10 px-6 md:px-0 md:pl-12"
+            className="w-full md:w-[45%] relative md:-ml-44 z-10 md:mt-10 px-6 md:px-0"
           >
             <div className="">
               <motion.h2
@@ -1358,14 +1507,16 @@ const Candles = () => {
                 viewport={{ once: true, amount: 0.3 }}
                 className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-6 md:mb-4 pr-4 line-clamp-2 md:line-clamp-none"
               >
-                Powdery, elegant, and quietly floral-Soft Orris wraps your space in a gentle hug. Perfect for slow mornings, self-care rituals, or unwinding at dusk. It's calm, bottled in wax.
+                Powdery, elegant, and quietly floral-Soft Orris wraps your space
+                in a gentle hug. Perfect for slow mornings, self-care rituals,
+                or unwinding at dusk. It's calm, bottled in wax.
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
-                className="text-center md:text-left"
+                className="text-center md:text-right md:mr-12"
               >
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -1460,7 +1611,11 @@ const Candles = () => {
                       key={`${currentImageIndex}-${index}`}
                       initial={{ opacity: 0, scale: 0.9 }}
                       whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.6, delay: index * 0.1, ease: smoothEase }}
+                      transition={{
+                        duration: 0.6,
+                        delay: index * 0.1,
+                        ease: smoothEase,
+                      }}
                       viewport={{ once: true, amount: 0.2 }}
                       className="w-full h-auto aspect-square overflow-hidden rounded-lg relative"
                     >
@@ -1589,4 +1744,3 @@ const Candles = () => {
 }
 
 export default Candles
-

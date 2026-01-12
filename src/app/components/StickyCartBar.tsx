@@ -88,6 +88,7 @@ export function StickyCartBar({
   const [showGoToCart, setShowGoToCart] = useState(false)
   const [showRitualSuggestion, setShowRitualSuggestion] = useState(false)
   const [ritualQuantity, setRitualQuantity] = useState(1)
+  const [ritualJustCompleted, setRitualJustCompleted] = useState(false)
 
   // read /[countryCode]/... from route, fallback to "in"
   const params = useParams() as any
@@ -156,6 +157,9 @@ export function StickyCartBar({
     })
 
     // Update ritual completion state based on cart contents
+    // Don't override states if ritual was just completed (to allow cart sync)
+    if (ritualJustCompleted) return
+
     if (ritualProduct && mainProductInCart && ritualProductInCart) {
       // Both products are in cart - ritual is completed
       console.log("✅ Ritual completed - both products in cart")
@@ -426,9 +430,9 @@ export function StickyCartBar({
       ritualProductId: ritualProduct.variantId,
       existingRitualProduct: existingRitualProduct
         ? {
-          id: existingRitualProduct.id,
-          quantity: existingRitualProduct.quantity,
-        }
+            id: existingRitualProduct.id,
+            quantity: existingRitualProduct.quantity,
+          }
         : null,
     })
 
@@ -482,8 +486,10 @@ export function StickyCartBar({
         // Show "Go to Cart" button after successful addition
         setShowGoToCart(true)
         setShowRitualSuggestion(false) // Hide ritual suggestion
+        setRitualJustCompleted(true)
         setJustUnlocked(true)
         setTimeout(() => setJustUnlocked(false), 3000)
+        setTimeout(() => setRitualJustCompleted(false), 5000) // Reset after 5 seconds to allow cart sync
       } catch (e: any) {
         // rollback visual success
         setRitualCompleted(false)
@@ -563,15 +569,17 @@ export function StickyCartBar({
                     <h3 className="font-american-typewriter text-black/90 text-xs md:text-sm truncate">
                       {ritualProduct && showRitualSuggestion && !showGoToCart
                         ? ritualProduct.name
-                        : `${name}${variant?.title ? ` • ${variant.title}` : ""}`}
+                        : `${name}${
+                            variant?.title ? ` • ${variant.title}` : ""
+                          }`}
                     </h3>
                     <div className="flex items-center space-x-1 overflow-hidden">
                       <p className="font-din-arabic-bold text-xs md:text-sm text-black/70 whitespace-nowrap">
                         {ritualProduct && showRitualSuggestion && !showGoToCart
                           ? formatMinor(
-                            ritualProduct.price,
-                            ritualProduct.currency
-                          )
+                              ritualProduct.price,
+                              ritualProduct.currency
+                            )
                           : formatMinor(minor, currency)}
                       </p>
                       {qualifiesShipping && (
@@ -588,8 +596,8 @@ export function StickyCartBar({
                           {showRitualSuggestion && !ritualCompleted
                             ? "Complete Your Ritual"
                             : showGoToCart
-                              ? "Order Qualifies For Complimentary Shipping"
-                              : "Order Qualifies For Complimentary Shipping"}
+                            ? "Order Qualifies For Complimentary Shipping"
+                            : "Order Qualifies For Complimentary Shipping"}
                         </motion.p>
                       )}
                     </div>
@@ -599,7 +607,19 @@ export function StickyCartBar({
                 <div className="flex items-center space-x-3 flex-1 min-w-0">
                   <div className="flex items-center space-x-2 text-[#545d4a]">
                     <div className="bg-[#545d4a]/10 p-1 rounded-full">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
                     </div>
                     <span className="font-din-arabic text-sm text-black/80">
                       Ritual Completed & Added to Cart
