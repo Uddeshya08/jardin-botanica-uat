@@ -1,13 +1,13 @@
 "use client"
 
-import { Button } from "@medusajs/ui"
-import React, { useCallback, useEffect, useState } from "react"
-import { useRazorpay, RazorpayOrderOptions } from "react-razorpay"
-import { HttpTypes } from "@medusajs/types"
 import { placeOrder } from "@lib/data/cart"
-import { CurrencyCode } from "react-razorpay/dist/constants/currency"
-import { useSearchParams } from "next/navigation"
+import type { HttpTypes } from "@medusajs/types"
+import { Button } from "@medusajs/ui"
 import { Lock, Sparkles } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import React, { useCallback, useEffect, useState } from "react"
+import { type RazorpayOrderOptions, useRazorpay } from "react-razorpay"
+import type { CurrencyCode } from "react-razorpay/dist/constants/currency"
 import ErrorMessage from "../error-message"
 
 export const RazorpayPaymentButton = ({
@@ -46,15 +46,36 @@ export const RazorpayPaymentButton = ({
     switch (type) {
       case "upi":
         return {
-          method: { upi: true, card: false, netbanking: false, wallet: false, emi: false, paylater: false },
+          method: {
+            upi: true,
+            card: false,
+            netbanking: false,
+            wallet: false,
+            emi: false,
+            paylater: false,
+          },
         }
       case "card":
         return {
-          method: { card: true, upi: false, netbanking: false, wallet: false, emi: false, paylater: false },
+          method: {
+            card: true,
+            upi: false,
+            netbanking: false,
+            wallet: false,
+            emi: false,
+            paylater: false,
+          },
         }
       case "netbanking":
         return {
-          method: { netbanking: true, card: false, upi: false, wallet: false, emi: false, paylater: false },
+          method: {
+            netbanking: true,
+            card: false,
+            upi: false,
+            wallet: false,
+            emi: false,
+            paylater: false,
+          },
         }
       default:
         return {}
@@ -146,10 +167,7 @@ export const RazorpayPaymentButton = ({
         <span>{submitting ? "Processing..." : "Place Order"}</span>
         <Sparkles className="w-5 h-5" />
       </Button>
-      <ErrorMessage
-        error={errorMessage}
-        data-testid="razorpay-payment-error-message"
-      />
+      <ErrorMessage error={errorMessage} data-testid="razorpay-payment-error-message" />
     </>
   )
 }

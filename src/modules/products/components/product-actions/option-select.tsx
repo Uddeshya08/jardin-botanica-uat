@@ -1,6 +1,6 @@
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
-import React from "react"
+import type React from "react"
 
 type OptionSelectProps = {
   option: HttpTypes.StoreProductOption
@@ -24,10 +24,7 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
   return (
     <div className="flex flex-col gap-y-3">
       <span className="text-sm">Select {title}</span>
-      <div
-        className="flex flex-wrap justify-between gap-2"
-        data-testid={dataTestId}
-      >
+      <div className="flex flex-wrap justify-between gap-2" data-testid={dataTestId}>
         {filteredOptions.map((v) => {
           return (
             <button

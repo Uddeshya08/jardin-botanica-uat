@@ -1,11 +1,10 @@
 "use client"
 
-import { useActionState } from "react"
 import { createTransferRequest } from "@lib/data/orders"
-import { Text, Heading, Input, Button, IconButton, Toaster } from "@medusajs/ui"
-import { SubmitButton } from "@modules/checkout/components/submit-button"
 import { CheckCircleMiniSolid, XCircleSolid } from "@medusajs/icons"
-import { useEffect, useState } from "react"
+import { Button, Heading, IconButton, Input, Text, Toaster } from "@medusajs/ui"
+import { SubmitButton } from "@modules/checkout/components/submit-button"
+import { useActionState, useEffect, useState } from "react"
 
 export default function TransferRequestForm() {
   const [showSuccess, setShowSuccess] = useState(false)
@@ -34,25 +33,17 @@ export default function TransferRequestForm() {
             <br /> Connect an order to your account.
           </Text>
         </div>
-        <form
-          action={formAction}
-          className="flex flex-col gap-y-1 sm:items-end"
-        >
+        <form action={formAction} className="flex flex-col gap-y-1 sm:items-end">
           <div className="flex flex-col gap-y-2 w-full">
             <Input className="w-full" name="order_id" placeholder="Order ID" />
-            <SubmitButton
-              variant="secondary"
-              className="w-fit whitespace-nowrap self-end"
-            >
+            <SubmitButton variant="secondary" className="w-fit whitespace-nowrap self-end">
               Request transfer
             </SubmitButton>
           </div>
         </form>
       </div>
       {!state.success && state.error && (
-        <Text className="text-base-regular text-rose-500 text-right">
-          {state.error}
-        </Text>
+        <Text className="text-base-regular text-rose-500 text-right">{state.error}</Text>
       )}
       {showSuccess && (
         <div className="flex justify-between p-4 bg-neutral-50 shadow-borders-base w-full self-stretch items-center">
@@ -67,11 +58,7 @@ export default function TransferRequestForm() {
               </Text>
             </div>
           </div>
-          <IconButton
-            variant="transparent"
-            className="h-fit"
-            onClick={() => setShowSuccess(false)}
-          >
+          <IconButton variant="transparent" className="h-fit" onClick={() => setShowSuccess(false)}>
             <XCircleSolid className="w-4 h-4 text-neutral-500" />
           </IconButton>
         </div>

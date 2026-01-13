@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { motion } from "motion/react"
-import { PageBanner as PageBannerType } from "../../types/contentful"
 import { getPageBanner } from "@lib/data/contentful"
+import { motion } from "motion/react"
+import { useEffect, useState } from "react"
+import type { PageBanner as PageBannerType } from "../../types/contentful"
 
 interface PageBannerProps {
   pageKey: string
@@ -45,16 +45,20 @@ export function PageBanner({
   }, [pageKey])
 
   // Default banner data for fallback (for candles page)
-  const defaultBanner: PageBannerType | null = pageKey === "candles" ? {
-    title: "Candlesss",
-    description: "Inspired by ancient stargazers, these candles fill your space with soft, lingering scent bringing calm, beauty, and a touch of the cosmos to your everyday moments.",
-    mediaType: "video",
-    videoUrl: "/assets/video-banner.mp4",
-    imageUrl: "/Images/TopBanner.jpg",
-    fallbackImageUrl: "/Images/TopBanner.jpg",
-    isActive: true,
-    pageKey: "candles",
-  } : null
+  const defaultBanner: PageBannerType | null =
+    pageKey === "candles"
+      ? {
+          title: "Candlesss",
+          description:
+            "Inspired by ancient stargazers, these candles fill your space with soft, lingering scent bringing calm, beauty, and a touch of the cosmos to your everyday moments.",
+          mediaType: "video",
+          videoUrl: "/assets/video-banner.mp4",
+          imageUrl: "/Images/TopBanner.jpg",
+          fallbackImageUrl: "/Images/TopBanner.jpg",
+          isActive: true,
+          pageKey: "candles",
+        }
+      : null
 
   // Use default banner if Contentful data is not available
   const displayBanner = bannerData || defaultBanner
@@ -103,10 +107,7 @@ export function PageBanner({
           whileInView={{ scale: 1, opacity: 1 }}
           transition={{ duration: 1.2 }}
           viewport={{ once: true }}
-          src={
-            (videoError && displayBanner.fallbackImageUrl) ||
-            displayBanner.imageUrl
-          }
+          src={(videoError && displayBanner.fallbackImageUrl) || displayBanner.imageUrl}
           alt={displayBanner.title || "Banner"}
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -118,7 +119,7 @@ export function PageBanner({
           }}
         />
       )}
-      
+
       {/* Text Overlay */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
@@ -149,4 +150,3 @@ export function PageBanner({
     </motion.div>
   )
 }
-

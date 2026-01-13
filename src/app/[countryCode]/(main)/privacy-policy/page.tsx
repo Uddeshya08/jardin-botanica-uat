@@ -1,8 +1,8 @@
-'use client'
+"use client"
 
+import { useEffect, useState } from "react"
 import { Navigation } from "../../../components/Navigation"
 import { PrivacyPolicy } from "../../../components/PrivacyPolicy"
-import { useEffect, useState } from "react"
 
 export default function PrivacyPolicyPage() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
   // Set page metadata on client side
   useEffect(() => {
     document.title = "Privacy Policy | Jardin Botanica"
-    
+
     // Update meta description
     const metaDescription = document.querySelector('meta[name="description"]')
     if (metaDescription) {
@@ -28,13 +28,13 @@ export default function PrivacyPolicyPage() {
       setIsScrolled(scrollPosition > 50)
     }
 
-    window.addEventListener('scroll', handleScroll)
-    
+    window.addEventListener("scroll", handleScroll)
+
     // Check initial scroll position
     handleScroll()
 
     return () => {
-      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener("scroll", handleScroll)
     }
   }, [])
 
@@ -47,8 +47,3 @@ export default function PrivacyPolicyPage() {
     </>
   )
 }
-
-
-
-
-

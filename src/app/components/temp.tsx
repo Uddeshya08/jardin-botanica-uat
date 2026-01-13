@@ -1,15 +1,15 @@
 "use client"
 
-import React, { useState } from "react"
-import { motion, AnimatePresence } from "motion/react"
 import {
+  ChevronRight as BreadcrumbChevron,
   ChevronLeft,
   ChevronRight,
-  Star,
-  Plus,
   Home,
-  ChevronRight as BreadcrumbChevron,
+  Plus,
+  Star,
 } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
+import React, { useState } from "react"
 import { InfoPanel } from "./InfoPanel"
 
 interface CartItem {
@@ -37,11 +37,7 @@ interface ProductHeroProps {
   onCartUpdate?: (item: CartItem | null) => void
 }
 
-export function ProductHero({
-  product,
-  countryCode,
-  onCartUpdate,
-}: ProductHeroProps) {
+export function ProductHero({ product, countryCode, onCartUpdate }: ProductHeroProps) {
   const [quantity, setQuantity] = useState(1)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isAddedToCart, setIsAddedToCart] = useState(false)
@@ -100,14 +96,10 @@ export function ProductHero({
   }
 
   const handlePrevImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? productImages.length - 1 : prev - 1
-    )
+    setCurrentImageIndex((prev) => (prev === 0 ? productImages.length - 1 : prev - 1))
   }
   const handleNextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === productImages.length - 1 ? 0 : prev + 1
-    )
+    setCurrentImageIndex((prev) => (prev === productImages.length - 1 ? 0 : prev + 1))
   }
 
   return (
@@ -160,9 +152,7 @@ export function ProductHero({
             transition={{ duration: 0.6, delay: 0.5 }}
             className="space-y-2 pb-4 pt-3"
           >
-            <p className="font-din-arabic-bold text-3xl text-black mt-4">
-              ₹{minorAmount}
-            </p>
+            <p className="font-din-arabic-bold text-3xl text-black mt-4">₹{minorAmount}</p>
           </motion.div>
 
           {/* QTY + Add */}
@@ -182,9 +172,7 @@ export function ProductHero({
               <div className="relative">
                 <select
                   value={quantity.toString()}
-                  onChange={(e) =>
-                    handleQuantityChange(parseInt(e.target.value))
-                  }
+                  onChange={(e) => handleQuantityChange(parseInt(e.target.value))}
                   className="font-din-arabic appearance-none bg-transparent border border-black/30 px-4 py-3 pr-8 text-black focus:outline-none focus:border-black transition-colors min-w-[80px]"
                 >
                   {[...Array(10)].map((_, i) => (
@@ -452,8 +440,7 @@ export function ProductHero({
                 currentImageIndex === index ? "w-8" : ""
               }`}
               style={{
-                backgroundColor:
-                  currentImageIndex === index ? "#a28b6f" : "rgba(0,0,0,0.3)",
+                backgroundColor: currentImageIndex === index ? "#a28b6f" : "rgba(0,0,0,0.3)",
               }}
               aria-label={`View image ${index + 1}`}
             />
@@ -468,9 +455,8 @@ export function ProductHero({
         title="RITUAL IN PRACTICE"
       >
         <p className="font-din-arabic text-black/80 leading-relaxed">
-          Dispense a measured amount. Work slowly into damp hands, letting the
-          exfoliating texture and black tea notes awaken the senses. Rinse away
-          — hands refreshed, reset, and primed.
+          Dispense a measured amount. Work slowly into damp hands, letting the exfoliating texture
+          and black tea notes awaken the senses. Rinse away — hands refreshed, reset, and primed.
         </p>
       </InfoPanel>
       <InfoPanel
@@ -480,41 +466,31 @@ export function ProductHero({
       >
         <div className="space-y-4">
           <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Black Tea Extract —{" "}
-            </span>
+            <span className="font-din-arabic text-black inline">Black Tea Extract — </span>
             <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
               antioxidant-rich, energizing.
             </span>
           </div>
           <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Colloidal Oats —{" "}
-            </span>
+            <span className="font-din-arabic text-black inline">Colloidal Oats — </span>
             <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
               natural scrubbing agent that lifts impurities gently.
             </span>
           </div>
           <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Panthenol (Pro-Vitamin B5) —{" "}
-            </span>
+            <span className="font-din-arabic text-black inline">Panthenol (Pro-Vitamin B5) — </span>
             <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
               hydrates and supports skin barrier.
             </span>
           </div>
           <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Aloe Leaf Water —{" "}
-            </span>
+            <span className="font-din-arabic text-black inline">Aloe Leaf Water — </span>
             <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
               refreshing, helps soothe after exfoliation.
             </span>
           </div>
           <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Glycerin —{" "}
-            </span>
+            <span className="font-din-arabic text-black inline">Glycerin — </span>
             <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
               draws in and holds moisture.
             </span>
@@ -528,25 +504,19 @@ export function ProductHero({
       >
         <div className="space-y-4">
           <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Top Notes —{" "}
-            </span>
+            <span className="font-din-arabic text-black inline">Top Notes — </span>
             <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
               Fresh bergamot, green tea leaves, crisp cucumber.
             </span>
           </div>
           <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Heart Notes —{" "}
-            </span>
+            <span className="font-din-arabic text-black inline">Heart Notes — </span>
             <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
               Black tea concentrate, white jasmine, subtle mint.
             </span>
           </div>
           <div className="group">
-            <span className="font-din-arabic text-black inline">
-              Base Notes —{" "}
-            </span>
+            <span className="font-din-arabic text-black inline">Base Notes — </span>
             <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
               Cedarwood, soft musk, clean linen.
             </span>
@@ -559,11 +529,10 @@ export function ProductHero({
         title="FULL INGREDIENTS"
       >
         <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
-          Water, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Black Tea
-          Extract (Camellia Sinensis), Colloidal Oatmeal, Panthenol (Pro-Vitamin
-          B5), Aloe Barbadensis Leaf Juice, Glycerin, Sodium Chloride, Citric
-          Acid, Phenoxyethanol, Ethylhexylglycerin, Natural Fragrance,
-          Tocopherol (Vitamin E).
+          Water, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Black Tea Extract (Camellia
+          Sinensis), Colloidal Oatmeal, Panthenol (Pro-Vitamin B5), Aloe Barbadensis Leaf Juice,
+          Glycerin, Sodium Chloride, Citric Acid, Phenoxyethanol, Ethylhexylglycerin, Natural
+          Fragrance, Tocopherol (Vitamin E).
         </p>
       </InfoPanel>
     </div>

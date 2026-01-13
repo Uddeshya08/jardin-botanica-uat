@@ -1,8 +1,8 @@
-'use client'
-import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
-import { Check, Star, Quote } from 'lucide-react'
-import { TestimonialsSection, TestimonialItem } from '../../types/contentful'
+"use client"
+import { Check, Quote, Star } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
+import React, { useState } from "react"
+import { TestimonialItem, type TestimonialsSection } from "../../types/contentful"
 
 // --------- UI bits you already had ----------
 const StarRating = ({ rating, delay = 0 }: { rating: number; delay?: number }) => (
@@ -12,10 +12,19 @@ const StarRating = ({ rating, delay = 0 }: { rating: number; delay?: number }) =
         key={i}
         initial={{ opacity: 0, scale: 0, rotate: -45 }}
         whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-        transition={{ duration: 0.4, delay: delay + i * 0.05, type: 'spring', stiffness: 200, damping: 10 }}
+        transition={{
+          duration: 0.4,
+          delay: delay + i * 0.05,
+          type: "spring",
+          stiffness: 200,
+          damping: 10,
+        }}
         viewport={{ once: true }}
       >
-        <Star className={`w-4 h-4 ${i < rating ? 'text-black fill-black' : 'text-black/20'}`} strokeWidth={1} />
+        <Star
+          className={`w-4 h-4 ${i < rating ? "text-black fill-black" : "text-black/20"}`}
+          strokeWidth={1}
+        />
       </motion.div>
     ))}
   </div>
@@ -25,7 +34,13 @@ const VerifiedBadge = ({ delay = 0 }: { delay?: number }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0, rotate: -180 }}
     whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-    transition={{ duration: 0.5, delay, type: 'spring', stiffness: 200, damping: 12 }}
+    transition={{
+      duration: 0.5,
+      delay,
+      type: "spring",
+      stiffness: 200,
+      damping: 12,
+    }}
     viewport={{ once: true }}
     className="inline-flex items-center justify-center w-5 h-5 bg-black rounded-full ml-2 relative"
   >
@@ -48,12 +63,16 @@ type CustomerTestimonialsProps = {
 export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonialsProps) {
   // Default values if no Contentful data is provided
   const defaults: TestimonialsSection = {
-    title: '',
-    sectionKey: '',
-    heading: 'Loved By Our Customers',
-    subheading: 'Real experiences from those who have made our product part of their daily ritual.',
-    backgroundColor: '#e3e3d8',
-    cta: { showMore: 'View All Reviews', showLess: 'Show Less Reviews', initialCount: 3 },
+    title: "",
+    sectionKey: "",
+    heading: "Loved By Our Customers",
+    subheading: "Real experiences from those who have made our product part of their daily ritual.",
+    backgroundColor: "#e3e3d8",
+    cta: {
+      showMore: "View All Reviews",
+      showLess: "Show Less Reviews",
+      initialCount: 3,
+    },
     items: [],
     isActive: true,
   }
@@ -84,7 +103,10 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
   }
 
   return (
-    <section className="pt-20 pb-20 lg:pt-10 lg:pb-20 relative overflow-hidden" style={{ backgroundColor: bg }}>
+    <section
+      className="pt-20 pb-20 lg:pt-10 lg:pb-20 relative overflow-hidden"
+      style={{ backgroundColor: bg }}
+    >
       {/* Subtle Background Pattern */}
       <div
         className="absolute inset-0 opacity-5"
@@ -92,7 +114,7 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
           backgroundImage: `radial-gradient(circle at 20% 30%, rgba(162, 139, 111, 0.3) 1px, transparent 1px),
                            radial-gradient(circle at 70% 60%, rgba(162, 139, 111, 0.2) 1px, transparent 1px),
                            radial-gradient(circle at 40% 80%, rgba(162, 139, 111, 0.2) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px, 40px 40px, 80px 80px',
+          backgroundSize: "60px 60px, 40px 40px, 80px 80px",
         }}
       />
 
@@ -103,20 +125,20 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-            className="text-center mb-8 md:mb-12 lg:mb-16"
+          className="text-center mb-8 md:mb-12 lg:mb-16"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="inline-block mb-3 md:mb-4"
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="inline-block mb-3 md:mb-4"
-            >
             <Quote className="w-8 h-8 text-black/30 mx-auto" strokeWidth={1} />
           </motion.div>
 
           <h2 className="font-american-typewriter text-2xl md:text-3xl tracking-tight text-black mb-3 md:mb-4">
-            {typeof heading === 'string' ? heading : String(heading)}
+            {typeof heading === "string" ? heading : String(heading)}
           </h2>
 
           {subheading && (
@@ -127,7 +149,7 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
               viewport={{ once: true }}
               className="font-din-arabic text-sm md:text-base text-black/70 max-w-2xl mx-auto mb-4 md:mb-6"
             >
-              {typeof subheading === 'string' ? subheading : String(subheading)}
+              {typeof subheading === "string" ? subheading : String(subheading)}
             </motion.p>
           )}
 
@@ -137,7 +159,7 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
             transition={{ duration: 0.8, delay: 0.4 }}
             viewport={{ once: true }}
             className="h-px bg-gradient-to-r from-transparent via-black/20 to-transparent mx-auto"
-            style={{ width: '120px' }}
+            style={{ width: "120px" }}
           />
         </motion.div>
 
@@ -152,19 +174,28 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
                   initial={{ opacity: 0, y: 50, scale: 0.9 }}
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -50, scale: 0.9 }}
-                  transition={{ duration: 0.6, delay: index * 0.1, type: 'spring', stiffness: 100, damping: 15 }}
+                  transition={{
+                    duration: 0.6,
+                    delay: index * 0.1,
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15,
+                  }}
                   viewport={{ once: true }}
                   whileHover={{ y: -8, scale: 1.02 }}
                   className="group"
                 >
                   <motion.div
                     className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-4 md:p-6 shadow-xl shadow-black/5 relative overflow-hidden min-h-[280px] md:min-h-[300px] max-h-[400px] flex flex-col"
-                    whileHover={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)', borderColor: 'rgba(255, 255, 255, 0.4)' }}
+                    whileHover={{
+                      boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)",
+                      borderColor: "rgba(255, 255, 255, 0.4)",
+                    }}
                     transition={{ duration: 0.3 }}
                   >
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      style={{ borderRadius: '1rem' }}
+                      style={{ borderRadius: "1rem" }}
                     />
 
                     {/* Customer Info */}
@@ -182,7 +213,8 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
                         {t.verified && <VerifiedBadge delay={index * 0.1 + 0.4} />}
                       </div>
                       <p className="font-din-arabic text-xs text-black/60 uppercase tracking-wide">
-                        {t.location}{t.purchaseDate ? ` • ${t.purchaseDate}` : ''}
+                        {t.location}
+                        {t.purchaseDate ? ` • ${t.purchaseDate}` : ""}
                       </p>
                     </motion.div>
 
@@ -197,7 +229,10 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
                       viewport={{ once: true }}
                       className="relative flex-1 overflow-y-auto"
                     >
-                      <Quote className="absolute -top-2 -left-2 w-6 h-6 text-black/20" strokeWidth={1} />
+                      <Quote
+                        className="absolute -top-2 -left-2 w-6 h-6 text-black/20"
+                        strokeWidth={1}
+                      />
                       <p className="font-din-arabic text-black/80 leading-relaxed italic relative z-10 pl-4">
                         {t.review.length > 200 ? `${t.review.substring(0, 200)}...` : t.review}
                       </p>

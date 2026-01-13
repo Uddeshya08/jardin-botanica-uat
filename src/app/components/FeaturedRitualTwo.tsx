@@ -1,7 +1,7 @@
-'use client'
-import React from 'react'
-import { motion } from 'motion/react'
-import { FeaturedRitualTwoSection } from '../../types/contentful'
+"use client"
+import { motion } from "motion/react"
+import React from "react"
+import type { FeaturedRitualTwoSection } from "../../types/contentful"
 
 type FeaturedRitualTwoProps = {
   featuredRitualTwoContent?: FeaturedRitualTwoSection | null
@@ -10,22 +10,23 @@ type FeaturedRitualTwoProps = {
 export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTwoProps) {
   // Default values if no Contentful data is provided
   const defaults: FeaturedRitualTwoSection = {
-    title: '',
-    sectionKey: '',
+    title: "",
+    sectionKey: "",
     productHandle: undefined,
-    heading: 'Hand Care Elevated',
-    subheading: 'A refreshing blend of tea antioxidants and gentle exfoliants, this handwash keeps your hands healthy, glowing, and nourished.',
-    backgroundColor: '#e3e3d8',
-    imageUrl: '/assets/handCareImage.png',
-    imageAlt: 'Jardin Botanica Tea Exfoliant Rinse with hands and botanical elements',
-    cta: { label: 'Read more', href: '#' },
-    imagePosition: 'left', // Changed default to image-left as requested
+    heading: "Hand Care Elevated",
+    subheading:
+      "A refreshing blend of tea antioxidants and gentle exfoliants, this handwash keeps your hands healthy, glowing, and nourished.",
+    backgroundColor: "#e3e3d8",
+    imageUrl: "/assets/handCareImage.png",
+    imageAlt: "Jardin Botanica Tea Exfoliant Rinse with hands and botanical elements",
+    cta: { label: "Read more", href: "#" },
+    imagePosition: "left", // Changed default to image-left as requested
     active: true,
   }
 
   // console.log('=== FeaturedRitualTwo Component Debug ===');
   // console.log('featuredRitualTwoContent:', featuredRitualTwoContent);
-  
+
   // if (featuredRitualTwoContent) {
   //   console.log('Product Handle:', featuredRitualTwoContent.productHandle);
   //   console.log('Section Key:', featuredRitualTwoContent.sectionKey);
@@ -33,7 +34,7 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
   //   console.log('Image URL:', featuredRitualTwoContent.imageUrl);
   //   console.log('Active:', featuredRitualTwoContent.active);
   // }
-  
+
   const meta = featuredRitualTwoContent || defaults
 
   // Don't render if Contentful data exists but is inactive
@@ -77,7 +78,7 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
           transition={{ duration: 0.6, delay: 0.5 }}
           viewport={{ once: true }}
         >
-          <a href={meta.cta.href ?? '#'} aria-label={meta.cta.label}>
+          <a href={meta.cta.href ?? "#"} aria-label={meta.cta.label}>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -99,7 +100,11 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
       className="w-full lg:w-3/5 relative px-0 md:px-0"
     >
       <div className="min-h-[400px] h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden rounded-lg md:rounded-none">
-        <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.9 }} className="w-full h-full">
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.9 }}
+          className="w-full h-full"
+        >
           <img
             src={meta.imageUrl}
             alt={meta.imageAlt}
@@ -111,22 +116,21 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
   )
 
   // Layout based on imagePosition (default is image-left as requested)
-  const content = meta.imagePosition === 'left' ? (
-    <>
-      {Right}
-      {Left}
-    </>
-  ) : (
-    <>
-      {Left}
-      {Right}
-    </>
-  )
+  const content =
+    meta.imagePosition === "left" ? (
+      <>
+        {Right}
+        {Left}
+      </>
+    ) : (
+      <>
+        {Left}
+        {Right}
+      </>
+    )
 
   return (
-    <section
-      style={{ backgroundColor: meta.backgroundColor, marginTop: '20px' }}
-    >
+    <section style={{ backgroundColor: meta.backgroundColor, marginTop: "20px" }}>
       <div className="flex flex-col lg:flex-row gap-0">{content}</div>
     </section>
   )

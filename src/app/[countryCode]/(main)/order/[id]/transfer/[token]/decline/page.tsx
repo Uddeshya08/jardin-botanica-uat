@@ -2,11 +2,7 @@ import { declineTransferRequest } from "@lib/data/orders"
 import { Heading, Text } from "@medusajs/ui"
 import TransferImage from "@modules/order/components/transfer-image"
 
-export default async function TransferPage({
-  params,
-}: {
-  params: { id: string; token: string }
-}) {
+export default async function TransferPage({ params }: { params: { id: string; token: string } }) {
   const { id, token } = params
 
   const { success, error } = await declineTransferRequest(id, token)
@@ -30,9 +26,7 @@ export default async function TransferPage({
             <Text className="text-zinc-600">
               There was an error declining the transfer. Please try again.
             </Text>
-            {error && (
-              <Text className="text-red-500">Error message: {error}</Text>
-            )}
+            {error && <Text className="text-red-500">Error message: {error}</Text>}
           </>
         )}
       </div>

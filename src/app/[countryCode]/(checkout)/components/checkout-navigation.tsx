@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { Navigation } from "app/components/Navigation"
-import { useCartItems } from "app/context/cart-items-context"
 import { useAuth } from "app/context/auth-context"
+import { useCartItems } from "app/context/cart-items-context"
+import { useEffect, useState } from "react"
 
 export default function CheckoutNavigation() {
   const [isScrolled, setIsScrolled] = useState(false)

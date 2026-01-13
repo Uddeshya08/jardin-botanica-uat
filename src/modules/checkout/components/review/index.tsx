@@ -1,12 +1,11 @@
 "use client"
 
-import { ArrowLeftMini } from "@medusajs/icons"
-import { Button, Heading, Text, clx } from "@medusajs/ui"
-import { MapPin, CreditCard, Edit, Shield, ChevronLeft } from "lucide-react"
 import { paymentInfoMap } from "@lib/constants"
-
-import PaymentButton from "../payment-button"
+import { ArrowLeftMini } from "@medusajs/icons"
+import { Button, clx, Heading, Text } from "@medusajs/ui"
+import { ChevronLeft, CreditCard, Edit, MapPin, Shield } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import PaymentButton from "../payment-button"
 
 // Payment type options - matching the ones in payment component
 const PAYMENT_TYPES = [
@@ -44,8 +43,7 @@ const Review = ({ cart }: { cart: any }) => {
 
   const isOpen = searchParams.get("step") === "review"
 
-  const paidByGiftcard =
-    cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
+  const paidByGiftcard = cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
   const previousStepsCompleted =
     cart.shipping_address &&
@@ -112,8 +110,6 @@ const Review = ({ cart }: { cart: any }) => {
 
   return (
     <div>
-
-
       {isOpen && previousStepsCompleted && (
         <>
           <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/80 shadow-xl">
@@ -178,9 +174,7 @@ const Review = ({ cart }: { cart: any }) => {
                   {cart.shipping_address.phone && (
                     <p className="text-black/70">{cart.shipping_address.phone}</p>
                   )}
-                  {cart.email && (
-                    <p className="text-black/70">{cart.email}</p>
-                  )}
+                  {cart.email && <p className="text-black/70">{cart.email}</p>}
                 </div>
               </div>
             )}
@@ -217,22 +211,21 @@ const Review = ({ cart }: { cart: any }) => {
             )}
 
             {/* Previous and Place Order Buttons */}
-
           </div>
-            <div className="flex justify-between items-center gap-4 mt-6 mb-6">
-              <button
-                onClick={handlePrevious}
-                className="px-6 py-3 bg-white/60 backdrop-blur-sm border-2 border-black/10 hover:border-black/20 rounded-xl font-din-arabic transition-all shadow-sm hover:shadow-md flex items-center space-x-2"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Previous</span>
-              </button>
-              <div className="flex-shrink-0">
-                <div className="[&_button]:!w-auto [&_button]:!min-w-fit">
-                  <PaymentButton cart={cart} data-testid="submit-order-button" />
-                </div>
+          <div className="flex justify-between items-center gap-4 mt-6 mb-6">
+            <button
+              onClick={handlePrevious}
+              className="px-6 py-3 bg-white/60 backdrop-blur-sm border-2 border-black/10 hover:border-black/20 rounded-xl font-din-arabic transition-all shadow-sm hover:shadow-md flex items-center space-x-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Previous</span>
+            </button>
+            <div className="flex-shrink-0">
+              <div className="[&_button]:!w-auto [&_button]:!min-w-fit">
+                <PaymentButton cart={cart} data-testid="submit-order-button" />
               </div>
             </div>
+          </div>
         </>
       )}
     </div>

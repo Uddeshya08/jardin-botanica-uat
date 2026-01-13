@@ -1,12 +1,8 @@
-import React from "react"
+import type React from "react"
 
-import { IconProps } from "types/icon"
+import type { IconProps } from "types/icon"
 
-const Spinner: React.FC<IconProps> = ({
-  size = "16",
-  color = "currentColor",
-  ...attributes
-}) => {
+const Spinner: React.FC<IconProps> = ({ size = "16", color = "currentColor", ...attributes }) => {
   return (
     <svg
       className="animate-spin"
@@ -17,14 +13,7 @@ const Spinner: React.FC<IconProps> = ({
       viewBox="0 0 24 24"
       {...attributes}
     >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke={color}
-        strokeWidth="4"
-      ></circle>
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke={color} strokeWidth="4"></circle>
       <path
         className="opacity-75"
         fill={color}

@@ -1,45 +1,36 @@
 "use client"
 
-import React, { useEffect, useMemo, useActionState, useState } from "react"
-
+import { addCustomerAddress, updateCustomerAddress } from "@lib/data/customer"
+import type { HttpTypes } from "@medusajs/types"
 import Input from "@modules/common/components/input"
 import NativeSelect from "@modules/common/components/native-select"
-
+import React, { useActionState, useEffect, useMemo, useState } from "react"
 import AccountInfo from "../account-info"
-import { HttpTypes } from "@medusajs/types"
-import { addCustomerAddress, updateCustomerAddress } from "@lib/data/customer"
 
 type MyInformationProps = {
   customer: HttpTypes.StoreCustomer
   regions: HttpTypes.StoreRegion[]
 }
 
-const ProfileBillingAddress: React.FC<MyInformationProps> = ({
-  customer,
-  regions,
-}) => {
+const ProfileBillingAddress: React.FC<MyInformationProps> = ({ customer, regions }) => {
   const regionOptions = useMemo(() => {
     return (
-      regions
-        ?.map((region) => {
-          return region.countries?.map((country) => ({
-            value: country.iso_2,
-            label: country.display_name,
-          }))
-        })
-        .flat() || []
+      regions?.flatMap((region) => {
+        return region.countries?.map((country) => ({
+          value: country.iso_2,
+          label: country.display_name,
+        }))
+      }) || []
     )
   }, [regions])
 
   const [successState, setSuccessState] = React.useState(false)
 
-  const billingAddress = customer.addresses?.find(
-    (addr) => addr.is_default_billing
-  )
+  const billingAddress = customer.addresses?.find((addr) => addr.is_default_billing)
 
-  const [postalCode, setPostalCode] = useState(billingAddress?.postal_code || '')
-  const [city, setCity] = useState(billingAddress?.city || '')
-  const [province, setProvince] = useState(billingAddress?.province || '')
+  const [postalCode, setPostalCode] = useState(billingAddress?.postal_code || "")
+  const [city, setCity] = useState(billingAddress?.city || "")
+  const [province, setProvince] = useState(billingAddress?.province || "")
   const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
 
   const initialState: Record<string, any> = {
@@ -61,9 +52,9 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
   const clearState = () => {
     setSuccessState(false)
     // Reset to original values
-    setPostalCode(billingAddress?.postal_code || '')
-    setCity(billingAddress?.city || '')
-    setProvince(billingAddress?.province || '')
+    setPostalCode(billingAddress?.postal_code || "")
+    setCity(billingAddress?.city || "")
+    setProvince(billingAddress?.province || "")
   }
 
   // Function to fetch city and state from postal code
@@ -73,14 +64,14 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
       try {
         const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`)
         const data = await response.json()
-        
-        if (data && data[0]?.Status === 'Success' && data[0]?.PostOffice?.length > 0) {
+
+        if (data && data[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
           const postOffice = data[0].PostOffice[0]
-          setCity(postOffice.District || postOffice.Name || '')
-          setProvince(postOffice.State || '')
+          setCity(postOffice.District || postOffice.Name || "")
+          setProvince(postOffice.State || "")
         }
       } catch (error) {
-        console.error('Error fetching postal code data:', error)
+        console.error("Error fetching postal code data:", error)
       } finally {
         setIsLoadingPostalData(false)
       }
@@ -100,9 +91,9 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
 
   // Reset form fields when billing address changes
   useEffect(() => {
-    setPostalCode(billingAddress?.postal_code || '')
-    setCity(billingAddress?.city || '')
-    setProvince(billingAddress?.province || '')
+    setPostalCode(billingAddress?.postal_code || "")
+    setCity(billingAddress?.city || "")
+    setProvince(billingAddress?.province || "")
   }, [billingAddress])
 
   const currentInfo = useMemo(() => {
@@ -111,9 +102,8 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
     }
 
     const country =
-      regionOptions?.find(
-        (country) => country?.value === billingAddress.country_code
-      )?.label || billingAddress.country_code?.toUpperCase()
+      regionOptions?.find((country) => country?.value === billingAddress.country_code)?.label ||
+      billingAddress.country_code?.toUpperCase()
 
     return (
       <div className="flex flex-col font-semibold" data-testid="current-info">

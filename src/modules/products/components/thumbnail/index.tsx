@@ -1,8 +1,7 @@
 import { Container, clx } from "@medusajs/ui"
-import Image from "next/image"
-import React from "react"
-
 import PlaceholderImage from "@modules/common/icons/placeholder-image"
+import Image from "next/image"
+import type React from "react"
 
 type ThumbnailProps = {
   thumbnail?: string | null
@@ -46,10 +45,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   )
 }
 
-const ImageOrPlaceholder = ({
-  image,
-  size,
-}: Pick<ThumbnailProps, "size"> & { image?: string }) => {
+const ImageOrPlaceholder = ({ image, size }: Pick<ThumbnailProps, "size"> & { image?: string }) => {
   return image ? (
     <Image
       src={image}

@@ -1,10 +1,10 @@
 "use client"
 
-import React, { useEffect, useActionState } from "react"
-import Input from "@modules/common/components/input"
-import AccountInfo from "../account-info"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { toast } from "@medusajs/ui"
+import Input from "@modules/common/components/input"
+import React, { useActionState, useEffect } from "react"
+import AccountInfo from "../account-info"
 
 type MyInformationProps = {
   customer: HttpTypes.StoreCustomer
@@ -23,16 +23,10 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
   }
 
   return (
-    <form
-      action={updatePassword}
-      onReset={() => clearState()}
-      className="w-full"
-    >
+    <form action={updatePassword} onReset={() => clearState()} className="w-full">
       <AccountInfo
         label="Password"
-        currentInfo={
-          <span>The password is not shown for security reasons</span>
-        }
+        currentInfo={<span>The password is not shown for security reasons</span>}
         isSuccess={successState}
         isError={false}
         errorMessage={undefined}

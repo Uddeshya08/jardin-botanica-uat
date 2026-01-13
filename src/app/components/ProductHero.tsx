@@ -1,32 +1,28 @@
 "use client"
 
-import React, { useTransition, useState, useMemo, useEffect } from "react"
-import { motion, AnimatePresence } from "motion/react"
+import { addToCartAction } from "@lib/data/cart-actions"
+import { emitCartUpdated } from "@lib/util/cart-client"
+import type { HttpTypes } from "@medusajs/types"
+import { type LedgerItem, useLedger } from "app/context/ledger-context"
 import {
+  ChevronRight as BreadcrumbChevron,
   ChevronLeft,
   ChevronRight,
-  Star,
   Heart,
-  Share2,
-  Plus,
-  Minus,
   Home,
-  ChevronRight as BreadcrumbChevron,
+  Minus,
+  Plus,
+  Share2,
+  Star,
   X,
 } from "lucide-react"
-
-import { IoIosArrowDown } from "react-icons/io"
-import { InfoPanel } from "./InfoPanel"
-import { addToCartAction } from "@lib/data/cart-actions"
+import { AnimatePresence, motion } from "motion/react"
 import { useRouter } from "next/navigation"
-import { emitCartUpdated } from "@lib/util/cart-client"
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
-import { Label } from "./ui/label"
-import { useLedger, LedgerItem } from "app/context/ledger-context"
+import React, { useEffect, useMemo, useState, useTransition } from "react"
+import { IoIosArrowDown } from "react-icons/io"
 import { toast } from "sonner"
-import { ProductInfoPanels, DynamicPanel } from "../../types/contentful"
-import { HttpTypes } from "@medusajs/types"
-
+import { DynamicPanel, type ProductInfoPanels } from "../../types/contentful"
+import { InfoPanel } from "./InfoPanel"
 import {
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -36,6 +32,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "./ui/breadcrumb"
+import { Label } from "./ui/label"
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
 
 interface CartItem {
   id: string
@@ -78,18 +76,14 @@ const extractNumericSize = (label: string) => {
   return value
 }
 
-const buildSizeOptions = (
-  product: ProductHeroProps["product"],
-  sizeOptionId?: string
-) => {
+const buildSizeOptions = (product: ProductHeroProps["product"], sizeOptionId?: string) => {
   return (product.variants || [])
     .map((variant) => {
       const label = sizeOptionId
-        ? variant?.options?.find((opt) => opt.option_id === sizeOptionId)
-            ?.value ??
+        ? (variant?.options?.find((opt) => opt.option_id === sizeOptionId)?.value ??
           variant?.title ??
-          ""
-        : variant?.title ?? variant?.options?.[0]?.value ?? ""
+          "")
+        : (variant?.title ?? variant?.options?.[0]?.value ?? "")
 
       return label
         ? {
@@ -98,9 +92,7 @@ const buildSizeOptions = (
           }
         : null
     })
-    .filter((option): option is { id: string; label: string } =>
-      Boolean(option)
-    )
+    .filter((option): option is { id: string; label: string } => Boolean(option))
     .sort((a, b) => extractNumericSize(a.label) - extractNumericSize(b.label))
 }
 
@@ -182,9 +174,7 @@ export function ProductHero({
 
     return preferredOption?.id ?? product.variants[0]?.id ?? null
   }, [product, visibleSizeOptions])
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-    defaultVariantId
-  )
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(defaultVariantId)
   useEffect(() => {
     setSelectedVariantId(defaultVariantId)
     // Only call onVariantChange if it's actually different and not undefined
@@ -193,8 +183,7 @@ export function ProductHero({
     }
   }, [defaultVariantId])
   const selectedVariant =
-    product.variants?.find((v) => v.id === selectedVariantId) ??
-    product.variants?.[0]
+    product.variants?.find((v) => v.id === selectedVariantId) ?? product.variants?.[0]
   const minorAmount = selectedVariant?.calculated_price?.calculated_amount ?? 0
   console.log("🔍 ProductHero - minorAmount:", {
     minorAmount,
@@ -206,19 +195,13 @@ export function ProductHero({
   const imgs = product.images?.map((i) => i.url).filter(Boolean) ?? []
   const productImages = imgs.length ? imgs : [fallbackImg]
 
-  const selectedSizeLabel = visibleSizeOptions.find(
-    (opt) => opt.id === selectedVariantId
-  )?.label
+  const selectedSizeLabel = visibleSizeOptions.find((opt) => opt.id === selectedVariantId)?.label
   const uniqueSizeLabels = useMemo(
-    () =>
-      Array.from(
-        new Set(visibleSizeOptions.map((option) => option.label.toLowerCase()))
-      ),
+    () => Array.from(new Set(visibleSizeOptions.map((option) => option.label.toLowerCase()))),
     [visibleSizeOptions]
   )
   const shouldShowSizeOptions =
-    visibleSizeOptions.length > 1 &&
-    uniqueSizeLabels.every(isRecognizedSizeLabel)
+    visibleSizeOptions.length > 1 && uniqueSizeLabels.every(isRecognizedSizeLabel)
 
   // Check if the product is a candle
   const isCandle = () => {
@@ -227,9 +210,7 @@ export function ProductHero({
 
     // Check for candle keywords
     const candleKeywords = ["candle", "candles"]
-    return candleKeywords.some(
-      (keyword) => title.includes(keyword) || handle.includes(keyword)
-    )
+    return candleKeywords.some((keyword) => title.includes(keyword) || handle.includes(keyword))
   }
 
   // Check if the product is a cleanser or exfoliant
@@ -238,14 +219,7 @@ export function ProductHero({
     const handle = (product as any).handle?.toLowerCase() || ""
 
     // Check for cleanser/exfoliant keywords
-    const keywords = [
-      "cleanser",
-      "exfoliant",
-      "hand wash",
-      "handwash",
-      "scrub",
-      "cleansing",
-    ]
+    const keywords = ["cleanser", "exfoliant", "hand wash", "handwash", "scrub", "cleansing"]
     const canSeeActives = keywords.some(
       (keyword) => title.includes(keyword) || handle.includes(keyword)
     )
@@ -260,17 +234,13 @@ export function ProductHero({
   }
 
   // Check if using dynamic panels (new approach) or legacy fields (backward compatibility)
-  const useDynamicPanels =
-    productInfoPanels?.panels && productInfoPanels.panels.length > 0
+  const useDynamicPanels = productInfoPanels?.panels && productInfoPanels.panels.length > 0
 
   // Use Contentful data if available, otherwise use defaults
-  const shouldShowRitual =
-    productInfoPanels?.showRitualInPractice ?? isCleanserOrExfoliant()
-  const shouldShowActives =
-    productInfoPanels?.showActives ?? isCleanserOrExfoliant()
+  const shouldShowRitual = productInfoPanels?.showRitualInPractice ?? isCleanserOrExfoliant()
+  const shouldShowActives = productInfoPanels?.showActives ?? isCleanserOrExfoliant()
   const shouldShowFragrance = productInfoPanels?.showFragranceNotes ?? true
-  const shouldShowIngredients =
-    productInfoPanels?.showFullIngredients ?? isCleanserOrExfoliant()
+  const shouldShowIngredients = productInfoPanels?.showFullIngredients ?? isCleanserOrExfoliant()
 
   // Default content (for legacy approach)
   const defaultRitualInPractice =
@@ -302,19 +272,16 @@ export function ProductHero({
   const defaultFullIngredients =
     "Water, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Black Tea Extract (Camellia Sinensis), Colloidal Oatmeal, Panthenol (Pro-Vitamin B5), Aloe Barbadensis Leaf Juice, Glycerin, Sodium Chloride, Citric Acid, Phenoxyethanol, Ethylhexylglycerin, Natural Fragrance, Tocopherol (Vitamin E)."
 
-  const ritualInPractice =
-    productInfoPanels?.ritualInPractice || defaultRitualInPractice
+  const ritualInPractice = productInfoPanels?.ritualInPractice || defaultRitualInPractice
   const actives =
     productInfoPanels?.actives && productInfoPanels.actives.length > 0
       ? productInfoPanels.actives
       : defaultActives
   const fragranceNotes =
-    productInfoPanels?.fragranceNotes &&
-    productInfoPanels.fragranceNotes.length > 0
+    productInfoPanels?.fragranceNotes && productInfoPanels.fragranceNotes.length > 0
       ? productInfoPanels.fragranceNotes
       : defaultFragranceNotes
-  const fullIngredients =
-    productInfoPanels?.fullIngredients || defaultFullIngredients
+  const fullIngredients = productInfoPanels?.fullIngredients || defaultFullIngredients
 
   // Dynamic panels (for future extensibility)
   const dynamicPanels = productInfoPanels?.panels || []
@@ -411,14 +378,10 @@ export function ProductHero({
   }
 
   const handlePrevImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? productImages.length - 1 : prev - 1
-    )
+    setCurrentImageIndex((prev) => (prev === 0 ? productImages.length - 1 : prev - 1))
   }
   const handleNextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === productImages.length - 1 ? 0 : prev + 1
-    )
+    setCurrentImageIndex((prev) => (prev === productImages.length - 1 ? 0 : prev + 1))
   }
 
   const handleToggleLedger = () => {
@@ -437,14 +400,9 @@ export function ProductHero({
     }
 
     toggleLedgerItem(ledgerItem)
-    toast.success(
-      `${product.title} ${
-        alreadyInLedger ? "Removed From" : "Added To"
-      } Ledger`,
-      {
-        duration: 2000,
-      }
-    )
+    toast.success(`${product.title} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+      duration: 2000,
+    })
   }
 
   const isProductInLedger = isInLedger(product.id)
@@ -482,10 +440,7 @@ export function ProductHero({
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator>
-                  <BreadcrumbChevron
-                    className="w-3 h-3"
-                    style={{ color: "#a28b6f" }}
-                  />
+                  <BreadcrumbChevron className="w-3 h-3" style={{ color: "#a28b6f" }} />
                 </BreadcrumbSeparator>
                 <BreadcrumbItem>
                   <BreadcrumbPage className="font-din-arabic text-xs tracking-wide text-black/80">
@@ -493,10 +448,7 @@ export function ProductHero({
                   </BreadcrumbPage>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator>
-                  <BreadcrumbChevron
-                    className="w-3 h-3"
-                    style={{ color: "#a28b6f" }}
-                  />
+                  <BreadcrumbChevron className="w-3 h-3" style={{ color: "#a28b6f" }} />
                 </BreadcrumbSeparator>
                 <BreadcrumbItem>
                   <BreadcrumbPage className="font-din-arabic text-xs tracking-wide text-black/80">
@@ -618,9 +570,7 @@ export function ProductHero({
               <div className="relative w-full sm:w-auto">
                 <select
                   value={quantity.toString()}
-                  onChange={(e) =>
-                    handleQuantityChange(parseInt(e.target.value))
-                  }
+                  onChange={(e) => handleQuantityChange(parseInt(e.target.value))}
                   className="font-din-arabic appearance-none bg-transparent border border-black/30 px-4 py-3 pr-8 text-black focus:outline-none focus:border-black transition-colors w-full sm:min-w-[80px]"
                 >
                   {[...Array(10)].map((_, i) => (
@@ -708,9 +658,7 @@ export function ProductHero({
                 onClick={() => {
                   // On mobile (below lg), use accordion; on desktop, use drawer
                   if (isMobile) {
-                    setOpenAccordionId(
-                      openAccordionId === "ritual" ? null : "ritual"
-                    )
+                    setOpenAccordionId(openAccordionId === "ritual" ? null : "ritual")
                   } else {
                     setIsRitualPanelOpen(true)
                   }
@@ -785,9 +733,7 @@ export function ProductHero({
                 onClick={() => {
                   // On mobile (below lg), use accordion; on desktop, use drawer
                   if (isMobile) {
-                    setOpenAccordionId(
-                      openAccordionId === "actives" ? null : "actives"
-                    )
+                    setOpenAccordionId(openAccordionId === "actives" ? null : "actives")
                   } else {
                     setIsActivesPanelOpen(true)
                   }
@@ -869,9 +815,7 @@ export function ProductHero({
                 onClick={() => {
                   // On mobile (below lg), use accordion; on desktop, use drawer
                   if (isMobile) {
-                    setOpenAccordionId(
-                      openAccordionId === "fragrance" ? null : "fragrance"
-                    )
+                    setOpenAccordionId(openAccordionId === "fragrance" ? null : "fragrance")
                   } else {
                     setIsFragranceNotesOpen(true)
                   }
@@ -953,9 +897,7 @@ export function ProductHero({
                 onClick={() => {
                   // On mobile (below lg), use accordion; on desktop, use drawer
                   if (isMobile) {
-                    setOpenAccordionId(
-                      openAccordionId === "ingredients" ? null : "ingredients"
-                    )
+                    setOpenAccordionId(openAccordionId === "ingredients" ? null : "ingredients")
                   } else {
                     setIsIngredientsPanelOpen(true)
                   }
@@ -1036,9 +978,7 @@ export function ProductHero({
                       onClick={() => {
                         // On mobile (below lg), use accordion; on desktop, use drawer
                         if (isMobile) {
-                          setOpenAccordionId(
-                            openAccordionId === panel.id ? null : panel.id
-                          )
+                          setOpenAccordionId(openAccordionId === panel.id ? null : panel.id)
                         } else {
                           setOpenPanelId(panel.id)
                         }
@@ -1087,61 +1027,51 @@ export function ProductHero({
                                 case "text":
                                   return (
                                     <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
-                                      {typeof panel.content === "string"
-                                        ? panel.content
-                                        : ""}
+                                      {typeof panel.content === "string" ? panel.content : ""}
                                     </p>
                                   )
                                 case "actives":
                                   return (
                                     <div className="space-y-4">
                                       {Array.isArray(panel.content) &&
-                                        panel.content.map(
-                                          (active: any, idx: number) => (
-                                            <div key={idx} className="group">
-                                              <span className="font-din-arabic text-black inline text-sm">
-                                                {active.name}{" "}
-                                              </span>
-                                              <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
-                                                {active.description}
-                                              </span>
-                                            </div>
-                                          )
-                                        )}
+                                        panel.content.map((active: any, idx: number) => (
+                                          <div key={idx} className="group">
+                                            <span className="font-din-arabic text-black inline text-sm">
+                                              {active.name}{" "}
+                                            </span>
+                                            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
+                                              {active.description}
+                                            </span>
+                                          </div>
+                                        ))}
                                     </div>
                                   )
                                 case "fragrance":
                                   return (
                                     <div className="space-y-4">
                                       {Array.isArray(panel.content) &&
-                                        panel.content.map(
-                                          (note: any, idx: number) => (
-                                            <div key={idx} className="group">
-                                              <span className="font-din-arabic text-black inline text-sm">
-                                                {note.type}{" "}
-                                              </span>
-                                              <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
-                                                {note.description}
-                                              </span>
-                                            </div>
-                                          )
-                                        )}
+                                        panel.content.map((note: any, idx: number) => (
+                                          <div key={idx} className="group">
+                                            <span className="font-din-arabic text-black inline text-sm">
+                                              {note.type}{" "}
+                                            </span>
+                                            <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors text-sm">
+                                              {note.description}
+                                            </span>
+                                          </div>
+                                        ))}
                                     </div>
                                   )
                                 case "ingredients":
                                   return (
                                     <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
-                                      {typeof panel.content === "string"
-                                        ? panel.content
-                                        : ""}
+                                      {typeof panel.content === "string" ? panel.content : ""}
                                     </p>
                                   )
                                 default:
                                   return (
                                     <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
-                                      {typeof panel.content === "string"
-                                        ? panel.content
-                                        : ""}
+                                      {typeof panel.content === "string" ? panel.content : ""}
                                     </p>
                                   )
                               }
@@ -1173,10 +1103,7 @@ export function ProductHero({
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
             <Star className="w-3 h-3" style={{ color: "#a28b6f" }} />
-            <span
-              className="font-din-arabic text-xs tracking-wide"
-              style={{ color: "#a28b6f" }}
-            >
+            <span className="font-din-arabic text-xs tracking-wide" style={{ color: "#a28b6f" }}>
               BOTANICAL BLEND
             </span>
           </div>
@@ -1195,19 +1122,13 @@ export function ProductHero({
             whileTap={{ scale: 0.9 }}
             onClick={handleToggleLedger}
             className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${
-              isProductInLedger
-                ? "text-[#e58a4d]"
-                : "text-black/60 hover:text-black"
+              isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"
             }`}
-            aria-label={
-              isProductInLedger ? "Remove from ledger" : "Add to ledger"
-            }
+            aria-label={isProductInLedger ? "Remove from ledger" : "Add to ledger"}
           >
             <Heart
               className={`w-5 h-5 transition-colors ${
-                isProductInLedger
-                  ? "fill-[#e58a4d] stroke-[#e58a4d]"
-                  : "stroke-current"
+                isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"
               }`}
             />
           </motion.button>
@@ -1285,10 +1206,7 @@ export function ProductHero({
                 currentImageIndex === index ? "w-8" : ""
               }`}
               style={{
-                backgroundColor:
-                  currentImageIndex === index
-                    ? "#a28b6f"
-                    : "rgba(0, 0, 0, 0.3)",
+                backgroundColor: currentImageIndex === index ? "#a28b6f" : "rgba(0, 0, 0, 0.3)",
               }}
               aria-label={`View image ${index + 1}`}
             />
@@ -1301,9 +1219,7 @@ export function ProductHero({
         onClose={() => setIsRitualPanelOpen(false)}
         title="Ritual in Practice"
       >
-        <p className="font-din-arabic text-black/80 leading-relaxed">
-          {ritualInPractice}
-        </p>
+        <p className="font-din-arabic text-black/80 leading-relaxed">{ritualInPractice}</p>
       </InfoPanel>
       <InfoPanel
         isOpen={isActivesPanelOpen}
@@ -1313,9 +1229,7 @@ export function ProductHero({
         <div className="space-y-4">
           {actives.map((active, index) => (
             <div key={index} className="group">
-              <span className="font-din-arabic text-black inline">
-                {active.name}{" "}
-              </span>
+              <span className="font-din-arabic text-black inline">{active.name} </span>
               <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
                 {active.description}
               </span>
@@ -1331,9 +1245,7 @@ export function ProductHero({
         <div className="space-y-4">
           {fragranceNotes.map((note, index) => (
             <div key={index} className="group">
-              <span className="font-din-arabic text-black inline">
-                {note.type}{" "}
-              </span>
+              <span className="font-din-arabic text-black inline">{note.type} </span>
               <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
                 {note.description}
               </span>
@@ -1346,9 +1258,7 @@ export function ProductHero({
         onClose={() => setIsIngredientsPanelOpen(false)}
         title="Full Ingredients"
       >
-        <p className="font-din-arabic text-black/70 text-sm leading-relaxed">
-          {fullIngredients}
-        </p>
+        <p className="font-din-arabic text-black/70 text-sm leading-relaxed">{fullIngredients}</p>
       </InfoPanel>
 
       {/* Dynamic Panels - for future extensibility */}
@@ -1370,9 +1280,7 @@ export function ProductHero({
                     {Array.isArray(panel.content) &&
                       panel.content.map((active: any, index: number) => (
                         <div key={index} className="group">
-                          <span className="font-din-arabic text-black inline">
-                            {active.name}{" "}
-                          </span>
+                          <span className="font-din-arabic text-black inline">{active.name} </span>
                           <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
                             {active.description}
                           </span>
@@ -1386,9 +1294,7 @@ export function ProductHero({
                     {Array.isArray(panel.content) &&
                       panel.content.map((note: any, index: number) => (
                         <div key={index} className="group">
-                          <span className="font-din-arabic text-black inline">
-                            {note.type}{" "}
-                          </span>
+                          <span className="font-din-arabic text-black inline">{note.type} </span>
                           <span className="font-din-arabic text-black/70 group-hover:text-black transition-colors">
                             {note.description}
                           </span>

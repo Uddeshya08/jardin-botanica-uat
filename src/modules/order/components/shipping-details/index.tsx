@@ -1,5 +1,5 @@
 import { convertToLocale } from "@lib/util/money"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@medusajs/ui"
 
 import Divider from "@modules/common/components/divider"
@@ -15,24 +15,16 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
         Delivery
       </Heading> */}
       <div className="flex items-start gap-x-8">
-        <div
-          className="flex flex-col w-1/3"
-          data-testid="shipping-address-summary"
-        >
-          <h2 className="txt-medium-plus text-base-semi mb-1 ">
-            Shipping Address
-          </h2>
+        <div className="flex flex-col w-1/3" data-testid="shipping-address-summary">
+          <h2 className="txt-medium-plus text-base-semi mb-1 ">Shipping Address</h2>
           <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.first_name}{" "}
-            {order.shipping_address?.last_name}
+            {order.shipping_address?.first_name} {order.shipping_address?.last_name}
           </Text>
           <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.address_1}{" "}
-            {order.shipping_address?.address_2}
+            {order.shipping_address?.address_1} {order.shipping_address?.address_2}
           </Text>
           <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.postal_code},{" "}
-            {order.shipping_address?.city}
+            {order.shipping_address?.postal_code}, {order.shipping_address?.city}
           </Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {order.shipping_address?.country_code?.toUpperCase()}

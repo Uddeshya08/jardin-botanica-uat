@@ -1,23 +1,24 @@
 "use client"
 
+import { requestEmailUpdate, updateCustomer } from "@lib/data/customer"
+import type { HttpTypes } from "@medusajs/types"
+import { Pencil } from "lucide-react"
 import { motion } from "motion/react"
-import React, { useState } from "react"
+import type React from "react"
+import { useState } from "react"
+import { toast } from "sonner"
+import { Checkbox } from "../../../../app/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogDescription,
 } from "../../../../app/components/ui/dialog"
 import { Input } from "../../../../app/components/ui/input"
 import { Label } from "../../../../app/components/ui/label"
 import { ScrollArea } from "../../../../app/components/ui/scroll-area"
-import { Checkbox } from "../../../../app/components/ui/checkbox"
-import { toast } from "sonner"
-import { HttpTypes } from "@medusajs/types"
-import { updateCustomer, requestEmailUpdate } from "@lib/data/customer"
-import { Pencil } from "lucide-react"
 
 type OverviewProps = {
   customer: HttpTypes.StoreCustomer | null
@@ -34,13 +35,13 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
 
   // Utility function to convert text to title case
   const toTitleCase = (text: string) => {
-    if (!text) return ''
+    if (!text) return ""
     return text
       .toLowerCase()
-      .split(' ')
+      .split(" ")
       .filter(Boolean)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
   }
 
   if (!customer) {
@@ -193,7 +194,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                 Name
               </label>
               <p className="font-din-arabic text-base text-black tracking-wide">
-                {toTitleCase(customer.first_name || '')} {toTitleCase(customer.last_name || '')}
+                {toTitleCase(customer.first_name || "")} {toTitleCase(customer.last_name || "")}
               </p>
             </div>
 
@@ -205,10 +206,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                 <p className="font-din-arabic text-base text-black tracking-wide">
                   {customer.email}
                 </p>
-                <Dialog
-                  open={updateEmailOpen}
-                  onOpenChange={setUpdateEmailOpen}
-                >
+                <Dialog open={updateEmailOpen} onOpenChange={setUpdateEmailOpen}>
                   <DialogTrigger asChild>
                     <motion.button
                       whileHover={{ scale: 1.1 }}
@@ -219,17 +217,14 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                       <Pencil className="w-4 h-4 text-black/40 group-hover:text-black/70 transition-colors" />
                     </motion.button>
                   </DialogTrigger>
-                  <DialogContent
-                    className="sm:max-w-md"
-                    style={{ backgroundColor: "#e3e3d8" }}
-                  >
+                  <DialogContent className="sm:max-w-md" style={{ backgroundColor: "#e3e3d8" }}>
                     <DialogHeader className="pb-6">
                       <DialogTitle className="font-american-typewriter text-2xl text-black tracking-wide">
                         Update Email Address
                       </DialogTitle>
                       <DialogDescription className="font-din-arabic text-black/60 tracking-wide">
-                        Enter your current password and new email. You'll
-                        receive a verification link to set a new password.
+                        Enter your current password and new email. You'll receive a verification
+                        link to set a new password.
                       </DialogDescription>
                     </DialogHeader>
                     <ScrollArea className="max-h-96 pr-4">
@@ -252,10 +247,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                             placeholder="Enter your password"
                           />
                         </div>
-                        <div
-                          className="border-t pt-6"
-                          style={{ borderColor: "#D8D2C7" }}
-                        >
+                        <div className="border-t pt-6" style={{ borderColor: "#D8D2C7" }}>
                           <Label className="font-din-arabic text-sm text-black/60 tracking-wide">
                             New Email Address
                           </Label>
@@ -324,10 +316,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                   Edit Information
                 </motion.button>
               </DialogTrigger>
-              <DialogContent
-                className="sm:max-w-md"
-                style={{ backgroundColor: "#e3e3d8" }}
-              >
+              <DialogContent className="sm:max-w-md" style={{ backgroundColor: "#e3e3d8" }}>
                 <DialogHeader className="pb-6">
                   <DialogTitle className="font-american-typewriter text-2xl text-black tracking-wide">
                     Edit Information
@@ -360,9 +349,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                       </Label>
                       <Input
                         value={userInfo.lastName}
-                        onChange={(e) =>
-                          setUserInfo({ ...userInfo, lastName: e.target.value })
-                        }
+                        onChange={(e) => setUserInfo({ ...userInfo, lastName: e.target.value })}
                         className="mt-2 bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10"
                         style={{ borderColor: "#D8D2C7" }}
                       />
@@ -393,10 +380,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
               </DialogContent>
             </Dialog>
 
-            <Dialog
-              open={changePasswordOpen}
-              onOpenChange={setChangePasswordOpen}
-            >
+            <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
               <DialogTrigger asChild>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -407,10 +391,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                   Change Password
                 </motion.button>
               </DialogTrigger>
-              <DialogContent
-                className="sm:max-w-md"
-                style={{ backgroundColor: "#e3e3d8" }}
-              >
+              <DialogContent className="sm:max-w-md" style={{ backgroundColor: "#e3e3d8" }}>
                 <DialogHeader className="pb-6">
                   <DialogTitle className="font-american-typewriter text-2xl text-black tracking-wide">
                     Change Password

@@ -1,12 +1,12 @@
 import { Checkbox } from "@medusajs/ui"
-import React from "react"
+import type React from "react"
 
 type CheckboxProps = {
   checked?: boolean
   onChange?: () => void
   label: string
   name?: string
-  'data-testid'?: string
+  "data-testid"?: string
   className?: string
   labelClassName?: string
 }
@@ -16,9 +16,9 @@ const CheckboxWithLabel: React.FC<CheckboxProps> = ({
   onChange,
   label,
   name,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
   className,
-  labelClassName
+  labelClassName,
 }) => {
   return (
     <label className="flex items-center space-x-3 cursor-pointer group">
@@ -33,9 +33,7 @@ const CheckboxWithLabel: React.FC<CheckboxProps> = ({
         name={name}
         data-testid={dataTestId}
       />
-      <span className={labelClassName || "!transform-none !txt-medium"}>
-        {label}
-      </span>
+      <span className={labelClassName || "!transform-none !txt-medium"}>{label}</span>
     </label>
   )
 }

@@ -1,15 +1,15 @@
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import { mapKeys } from "lodash"
-import React, { useEffect, useMemo, useState, useCallback } from "react"
-import AddressSelect from "../address-select"
-import CountrySelect from "../country-select"
-import { motion, AnimatePresence } from "motion/react"
 import { Edit, Plus } from "lucide-react"
-import { Label } from "../../../../app/components/ui/label"
+import { AnimatePresence, motion } from "motion/react"
+import type React from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 import { Checkbox as ShadcnCheckbox } from "../../../../app/components/ui/checkbox"
+import { Label } from "../../../../app/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -17,7 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../../app/components/ui/select"
-import { toast } from "sonner"
+import AddressSelect from "../address-select"
+import CountrySelect from "../country-select"
 
 // Indian States
 const indianStates = [
@@ -188,10 +189,7 @@ const ShippingAddress = ({
     [customer?.addresses, countriesInRegion]
   )
 
-  const setFormAddress = (
-    address?: HttpTypes.StoreCartAddress,
-    email?: string
-  ) => {
+  const setFormAddress = (address?: HttpTypes.StoreCartAddress, email?: string) => {
     address &&
       setFormData((prevState: Record<string, any>) => ({
         ...prevState,
@@ -272,7 +270,9 @@ const ShippingAddress = ({
           return
         }
 
-        const subdomainMatch = validEmailProviders.some((provider) => domain.endsWith(`.${provider}`))
+        const subdomainMatch = validEmailProviders.some((provider) =>
+          domain.endsWith(`.${provider}`)
+        )
         if (subdomainMatch) {
           setEmailError("")
           return
@@ -364,17 +364,17 @@ const ShippingAddress = ({
       try {
         const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`)
         const data = await response.json()
-        
-        if (data && data[0]?.Status === 'Success' && data[0]?.PostOffice?.length > 0) {
+
+        if (data && data[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
           const postOffice = data[0].PostOffice[0]
-          setNewAddressData(prev => ({
+          setNewAddressData((prev) => ({
             ...prev,
             city: postOffice.District || postOffice.Name || prev.city,
-            state: postOffice.State || prev.state
+            state: postOffice.State || prev.state,
           }))
         }
       } catch (error) {
-        console.error('Error fetching postal code data:', error)
+        console.error("Error fetching postal code data:", error)
       } finally {
         setIsLoadingPostalData(false)
       }
@@ -457,9 +457,7 @@ const ShippingAddress = ({
   }
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLInputElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLInputElement | HTMLSelectElement>
   ) => {
     const value = e.target.value
     setFormData({
@@ -526,9 +524,7 @@ const ShippingAddress = ({
                     {address.city}, {address.state} {address.pincode}
                   </p>
                   <div className="flex items-center space-x-2 pt-1">
-                    <p className="font-din-arabic text-sm text-black/60">
-                      {address.phone}
-                    </p>
+                    <p className="font-din-arabic text-sm text-black/60">{address.phone}</p>
                     <span className="text-black/30">|</span>
                     <span className="font-din-arabic text-xs px-2 py-1 bg-black/5 rounded-full text-black/50">
                       {address.label}
@@ -623,7 +619,10 @@ const ShippingAddress = ({
                   name="newName"
                   value={newAddressData.name}
                   onChange={(e) =>
-                    setNewAddressData({ ...newAddressData, name: e.target.value })
+                    setNewAddressData({
+                      ...newAddressData,
+                      name: e.target.value,
+                    })
                   }
                   className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30"
                 />
@@ -694,7 +693,7 @@ const ShippingAddress = ({
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
-            <div>
+              <div>
                 <Label htmlFor="newPincode" className="font-din-arabic mb-2 block">
                   PIN Code
                 </Label>
@@ -714,7 +713,7 @@ const ShippingAddress = ({
                   maxLength={6}
                 />
               </div>
-            
+
               <div>
                 <Label htmlFor="newState" className="font-din-arabic mb-2 block">
                   State
@@ -834,15 +833,10 @@ const ShippingAddress = ({
                   if (isEditingAddress) {
                     // Update existing address
                     const updated = savedAddresses.map((addr) =>
-                      addr.id === editingAddressId
-                        ? { ...addr, ...newAddressData }
-                        : addr
+                      addr.id === editingAddressId ? { ...addr, ...newAddressData } : addr
                     )
                     setSavedAddresses(updated)
-                    localStorage.setItem(
-                      "jardinBotanica_savedAddresses",
-                      JSON.stringify(updated)
-                    )
+                    localStorage.setItem("jardinBotanica_savedAddresses", JSON.stringify(updated))
 
                     // Update form fields if this address is selected
                     if (selectedAddressId === editingAddressId) {
@@ -861,10 +855,7 @@ const ShippingAddress = ({
                     }
                     const updated = [...savedAddresses, newAddr]
                     setSavedAddresses(updated)
-                    localStorage.setItem(
-                      "jardinBotanica_savedAddresses",
-                      JSON.stringify(updated)
-                    )
+                    localStorage.setItem("jardinBotanica_savedAddresses", JSON.stringify(updated))
 
                     // Select it and populate form
                     setSelectedAddressId(newAddr.id)
@@ -932,13 +923,15 @@ const ShippingAddress = ({
           animate={{ opacity: 1 }}
           className="space-y-4 pt-6 border-t border-black/10"
         >
-          <h3 className="font-din-arabic text-sm text-black/50 mb-4">
-            Contact Information
-          </h3>
+          <h3 className="font-din-arabic text-sm text-black/50 mb-4">Contact Information</h3>
           <div>
-          <label data-slot="label" className="items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 font-din-arabic mb-2 block" htmlFor="email">
-            Email Address <span className="text-red-500">*</span>
-          </label>
+            <label
+              data-slot="label"
+              className="items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 font-din-arabic mb-2 block"
+              htmlFor="email"
+            >
+              Email Address <span className="text-red-500">*</span>
+            </label>
             <Input
               id="email"
               label=""
@@ -956,9 +949,7 @@ const ShippingAddress = ({
               data-testid="shipping-email-input"
             />
             {emailError && (
-              <p className="mt-1.5 text-sm text-red-500 font-din-arabic">
-                {emailError}
-              </p>
+              <p className="mt-1.5 text-sm text-red-500 font-din-arabic">{emailError}</p>
             )}
           </div>
         </motion.div>
@@ -975,7 +966,7 @@ const ShippingAddress = ({
                 data-testid="billing-address-checkbox"
               />
               <span className="font-din-arabic text-black/80 group-hover:text-black transition-colors">
-              Use a different billing address
+                Use a different billing address
               </span>
             </label>
           </div>

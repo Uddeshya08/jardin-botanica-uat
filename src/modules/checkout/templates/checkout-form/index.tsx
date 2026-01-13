@@ -1,6 +1,6 @@
 import { listCartShippingMethods } from "@lib/data/fulfillment"
 import { listCartPaymentMethods } from "@lib/data/payment"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import CheckoutFormClient from "./checkout-form-client"
 
 interface CheckoutFormProps {
@@ -8,10 +8,7 @@ interface CheckoutFormProps {
   customer: HttpTypes.StoreCustomer | null
 }
 
-export default async function CheckoutForm({
-  cart,
-  customer,
-}: CheckoutFormProps) {
+export default async function CheckoutForm({ cart, customer }: CheckoutFormProps) {
   if (!cart) {
     return null
   }

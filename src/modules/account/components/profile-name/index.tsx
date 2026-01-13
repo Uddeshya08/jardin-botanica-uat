@@ -1,12 +1,10 @@
 "use client"
 
-import React, { useEffect, useActionState } from "react";
-
-import Input from "@modules/common/components/input"
-
-import AccountInfo from "../account-info"
-import { HttpTypes } from "@medusajs/types"
 import { updateCustomer } from "@lib/data/customer"
+import type { HttpTypes } from "@medusajs/types"
+import Input from "@modules/common/components/input"
+import React, { useActionState, useEffect } from "react"
+import AccountInfo from "../account-info"
 
 type MyInformationProps = {
   customer: HttpTypes.StoreCustomer
@@ -17,19 +15,16 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
 
   // Utility function to convert text to title case
   const toTitleCase = (text: string) => {
-    if (!text) return ''
+    if (!text) return ""
     return text
       .toLowerCase()
-      .split(' ')
+      .split(" ")
       .filter(Boolean)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
   }
 
-  const updateCustomerName = async (
-    _currentState: Record<string, unknown>,
-    formData: FormData
-  ) => {
+  const updateCustomerName = async (_currentState: Record<string, unknown>, formData: FormData) => {
     const customer = {
       first_name: formData.get("first_name") as string,
       last_name: formData.get("last_name") as string,
@@ -60,7 +55,7 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
     <form action={formAction} className="w-full overflow-visible">
       <AccountInfo
         label="Name"
-        currentInfo={`${toTitleCase(customer.first_name || '')} ${toTitleCase(customer.last_name || '')}`}
+        currentInfo={`${toTitleCase(customer.first_name || "")} ${toTitleCase(customer.last_name || "")}`}
         isSuccess={successState}
         isError={!!state?.error}
         clearState={clearState}

@@ -2,11 +2,11 @@
 "use client"
 import { Github } from "@medusajs/icons"
 import { Heading } from "@medusajs/ui"
-import { useEffect, useState } from "react"
-import { motion } from "motion/react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
+import { RippleEffect } from "app/components/RippleEffect"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { motion } from "motion/react"
+import { useEffect, useState } from "react"
 
 interface CartItem {
   id: string
@@ -71,37 +71,54 @@ const Category = () => {
   }
 
   const products = [
-    { src: "/Images/SoftFloral.jpg", label: "Floral Spice", hoverSrc: "/Images/SoftFloral.jpg" },
-    { src: "/Images/Crushedpine.jpg", label: "Cedar Bloom", hoverSrc: "/Images/Crushedpine.jpg" },
-    { src: "/Images/warmroots.jpg", label: "Forest Floor", hoverSrc: "/Images/warmroots.jpg" },
-    { src: "/Images/AquaVeil1.jpg", label: "Water & Wood", hoverSrc: "/Images/AquaVeil1.jpg" },
+    {
+      src: "/Images/SoftFloral.jpg",
+      label: "Floral Spice",
+      hoverSrc: "/Images/SoftFloral.jpg",
+    },
+    {
+      src: "/Images/Crushedpine.jpg",
+      label: "Cedar Bloom",
+      hoverSrc: "/Images/Crushedpine.jpg",
+    },
+    {
+      src: "/Images/warmroots.jpg",
+      label: "Forest Floor",
+      hoverSrc: "/Images/warmroots.jpg",
+    },
+    {
+      src: "/Images/AquaVeil1.jpg",
+      label: "Water & Wood",
+      hoverSrc: "/Images/AquaVeil1.jpg",
+    },
   ]
 
-  const scrollProducts = (direction: 'left' | 'right') => {
-    const scrollContainer = document.getElementById('product-slider')
+  const scrollProducts = (direction: "left" | "right") => {
+    const scrollContainer = document.getElementById("product-slider")
     if (scrollContainer) {
       // Calculate scroll amount: 2 items + gap
       // Item width: (100vw - 2rem) / 2 - 0.5rem
       // Gap: 1rem = 16px
       const containerWidth = scrollContainer.clientWidth
       const itemWidth = (containerWidth - 32 - 16) / 2 // Account for px-4 (32px) and gap
-      const scrollAmount = (itemWidth * 2) + 16 // Two images + gap
-      
+      const scrollAmount = itemWidth * 2 + 16 // Two images + gap
+
       const currentScroll = scrollContainer.scrollLeft
-      const newPosition = direction === 'right' 
-        ? currentScroll + scrollAmount 
-        : Math.max(0, currentScroll - scrollAmount)
-      
-      scrollContainer.scrollTo({ 
-        left: newPosition, 
-        behavior: 'smooth' 
+      const newPosition =
+        direction === "right"
+          ? currentScroll + scrollAmount
+          : Math.max(0, currentScroll - scrollAmount)
+
+      scrollContainer.scrollTo({
+        left: newPosition,
+        behavior: "smooth",
       })
       setProductScrollPosition(newPosition)
     }
   }
 
   useEffect(() => {
-    const scrollContainer = document.getElementById('product-slider')
+    const scrollContainer = document.getElementById("product-slider")
     if (!scrollContainer) return
 
     const updateScrollInfo = () => {
@@ -110,14 +127,14 @@ const Category = () => {
     }
 
     updateScrollInfo()
-    scrollContainer.addEventListener('scroll', updateScrollInfo)
-    
+    scrollContainer.addEventListener("scroll", updateScrollInfo)
+
     // Recalculate on resize
-    window.addEventListener('resize', updateScrollInfo)
-    
+    window.addEventListener("resize", updateScrollInfo)
+
     return () => {
-      scrollContainer.removeEventListener('scroll', updateScrollInfo)
-      window.removeEventListener('resize', updateScrollInfo)
+      scrollContainer.removeEventListener("scroll", updateScrollInfo)
+      window.removeEventListener("resize", updateScrollInfo)
     }
   }, [])
 
@@ -126,36 +143,36 @@ const Category = () => {
 
   // Garage slider items
   const garageSliderItems = [
-    { 
-      src: "/Images/Crushedpine.jpg", 
+    {
+      src: "/Images/Crushedpine.jpg",
       label: "Cedar Bloom",
-      bgColor: "bg-amber-900/20"
+      bgColor: "bg-amber-900/20",
     },
-    { 
-      src: "/Images/SoftFloral.jpg", 
+    {
+      src: "/Images/SoftFloral.jpg",
       label: "Floral Spice",
-      bgColor: "bg-green-900/30"
+      bgColor: "bg-green-900/30",
     },
-    { 
-      src: "/Images/warmroots.jpg", 
+    {
+      src: "/Images/warmroots.jpg",
       label: "Forest Floor",
-      bgColor: "bg-amber-800/20"
+      bgColor: "bg-amber-800/20",
     },
-    { 
-      src: "/Images/AquaVeil1.jpg", 
+    {
+      src: "/Images/AquaVeil1.jpg",
       label: "Water & Wood",
-      bgColor: "bg-blue-900/20"
+      bgColor: "bg-blue-900/20",
     },
-    { 
-      src: "/Images/Pineraw.jpg", 
+    {
+      src: "/Images/Pineraw.jpg",
       label: "Pine Essence",
-      bgColor: "bg-green-800/20"
+      bgColor: "bg-green-800/20",
     },
   ]
 
   // Track garage slider scroll position
   useEffect(() => {
-    const garageSlider = document.getElementById('garage-slider')
+    const garageSlider = document.getElementById("garage-slider")
     if (!garageSlider) return
 
     const updateGarageSliderIndex = () => {
@@ -192,22 +209,22 @@ const Category = () => {
     }, 100)
 
     updateGarageSliderIndex()
-    garageSlider.addEventListener('scroll', updateGarageSliderIndex)
-    
-    window.addEventListener('resize', () => {
+    garageSlider.addEventListener("scroll", updateGarageSliderIndex)
+
+    window.addEventListener("resize", () => {
       centerInitialCard()
       updateGarageSliderIndex()
     })
-    
+
     return () => {
-      garageSlider.removeEventListener('scroll', updateGarageSliderIndex)
-      window.removeEventListener('resize', updateGarageSliderIndex)
+      garageSlider.removeEventListener("scroll", updateGarageSliderIndex)
+      window.removeEventListener("resize", updateGarageSliderIndex)
     }
   }, [])
 
   // Function to scroll garage slider to specific index
   const goToGarageSlide = (index: number) => {
-    const garageSlider = document.getElementById('garage-slider')
+    const garageSlider = document.getElementById("garage-slider")
     if (!garageSlider) return
 
     const viewportWidth = window.innerWidth
@@ -216,23 +233,26 @@ const Category = () => {
     const paddingLeft = viewportWidth * 0.19
     // Calculate scroll position to center the selected card
     const scrollPosition = (avgCardWidth + gap) * index - paddingLeft
-    
-    garageSlider.scrollTo({ 
-      left: Math.max(0, scrollPosition), 
-      behavior: 'smooth' 
+
+    garageSlider.scrollTo({
+      left: Math.max(0, scrollPosition),
+      behavior: "smooth",
     })
   }
 
-
   return (
     <div className="bg-[#e2e2d8]">
-      <style dangerouslySetInnerHTML={{__html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @media (min-width: 768px) {
           .md-pl-custom {
             padding-left: 2.2rem !important;
           }
         }
-      `}} />
+      `,
+        }}
+      />
       <RippleEffect />
       <Navigation
         isScrolled={isScrolled}
@@ -240,7 +260,7 @@ const Category = () => {
         onCartUpdate={handleCartUpdate}
         forceWhiteText={true}
       />
-      
+
       {/* first section */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -297,7 +317,8 @@ const Category = () => {
             viewport={{ once: true }}
             className="font-din-arabic text-base md:text-lg text-white/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-2 md:px-0"
           >
-            Inspired by ancient stargazers, these candles fill your space with soft, lingering scent bringing calm, beauty, and a touch of the cosmos to your everyday moments.
+            Inspired by ancient stargazers, these candles fill your space with soft, lingering scent
+            bringing calm, beauty, and a touch of the cosmos to your everyday moments.
           </motion.p>
         </motion.div>
       </motion.div>
@@ -316,27 +337,27 @@ const Category = () => {
           transition={{ duration: 1 }}
           viewport={{ once: true }}
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] md:text-[200px] lg:text-[280px] font-light text-gray-300/30 select-none pointer-events-none z-0 tracking-tight"
-          style={{ 
-            fontFamily: 'system-ui, -apple-system, sans-serif',
+          style={{
+            fontFamily: "system-ui, -apple-system, sans-serif",
             fontWeight: 300,
-            letterSpacing: '-0.02em'
+            letterSpacing: "-0.02em",
           }}
         >
           Botanica
         </motion.h2>
 
         <div className="relative z-10">
-          <div 
+          <div
             id="garage-slider"
             className="overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            <div 
-              className="flex gap-4 items-center h-full" 
-              style={{ 
-                width: 'max-content',
-                paddingLeft: '19vw',
-                paddingRight: '19vw'
+            <div
+              className="flex gap-4 items-center h-full"
+              style={{
+                width: "max-content",
+                paddingLeft: "19vw",
+                paddingRight: "19vw",
               }}
             >
               {garageSliderItems.map((item, index) => {
@@ -345,22 +366,22 @@ const Category = () => {
                   <motion.div
                     key={index}
                     initial={{ opacity: 0 }}
-                    animate={{ 
+                    animate={{
                       opacity: 1,
-                      scale: isCenter ? 1 : 0.85
+                      scale: isCenter ? 1 : 0.85,
                     }}
                     transition={{ duration: 0.4 }}
                     className="relative flex-shrink-0 snap-center"
-                    style={{ 
-                      width: isCenter ? '75vw' : '62vw',
-                      minWidth: isCenter ? '75vw' : '62vw'
+                    style={{
+                      width: isCenter ? "75vw" : "62vw",
+                      minWidth: isCenter ? "75vw" : "62vw",
                     }}
                   >
                     <motion.div
                       whileHover={{ scale: 1.02 }}
                       transition={{ duration: 0.3 }}
                       className={`relative aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-lg ${
-                        isCenter ? 'mx-2' : 'mx-1'
+                        isCenter ? "mx-2" : "mx-1"
                       }`}
                     >
                       <motion.img
@@ -430,9 +451,9 @@ const Category = () => {
                 viewport={{ once: true }}
                 onClick={() => goToGarageSlide(index)}
                 className={`rounded-full transition-all duration-300 cursor-pointer ${
-                  index === garageSliderIndex 
-                    ? 'bg-gray-800 w-3 h-2' 
-                    : 'bg-gray-300 hover:bg-gray-400 w-2 h-2'
+                  index === garageSliderIndex
+                    ? "bg-gray-800 w-3 h-2"
+                    : "bg-gray-300 hover:bg-gray-400 w-2 h-2"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -464,7 +485,7 @@ const Category = () => {
             >
               <motion.div
                 whileHover={{ scale: 1.03 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 className="aspect-square overflow-hidden rounded-lg shadow-lg relative"
               >
                 {/* Base Image */}
@@ -474,7 +495,7 @@ const Category = () => {
                   className="w-full h-full object-cover absolute inset-0"
                   initial={{ opacity: 1 }}
                   animate={{ opacity: hoveredProductIndex === i ? 0 : 1 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
                 />
                 {/* Hover Image */}
                 <motion.img
@@ -483,7 +504,7 @@ const Category = () => {
                   className="w-full h-full object-cover absolute inset-0"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: hoveredProductIndex === i ? 1 : 0 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
                 />
                 {/* Black Overlay - Only on hover with gradient from top to bottom */}
                 <motion.div
@@ -492,10 +513,11 @@ const Category = () => {
                   transition={{ duration: 0.3 }}
                   className="absolute inset-0 rounded-lg"
                   style={{
-                    background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.45) 100%)'
+                    background:
+                      "linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.45) 100%)",
                   }}
                 />
-                
+
                 {/* Text - Always visible */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <p className="text-white text-2xl font-bold tracking-wide font-din-arabic drop-shadow-lg">
@@ -533,7 +555,8 @@ const Category = () => {
             viewport={{ once: true }}
             className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-4 md:px-0"
           >
-            Connect with one of our experts for personalized guidance and thoughtful product recommendations-crafted just for your skin, your rituals, your glow.
+            Connect with one of our experts for personalized guidance and thoughtful product
+            recommendations-crafted just for your skin, your rituals, your glow.
           </motion.p>
           <motion.button
             initial={{ opacity: 0, y: 0 }}
@@ -597,7 +620,9 @@ const Category = () => {
                 viewport={{ once: true }}
                 className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-6 md:mb-4 pr-4 line-clamp-2 md:line-clamp-none"
               >
-                Powdery, elegant, and quietly floral-Soft Orris wraps your space in a gentle hug. Perfect for slow mornings, self-care rituals, or unwinding at dusk. It's calm, bottled in wax.
+                Powdery, elegant, and quietly floral-Soft Orris wraps your space in a gentle hug.
+                Perfect for slow mornings, self-care rituals, or unwinding at dusk. It's calm,
+                bottled in wax.
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -739,15 +764,11 @@ const Category = () => {
       </motion.div>
 
       {/* Newsletter Section */}
-      <section
-        className="py-20 relative overflow-hidden"
-        style={{ backgroundColor: "#e3e3d8" }}
-      >
+      <section className="py-20 relative overflow-hidden" style={{ backgroundColor: "#e3e3d8" }}>
         <motion.div
           className="absolute inset-0 opacity-15"
           style={{
-            background:
-              "linear-gradient(45deg, #e58a4d, #545d4a, #e58a4d, #545d4a, #e58a4d)",
+            background: "linear-gradient(45deg, #e58a4d, #545d4a, #e58a4d, #545d4a, #e58a4d)",
             backgroundSize: "600% 600%",
           }}
           animate={{
@@ -762,8 +783,7 @@ const Category = () => {
         <motion.div
           className="absolute inset-0 opacity-10"
           style={{
-            background:
-              "linear-gradient(-45deg, #545d4a, #e58a4d, #545d4a, #e58a4d)",
+            background: "linear-gradient(-45deg, #545d4a, #e58a4d, #545d4a, #e58a4d)",
             backgroundSize: "800% 800%",
           }}
           animate={{
@@ -793,8 +813,8 @@ const Category = () => {
               viewport={{ once: true }}
               className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8"
             >
-              Be the first to discover new blends, exclusive rituals, and
-              stories from our botanical laboratory.
+              Be the first to discover new blends, exclusive rituals, and stories from our botanical
+              laboratory.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}

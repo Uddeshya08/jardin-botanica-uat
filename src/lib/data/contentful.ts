@@ -1,38 +1,38 @@
 "use server"
 
 import { getContentfulClient } from "@lib/contentful"
+import type { Entry } from "contentful"
 import {
-  ContentfulProductContent,
-  ProductContent,
-  ProductImage,
-  ContentfulAsset,
-  ContentfulFeaturedSection,
-  FeaturedSection,
-  ContentfulTestimonials,
-  TestimonialsSection,
-  TestimonialItem,
-  ContentfulFeaturedRitualTwo,
-  FeaturedRitualTwoSection,
-  ContentfulAfterlifeSection,
-  AfterlifeSection,
-  AfterlifeItem,
-  ContentfulProductInfoPanels,
-  ProductInfoPanels,
-  ActiveItem,
-  FragranceNote,
-  DynamicPanel,
-  ContentfulFromTheLabSection,
-  FromTheLabSection,
-  FromTheLabProduct,
-  ContentfulProductCard,
-  ContentfulPageBanner,
-  PageBanner,
+  type ActiveItem,
+  type AfterlifeItem,
+  type AfterlifeSection,
+  type CandlesCollectionItem,
   CandlesPageBanner, // For backward compatibility
-  ContentfulCandlesCollectionItem,
-  ContentfulCandlesCollectionSection,
-  CandlesCollectionItem,
+  type ContentfulAfterlifeSection,
+  ContentfulAsset,
+  type ContentfulCandlesCollectionItem,
+  type ContentfulCandlesCollectionSection,
+  type ContentfulFeaturedRitualTwo,
+  type ContentfulFeaturedSection,
+  type ContentfulFromTheLabSection,
+  type ContentfulPageBanner,
+  ContentfulProductCard,
+  type ContentfulProductContent,
+  type ContentfulProductInfoPanels,
+  type ContentfulTestimonials,
+  type DynamicPanel,
+  type FeaturedRitualTwoSection,
+  type FeaturedSection,
+  type FragranceNote,
+  type FromTheLabProduct,
+  type FromTheLabSection,
+  type PageBanner,
+  type ProductContent,
+  type ProductImage,
+  type ProductInfoPanels,
+  type TestimonialItem,
+  type TestimonialsSection,
 } from "../../types/contentful"
-import { Entry } from "contentful"
 
 /**
  * Helper function to extract plain text from Contentful rich text fields
@@ -40,12 +40,17 @@ import { Entry } from "contentful"
  */
 function extractTextFromRichText(value: any): string {
   if (!value) return ""
-  
+
   // If it's already a string, return it
   if (typeof value === "string") return value
-  
+
   // If it's a rich text document object
-  if (value && typeof value === "object" && value.nodeType === "document" && Array.isArray(value.content)) {
+  if (
+    value &&
+    typeof value === "object" &&
+    value.nodeType === "document" &&
+    Array.isArray(value.content)
+  ) {
     const extractText = (node: any): string => {
       if (node.nodeType === "text" && node.value) {
         return node.value
@@ -57,12 +62,12 @@ function extractTextFromRichText(value: any): string {
     }
     return value.content.map(extractText).join(" ").trim()
   }
-  
+
   // Fallback: try to stringify if it's an object
   if (typeof value === "object") {
     return JSON.stringify(value)
   }
-  
+
   return String(value)
 }
 
@@ -90,7 +95,7 @@ export async function getProductContentByHandle(
     }
 
     const entry = response.items[0] as Entry<ContentfulProductContent>
-    
+
     // Transform Contentful entry to our simplified type
     return transformContentfulEntry(entry)
   } catch (error) {
@@ -128,9 +133,7 @@ export async function getAllProductContent(): Promise<ProductContent[]> {
 /**
  * Transform Contentful entry to our simplified ProductContent type
  */
-function transformContentfulEntry(
-  entry: Entry<ContentfulProductContent>
-): ProductContent | null {
+function transformContentfulEntry(entry: Entry<ContentfulProductContent>): ProductContent | null {
   try {
     const fields = entry.fields as any
 
@@ -185,9 +188,7 @@ export async function validateContentfulConnection(): Promise<boolean> {
  * @param sectionKey - The unique key for the featured section (e.g., "pdp-featured", "homepage-featured")
  * @returns FeaturedSection or null if not found
  */
-export async function getFeaturedSectionByKey(
-  sectionKey: string
-): Promise<FeaturedSection | null> {
+export async function getFeaturedSectionByKey(sectionKey: string): Promise<FeaturedSection | null> {
   try {
     const client = getContentfulClient()
 
@@ -205,7 +206,7 @@ export async function getFeaturedSectionByKey(
     }
 
     const entry = response.items[0] as unknown as Entry<ContentfulFeaturedSection>
-    
+
     return transformFeaturedSectionEntry(entry)
   } catch (error) {
     console.error("Error fetching featured section from Contentful:", error)
@@ -232,7 +233,9 @@ export async function getAllFeaturedSections(): Promise<FeaturedSection[]> {
     }
 
     return response.items
-      .map((item) => transformFeaturedSectionEntry(item as unknown as Entry<ContentfulFeaturedSection>))
+      .map((item) =>
+        transformFeaturedSectionEntry(item as unknown as Entry<ContentfulFeaturedSection>)
+      )
       .filter((item): item is FeaturedSection => item !== null)
   } catch (error) {
     console.error("Error fetching all featured sections from Contentful:", error)
@@ -254,7 +257,9 @@ function transformFeaturedSectionEntry(
       title: fields.title || "",
       sectionKey: fields.sectionKey || "",
       heading: extractTextFromRichText(fields.heading) || "Cultivate Your Ritu",
-      subheading: extractTextFromRichText(fields.subheading) || "Subscribe to receive hand care wisdom, botanical insights, and early access to our latest concoctions.",
+      subheading:
+        extractTextFromRichText(fields.subheading) ||
+        "Subscribe to receive hand care wisdom, botanical insights, and early access to our latest concoctions.",
       backgroundColor: fields.backgroundColor || "#e3e3d8",
       inputPlaceholder: fields.inputPlaceholder || "Enter your email",
       ctaLabel: fields.ctaLabel || "Subscribe",
@@ -334,7 +339,7 @@ export async function getTestimonialsSectionByKey(
 
     const entry = response.items[0] as unknown as Entry<ContentfulTestimonials>
     // console.log("Testimonials entry fields:", entry.fields) // Debug logging
-    
+
     return transformTestimonialsSectionEntry(entry)
   } catch (error) {
     console.error("Error fetching testimonials section from Contentful:", error)
@@ -361,7 +366,9 @@ export async function getAllTestimonialsSections(): Promise<TestimonialsSection[
     }
 
     return response.items
-      .map((item) => transformTestimonialsSectionEntry(item as unknown as Entry<ContentfulTestimonials>))
+      .map((item) =>
+        transformTestimonialsSectionEntry(item as unknown as Entry<ContentfulTestimonials>)
+      )
       .filter((item): item is TestimonialsSection => item !== null)
   } catch (error) {
     console.error("Error fetching all testimonials sections from Contentful:", error)
@@ -382,8 +389,8 @@ function transformTestimonialsSectionEntry(
     const items: TestimonialItem[] = Array.isArray(fields.testimonials)
       ? fields.testimonials.map((t: any, index: number) => {
           // Handle both JSON objects and stringified JSON
-          const testimonial = typeof t === 'string' ? JSON.parse(t) : t
-          
+          const testimonial = typeof t === "string" ? JSON.parse(t) : t
+
           return {
             id: testimonial.id ?? index + 1,
             name: testimonial.name || "",
@@ -404,7 +411,9 @@ function transformTestimonialsSectionEntry(
       sectionKey: fields.sectionKey || "",
       productHandle: fields.productHandle || undefined,
       heading: extractTextFromRichText(fields.heading) || "Loved By Our Customers",
-      subheading: extractTextFromRichText(fields.subheading) || "Real experiences from those who've made our product part of their daily ritual.",
+      subheading:
+        extractTextFromRichText(fields.subheading) ||
+        "Real experiences from those who've made our product part of their daily ritual.",
       backgroundColor: fields.backgroundColor || "#e3e3d8",
       cta: {
         showMore: fields.showMoreText || "View All Reviews",
@@ -487,7 +496,7 @@ export async function getFeaturedRitualTwoSectionByKey(
 
     const entry = response.items[0] as unknown as Entry<ContentfulFeaturedRitualTwo>
     // console.log("Entry fields:", entry.fields) // Debug logging
-    
+
     return transformFeaturedRitualTwoSectionEntry(entry)
   } catch (error) {
     console.error("Error fetching featured ritual two section from Contentful:", error)
@@ -514,7 +523,11 @@ export async function getAllFeaturedRitualTwoSections(): Promise<FeaturedRitualT
     }
 
     return response.items
-      .map((item) => transformFeaturedRitualTwoSectionEntry(item as unknown as Entry<ContentfulFeaturedRitualTwo>))
+      .map((item) =>
+        transformFeaturedRitualTwoSectionEntry(
+          item as unknown as Entry<ContentfulFeaturedRitualTwo>
+        )
+      )
       .filter((item): item is FeaturedRitualTwoSection => item !== null)
   } catch (error) {
     console.error("Error fetching all featured ritual two sections from Contentful:", error)
@@ -533,7 +546,7 @@ function transformFeaturedRitualTwoSectionEntry(
 
     // Process Contentful Asset to get image URL
     let imageUrl = "/assets/handCareImage.png" // Default fallback
-    
+
     if (fields.image && fields.image.fields && fields.image.fields.file) {
       const assetUrl = fields.image.fields.file.url
       imageUrl = assetUrl.startsWith("//") ? `https:${assetUrl}` : assetUrl
@@ -548,15 +561,21 @@ function transformFeaturedRitualTwoSectionEntry(
       sectionKey: fields.sectionKey || "",
       productHandle: fields.productHandle || undefined,
       heading: extractTextFromRichText(fields.heading) || "Hand Care Elevated",
-      subheading: extractTextFromRichText(fields.subheading) || "A refreshing blend of tea antioxidants and gentle exfoliants, this handwash keeps your hands healthy, glowing, and nourished.",
+      subheading:
+        extractTextFromRichText(fields.subheading) ||
+        "A refreshing blend of tea antioxidants and gentle exfoliants, this handwash keeps your hands healthy, glowing, and nourished.",
       backgroundColor: fields.backgroundColor || "#e3e3d8",
       imageUrl: imageUrl,
-      imageAlt: fields.imageAlt || "Jardin Botanica Tea Exfoliant Rinse with hands and botanical elements",
+      imageAlt:
+        fields.imageAlt || "Jardin Botanica Tea Exfoliant Rinse with hands and botanical elements",
       cta: {
         label: fields.ctaLabel || "Read more",
         href: fields.ctaLink || "#",
       },
-      imagePosition: fields.imagePosition === 'left' || fields.imagePosition === 'right' ? fields.imagePosition : 'left',
+      imagePosition:
+        fields.imagePosition === "left" || fields.imagePosition === "right"
+          ? fields.imagePosition
+          : "left",
       active: fields.active ?? true,
     }
   } catch (error) {
@@ -564,7 +583,6 @@ function transformFeaturedRitualTwoSectionEntry(
     return null
   }
 }
-
 
 /**
  * Fetch afterlife section from Contentful by product handle
@@ -638,16 +656,19 @@ function transformAfterlifeSectionEntry(
     // Transform items array
     const itemsSrc = Array.isArray(fields.items) ? fields.items : []
     const items: AfterlifeItem[] = itemsSrc.map((it: any): AfterlifeItem => {
-      let icon: string | { src: string; alt: string } | undefined = undefined
-      
+      let icon: string | { src: string; alt: string } | undefined
+
       if (it?.icon) {
-        if (typeof it.icon === "string" && (it.icon === "recycle" || it.icon === "refresh" || it.icon === "leaf")) {
+        if (
+          typeof it.icon === "string" &&
+          (it.icon === "recycle" || it.icon === "refresh" || it.icon === "leaf")
+        ) {
           icon = it.icon
         } else if (typeof it.icon === "object" && it.icon.src && it.icon.alt) {
           icon = { src: it.icon.src, alt: it.icon.alt }
         }
       }
-      
+
       return {
         icon,
         title: typeof it?.title === "string" ? it.title : undefined,
@@ -713,7 +734,7 @@ function transformProductInfoPanelsEntry(
     const activesSrc = Array.isArray(fields.actives) ? fields.actives : []
     const actives: ActiveItem[] = activesSrc.map((item: any): ActiveItem => {
       // Handle both JSON objects and stringified JSON
-      const active = typeof item === 'string' ? JSON.parse(item) : item
+      const active = typeof item === "string" ? JSON.parse(item) : item
       return {
         name: active?.name || "",
         description: active?.description || "",
@@ -724,7 +745,7 @@ function transformProductInfoPanelsEntry(
     const fragranceNotesSrc = Array.isArray(fields.fragranceNotes) ? fields.fragranceNotes : []
     const fragranceNotes: FragranceNote[] = fragranceNotesSrc.map((item: any): FragranceNote => {
       // Handle both JSON objects and stringified JSON
-      const note = typeof item === 'string' ? JSON.parse(item) : item
+      const note = typeof item === "string" ? JSON.parse(item) : item
       return {
         type: note?.type || "",
         description: note?.description || "",
@@ -737,15 +758,15 @@ function transformProductInfoPanelsEntry(
       .map((item: any, index: number): DynamicPanel | null => {
         try {
           // Handle both JSON objects and stringified JSON
-          const panel = typeof item === 'string' ? JSON.parse(item) : item
-          
+          const panel = typeof item === "string" ? JSON.parse(item) : item
+
           if (!panel || !panel.title || !panel.type) {
             return null
           }
 
           // Transform content based on type
           let content: any = panel.content || ""
-          
+
           if (panel.type === "actives" && Array.isArray(panel.content)) {
             content = panel.content.map((c: any) => ({
               name: c?.name || "",
@@ -883,7 +904,9 @@ export async function getAllFromTheLabSections(): Promise<FromTheLabSection[]> {
     }
 
     return response.items
-      .map((item) => transformFromTheLabSectionEntry(item as unknown as Entry<ContentfulFromTheLabSection>))
+      .map((item) =>
+        transformFromTheLabSectionEntry(item as unknown as Entry<ContentfulFromTheLabSection>)
+      )
       .filter((item): item is FromTheLabSection => item !== null)
   } catch (error) {
     console.error("Error fetching all From the Lab sections from Contentful:", error)
@@ -903,21 +926,21 @@ function transformFromTheLabSectionEntry(
     // Helper function to extract image URL from Contentful Asset or string
     const getImageUrl = (img: any): string | undefined => {
       if (!img) return undefined
-      
+
       // If it's already a string URL, return it
-      if (typeof img === 'string') return img
-      
+      if (typeof img === "string") return img
+
       // If it's a Contentful Asset object (from References or nested)
       if (img.fields && img.fields.file && img.fields.file.url) {
         const url = img.fields.file.url
-        return url.startsWith('//') ? `https:${url}` : url
+        return url.startsWith("//") ? `https:${url}` : url
       }
-      
+
       // If it's a nested object with url property
       if (img.url) {
-        return typeof img.url === 'string' ? img.url : undefined
+        return typeof img.url === "string" ? img.url : undefined
       }
-      
+
       return undefined
     }
 
@@ -930,21 +953,21 @@ function transformFromTheLabSectionEntry(
         return {
           id: p.sys?.id || `product-${index}`,
           name: p.fields.name || "",
-          price: typeof p.fields.price === 'number' ? p.fields.price : undefined,
-          currency: typeof p.fields.currency === 'string' ? p.fields.currency : undefined,
+          price: typeof p.fields.price === "number" ? p.fields.price : undefined,
+          currency: typeof p.fields.currency === "string" ? p.fields.currency : undefined,
           image: getImageUrl(p.fields.image),
           hoverImage: getImageUrl(p.fields.hoverImage),
-          description: typeof p.fields.description === 'string' ? p.fields.description : undefined,
-          badge: typeof p.fields.badge === 'string' ? p.fields.badge : undefined,
-          url: typeof p.fields.url === 'string' ? p.fields.url : undefined,
-          variantId: typeof p.fields.variantId === 'string' ? p.fields.variantId : undefined,
+          description: typeof p.fields.description === "string" ? p.fields.description : undefined,
+          badge: typeof p.fields.badge === "string" ? p.fields.badge : undefined,
+          url: typeof p.fields.url === "string" ? p.fields.url : undefined,
+          variantId: typeof p.fields.variantId === "string" ? p.fields.variantId : undefined,
         }
       }
-      
+
       // If it's a link object (sys.type === 'Link'), we need to resolve it from includes
       // This shouldn't happen with include: 2, but handle it just in case
-      if (p.sys && p.sys.type === 'Link' && p.sys.linkType === 'Entry') {
-        console.warn('ProductCard entry not resolved, may need to check includes')
+      if (p.sys && p.sys.type === "Link" && p.sys.linkType === "Entry") {
+        console.warn("ProductCard entry not resolved, may need to check includes")
         return {
           id: p.sys.id || `product-${index}`,
           name: "",
@@ -957,27 +980,27 @@ function transformFromTheLabSectionEntry(
           url: undefined,
         }
       }
-      
+
       // Fallback: If it's a JSON object (backward compatibility for old entries)
-      const product = typeof p === 'string' ? JSON.parse(p) : p
-      
+      const product = typeof p === "string" ? JSON.parse(p) : p
+
       return {
         id: product?.id ?? index + 1,
         name: product?.name || "",
-        price: typeof product?.price === 'number' ? product.price : undefined,
-        currency: typeof product?.currency === 'string' ? product.currency : undefined,
+        price: typeof product?.price === "number" ? product.price : undefined,
+        currency: typeof product?.currency === "string" ? product.currency : undefined,
         image: getImageUrl(product?.image),
         hoverImage: getImageUrl(product?.hoverImage),
-        description: typeof product?.description === 'string' ? product.description : undefined,
-        badge: typeof product?.badge === 'string' ? product.badge : undefined,
-        url: typeof product?.url === 'string' ? product.url : undefined,
-        variantId: typeof product?.variantId === 'string' ? product.variantId : undefined,
+        description: typeof product?.description === "string" ? product.description : undefined,
+        badge: typeof product?.badge === "string" ? product.badge : undefined,
+        url: typeof product?.url === "string" ? product.url : undefined,
+        variantId: typeof product?.variantId === "string" ? product.variantId : undefined,
       }
     }
 
     // Parse products - Array of references to ProductCard entries
     let products: FromTheLabProduct[] = []
-    
+
     if (Array.isArray(fields.products)) {
       products = fields.products.map(transformProductCard)
     } else if (fields.products && fields.products.fields) {
@@ -988,7 +1011,8 @@ function transformFromTheLabSectionEntry(
     // Provide defaults for optional fields
     return {
       heading: extractTextFromRichText(fields.heading) || "From the Lab",
-      subheading: extractTextFromRichText(fields.subheading) || "Formulations most often paired in practice.",
+      subheading:
+        extractTextFromRichText(fields.subheading) || "Formulations most often paired in practice.",
       backgroundColor: fields.backgroundColor || "#e3e3d8",
       products,
       isActive: fields.isActive ?? true,
@@ -1012,22 +1036,20 @@ function getAssetUrl(asset: any): string | undefined {
 
 /**
  * Fetch page banner from Contentful by page key (Generic function for any page)
- * 
+ *
  * @param pageKey - Required: The page identifier (e.g., "candles", "home", "about", "hand-care")
- * 
+ *
  * @returns PageBanner or null if not found
- * 
+ *
  * @example
  * // Get banner for candles page
  * const banner = await getPageBanner("candles")
- * 
+ *
  * @example
  * // Get banner for home page
  * const homeBanner = await getPageBanner("home")
  */
-export async function getPageBanner(
-  pageKey: string
-): Promise<PageBanner | null> {
+export async function getPageBanner(pageKey: string): Promise<PageBanner | null> {
   try {
     const client = getContentfulClient()
 
@@ -1038,7 +1060,6 @@ export async function getPageBanner(
       limit: 1,
     }
 
-
     let response
     try {
       response = await client.getEntries(query)
@@ -1047,7 +1068,7 @@ export async function getPageBanner(
       const errorMessage = apiError?.message || String(apiError)
       const errorSysId = apiError?.sys?.id
       const errorDetails = apiError?.details?.errors || []
-      
+
       console.error(`[ERROR] Contentful API Error:`, {
         message: errorMessage,
         sysId: errorSysId,
@@ -1058,27 +1079,31 @@ export async function getPageBanner(
       })
 
       // Most common error: Content Type doesn't exist
-      if (errorMessage?.toLowerCase().includes("not found") || 
-          errorSysId === "NotFound" ||
-          errorMessage?.includes("Resource not found")) {
+      if (
+        errorMessage?.toLowerCase().includes("not found") ||
+        errorSysId === "NotFound" ||
+        errorMessage?.includes("Resource not found")
+      ) {
         console.error(
           `\n[SOLUTION] ❌ Content Type "pageBanner" not found in Contentful!\n` +
-          `Please create a content type with:\n` +
-          `- Content Type ID (API Identifier): "pageBanner"\n` +
-          `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey\n\n`
+            `Please create a content type with:\n` +
+            `- Content Type ID (API Identifier): "pageBanner"\n` +
+            `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey\n\n`
         )
         return null // Return null instead of throwing
       }
-      
+
       // Field not found error
-      if (errorMessage?.includes("InvalidQuery") || 
-          errorMessage?.includes("UnknownField") ||
-          errorDetails.some((e: any) => e?.name === "pageKey")) {
+      if (
+        errorMessage?.includes("InvalidQuery") ||
+        errorMessage?.includes("UnknownField") ||
+        errorDetails.some((e: any) => e?.name === "pageKey")
+      ) {
         console.error(
           `\n[SOLUTION] ❌ Field "pageKey" not found in "pageBanner" content type!\n` +
-          `Please add a field with:\n` +
-          `- Field ID: "pageKey"\n` +
-          `- Field Type: Short text\n\n`
+            `Please add a field with:\n` +
+            `- Field ID: "pageKey"\n` +
+            `- Field Type: Short text\n\n`
         )
         return null
       }
@@ -1097,20 +1122,23 @@ export async function getPageBanner(
           content_type: "pageBanner",
           limit: 10,
         })
-        console.warn(`[DEBUG] Available pageBanner entries:`, allEntries.items.map((item: any) => ({
-          id: item.sys.id,
-          pageKey: item.fields?.pageKey || item.fields?.page_key || 'NOT FOUND',
-          isActive: item.fields?.isActive ?? item.fields?.is_active ?? 'NOT FOUND',
-          title: item.fields?.title || 'NO TITLE'
-        })))
+        console.warn(
+          `[DEBUG] Available pageBanner entries:`,
+          allEntries.items.map((item: any) => ({
+            id: item.sys.id,
+            pageKey: item.fields?.pageKey || item.fields?.page_key || "NOT FOUND",
+            isActive: item.fields?.isActive ?? item.fields?.is_active ?? "NOT FOUND",
+            title: item.fields?.title || "NO TITLE",
+          }))
+        )
       } catch (debugError) {
         console.error(`[DEBUG] Error fetching all entries:`, debugError)
       }
 
       console.warn(
         `No active page banner found for pageKey: "${pageKey}". ` +
-        `Make sure you have an active banner entry with pageKey="${pageKey}" in Contentful. ` +
-        `Content Type ID should be "pageBanner" and field should be "pageKey" (camelCase).`
+          `Make sure you have an active banner entry with pageKey="${pageKey}" in Contentful. ` +
+          `Content Type ID should be "pageBanner" and field should be "pageKey" (camelCase).`
       )
       return null
     }
@@ -1119,23 +1147,23 @@ export async function getPageBanner(
     console.log(`[DEBUG] Found entry:`, {
       id: entry.sys.id,
       pageKey: (entry.fields as any)?.pageKey,
-      title: (entry.fields as any)?.title
+      title: (entry.fields as any)?.title,
     })
-    
+
     return transformPageBannerEntry(entry)
   } catch (error: any) {
     console.error(`[ERROR] Error fetching page banner for pageKey "${pageKey}" from Contentful:`)
     console.error(`[ERROR] Error type:`, error?.constructor?.name)
     console.error(`[ERROR] Error message:`, error?.message)
     console.error(`[ERROR] Full error:`, error)
-    
+
     // More helpful error messages
     if (error?.message?.includes("not found") || error?.sys?.id === "NotFound") {
       console.error(
         `\n[SOLUTION] Content Type "pageBanner" doesn't exist in Contentful.\n` +
-        `Please create it with:\n` +
-        `- Content Type ID: "pageBanner"\n` +
-        `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey`
+          `Please create it with:\n` +
+          `- Content Type ID: "pageBanner"\n` +
+          `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey`
       )
     }
 
@@ -1184,15 +1212,13 @@ export async function getAllPageBanners(): Promise<PageBanner[]> {
  */
 export async function getAllCandlesPageBanners(): Promise<PageBanner[]> {
   const allBanners = await getAllPageBanners()
-  return allBanners.filter(banner => banner.pageKey === "candles")
+  return allBanners.filter((banner) => banner.pageKey === "candles")
 }
 
 /**
  * Transform Contentful page banner entry to simplified PageBanner type
  */
-function transformPageBannerEntry(
-  entry: Entry<ContentfulPageBanner>
-): PageBanner | null {
+function transformPageBannerEntry(entry: Entry<ContentfulPageBanner>): PageBanner | null {
   try {
     const fields = entry.fields as any
 
@@ -1223,7 +1249,7 @@ function transformPageBannerEntry(
       mediaType: fields.mediaType,
       hasVideo: !!fields.video,
       hasImage: !!fields.image,
-      isActive: fields.isActive
+      isActive: fields.isActive,
     })
 
     const result: PageBanner = {
@@ -1241,7 +1267,7 @@ function transformPageBannerEntry(
     return result
   } catch (error) {
     console.error("Error transforming Contentful page banner entry:", error)
-    console.error("Entry fields:", (entry.fields as any))
+    console.error("Entry fields:", entry.fields as any)
     return null
   }
 }
@@ -1251,7 +1277,9 @@ function transformPageBannerEntry(
  * @param sectionKey - Optional section key to filter by (defaults to "candles" if not provided)
  * @returns Array of CandlesCollectionItem sorted by order
  */
-export async function getCandlesCollection(sectionKey: string = "candles"): Promise<CandlesCollectionItem[]> {
+export async function getCandlesCollection(
+  sectionKey: string = "candles"
+): Promise<CandlesCollectionItem[]> {
   try {
     const client = getContentfulClient()
 
@@ -1305,13 +1333,20 @@ export async function getCandlesCollection(sectionKey: string = "candles"): Prom
     }
 
     const items = itemResponse.items
-      .map((entry) => transformCandlesCollectionItemEntry(entry as unknown as Entry<ContentfulCandlesCollectionItem>))
+      .map((entry) =>
+        transformCandlesCollectionItemEntry(
+          entry as unknown as Entry<ContentfulCandlesCollectionItem>
+        )
+      )
       .filter((item): item is CandlesCollectionItem => item !== null)
       .sort((a, b) => a.order - b.order)
 
     return items
   } catch (error) {
-    console.error("[getCandlesCollection] Error fetching candles collection from Contentful:", error)
+    console.error(
+      "[getCandlesCollection] Error fetching candles collection from Contentful:",
+      error
+    )
     return []
   }
 }
@@ -1336,30 +1371,34 @@ function transformCandlesCollectionSectionEntry(
     }
 
     // Transform ProductCard entries to CandlesCollectionItem format
-    const items: CandlesCollectionItem[] = fields.products.map((product: any, index: number) => {
-      // Handle ProductCard entry (from References field)
-      if (product.fields) {
-        const imageUrl = getImageUrl(product.fields.image)
-        const hoverImageUrl = getImageUrl(product.fields.hoverImage)
+    const items: CandlesCollectionItem[] = fields.products
+      .map((product: any, index: number) => {
+        // Handle ProductCard entry (from References field)
+        if (product.fields) {
+          const imageUrl = getImageUrl(product.fields.image)
+          const hoverImageUrl = getImageUrl(product.fields.hoverImage)
 
-        if (!imageUrl) {
-          console.warn(`[transformCandlesCollectionSectionEntry] ProductCard "${product.fields.name}" missing image`)
-          return null
+          if (!imageUrl) {
+            console.warn(
+              `[transformCandlesCollectionSectionEntry] ProductCard "${product.fields.name}" missing image`
+            )
+            return null
+          }
+
+          return {
+            label: product.fields.label || product.fields.name || "",
+            src: imageUrl,
+            hoverSrc: hoverImageUrl,
+            url: product.fields.url || undefined,
+            order: fields.order ?? index,
+            isActive: true,
+          }
         }
 
-        return {
-          label: product.fields.label || product.fields.name || "",
-          src: imageUrl,
-          hoverSrc: hoverImageUrl,
-          url: product.fields.url || undefined,
-          order: fields.order ?? index,
-          isActive: true,
-        }
-      }
-
-      // Fallback handling
-      return null
-    }).filter((item: CandlesCollectionItem | null): item is CandlesCollectionItem => item !== null)
+        // Fallback handling
+        return null
+      })
+      .filter((item: CandlesCollectionItem | null): item is CandlesCollectionItem => item !== null)
 
     // Sort by order
     return items.sort((a, b) => a.order - b.order)
@@ -1396,9 +1435,9 @@ function transformCandlesCollectionItemEntry(
     // Handle order field - can be number or string (since it's Short text in Contentful)
     let orderValue = 0
     if (fields.order !== undefined && fields.order !== null) {
-      if (typeof fields.order === 'number') {
+      if (typeof fields.order === "number") {
         orderValue = fields.order
-      } else if (typeof fields.order === 'string') {
+      } else if (typeof fields.order === "string") {
         const parsed = parseInt(fields.order, 10)
         orderValue = isNaN(parsed) ? 0 : parsed
       }

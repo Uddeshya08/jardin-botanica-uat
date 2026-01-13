@@ -1,23 +1,22 @@
 "use client"
 
-import { isManual, isStripe, isRazorpay } from "@lib/constants"
+import { isManual, isRazorpay, isStripe } from "@lib/constants"
 import { placeOrder } from "@lib/data/cart"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
-import React, { useState } from "react"
 import { Lock, Sparkles } from "lucide-react"
+import type React from "react"
+import { useState } from "react"
 import ErrorMessage from "../error-message"
-import {RazorpayPaymentButton} from "./razorpay-payment-button"
+import { RazorpayPaymentButton } from "./razorpay-payment-button"
+
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
   "data-testid": string
 }
 
-const PaymentButton: React.FC<PaymentButtonProps> = ({
-  cart,
-  "data-testid": dataTestId,
-}) => {
+const PaymentButton: React.FC<PaymentButtonProps> = ({ cart, "data-testid": dataTestId }) => {
   const notReady =
     !cart ||
     !cart.shipping_address ||
@@ -29,41 +28,33 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
   switch (true) {
     case isStripe(paymentSession?.provider_id):
+      return <StripePaymentButton notReady={notReady} cart={cart} data-testid={dataTestId} />
+    case isRazorpay(paymentSession?.provider_id):
+      if (!paymentSession) {
+        return (
+          <Button
+            disabled
+            className="w-full px-8 py-4 bg-black text-white rounded-xl font-din-arabic disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl flex items-center justify-center space-x-3"
+          >
+            <Lock className="w-5 h-5" />
+            <span>Select a payment method</span>
+          </Button>
+        )
+      }
       return (
-        <StripePaymentButton
+        <RazorpayPaymentButton
+          session={paymentSession}
           notReady={notReady}
           cart={cart}
           data-testid={dataTestId}
         />
       )
-      case isRazorpay(paymentSession?.provider_id):
-        if (!paymentSession) {
-          return (
-            <Button 
-              disabled 
-              className="w-full px-8 py-4 bg-black text-white rounded-xl font-din-arabic disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl flex items-center justify-center space-x-3"
-            >
-              <Lock className="w-5 h-5" />
-              <span>Select a payment method</span>
-            </Button>
-          )
-        }
-        return(
-          <RazorpayPaymentButton 
-           session={paymentSession}
-           notReady={notReady}
-           cart={cart}
-           data-testid={dataTestId}
-          />
-        )
     case isManual(paymentSession?.provider_id):
-      return (
-        <ManualTestPaymentButton notReady={notReady} data-testid={dataTestId} />
-      )
+      return <ManualTestPaymentButton notReady={notReady} data-testid={dataTestId} />
     default:
       return (
-        <Button 
-          disabled 
+        <Button
+          disabled
           className="w-full px-8 py-4 bg-black text-white rounded-xl font-din-arabic disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl flex items-center justify-center space-x-3"
         >
           <Lock className="w-5 h-5" />
@@ -99,9 +90,7 @@ const StripePaymentButton = ({
   const elements = useElements()
   const card = elements?.getElement("card")
 
-  const session = cart.payment_collection?.payment_sessions?.find(
-    (s) => s.status === "pending"
-  )
+  const session = cart.payment_collection?.payment_sessions?.find((s) => s.status === "pending")
 
   const disabled = !stripe || !elements ? true : false
 
@@ -118,10 +107,7 @@ const StripePaymentButton = ({
         payment_method: {
           card: card,
           billing_details: {
-            name:
-              cart.billing_address?.first_name +
-              " " +
-              cart.billing_address?.last_name,
+            name: cart.billing_address?.first_name + " " + cart.billing_address?.last_name,
             address: {
               city: cart.billing_address?.city ?? undefined,
               country: cart.billing_address?.country_code ?? undefined,
@@ -139,10 +125,7 @@ const StripePaymentButton = ({
         if (error) {
           const pi = error.payment_intent
 
-          if (
-            (pi && pi.status === "requires_capture") ||
-            (pi && pi.status === "succeeded")
-          ) {
+          if ((pi && pi.status === "requires_capture") || (pi && pi.status === "succeeded")) {
             onPaymentCompleted()
           }
 
@@ -175,15 +158,18 @@ const StripePaymentButton = ({
         <span>{submitting ? "Processing..." : "Place Order"}</span>
         <Sparkles className="w-5 h-5" />
       </Button>
-      <ErrorMessage
-        error={errorMessage}
-        data-testid="stripe-payment-error-message"
-      />
+      <ErrorMessage error={errorMessage} data-testid="stripe-payment-error-message" />
     </>
   )
 }
 
-const ManualTestPaymentButton = ({ notReady, "data-testid": dataTestId }: { notReady: boolean; "data-testid"?: string }) => {
+const ManualTestPaymentButton = ({
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  notReady: boolean
+  "data-testid"?: string
+}) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -217,10 +203,7 @@ const ManualTestPaymentButton = ({ notReady, "data-testid": dataTestId }: { notR
         <span>{submitting ? "Processing..." : "Place Order"}</span>
         <Sparkles className="w-5 h-5" />
       </Button>
-      <ErrorMessage
-        error={errorMessage}
-        data-testid="manual-payment-error-message"
-      />
+      <ErrorMessage error={errorMessage} data-testid="manual-payment-error-message" />
     </>
   )
 }

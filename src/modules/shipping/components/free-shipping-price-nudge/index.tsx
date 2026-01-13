@@ -2,24 +2,14 @@
 
 import { convertToLocale } from "@lib/util/money"
 import { CheckCircleSolid, XMark } from "@medusajs/icons"
-import {
-  HttpTypes,
-  StoreCart,
-  StoreCartShippingOption,
-  StorePrice,
-} from "@medusajs/types"
+import type { HttpTypes, StoreCart, StoreCartShippingOption, StorePrice } from "@medusajs/types"
 import { Button, clx } from "@medusajs/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useState } from "react"
-import { StoreFreeShippingPrice } from "types/global"
+import type { StoreFreeShippingPrice } from "types/global"
 
-const computeTarget = (
-  cart: HttpTypes.StoreCart,
-  price: HttpTypes.StorePrice
-) => {
-  const priceRule = (price.price_rules || []).find(
-    (pr) => pr.attribute === "item_total"
-  )!
+const computeTarget = (cart: HttpTypes.StoreCart, price: HttpTypes.StorePrice) => {
+  const priceRule = (price.price_rules || []).find((pr) => pr.attribute === "item_total")!
 
   const currentAmount = cart.item_total
   const targetAmount = parseFloat(priceRule.value)
@@ -29,8 +19,7 @@ const computeTarget = (
       current_amount: currentAmount,
       target_amount: targetAmount,
       target_reached: currentAmount > targetAmount,
-      target_remaining:
-        currentAmount > targetAmount ? 0 : targetAmount + 1 - currentAmount,
+      target_remaining: currentAmount > targetAmount ? 0 : targetAmount + 1 - currentAmount,
       remaining_percentage: (currentAmount / targetAmount) * 100,
     }
   } else if (priceRule.operator === "gte") {
@@ -38,8 +27,7 @@ const computeTarget = (
       current_amount: currentAmount,
       target_amount: targetAmount,
       target_reached: currentAmount > targetAmount,
-      target_remaining:
-        currentAmount > targetAmount ? 0 : targetAmount - currentAmount,
+      target_remaining: currentAmount > targetAmount ? 0 : targetAmount - currentAmount,
       remaining_percentage: (currentAmount / targetAmount) * 100,
     }
   } else if (priceRule.operator === "lt") {
@@ -47,8 +35,7 @@ const computeTarget = (
       current_amount: currentAmount,
       target_amount: targetAmount,
       target_reached: targetAmount > currentAmount,
-      target_remaining:
-        targetAmount > currentAmount ? 0 : currentAmount + 1 - targetAmount,
+      target_remaining: targetAmount > currentAmount ? 0 : currentAmount + 1 - targetAmount,
       remaining_percentage: (currentAmount / targetAmount) * 100,
     }
   } else if (priceRule.operator === "lte") {
@@ -56,8 +43,7 @@ const computeTarget = (
       current_amount: currentAmount,
       target_amount: targetAmount,
       target_reached: targetAmount > currentAmount,
-      target_remaining:
-        targetAmount > currentAmount ? 0 : currentAmount - targetAmount,
+      target_remaining: targetAmount > currentAmount ? 0 : currentAmount - targetAmount,
       remaining_percentage: (currentAmount / targetAmount) * 100,
     }
   } else {
@@ -65,8 +51,7 @@ const computeTarget = (
       current_amount: currentAmount,
       target_amount: targetAmount,
       target_reached: currentAmount === targetAmount,
-      target_remaining:
-        targetAmount > currentAmount ? 0 : targetAmount - currentAmount,
+      target_remaining: targetAmount > currentAmount ? 0 : targetAmount - currentAmount,
       remaining_percentage: (currentAmount / targetAmount) * 100,
     }
   }
@@ -87,7 +72,7 @@ export default function ShippingPriceNudge({
 
   // Check if any shipping options have a conditional price based on item_total
   const freeShippingPrice = shippingOptions
-    .map((shippingOption) => {
+    .flatMap((shippingOption) => {
       const calculatedPrice = shippingOption.calculated_price
 
       if (!calculatedPrice) {
@@ -100,9 +85,7 @@ export default function ShippingPriceNudge({
       const validCurrencyPrices = shippingOption.prices.filter(
         (price) =>
           price.currency_code === cart.currency_code &&
-          (price.price_rules || []).some(
-            (priceRule) => priceRule.attribute === "item_total"
-          )
+          (price.price_rules || []).some((priceRule) => priceRule.attribute === "item_total")
       )
 
       return validCurrencyPrices.map((price) => {
@@ -113,7 +96,6 @@ export default function ShippingPriceNudge({
         }
       })
     })
-    .flat(1)
     .filter(Boolean)
     // We focus here entirely on free shipping, but this can be edited to handle multiple layers
     // of reduced shipping prices.
@@ -148,8 +130,7 @@ function FreeShippingInline({
           <div>
             {price.target_reached ? (
               <div className="flex items-center gap-1.5">
-                <CheckCircleSolid className="text-green-500 inline-block" />{" "}
-                Free Shipping unlocked!
+                <CheckCircleSolid className="text-green-500 inline-block" /> Free Shipping unlocked!
               </div>
             ) : (
               `Unlock Free Shipping`
@@ -188,13 +169,7 @@ function FreeShippingInline({
   )
 }
 
-function FreeShippingPopup({
-  cart,
-  price,
-}: {
-  cart: StoreCart
-  price: StoreFreeShippingPrice
-}) {
+function FreeShippingPopup({ cart, price }: { cart: StoreCart; price: StoreFreeShippingPrice }) {
   const [isClosed, setIsClosed] = useState(false)
 
   return (
@@ -224,8 +199,8 @@ function FreeShippingPopup({
               <div>
                 {price.target_reached ? (
                   <div className="flex items-center gap-1.5">
-                    <CheckCircleSolid className="text-green-500 inline-block" />{" "}
-                    Free Shipping unlocked!
+                    <CheckCircleSolid className="text-green-500 inline-block" /> Free Shipping
+                    unlocked!
                   </div>
                 ) : (
                   `Unlock Free Shipping`

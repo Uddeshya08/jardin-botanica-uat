@@ -1,15 +1,14 @@
 "use client"
 
-import React, { useMemo, useState, useEffect } from "react"
-import { motion } from "motion/react"
-import { Heart } from "lucide-react"
-import { toast } from "sonner"
-import { useSearchParams } from "next/navigation"
-import Link from "next/link"
-
-import { ImageWithFallback } from "./figma/ImageWithFallback"
-import { useLedger, LedgerItem } from "app/context/ledger-context"
 import { useCartItems } from "app/context/cart-items-context"
+import { type LedgerItem, useLedger } from "app/context/ledger-context"
+import { Heart } from "lucide-react"
+import { motion } from "motion/react"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import React, { useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
+import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 interface Product {
   id: string
@@ -49,8 +48,7 @@ interface FullWidthFeature {
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1632118588340-c4c7a674c707?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncmVlbmhvdXNlJTIwYm90YW5pY2FsJTIwdmludGFnZXxlbnwxfHx8fDE3NjIwMDk0Mjh8MA&ixlib=rb-4.1.0&q=80&w=1920&utm_source=figma&utm_medium=referral"
 
-const EDITORIAL_IMAGE =
-  "/assets/99b7e68b7e2b2dbbfbf85a52e8237ce212b58258.png"
+const EDITORIAL_IMAGE = "/assets/99b7e68b7e2b2dbbfbf85a52e8237ce212b58258.png"
 
 const products: Product[] = [
   {
@@ -154,8 +152,8 @@ const fullWidthFeatures: FullWidthFeature[] = [
 function getProductSlug(productName: string): string {
   return productName
     .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
 }
 
 export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
@@ -204,7 +202,7 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
     const itemId = product.id
 
     // Check if item already exists in cart
-    const existingItem = cartItems.find(cartItem => cartItem.id === itemId)
+    const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
 
     let item
     if (existingItem) {
@@ -238,11 +236,11 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
     }
 
     // Add to recently added products for UI state
-    setRecentlyAddedProducts(prev => new Set(prev).add(itemId))
+    setRecentlyAddedProducts((prev) => new Set(prev).add(itemId))
 
     // Reset the button state after 3 seconds
     setTimeout(() => {
-      setRecentlyAddedProducts(prev => {
+      setRecentlyAddedProducts((prev) => {
         const newSet = new Set(prev)
         newSet.delete(itemId)
         return newSet
@@ -256,38 +254,57 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
     <div className="min-h-screen" style={{ backgroundColor: "#e3e3d8" }}>
       {/* Hero Banner */}
       <section className="relative h-screen sm:h-[65vh] lg:h-[75vh] overflow-hidden">
-        <motion.div initial={{ scale: 1.1 }} animate={{ scale: 1 }} transition={{ duration: 1.5, ease: "easeOut" }} className="absolute inset-0 w-full h-full z-0">
-          <ImageWithFallback src={HERO_IMAGE} alt="Home Creations Collection" className="w-full h-full object-cover" />
+        <motion.div
+          initial={{ scale: 1.1 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="absolute inset-0 w-full h-full z-0"
+        >
+          <ImageWithFallback
+            src={HERO_IMAGE}
+            alt="Home Creations Collection"
+            className="w-full h-full object-cover"
+          />
         </motion.div>
         {/* Background Overlay - smooth natural gradient from top extending below center */}
-        <div className="absolute inset-0 z-10" 
-       style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.02) 85%, transparent 95%)' }}/>
+        <div
+          className="absolute inset-0 z-10"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.02) 85%, transparent 95%)",
+          }}
+        />
 
         {/* Hero Text */}
         <div className="absolute inset-0 flex items-center justify-center z-20">
           <div className="text-center px-4 sm:px-6">
-            <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.2 }}>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              className="font-din-arabic text-white/80 text-xs sm:text-sm mb-4 sm:mb-6 tracking-widest"
-              style={{ letterSpacing: "0.2em" }}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.2 }}
             >
-              BOTANICAL HOME FRAGRANCES
-            </motion.p>
-            <h1
-              className="font-american-typewriter text-white text-3xl sm:text-4xl md:text-5xl lg:text-7xl mb-4 sm:mb-6"
-              style={{ letterSpacing: "0.05em" }}
-            >
-              Home Creations
-            </h1>
-            <p
-              className="font-din-arabic text-white/95 max-w-2xl mx-auto text-base sm:text-lg lg:text-xl leading-relaxed px-4"
-              style={{ letterSpacing: "0.1em" }}
-            >
-              Hand-poured candles and artisanal diffusers to create atmosphere, warmth, and an enduring sense of ease.
-            </p>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="font-din-arabic text-white/80 text-xs sm:text-sm mb-4 sm:mb-6 tracking-widest"
+                style={{ letterSpacing: "0.2em" }}
+              >
+                BOTANICAL HOME FRAGRANCES
+              </motion.p>
+              <h1
+                className="font-american-typewriter text-white text-3xl sm:text-4xl md:text-5xl lg:text-7xl mb-4 sm:mb-6"
+                style={{ letterSpacing: "0.05em" }}
+              >
+                Home Creations
+              </h1>
+              <p
+                className="font-din-arabic text-white/95 max-w-2xl mx-auto text-base sm:text-lg lg:text-xl leading-relaxed px-4"
+                style={{ letterSpacing: "0.1em" }}
+              >
+                Hand-poured candles and artisanal diffusers to create atmosphere, warmth, and an
+                enduring sense of ease.
+              </p>
             </motion.div>
           </div>
         </div>
@@ -297,7 +314,12 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
       <section className="py-6 sm:py-8 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 border-b border-black/10">
         <div className="max-w-[90rem] mx-auto">
           <div className="flex justify-start">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.1 }} className="flex flex-wrap gap-4 sm:gap-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="flex flex-wrap gap-4 sm:gap-6"
+            >
               {[
                 { label: "All products", value: "all" as const },
                 { label: "Candles", value: "candle" as const },
@@ -307,7 +329,9 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
                   key={filter.value}
                   onClick={() => setSelectedFilter(filter.value)}
                   className={`font-din-arabic text-sm transition-colors duration-300 ${
-                    selectedFilter === filter.value ? "text-black border-b border-black" : "text-black/40 hover:text-black/70"
+                    selectedFilter === filter.value
+                      ? "text-black border-b border-black"
+                      : "text-black/40 hover:text-black/70"
                   }`}
                   style={{ letterSpacing: "0.15em" }}
                 >
@@ -324,20 +348,28 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
         <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 sm:gap-y-16 lg:gap-y-20  justify-items-center">
             {filteredProducts.slice(0, 3).map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} isInLedger={isInLedger} handleToggleLedger={handleToggleLedger} handleAddToCart={handleAddToCart} recentlyAddedProducts={recentlyAddedProducts} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={index}
+                isInLedger={isInLedger}
+                handleToggleLedger={handleToggleLedger}
+                handleAddToCart={handleAddToCart}
+                recentlyAddedProducts={recentlyAddedProducts}
+              />
             ))}
 
-{filteredProducts.slice(3, 6).map((product, index) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={index + 3}
-                  isInLedger={isInLedger}
-                  handleToggleLedger={handleToggleLedger}
-                  handleAddToCart={handleAddToCart}
-                  recentlyAddedProducts={recentlyAddedProducts}
-                />
-              ))}
+            {filteredProducts.slice(3, 6).map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={index + 3}
+                isInLedger={isInLedger}
+                handleToggleLedger={handleToggleLedger}
+                handleAddToCart={handleAddToCart}
+                recentlyAddedProducts={recentlyAddedProducts}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -349,12 +381,12 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
       {filteredProducts.length > 3 && (
         <section className="py-0">
           <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 sm:gap-y-16 lg:gap-y-20 mb-5 justify-items-center">
-         
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 sm:gap-y-16 lg:gap-y-20 mb-5 justify-items-center"></div>
 
             {/* First Feature Section */}
-            {fullWidthFeatures[0] && filteredProducts.length > 6 && <FullWidthFeatureSection feature={fullWidthFeatures[0]} />}
+            {fullWidthFeatures[0] && filteredProducts.length > 6 && (
+              <FullWidthFeatureSection feature={fullWidthFeatures[0]} />
+            )}
 
             {/* Remaining Products */}
             {filteredProducts.length > 6 && (
@@ -374,7 +406,9 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
             )}
 
             {/* Second Feature Section */}
-            {fullWidthFeatures[1] && filteredProducts.length > 6 && <FullWidthFeatureSection feature={fullWidthFeatures[1]} />}
+            {fullWidthFeatures[1] && filteredProducts.length > 6 && (
+              <FullWidthFeatureSection feature={fullWidthFeatures[1]} />
+            )}
 
             {/* Home Fragrance Ritual Section */}
             <HomeFragranceRitualSection />
@@ -394,7 +428,14 @@ interface ProductCardProps {
   recentlyAddedProducts: Set<string>
 }
 
-function ProductCard({ product, index, isInLedger, handleToggleLedger, handleAddToCart, recentlyAddedProducts }: ProductCardProps) {
+function ProductCard({
+  product,
+  index,
+  isInLedger,
+  handleToggleLedger,
+  handleAddToCart,
+  recentlyAddedProducts,
+}: ProductCardProps) {
   const [isImageHovered, setIsImageHovered] = useState(false)
   const isRecentlyAdded = recentlyAddedProducts.has(product.id)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
@@ -417,53 +458,78 @@ function ProductCard({ product, index, isInLedger, handleToggleLedger, handleAdd
           onMouseEnter={() => setIsImageHovered(true)}
           onMouseLeave={() => setIsImageHovered(false)}
         >
-        {/* Hover Image - Behind */}
-        {product.hoverImage && (
-          <div className="absolute inset-0">
-            <ImageWithFallback src={product.hoverImage} alt={`${product.name} alternate view`} className="w-full h-full object-cover" />
+          {/* Hover Image - Behind */}
+          {product.hoverImage && (
+            <div className="absolute inset-0">
+              <ImageWithFallback
+                src={product.hoverImage}
+                alt={`${product.name} alternate view`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          {/* Main Image - On Top */}
+          <div
+            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+            style={{ opacity: isImageHovered ? 0 : 1 }}
+          >
+            <ImageWithFallback
+              src={product.image}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
           </div>
-        )}
 
-        {/* Main Image - On Top */}
-        <div className="absolute inset-0 transition-opacity duration-700 ease-in-out" style={{ opacity: isImageHovered ? 0 : 1 }}>
-          <ImageWithFallback src={product.image} alt={product.name} className="w-full h-full object-cover" />
+          {/* Ledger Icon - Always Visible */}
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              handleToggleLedger(product)
+            }}
+            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
+              isInLedger(product.id)
+                ? "bg-white/20 border border-white/30"
+                : "bg-white/20 border border-white/30 hover:bg-white/30"
+            }`}
+            aria-label={`${isInLedger(product.id) ? "Remove from" : "Add to"} ledger`}
+          >
+            <Heart
+              size={18}
+              className={`transition-colors duration-300 ${isInLedger(product.id) ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"}`}
+            />
+          </motion.button>
         </div>
-
-        {/* Ledger Icon - Always Visible */}
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            handleToggleLedger(product)
-          }}
-          className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
-            isInLedger(product.id) ? "bg-white/20 border border-white/30" : "bg-white/20 border border-white/30 hover:bg-white/30"
-          }`}
-          aria-label={`${isInLedger(product.id) ? "Remove from" : "Add to"} ledger`}
-        >
-          <Heart size={18} className={`transition-colors duration-300 ${isInLedger(product.id) ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"}`} />
-        </motion.button>
-      </div>
       </Link>
 
       {/* Product Info */}
       <div className="flex flex-col flex-grow">
         <Link href={`/products/${productSlug}`}>
           <div>
-            <h3 className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer" style={{ letterSpacing: "0.05em" }}>
+            <h3
+              className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer"
+              style={{ letterSpacing: "0.05em" }}
+            >
               {product.name}
             </h3>
-            <p className="font-din-arabic text-black/60 text-sm mb-2" style={{ letterSpacing: "0.1em" }}>
+            <p
+              className="font-din-arabic text-black/60 text-sm mb-2"
+              style={{ letterSpacing: "0.1em" }}
+            >
               {product.size}
             </p>
           </div>
         </Link>
 
-        <p className="font-din-arabic text-black/70 leading-relaxed mt-3" style={{ letterSpacing: "0.1em" }}>
+        <p
+          className="font-din-arabic text-black/70 leading-relaxed mt-3"
+          style={{ letterSpacing: "0.1em" }}
+        >
           {product.description}
         </p>
 
@@ -480,7 +546,10 @@ function ProductCard({ product, index, isInLedger, handleToggleLedger, handleAdd
               onMouseLeave={() => setIsButtonHovered(false)}
               className="group/btn relative inline-flex items-center gap-2 pb-0.5"
             >
-              <span className="font-din-arabic text-black text-base sm:text-sm" style={{ letterSpacing: "0.12em" }}>
+              <span
+                className="font-din-arabic text-black text-base sm:text-sm"
+                style={{ letterSpacing: "0.12em" }}
+              >
                 {isRecentlyAdded ? "Added to cart" : "Add to cart"}
               </span>
               <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
@@ -511,13 +580,28 @@ function EditorialBlogSection() {
     >
       <div className="relative h-[60vh] sm:h-[65vh] lg:h-[75vh] overflow-hidden">
         {/* Background Image */}
-        <motion.div initial={{ scale: 1.05 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: "easeOut" }} className="absolute inset-0 w-full h-full z-0">
-          <ImageWithFallback src={EDITORIAL_IMAGE} alt="Creating atmosphere through fragrance" className="w-full h-full object-cover" />
+        <motion.div
+          initial={{ scale: 1.05 }}
+          whileInView={{ scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="absolute inset-0 w-full h-full z-0"
+        >
+          <ImageWithFallback
+            src={EDITORIAL_IMAGE}
+            alt="Creating atmosphere through fragrance"
+            className="w-full h-full object-cover"
+          />
         </motion.div>
 
         {/* Background Overlay - smooth natural gradient from top extending below center */}
-        <div className="absolute inset-0 z-10" 
-        style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.02) 85%, transparent 95%)' }} />
+        <div
+          className="absolute inset-0 z-10"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.02) 85%, transparent 95%)",
+          }}
+        />
 
         {/* Content */}
         <motion.div
@@ -558,7 +642,8 @@ function EditorialBlogSection() {
               className="font-din-arabic text-white/95 text-sm sm:text-base md:text-lg leading-relaxed mb-8 sm:mb-12"
               style={{ letterSpacing: "0.1em" }}
             >
-              Each scent tells a story — of sandalwood in summer light, oud drifting through mist and rain, and saffron fields at dusk. These memories of places and seasons shape
+              Each scent tells a story — of sandalwood in summer light, oud drifting through mist
+              and rain, and saffron fields at dusk. These memories of places and seasons shape
               familiar rooms into spaces that feel entirely your own.
             </motion.p>
 
@@ -571,10 +656,21 @@ function EditorialBlogSection() {
               whileTap={{ scale: 0.98 }}
               className="group inline-flex items-center gap-3 border border-white/40 hover:border-white hover:bg-white/5 px-10 py-3.5 transition-all duration-300"
             >
-              <span className="font-din-arabic text-white text-sm" style={{ letterSpacing: "0.15em" }}>
+              <span
+                className="font-din-arabic text-white text-sm"
+                style={{ letterSpacing: "0.15em" }}
+              >
                 Read the guide
               </span>
-              <motion.span className="text-white" animate={{ x: [0, 5, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}>
+              <motion.span
+                className="text-white"
+                animate={{ x: [0, 5, 0] }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
                 →
               </motion.span>
             </motion.button>
@@ -594,7 +690,9 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
       transition={{ duration: 0.8 }}
       className="mb-16 sm:mb-24 lg:mb-32"
     >
-      <div className={`grid grid-cols-1 lg:grid-cols-2 ${feature.imagePosition === "right" ? "" : "lg:grid-flow-dense"}`}>
+      <div
+        className={`grid grid-cols-1 lg:grid-cols-2 ${feature.imagePosition === "right" ? "" : "lg:grid-flow-dense"}`}
+      >
         {/* Image */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -605,35 +703,66 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
             feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
           }`}
         >
-          <ImageWithFallback src={feature.image} alt={feature.title} className="w-full h-full object-cover" />
+          <ImageWithFallback
+            src={feature.image}
+            alt={feature.title}
+            className="w-full h-full object-cover"
+          />
         </motion.div>
 
         {/* Content */}
         <motion.div
-          initial={{ opacity: 0, x: feature.imagePosition === "left" ? 40 : -40 }}
+          initial={{
+            opacity: 0,
+            x: feature.imagePosition === "left" ? 40 : -40,
+          }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3 }}
           className={`flex items-center bg-white/10 p-8 sm:p-12 lg:p-20 ${feature.imagePosition === "left" ? "lg:col-start-2 lg:row-start-1" : "lg:col-start-1 lg:row-start-1"}`}
         >
           <div className="max-w-md">
-            <p className="font-din-arabic text-black/50 text-xs mb-3 sm:mb-4" style={{ letterSpacing: "0.2em" }}>
+            <p
+              className="font-din-arabic text-black/50 text-xs mb-3 sm:mb-4"
+              style={{ letterSpacing: "0.2em" }}
+            >
               {feature.subtitle.toUpperCase()}
             </p>
 
-            <h2 className="font-american-typewriter text-2xl sm:text-3xl lg:text-4xl mb-4 sm:mb-6" style={{ letterSpacing: "0.05em" }}>
+            <h2
+              className="font-american-typewriter text-2xl sm:text-3xl lg:text-4xl mb-4 sm:mb-6"
+              style={{ letterSpacing: "0.05em" }}
+            >
               {feature.title}
             </h2>
 
-            <p className="font-din-arabic text-black/70 text-sm sm:text-base leading-relaxed mb-6 sm:mb-8" style={{ letterSpacing: "0.1em" }}>
+            <p
+              className="font-din-arabic text-black/70 text-sm sm:text-base leading-relaxed mb-6 sm:mb-8"
+              style={{ letterSpacing: "0.1em" }}
+            >
               {feature.description}
             </p>
 
-            <motion.button whileHover={{ x: 5 }} whileTap={{ scale: 0.98 }} className="group inline-flex items-center gap-3">
-              <span className="font-din-arabic text-black text-sm border-b border-black/30 group-hover:border-black transition-colors pb-0.5" style={{ letterSpacing: "0.15em" }}>
+            <motion.button
+              whileHover={{ x: 5 }}
+              whileTap={{ scale: 0.98 }}
+              className="group inline-flex items-center gap-3"
+            >
+              <span
+                className="font-din-arabic text-black text-sm border-b border-black/30 group-hover:border-black transition-colors pb-0.5"
+                style={{ letterSpacing: "0.15em" }}
+              >
                 {feature.ctaText}
               </span>
-              <motion.span className="text-black" animate={{ x: [0, 5, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}>
+              <motion.span
+                className="text-black"
+                animate={{ x: [0, 5, 0] }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
                 →
               </motion.span>
             </motion.button>
@@ -686,16 +815,26 @@ function HomeFragranceRitualSection() {
           transition={{ duration: 0.7 }}
           className="text-center mb-16 lg:mb-20"
         >
-          <p className="font-din-arabic text-black/50 text-xs mb-4" style={{ letterSpacing: "0.2em" }}>
+          <p
+            className="font-din-arabic text-black/50 text-xs mb-4"
+            style={{ letterSpacing: "0.2em" }}
+          >
             THE RITUAL
           </p>
 
-          <h1 className="font-american-typewriter text-2xl sm:text-3xl lg:text-4xl mb-6" style={{ letterSpacing: "0.05em" }}>
+          <h1
+            className="font-american-typewriter text-2xl sm:text-3xl lg:text-4xl mb-6"
+            style={{ letterSpacing: "0.05em" }}
+          >
             A home fragrance ritual
           </h1>
 
-          <p className="font-din-arabic text-black/70 leading-relaxed max-w-2xl mx-auto" style={{ letterSpacing: "0.1em" }}>
-            A mindful approach to scenting your sanctuary, designed to create atmosphere, evoke emotion, and transform spaces.
+          <p
+            className="font-din-arabic text-black/70 leading-relaxed max-w-2xl mx-auto"
+            style={{ letterSpacing: "0.1em" }}
+          >
+            A mindful approach to scenting your sanctuary, designed to create atmosphere, evoke
+            emotion, and transform spaces.
           </p>
         </motion.div>
 
@@ -711,7 +850,15 @@ function HomeFragranceRitualSection() {
               className="group relative"
             >
               {/* Connector Line - Not for last item */}
-              {index < ritualSteps.length - 1 && <div style={{ background: "linear-gradient(to bottom, rgba(96, 95, 95, 0.15), rgba(186, 181, 181, 0.1))" }}  className="absolute left-5 top-14 w-px h-full bg-gradient-to-b from-black/10 to-transparent hidden sm:block" />}
+              {index < ritualSteps.length - 1 && (
+                <div
+                  style={{
+                    background:
+                      "linear-gradient(to bottom, rgba(96, 95, 95, 0.15), rgba(186, 181, 181, 0.1))",
+                  }}
+                  className="absolute left-5 top-14 w-px h-full bg-gradient-to-b from-black/10 to-transparent hidden sm:block"
+                />
+              )}
 
               <div className="flex items-start gap-8 lg:gap-12">
                 {/* Step Number with Circle */}
@@ -723,7 +870,10 @@ function HomeFragranceRitualSection() {
                   className="flex-shrink-0 relative z-10"
                 >
                   <div className="w-10 h-10 rounded-full border-2 border-black/10 bg-[#e3e3d8] flex items-center justify-center group-hover:border-black/30 transition-colors duration-300">
-                    <span className="font-american-typewriter text-sm text-black/40 group-hover:text-black/60 transition-colors duration-300" style={{ letterSpacing: "0.05em" }}>
+                    <span
+                      className="font-american-typewriter text-sm text-black/40 group-hover:text-black/60 transition-colors duration-300"
+                      style={{ letterSpacing: "0.05em" }}
+                    >
                       {step.step}
                     </span>
                   </div>
@@ -731,11 +881,17 @@ function HomeFragranceRitualSection() {
 
                 {/* Content */}
                 <div className="flex-1 pt-1">
-                  <h3 className="font-american-typewriter text-xl lg:text-2xl mb-4" style={{ letterSpacing: "0.05em" }}>
+                  <h3
+                    className="font-american-typewriter text-xl lg:text-2xl mb-4"
+                    style={{ letterSpacing: "0.05em" }}
+                  >
                     {step.title}
                   </h3>
 
-                  <p className="font-din-arabic text-black/70 leading-relaxed max-w-2xl" style={{ letterSpacing: "0.1em" }}>
+                  <p
+                    className="font-din-arabic text-black/70 leading-relaxed max-w-2xl"
+                    style={{ letterSpacing: "0.1em" }}
+                  >
                     {step.description}
                   </p>
                 </div>
@@ -753,12 +909,27 @@ function HomeFragranceRitualSection() {
           className="mt-16 lg:mt-20 relative"
         >
           <div className="relative aspect-[16/9] lg:aspect-[21/9] overflow-hidden">
-            <motion.div initial={{ scale: 1.1 }} whileInView={{ scale: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 1.2, ease: "easeOut" }}>
-              <ImageWithFallback src={EDITORIAL_IMAGE} alt="Home fragrance ritual" className="w-full h-full object-cover" />
+            <motion.div
+              initial={{ scale: 1.1 }}
+              whileInView={{ scale: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+            >
+              <ImageWithFallback
+                src={EDITORIAL_IMAGE}
+                alt="Home fragrance ritual"
+                className="w-full h-full object-cover"
+              />
             </motion.div>
 
             {/* Overlay Text */}
-            <div className="absolute inset-0 z-10 p-8 lg:p-12" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.22) 55%, rgba(0,0,0,0.12) 65%, rgba(0,0,0,0.05) 75%, transparent 85%)' }}>
+            <div
+              className="absolute inset-0 z-10 p-8 lg:p-12"
+              style={{
+                background:
+                  "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.22) 55%, rgba(0,0,0,0.12) 65%, rgba(0,0,0,0.05) 75%, transparent 85%)",
+              }}
+            >
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -786,5 +957,3 @@ function HomeFragranceRitualSection() {
     </motion.section>
   )
 }
-
-

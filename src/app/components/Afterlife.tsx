@@ -1,20 +1,20 @@
-import React from "react"
+import { Leaf, Recycle, RefreshCw } from "lucide-react"
 import { motion } from "motion/react"
 import Image from "next/image"
-import { Recycle, RefreshCw, Leaf } from "lucide-react"
-import { AfterlifeSection, AfterlifeItem } from "../../types/contentful"
+import React from "react"
+import { AfterlifeItem, type AfterlifeSection } from "../../types/contentful"
 
 type AfterlifeProps = {
   afterlifeContent?: AfterlifeSection | null
 }
 function normalizeIconPath(iconSrc: string): string {
-  const filename = iconSrc.split('/').pop()?.toLowerCase() || ''
-  
+  const filename = iconSrc.split("/").pop()?.toLowerCase() || ""
+
   // Map database paths to local asset paths
-  if (filename === 'chat.svg') return '/assets/chat.svg'
-  if (filename === 'love.svg') return '/assets/Love.svg'
-  if (filename === 'gift-box.svg' || filename === 'gift.svg') return '/assets/gift.svg'
-  
+  if (filename === "chat.svg") return "/assets/chat.svg"
+  if (filename === "love.svg") return "/assets/Love.svg"
+  if (filename === "gift-box.svg" || filename === "gift.svg") return "/assets/gift.svg"
+
   // Return original if no match
   return iconSrc
 }
@@ -34,9 +34,21 @@ export function Afterlife({ afterlifeContent }: AfterlifeProps) {
     heading: "Afterlife",
     backgroundColor: "#EBEBE1",
     items: [
-      { icon: "recycle", title: "Glass Vessels", text: "Our amber glass bottles are designed for recycling and reuse — they can be rinsed, refilled, or even reimagined as planters." },
-      { icon: "refresh", title: "Pump Systems", text: "Pumps are a mix of metal and plastic. We encourage reusing them across bottles until their natural end." },
-      { icon: "leaf",    title: "Mindful End",   text: "When the pump no longer functions, please discard thoughtfully. Every choice matters to the gardens we're preserving." }
+      {
+        icon: "recycle",
+        title: "Glass Vessels",
+        text: "Our amber glass bottles are designed for recycling and reuse — they can be rinsed, refilled, or even reimagined as planters.",
+      },
+      {
+        icon: "refresh",
+        title: "Pump Systems",
+        text: "Pumps are a mix of metal and plastic. We encourage reusing them across bottles until their natural end.",
+      },
+      {
+        icon: "leaf",
+        title: "Mindful End",
+        text: "When the pump no longer functions, please discard thoughtfully. Every choice matters to the gardens we're preserving.",
+      },
     ],
     isActive: true,
   }
@@ -75,20 +87,23 @@ export function Afterlife({ afterlifeContent }: AfterlifeProps) {
               // Determine if using old format (string) or new format (object)
               const isOldFormat = typeof item.icon === "string"
               const isNewFormat = typeof item.icon === "object" && item.icon !== null
-              
+
               // For old format: get Lucide icon component
-              const LucideIcon = isOldFormat && item.icon 
-                ? lucideIconMap[item.icon as keyof typeof lucideIconMap] || lucideIconMap.leaf
-                : lucideIconMap.leaf
-              
+              const LucideIcon =
+                isOldFormat && item.icon
+                  ? lucideIconMap[item.icon as keyof typeof lucideIconMap] || lucideIconMap.leaf
+                  : lucideIconMap.leaf
+
               // For new format: get image src and alt
-              const iconSrc = isNewFormat && typeof item.icon === "object" && item.icon.src
-                ? normalizeIconPath(item.icon.src) 
-                : '/assets/Love.svg'
-              const iconAlt = isNewFormat && typeof item.icon === "object" && item.icon.alt 
-                ? item.icon.alt 
-                : 'Icon'
-              
+              const iconSrc =
+                isNewFormat && typeof item.icon === "object" && item.icon.src
+                  ? normalizeIconPath(item.icon.src)
+                  : "/assets/Love.svg"
+              const iconAlt =
+                isNewFormat && typeof item.icon === "object" && item.icon.alt
+                  ? item.icon.alt
+                  : "Icon"
+
               return (
                 <motion.div
                   key={`${item.title}-${idx}`}
@@ -98,9 +113,11 @@ export function Afterlife({ afterlifeContent }: AfterlifeProps) {
                   viewport={{ once: true }}
                   className={`space-y-3 ${idx === 0 ? "lg:-ml-4" : idx === 2 ? "lg:ml-4" : ""}`}
                 >
-                  <div className={`flex ${isOldFormat ? 'items-center' : 'items-start'} mb-3 ${item.title ? 'space-x-5' : 'justify-center'}`}>
+                  <div
+                    className={`flex ${isOldFormat ? "items-center" : "items-start"} mb-3 ${item.title ? "space-x-5" : "justify-center"}`}
+                  >
                     <div
-                      className={`${isOldFormat ? 'p-2 rounded-full' : ''} group/icon flex-shrink-0`}
+                      className={`${isOldFormat ? "p-2 rounded-full" : ""} group/icon flex-shrink-0`}
                       style={isOldFormat ? { backgroundColor: "rgba(162, 139, 111, 0.08)" } : {}}
                     >
                       {isOldFormat ? (
@@ -117,8 +134,9 @@ export function Afterlife({ afterlifeContent }: AfterlifeProps) {
                           width={48}
                           height={48}
                           className="w-12 h-12"
-                          style={{ 
-                            filter: "brightness(0) saturate(100%) invert(37%) sepia(10%) saturate(662%) hue-rotate(52deg) brightness(94%) contrast(110%) drop-shadow(0 0 0.5px rgba(84, 93, 74, 0.8))"
+                          style={{
+                            filter:
+                              "brightness(0) saturate(100%) invert(37%) sepia(10%) saturate(662%) hue-rotate(52deg) brightness(94%) contrast(110%) drop-shadow(0 0 0.5px rgba(84, 93, 74, 0.8))",
                           }}
                         />
                       )}
@@ -129,7 +147,9 @@ export function Afterlife({ afterlifeContent }: AfterlifeProps) {
                       </h3>
                     )}
                   </div>
-                  <p className={`font-din-arabic text-sm text-black/55 leading-relaxed whitespace-pre-line ${!item.title ? 'text-center' : ''}`}>
+                  <p
+                    className={`font-din-arabic text-sm text-black/55 leading-relaxed whitespace-pre-line ${!item.title ? "text-center" : ""}`}
+                  >
                     {item.text}
                   </p>
                 </motion.div>

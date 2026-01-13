@@ -1,12 +1,12 @@
 "use client"
 
-import React, { useEffect, useState, useActionState } from "react"
-import { useRouter, useParams } from "next/navigation"
-import { motion } from "motion/react"
-import { ArrowLeft, Mail, CheckCircle } from "lucide-react"
 import { requestPasswordReset } from "@lib/data/customer"
-import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
+import { RippleEffect } from "app/components/RippleEffect"
+import { ArrowLeft, CheckCircle, Mail } from "lucide-react"
+import { motion } from "motion/react"
+import { useParams, useRouter } from "next/navigation"
+import React, { useActionState, useEffect, useState } from "react"
 
 interface CartItem {
   id: string
@@ -25,8 +25,8 @@ function ErrorText({ error }: { error: string | null }) {
 export default function ForgotPasswordPage() {
   const router = useRouter()
   const params = useParams()
-  const countryCode = params?.countryCode as string || 'us'
-  
+  const countryCode = (params?.countryCode as string) || "us"
+
   const [isScrolled, setIsScrolled] = useState(false)
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [emailSent, setEmailSent] = useState(false)
@@ -74,11 +74,7 @@ export default function ForgotPasswordPage() {
   return (
     <div>
       <RippleEffect />
-      <Navigation
-        isScrolled={isScrolled}
-        cartItems={cartItems}
-        onCartUpdate={handleCartUpdate}
-      />
+      <Navigation isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} />
 
       <div className="min-h-screen pt-44 pb-12" style={{ backgroundColor: "#e3e3d8" }}>
         <div className="container mx-auto px-4 lg:px-12">
@@ -108,7 +104,8 @@ export default function ForgotPasswordPage() {
                     Forgot Your Password?
                   </h1>
                   <p className="font-din-arabic text-sm text-black/70 leading-relaxed">
-                    No worries! Enter your email address and we'll send you instructions to reset your password.
+                    No worries! Enter your email address and we'll send you instructions to reset
+                    your password.
                   </p>
                 </div>
 
@@ -127,9 +124,7 @@ export default function ForgotPasswordPage() {
                       placeholder="Enter your email address"
                       required
                     />
-                    {formState && !formState.success && (
-                      <ErrorText error={formState.message} />
-                    )}
+                    {formState && !formState.success && <ErrorText error={formState.message} />}
                   </div>
 
                   <motion.button
@@ -162,11 +157,11 @@ export default function ForgotPasswordPage() {
                 <h2 className="font-american-typewriter text-2xl mb-4 text-black">
                   Check Your Email
                 </h2>
-                
+
                 <p className="font-din-arabic text-sm text-black/70 leading-relaxed mb-6">
                   We've sent password reset instructions to:
                 </p>
-                
+
                 <p className="font-din-arabic text-base text-black font-medium mb-8">
                   {submittedEmail}
                 </p>
@@ -189,7 +184,7 @@ export default function ForgotPasswordPage() {
                     >
                       Try Again
                     </motion.button>
-                    
+
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -208,4 +203,3 @@ export default function ForgotPasswordPage() {
     </div>
   )
 }
-

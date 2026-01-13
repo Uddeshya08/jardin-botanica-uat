@@ -1,34 +1,19 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "motion/react"
-import {
-  User,
-  Search,
-  ShoppingBag,
-  X,
-  Plus,
-  Minus,
-  Heart,
-  Menu,
-  ChevronDown,
-} from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
-import { useRouter, usePathname } from "next/navigation"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog"
-import { useAuth } from "app/context/auth-context"
-import { useCartItemsSafe, CartItem } from "app/context/cart-items-context"
-import { updateLineItem, deleteLineItem } from "@lib/data/cart"
+import { deleteLineItem, updateLineItem } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
+import type { HttpTypes } from "@medusajs/types"
+import { useAuth } from "app/context/auth-context"
+import { type CartItem, useCartItemsSafe } from "app/context/cart-items-context"
+import { ChevronDown, Heart, Menu, Minus, Plus, Search, ShoppingBag, User, X } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
+import Image from "next/image"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import type React from "react"
+import { useEffect, useRef, useState } from "react"
 import { SearchMegaMenu } from "./SearchMegaMenu"
-import { HttpTypes } from "@medusajs/types"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 
 interface DropdownItem {
   label: string
@@ -66,7 +51,7 @@ export function Navigation({
   const router = useRouter()
   const pathname = usePathname()
   const { isLoggedIn: authIsLoggedIn } = useAuth()
-  
+
   // Use context if available, otherwise fall back to props
   const cartContext = useCartItemsSafe()
   const cartItems = cartContext?.cartItems ?? cartItemsProp ?? []
@@ -81,9 +66,7 @@ export function Navigation({
   const [mounted, setMounted] = useState(false)
   const [isHomePage, setIsHomePage] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [mobileActiveDropdown, setMobileActiveDropdown] = useState<
-    string | null
-  >(null)
+  const [mobileActiveDropdown, setMobileActiveDropdown] = useState<string | null>(null)
   const [showLoginDialog, setShowLoginDialog] = useState(false)
   const [updatingCartItem, setUpdatingCartItem] = useState<string | null>(null)
   const cartRef = useRef<HTMLDivElement>(null)
@@ -102,8 +85,7 @@ export function Navigation({
     setMounted(true)
 
     const checkAndSetHomePage = () => {
-      const currentPath =
-        typeof window !== "undefined" ? window.location.pathname : "/"
+      const currentPath = typeof window !== "undefined" ? window.location.pathname : "/"
       const isHome = currentPath === "/in"
       setIsHomePage(isHome)
 
@@ -137,11 +119,7 @@ export function Navigation({
       const originalPushState = window.history.pushState
       const originalReplaceState = window.history.replaceState
 
-      window.history.pushState = function (
-        data: any,
-        unused: string,
-        url?: string | URL | null
-      ) {
+      window.history.pushState = function (data: any, unused: string, url?: string | URL | null) {
         originalPushState.call(this, data, unused, url)
         handleNavigation()
       }
@@ -172,10 +150,7 @@ export function Navigation({
       if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
         setIsCartOpen(false)
       }
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node)
-      ) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsSearchOpen(false)
       }
     }
@@ -227,7 +202,6 @@ export function Navigation({
     }
   }, [isMobileMenuOpen])
 
-
   // Preload dropdown images
   useEffect(() => {
     menuItems.forEach((item) => {
@@ -243,10 +217,7 @@ export function Navigation({
   }, [])
 
   const getTotalPrice = () => {
-    return cartItems.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    )
+    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
   }
 
   const getTotalItems = () => {
@@ -328,7 +299,7 @@ export function Navigation({
   // Get country code from current path
   const getCountryCode = () => {
     const currentPath = pathname || ""
-    const countryMatch = currentPath.match(/^\/([^\/]+)/)
+    const countryMatch = currentPath.match(/^\/([^/]+)/)
     return countryMatch ? countryMatch[1] : "in"
   }
 
@@ -337,7 +308,7 @@ export function Navigation({
       // User is logged in, redirect to ledger
       const currentPath = pathname || ""
       // Extract country code from path if present (e.g., /in/account/...)
-      const countryMatch = currentPath.match(/^\/([^\/]+)/)
+      const countryMatch = currentPath.match(/^\/([^/]+)/)
       const countryCode = countryMatch ? countryMatch[1] : "in"
       router.push(`/${countryCode}/account/ledger`)
     } else {
@@ -389,8 +360,7 @@ export function Navigation({
       if (overlay) {
         overlay.style.opacity = "0"
         setTimeout(() => {
-          if (overlay && overlay.parentNode)
-            overlay.parentNode.removeChild(overlay)
+          if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay)
         }, 180)
       }
     }, 120)
@@ -424,7 +394,6 @@ export function Navigation({
           image:
             "https://images.unsplash.com/photo-1660675558428-5a7a1b8546f4?auto=format&fit=crop&w=1080&q=80",
         },
-       
       ],
     },
     {
@@ -529,18 +498,12 @@ export function Navigation({
 
   return (
     <>
-      <div
-        className={
-          disableSticky ? "relative" : "fixed top-0 left-0 right-0 z-50"
-        }
-      >
+      <div className={disableSticky ? "relative" : "fixed top-0 left-0 right-0 z-50"}>
         {/* Top Shipping Bar */}
         <motion.div
           initial={disableAnimations ? undefined : { y: -50, opacity: 0 }}
           animate={disableAnimations ? undefined : { y: 0, opacity: 1 }}
-          transition={
-            disableAnimations ? undefined : { duration: 0.6, ease: "easeOut" }
-          }
+          transition={disableAnimations ? undefined : { duration: 0.6, ease: "easeOut" }}
           className="text-white py-2"
           style={{ backgroundColor: "#545d4a" }}
         >
@@ -558,9 +521,7 @@ export function Navigation({
           initial={disableAnimations ? undefined : { y: -100 }}
           animate={disableAnimations ? undefined : { y: 0 }}
           transition={
-            disableAnimations
-              ? undefined
-              : { duration: 0.8, ease: "easeOut", delay: 0.3 }
+            disableAnimations ? undefined : { duration: 0.8, ease: "easeOut", delay: 0.3 }
           }
           className="group/nav"
           onMouseEnter={() => setIsNavHovered(true)}
@@ -570,9 +531,7 @@ export function Navigation({
             backdropFilter: navStyles.backdropFilter as any,
             WebkitBackdropFilter: (navStyles as any).WebkitBackdropFilter,
             borderBottom: navStyles.borderBottom,
-            transition: disableAnimations
-              ? "none"
-              : "all 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+            transition: disableAnimations ? "none" : "all 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
             position: "relative",
           }}
         >
@@ -599,9 +558,7 @@ export function Navigation({
               <motion.div
                 initial={disableAnimations ? undefined : { opacity: 0 }}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
-                transition={
-                  disableAnimations ? undefined : { delay: 0.3, duration: 0.6 }
-                }
+                transition={disableAnimations ? undefined : { delay: 0.3, duration: 0.6 }}
                 className="flex w-full"
               >
                 <a href="/" className="">
@@ -619,37 +576,23 @@ export function Navigation({
               <motion.div
                 initial={disableAnimations ? undefined : { opacity: 0 }}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
-                transition={
-                  disableAnimations ? undefined : { delay: 0.4, duration: 0.6 }
-                }
+                transition={disableAnimations ? undefined : { delay: 0.4, duration: 0.6 }}
                 className="hidden lg:flex space-x-8 absolute left-1/2 transform -translate-x-1/2"
               >
                 {menuItems.map((item, index) => (
                   <div
                     key={item.name}
                     className="relative"
-                    style={
-                      item.name === "HOME CREATIONS"
-                        ? { marginLeft: "0.5rem" }
-                        : undefined
-                    }
-                    onMouseEnter={() =>
-                      item.dropdown && handleMouseEnter(item.name)
-                    }
+                    style={item.name === "HOME CREATIONS" ? { marginLeft: "0.5rem" } : undefined}
+                    onMouseEnter={() => item.dropdown && handleMouseEnter(item.name)}
                     onMouseLeave={handleMouseLeave}
                   >
                     <motion.a
                       href={item.href || "#"}
-                      initial={
-                        disableAnimations ? undefined : { opacity: 0, y: -10 }
-                      }
-                      animate={
-                        disableAnimations ? undefined : { opacity: 1, y: 0 }
-                      }
+                      initial={disableAnimations ? undefined : { opacity: 0, y: -10 }}
+                      animate={disableAnimations ? undefined : { opacity: 1, y: 0 }}
                       transition={
-                        disableAnimations
-                          ? undefined
-                          : { delay: 0.4 + index * 0.1, duration: 0.4 }
+                        disableAnimations ? undefined : { delay: 0.4 + index * 0.1, duration: 0.4 }
                       }
                       className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative group/item hover:opacity-80 whitespace-nowrap"
                       style={{ color: navStyles.textColor }}
@@ -665,12 +608,8 @@ export function Navigation({
                     <AnimatePresence>
                       {item.dropdown && activeDropdown === item.name && (
                         <motion.div
-                          initial={
-                            disableAnimations ? undefined : { opacity: 0 }
-                          }
-                          animate={
-                            disableAnimations ? undefined : { opacity: 1 }
-                          }
+                          initial={disableAnimations ? undefined : { opacity: 0 }}
+                          animate={disableAnimations ? undefined : { opacity: 1 }}
                           exit={disableAnimations ? undefined : { opacity: 0 }}
                           transition={
                             disableAnimations
@@ -703,9 +642,7 @@ export function Navigation({
                                         color: "#000",
                                         fontSize: "0.95rem",
                                       }}
-                                      onMouseEnter={() =>
-                                        handleDropdownItemHover(dItem.label)
-                                      }
+                                      onMouseEnter={() => handleDropdownItemHover(dItem.label)}
                                     >
                                       <span className="relative inline-block">
                                         {dItem.label}
@@ -732,18 +669,16 @@ export function Navigation({
                                       alt={dItem.label}
                                       className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
                                       style={{
-                                        opacity:
-                                          hoveredItem === dItem.label ? 1 : 0,
+                                        opacity: hoveredItem === dItem.label ? 1 : 0,
                                         transition: "opacity 0.18s ease-out",
-                                        zIndex:
-                                          hoveredItem === dItem.label ? 2 : 1,
+                                        zIndex: hoveredItem === dItem.label ? 2 : 1,
                                       }}
                                       loading="eager"
                                     />
                                   ))}
                                 {/* fallback/default image */}
-                                {item.dropdown
-                                  .filter((dItem) => dItem.label !== "All Products")[0]?.image && (
+                                {item.dropdown.filter((dItem) => dItem.label !== "All Products")[0]
+                                  ?.image && (
                                   <img
                                     src={
                                       item.dropdown.filter(
@@ -774,12 +709,9 @@ export function Navigation({
               <motion.div
                 initial={disableAnimations ? undefined : { opacity: 0 }}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
-                transition={
-                  disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }
-                }
+                transition={disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }}
                 className="lg:hidden flex items-center space-x-1 z-10"
               >
-
                 {/* Mobile Cart */}
                 <div className="relative" ref={cartRef}>
                   <motion.button
@@ -808,23 +740,11 @@ export function Navigation({
                     {isCartOpen && (
                       <motion.div
                         initial={
-                          disableAnimations
-                            ? undefined
-                            : { opacity: 0, y: -10, scale: 0.95 }
+                          disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }
                         }
-                        animate={
-                          disableAnimations
-                            ? undefined
-                            : { opacity: 1, y: 0, scale: 1 }
-                        }
-                        exit={
-                          disableAnimations
-                            ? undefined
-                            : { opacity: 0, y: -10, scale: 0.95 }
-                        }
-                        transition={
-                          disableAnimations ? undefined : { duration: 0.2 }
-                        }
+                        animate={disableAnimations ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                        exit={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
+                        transition={disableAnimations ? undefined : { duration: 0.2 }}
                         className="fixed left-4 right-4 top-[110px] max-w-md mx-auto border shadow-2xl z-[100]"
                         style={{
                           backgroundColor: "#e3e3d8",
@@ -832,10 +752,7 @@ export function Navigation({
                         }}
                       >
                         {/* Cart Header */}
-                        <div
-                          className="p-4 border-b"
-                          style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
-                        >
+                        <div className="p-4 border-b" style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}>
                           <div className="flex items-center justify-between">
                             <h3 className="font-american-typewriter text-lg text-black">
                               Your Cart
@@ -895,9 +812,7 @@ export function Navigation({
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <button
-                                      onClick={() =>
-                                        handleQuantityChange(item.id, -1)
-                                      }
+                                      onClick={() => handleQuantityChange(item.id, -1)}
                                       disabled={updatingCartItem === item.id}
                                       className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
@@ -907,9 +822,7 @@ export function Navigation({
                                       {updatingCartItem === item.id ? "..." : item.quantity}
                                     </span>
                                     <button
-                                      onClick={() =>
-                                        handleQuantityChange(item.id, 1)
-                                      }
+                                      onClick={() => handleQuantityChange(item.id, 1)}
                                       disabled={updatingCartItem === item.id}
                                       className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
@@ -929,9 +842,7 @@ export function Navigation({
                             style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
                           >
                             <div className="flex items-center justify-between mb-4">
-                              <span className="font-din-arabic text-black">
-                                Total:
-                              </span>
+                              <span className="font-din-arabic text-black">Total:</span>
                               <span className="font-din-arabic text-black font-medium">
                                 {convertToLocale({
                                   amount: getTotalPrice(),
@@ -972,11 +883,7 @@ export function Navigation({
                   style={{ color: navStyles.textColor }}
                   aria-label="Menu"
                 >
-                  {isMobileMenuOpen ? (
-                    <X className="w-6 h-6" />
-                  ) : (
-                    <Menu className="w-6 h-6" />
-                  )}
+                  {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                 </motion.button>
               </motion.div>
 
@@ -984,9 +891,7 @@ export function Navigation({
               <motion.div
                 initial={disableAnimations ? undefined : { opacity: 0 }}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
-                transition={
-                  disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }
-                }
+                transition={disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }}
                 className="hidden lg:flex items-center gap-6"
               >
                 {/* Search Section - Hidden when SearchMegaMenu is open */}
@@ -1059,23 +964,11 @@ export function Navigation({
                     {isCartOpen && (
                       <motion.div
                         initial={
-                          disableAnimations
-                            ? undefined
-                            : { opacity: 0, y: -10, scale: 0.95 }
+                          disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }
                         }
-                        animate={
-                          disableAnimations
-                            ? undefined
-                            : { opacity: 1, y: 0, scale: 1 }
-                        }
-                        exit={
-                          disableAnimations
-                            ? undefined
-                            : { opacity: 0, y: -10, scale: 0.95 }
-                        }
-                        transition={
-                          disableAnimations ? undefined : { duration: 0.2 }
-                        }
+                        animate={disableAnimations ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                        exit={disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }}
+                        transition={disableAnimations ? undefined : { duration: 0.2 }}
                         className="absolute right-0 top-full mt-2 w-96 border shadow-2xl z-50"
                         style={{
                           backgroundColor: "#e3e3d8",
@@ -1083,10 +976,7 @@ export function Navigation({
                         }}
                       >
                         {/* Cart Header */}
-                        <div
-                          className="p-4 border-b"
-                          style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
-                        >
+                        <div className="p-4 border-b" style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}>
                           <div className="flex items-center justify-between">
                             <h3 className="font-american-typewriter text-lg text-black">
                               Your Cart
@@ -1146,9 +1036,7 @@ export function Navigation({
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <button
-                                      onClick={() =>
-                                        handleQuantityChange(item.id, -1)
-                                      }
+                                      onClick={() => handleQuantityChange(item.id, -1)}
                                       disabled={updatingCartItem === item.id}
                                       className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
@@ -1158,9 +1046,7 @@ export function Navigation({
                                       {updatingCartItem === item.id ? "..." : item.quantity}
                                     </span>
                                     <button
-                                      onClick={() =>
-                                        handleQuantityChange(item.id, 1)
-                                      }
+                                      onClick={() => handleQuantityChange(item.id, 1)}
                                       disabled={updatingCartItem === item.id}
                                       className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
@@ -1180,9 +1066,7 @@ export function Navigation({
                             style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
                           >
                             <div className="flex items-center justify-between mb-4">
-                              <span className="font-din-arabic text-black">
-                                Total:
-                              </span>
+                              <span className="font-din-arabic text-black">Total:</span>
                               <span className="font-din-arabic text-black font-medium">
                                 {convertToLocale({
                                   amount: getTotalPrice(),
@@ -1243,10 +1127,7 @@ export function Navigation({
             >
               <div className="p-6">
                 {/* Mobile Search Button */}
-                <div
-                  className="mb-6 pb-6 border-b"
-                  style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}
-                >
+                <div className="mb-6 pb-6 border-b" style={{ borderColor: "rgba(0, 0, 0, 0.1)" }}>
                   <button
                     onClick={() => {
                       setIsMobileMenuOpen(false)
@@ -1269,9 +1150,7 @@ export function Navigation({
                           <button
                             onClick={() =>
                               setMobileActiveDropdown(
-                                mobileActiveDropdown === item.name
-                                  ? null
-                                  : item.name
+                                mobileActiveDropdown === item.name ? null : item.name
                               )
                             }
                             className="w-full flex items-center justify-between px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
@@ -1279,9 +1158,7 @@ export function Navigation({
                             <span>{item.name}</span>
                             <ChevronDown
                               className={`w-4 h-4 transition-transform ${
-                                mobileActiveDropdown === item.name
-                                  ? "rotate-180"
-                                  : ""
+                                mobileActiveDropdown === item.name ? "rotate-180" : ""
                               }`}
                             />
                           </button>
@@ -1321,7 +1198,7 @@ export function Navigation({
                       )}
                     </div>
                   ))}
-                  
+
                   {/* Mobile-only: Gift Sets */}
                   <a
                     href="/in/gift-sets"
@@ -1367,10 +1244,10 @@ export function Navigation({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-american-typewriter text-xl text-black">
-            Open Your Ledger
+              Open Your Ledger
             </DialogTitle>
             <DialogDescription className="font-din-arabic text-black/70 pt-2">
-            Sign in to view and save your favourites.
+              Sign in to view and save your favourites.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 pt-4">
@@ -1378,7 +1255,7 @@ export function Navigation({
               onClick={() => {
                 setShowLoginDialog(false)
                 const currentPath = pathname || ""
-                const countryMatch = currentPath.match(/^\/([^\/]+)/)
+                const countryMatch = currentPath.match(/^\/([^/]+)/)
                 const countryCode = countryMatch ? countryMatch[1] : "in"
                 router.push(`/${countryCode}/account?tab=signin`)
               }}
@@ -1399,13 +1276,16 @@ export function Navigation({
               onClick={() => {
                 setShowLoginDialog(false)
                 const currentPath = pathname || ""
-                const countryMatch = currentPath.match(/^\/([^\/]+)/)
+                const countryMatch = currentPath.match(/^\/([^/]+)/)
                 const countryCode = countryMatch ? countryMatch[1] : "in"
                 router.push(`/${countryCode}/account?tab=signup`)
               }}
               className="font-din-arabic text-sm text-black/70 hover:text-black transition-colors"
             >
-              New here? <span className="underline decoration-black/20 hover:decoration-black/60">Create an account</span>
+              New here?{" "}
+              <span className="underline decoration-black/20 hover:decoration-black/60">
+                Create an account
+              </span>
             </button>
           </div>
         </DialogContent>

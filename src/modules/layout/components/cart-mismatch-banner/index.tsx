@@ -2,14 +2,11 @@
 
 import { transferCart } from "@lib/data/customer"
 import { ExclamationCircleSolid } from "@medusajs/icons"
-import { StoreCart, StoreCustomer } from "@medusajs/types"
+import type { StoreCart, StoreCustomer } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useState } from "react"
 
-function CartMismatchBanner(props: {
-  customer: StoreCustomer
-  cart: StoreCart
-}) {
+function CartMismatchBanner(props: { customer: StoreCustomer; cart: StoreCart }) {
   const { customer, cart } = props
   const [isPending, setIsPending] = useState(false)
   const [actionText, setActionText] = useState("Run transfer again")

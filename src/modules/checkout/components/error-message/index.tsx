@@ -10,16 +10,10 @@ const ErrorMessage = ({
   }
 
   // Remove "Error: " prefix safely
-  const cleanedError =
-    typeof error === "string"
-      ? error.replace(/^Error:\s*/i, "")
-      : error
+  const cleanedError = typeof error === "string" ? error.replace(/^Error:\s*/i, "") : error
 
   return (
-    <div
-      className="pt-2 text-rose-500 text-small-regular"
-      data-testid={dataTestid}
-    >
+    <div className="pt-2 text-rose-500 text-small-regular" data-testid={dataTestid}>
       <span>{cleanedError}</span>
     </div>
   )

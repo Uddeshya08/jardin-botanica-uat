@@ -1,12 +1,12 @@
 "use client"
 
-import { useActionState } from "react"
-import Input from "@modules/common/components/input"
+import { signup } from "@lib/data/customer"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
+import Input from "@modules/common/components/input"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { signup } from "@lib/data/customer"
+import { useActionState } from "react"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
@@ -16,16 +16,12 @@ const Register = ({ setCurrentView }: Props) => {
   const [message, formAction] = useActionState(signup, null)
 
   return (
-    <div
-      className="max-w-sm flex flex-col items-center"
-      data-testid="register-page"
-    >
+    <div className="max-w-sm flex flex-col items-center" data-testid="register-page">
       <h1 className="font-din-arabic text-base text-black tracking-wide mb-2 uppercase mb-6">
         Become a Medusa Store Member
       </h1>
       <p className="text-center text-base-regular font-din-arabic text-sm text-black/70 tracking-wide mb-4">
-        Create your Medusa Store Member profile, and get access to an enhanced
-        shopping experience.
+        Create your Medusa Store Member profile, and get access to an enhanced shopping experience.
       </p>
       <form className="w-full flex flex-col" action={formAction}>
         <div className="flex flex-col w-full gap-y-2">
@@ -70,17 +66,11 @@ const Register = ({ setCurrentView }: Props) => {
         <ErrorMessage error={message} data-testid="register-error" />
         <span className="text-center font-din-arabic text-sm text-black/70 tracking-wide text-small-regular mt-6">
           By creating an account, you agree to Medusa Store&apos;s{" "}
-          <LocalizedClientLink
-            href="/content/privacy-policy"
-            className="underline"
-          >
+          <LocalizedClientLink href="/content/privacy-policy" className="underline">
             Privacy Policy
           </LocalizedClientLink>{" "}
           and{" "}
-          <LocalizedClientLink
-            href="/content/terms-of-use"
-            className="underline"
-          >
+          <LocalizedClientLink href="/content/terms-of-use" className="underline">
             Terms of Use
           </LocalizedClientLink>
           .
@@ -91,10 +81,7 @@ const Register = ({ setCurrentView }: Props) => {
       </form>
       <span className="text-center font-din-arabic text-sm text-black/70 tracking-wide text-small-regular mt-6">
         Already a member?{" "}
-        <button
-          onClick={() => setCurrentView(LOGIN_VIEW.SIGN_IN)}
-          className="underline"
-        >
+        <button onClick={() => setCurrentView(LOGIN_VIEW.SIGN_IN)} className="underline">
           Sign in
         </button>
         .

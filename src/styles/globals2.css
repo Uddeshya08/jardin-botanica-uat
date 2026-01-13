@@ -1,21 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=DIN+Next+Arabic:wght@300;400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=DIN+Next+Arabic:wght@300;400;500;700&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
 /* Custom font classes */
 .font-american-typewriter {
-  font-family: 'American Typewriter', 'Courier New', monospace;
+  font-family: "American Typewriter", "Courier New", monospace;
   letter-spacing: 0.05em; /* 50 letter spacing for headings */
 }
 
 .font-din-arabic {
-  font-family: 'DIN Next Arabic', 'Arial', sans-serif;
+  font-family: "DIN Next Arabic", "Arial", sans-serif;
   font-weight: 400; /* Ensure regular weight */
   letter-spacing: 0.1em; /* 100 letter spacing for subcopy */
 }
 
 .font-din-arabic-bold {
-  font-family: 'DIN Next Arabic', 'Arial', sans-serif;
+  font-family: "DIN Next Arabic", "Arial", sans-serif;
   font-weight: 700; /* Bold weight */
   letter-spacing: 0.1em; /* 100 letter spacing for subcopy */
 }

@@ -1,6 +1,7 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react"
+import type React from "react"
+import { createContext, useContext, useEffect, useMemo, useState } from "react"
 
 export interface CartItem {
   id: string
@@ -17,9 +18,7 @@ interface CartItemsContextValue {
   handleCartUpdate: (item: CartItem | null) => void
 }
 
-const CartItemsContext = createContext<CartItemsContextValue | undefined>(
-  undefined
-)
+const CartItemsContext = createContext<CartItemsContextValue | undefined>(undefined)
 
 export function CartItemsProvider({
   children,
@@ -38,13 +37,13 @@ export function CartItemsProvider({
   const handleCartUpdate = (item: CartItem | null) => {
     // Debug: Log price value when item is added/updated
     if (item) {
-      console.log('🔍 Cart Item Update - Price Debug:', {
+      console.log("🔍 Cart Item Update - Price Debug:", {
         itemId: item.id,
         itemName: item.name,
         price: item.price,
         priceType: typeof item.price,
         quantity: item.quantity,
-        fullItem: item
+        fullItem: item,
       })
     }
 
@@ -63,7 +62,11 @@ export function CartItemsProvider({
 
           // Match by variant_id if present (for main products)
           if (!itemIsRitual && !cartItemIsRitual && itemVariantId && cartItemVariantId) {
-            if (itemVariantId === cartItemVariantId || cartItem.id === itemVariantId || item.id === cartItemVariantId) {
+            if (
+              itemVariantId === cartItemVariantId ||
+              cartItem.id === itemVariantId ||
+              item.id === cartItemVariantId
+            ) {
               return true
             }
           }
@@ -74,7 +77,13 @@ export function CartItemsProvider({
           }
 
           // Match by name for main products (fallback)
-          if (!itemIsRitual && !cartItemIsRitual && cartItem.name === item.name && !itemVariantId && !cartItemVariantId) {
+          if (
+            !itemIsRitual &&
+            !cartItemIsRitual &&
+            cartItem.name === item.name &&
+            !itemVariantId &&
+            !cartItemVariantId
+          ) {
             return true
           }
 
@@ -85,29 +94,37 @@ export function CartItemsProvider({
           // Update existing item
           const updatedItems = [...prevItems]
           updatedItems[existingIndex] = item
-          console.log('✅ Updated existing cart item:', {
+          console.log("✅ Updated existing cart item:", {
             old: prevItems[existingIndex],
             new: item,
-            index: existingIndex
+            index: existingIndex,
           })
           return updatedItems
         } else {
           // Add new item
-          console.log('➕ Added new cart item:', item)
-          console.log('📦 Current cart before add:', prevItems.map(i => ({ id: i.id, name: i.name })))
+          console.log("➕ Added new cart item:", item)
+          console.log(
+            "📦 Current cart before add:",
+            prevItems.map((i) => ({ id: i.id, name: i.name }))
+          )
           return [...prevItems, item]
         }
       })
     } else if (item && item.quantity === 0) {
       // Remove item if quantity is 0 - improved matching
-      console.log('🗑️ Removing cart item:', item.id)
+      console.log("🗑️ Removing cart item:", item.id)
       setCartItems((prevItems) => {
         const itemVariantId = (item as any).variant_id
         return prevItems.filter((cartItem) => {
           // Remove by exact ID or variant_id match
           if (cartItem.id === item.id) return false
           const cartItemVariantId = (cartItem as any).variant_id
-          if (itemVariantId && (cartItem.id === itemVariantId || cartItemVariantId === item.id || cartItemVariantId === itemVariantId)) {
+          if (
+            itemVariantId &&
+            (cartItem.id === itemVariantId ||
+              cartItemVariantId === item.id ||
+              cartItemVariantId === itemVariantId)
+          ) {
             return false
           }
           return true
@@ -124,14 +141,10 @@ export function CartItemsProvider({
     [cartItems]
   )
 
-  console.log('🔍 Current cart items:', cartItems)
-  console.log('🔍 Cart Items Context Value:', value)
+  console.log("🔍 Current cart items:", cartItems)
+  console.log("🔍 Cart Items Context Value:", value)
 
-  return (
-    <CartItemsContext.Provider value={value}>
-      {children}
-    </CartItemsContext.Provider>
-  )
+  return <CartItemsContext.Provider value={value}>{children}</CartItemsContext.Provider>
 }
 
 export function useCartItems() {

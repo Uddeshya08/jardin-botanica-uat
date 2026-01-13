@@ -1,12 +1,13 @@
 "use client"
 
-import { motion } from "motion/react"
-import React, { useState, useEffect } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
-import { toast } from "sonner"
 import { verifyEmailAndSetPassword } from "@lib/data/customer"
-import { Eye, EyeOff, CheckCircle2 } from "lucide-react"
 import { Label } from "@medusajs/ui"
+import { CheckCircle2, Eye, EyeOff } from "lucide-react"
+import { motion } from "motion/react"
+import { useRouter, useSearchParams } from "next/navigation"
+import type React from "react"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 const VerifyEmailUpdate = () => {
   const searchParams = useSearchParams()
@@ -103,12 +104,9 @@ const VerifyEmailUpdate = () => {
               >
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
               </motion.div>
-              <h1 className="font-american-typewriter text-2xl mb-2 text-black">
-                Success!
-              </h1>
+              <h1 className="font-american-typewriter text-2xl mb-2 text-black">Success!</h1>
               <p className="font-din-arabic text-black/60 tracking-wide">
-                Your email and password have been updated successfully.
-                Redirecting to login...
+                Your email and password have been updated successfully. Redirecting to login...
               </p>
             </div>
           </div>
@@ -158,11 +156,7 @@ const VerifyEmailUpdate = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-black/40 hover:text-black/60 transition-colors"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
 
@@ -173,8 +167,7 @@ const VerifyEmailUpdate = () => {
                     isPasswordValid ? "text-green-600" : "text-black/40"
                   }`}
                 >
-                  {isPasswordValid ? "✓" : "○"} Password must be at least 8
-                  characters
+                  {isPasswordValid ? "✓" : "○"} Password must be at least 8 characters
                 </p>
               )}
             </div>

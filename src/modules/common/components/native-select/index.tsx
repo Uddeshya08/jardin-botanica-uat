@@ -1,8 +1,8 @@
 import { ChevronUpDown } from "@medusajs/icons"
 import { clx } from "@medusajs/ui"
 import {
-  SelectHTMLAttributes,
   forwardRef,
+  type SelectHTMLAttributes,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -16,10 +16,7 @@ export type NativeSelectProps = {
 } & SelectHTMLAttributes<HTMLSelectElement>
 
 const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
-  (
-    { placeholder = "Select...", defaultValue, className, children, ...props },
-    ref
-  ) => {
+  ({ placeholder = "Select...", defaultValue, className, children, ...props }, ref) => {
     const innerRef = useRef<HTMLSelectElement>(null)
     const [isPlaceholder, setIsPlaceholder] = useState(false)
 

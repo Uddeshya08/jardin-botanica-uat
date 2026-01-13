@@ -4,21 +4,22 @@ import { RadioGroup } from "@headlessui/react"
 import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { initiatePaymentSession, setShippingMethod } from "@lib/data/cart"
 import { ArrowLeftMini, CheckCircleSolid, CreditCard } from "@medusajs/icons"
-import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
+import { Button, Container, clx, Heading, Text } from "@medusajs/ui"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import Divider from "@modules/common/components/divider"
+import {
+  Banknote,
+  Building2,
+  Check,
+  ChevronLeft,
+  CreditCard as CreditCardIcon,
+  Shield,
+  Smartphone,
+  Sparkles,
+  Wallet,
+} from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
-import {
-  CreditCard as CreditCardIcon,
-  Smartphone,
-  Building2,
-  Wallet,
-  Banknote,
-  ChevronLeft,
-} from "lucide-react"
-
-import { Shield, Check, Sparkles } from "lucide-react"
 
 function SecurePaymentCard() {
   return (
@@ -28,8 +29,7 @@ function SecurePaymentCard() {
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
           style={{
-            background:
-              "linear-gradient(135deg, rgba(5,150,105,0.2), rgba(5,150,105,0.1))",
+            background: "linear-gradient(135deg, rgba(5,150,105,0.2), rgba(5,150,105,0.1))",
           }}
         >
           <Shield className="w-6 h-6 text-emerald-600" strokeWidth={2} />
@@ -37,9 +37,7 @@ function SecurePaymentCard() {
 
         {/* Text Content */}
         <div className="flex-1">
-          <h3 className="font-american-typewriter mb-3">
-            Secure Payment Via Razorpay
-          </h3>
+          <h3 className="font-american-typewriter mb-3">Secure Payment Via Razorpay</h3>
 
           <p className="font-din-arabic text-black/70 mb-4">
             Your Payment Details Are Encrypted and Processed Safely.
@@ -79,8 +77,7 @@ function CashOnDeliveryCard() {
           </h3>
 
           <p className="font-din-arabic text-black/70 mb-4">
-            Pay with cash when your order is delivered. Please keep exact change
-            ready.
+            Pay with cash when your order is delivered. Please keep exact change ready.
           </p>
 
           <div
@@ -95,9 +92,7 @@ function CashOnDeliveryCard() {
               style={{ color: "rgb(107, 93, 71)" }}
             >
               <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span>
-                Additional ₹50 COD handling charges will be added to your order.
-              </span>
+              <span>Additional ₹50 COD handling charges will be added to your order.</span>
             </p>
           </div>
         </div>
@@ -161,8 +156,7 @@ const Payment = ({
   const [error, setError] = useState<string | null>(null)
   const [cardBrand, setCardBrand] = useState<string | null>(null)
   const [cardComplete, setCardComplete] = useState(false)
-  const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState(PAYMENT_PROVIDER_ID)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(PAYMENT_PROVIDER_ID)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -187,11 +181,9 @@ const Payment = ({
     }
   }
 
-  const paidByGiftcard =
-    cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
+  const paidByGiftcard = cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
-  const paymentReady =
-    (activeSession && cart?.shipping_methods.length !== 0) || paidByGiftcard
+  const paymentReady = (activeSession && cart?.shipping_methods.length !== 0) || paidByGiftcard
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -229,12 +221,9 @@ const Payment = ({
       await setPaymentMethod(PAYMENT_PROVIDER_ID)
     }
 
-    router.push(
-      pathname +
-        "?" +
-        updateQueryParams({ step: "payment", paymenttype: type }),
-      { scroll: false }
-    )
+    router.push(pathname + "?" + updateQueryParams({ step: "payment", paymenttype: type }), {
+      scroll: false,
+    })
   }
 
   const handleSubmit = async () => {
@@ -256,11 +245,9 @@ const Payment = ({
         })
       }
 
-      const shouldInputCard =
-        isStripeFunc(selectedPaymentMethod) && !activeSession
+      const shouldInputCard = isStripeFunc(selectedPaymentMethod) && !activeSession
 
-      const checkActiveSession =
-        activeSession?.provider_id === selectedPaymentMethod
+      const checkActiveSession = activeSession?.provider_id === selectedPaymentMethod
 
       if (!checkActiveSession) {
         await initiatePaymentSession(cart, {
@@ -295,10 +282,7 @@ const Payment = ({
   // Sync payment type from URL
   useEffect(() => {
     const urlPaymentType = searchParams.get("paymenttype") as PaymentType
-    if (
-      urlPaymentType &&
-      PAYMENT_TYPES.some((pt) => pt.id === urlPaymentType)
-    ) {
+    if (urlPaymentType && PAYMENT_TYPES.some((pt) => pt.id === urlPaymentType)) {
       setSelectedPaymentType(urlPaymentType)
     }
   }, [searchParams])
@@ -342,14 +326,7 @@ const Payment = ({
                       strokeLinejoin="round"
                       className="lucide lucide-lock w-6 h-6"
                     >
-                      <rect
-                        width="18"
-                        height="11"
-                        x="3"
-                        y="11"
-                        rx="2"
-                        ry="2"
-                      ></rect>
+                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
                       <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
                   </div>
@@ -374,8 +351,7 @@ const Payment = ({
                         className={clx(
                           "relative flex items-center space-x-4 p-5 rounded-2xl text-left cursor-pointer transition-all duration-300 overflow-hidden bg-white/40 hover:bg-white/60 hover:shadow-md",
                           {
-                            " bg-green-50/50 shadow-sm":
-                              selectedPaymentType === type.id,
+                            " bg-green-50/50 shadow-sm": selectedPaymentType === type.id,
                             " bg-white": selectedPaymentType !== type.id,
                           }
                         )}
@@ -383,24 +359,18 @@ const Payment = ({
                       >
                         <div
                           className={`w-12 h-12 ${
-                            selectedPaymentType === type.id
-                              ? "bg-green-100"
-                              : "bg-white"
+                            selectedPaymentType === type.id ? "bg-green-100" : "bg-white"
                           } rounded-lg flex items-center justify-center flex-shrink-0`}
                         >
                           <Icon
                             className={`w-6 h-6 ${
-                              selectedPaymentType === type.id
-                                ? "text-green-700"
-                                : "text-black"
+                              selectedPaymentType === type.id ? "text-green-700" : "text-black"
                             }`}
                           />
                         </div>
 
                         <div className="flex-1">
-                          <Text className="font-din-arabic-bold">
-                            {type.label}
-                          </Text>
+                          <Text className="font-din-arabic-bold">{type.label}</Text>
                           <Text className="font-din-arabic text-sm text-black/60">
                             {type.description}
                           </Text>
@@ -427,11 +397,7 @@ const Payment = ({
                 </div>
               </div>
 
-              {selectedPaymentType === "cod" ? (
-                <CashOnDeliveryCard />
-              ) : (
-                <SecurePaymentCard />
-              )}
+              {selectedPaymentType === "cod" ? <CashOnDeliveryCard /> : <SecurePaymentCard />}
 
               {/* Payment Provider Selection - REMOVED UI, auto-set to pp_razorpay_razorpay */}
             </>
@@ -442,19 +408,13 @@ const Payment = ({
               <Text className="txt-medium-plus font-din-arabic text-sm text-black/70 tracking-wide mb-1">
                 Payment method
               </Text>
-              <Text
-                className="txt-medium text-ui-fg-subtle"
-                data-testid="payment-method-summary"
-              >
+              <Text className="txt-medium text-ui-fg-subtle" data-testid="payment-method-summary">
                 Gift card
               </Text>
             </div>
           )}
 
-          <ErrorMessage
-            error={error}
-            data-testid="payment-method-error-message"
-          />
+          <ErrorMessage error={error} data-testid="payment-method-error-message" />
 
           <div className="mt-6 flex items-center justify-between gap-4">
             <button
@@ -473,10 +433,7 @@ const Payment = ({
             <button
               className="ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
               onClick={handleSubmit}
-              disabled={
-                (isStripe && !cardComplete) ||
-                (!selectedPaymentMethod && !paidByGiftcard)
-              }
+              disabled={(isStripe && !cardComplete) || (!selectedPaymentMethod && !paidByGiftcard)}
               data-testid="submit-payment-button"
             >
               Continue
@@ -492,12 +449,8 @@ const Payment = ({
                 <Text className="txt-medium-plus font-din-arabic text-sm text-black/70 tracking-wide mb-1">
                   Payment method
                 </Text>
-                <Text
-                  className="txt-medium text-ui-fg-subtle"
-                  data-testid="payment-method-summary"
-                >
-                  {paymentInfoMap[activeSession?.provider_id]?.title ||
-                    activeSession?.provider_id}
+                <Text className="txt-medium text-ui-fg-subtle" data-testid="payment-method-summary">
+                  {paymentInfoMap[activeSession?.provider_id]?.title || activeSession?.provider_id}
                 </Text>
               </div>
               <div className="flex flex-col w-1/3">
@@ -505,8 +458,8 @@ const Payment = ({
                   Payment type
                 </Text>
                 <Text className="txt-medium text-ui-fg-subtle">
-                  {PAYMENT_TYPES.find((pt) => pt.id === selectedPaymentType)
-                    ?.label || selectedPaymentType}
+                  {PAYMENT_TYPES.find((pt) => pt.id === selectedPaymentType)?.label ||
+                    selectedPaymentType}
                 </Text>
               </div>
               <div className="flex flex-col w-1/3">
@@ -518,9 +471,7 @@ const Payment = ({
                   data-testid="payment-details-summary"
                 >
                   <Container className="flex items-center h-7 w-fit p-2 bg-ui-button-neutral-hover">
-                    {paymentInfoMap[selectedPaymentMethod]?.icon || (
-                      <CreditCard />
-                    )}
+                    {paymentInfoMap[selectedPaymentMethod]?.icon || <CreditCard />}
                   </Container>
                   <Text>
                     {isStripeFunc(selectedPaymentMethod) && cardBrand
@@ -535,10 +486,7 @@ const Payment = ({
               <Text className="txt-medium-plus font-din-arabic text-sm text-black/70 tracking-wide mb-1">
                 Payment method
               </Text>
-              <Text
-                className="txt-medium text-ui-fg-subtle"
-                data-testid="payment-method-summary"
-              >
+              <Text className="txt-medium text-ui-fg-subtle" data-testid="payment-method-summary">
                 Gift card
               </Text>
             </div>

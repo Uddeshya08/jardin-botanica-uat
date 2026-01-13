@@ -1,9 +1,9 @@
 "use client"
-import React, { useEffect, useState } from 'react'
-import { Navigation } from 'app/components/Navigation'
-import { RippleEffect } from 'app/components/RippleEffect'
-import { BodyHandsPage } from 'app/components/BodyHandsPage'
-import { useCartItems } from 'app/context/cart-items-context'
+import { BodyHandsPage } from "app/components/BodyHandsPage"
+import { Navigation } from "app/components/Navigation"
+import { RippleEffect } from "app/components/RippleEffect"
+import { useCartItems } from "app/context/cart-items-context"
+import React, { useEffect, useState } from "react"
 
 type CartItem = {
   id: string
@@ -20,15 +20,19 @@ export default function BodyHandsRoutePage() {
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 50)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
+    window.addEventListener("scroll", onScroll)
+    return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
   return (
     <div className="min-h-screen">
       <RippleEffect />
       <Navigation
-        isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} forceWhiteText={true} />
+        isScrolled={isScrolled}
+        cartItems={cartItems}
+        onCartUpdate={handleCartUpdate}
+        forceWhiteText={true}
+      />
       <div className="h-4" />
       <BodyHandsPage onAddToCart={handleCartUpdate} />
     </div>

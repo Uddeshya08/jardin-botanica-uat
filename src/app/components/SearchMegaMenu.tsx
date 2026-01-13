@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "motion/react"
-import { Search, X } from "lucide-react"
-import { HttpTypes } from "@medusajs/types"
-import Link from "next/link"
-import Image from "next/image"
 import { convertToLocale } from "@lib/util/money"
+import type { HttpTypes } from "@medusajs/types"
+import { Search, X } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
+import Image from "next/image"
+import Link from "next/link"
+import { useEffect, useRef, useState } from "react"
 
 interface SearchMegaMenuProps {
   isOpen: boolean
@@ -30,12 +30,7 @@ interface Product {
   }>
 }
 
-export function SearchMegaMenu({
-  isOpen,
-  onClose,
-  countryCode,
-  region,
-}: SearchMegaMenuProps) {
+export function SearchMegaMenu({ isOpen, onClose, countryCode, region }: SearchMegaMenuProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<{
@@ -164,9 +159,9 @@ export function SearchMegaMenu({
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
             className="fixed left-0 right-0 z-50 bg-[#e3e3d8] shadow-xl overflow-y-auto"
-            style={{ 
+            style={{
               top: "105px",
-              maxHeight: "calc(100vh - 105px)"
+              maxHeight: "calc(100vh - 105px)",
             }}
           >
             <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 py-8 sm:py-12">
@@ -181,12 +176,15 @@ export function SearchMegaMenu({
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="I'm looking for..."
                       className="flex-1 px-0 py-4 pr-16 text-xl sm:text-2xl border-b-2 border-black/20 bg-transparent font-din-arabic focus:outline-none focus:border-black transition-colors placeholder:text-black/30"
-                      style={{ 
+                      style={{
                         color: "#000",
-                        lineHeight: "1.2"
+                        lineHeight: "1.2",
                       }}
                     />
-                    <div className="absolute right-0 flex items-center gap-3" style={{ bottom: "1rem" }}>
+                    <div
+                      className="absolute right-0 flex items-center gap-3"
+                      style={{ bottom: "1rem" }}
+                    >
                       {isSearching && (
                         <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
                       )}
@@ -224,16 +222,13 @@ export function SearchMegaMenu({
 
                     {searchResults.products.length === 0 && !isSearching ? (
                       <div className="py-20 text-center">
-                        <p className="font-din-arabic text-black/50 text-base">
-                          No products found
-                        </p>
+                        <p className="font-din-arabic text-black/50 text-base">No products found</p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {searchResults.products.slice(0, 6).map((product) => {
                           const price = getProductPrice(product)
-                          const thumbnail =
-                            product.thumbnail || product.images?.[0]?.url
+                          const thumbnail = product.thumbnail || product.images?.[0]?.url
                           const hasImageError = imageErrors.has(product.id)
                           const showPlaceholder = !thumbnail || hasImageError
 
@@ -253,19 +248,21 @@ export function SearchMegaMenu({
                                     fill
                                     className="object-cover transition-opacity duration-300 group-hover:opacity-90"
                                     onError={() => {
-                                      setImageErrors(prev => new Set(prev).add(product.id))
+                                      setImageErrors((prev) => new Set(prev).add(product.id))
                                     }}
                                   />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/60 to-white/30">
                                     <div className="text-center">
                                       <div className="text-3xl mb-1 opacity-30">🌿</div>
-                                      <p className="text-[10px] font-din-arabic text-black/30">No Image</p>
+                                      <p className="text-[10px] font-din-arabic text-black/30">
+                                        No Image
+                                      </p>
                                     </div>
                                   </div>
                                 )}
                               </div>
-                              
+
                               {/* Product Details - Right Side */}
                               <div className="flex-1 flex flex-col justify-center space-y-2">
                                 <h3 className="font-american-typewriter text-black text-base leading-tight">
@@ -347,10 +344,22 @@ export function SearchMegaMenu({
                         </h3>
                         <div className="space-y-2">
                           {[
-                            { label: "hand balm", link: `/${countryCode}/body-hands` },
-                            { label: "hand soap", link: `/${countryCode}/body-hands` },
-                            { label: "candles", link: `/${countryCode}/candles` },
-                            { label: "gift sets", link: `/${countryCode}/gift-sets` },
+                            {
+                              label: "hand balm",
+                              link: `/${countryCode}/body-hands`,
+                            },
+                            {
+                              label: "hand soap",
+                              link: `/${countryCode}/body-hands`,
+                            },
+                            {
+                              label: "candles",
+                              link: `/${countryCode}/candles`,
+                            },
+                            {
+                              label: "gift sets",
+                              link: `/${countryCode}/gift-sets`,
+                            },
                           ].map((item) => (
                             <Link
                               key={item.label}
@@ -374,10 +383,16 @@ export function SearchMegaMenu({
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 max-w-6xl">
                     {[
-                      { label: "Hand & Hands", link: `/${countryCode}/body-hands` },
+                      {
+                        label: "Hand & Hands",
+                        link: `/${countryCode}/body-hands`,
+                      },
                       { label: "Candles", link: `/${countryCode}/candles` },
                       { label: "Gift Sets", link: `/${countryCode}/gift-sets` },
-                      { label: "Home Creations", link: `/${countryCode}/home-creations` },
+                      {
+                        label: "Home Creations",
+                        link: `/${countryCode}/home-creations`,
+                      },
                       { label: "The Lab", link: `/${countryCode}/the-lab` },
                     ].map((item) => (
                       <Link
@@ -386,9 +401,7 @@ export function SearchMegaMenu({
                         onClick={handleClose}
                         className="text-left p-4 bg-white/30 hover:bg-white/50 transition-colors"
                       >
-                        <p className="font-din-arabic text-black text-sm">
-                          {item.label}
-                        </p>
+                        <p className="font-din-arabic text-black text-sm">{item.label}</p>
                       </Link>
                     ))}
                   </div>
@@ -401,4 +414,3 @@ export function SearchMegaMenu({
     </AnimatePresence>
   )
 }
-

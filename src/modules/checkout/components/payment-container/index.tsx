@@ -1,13 +1,12 @@
 import { Radio as RadioGroupOption } from "@headlessui/react"
-import { Text, clx } from "@medusajs/ui"
-import React, { useContext, useMemo, type JSX } from "react"
+import { isManual } from "@lib/constants"
+import { clx, Text } from "@medusajs/ui"
 
 import Radio from "@modules/common/components/radio"
-
-import { isManual } from "@lib/constants"
 import SkeletonCardDetails from "@modules/skeletons/components/skeleton-card-details"
 import { CardElement } from "@stripe/react-stripe-js"
-import { StripeCardElementOptions } from "@stripe/stripe-js"
+import type { StripeCardElementOptions } from "@stripe/stripe-js"
+import React, { type JSX, useContext, useMemo } from "react"
 import PaymentTest from "../payment-test"
 import { StripeContext } from "../payment-wrapper/stripe-wrapper"
 
@@ -36,8 +35,7 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
       className={clx(
         "flex flex-col gap-y-2 text-small-regular cursor-pointer py-4 border rounded-rounded px-8 mb-2 hover:shadow-borders-interactive-with-active",
         {
-          "border-ui-border-interactive":
-            selectedPaymentOptionId === paymentProviderId,
+          "border-ui-border-interactive": selectedPaymentOptionId === paymentProviderId,
         }
       )}
     >
@@ -113,9 +111,7 @@ export const StripeCardContainer = ({
             <CardElement
               options={useOptions as StripeCardElementOptions}
               onChange={(e) => {
-                setCardBrand(
-                  e.brand && e.brand.charAt(0).toUpperCase() + e.brand.slice(1)
-                )
+                setCardBrand(e.brand && e.brand.charAt(0).toUpperCase() + e.brand.slice(1))
                 setError(e.error?.message || null)
                 setCardComplete(e.complete)
               }}

@@ -1,13 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
 import { handleGoogleCallback } from "./action"
 
 export default function GoogleCallbackPage() {
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading"
-  )
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
   const [error, setError] = useState<string>("")
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -44,9 +42,7 @@ export default function GoogleCallbackPage() {
         {status === "loading" && (
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold text-gray-700">
-              Completing Google Sign In...
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-700">Completing Google Sign In...</h2>
             <p className="text-gray-500 mt-2">Please wait a moment</p>
           </div>
         )}
@@ -68,9 +64,7 @@ export default function GoogleCallbackPage() {
                 />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-700">
-              Successfully Authenticated!
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-700">Successfully Authenticated!</h2>
             <p className="text-gray-500 mt-2">Redirecting to your account...</p>
           </div>
         )}
@@ -92,9 +86,7 @@ export default function GoogleCallbackPage() {
                 />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-700">
-              Authentication Failed
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-700">Authentication Failed</h2>
             <p className="text-red-600 mt-2">{error}</p>
             <button
               onClick={() => router.push("/login")}

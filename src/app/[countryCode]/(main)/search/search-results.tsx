@@ -1,15 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion } from "motion/react"
-import { HttpTypes } from "@medusajs/types"
-import { SearchResult } from "@lib/data/search"
+import type { SearchResult } from "@lib/data/search"
+import type { HttpTypes } from "@medusajs/types"
 import { Navigation } from "app/components/Navigation"
 import { RippleEffect } from "app/components/RippleEffect"
-import Link from "next/link"
+import { Heart, Search } from "lucide-react"
+import { motion } from "motion/react"
 import Image from "next/image"
-import { Search, Heart } from "lucide-react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
 interface SearchResultsProps {
   query: string
@@ -83,10 +83,11 @@ export default function SearchResults({
       excerpt: "How we blend nature and science in our laboratory",
       category: "Behind the scenes",
     },
-  ].filter((article) =>
-    article.title.toLowerCase().includes(query.toLowerCase()) ||
-    article.excerpt.toLowerCase().includes(query.toLowerCase()) ||
-    article.category.toLowerCase().includes(query.toLowerCase())
+  ].filter(
+    (article) =>
+      article.title.toLowerCase().includes(query.toLowerCase()) ||
+      article.excerpt.toLowerCase().includes(query.toLowerCase()) ||
+      article.category.toLowerCase().includes(query.toLowerCase())
   )
 
   return (
@@ -138,9 +139,7 @@ export default function SearchResults({
                 transition={{ duration: 0.6, delay: 0.1 }}
               >
                 <div className="flex items-center justify-between mb-8">
-                  <h2 className="font-american-typewriter text-black text-2xl">
-                    Best matches
-                  </h2>
+                  <h2 className="font-american-typewriter text-black text-2xl">Best matches</h2>
                   {searchResults.totalCount > 0 && (
                     <Link
                       href={`/${countryCode}/store?q=${encodeURIComponent(query)}`}
@@ -261,9 +260,7 @@ export default function SearchResults({
                 {/* Suggested Keywords */}
                 {searchResults.suggestedTerms.length > 0 && (
                   <div>
-                    <h3 className="font-american-typewriter text-black text-lg mb-4">
-                      Suggested
-                    </h3>
+                    <h3 className="font-american-typewriter text-black text-lg mb-4">Suggested</h3>
                     <div className="space-y-2">
                       {searchResults.suggestedTerms.map((term, index) => (
                         <Link
@@ -281,9 +278,7 @@ export default function SearchResults({
                 {/* Categories */}
                 {searchResults.categories.length > 0 && (
                   <div>
-                    <h3 className="font-american-typewriter text-black text-lg mb-4">
-                      Categories
-                    </h3>
+                    <h3 className="font-american-typewriter text-black text-lg mb-4">Categories</h3>
                     <div className="space-y-2">
                       {searchResults.categories.map((category, index) => (
                         <Link
@@ -304,17 +299,15 @@ export default function SearchResults({
                     Popular searches
                   </h3>
                   <div className="space-y-2">
-                    {["candles", "gift sets", "body lotion", "shampoo"].map(
-                      (term, index) => (
-                        <Link
-                          key={index}
-                          href={`/${countryCode}/search?q=${encodeURIComponent(term)}`}
-                          className="block font-din-arabic text-black/70 hover:text-black text-sm py-1 transition-colors"
-                        >
-                          {term}
-                        </Link>
-                      )
-                    )}
+                    {["candles", "gift sets", "body lotion", "shampoo"].map((term, index) => (
+                      <Link
+                        key={index}
+                        href={`/${countryCode}/search?q=${encodeURIComponent(term)}`}
+                        className="block font-din-arabic text-black/70 hover:text-black text-sm py-1 transition-colors"
+                      >
+                        {term}
+                      </Link>
+                    ))}
                   </div>
                 </div>
               </motion.div>
@@ -325,5 +318,3 @@ export default function SearchResults({
     </div>
   )
 }
-
-

@@ -3,7 +3,7 @@
 
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import {
@@ -57,11 +57,7 @@ export async function getOrSetCart(countryCode: string) {
   }
 
   if (!cart) {
-    const cartResp = await sdk.store.cart.create(
-      { region_id: region.id },
-      {},
-      headers
-    )
+    const cartResp = await sdk.store.cart.create({ region_id: region.id }, {}, headers)
     cart = cartResp.cart
 
     await setCartId(cart.id)
@@ -147,13 +143,7 @@ export async function addToCart({
     .catch(medusaError)
 }
 
-export async function updateLineItem({
-  lineId,
-  quantity,
-}: {
-  lineId: string
-  quantity: number
-}) {
+export async function updateLineItem({ lineId, quantity }: { lineId: string; quantity: number }) {
   if (!lineId) {
     throw new Error("Missing lineItem ID when updating line item")
   }
@@ -332,10 +322,7 @@ export async function removeGiftCard(
   //   }
 }
 
-export async function submitPromotionForm(
-  currentState: unknown,
-  formData: FormData
-) {
+export async function submitPromotionForm(currentState: unknown, formData: FormData) {
   const code = formData.get("code") as string
   try {
     await applyPromotions([code])
@@ -357,17 +344,14 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
 
     const data = {
       shipping_address: {
-        first_name:
-          formData.get("shipping_address.first_name")?.toString() || "",
+        first_name: formData.get("shipping_address.first_name")?.toString() || "",
         last_name: formData.get("shipping_address.last_name")?.toString() || "",
         address_1: formData.get("shipping_address.address_1")?.toString() || "",
         address_2: "",
         company: formData.get("shipping_address.company")?.toString() || "",
-        postal_code:
-          formData.get("shipping_address.postal_code")?.toString() || "",
+        postal_code: formData.get("shipping_address.postal_code")?.toString() || "",
         city: formData.get("shipping_address.city")?.toString() || "",
-        country_code:
-          formData.get("shipping_address.country_code")?.toString() || "",
+        country_code: formData.get("shipping_address.country_code")?.toString() || "",
         province: formData.get("shipping_address.province")?.toString() || "",
         phone: formData.get("shipping_address.phone")?.toString() || "",
       },
@@ -379,17 +363,14 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       data.billing_address = data.shipping_address
     } else {
       data.billing_address = {
-        first_name:
-          formData.get("billing_address.first_name")?.toString() || "",
+        first_name: formData.get("billing_address.first_name")?.toString() || "",
         last_name: formData.get("billing_address.last_name")?.toString() || "",
         address_1: formData.get("billing_address.address_1")?.toString() || "",
         address_2: "",
         company: formData.get("billing_address.company")?.toString() || "",
-        postal_code:
-          formData.get("billing_address.postal_code")?.toString() || "",
+        postal_code: formData.get("billing_address.postal_code")?.toString() || "",
         city: formData.get("billing_address.city")?.toString() || "",
-        country_code:
-          formData.get("billing_address.country_code")?.toString() || "",
+        country_code: formData.get("billing_address.country_code")?.toString() || "",
         province: formData.get("billing_address.province")?.toString() || "",
         phone: formData.get("billing_address.phone")?.toString() || "",
       }
@@ -399,9 +380,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     return e.message
   }
 
-  redirect(
-    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`
-  )
+  redirect(`/${formData.get("shipping_address.country_code")}/checkout?step=delivery`)
 }
 
 /**
@@ -430,8 +409,7 @@ export async function placeOrder(cartId?: string) {
     .catch(medusaError)
 
   if (cartRes?.type === "order") {
-    const countryCode =
-      cartRes.order.shipping_address?.country_code?.toLowerCase()
+    const countryCode = cartRes.order.shipping_address?.country_code?.toLowerCase()
 
     const orderCacheTag = await getCacheTag("orders")
     revalidateTag(orderCacheTag)

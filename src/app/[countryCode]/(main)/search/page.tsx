@@ -1,5 +1,5 @@
-import { searchProducts } from "@lib/data/search"
 import { getRegion } from "@lib/data/regions"
+import { searchProducts } from "@lib/data/search"
 import { notFound } from "next/navigation"
 import SearchResults from "./search-results"
 
@@ -38,5 +38,3 @@ export default async function SearchPage(props: Props) {
     />
   )
 }
-
-

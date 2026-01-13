@@ -1,18 +1,17 @@
 "use client"
-import React, { useState, useEffect } from "react"
-import { motion } from "motion/react"
-import { Navigation } from "app/components/Navigation"
-import { ProductHero } from "app/components/ProductHero"
-import { StickyCartBar } from "app/components/StickyCartBar"
 import { Afterlife } from "app/components/Afterlife"
-import { PeopleAlsoBought } from "app/components/PeopleAlsoBought"
-import { FeaturedRitual } from "app/components/FeaturedRitual"
-
 import { CustomerTestimonials } from "app/components/CustomerTestimonials"
-import { RippleEffect } from "app/components/RippleEffect"
-import { PeopleAlsoBoughtTwo } from "app/components/PeopleAlsoBoughtTwo"
+import { FeaturedRitual } from "app/components/FeaturedRitual"
 import { FeaturedRitualTwo } from "app/components/FeaturedRitualTwo"
+import { Navigation } from "app/components/Navigation"
+import { PeopleAlsoBought } from "app/components/PeopleAlsoBought"
+import { PeopleAlsoBoughtTwo } from "app/components/PeopleAlsoBoughtTwo"
+import { ProductHero } from "app/components/ProductHero"
 import { ProductHeroHands } from "app/components/ProductHeroHands"
+import { RippleEffect } from "app/components/RippleEffect"
+import { StickyCartBar } from "app/components/StickyCartBar"
+import { motion } from "motion/react"
+import React, { useEffect, useState } from "react"
 
 interface CartItem {
   id: string
@@ -34,9 +33,7 @@ export default function App() {
     // Update cartItems array for navigation
     if (item && item.quantity > 0) {
       setCartItems((prevItems) => {
-        const existingIndex = prevItems.findIndex(
-          (cartItem) => cartItem.id === item.id
-        )
+        const existingIndex = prevItems.findIndex((cartItem) => cartItem.id === item.id)
         if (existingIndex >= 0) {
           // Update existing item
           const updatedItems = [...prevItems]
@@ -49,9 +46,7 @@ export default function App() {
       })
     } else if (item && item.quantity === 0) {
       // Remove item if quantity is 0
-      setCartItems((prevItems) =>
-        prevItems.filter((cartItem) => cartItem.id !== item.id)
-      )
+      setCartItems((prevItems) => prevItems.filter((cartItem) => cartItem.id !== item.id))
     }
   }
 
@@ -71,20 +66,15 @@ export default function App() {
 
       // Show sticky cart after scrolling past the ProductHero section (approximately 450px for compact height)
       // Show by default, hide only when heroCartItem exists and quantity is explicitly 0
-      const shouldShowCart =
-        scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0)
+      const shouldShowCart = scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0)
 
       // Hide sticky cart when footer copyright is visible
       const footerElement = document.querySelector("footer")
       const copyrightElement = footerElement?.querySelector("p")
 
-      if (
-        copyrightElement &&
-        copyrightElement.textContent?.includes("© 2025 Jardin Botanica")
-      ) {
+      if (copyrightElement && copyrightElement.textContent?.includes("© 2025 Jardin Botanica")) {
         const copyrightRect = copyrightElement.getBoundingClientRect()
-        const isFooterVisible =
-          copyrightRect.top < window.innerHeight && copyrightRect.bottom > 0
+        const isFooterVisible = copyrightRect.top < window.innerHeight && copyrightRect.bottom > 0
 
         setShowStickyCart(shouldShowCart && !isFooterVisible)
       } else {
@@ -99,11 +89,7 @@ export default function App() {
   return (
     <div className="min-h-screen">
       <RippleEffect />
-      <Navigation
-        isScrolled={isScrolled}
-        cartItems={cartItems}
-        onCartUpdate={handleCartUpdate}
-      />
+      <Navigation isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} />
       <div className="h-4"></div>
       <ProductHeroHands onCartUpdate={handleCartUpdate} />
       <StickyCartBar
@@ -119,16 +105,12 @@ export default function App() {
       <FeaturedRitualTwo />
       <CustomerTestimonials />
       {/* Newsletter/Contact Section */}
-      <section
-        className="py-20 relative overflow-hidden"
-        style={{ backgroundColor: "#e3e3d8" }}
-      >
+      <section className="py-20 relative overflow-hidden" style={{ backgroundColor: "#e3e3d8" }}>
         {/* Smooth Animated Gradient Background */}
         <motion.div
           className="absolute inset-0 opacity-15"
           style={{
-            background:
-              "linear-gradient(45deg, #e58a4d, #545d4a, #e58a4d, #545d4a, #e58a4d)",
+            background: "linear-gradient(45deg, #e58a4d, #545d4a, #e58a4d, #545d4a, #e58a4d)",
             backgroundSize: "600% 600%",
           }}
           animate={{
@@ -145,8 +127,7 @@ export default function App() {
         <motion.div
           className="absolute inset-0 opacity-10"
           style={{
-            background:
-              "linear-gradient(-45deg, #545d4a, #e58a4d, #545d4a, #e58a4d)",
+            background: "linear-gradient(-45deg, #545d4a, #e58a4d, #545d4a, #e58a4d)",
             backgroundSize: "800% 800%",
           }}
           animate={{
@@ -176,8 +157,8 @@ export default function App() {
               viewport={{ once: true }}
               className="font-din-arabic text-black/70 mb-8 leading-relaxed text-lg"
             >
-              Subscribe to receive hand care wisdom, botanical insights, and
-              early access to our latest concoctions.
+              Subscribe to receive hand care wisdom, botanical insights, and early access to our
+              latest concoctions.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}

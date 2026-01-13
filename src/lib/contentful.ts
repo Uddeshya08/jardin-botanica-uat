@@ -1,4 +1,4 @@
-import { createClient, ContentfulClientApi, Entry } from "contentful"
+import { type ContentfulClientApi, createClient, Entry } from "contentful"
 
 let contentfulClient: ContentfulClientApi<undefined> | null = null
 

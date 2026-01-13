@@ -1,9 +1,8 @@
-import { Container, Heading, Text } from "@medusajs/ui"
-
 import { isStripe, paymentInfoMap } from "@lib/constants"
-import Divider from "@modules/common/components/divider"
 import { convertToLocale } from "@lib/util/money"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
+import { Container, Heading, Text } from "@medusajs/ui"
+import Divider from "@modules/common/components/divider"
 
 type PaymentDetailsProps = {
   order: HttpTypes.StoreOrder
@@ -24,10 +23,7 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
               <Text className="txt-medium-plus font-din-arabic text-sm text-black/70 tracking-wide mb-1">
                 Payment method
               </Text>
-              <Text
-                className="txt-medium text-ui-fg-subtle"
-                data-testid="payment-method"
-              >
+              <Text className="txt-medium text-ui-fg-subtle" data-testid="payment-method">
                 {paymentInfoMap[payment.provider_id].title}
               </Text>
             </div>
@@ -45,9 +41,7 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
                     : `${convertToLocale({
                         amount: payment.amount,
                         currency_code: order.currency_code,
-                      })} paid at ${new Date(
-                        payment.created_at ?? ""
-                      ).toLocaleString()}`}
+                      })} paid at ${new Date(payment.created_at ?? "").toLocaleString()}`}
                 </Text>
               </div>
             </div>

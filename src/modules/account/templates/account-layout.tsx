@@ -1,7 +1,7 @@
-import React from "react"
+import type { HttpTypes } from "@medusajs/types"
 import UnderlineLink from "@modules/common/components/interactive-link"
+import type React from "react"
 import AccountNav from "../components/account-nav"
-import { HttpTypes } from "@medusajs/types"
 
 interface AccountLayoutProps {
   customer: HttpTypes.StoreCustomer | null
@@ -21,10 +21,10 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ customer, children }) => 
       .toLowerCase()
       .split(" ")
       .filter(Boolean)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ")
   }
-  
+
   return (
     <div
       className="min-h-screen flex flex-col lg:flex-row pt-32"
@@ -33,11 +33,14 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ customer, children }) => 
     >
       {/* Mobile Header - Only show on mobile */}
       {customer && (
-        <div className="lg:hidden mx-8 px-4 md:px-6 py-6 md:py-8 border-b" style={{ borderColor: "#D8D2C7" }}>
+        <div
+          className="lg:hidden mx-8 px-4 md:px-6 py-6 md:py-8 border-b"
+          style={{ borderColor: "#D8D2C7" }}
+        >
           <div className="text-center mb-4 md:mb-6">
-          <h2 className="font-american-typewriter text-2xl md:text-3xl text-black tracking-wide">
-  Hello, {toTitleCase(customer.first_name || "there")}
-</h2>
+            <h2 className="font-american-typewriter text-2xl md:text-3xl text-black tracking-wide">
+              Hello, {toTitleCase(customer.first_name || "there")}
+            </h2>
 
             <p className="font-din-arabic text-sm text-black/50 tracking-wide mt-1">
               Manage your account and preferences
@@ -48,14 +51,20 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ customer, children }) => 
 
       {/* Sidebar - Hidden on mobile, shown as horizontal tabs */}
       {customer && (
-        <aside className="hidden lg:block lg:w-96 border-r pr-12 pl-16 py-8" style={{ borderColor: "#D8D2C7" }}>
+        <aside
+          className="hidden lg:block lg:w-96 border-r pr-12 pl-16 py-8"
+          style={{ borderColor: "#D8D2C7" }}
+        >
           <AccountNav customer={customer} />
         </aside>
       )}
 
       {/* Mobile Tab Navigation */}
       {customer && (
-        <div className="lg:hidden mx-8 px-4 py-4 border-b overflow-x-auto" style={{ borderColor: "#D8D2C7" }}>
+        <div
+          className="lg:hidden mx-8 px-4 py-4 border-b overflow-x-auto"
+          style={{ borderColor: "#D8D2C7" }}
+        >
           <AccountNav customer={customer} />
         </div>
       )}

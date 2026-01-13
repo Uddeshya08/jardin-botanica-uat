@@ -1,7 +1,7 @@
 "use client"
 
-import { Package } from "lucide-react"
 import { motion } from "framer-motion"
+import { Package } from "lucide-react"
 
 export default function CheckoutHeader() {
   return (
@@ -23,6 +23,3 @@ export default function CheckoutHeader() {
     </div>
   )
 }
-
-
-

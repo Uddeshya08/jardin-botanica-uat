@@ -1,6 +1,6 @@
 "use client"
-import React, { useState } from "react"
 import { ChevronLeft, ChevronRight, Star, ThumbsUp } from "lucide-react"
+import React, { useState } from "react"
 
 const Product = () => {
   const [quantity, setQuantity] = useState(2)
@@ -8,11 +8,7 @@ const Product = () => {
   const [aromaSlide, setAromaSlide] = useState(0)
 
   // Product images array for the main product
-  const productImages = [
-    "/Images/GPT.png",
-    "/Images/product1.png",
-    "/Images/product2.png",
-  ]
+  const productImages = ["/Images/GPT.png", "/Images/product1.png", "/Images/product2.png"]
 
   // Custom styles for exact font specifications
   const fontStyles = {
@@ -128,22 +124,19 @@ const Product = () => {
     {
       name: "Priya M.",
       rating: 5,
-      review:
-        "Smells like a fresh forest walk - clean, calming, and not overpowering.",
+      review: "Smells like a fresh forest walk - clean, calming, and not overpowering.",
       recommends: true,
     },
     {
       name: "Aditi R.",
       rating: 5,
-      review:
-        "The scent fills the room without being too strong. My new favorite!",
+      review: "The scent fills the room without being too strong. My new favorite!",
       recommends: true,
     },
     {
       name: "Sara L.",
       rating: 5,
-      review:
-        "Crushed Pine feels like nature in a jar. Perfect for cozy evenings.",
+      review: "Crushed Pine feels like nature in a jar. Perfect for cozy evenings.",
       recommends: true,
     },
   ]
@@ -153,9 +146,7 @@ const Product = () => {
   }
 
   const prevImage = () => {
-    setCurrentSlide(
-      (prev) => (prev - 1 + productImages.length) % productImages.length
-    )
+    setCurrentSlide((prev) => (prev - 1 + productImages.length) % productImages.length)
   }
 
   const nextAroma = () => {
@@ -240,11 +231,11 @@ const Product = () => {
                       onChange={(e) => setQuantity(Number(e.target.value))}
                       style={{
                         backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                        backgroundPosition: "left 12px center", 
+                        backgroundPosition: "left 12px center",
                         backgroundRepeat: "no-repeat",
                         backgroundSize: "16px",
-                        paddingLeft: "40px", 
-                        paddingRight: "40px", 
+                        paddingLeft: "40px",
+                        paddingRight: "40px",
                       }}
                     >
                       <option value={1}>1</option>
@@ -268,22 +259,15 @@ const Product = () => {
                 </h3>
                 <div className="space-y-2 my-2">
                   <p style={fontStyles.subCopy} className="">
-                    <span className="font-bold font-dinBold text-[14px]">
-                      Top Note:
-                    </span>{" "}
-                    Fresh Pine
+                    <span className="font-bold font-dinBold text-[14px]">Top Note:</span> Fresh Pine
                   </p>
                   <p style={fontStyles.subCopy}>
-                    <span className="font-bold font-dinBold text-[14px]">
-                      Heart Note:
-                    </span>{" "}
-                    Resinous Balsam
+                    <span className="font-bold font-dinBold text-[14px]">Heart Note:</span> Resinous
+                    Balsam
                   </p>
                   <p style={fontStyles.subCopy}>
-                    <span className="font-bold font-dinBold text-[14px]">
-                      Base Note:
-                    </span>{" "}
-                    Grounded Cedarwood
+                    <span className="font-bold font-dinBold text-[14px]">Base Note:</span> Grounded
+                    Cedarwood
                   </p>
                 </div>
               </div>
@@ -309,7 +293,7 @@ const Product = () => {
                   />
                 </div>
 
-                <img src="/Images/Shadow.png" alt="Shadow" className="w-full h-auto"/>
+                <img src="/Images/Shadow.png" alt="Shadow" className="w-full h-auto" />
                 <button
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-32 hover:scale-110 transition-transform"
                   onClick={nextImage}
@@ -403,16 +387,12 @@ const Product = () => {
               <h2 style={fontStyles.subsequentHeading} className="px-2">
                 A FOREST REBORN
               </h2>
-              <p
-                style={{ ...fontStyles.subCopy, lineHeight: "1.8" }}
-                className="pl-2 pr-8 "
-              >
-                Crushed Pine by Jardin Botanica evokes the quiet majesty of
-                mist-covered evergreens after winter rain. It is a scent of
-                awakening—the snap of pine needles beneath your feet, the crisp
-                bite of cedar carried on the wind, and the meditative warmth of
-                balsam deep in the trees. Rooted and restorative, this candle
-                celebrates the enduring spirit of nature.
+              <p style={{ ...fontStyles.subCopy, lineHeight: "1.8" }} className="pl-2 pr-8 ">
+                Crushed Pine by Jardin Botanica evokes the quiet majesty of mist-covered evergreens
+                after winter rain. It is a scent of awakening—the snap of pine needles beneath your
+                feet, the crisp bite of cedar carried on the wind, and the meditative warmth of
+                balsam deep in the trees. Rooted and restorative, this candle celebrates the
+                enduring spirit of nature.
               </p>
             </div>
           </div>
@@ -425,9 +405,7 @@ const Product = () => {
             {/* Left Side - Heading */}
             <div
               className={`flex-shrink-0 w-full lg:w-96 transition-all duration-500 ease-in-out ${
-                aromaSlide > 0
-                  ? "lg:opacity-0 lg:w-0 lg:overflow-hidden"
-                  : "lg:opacity-100 lg:w-96"
+                aromaSlide > 0 ? "lg:opacity-0 lg:w-0 lg:overflow-hidden" : "lg:opacity-100 lg:w-96"
               }`}
             >
               <h2
@@ -449,7 +427,6 @@ const Product = () => {
                 }}
                 className="text-right"
               >
-                
                 Because one scent is never enough
               </p>
             </div>
@@ -485,7 +462,6 @@ const Product = () => {
                   {products.map((product, index) => (
                     <div key={index} className="flex-shrink-0 w-60">
                       {" "}
-                     
                       {/* Product Image */}
                       <div className="w-full h-[310px] mb-6 overflow-hidden">
                         {" "}
@@ -501,13 +477,12 @@ const Product = () => {
                         {/* Left: Name and Description */}
                         <div className="flex-1 pr-2">
                           {" "}
-                         
                           <h3
                             style={{
                               ...fontStyles.subsequentHeading,
-                              fontSize: "15px", 
-                              letterSpacing: "1.5px", 
-                              marginBottom: "6px", 
+                              fontSize: "15px",
+                              letterSpacing: "1.5px",
+                              marginBottom: "6px",
                               lineHeight: "1.2",
                             }}
                           >
@@ -516,9 +491,9 @@ const Product = () => {
                           <p
                             style={{
                               ...fontStyles.subCopy,
-                              fontSize: "13px", 
-                              lineHeight: "1.3", 
-                              letterSpacing: "0.3px", 
+                              fontSize: "13px",
+                              lineHeight: "1.3",
+                              letterSpacing: "0.3px",
                             }}
                           >
                             {product.description}
@@ -577,15 +552,11 @@ const Product = () => {
                 {/* increased inner spacing too */}
                 <div className="flex items-center gap-2">
                   <h4 style={fontStyles.reviewerNama}>{review.name}</h4>
-                  <img src="/Images/tick.svg" alt="tick" className="w-5 h-5"/>
+                  <img src="/Images/tick.svg" alt="tick" className="w-5 h-5" />
                 </div>
                 <div className="flex">
                   {[...Array(review.rating)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={18}
-                      className="fill-current text-[#535c4a] pt-[4px]"
-                    />
+                    <Star key={i} size={18} className="fill-current text-[#535c4a] pt-[4px]" />
                   ))}
                 </div>
                 <p
@@ -633,19 +604,13 @@ const Product = () => {
             {/* Logo - Centered on mobile */}
             <div className="col-span-1 mt-10 flex justify-center md:justify-start">
               <div className="text-white">
-                <img
-                  src="/Images/Jardinlogo.png"
-                  alt="JardinLogo"
-                  className="w-48"
-                />
+                <img src="/Images/Jardinlogo.png" alt="JardinLogo" className="w-48" />
               </div>
             </div>
 
             {/* About Us */}
             <div className="text-center md:text-left">
-              <h3 className="text-white mb-4 tracking-wider font-din font-bold">
-                ABOUT US
-              </h3>
+              <h3 className="text-white mb-4 tracking-wider font-din font-bold">ABOUT US</h3>
               <ul className="space-y-2 text-gray-400 font-din">
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
@@ -667,9 +632,7 @@ const Product = () => {
 
             {/* Shop */}
             <div className="text-center md:text-left">
-              <h3 className="text-white mb-4 tracking-wider font-din font-bold">
-                SHOP
-              </h3>
+              <h3 className="text-white mb-4 tracking-wider font-din font-bold">SHOP</h3>
               <ul className="space-y-2 text-gray-400 font-din">
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
@@ -720,9 +683,7 @@ const Product = () => {
 
             {/* Follow Us */}
             <div className="text-center md:text-left">
-              <h3 className="text-white mb-4 tracking-wider font-din font-bold">
-                FOLLOW US
-              </h3>
+              <h3 className="text-white mb-4 tracking-wider font-din font-bold">FOLLOW US</h3>
               <ul className="space-y-2 text-gray-400 font-din">
                 <li>
                   <a href="#" className="hover:text-white transition-colors">

@@ -1,7 +1,8 @@
 "use client"
 
-import React, { createContext, useContext, useMemo } from "react"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
+import type React from "react"
+import { createContext, useContext, useMemo } from "react"
 
 interface AuthContextValue {
   customer: HttpTypes.StoreCustomer | null
@@ -10,12 +11,12 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-export function AuthProvider({ 
-  customer, 
-  children 
-}: { 
+export function AuthProvider({
+  customer,
+  children,
+}: {
   customer: HttpTypes.StoreCustomer | null
-  children: React.ReactNode 
+  children: React.ReactNode
 }) {
   const value = useMemo(
     () => ({
@@ -36,7 +37,3 @@ export function useAuth() {
   }
   return context
 }
-
-
-
-

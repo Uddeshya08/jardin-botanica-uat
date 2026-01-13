@@ -1,11 +1,10 @@
-import { Metadata } from "next"
-import { notFound } from "next/navigation"
-
 import { getCategoryByHandle, listCategories } from "@lib/data/categories"
 import { listRegions } from "@lib/data/regions"
-import { StoreRegion } from "@medusajs/types"
+import type { StoreRegion } from "@medusajs/types"
 import CategoryTemplate from "@modules/categories/templates"
-import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import type { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
 
 type Props = {
   params: Promise<{ category: string[]; countryCode: string }>
@@ -23,21 +22,17 @@ export async function generateStaticParams() {
   }
 
   const countryCodes = await listRegions().then((regions: StoreRegion[]) =>
-    regions?.map((r) => r.countries?.map((c) => c.iso_2)).flat()
+    regions?.flatMap((r) => r.countries?.map((c) => c.iso_2))
   )
 
-  const categoryHandles = product_categories.map(
-    (category: any) => category.handle
-  )
+  const categoryHandles = product_categories.map((category: any) => category.handle)
 
-  const staticParams = countryCodes
-    ?.map((countryCode: string | undefined) =>
-      categoryHandles.map((handle: any) => ({
-        countryCode,
-        category: [handle],
-      }))
-    )
-    .flat()
+  const staticParams = countryCodes?.flatMap((countryCode: string | undefined) =>
+    categoryHandles.map((handle: any) => ({
+      countryCode,
+      category: [handle],
+    }))
+  )
 
   return staticParams
 }

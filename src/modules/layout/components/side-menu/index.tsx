@@ -2,12 +2,12 @@
 
 import { Popover, PopoverPanel, Transition } from "@headlessui/react"
 import { ArrowRightMini, XMark } from "@medusajs/icons"
-import { Text, clx, useToggleState } from "@medusajs/ui"
-import { Fragment } from "react"
+import type { HttpTypes } from "@medusajs/types"
+import { clx, Text, useToggleState } from "@medusajs/ui"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { Fragment } from "react"
 import CountrySelect from "../country-select"
-import { HttpTypes } from "@medusajs/types"
 
 const SideMenuItems = {
   Home: "/",
@@ -76,12 +76,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                         onMouseEnter={toggleState.open}
                         onMouseLeave={toggleState.close}
                       >
-                        {regions && (
-                          <CountrySelect
-                            toggleState={toggleState}
-                            regions={regions}
-                          />
-                        )}
+                        {regions && <CountrySelect toggleState={toggleState} regions={regions} />}
                         <ArrowRightMini
                           className={clx(
                             "transition-transform duration-150",
@@ -90,8 +85,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                         />
                       </div>
                       <Text className="flex justify-between txt-compact-small">
-                        © {new Date().getFullYear()} Medusa Store. All rights
-                        reserved.
+                        © {new Date().getFullYear()} Medusa Store. All rights reserved.
                       </Text>
                     </div>
                   </div>

@@ -1,7 +1,7 @@
 import { getBaseURL } from "@lib/util/env"
-import { Metadata } from "next"
-import { Toaster } from "./components/ui/sonner"
+import type { Metadata } from "next"
 import CookieConsent from "./components/CookieConsent"
+import { Toaster } from "./components/ui/sonner"
 import "styles/globals.css"
 
 export const metadata: Metadata = {

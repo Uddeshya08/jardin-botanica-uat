@@ -1,8 +1,8 @@
-'use client'
+"use client"
 
-import { Navigation } from "../../../components/Navigation"
-import { HelpFAQ } from "../../../components/HelpFAQ"
 import { useEffect, useState } from "react"
+import { HelpFAQ } from "../../../components/HelpFAQ"
+import { Navigation } from "../../../components/Navigation"
 
 export default function HelpFAQPage() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -28,13 +28,13 @@ export default function HelpFAQPage() {
       setIsScrolled(scrollPosition > 50)
     }
 
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener("scroll", handleScroll)
 
     // Check initial scroll position
     handleScroll()
 
     return () => {
-      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener("scroll", handleScroll)
     }
   }, [])
 
@@ -47,5 +47,3 @@ export default function HelpFAQPage() {
     </>
   )
 }
-
-

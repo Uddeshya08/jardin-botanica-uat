@@ -1,7 +1,7 @@
 "use client"
 
-import React from "react"
 import { motion } from "motion/react"
+import React from "react"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 export function HandCareRitualSection() {
@@ -53,11 +53,17 @@ export function HandCareRitualSection() {
           transition={{ duration: 0.7 }}
           className="text-center mb-16 lg:mb-20"
         >
-          <p className="font-din-arabic text-black/50 text-xs mb-4" style={{ letterSpacing: "0.2em" }}>
+          <p
+            className="font-din-arabic text-black/50 text-xs mb-4"
+            style={{ letterSpacing: "0.2em" }}
+          >
             THE RITUAL
           </p>
 
-          <h1 className="font-american-typewriter text-2xl sm:text-3xl lg:text-4xl mb-6" style={{ letterSpacing: "0.05em" }}>
+          <h1
+            className="font-american-typewriter text-2xl sm:text-3xl lg:text-4xl mb-6"
+            style={{ letterSpacing: "0.05em" }}
+          >
             A daily hand care ritual
           </h1>
 
@@ -65,7 +71,9 @@ export function HandCareRitualSection() {
             className="font-din-arabic text-black/70 leading-relaxed max-w-2xl mx-auto"
             style={{ letterSpacing: "0.1em" }}
           >
-            A quiet moment between tasks, this ritual restores balance and brings comfort to the skin through deliberate care and evocative scent — a small act of renewal woven into the rhythm of your day.
+            A quiet moment between tasks, this ritual restores balance and brings comfort to the
+            skin through deliberate care and evocative scent — a small act of renewal woven into the
+            rhythm of your day.
           </p>
         </motion.div>
 
@@ -82,8 +90,13 @@ export function HandCareRitualSection() {
             >
               {/* Connector Line - Not for last item */}
               {index < ritualSteps.length - 1 && (
-                <div className="absolute left-[1.25rem] top-14 bottom-[-2.5rem] w-px bg-gradient-to-b from-black/15 via-black/10 to-transparent hidden sm:block" 
-                style={{ background: "linear-gradient(to bottom, rgba(96, 95, 95, 0.15), rgba(186, 181, 181, 0.1))" }} />
+                <div
+                  className="absolute left-[1.25rem] top-14 bottom-[-2.5rem] w-px bg-gradient-to-b from-black/15 via-black/10 to-transparent hidden sm:block"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom, rgba(96, 95, 95, 0.15), rgba(186, 181, 181, 0.1))",
+                  }}
+                />
               )}
 
               <div className="flex items-start gap-8 lg:gap-12">
@@ -106,11 +119,17 @@ export function HandCareRitualSection() {
                 </motion.div>
                 {/* Content */}
                 <div className="flex-1 pt-1">
-                  <h3 className="font-american-typewriter text-xl lg:text-2xl mb-4" style={{ letterSpacing: "0.05em" }}>
+                  <h3
+                    className="font-american-typewriter text-xl lg:text-2xl mb-4"
+                    style={{ letterSpacing: "0.05em" }}
+                  >
                     {step.title}
                   </h3>
 
-                  <p className="font-din-arabic text-black/70 leading-relaxed max-w-2xl" style={{ letterSpacing: "0.1em" }}>
+                  <p
+                    className="font-din-arabic text-black/70 leading-relaxed max-w-2xl"
+                    style={{ letterSpacing: "0.1em" }}
+                  >
                     {step.description}
                   </p>
                 </div>
@@ -162,7 +181,8 @@ export function HandCareRitualSection() {
                   className="font-american-typewriter text-white text-xl lg:text-3xl text-center max-w-3xl"
                   style={{ letterSpacing: "0.05em" }}
                 >
-                  "Care for your hands as you would care for your garden — with patience, attention, and reverence."
+                  "Care for your hands as you would care for your garden — with patience, attention,
+                  and reverence."
                 </motion.p>
               </div>
             </div>

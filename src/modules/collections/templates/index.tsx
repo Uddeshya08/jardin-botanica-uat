@@ -1,10 +1,10 @@
-import { Suspense } from "react"
+import type { HttpTypes } from "@medusajs/types"
 
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import RefinementList from "@modules/store/components/refinement-list"
-import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import type { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import PaginatedProducts from "@modules/store/templates/paginated-products"
-import { HttpTypes } from "@medusajs/types"
+import { Suspense } from "react"
 
 export default function CollectionTemplate({
   sortBy,
@@ -27,13 +27,7 @@ export default function CollectionTemplate({
         <div className="mb-8 text-2xl-semi">
           <h1>{collection.title}</h1>
         </div>
-        <Suspense
-          fallback={
-            <SkeletonProductGrid
-              numberOfProducts={collection.products?.length}
-            />
-          }
-        >
+        <Suspense fallback={<SkeletonProductGrid numberOfProducts={collection.products?.length} />}>
           <PaginatedProducts
             sortBy={sort}
             page={pageNumber}

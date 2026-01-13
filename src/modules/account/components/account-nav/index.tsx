@@ -1,38 +1,25 @@
 "use client"
 
-import { useParams, usePathname } from "next/navigation"
-import { motion } from "motion/react"
-import { 
-  Settings, 
-  Package, 
-  MapPin, 
-  CreditCard, 
-  LogOut, 
-  ChevronRight,
-  Heart 
-} from "lucide-react"
-
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { HttpTypes } from "@medusajs/types"
 import { signout } from "@lib/data/customer"
+import type { HttpTypes } from "@medusajs/types"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { ChevronRight, CreditCard, Heart, LogOut, MapPin, Package, Settings } from "lucide-react"
+import { motion } from "motion/react"
+import { useParams, usePathname } from "next/navigation"
 
-const AccountNav = ({
-  customer,
-}: {
-  customer: HttpTypes.StoreCustomer | null
-}) => {
+const AccountNav = ({ customer }: { customer: HttpTypes.StoreCustomer | null }) => {
   const route = usePathname()
   const { countryCode } = useParams() as { countryCode: string }
 
   // Utility function to convert text to title case
   const toTitleCase = (text: string) => {
-    if (!text) return ''
+    if (!text) return ""
     return text
       .toLowerCase()
-      .split(' ')
+      .split(" ")
       .filter(Boolean)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
   }
 
   const handleLogout = async () => {
@@ -40,19 +27,34 @@ const AccountNav = ({
   }
 
   const sidebarItems = [
-    { id: 'account', href: '/account', label: 'Account Settings', icon: Settings },
-    { id: 'orders', href: '/account/orders', label: 'Orders', icon: Package },
-    { id: 'ledger', href: '/account/ledger', label: 'Ledger', icon: Heart },
-    { id: 'addresses', href: '/account/addresses', label: 'Saved Addresses', icon: MapPin },
-    { id: 'payment', href: '/account/payment', label: 'Payment Methods', icon: CreditCard },
+    {
+      id: "account",
+      href: "/account",
+      label: "Account Settings",
+      icon: Settings,
+    },
+    { id: "orders", href: "/account/orders", label: "Orders", icon: Package },
+    { id: "ledger", href: "/account/ledger", label: "Ledger", icon: Heart },
+    {
+      id: "addresses",
+      href: "/account/addresses",
+      label: "Saved Addresses",
+      icon: MapPin,
+    },
+    {
+      id: "payment",
+      href: "/account/payment",
+      label: "Payment Methods",
+      icon: CreditCard,
+    },
   ]
 
   const isActive = (href: string) => {
-    const path = route.split(countryCode)[1] || ''
-    if (href === '/account') {
-      return path === '/account' || path === '/account/'
+    const path = route.split(countryCode)[1] || ""
+    if (href === "/account") {
+      return path === "/account" || path === "/account/"
     }
-    return path === href || path.startsWith(href + '/')
+    return path === href || path.startsWith(href + "/")
   }
 
   // Desktop Sidebar
@@ -60,7 +62,7 @@ const AccountNav = ({
     <>
       <div className="hidden lg:block" data-testid="account-nav">
         {/* Greeting */}
-        <motion.div 
+        <motion.div
           className="mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -80,7 +82,7 @@ const AccountNav = ({
           {sidebarItems.map((item, index) => {
             const Icon = item.icon
             const active = isActive(item.href)
-            
+
             return (
               <motion.div
                 key={item.id}
@@ -93,9 +95,7 @@ const AccountNav = ({
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.98 }}
                     className={`w-full flex items-center justify-between px-4 py-4 rounded transition-all duration-300 ${
-                      active
-                        ? 'bg-black text-white'
-                        : 'text-black hover:bg-black/5'
+                      active ? "bg-black text-white" : "text-black hover:bg-black/5"
                     }`}
                     data-testid={`${item.id}-link`}
                   >
@@ -103,7 +103,9 @@ const AccountNav = ({
                       <Icon className="w-5 h-5" />
                       <span className="font-din-arabic tracking-wide">{item.label}</span>
                     </div>
-                    <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${active ? 'rotate-90' : ''}`} />
+                    <ChevronRight
+                      className={`w-4 h-4 transition-transform duration-200 ${active ? "rotate-90" : ""}`}
+                    />
                   </motion.button>
                 </LocalizedClientLink>
               </motion.div>
@@ -111,8 +113,8 @@ const AccountNav = ({
           })}
         </nav>
 
-        <motion.div 
-          className="mt-12 pt-8 border-t" 
+        <motion.div
+          className="mt-12 pt-8 border-t"
           style={{ borderColor: "#D8D2C7" }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -137,14 +139,14 @@ const AccountNav = ({
           {sidebarItems.map((item) => {
             const Icon = item.icon
             const active = isActive(item.href)
-            
+
             return (
               <LocalizedClientLink key={item.id} href={item.href}>
                 <button
                   className={`flex items-center justify-center p-4 rounded-full transition-all duration-300 min-w-[48px] min-h-[48px] ${
                     active
-                      ? 'bg-black text-white shadow-lg ring-1 ring-[#D8D2C7]'
-                      : 'text-black hover:bg-black/10 ring-1 ring-[#D8D2C7]'
+                      ? "bg-black text-white shadow-lg ring-1 ring-[#D8D2C7]"
+                      : "text-black hover:bg-black/10 ring-1 ring-[#D8D2C7]"
                   }`}
                   title={item.label}
                   aria-label={item.label}

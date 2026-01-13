@@ -1,6 +1,6 @@
-import React from "react"
-
 import Footer from "@modules/layout/templates/footer"
+import type React from "react"
+
 // import Nav from "@modules/layout/templates/nav"
 
 const Layout: React.FC<{

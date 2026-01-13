@@ -1,27 +1,27 @@
 // HERO COMPONENT with Motion Animations (Updated with PeopleAlsoBought effects)
 "use client"
+import { getCandlesCollection } from "@lib/data/contentful"
 import { Github } from "@medusajs/icons"
 import { Heading } from "@medusajs/ui"
-import { useEffect, useState, useRef } from "react"
-import { motion, useScroll, useTransform, useSpring } from "motion/react"
-import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
-import { RippleEffect } from "app/components/RippleEffect"
+import { ImageWithFallback } from "app/components/figma/ImageWithFallback"
 import { Navigation } from "app/components/Navigation"
 import { PageBanner } from "app/components/PageBanner"
-import { getCandlesCollection } from "@lib/data/contentful"
-import { CandlesCollectionItem } from "../../../../types/contentful"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { ImageWithFallback } from "app/components/figma/ImageWithFallback"
+import { RippleEffect } from "app/components/RippleEffect"
 import {
   Carousel,
+  type CarouselApi,
   CarouselContent,
   CarouselItem,
-  type CarouselApi,
 } from "app/components/ui/carousel"
-import { useLedger, LedgerItem } from "app/context/ledger-context"
 import { useCartItems } from "app/context/cart-items-context"
+import { type LedgerItem, useLedger } from "app/context/ledger-context"
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
+import { motion, useScroll, useSpring, useTransform } from "motion/react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
+import type { CandlesCollectionItem } from "../../../../types/contentful"
 
 interface CartItem {
   id: string
@@ -45,14 +45,10 @@ const Candles = () => {
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [hoveredProductIndex, setHoveredProductIndex] = useState<number | null>(
-    null
-  )
+  const [hoveredProductIndex, setHoveredProductIndex] = useState<number | null>(null)
   const [productScrollPosition, setProductScrollPosition] = useState(0)
   const [maxProductScroll, setMaxProductScroll] = useState(0)
-  const [candlesCollection, setCandlesCollection] = useState<
-    CandlesCollectionItem[]
-  >([])
+  const [candlesCollection, setCandlesCollection] = useState<CandlesCollectionItem[]>([])
   const [isLoadingCollection, setIsLoadingCollection] = useState(true)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [isMobile, setIsMobile] = useState(false)
@@ -68,9 +64,7 @@ const Candles = () => {
   const [mobileCurrent, setMobileCurrent] = useState(0)
   const [mobileScrollProgress, setMobileScrollProgress] = useState(0)
   const [isMobileDragging, setIsMobileDragging] = useState(false)
-  const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(
-    null
-  )
+  const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null)
   const [bannerCarouselApi, setBannerCarouselApi] = useState<CarouselApi>()
   const [bannerCurrent, setBannerCurrent] = useState(0)
 
@@ -296,9 +290,7 @@ const Candles = () => {
 
     const handleProductClick = () => {
       if (item.url) {
-        const normalizedUrl = item.url.startsWith("/")
-          ? item.url
-          : `/${item.url}`
+        const normalizedUrl = item.url.startsWith("/") ? item.url : `/${item.url}`
         router.push(normalizedUrl)
       }
     }
@@ -318,12 +310,9 @@ const Candles = () => {
       }
 
       toggleLedgerItem(ledgerItem)
-      toast.success(
-        `${item.label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`,
-        {
-          duration: 2000,
-        }
-      )
+      toast.success(`${item.label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+        duration: 2000,
+      })
     }
 
     return (
@@ -374,9 +363,7 @@ const Candles = () => {
             <Heart
               size={18}
               className={`transition-colors duration-300 ${
-                isItemInLedger
-                  ? "fill-[#e58a4d] stroke-[#e58a4d]"
-                  : "stroke-white fill-none"
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
               }`}
             />
           </button>
@@ -434,12 +421,9 @@ const Candles = () => {
       }
 
       toggleLedgerItem(ledgerItem)
-      toast.success(
-        `${label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`,
-        {
-          duration: 2000,
-        }
-      )
+      toast.success(`${label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+        duration: 2000,
+      })
     }
 
     return (
@@ -483,16 +467,12 @@ const Candles = () => {
               <button
                 onClick={handleToggleLedger}
                 className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 bg-white/20 border border-white/30 hover:bg-white/30"
-                aria-label={`${
-                  isItemInLedger ? "Remove from" : "Add to"
-                } ledger`}
+                aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
               >
                 <Heart
                   size={18}
                   className={`transition-colors duration-300 ${
-                    isItemInLedger
-                      ? "fill-[#e58a4d] stroke-[#e58a4d]"
-                      : "stroke-white fill-none"
+                    isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
                   }`}
                 />
               </button>
@@ -537,9 +517,7 @@ const Candles = () => {
               <Heart
                 size={18}
                 className={`transition-colors duration-300 ${
-                  isItemInLedger
-                    ? "fill-[#e58a4d] stroke-[#e58a4d]"
-                    : "stroke-white fill-none"
+                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
                 }`}
               />
             </button>
@@ -581,8 +559,8 @@ const Candles = () => {
       const urlPath = url.startsWith("/")
         ? url
         : url.startsWith("http://") || url.startsWith("https://")
-        ? new URL(url).pathname
-        : `/${url}`
+          ? new URL(url).pathname
+          : `/${url}`
 
       if (urlPath && urlPath.trim() !== "" && urlPath !== "/") {
         router.push(urlPath)
@@ -620,9 +598,7 @@ const Candles = () => {
 
     const updateScrollInfo = () => {
       setProductScrollPosition(scrollContainer.scrollLeft)
-      setMaxProductScroll(
-        scrollContainer.scrollWidth - scrollContainer.clientWidth
-      )
+      setMaxProductScroll(scrollContainer.scrollWidth - scrollContainer.clientWidth)
     }
 
     updateScrollInfo()
@@ -716,9 +692,7 @@ const Candles = () => {
 
   // Calculate mobile slider position
   const mobileSliderPercentage =
-    candlesCollection.length > 0
-      ? (mobileCurrent / (candlesCollection.length - 1)) * 100
-      : 0
+    candlesCollection.length > 0 ? (mobileCurrent / (candlesCollection.length - 1)) * 100 : 0
 
   // Banner carousel handlers
   useEffect(() => {
@@ -736,20 +710,12 @@ const Candles = () => {
   }, [bannerCarouselApi])
 
   // Banner Product Card Component - Banner Style
-  function BannerProductCard({
-    item,
-    index,
-  }: {
-    item: CandlesCollectionItem
-    index: number
-  }) {
+  function BannerProductCard({ item, index }: { item: CandlesCollectionItem; index: number }) {
     const [isHovered, setIsHovered] = useState(false)
 
     const handleProductClick = () => {
       if (item.url) {
-        const normalizedUrl = item.url.startsWith("/")
-          ? item.url
-          : `/${item.url}`
+        const normalizedUrl = item.url.startsWith("/") ? item.url : `/${item.url}`
         router.push(normalizedUrl)
       }
     }
@@ -764,12 +730,10 @@ const Candles = () => {
         background: "linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.5))",
       }, // Dark
       {
-        background:
-          "linear-gradient(135deg, rgba(200,150,150,0.2), rgba(180,100,100,0.3))",
+        background: "linear-gradient(135deg, rgba(200,150,150,0.2), rgba(180,100,100,0.3))",
       }, // Warm pinkish
       {
-        background:
-          "linear-gradient(135deg, rgba(150,150,150,0.3), rgba(100,100,100,0.4))",
+        background: "linear-gradient(135deg, rgba(150,150,150,0.3), rgba(100,100,100,0.4))",
       }, // Grey
     ]
 
@@ -822,8 +786,8 @@ const Candles = () => {
               {positionInGroup === 0
                 ? "MODERN LIGHTING"
                 : positionInGroup === 1
-                ? "CANDLES & REED DIFFUSERS"
-                : "GLOBALLY AWARDED"}
+                  ? "CANDLES & REED DIFFUSERS"
+                  : "GLOBALLY AWARDED"}
             </motion.p>
 
             <motion.h3
@@ -994,18 +958,10 @@ const Candles = () => {
                 >
                   <CarouselContent className="mobile-candles-carousel-content">
                     {candlesCollection.map((item, i) => {
-                      const productId =
-                        item.url ||
-                        item.label.toLowerCase().replace(/\s+/g, "-")
+                      const productId = item.url || item.label.toLowerCase().replace(/\s+/g, "-")
                       return (
-                        <CarouselItem
-                          key={i}
-                          className="mobile-candles-carousel-item"
-                        >
-                          <MobileProductCard
-                            item={item}
-                            productId={productId}
-                          />
+                        <CarouselItem key={i} className="mobile-candles-carousel-item">
+                          <MobileProductCard item={item} productId={productId} />
                         </CarouselItem>
                       )
                     })}
@@ -1026,10 +982,7 @@ const Candles = () => {
                   <div
                     className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
                     style={{
-                      left: `calc(${Math.max(
-                        0,
-                        Math.min(100, mobileSliderPercentage)
-                      )}% - 16px)`,
+                      left: `calc(${Math.max(0, Math.min(100, mobileSliderPercentage))}% - 16px)`,
                       transform: "translateY(-50%)",
                     }}
                     onMouseDown={(e) => {
@@ -1164,13 +1117,9 @@ const Candles = () => {
               >
                 <CarouselContent className="candles-carousel-content -ml-0">
                   {products.map(({ src, label, hoverSrc, url }, i) => {
-                    const productId =
-                      url || label.toLowerCase().replace(/\s+/g, "-")
+                    const productId = url || label.toLowerCase().replace(/\s+/g, "-")
                     return (
-                      <CarouselItem
-                        key={i}
-                        className="candles-carousel-item pl-0"
-                      >
+                      <CarouselItem key={i} className="candles-carousel-item pl-0">
                         <ProductCard
                           index={i}
                           src={src}
@@ -1200,10 +1149,7 @@ const Candles = () => {
                 <div
                   className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
                   style={{
-                    left: `calc(${Math.max(
-                      0,
-                      Math.min(100, sliderPercentage)
-                    )}% - 16px)`,
+                    left: `calc(${Math.max(0, Math.min(100, sliderPercentage))}% - 16px)`,
                     transform: "translateY(-50%)",
                   }}
                   onMouseDown={(e) => {
@@ -1305,42 +1251,28 @@ const Candles = () => {
                   {isMobile
                     ? // Mobile: One product per slide
                       candlesCollection.map((item, index) => (
-                        <CarouselItem
-                          key={index}
-                          className="banner-carousel-item"
-                        >
+                        <CarouselItem key={index} className="banner-carousel-item">
                           <BannerProductCard item={item} index={index} />
                         </CarouselItem>
                       ))
                     : // Desktop: Groups of 3 products
                       bannerGroups.map((group, groupIndex) => (
-                        <CarouselItem
-                          key={groupIndex}
-                          className="banner-carousel-item"
-                        >
+                        <CarouselItem key={groupIndex} className="banner-carousel-item">
                           <div className="flex flex-row gap-0 w-full h-auto">
                             {group.map((item, itemIndex) => {
                               const globalIndex = groupIndex * 3 + itemIndex
                               return (
                                 <div key={globalIndex} className="flex-1 w-1/3">
-                                  <BannerProductCard
-                                    item={item}
-                                    index={globalIndex}
-                                  />
+                                  <BannerProductCard item={item} index={globalIndex} />
                                 </div>
                               )
                             })}
 
                             {/* Fill remaining slots if group has less than 3 items */}
                             {group.length < 3 &&
-                              Array.from({ length: 3 - group.length }).map(
-                                (_, fillIndex) => (
-                                  <div
-                                    key={`fill-${fillIndex}`}
-                                    className="flex-1 w-1/3"
-                                  />
-                                )
-                              )}
+                              Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                                <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                              ))}
                           </div>
                         </CarouselItem>
                       ))}
@@ -1358,10 +1290,7 @@ const Candles = () => {
                   <div
                     className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
                     style={{
-                      left: `calc(${Math.max(
-                        0,
-                        Math.min(100, mobileSliderPercentage)
-                      )}% - 16px)`,
+                      left: `calc(${Math.max(0, Math.min(100, mobileSliderPercentage))}% - 16px)`,
                       transform: "translateY(-50%)",
                     }}
                     onMouseDown={(e) => {
@@ -1441,9 +1370,8 @@ const Candles = () => {
             viewport={{ once: true, amount: 0.3 }}
             className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-4 md:px-0"
           >
-            Connect with one of our experts for personalized guidance and
-            thoughtful product recommendations-crafted just for your skin, your
-            rituals, your glow.
+            Connect with one of our experts for personalized guidance and thoughtful product
+            recommendations-crafted just for your skin, your rituals, your glow.
           </motion.p>
           <motion.button
             initial={{ opacity: 0, y: 10 }}
@@ -1507,9 +1435,9 @@ const Candles = () => {
                 viewport={{ once: true, amount: 0.3 }}
                 className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-6 md:mb-4 pr-4 line-clamp-2 md:line-clamp-none"
               >
-                Powdery, elegant, and quietly floral-Soft Orris wraps your space
-                in a gentle hug. Perfect for slow mornings, self-care rituals,
-                or unwinding at dusk. It's calm, bottled in wax.
+                Powdery, elegant, and quietly floral-Soft Orris wraps your space in a gentle hug.
+                Perfect for slow mornings, self-care rituals, or unwinding at dusk. It's calm,
+                bottled in wax.
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -1656,15 +1584,11 @@ const Candles = () => {
       </motion.div>
 
       {/* Newsletter Section */}
-      <section
-        className="py-20 relative overflow-hidden"
-        style={{ backgroundColor: "#e3e3d8" }}
-      >
+      <section className="py-20 relative overflow-hidden" style={{ backgroundColor: "#e3e3d8" }}>
         <motion.div
           className="absolute inset-0 opacity-15"
           style={{
-            background:
-              "linear-gradient(45deg, #e58a4d, #545d4a, #e58a4d, #545d4a, #e58a4d)",
+            background: "linear-gradient(45deg, #e58a4d, #545d4a, #e58a4d, #545d4a, #e58a4d)",
             backgroundSize: "600% 600%",
           }}
           animate={{
@@ -1679,8 +1603,7 @@ const Candles = () => {
         <motion.div
           className="absolute inset-0 opacity-10"
           style={{
-            background:
-              "linear-gradient(-45deg, #545d4a, #e58a4d, #545d4a, #e58a4d)",
+            background: "linear-gradient(-45deg, #545d4a, #e58a4d, #545d4a, #e58a4d)",
             backgroundSize: "800% 800%",
           }}
           animate={{
@@ -1710,8 +1633,8 @@ const Candles = () => {
               viewport={{ once: true, amount: 0.3 }}
               className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8"
             >
-              Be the first to discover new blends, exclusive rituals, and
-              stories from our botanical laboratory.
+              Be the first to discover new blends, exclusive rituals, and stories from our botanical
+              laboratory.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}

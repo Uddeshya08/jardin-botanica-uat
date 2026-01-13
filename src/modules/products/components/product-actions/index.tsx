@@ -2,7 +2,7 @@
 
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
@@ -18,19 +18,14 @@ type ProductActionsProps = {
   disabled?: boolean
 }
 
-const optionsAsKeymap = (
-  variantOptions: HttpTypes.StoreProductVariant["options"]
-) => {
+const optionsAsKeymap = (variantOptions: HttpTypes.StoreProductVariant["options"]) => {
   return variantOptions?.reduce((acc: Record<string, string>, varopt: any) => {
     acc[varopt.option_id] = varopt.value
     return acc
   }, {})
 }
 
-export default function ProductActions({
-  product,
-  disabled,
-}: ProductActionsProps) {
+export default function ProductActions({ product, disabled }: ProductActionsProps) {
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
   const countryCode = useParams().countryCode as string
@@ -83,10 +78,7 @@ export default function ProductActions({
     }
 
     // If there is inventory available, we can add to cart
-    if (
-      selectedVariant?.manage_inventory &&
-      (selectedVariant?.inventory_quantity || 0) > 0
-    ) {
+    if (selectedVariant?.manage_inventory && (selectedVariant?.inventory_quantity || 0) > 0) {
       return true
     }
 
@@ -142,13 +134,7 @@ export default function ProductActions({
 
         <Button
           onClick={handleAddToCart}
-          disabled={
-            !inStock ||
-            !selectedVariant ||
-            !!disabled ||
-            isAdding ||
-            !isValidVariant
-          }
+          disabled={!inStock || !selectedVariant || !!disabled || isAdding || !isValidVariant}
           variant="primary"
           className="w-full h-10"
           isLoading={isAdding}
@@ -157,8 +143,8 @@ export default function ProductActions({
           {!selectedVariant && !options
             ? "Select variant"
             : !inStock || !isValidVariant
-            ? "Out of stock"
-            : "Add to cart"}
+              ? "Out of stock"
+              : "Add to cart"}
         </Button>
         <MobileActions
           product={product}

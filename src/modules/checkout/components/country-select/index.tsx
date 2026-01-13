@@ -1,9 +1,7 @@
-import { forwardRef, useImperativeHandle, useMemo, useRef } from "react"
+import type { HttpTypes } from "@medusajs/types"
 
-import NativeSelect, {
-  NativeSelectProps,
-} from "@modules/common/components/native-select"
-import { HttpTypes } from "@medusajs/types"
+import NativeSelect, { type NativeSelectProps } from "@modules/common/components/native-select"
+import { forwardRef, useImperativeHandle, useMemo, useRef } from "react"
 
 const CountrySelect = forwardRef<
   HTMLSelectElement,
@@ -30,12 +28,7 @@ const CountrySelect = forwardRef<
   }, [region])
 
   return (
-    <NativeSelect
-      ref={innerRef}
-      placeholder={placeholder}
-      defaultValue={defaultValue}
-      {...props}
-    >
+    <NativeSelect ref={innerRef} placeholder={placeholder} defaultValue={defaultValue} {...props}>
       {countryOptions?.map(({ value, label }, index) => (
         <option key={index} value={value}>
           {label}

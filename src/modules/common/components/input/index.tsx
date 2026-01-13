@@ -1,13 +1,9 @@
 import { Label } from "@medusajs/ui"
-import React, { useEffect, useImperativeHandle, useState } from "react"
-
 import Eye from "@modules/common/icons/eye"
 import EyeOff from "@modules/common/icons/eye-off"
+import React, { useEffect, useImperativeHandle, useState } from "react"
 
-type InputProps = Omit<
-  React.InputHTMLAttributes<HTMLInputElement>,
-  "size"
-> & {
+type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> & {
   label: string
   errors?: Record<string, unknown>
   touched?: Record<string, unknown>
@@ -35,9 +31,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className="flex flex-col w-full">
-        {topLabel && (
-          <Label className="mb-2 txt-compact-medium-plus">{topLabel}</Label>
-        )}
+        {topLabel && <Label className="mb-2 txt-compact-medium-plus">{topLabel}</Label>}
         <div className="flex relative z-0 w-full txt-compact-medium">
           <input
             type={inputType}

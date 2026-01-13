@@ -3,15 +3,15 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 
-import SortProducts, { SortOptions } from "./sort-products"
+import SortProducts, { type SortOptions } from "./sort-products"
 
 type RefinementListProps = {
   sortBy: SortOptions
   search?: boolean
-  'data-testid'?: string
+  "data-testid"?: string
 }
 
-const RefinementList = ({ sortBy, 'data-testid': dataTestId }: RefinementListProps) => {
+const RefinementList = ({ sortBy, "data-testid": dataTestId }: RefinementListProps) => {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()

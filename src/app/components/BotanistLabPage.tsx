@@ -1,16 +1,14 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react"
+import { AnimatePresence, motion, useScroll, useTransform } from "motion/react"
 import { useParams, useRouter } from "next/navigation"
-import { motion, useScroll, useTransform, AnimatePresence } from "motion/react"
-
-import { ImageWithFallback } from "./figma/ImageWithFallback"
+import type React from "react"
+import { useEffect, useRef, useState } from "react"
 import { BotanicalCollections } from "./BotanicalCollections"
+import { ImageWithFallback } from "./figma/ImageWithFallback"
 
-const ICON_IMAGE =
-  "/assets/b-labs-logo.png"
-const FOUNDER_WORKSPACE_IMAGE =
-  "/assets/founder-pic.png"
+const ICON_IMAGE = "/assets/b-labs-logo.png"
+const FOUNDER_WORKSPACE_IMAGE = "/assets/founder-pic.png"
 
 const questionText = "Every formula begins as a question."
 const answerPart1 = "We observe, formulate, and reiterate until there's proof."
@@ -20,8 +18,9 @@ const fullAnswerText =
 
 // Overlay gradient - smooth natural gradient from top extending below center
 const OVERLAY_GRADIENT_STYLE = {
-  background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.55) 15%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.08) 65%, rgba(0,0,0,0.03) 75%, transparent 85%)',
-  pointerEvents: 'none' as const
+  background:
+    "linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.55) 15%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.08) 65%, rgba(0,0,0,0.03) 75%, transparent 85%)",
+  pointerEvents: "none" as const,
 }
 
 // Sound pool for overlapping sounds
@@ -31,13 +30,13 @@ const SOUND_PATH = "/assets/typewriter-typing-68696.mp3"
 let audioUnlocked = false
 // Unlock audio with user interaction
 const unlockAudio = async () => {
-  if (audioUnlocked || typeof window === 'undefined') return
-  
+  if (audioUnlocked || typeof window === "undefined") return
+
   try {
     // Create a temporary audio element to unlock audio
     const testAudio = new Audio(SOUND_PATH)
     testAudio.volume = 0.01
-    
+
     await testAudio.play()
     testAudio.pause()
     testAudio.currentTime = 0
@@ -61,7 +60,7 @@ const initializeSoundPool = () => {
 // Function to play typing sound
 const playTypingSound = () => {
   if (!audioUnlocked) return
-  const audio = soundPool.find(a => a.paused || a.ended) ?? soundPool[0]
+  const audio = soundPool.find((a) => a.paused || a.ended) ?? soundPool[0]
   if (!audio) return
 
   audio.currentTime = 0
@@ -73,7 +72,7 @@ const playTypingSound = () => {
 }
 
 const stopAllTypingSound = () => {
-  soundPool.forEach(a => {
+  soundPool.forEach((a) => {
     a.pause()
     a.currentTime = 0
   })
@@ -89,10 +88,10 @@ export const useTypewriter = (
   const [displayedText, setDisplayedText] = useState("")
   const [index, setIndex] = useState(0)
   const [complete, setComplete] = useState(false)
-  
+
   // SOUND SLOW FACTOR
   const playSoundEvery = 2 // ✔ sound har 2 letters me
-  
+
   useEffect(() => {
     if (!isActive) return
 
@@ -100,7 +99,7 @@ export const useTypewriter = (
       const char = text[index]
       let delay = baseSpeed + Math.random() * 35
 
-      if (".,:" .includes(char)) delay += 400
+      if (".,:".includes(char)) delay += 400
 
       const timer = setTimeout(() => {
         // Play sound only for non-space chars AND slower
@@ -108,20 +107,18 @@ export const useTypewriter = (
           playTypingSound()
         }
 
-        setDisplayedText(prev => prev + char)
-        setIndex(prev => prev + 1)
+        setDisplayedText((prev) => prev + char)
+        setIndex((prev) => prev + 1)
 
         if (pauseAt && index === pauseAt) {
           setTimeout(() => {}, 1200)
         }
-
       }, delay)
 
       return () => clearTimeout(timer)
     } else {
       setComplete(true)
     }
-
   }, [index, isActive, text, enableSound])
 
   // Reset when re-triggered
@@ -281,22 +278,24 @@ function InteractiveLabImage() {
             if (!isMobile || !activePoint || activePoint === hotspot.id) {
               return null
             }
-            
+
             // Get all inactive hotspots
-            const inactiveHotspots = hotspots.filter(h => h.id !== activePoint)
-            const currentIndex = inactiveHotspots.findIndex(h => h.id === hotspot.id)
-            
+            const inactiveHotspots = hotspots.filter((h) => h.id !== activePoint)
+            const currentIndex = inactiveHotspots.findIndex((h) => h.id === hotspot.id)
+
             // Check if active hotspot is at the bottom (3 or 4)
-            const activeHotspot = hotspots.find(h => h.id === activePoint)
-            const isActiveAtBottom = activeHotspot && (activeHotspot.id === 3 || activeHotspot.id === 4)
-            
+            const activeHotspot = hotspots.find((h) => h.id === activePoint)
+            const isActiveAtBottom =
+              activeHotspot && (activeHotspot.id === 3 || activeHotspot.id === 4)
+
             // Special case: when hotspot 3 is active, hotspot 4 needs to move up significantly
             // Special case: when hotspot 4 is active, hotspot 3 needs to move up significantly
-            const isSpecialCase = (activePoint === 3 && hotspot.id === 4) || (activePoint === 4 && hotspot.id === 3)
-            
+            const isSpecialCase =
+              (activePoint === 3 && hotspot.id === 4) || (activePoint === 4 && hotspot.id === 3)
+
             // Distribute inactive numbers on left and right edges
             const totalInactive = inactiveHotspots.length
-            
+
             // For special cases, we need to ensure proper distribution
             // When hotspot 3 is active: 1, 2, 4 are inactive
             //   - 01 and 04 should appear at bottom on sides
@@ -306,7 +305,7 @@ function InteractiveLabImage() {
             //   - Right: 2 (original position)
             let leftHotspots: number[] = []
             let rightHotspots: number[] = []
-            
+
             if (activePoint === 3) {
               // Hotspot 3 active: 1, 2, 4 inactive
               // Special case: 01 stays at top left, 02 and 04 move to bottom sides
@@ -316,18 +315,18 @@ function InteractiveLabImage() {
               } else if (hotspot.id === 2) {
                 // Position 02 at bottom right
                 return {
-                  top: 'auto',
-                  bottom: '20%',
-                  right: '12px',
-                  left: 'auto',
+                  top: "auto",
+                  bottom: "20%",
+                  right: "12px",
+                  left: "auto",
                 }
               } else if (hotspot.id === 4) {
                 // Position 04 at bottom left
                 return {
-                  top: 'auto',
-                  bottom: '20%',
-                  left: '12px',
-                  right: 'auto',
+                  top: "auto",
+                  bottom: "20%",
+                  left: "12px",
+                  right: "auto",
                 }
               }
             } else if (activePoint === 4) {
@@ -345,59 +344,59 @@ function InteractiveLabImage() {
                 }
               })
             }
-            
+
             // Calculate positions
             const startTop = 30
             const endTop = isActiveAtBottom ? 55 : 80 // Reduced for bottom hotspots to avoid popup
             const availableSpace = endTop - startTop
-            
+
             // Check if current hotspot is in left or right group
             const isLeft = leftHotspots.includes(hotspot.id)
             const isRight = rightHotspots.includes(hotspot.id)
-            
+
             if (isLeft) {
               const leftIndex = leftHotspots.indexOf(hotspot.id)
               const maxLeft = leftHotspots.length
-              
+
               // Special handling: if hotspot 4 is active and this is hotspot 3
               if (isSpecialCase && activePoint === 4 && hotspot.id === 3) {
                 // Position hotspot 3 higher up to avoid popup, with good spacing from hotspot 1
                 // Hotspot 1 should be at ~30%, hotspot 3 should be at ~45-50%
                 return {
-                  top: '45%',
-                  left: '12px',
-                  right: 'auto',
-                  bottom: 'auto',
+                  top: "45%",
+                  left: "12px",
+                  right: "auto",
+                  bottom: "auto",
                 }
               }
-              
+
               // Normal distribution for left side
               const spacing = Math.max(availableSpace / Math.max(maxLeft, 1), 20)
-              const topPercent = startTop + (leftIndex * spacing)
+              const topPercent = startTop + leftIndex * spacing
               return {
                 top: `${Math.min(topPercent, endTop)}%`,
-                left: '12px',
-                right: 'auto',
-                bottom: 'auto',
+                left: "12px",
+                right: "auto",
+                bottom: "auto",
               }
             } else if (isRight) {
               const rightIndex = rightHotspots.indexOf(hotspot.id)
               const maxRight = rightHotspots.length
-              
+
               // Special handling: if hotspot 3 is active and this is hotspot 4
               // This case is already handled above, so skip here
-              
+
               // Normal distribution for right side
               const spacing = Math.max(availableSpace / Math.max(maxRight, 1), 20)
-              const topPercent = startTop + (rightIndex * spacing)
+              const topPercent = startTop + rightIndex * spacing
               return {
                 top: `${Math.min(topPercent, endTop)}%`,
-                right: '12px',
-                left: 'auto',
-                bottom: 'auto',
+                right: "12px",
+                left: "auto",
+                bottom: "auto",
               }
             }
-            
+
             // Fallback (shouldn't reach here)
             return null
           }
@@ -406,192 +405,197 @@ function InteractiveLabImage() {
           const finalPosition = mobilePosition || hotspot.position
 
           return (
-          <motion.div 
-            key={hotspot.id} 
-            className={`absolute z-30`}
-            initial={hotspot.position}
-            animate={finalPosition}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            <div className={`relative w-12 h-12 z-30`}>
-              <motion.div
-                className="absolute inset-0 w-full h-full rounded-full pointer-events-none"
-                style={{
-                  backgroundColor: "rgba(162, 139, 111, 0.4)",
-                  filter: "blur(10px)",
-                }}
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.5, 0.9, 0.5],
-                }}
-                transition={{
-                  duration: 2.5,
-                  repeat: Infinity,
-                  ease: [0.4, 0, 0.6, 1],
-                }}
-              />
-
-              {activePoint === hotspot.id && (
+            <motion.div
+              key={hotspot.id}
+              className={`absolute z-30`}
+              initial={hotspot.position}
+              animate={finalPosition}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <div className={`relative w-12 h-12 z-30`}>
                 <motion.div
                   className="absolute inset-0 w-full h-full rounded-full pointer-events-none"
                   style={{
-                    backgroundColor: "rgba(162, 139, 111, 0.6)",
-                    filter: "blur(15px)",
+                    backgroundColor: "rgba(162, 139, 111, 0.4)",
+                    filter: "blur(10px)",
                   }}
-                  initial={{ scale: 1, opacity: 0 }}
                   animate={{
-                    scale: [1, 1.8, 1],
-                    opacity: [0.6, 1, 0.6],
+                    scale: [1, 1.5, 1],
+                    opacity: [0.5, 0.9, 0.5],
                   }}
-                  exit={{ scale: 1, opacity: 0 }}
                   transition={{
-                    duration: 2,
+                    duration: 2.5,
                     repeat: Infinity,
                     ease: [0.4, 0, 0.6, 1],
                   }}
                 />
-              )}
 
-              <motion.div
-                className="relative w-full h-full rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center cursor-pointer shadow-lg"
-                whileHover={{ scale: 1.2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{
-                  scale: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
-                }}
-                onMouseEnter={() => handleMouseEnter(hotspot.id)}
-                onMouseLeave={handleMouseLeave}
-                onClick={() => handlePointClick(hotspot.id)}
-                style={{
-                  zIndex: 40,
-                  position: 'relative',
-                }}
-              >
-                <span
-                  className="font-american-typewriter text-black"
-                  style={{ letterSpacing: "0.05em" }}
-                >
-                  {hotspot.number}
-                </span>
-              </motion.div>
-            </div>
-
-            <AnimatePresence>
-              {activePoint === hotspot.id && (
-                <motion.div
-                  initial={{
-                    opacity: 0,
-                    scale: 0.95,
-                    y: hotspot.id === 3 || hotspot.id === 4 ? -8 : 8,
-                  }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{
-                    opacity: 0,
-                    scale: 0.95,
-                    y: hotspot.id === 3 || hotspot.id === 4 ? -8 : 8,
-                  }}
-                  transition={{ duration: 0.9, type: "spring", stiffness: 100, damping: 28 }}
-                  className={`absolute ${
-                    hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-4" : "top-full mt-4"
-                  } w-72 sm:w-80 bg-white/95 backdrop-blur-md rounded-sm shadow-2xl p-5 sm:p-6 max-w-[calc(100vw-2rem)] pointer-events-none`}
-                  style={{
-                    left: hotspot.id === 3 ? "0" : hotspot.position.left ? "0" : "auto",
-                    right: hotspot.id === 4 ? "0" : hotspot.position.right ? "0" : "auto",
-                    transform:
-                      hotspot.id === 4
-                        ? "translateX(calc(-100% + 48px))"
-                        : hotspot.position.right && hotspot.id !== 3
-                        ? "translateX(calc(-100% + 48px))"
-                        : "translateX(-24px)",
-                    zIndex: 50,
-                  }}
-                >
-                  <div
-                    className={`absolute ${
-                      hotspot.id === 3 || hotspot.id === 4 ? "-bottom-2" : "-top-2"
-                    } w-4 h-4 bg-white shadow-xl`}
-                    style={{
-                      left: hotspot.id === 3 ? "24px" : hotspot.position.left ? "24px" : "auto",
-                      right: hotspot.id === 4 ? "24px" : hotspot.position.right ? "24px" : "auto",
-                      transform: "rotate(45deg)",
-                      border: "1px solid rgba(0, 0, 0, 0.05)",
-                      zIndex: 60,
-                    }}
-                  />
-                  {/* Connecting line between hotspot and popup */}
+                {activePoint === hotspot.id && (
                   <motion.div
-                    initial={{ opacity: 0, scaleY: 0 }}
-                    animate={{ opacity: 1, scaleY: 1 }}
-                    exit={{ opacity: 0, scaleY: 0 }}
-                    transition={{ duration: 0.3, delay: 0.1 }}
-                    className={`absolute ${
-                      hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-0" : "top-full mt-0"
-                    } left-1/2 -translate-x-1/2 w-0.5 bg-gradient-to-b ${
-                      hotspot.id === 3 || hotspot.id === 4
-                        ? "from-white/95 to-[#a28b6f]/40"
-                        : "from-[#a28b6f]/40 to-white/95"
-                    }`}
+                    className="absolute inset-0 w-full h-full rounded-full pointer-events-none"
                     style={{
-                      height: hotspot.id === 3 || hotspot.id === 4 ? "16px" : "16px",
+                      backgroundColor: "rgba(162, 139, 111, 0.6)",
+                      filter: "blur(15px)",
+                    }}
+                    initial={{ scale: 1, opacity: 0 }}
+                    animate={{
+                      scale: [1, 1.8, 1],
+                      opacity: [0.6, 1, 0.6],
+                    }}
+                    exit={{ scale: 1, opacity: 0 }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: [0.4, 0, 0.6, 1],
                     }}
                   />
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center shadow-md"
-                        style={{ backgroundColor: "#a28b6f" }}
-                      >
-                        <span
-                          className="font-american-typewriter text-white text-sm font-semibold"
+                )}
+
+                <motion.div
+                  className="relative w-full h-full rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center cursor-pointer shadow-lg"
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{
+                    scale: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+                  }}
+                  onMouseEnter={() => handleMouseEnter(hotspot.id)}
+                  onMouseLeave={handleMouseLeave}
+                  onClick={() => handlePointClick(hotspot.id)}
+                  style={{
+                    zIndex: 40,
+                    position: "relative",
+                  }}
+                >
+                  <span
+                    className="font-american-typewriter text-black"
+                    style={{ letterSpacing: "0.05em" }}
+                  >
+                    {hotspot.number}
+                  </span>
+                </motion.div>
+              </div>
+
+              <AnimatePresence>
+                {activePoint === hotspot.id && (
+                  <motion.div
+                    initial={{
+                      opacity: 0,
+                      scale: 0.95,
+                      y: hotspot.id === 3 || hotspot.id === 4 ? -8 : 8,
+                    }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{
+                      opacity: 0,
+                      scale: 0.95,
+                      y: hotspot.id === 3 || hotspot.id === 4 ? -8 : 8,
+                    }}
+                    transition={{
+                      duration: 0.9,
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 28,
+                    }}
+                    className={`absolute ${
+                      hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-4" : "top-full mt-4"
+                    } w-72 sm:w-80 bg-white/95 backdrop-blur-md rounded-sm shadow-2xl p-5 sm:p-6 max-w-[calc(100vw-2rem)] pointer-events-none`}
+                    style={{
+                      left: hotspot.id === 3 ? "0" : hotspot.position.left ? "0" : "auto",
+                      right: hotspot.id === 4 ? "0" : hotspot.position.right ? "0" : "auto",
+                      transform:
+                        hotspot.id === 4
+                          ? "translateX(calc(-100% + 48px))"
+                          : hotspot.position.right && hotspot.id !== 3
+                            ? "translateX(calc(-100% + 48px))"
+                            : "translateX(-24px)",
+                      zIndex: 50,
+                    }}
+                  >
+                    <div
+                      className={`absolute ${
+                        hotspot.id === 3 || hotspot.id === 4 ? "-bottom-2" : "-top-2"
+                      } w-4 h-4 bg-white shadow-xl`}
+                      style={{
+                        left: hotspot.id === 3 ? "24px" : hotspot.position.left ? "24px" : "auto",
+                        right: hotspot.id === 4 ? "24px" : hotspot.position.right ? "24px" : "auto",
+                        transform: "rotate(45deg)",
+                        border: "1px solid rgba(0, 0, 0, 0.05)",
+                        zIndex: 60,
+                      }}
+                    />
+                    {/* Connecting line between hotspot and popup */}
+                    <motion.div
+                      initial={{ opacity: 0, scaleY: 0 }}
+                      animate={{ opacity: 1, scaleY: 1 }}
+                      exit={{ opacity: 0, scaleY: 0 }}
+                      transition={{ duration: 0.3, delay: 0.1 }}
+                      className={`absolute ${
+                        hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-0" : "top-full mt-0"
+                      } left-1/2 -translate-x-1/2 w-0.5 bg-gradient-to-b ${
+                        hotspot.id === 3 || hotspot.id === 4
+                          ? "from-white/95 to-[#a28b6f]/40"
+                          : "from-[#a28b6f]/40 to-white/95"
+                      }`}
+                      style={{
+                        height: hotspot.id === 3 || hotspot.id === 4 ? "16px" : "16px",
+                      }}
+                    />
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center shadow-md"
+                          style={{ backgroundColor: "#a28b6f" }}
+                        >
+                          <span
+                            className="font-american-typewriter text-white text-sm font-semibold"
+                            style={{ letterSpacing: "0.05em" }}
+                          >
+                            {hotspot.number}
+                          </span>
+                        </div>
+                        <h1
+                          className="font-american-typewriter text-2xl lg:text-3xl"
                           style={{ letterSpacing: "0.05em" }}
                         >
-                          {hotspot.number}
-                        </span>
+                          {hotspot.title}
+                        </h1>
                       </div>
-                      <h1
-                        className="font-american-typewriter text-2xl lg:text-3xl"
-                        style={{ letterSpacing: "0.05em" }}
-                      >
-                        {hotspot.title}
-                      </h1>
-                    </div>
-                    <div className="space-y-3">
-                      <p
-                        className="font-din-arabic text-black/80 leading-relaxed"
-                        style={{ letterSpacing: "0.1em" }}
-                      >
-                        {hotspot.description}
-                      </p>
-                      <p
-                        className="font-din-arabic text-black/60 leading-relaxed"
-                        style={{ letterSpacing: "0.1em" }}
-                      >
-                        {hotspot.detail}
-                      </p>
-                    </div>
-                    <motion.div
-                      initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: "100%", opacity: 1 }}
-                      transition={{ duration: 0.8, delay: 0.3 }}
-                      className="h-[2px] bg-gradient-to-b from-black via-[#a28b6f]/60  mt-6 relative overflow-visible"
-                    >
+                      <div className="space-y-3">
+                        <p
+                          className="font-din-arabic text-black/80 leading-relaxed"
+                          style={{ letterSpacing: "0.1em" }}
+                        >
+                          {hotspot.description}
+                        </p>
+                        <p
+                          className="font-din-arabic text-black/60 leading-relaxed"
+                          style={{ letterSpacing: "0.1em" }}
+                        >
+                          {hotspot.detail}
+                        </p>
+                      </div>
                       <motion.div
-                        animate={{
-                          x: ["-100%", "100%"],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                        className="absolute inset-0 w-1/3 "
-                      />
-                    </motion.div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+                        initial={{ width: 0, opacity: 0 }}
+                        animate={{ width: "100%", opacity: 1 }}
+                        transition={{ duration: 0.8, delay: 0.3 }}
+                        className="h-[2px] bg-gradient-to-b from-black via-[#a28b6f]/60  mt-6 relative overflow-visible"
+                      >
+                        <motion.div
+                          animate={{
+                            x: ["-100%", "100%"],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
+                          className="absolute inset-0 w-1/3 "
+                        />
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           )
         })}
 
@@ -666,7 +670,10 @@ function OriginStorySection() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="py-16 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-16 overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="py-16 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-16 overflow-hidden"
+    >
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
           <motion.div
@@ -691,7 +698,11 @@ function OriginStorySection() {
               {!isComplete && (
                 <motion.span
                   animate={{ opacity: [1, 0] }}
-                  transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+                  transition={{
+                    duration: 0.8,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                  }}
                   className="inline-block ml-1"
                 >
                   |
@@ -725,8 +736,8 @@ function OriginStorySection() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
-                It&apos;s not white coats and microscopes but notebooks, glassware, temperature logs,
-                and the patience to observe what each botanical chooses to do in its own time.
+                It&apos;s not white coats and microscopes but notebooks, glassware, temperature
+                logs, and the patience to observe what each botanical chooses to do in its own time.
               </motion.p>
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
@@ -783,7 +794,11 @@ function LivingStudySection() {
               {!isComplete && (
                 <motion.span
                   animate={{ opacity: [1, 0] }}
-                  transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+                  transition={{
+                    duration: 0.8,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                  }}
                   className="inline-block ml-1"
                 >
                   |
@@ -890,7 +905,11 @@ function FounderSection({
             {!isComplete && (
               <motion.span
                 animate={{ opacity: [1, 0] }}
-                transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+                transition={{
+                  duration: 0.8,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                }}
                 className="inline-block ml-1"
               >
                 |
@@ -944,13 +963,13 @@ function FounderSection({
               >
                 <p className="text-sm sm:text-base lg:text-lg">
                   With Jardin Botanica, I wanted to create something deliberate — functional yet
-                  quietly alive. Each idea that leaves my desk and becomes a formula on your shelf is
-                  a practice of equal parts craft and chemistry.
+                  quietly alive. Each idea that leaves my desk and becomes a formula on your shelf
+                  is a practice of equal parts craft and chemistry.
                 </p>
                 <p className="text-sm sm:text-base lg:text-lg">
                   The Botanist&apos;s Lab stands for that promise. It&apos;s where curiosity meets
-                  precision, where tradition informs innovation, and where nature reveals its secrets
-                  one formula at a time.
+                  precision, where tradition informs innovation, and where nature reveals its
+                  secrets one formula at a time.
                 </p>
               </blockquote>
 
@@ -1012,7 +1031,6 @@ export function BotanistLabPage() {
     false // Sound disabled
   )
 
-
   // Start animation immediately when page loads
   useEffect(() => {
     // Start animation on page load with a small delay
@@ -1064,10 +1082,9 @@ export function BotanistLabPage() {
   useEffect(() => {
     if (phase === 4) {
       // Dispatch custom event to notify ScrollIndicator
-      window.dispatchEvent(new CustomEvent('botanist-typing-complete'))
+      window.dispatchEvent(new CustomEvent("botanist-typing-complete"))
     }
   }, [phase])
-
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -1126,7 +1143,11 @@ export function BotanistLabPage() {
                     {!questionComplete && (
                       <motion.span
                         animate={{ opacity: [1, 0] }}
-                        transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+                        transition={{
+                          duration: 0.8,
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                        }}
                         className="inline-block ml-1"
                       >
                         |
@@ -1153,7 +1174,11 @@ export function BotanistLabPage() {
                     {!part1Complete && (
                       <motion.span
                         animate={{ opacity: [1, 0] }}
-                        transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+                        transition={{
+                          duration: 0.8,
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                        }}
                         className="inline-block ml-1"
                       >
                         |
@@ -1180,7 +1205,11 @@ export function BotanistLabPage() {
                     {!part2Complete && (
                       <motion.span
                         animate={{ opacity: [1, 0] }}
-                        transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+                        transition={{
+                          duration: 0.8,
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                        }}
                         className="inline-block ml-1"
                       >
                         |
@@ -1233,7 +1262,11 @@ export function BotanistLabPage() {
             >
               <motion.div
                 animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
                 className="w-px h-16 bg-white/50"
               />
             </motion.div>
@@ -1288,7 +1321,10 @@ export function BotanistLabPage() {
             className="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto"
           >
             <motion.button
-              whileHover={{ scale: 1.02, backgroundColor: "rgba(0, 0, 0, 0.95)" }}
+              whileHover={{
+                scale: 1.02,
+                backgroundColor: "rgba(0, 0, 0, 0.95)",
+              }}
               whileTap={{ scale: 0.98 }}
               onClick={() => router.push(`/${resolvedCountryCode}/blogs`)}
               className="px-8 py-4 bg-black text-white font-din-arabic transition-all duration-300"
@@ -1297,7 +1333,10 @@ export function BotanistLabPage() {
               Explore the Journal
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.02, backgroundColor: "rgba(0, 0, 0, 0.05)" }}
+              whileHover={{
+                scale: 1.02,
+                backgroundColor: "rgba(0, 0, 0, 0.05)",
+              }}
               whileTap={{ scale: 0.98 }}
               onClick={() => router.push(`/${resolvedCountryCode}/home-creations`)}
               className="px-8 py-4 bg-transparent text-black font-din-arabic transition-all duration-300 border border-black/20"
@@ -1311,4 +1350,3 @@ export function BotanistLabPage() {
     </motion.div>
   )
 }
-
