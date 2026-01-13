@@ -120,10 +120,13 @@ export function StickyCartBar({
         isNotRitual
       )
     })
-    const ritualProductInCart = cartItems.find(
-      (item) =>
-        ritualProduct && item.id === ritualProduct.variantId && (item as any).isRitualProduct
-    )
+    // Match ritual product by variant_id or id - don't require isRitualProduct flag
+    // since that's only set on optimistic local state, not on server-loaded cart data
+    const ritualProductInCart = cartItems.find((item) => {
+      if (!ritualProduct) return false
+      const itemVariantId = (item as any).variant_id || item.id
+      return itemVariantId === ritualProduct.variantId || item.id === ritualProduct.variantId
+    })
 
     console.log("🔍 StickyCartBar - Cart sync check:", {
       productId,
