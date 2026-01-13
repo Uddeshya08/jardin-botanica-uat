@@ -1,7 +1,7 @@
 "use client"
-import { MapPin, CreditCard, Check } from "lucide-react"
-import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
+import { Check, CreditCard, MapPin } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 import React from "react"
 
 type CheckoutStep = "address" | "payment" | "review"
@@ -65,8 +65,7 @@ export default function CheckoutSteps() {
                   <motion.div
                     className="absolute inset-0 rounded-full"
                     style={{
-                      background:
-                        "radial-gradient(circle, rgba(0, 0, 0, 0.3) 0%, transparent 70%)",
+                      background: "radial-gradient(circle, rgba(0, 0, 0, 0.3) 0%, transparent 70%)",
                       filter: "blur(8px)",
                     }}
                     animate={{
@@ -86,8 +85,8 @@ export default function CheckoutSteps() {
                     currentStepNumeric > step.id
                       ? "bg-black text-white"
                       : currentStepNumeric === step.id
-                      ? "bg-white/80 backdrop-blur-sm shadow-lg"
-                      : "bg-white/40 backdrop-blur-sm"
+                        ? "bg-white/80 backdrop-blur-sm shadow-lg"
+                        : "bg-white/40 backdrop-blur-sm"
                   }`}
                 >
                   {currentStepNumeric > step.id ? (
@@ -113,11 +112,11 @@ export default function CheckoutSteps() {
             </motion.div>
 
             {index < steps.length - 1 && (
-              <div 
+              <div
                 className="flex-1 h-px bg-black/10 mx-auto relative overflow-hidden"
-                style={{ 
-                  marginTop: '-20px',
-                  zIndex: 1
+                style={{
+                  marginTop: "-20px",
+                  zIndex: 1,
                 }}
               >
                 {/* Background line - always visible */}

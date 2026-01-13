@@ -1,31 +1,32 @@
 // src/app/[countryCode]/account/auth/page.tsx
 "use client"
 
-import React, { useEffect, useState } from "react"
-import { useActionState } from "react"
-import { useRouter, useSearchParams, useParams } from "next/navigation"
-import { motion } from "motion/react"
-import { Eye, EyeOff, Smartphone } from "lucide-react"
-
-import { login, signup } from "@lib/data/customer"
-import { RippleEffect } from "app/components/RippleEffect"
-import { Navigation } from "app/components/Navigation"
-import { DatePicker } from "app/components/ui/date-picker"
 import { sdk } from "@lib/config"
+import { login, signup } from "@lib/data/customer"
+import { Navigation } from "app/components/Navigation"
+import { RippleEffect } from "app/components/RippleEffect"
+import { DatePicker } from "app/components/ui/date-picker"
+import { Eye, EyeOff, Smartphone } from "lucide-react"
+import { motion } from "motion/react"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
+import React, { useActionState, useEffect, useState } from "react"
 
 // Google reCAPTCHA v2 types
 declare global {
   interface Window {
     grecaptcha?: {
       ready: (callback: () => void) => void
-      render: (container: HTMLElement, options: {
-        sitekey: string
-        callback: (token: string) => void
-        'expired-callback': () => void
-        'error-callback': () => void
-        size?: string
-        theme?: string
-      }) => number
+      render: (
+        container: HTMLElement,
+        options: {
+          sitekey: string
+          callback: (token: string) => void
+          "expired-callback": () => void
+          "error-callback": () => void
+          size?: string
+          theme?: string
+        }
+      ) => number
       reset: (widgetId?: number) => void
       getResponse: (widgetId?: number) => string
     }
@@ -45,9 +46,7 @@ function ErrorText({ error }: { error: string | null }) {
   if (!error) return null
 
   // "Error:" prefix remove
-  const cleanError = error
-    .replace(/^Error:\s*/i, "")
-    .replace(/^Invalid request:\s*/i, "")
+  const cleanError = error.replace(/^Error:\s*/i, "").replace(/^Invalid request:\s*/i, "")
 
   return <p className="mt-2 text-sm text-rose-600">{cleanError}</p>
 }
@@ -66,9 +65,7 @@ export default function AuthPage() {
   useEffect(() => {
     // Check if there's a stored email and redirect path from order confirmation
     const storedEmail = sessionStorage.getItem("jardinBotanica_orderEmail")
-    const storedRedirect = sessionStorage.getItem(
-      "jardinBotanica_redirectAfterLogin"
-    )
+    const storedRedirect = sessionStorage.getItem("jardinBotanica_redirectAfterLogin")
 
     if (storedEmail) {
       setOrderEmail(storedEmail)
@@ -99,14 +96,14 @@ export default function AuthPage() {
       return // Script already loaded
     }
 
-    const script = document.createElement('script')
-    script.src = 'https://www.google.com/recaptcha/api.js?render=explicit'
+    const script = document.createElement("script")
+    script.src = "https://www.google.com/recaptcha/api.js?render=explicit"
     script.async = true
     script.defer = true
     script.onerror = () => {
-      console.error('Failed to load reCAPTCHA script')
+      console.error("Failed to load reCAPTCHA script")
     }
-    
+
     document.body.appendChild(script)
 
     return () => {
@@ -125,7 +122,7 @@ export default function AuthPage() {
       if (recaptchaWidgetId.current !== null && window.grecaptcha) {
         try {
           if (recaptchaRef.current) {
-            recaptchaRef.current.innerHTML = ''
+            recaptchaRef.current.innerHTML = ""
           }
           recaptchaWidgetId.current = null
         } catch (e) {
@@ -141,53 +138,55 @@ export default function AuthPage() {
       if (!recaptchaRef.current) return
 
       // Clear container first
-      recaptchaRef.current.innerHTML = ''
+      recaptchaRef.current.innerHTML = ""
 
       if (window.grecaptcha && window.grecaptcha.render) {
         const grecaptcha = window.grecaptcha
-        
+
         // Render new widget
-        const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '6LdcOz4sAAAAALhObDF_LXr0dea8zYCfFOoi3qX8';
+        const siteKey =
+          process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LdcOz4sAAAAALhObDF_LXr0dea8zYCfFOoi3qX8"
         if (siteKey) {
           try {
             recaptchaWidgetId.current = grecaptcha.render(recaptchaRef.current, {
               sitekey: siteKey,
               callback: (token: string) => {
-                console.log('reCAPTCHA token received')
+                console.log("reCAPTCHA token received")
                 setCaptchaToken(token)
               },
-              'expired-callback': () => {
-                console.log('reCAPTCHA token expired')
+              "expired-callback": () => {
+                console.log("reCAPTCHA token expired")
                 setCaptchaToken(null)
                 // Reset widget when expired
                 if (recaptchaWidgetId.current !== null && window.grecaptcha) {
                   window.grecaptcha.reset(recaptchaWidgetId.current)
                 }
               },
-              'error-callback': () => {
-                console.error('reCAPTCHA error occurred')
+              "error-callback": () => {
+                console.error("reCAPTCHA error occurred")
                 setCaptchaToken(null)
               },
-              size: 'normal',
-              theme: 'light',
+              size: "normal",
+              theme: "light",
             })
-            console.log('reCAPTCHA widget rendered successfully')
+            console.log("reCAPTCHA widget rendered successfully")
           } catch (error) {
-            console.error('Failed to render reCAPTCHA widget:', error)
+            console.error("Failed to render reCAPTCHA widget:", error)
             // Show user-friendly error
             if (recaptchaRef.current) {
-              recaptchaRef.current.innerHTML = '<p class="text-red-600 text-sm font-din-arabic">reCAPTCHA failed to load. Please refresh the page.</p>'
+              recaptchaRef.current.innerHTML =
+                '<p class="text-red-600 text-sm font-din-arabic">reCAPTCHA failed to load. Please refresh the page.</p>'
             }
           }
         } else {
-          console.warn('NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not set')
+          console.warn("NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not set")
         }
       }
     }
 
     // Wait for grecaptcha to be ready
     const checkAndRender = () => {
-      if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
+      if (window.grecaptcha && typeof window.grecaptcha.render === "function") {
         // Use ready callback if available
         if (window.grecaptcha.ready) {
           window.grecaptcha.ready(() => {
@@ -212,7 +211,7 @@ export default function AuthPage() {
       if (recaptchaWidgetId.current !== null && window.grecaptcha) {
         try {
           if (recaptchaRef.current) {
-            recaptchaRef.current.innerHTML = ''
+            recaptchaRef.current.innerHTML = ""
           }
           recaptchaWidgetId.current = null
         } catch (e) {
@@ -247,7 +246,7 @@ export default function AuthPage() {
     // In the starter, a *truthy* message is usually an error string.
     // If your login action returns structured state, adjust accordingly.
     if (signinMessage === null) return
-    
+
     if (signinMessage === "") {
       // Success - reset failed attempts
       localStorage.removeItem("jardinBotanica_failedLoginAttempts")
@@ -257,7 +256,7 @@ export default function AuthPage() {
       setDelaySeconds(0)
       setShowCaptcha(false)
       setCaptchaToken(null)
-      
+
       // Cleanup reCAPTCHA widget
       if (recaptchaWidgetId.current !== null && window.grecaptcha) {
         try {
@@ -267,7 +266,7 @@ export default function AuthPage() {
           // Ignore errors
         }
       }
-      
+
       // Clear session storage after successful login
       sessionStorage.removeItem("jardinBotanica_orderEmail")
       sessionStorage.removeItem("jardinBotanica_redirectAfterLogin")
@@ -279,13 +278,13 @@ export default function AuthPage() {
       const stored = localStorage.getItem("jardinBotanica_failedLoginAttempts")
       const currentAttempts = stored ? parseInt(stored, 10) : 0
       const newAttempts = currentAttempts + 1
-      
+
       // Update localStorage immediately
       localStorage.setItem("jardinBotanica_failedLoginAttempts", newAttempts.toString())
-      
+
       // Update state immediately
       setFailedAttempts(newAttempts)
-      
+
       if (newAttempts >= 10) {
         setIsLockedOut(true)
         setShowCaptcha(false)
@@ -294,7 +293,7 @@ export default function AuthPage() {
         // Show captcha after 3 failed attempts
         setShowCaptcha(true)
         setCaptchaToken(null) // Reset captcha token
-        
+
         // Start 5-second delay
         const delay = 5
         setDelaySeconds(delay)
@@ -346,9 +345,7 @@ export default function AuthPage() {
     // Update cartItems array for navigation
     if (item && item.quantity > 0) {
       setCartItems((prevItems) => {
-        const existingIndex = prevItems.findIndex(
-          (cartItem) => cartItem.id === item.id
-        )
+        const existingIndex = prevItems.findIndex((cartItem) => cartItem.id === item.id)
         if (existingIndex >= 0) {
           // Update existing item
           const updatedItems = [...prevItems]
@@ -361,9 +358,7 @@ export default function AuthPage() {
       })
     } else if (item && item.quantity === 0) {
       // Remove item if quantity is 0
-      setCartItems((prevItems) =>
-        prevItems.filter((cartItem) => cartItem.id !== item.id)
-      )
+      setCartItems((prevItems) => prevItems.filter((cartItem) => cartItem.id !== item.id))
     }
   }
 
@@ -383,20 +378,15 @@ export default function AuthPage() {
 
       // Show sticky cart after scrolling past the ProductHero section (approximately 450px for compact height)
       // Show by default, hide only when heroCartItem exists and quantity is explicitly 0
-      const shouldShowCart =
-        scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0)
+      const shouldShowCart = scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0)
 
       // Hide sticky cart when footer copyright is visible
       const footerElement = document.querySelector("footer")
       const copyrightElement = footerElement?.querySelector("p")
 
-      if (
-        copyrightElement &&
-        copyrightElement.textContent?.includes("© 2025 Jardin Botanica")
-      ) {
+      if (copyrightElement && copyrightElement.textContent?.includes("© 2025 Jardin Botanica")) {
         const copyrightRect = copyrightElement.getBoundingClientRect()
-        const isFooterVisible =
-          copyrightRect.top < window.innerHeight && copyrightRect.bottom > 0
+        const isFooterVisible = copyrightRect.top < window.innerHeight && copyrightRect.bottom > 0
 
         setShowStickyCart(shouldShowCart && !isFooterVisible)
       } else {
@@ -427,23 +417,13 @@ export default function AuthPage() {
   return (
     <div>
       <RippleEffect />
-      <Navigation
-        isScrolled={isScrolled}
-        cartItems={cartItems}
-        onCartUpdate={handleCartUpdate}
-      />
+      <Navigation isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} />
 
-      <div
-        className="min-h-screen pt-44 pb-12"
-        style={{ backgroundColor: "#e3e3d8" }}
-      >
+      <div className="min-h-screen pt-44 pb-12" style={{ backgroundColor: "#e3e3d8" }}>
         <div className="container mx-auto px-2 lg:px-12">
           {/* Mobile Tabs - Only visible on mobile */}
           <div className="lg:hidden mb-8">
-            <div
-              className="flex border-b border-black/20"
-              style={{ borderColor: "#D8D2C7" }}
-            >
+            <div className="flex border-b border-black/20" style={{ borderColor: "#D8D2C7" }}>
               <button
                 type="button"
                 onClick={() => setActiveTab("signin")}
@@ -453,8 +433,7 @@ export default function AuthPage() {
                     : "text-black/50"
                 }`}
                 style={{
-                  borderBottomColor:
-                    activeTab === "signin" ? "#000" : "transparent",
+                  borderBottomColor: activeTab === "signin" ? "#000" : "transparent",
                 }}
               >
                 Sign In
@@ -468,8 +447,7 @@ export default function AuthPage() {
                     : "text-black/50"
                 }`}
                 style={{
-                  borderBottomColor:
-                    activeTab === "signup" ? "#000" : "transparent",
+                  borderBottomColor: activeTab === "signup" ? "#000" : "transparent",
                 }}
               >
                 Create Account
@@ -483,9 +461,7 @@ export default function AuthPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className={`p-8 lg:p-10 ${
-                activeTab !== "signin" ? "hidden lg:block" : ""
-              }`}
+              className={`p-8 lg:p-10 ${activeTab !== "signin" ? "hidden lg:block" : ""}`}
             >
               <h2 className="font-american-typewriter text-2xl mb-8 text-black text-center">
                 Sign In
@@ -498,10 +474,7 @@ export default function AuthPage() {
                       We can't sign you in right now. Reset your password to continue.
                     </p>
                   </div>
-                  <a
-                    href={`/${countryCode}/forgot-password`}
-                    className="block"
-                  >
+                  <a href={`/${countryCode}/forgot-password`} className="block">
                     <motion.button
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
@@ -513,8 +486,8 @@ export default function AuthPage() {
                   </a>
                 </div>
               ) : (
-                <form 
-                  action={signinAction} 
+                <form
+                  action={signinAction}
                   className="space-y-5"
                   onSubmit={(e) => {
                     if (isDelaying || delaySeconds > 0 || (showCaptcha && !captchaToken)) {
@@ -569,14 +542,11 @@ export default function AuthPage() {
                         )}
                       </button>
                     </div>
-                    <ErrorText
-                      error={
-                        typeof signinMessage === "string" ? signinMessage : null
-                      }
-                    />
+                    <ErrorText error={typeof signinMessage === "string" ? signinMessage : null} />
                     {isDelaying && delaySeconds > 0 && (
                       <p className="mt-2 text-sm text-rose-600 font-din-arabic">
-                        Please wait {delaySeconds} second{delaySeconds !== 1 ? 's' : ''} before trying again.
+                        Please wait {delaySeconds} second
+                        {delaySeconds !== 1 ? "s" : ""} before trying again.
                       </p>
                     )}
                   </div>
@@ -588,7 +558,10 @@ export default function AuthPage() {
                           Security Verification Required
                         </p>
                         <div className="flex justify-center py-2">
-                          <div ref={recaptchaRef} className="min-h-[78px] w-full flex justify-center"></div>
+                          <div
+                            ref={recaptchaRef}
+                            className="min-h-[78px] w-full flex justify-center"
+                          ></div>
                         </div>
                       </div>
                       {captchaToken && (
@@ -623,17 +596,25 @@ export default function AuthPage() {
                   </div>
 
                   <motion.button
-                    whileHover={!isDelaying && delaySeconds === 0 && (!showCaptcha || captchaToken) ? { scale: 1.01 } : {}}
-                    whileTap={!isDelaying && delaySeconds === 0 && (!showCaptcha || captchaToken) ? { scale: 0.99 } : {}}
+                    whileHover={
+                      !isDelaying && delaySeconds === 0 && (!showCaptcha || captchaToken)
+                        ? { scale: 1.01 }
+                        : {}
+                    }
+                    whileTap={
+                      !isDelaying && delaySeconds === 0 && (!showCaptcha || captchaToken)
+                        ? { scale: 0.99 }
+                        : {}
+                    }
                     type="submit"
                     disabled={isDelaying || delaySeconds > 0 || (showCaptcha && !captchaToken)}
                     className="font-din-arabic w-full py-4 bg-black text-white hover:bg-black/90 transition-all duration-300 text-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isDelaying && delaySeconds > 0 
-                      ? `Please wait ${delaySeconds}s...` 
+                    {isDelaying && delaySeconds > 0
+                      ? `Please wait ${delaySeconds}s...`
                       : showCaptcha && !captchaToken
-                      ? 'Complete verification to continue'
-                      : 'Sign In'}
+                        ? "Complete verification to continue"
+                        : "Sign In"}
                   </motion.button>
 
                   {/* Divider + SSO (stub) */}
@@ -714,16 +695,14 @@ export default function AuthPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className={`p-8 lg:p-10 ${
-                activeTab !== "signup" ? "hidden lg:block" : ""
-              }`}
+              className={`p-8 lg:p-10 ${activeTab !== "signup" ? "hidden lg:block" : ""}`}
             >
               <h2 className="font-american-typewriter text-2xl mb-8 text-black text-center">
                 Create Account
               </h2>
 
-              <form 
-                action={signupAction} 
+              <form
+                action={signupAction}
                 className="space-y-5"
                 onSubmit={(e) => {
                   if (createPassword.length < 15) {
@@ -778,9 +757,7 @@ export default function AuthPage() {
                   <input
                     type="hidden"
                     name="dob"
-                    value={
-                      dateValue ? dateValue.toISOString().split("T")[0] : ""
-                    }
+                    value={dateValue ? dateValue.toISOString().split("T")[0] : ""}
                     autoComplete="bday"
                   />
                 </div>
@@ -814,8 +791,8 @@ export default function AuthPage() {
                   />
                   {orderEmail && (
                     <p className="mt-2 text-sm text-black/60 font-din-arabic">
-                      Using email from your recent order. Create an account to
-                      view your order history.
+                      Using email from your recent order. Create an account to view your order
+                      history.
                     </p>
                   )}
                 </div>
@@ -842,7 +819,9 @@ export default function AuthPage() {
                       }}
                       autoComplete="new-password"
                       className="font-din-arabic w-full px-4 py-3.5 pr-12 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
-                      style={{ borderColor: passwordError ? "#ef4444" : "#D8D2C7" }}
+                      style={{
+                        borderColor: passwordError ? "#ef4444" : "#D8D2C7",
+                      }}
                       placeholder="Create a secure password (15+)"
                     />
                     <button
@@ -868,17 +847,11 @@ export default function AuthPage() {
                     )}
                   </div>
                   {passwordError && (
-                    <p className="mt-2 text-sm text-rose-600 font-din-arabic">
-                      {passwordError}
-                    </p>
+                    <p className="mt-2 text-sm text-rose-600 font-din-arabic">{passwordError}</p>
                   )}
                 </div>
 
-                <ErrorText
-                  error={
-                    typeof signupMessage === "string" ? signupMessage : null
-                  }
-                />
+                <ErrorText error={typeof signupMessage === "string" ? signupMessage : null} />
 
                 <motion.button
                   whileHover={{ scale: 1.01 }}

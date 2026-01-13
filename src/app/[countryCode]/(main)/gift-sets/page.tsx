@@ -1,10 +1,10 @@
-'use client'
+"use client"
 
-import React, { useEffect, useState } from 'react'
-import { Navigation } from '../../../components/Navigation'
-import { RippleEffect } from '../../../components/RippleEffect'
-import { GiftSetsPage } from '../../../components/GiftSetsPage'
-import { useLedger } from 'app/context/ledger-context'
+import { useLedger } from "app/context/ledger-context"
+import React, { useEffect, useState } from "react"
+import { GiftSetsPage } from "../../../components/GiftSetsPage"
+import { Navigation } from "../../../components/Navigation"
+import { RippleEffect } from "../../../components/RippleEffect"
 
 type CartItem = {
   id: string
@@ -23,8 +23,8 @@ export default function GiftSetsRoutePage() {
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 50)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
+    window.addEventListener("scroll", onScroll)
+    return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
   const handleCartUpdate = (item: CartItem | null) => {
@@ -55,7 +55,7 @@ export default function GiftSetsRoutePage() {
       image: item.image,
       size: item.size,
       category: item.category,
-      ...item
+      ...item,
     }
     handleCartUpdate(cartItem)
   }
@@ -63,12 +63,17 @@ export default function GiftSetsRoutePage() {
   return (
     <div className="min-h-screen">
       <RippleEffect />
-      <Navigation isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} forceWhiteText />
+      <Navigation
+        isScrolled={isScrolled}
+        cartItems={cartItems}
+        onCartUpdate={handleCartUpdate}
+        forceWhiteText
+      />
       <div className="h-4" />
       <GiftSetsPage
         onClose={() => {
           // Navigate back or close modal if needed
-          if (typeof window !== 'undefined') {
+          if (typeof window !== "undefined") {
             window.history.back()
           }
         }}
@@ -79,4 +84,3 @@ export default function GiftSetsRoutePage() {
     </div>
   )
 }
-

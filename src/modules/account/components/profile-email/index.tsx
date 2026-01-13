@@ -1,11 +1,11 @@
 "use client"
 
-import React, { useEffect, useActionState } from "react";
+import type { HttpTypes } from "@medusajs/types"
 
 import Input from "@modules/common/components/input"
-
+import React, { useActionState, useEffect } from "react"
 import AccountInfo from "../account-info"
-import { HttpTypes } from "@medusajs/types"
+
 // import { updateCustomer } from "@lib/data/customer"
 
 type MyInformationProps = {
@@ -16,10 +16,7 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
   const [successState, setSuccessState] = React.useState(false)
 
   // TODO: It seems we don't support updating emails now?
-  const updateCustomerEmail = (
-    _currentState: Record<string, unknown>,
-    formData: FormData
-  ) => {
+  const updateCustomerEmail = (_currentState: Record<string, unknown>, formData: FormData) => {
     const customer = {
       email: formData.get("email") as string,
     }

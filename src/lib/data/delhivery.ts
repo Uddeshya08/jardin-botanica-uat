@@ -8,11 +8,8 @@ export async function checkPincodeServiceability(pincode: string) {
     ...(await getAuthHeaders()),
   }
 
-  return await sdk.client.fetch(
-    `/store/custom/delhivery/serviceability?pincode=${pincode}`,
-    {
-      method: "GET",
-      headers,
-    }
-  )
+  return await sdk.client.fetch(`/store/custom/delhivery/serviceability?pincode=${pincode}`, {
+    method: "GET",
+    headers,
+  })
 }

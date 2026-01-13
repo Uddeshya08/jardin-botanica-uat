@@ -2,8 +2,8 @@
 
 import { sdk } from "@lib/config"
 import { sortProducts } from "@lib/util/sort-products"
-import { HttpTypes } from "@medusajs/types"
-import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import type { HttpTypes } from "@medusajs/types"
+import type { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { getRegion, retrieveRegion } from "./regions"
 
@@ -54,23 +54,20 @@ export const listProducts = async ({
   }
 
   return sdk.client
-    .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(
-      `/store/products`,
-      {
-        method: "GET",
-        query: {
-          limit,
-          offset,
-          region_id: region?.id,
-          fields:
-            "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,*categories",
-          ...queryParams,
-        },
-        headers,
-        next,
-        cache: "force-cache",
-      }
-    )
+    .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(`/store/products`, {
+      method: "GET",
+      query: {
+        limit,
+        offset,
+        region_id: region?.id,
+        fields:
+          "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,*categories",
+        ...queryParams,
+      },
+      headers,
+      next,
+      cache: "force-cache",
+    })
     .then(({ products, count }) => {
       const nextPage = count > offset + limit ? pageParam + 1 : null
 

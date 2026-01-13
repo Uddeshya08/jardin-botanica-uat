@@ -1,13 +1,13 @@
 "use client"
 
-import React, { useMemo, useState, useTransition, useEffect } from "react"
-import { motion, AnimatePresence } from "motion/react"
-import { ShoppingBag, Plus, Minus } from "lucide-react"
-import type { HttpTypes } from "@medusajs/types"
-import { useParams, useRouter } from "next/navigation"
 import { addToCartAction } from "@lib/data/cart-actions"
 import { emitCartUpdated } from "@lib/util/cart-client"
+import type { HttpTypes } from "@medusajs/types"
 import { useCartItemsSafe } from "app/context/cart-items-context"
+import { Minus, Plus, ShoppingBag } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
+import { useParams, useRouter } from "next/navigation"
+import React, { useEffect, useMemo, useState, useTransition } from "react"
 import { toast } from "sonner"
 
 type ProductLike = Partial<HttpTypes.StoreProduct> & {
@@ -36,17 +36,13 @@ interface StickyCartBarProps {
 
 /* ————— helpers ————— */
 function pickVariant(p?: ProductLike) {
-  return Array.isArray(p?.variants) && p!.variants[0]
-    ? p!.variants[0]
-    : undefined
+  return Array.isArray(p?.variants) && p!.variants[0] ? p!.variants[0] : undefined
 }
 function getMinorPrice(v: any): number {
   const calc = v?.calculated_price?.calculated_amount
   if (typeof calc === "number") return calc
   const amt =
-    Array.isArray(v?.prices) && typeof v.prices[0]?.amount === "number"
-      ? v.prices[0].amount
-      : 0
+    Array.isArray(v?.prices) && typeof v.prices[0]?.amount === "number" ? v.prices[0].amount : 0
   return amt
 }
 function formatMinor(minor: number, currencyCode: string) {
@@ -92,17 +88,13 @@ export function StickyCartBar({
 
   // read /[countryCode]/... from route, fallback to "in"
   const params = useParams() as any
-  const countryCode: string = (params?.countryCode ?? "in")
-    .toString()
-    .toLowerCase()
+  const countryCode: string = (params?.countryCode ?? "in").toString().toLowerCase()
   const router = useRouter()
 
   // Use selected variant from hero section if provided, otherwise pick default variant
   const variant = useMemo(() => {
     if (selectedVariantIdProp && product?.variants) {
-      const selectedVariant = product.variants.find(
-        (v: any) => v.id === selectedVariantIdProp
-      )
+      const selectedVariant = product.variants.find((v: any) => v.id === selectedVariantIdProp)
       if (selectedVariant) return selectedVariant
     }
     return pickVariant(product ?? undefined)
@@ -119,8 +111,7 @@ export function StickyCartBar({
       const isNotRitual = !(item as any).isRitualProduct
       // Match if: item.id matches productId, item.id matches variant.id, or variant_id matches variant.id
       // Also check if item name matches product title (fallback for edge cases)
-      const nameMatch =
-        item.name === product.title || item.name === (product as any).title
+      const nameMatch = item.name === product.title || item.name === (product as any).title
       return (
         (item.id === productId ||
           item.id === variant.id ||
@@ -131,9 +122,7 @@ export function StickyCartBar({
     })
     const ritualProductInCart = cartItems.find(
       (item) =>
-        ritualProduct &&
-        item.id === ritualProduct.variantId &&
-        (item as any).isRitualProduct
+        ritualProduct && item.id === ritualProduct.variantId && (item as any).isRitualProduct
     )
 
     console.log("🔍 StickyCartBar - Cart sync check:", {
@@ -168,9 +157,7 @@ export function StickyCartBar({
       setShowRitualSuggestion(false)
     } else if (ritualProduct && mainProductInCart && !ritualProductInCart) {
       // Only main product is in cart - show ritual suggestion
-      console.log(
-        "💡 Showing ritual suggestion - main product in cart, ritual product not in cart"
-      )
+      console.log("💡 Showing ritual suggestion - main product in cart, ritual product not in cart")
       setRitualCompleted(false)
       setShowGoToCart(false)
       setShowRitualSuggestion(true)
@@ -203,9 +190,7 @@ export function StickyCartBar({
   ).toUpperCase()
 
   const name = product?.title ?? "Product"
-  const image =
-    (Array.isArray(product?.images) && product!.images[0]?.url) ||
-    product?.thumbnail
+  const image = (Array.isArray(product?.images) && product!.images[0]?.url) || product?.thumbnail
 
   const shippingThresholdMinor = 2500 // you appear to treat prices as whole rupees already
 
@@ -214,9 +199,7 @@ export function StickyCartBar({
   // - If ritual completed: show combined total (main + ritual)
   // - Otherwise: show only main product total
   const mainProductTotal = minor * quantity
-  const ritualProductTotal = ritualProduct
-    ? ritualProduct.price * ritualQuantity
-    : 0
+  const ritualProductTotal = ritualProduct ? ritualProduct.price * ritualQuantity : 0
 
   let currentTotalMinor: number
   if (showRitualSuggestion && !ritualCompleted) {
@@ -243,9 +226,7 @@ export function StickyCartBar({
 
     // Check if this change unlocks shipping (including ritual product)
     const nextMainTotal = minor * next
-    const nextRitualTotal = ritualProduct
-      ? ritualProduct.price * ritualQuantity
-      : 0
+    const nextRitualTotal = ritualProduct ? ritualProduct.price * ritualQuantity : 0
 
     let nextTotal: number
     if (showRitualSuggestion && !ritualCompleted) {
@@ -379,14 +360,7 @@ export function StickyCartBar({
   }
 
   const completeRitual = () => {
-    if (
-      !ritualProduct?.variantId ||
-      !variant?.id ||
-      adding ||
-      isPending ||
-      ritualCompleted
-    )
-      return
+    if (!ritualProduct?.variantId || !variant?.id || adding || isPending || ritualCompleted) return
 
     setAdding(true)
     setUiError(null)
@@ -397,8 +371,7 @@ export function StickyCartBar({
     // Check if main product already exists in cart by checking both id and variant_id
     const existingMainProduct = cartItems.find((item) => {
       const itemVariantId = (item as any).variant_id || item.id
-      const matchesId =
-        item?.product_id === productId || item?.variant_id === variant.id
+      const matchesId = item?.product_id === productId || item?.variant_id === variant.id
       const matchesVariantId = itemVariantId === variant.id
       const isNotRitual = !(item as any).isRitualProduct
       return (matchesId || matchesVariantId) && isNotRitual
@@ -422,8 +395,7 @@ export function StickyCartBar({
 
     // Check if ritual product already exists in cart
     const existingRitualProduct = cartItems.find(
-      (item) =>
-        item.id === ritualProduct.variantId && (item as any).isRitualProduct
+      (item) => item.id === ritualProduct.variantId && (item as any).isRitualProduct
     )
 
     console.log("🔍 completeRitual - Checking ritual product:", {
@@ -470,9 +442,7 @@ export function StickyCartBar({
             quantity: ritualQuantity,
           } as any)
         } else {
-          console.log(
-            "➕ Adding new ritual product to context after Medusa success"
-          )
+          console.log("➕ Adding new ritual product to context after Medusa success")
           // Add new ritual product
           onCartUpdate?.({
             id: ritualProduct.variantId,
@@ -569,17 +539,12 @@ export function StickyCartBar({
                     <h3 className="font-american-typewriter text-black/90 text-xs md:text-sm truncate">
                       {ritualProduct && showRitualSuggestion && !showGoToCart
                         ? ritualProduct.name
-                        : `${name}${
-                            variant?.title ? ` • ${variant.title}` : ""
-                          }`}
+                        : `${name}${variant?.title ? ` • ${variant.title}` : ""}`}
                     </h3>
                     <div className="flex items-center space-x-1 overflow-hidden">
                       <p className="font-din-arabic-bold text-xs md:text-sm text-black/70 whitespace-nowrap">
                         {ritualProduct && showRitualSuggestion && !showGoToCart
-                          ? formatMinor(
-                              ritualProduct.price,
-                              ritualProduct.currency
-                            )
+                          ? formatMinor(ritualProduct.price, ritualProduct.currency)
                           : formatMinor(minor, currency)}
                       </p>
                       {qualifiesShipping && (
@@ -596,8 +561,8 @@ export function StickyCartBar({
                           {showRitualSuggestion && !ritualCompleted
                             ? "Complete Your Ritual"
                             : showGoToCart
-                            ? "Order Qualifies For Complimentary Shipping"
-                            : "Order Qualifies For Complimentary Shipping"}
+                              ? "Order Qualifies For Complimentary Shipping"
+                              : "Order Qualifies For Complimentary Shipping"}
                         </motion.p>
                       )}
                     </div>
@@ -641,11 +606,7 @@ export function StickyCartBar({
                         type="button"
                         whileTap={{ scale: 0.95 }}
                         onClick={() => {
-                          if (
-                            ritualProduct &&
-                            showRitualSuggestion &&
-                            !showGoToCart
-                          ) {
+                          if (ritualProduct && showRitualSuggestion && !showGoToCart) {
                             handleRitualQuantityChange(-1)
                           } else {
                             handleQuantityChange(-1)
@@ -669,11 +630,7 @@ export function StickyCartBar({
                         type="button"
                         whileTap={{ scale: 0.95 }}
                         onClick={() => {
-                          if (
-                            ritualProduct &&
-                            showRitualSuggestion &&
-                            !showGoToCart
-                          ) {
+                          if (ritualProduct && showRitualSuggestion && !showGoToCart) {
                             handleRitualQuantityChange(1)
                           } else {
                             handleQuantityChange(1)
@@ -749,9 +706,7 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <span className="hidden sm:inline">
-                            Complete the Ritual
-                          </span>
+                          <span className="hidden sm:inline">Complete the Ritual</span>
                           <span className="sm:hidden">Ritual</span>
                         </motion.span>
                       )}
@@ -776,9 +731,7 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <span className="hidden sm:inline">
-                            Added to Cart
-                          </span>
+                          <span className="hidden sm:inline">Added to Cart</span>
                           <span className="sm:hidden">Added</span>
                         </motion.span>
                       ) : (

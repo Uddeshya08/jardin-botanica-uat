@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
-import { usePathname } from "next/navigation"
 import { ChevronsDown } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
 import { useIsMobile } from "../../../../app/components/ui/use-mobile"
 
 export default function ScrollIndicator() {
@@ -16,7 +16,8 @@ export default function ScrollIndicator() {
   const isMobile = useIsMobile()
 
   // Define pages where scroll indicator should appear
-  const isBannerPage = pathname === "/" ||
+  const isBannerPage =
+    pathname === "/" ||
     pathname === "/in" ||
     pathname?.endsWith("/the-lab") ||
     pathname?.includes("/in/the-lab") ||
@@ -29,7 +30,8 @@ export default function ScrollIndicator() {
   const isBotanistLabPage = pathname?.includes("/the-lab")
 
   // Exclude account settings and checkout pages
-  const isExcludedPage = pathname?.includes("/account") ||
+  const isExcludedPage =
+    pathname?.includes("/account") ||
     pathname?.includes("/checkout") ||
     pathname?.includes("/cart") ||
     pathname?.includes("/order")
@@ -44,10 +46,10 @@ export default function ScrollIndicator() {
     }
 
     if (isBotanistLabPage) {
-      window.addEventListener('botanist-typing-complete', handleTypingComplete)
+      window.addEventListener("botanist-typing-complete", handleTypingComplete)
 
       return () => {
-        window.removeEventListener('botanist-typing-complete', handleTypingComplete)
+        window.removeEventListener("botanist-typing-complete", handleTypingComplete)
       }
     } else {
       setTypingComplete(false)
@@ -83,9 +85,9 @@ export default function ScrollIndicator() {
         // Trigger screen bounce only once when indicator first appears
         if (!hasBouncedRef.current) {
           hasBouncedRef.current = true
-          document.body.classList.add('screen-bounce')
+          document.body.classList.add("screen-bounce")
           setTimeout(() => {
-            document.body.classList.remove('screen-bounce')
+            document.body.classList.remove("screen-bounce")
           }, 600)
         }
       } else {
@@ -97,7 +99,7 @@ export default function ScrollIndicator() {
 
     const handleScroll = () => {
       const currentScrollPosition = window.scrollY || document.documentElement.scrollTop
-      
+
       // Hide indicator immediately when scrolling
       setShowIndicator(false)
       hasBouncedRef.current = false
@@ -116,13 +118,13 @@ export default function ScrollIndicator() {
       // Wait for scrolling to stop (check if position hasn't changed)
       scrollTimeoutRef.current = setTimeout(() => {
         const newScrollPosition = window.scrollY || document.documentElement.scrollTop
-        
+
         // Only proceed if scroll position hasn't changed (user is at same place)
         if (Math.abs(newScrollPosition - lastScrollPositionRef.current) < 5) {
           // Wait 5 seconds after scrolling stops before showing indicator
           scrollStopTimeoutRef.current = setTimeout(() => {
             const finalScrollPosition = window.scrollY || document.documentElement.scrollTop
-            
+
             // Double check user is still at same place (within 5px tolerance)
             if (Math.abs(finalScrollPosition - lastScrollPositionRef.current) < 5) {
               checkScrollPosition()
@@ -136,7 +138,7 @@ export default function ScrollIndicator() {
     const initialTimeout = setTimeout(() => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop
       lastScrollPositionRef.current = scrollTop
-      
+
       // Wait 5 seconds before showing indicator on initial load
       scrollStopTimeoutRef.current = setTimeout(() => {
         const currentScrollTop = window.scrollY || document.documentElement.scrollTop
@@ -190,4 +192,3 @@ export default function ScrollIndicator() {
     </div>
   )
 }
-

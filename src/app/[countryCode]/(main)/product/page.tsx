@@ -1,9 +1,9 @@
 "use client"
-import React, { useEffect, useState } from "react"
-import { ChevronLeft, ChevronRight, Star, ThumbsUp } from "lucide-react"
-import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
 import Newsletter from "app/components/Newsletter"
+import { RippleEffect } from "app/components/RippleEffect"
+import { ChevronLeft, ChevronRight, Star, ThumbsUp } from "lucide-react"
+import React, { useEffect, useState } from "react"
 
 const Product = () => {
   const [quantity, setQuantity] = useState(2)
@@ -17,11 +17,7 @@ const Product = () => {
     image?: string
   }
   // Product images array for the main product
-  const productImages = [
-    "/Images/GPT.png",
-    "/Images/product1.png",
-    "/Images/product2.png",
-  ]
+  const productImages = ["/Images/GPT.png", "/Images/product1.png", "/Images/product2.png"]
   const [isScrolled, setIsScrolled] = useState(false)
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
@@ -29,8 +25,7 @@ const Product = () => {
       name: "Soft Orris Hand Veil",
       price: 1800,
       quantity: 1,
-      image:
-        "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop",
+      image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop",
     },
   ])
 
@@ -38,9 +33,7 @@ const Product = () => {
     // Update cartItems array for navigation
     if (item && item.quantity > 0) {
       setCartItems((prevItems) => {
-        const existingIndex = prevItems.findIndex(
-          (cartItem) => cartItem.id === item.id
-        )
+        const existingIndex = prevItems.findIndex((cartItem) => cartItem.id === item.id)
         if (existingIndex >= 0) {
           // Update existing item
           const updatedItems = [...prevItems]
@@ -53,9 +46,7 @@ const Product = () => {
       })
     } else if (item && item.quantity === 0) {
       // Remove item if quantity is 0
-      setCartItems((prevItems) =>
-        prevItems.filter((cartItem) => cartItem.id !== item.id)
-      )
+      setCartItems((prevItems) => prevItems.filter((cartItem) => cartItem.id !== item.id))
     }
   }
 
@@ -164,29 +155,25 @@ const Product = () => {
       description: "Salt air and endless horizons.",
       image: "/Images/product1.png",
     },
-   
   ]
 
   const reviews = [
     {
       name: "Priya M.",
       rating: 5,
-      review:
-        "Smells like a fresh forest walk - clean, calming, and not overpowering.",
+      review: "Smells like a fresh forest walk - clean, calming, and not overpowering.",
       recommends: true,
     },
     {
       name: "Aditi R.",
       rating: 5,
-      review:
-        "The scent fills the room without being too strong. My new favorite!",
+      review: "The scent fills the room without being too strong. My new favorite!",
       recommends: true,
     },
     {
       name: "Sara L.",
       rating: 5,
-      review:
-        "Crushed Pine feels like nature in a jar. Perfect for cozy evenings.",
+      review: "Crushed Pine feels like nature in a jar. Perfect for cozy evenings.",
       recommends: true,
     },
   ]
@@ -196,9 +183,7 @@ const Product = () => {
   }
 
   const prevImage = () => {
-    setCurrentSlide(
-      (prev) => (prev - 1 + productImages.length) % productImages.length
-    )
+    setCurrentSlide((prev) => (prev - 1 + productImages.length) % productImages.length)
   }
 
   const nextAroma = () => {
@@ -218,11 +203,7 @@ const Product = () => {
   return (
     <div className="p-0 bg-[#e3e3d8]">
       <RippleEffect />
-      <Navigation
-        isScrolled={isScrolled}
-        cartItems={cartItems}
-        onCartUpdate={handleCartUpdate}
-      />
+      <Navigation isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} />
       {/* First Section - Product Details */}
       <div className="flex items-center">
         <div className="w-full mx-auto">
@@ -330,22 +311,15 @@ const Product = () => {
                 </h3>
                 <div className="space-y-2 my-2">
                   <p style={fontStyles.subCopy} className="">
-                    <span className="font-bold font-dinBold text-[14px]">
-                      Top Note:
-                    </span>{" "}
-                    Fresh Pine
+                    <span className="font-bold font-dinBold text-[14px]">Top Note:</span> Fresh Pine
                   </p>
                   <p style={fontStyles.subCopy}>
-                    <span className="font-bold font-dinBold text-[14px]">
-                      Heart Note:
-                    </span>{" "}
-                    Resinous Balsam
+                    <span className="font-bold font-dinBold text-[14px]">Heart Note:</span> Resinous
+                    Balsam
                   </p>
                   <p style={fontStyles.subCopy}>
-                    <span className="font-bold font-dinBold text-[14px]">
-                      Base Note:
-                    </span>{" "}
-                    Grounded Cedarwood
+                    <span className="font-bold font-dinBold text-[14px]">Base Note:</span> Grounded
+                    Cedarwood
                   </p>
                 </div>
               </div>
@@ -463,16 +437,12 @@ const Product = () => {
               <h2 style={fontStyles.subsequentHeading} className="px-2">
                 A FOREST REBORN
               </h2>
-              <p
-                style={{ ...fontStyles.subCopy, lineHeight: "1.8" }}
-                className="pl-2 pr-8 "
-              >
-                Crushed Pine by Jardin Botanica evokes the quiet majesty of
-                mist-covered evergreens after winter rain. It is a scent of
-                awakening—the snap of pine needles beneath your feet, the crisp
-                bite of cedar carried on the wind, and the meditative warmth of
-                balsam deep in the trees. Rooted and restorative, this candle
-                celebrates the enduring spirit of nature.
+              <p style={{ ...fontStyles.subCopy, lineHeight: "1.8" }} className="pl-2 pr-8 ">
+                Crushed Pine by Jardin Botanica evokes the quiet majesty of mist-covered evergreens
+                after winter rain. It is a scent of awakening—the snap of pine needles beneath your
+                feet, the crisp bite of cedar carried on the wind, and the meditative warmth of
+                balsam deep in the trees. Rooted and restorative, this candle celebrates the
+                enduring spirit of nature.
               </p>
             </div>
           </div>
@@ -486,9 +456,7 @@ const Product = () => {
             {/* Left Side - Heading */}
             <div
               className={`flex-shrink-0 w-full lg:w-96 transition-all duration-300 ease-out ${
-                aromaSlide > 0
-                  ? "lg:opacity-0 lg:w-0 lg:overflow-hidden"
-                  : "lg:opacity-100 lg:w-96"
+                aromaSlide > 0 ? "lg:opacity-0 lg:w-0 lg:overflow-hidden" : "lg:opacity-100 lg:w-96"
               }`}
             >
               <h2
@@ -631,18 +599,14 @@ const Product = () => {
               </div>
               <div className="flex">
                 {[...Array(review.rating)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={18}
-                    className="fill-current text-[#535c4a] pt-[4px]"
-                  />
+                  <Star key={i} size={18} className="fill-current text-[#535c4a] pt-[4px]" />
                 ))}
               </div>
               <p
                 style={{
                   ...fontStyles.reviews,
                   lineHeight: "1.6",
-                  paddingBottom: "60px"
+                  paddingBottom: "60px",
                 }}
                 className="pt-3"
               >

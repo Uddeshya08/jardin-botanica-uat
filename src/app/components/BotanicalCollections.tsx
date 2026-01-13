@@ -1,33 +1,39 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { motion } from "motion/react"
+import React from "react"
+import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 const collections = [
   {
     id: 1,
     name: "Heritage Herbarium",
     subtitle: "Pressed botanical specimens from 1890",
-    description: "A curated collection of preserved flora documenting botanical diversity across centuries",
-    imageUrl: "https://images.unsplash.com/photo-1618468121353-aaa41d8fb2e0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBpbGx1c3RyYXRpb24lMjB2aW50YWdlJTIwaGVyYnN8ZW58MXx8fHwxNzU2ODE1NDU3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    price: "Exhibition"
+    description:
+      "A curated collection of preserved flora documenting botanical diversity across centuries",
+    imageUrl:
+      "https://images.unsplash.com/photo-1618468121353-aaa41d8fb2e0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBpbGx1c3RyYXRpb24lMjB2aW50YWdlJTIwaGVyYnN8ZW58MXx8fHwxNzU2ODE1NDU3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    price: "Exhibition",
   },
   {
     id: 2,
     name: "Victorian Specimens",
     subtitle: "Rare plant collection from colonial expeditions",
-    description: "Discover exotic flora brought back from botanical expeditions of the Victorian era",
-    imageUrl: "https://images.unsplash.com/photo-1578509725196-53444c549731?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwcGxhbnQlMjBzcGVjaW1lbiUyMGNvbGxlY3Rpb258ZW58MXx8fHwxNzU2ODE1NDU4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    price: "Private Tour"
+    description:
+      "Discover exotic flora brought back from botanical expeditions of the Victorian era",
+    imageUrl:
+      "https://images.unsplash.com/photo-1578509725196-53444c549731?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwcGxhbnQlMjBzcGVjaW1lbiUyMGNvbGxlY3Rpb258ZW58MXx8fHwxNzU2ODE1NDU4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    price: "Private Tour",
   },
   {
     id: 3,
     name: "Antique Botanical Prints",
     subtitle: "Original illustrations and pressed flowers",
-    description: "Hand-illustrated botanical studies and preserved flowers from renowned naturalists",
-    imageUrl: "https://images.unsplash.com/photo-1693069313209-a9c8eca1eb1a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbnRpcXVlJTIwYm90YW5pY2FsJTIwcHJpbnRzJTIwcHJlc3NlZCUyMGZsb3dlcnN8ZW58MXx8fHwxNzU2ODE1NDU4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    price: "Gift Shop"
-  }
-];
+    description:
+      "Hand-illustrated botanical studies and preserved flowers from renowned naturalists",
+    imageUrl:
+      "https://images.unsplash.com/photo-1693069313209-a9c8eca1eb1a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbnRpcXVlJTIwYm90YW5pY2FsJTIwcHJpbnRzJTIwcHJlc3NlZCUyMGZsb3dlcnN8ZW58MXx8fHwxNzU2ODE1NDU4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    price: "Gift Shop",
+  },
+]
 
 export function BotanicalCollections() {
   return (
@@ -40,12 +46,10 @@ export function BotanicalCollections() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl lg:text-5xl tracking-tight mb-4">
-            Our Collections
-          </h2>
+          <h2 className="text-4xl lg:text-5xl tracking-tight mb-4">Our Collections</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Explore our curated botanical collections, each telling a unique story 
-            of discovery, preservation, and natural beauty.
+            Explore our curated botanical collections, each telling a unique story of discovery,
+            preservation, and natural beauty.
           </p>
         </motion.div>
 
@@ -66,17 +70,13 @@ export function BotanicalCollections() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <h3 className="text-xl tracking-wide">
-                  {collection.name}
-                </h3>
+                <h3 className="text-xl tracking-wide">{collection.name}</h3>
                 <p className="text-sm text-gray-500 tracking-wider uppercase">
                   {collection.subtitle}
                 </p>
-                <p className="text-gray-600 leading-relaxed">
-                  {collection.description}
-                </p>
+                <p className="text-gray-600 leading-relaxed">{collection.description}</p>
                 <div className="pt-2">
                   <span className="text-sm tracking-widest uppercase border-b border-black/20 pb-1">
                     {collection.price}
@@ -100,5 +100,5 @@ export function BotanicalCollections() {
         </motion.div>
       </div>
     </section>
-  );
+  )
 }

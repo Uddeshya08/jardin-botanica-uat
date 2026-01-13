@@ -1,8 +1,9 @@
 "use client"
 
-import React, { useState, useTransition } from "react"
-import { motion } from "motion/react"
 import { subscribeToNewsletter } from "@lib/data/brevo"
+import { motion } from "motion/react"
+import type React from "react"
+import { useState, useTransition } from "react"
 
 const Newsletter = () => {
   const [email, setEmail] = useState("")
@@ -36,16 +37,12 @@ const Newsletter = () => {
   }
 
   return (
-    <section
-      className="py-20 relative overflow-hidden"
-      style={{ backgroundColor: "#e3e3d8" }}
-    >
+    <section className="py-20 relative overflow-hidden" style={{ backgroundColor: "#e3e3d8" }}>
       {/* Smooth Animated Gradient Background */}
       <motion.div
         className="absolute inset-0 opacity-15"
         style={{
-          background:
-            "linear-gradient(45deg, #e58a4d, #545d4a, #e58a4d, #545d4a, #e58a4d)",
+          background: "linear-gradient(45deg, #e58a4d, #545d4a, #e58a4d, #545d4a, #e58a4d)",
           backgroundSize: "600% 600%",
         }}
         animate={{
@@ -61,8 +58,7 @@ const Newsletter = () => {
       <motion.div
         className="absolute inset-0 opacity-10"
         style={{
-          background:
-            "linear-gradient(-45deg, #545d4a, #e58a4d, #545d4a, #e58a4d)",
+          background: "linear-gradient(-45deg, #545d4a, #e58a4d, #545d4a, #e58a4d)",
           backgroundSize: "800% 800%",
         }}
         animate={{
@@ -92,8 +88,8 @@ const Newsletter = () => {
             viewport={{ once: true }}
             className="font-din-arabic text-black/70 mb-8 leading-relaxed text-lg"
           >
-            Be the first to discover new blends, exclusive rituals, and stories
-            from our botanical laboratory.
+            Be the first to discover new blends, exclusive rituals, and stories from our botanical
+            laboratory.
           </motion.p>
           <motion.form
             onSubmit={handleSubmit}

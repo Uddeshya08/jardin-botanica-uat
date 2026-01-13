@@ -1,7 +1,6 @@
-import { clx } from "@medusajs/ui"
-
 import { getProductPrice } from "@lib/util/get-product-price"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
+import { clx } from "@medusajs/ui"
 
 export default function ProductPrice({
   product,
@@ -29,10 +28,7 @@ export default function ProductPrice({
         })}
       >
         {!variant && "From "}
-        <span
-          data-testid="product-price"
-          data-value={selectedPrice.calculated_price_number}
-        >
+        <span data-testid="product-price" data-value={selectedPrice.calculated_price_number}>
           {selectedPrice.calculated_price}
         </span>
       </span>
@@ -48,9 +44,7 @@ export default function ProductPrice({
               {selectedPrice.original_price}
             </span>
           </p>
-          <span className="text-ui-fg-interactive">
-            -{selectedPrice.percentage_diff}%
-          </span>
+          <span className="text-ui-fg-interactive">-{selectedPrice.percentage_diff}%</span>
         </>
       )}
     </div>

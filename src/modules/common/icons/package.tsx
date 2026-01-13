@@ -1,12 +1,8 @@
-import React from "react"
+import type React from "react"
 
-import { IconProps } from "types/icon"
+import type { IconProps } from "types/icon"
 
-const Package: React.FC<IconProps> = ({
-  size = "20",
-  color = "currentColor",
-  ...attributes
-}) => {
+const Package: React.FC<IconProps> = ({ size = "20", color = "currentColor", ...attributes }) => {
   return (
     <svg
       width={size}

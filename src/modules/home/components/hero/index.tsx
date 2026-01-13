@@ -1,13 +1,13 @@
 "use client"
-import React, { useState, useEffect } from "react"
-import { Navigation } from "app/components/Navigation"
-import { HeroSection } from "app/components/HeroSection"
+import { BespokeGifting } from "app/components/BespokeGifting"
 import { DesignPhilosophy } from "app/components/DesignPhilosophy"
 import { FeaturedRitual } from "app/components/FeaturedRitual"
-import { BespokeGifting } from "app/components/BespokeGifting"
+import { HeroSection } from "app/components/HeroSection"
 import { JournalSection } from "app/components/JournalSection"
-import { RippleEffect } from "app/components/RippleEffect"
+import { Navigation } from "app/components/Navigation"
 import Newsletter from "app/components/Newsletter"
+import { RippleEffect } from "app/components/RippleEffect"
+import React, { useEffect, useState } from "react"
 import { ProductCarousel } from "../product-carousel"
 
 export default function Home() {
@@ -35,7 +35,7 @@ export default function Home() {
       <FeaturedRitual />
       <BespokeGifting />
       <JournalSection />
-     <Newsletter />
+      <Newsletter />
     </div>
   )
 }

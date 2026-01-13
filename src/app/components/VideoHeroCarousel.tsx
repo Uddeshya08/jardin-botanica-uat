@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
+import React, { useEffect, useState } from "react"
+import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 interface CarouselSlide {
-  id: number;
-  title: string;
-  subtitle: string;
-  description: string;
-  imageUrl: string;
-  cta: string;
-  isSpecial?: boolean;
+  id: number
+  title: string
+  subtitle: string
+  description: string
+  imageUrl: string
+  cta: string
+  isSpecial?: boolean
 }
 
 const slides: CarouselSlide[] = [
@@ -19,65 +19,70 @@ const slides: CarouselSlide[] = [
     title: "Where nature begins to whisper.",
     subtitle: "Origins",
     description: "Raw botanicals. Distilled purity.\nEvery drop crafted with intention.",
-    imageUrl: "https://images.unsplash.com/photo-1720275273886-89966091ce4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyYXclMjBib3RhbmljYWxzJTIwaGVyYnMlMjByb290cyUyMHNlZWRzJTIwZGV3JTIwZHJvcHN8ZW58MXx8fHwxNzU2ODE1ODAwfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    cta: "Discover Origins"
+    imageUrl:
+      "https://images.unsplash.com/photo-1720275273886-89966091ce4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyYXclMjBib3RhbmljYWxzJTIwaGVyYnMlMjByb290cyUyMHNlZWRzJTIwZGV3JTIwZHJvcHN8ZW58MXx8fHwxNzU2ODE1ODAwfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    cta: "Discover Origins",
   },
   {
     id: 2,
     title: "Alchemy in motion.",
     subtitle: "Craft",
     description: "Hand-blended. Slow-brewed.\nA ritual of patience, precision, and soul.",
-    imageUrl: "https://images.unsplash.com/photo-1674620305515-1394fe40c634?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhcG90aGVjYXJ5JTIwaGFuZHMlMjBibGVuZGluZyUyMGFtYmVyJTIwYm90dGxlcyUyMGJyYXNzJTIwc2NhbGVzfGVufDF8fHx8MTc1NjgxNTgwMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    cta: "Witness Craft"
+    imageUrl:
+      "https://images.unsplash.com/photo-1674620305515-1394fe40c634?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhcG90aGVjYXJ5JTIwaGFuZHMlMjBibGVuZGluZyUyMGFtYmVyJTIwYm90dGxlcyUyMGJyYXNzJTIwc2NhbGVzfGVufDF8fHx8MTc1NjgxNTgwMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    cta: "Witness Craft",
   },
   {
     id: 3,
     title: "For the senses, not the shelf.",
     subtitle: "Experience",
     description: "Unfiltered. Honest.\nAn aroma that lingers, a story that stays.",
-    imageUrl: "https://images.unsplash.com/photo-1650482713537-8de547ea7a16?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzbW9rZSUyMHRyYWlscyUyMG1pc3QlMjBjYW5kbGUlMjBmbGFtZXMlMjBzZW5zb3J5JTIwYXJvbWF0aGVyYXB5fGVufDF8fHx8MTc1NjgxNTgwMnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    cta: "Feel Experience"
+    imageUrl:
+      "https://images.unsplash.com/photo-1650482713537-8de547ea7a16?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzbW9rZSUyMHRyYWlscyUyMG1pc3QlMjBjYW5kbGUlMjBmbGFtZXMlMjBzZW5zb3J5JTIwYXJvbWF0aGVyYXB5fGVufDF8fHx8MTc1NjgxNTgwMnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    cta: "Feel Experience",
   },
   {
     id: 4,
     title: "The Botanist's Circle",
     subtitle: "Join Now",
-    description: "An invitation to the inner world.\nEarly access. Limited blends. Private gatherings.\n\nJoin now — step inside the circle.",
-    imageUrl: "https://images.unsplash.com/photo-1713117224401-b88adbc53fe3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZW1iZXJzaGlwJTIwY2FyZCUyMGJvdGFuaWNhbCUyMGVsZW1lbnRzJTIwZmxhdCUyMGxheSUyMGxpbmVuJTIwcGFwZXJ8ZW58MXx8fHwxNzU2ODE1ODAyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    description:
+      "An invitation to the inner world.\nEarly access. Limited blends. Private gatherings.\n\nJoin now — step inside the circle.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1713117224401-b88adbc53fe3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZW1iZXJzaGlwJTIwY2FyZCUyMGJvdGFuaWNhbCUyMGVsZW1lbnRzJTIwZmxhdCUyMGxheSUyMGxpbmVuJTIwcGFwZXJ8ZW58MXx8fHwxNzU2ODE1ODAyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     cta: "Join the Circle",
-    isSpecial: true
-  }
-];
+    isSpecial: true,
+  },
+]
 
 export function VideoHeroCarousel() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(true)
 
   // Auto-advance slides
   useEffect(() => {
-    if (!isPlaying) return;
-    
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 6000); // Slightly longer for the membership panel
+    if (!isPlaying) return
 
-    return () => clearInterval(interval);
-  }, [isPlaying]);
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length)
+    }, 6000) // Slightly longer for the membership panel
+
+    return () => clearInterval(interval)
+  }, [isPlaying])
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
+    setCurrentSlide((prev) => (prev + 1) % slides.length)
+  }
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
+  }
 
   const goToSlide = (index: number) => {
-    setCurrentSlide(index);
-  };
+    setCurrentSlide(index)
+  }
 
   return (
-    <div 
+    <div
       className="relative w-full h-screen overflow-hidden bg-black"
       onMouseEnter={() => setIsPlaying(false)}
       onMouseLeave={() => setIsPlaying(true)}
@@ -105,7 +110,9 @@ export function VideoHeroCarousel() {
           {/* Content */}
           <div className="relative z-10 h-full flex items-center">
             <div className="container mx-auto px-6 lg:px-12">
-              <div className={`${slides[currentSlide].isSpecial ? 'max-w-3xl text-center mx-auto' : 'max-w-2xl'}`}>
+              <div
+                className={`${slides[currentSlide].isSpecial ? "max-w-3xl text-center mx-auto" : "max-w-2xl"}`}
+              >
                 <motion.div
                   initial={{ y: 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -122,9 +129,9 @@ export function VideoHeroCarousel() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.5, duration: 0.8 }}
                   className={`font-light text-white mb-6 tracking-tight ${
-                    slides[currentSlide].isSpecial 
-                      ? 'text-3xl md:text-5xl lg:text-6xl' 
-                      : 'text-4xl md:text-6xl lg:text-7xl'
+                    slides[currentSlide].isSpecial
+                      ? "text-3xl md:text-5xl lg:text-6xl"
+                      : "text-4xl md:text-6xl lg:text-7xl"
                   }`}
                 >
                   {slides[currentSlide].title}
@@ -135,15 +142,13 @@ export function VideoHeroCarousel() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.7, duration: 0.8 }}
                   className={`text-white/80 mb-8 leading-relaxed ${
-                    slides[currentSlide].isSpecial 
-                      ? 'text-base md:text-lg' 
-                      : 'text-lg md:text-xl'
+                    slides[currentSlide].isSpecial ? "text-base md:text-lg" : "text-lg md:text-xl"
                   }`}
                 >
-                  {slides[currentSlide].description.split('\n').map((line, index) => (
+                  {slides[currentSlide].description.split("\n").map((line, index) => (
                     <span key={index}>
                       {line}
-                      {index < slides[currentSlide].description.split('\n').length - 1 && <br />}
+                      {index < slides[currentSlide].description.split("\n").length - 1 && <br />}
                     </span>
                   ))}
                 </motion.div>
@@ -154,8 +159,8 @@ export function VideoHeroCarousel() {
                   transition={{ delay: 0.9, duration: 0.8 }}
                   className={`inline-flex items-center px-8 py-3 transition-all duration-300 tracking-wide ${
                     slides[currentSlide].isSpecial
-                      ? 'bg-white text-black hover:bg-white/90'
-                      : 'text-white border border-white/30 hover:bg-white hover:text-black'
+                      ? "bg-white text-black hover:bg-white/90"
+                      : "text-white border border-white/30 hover:bg-white hover:text-black"
                   }`}
                 >
                   {slides[currentSlide].cta}
@@ -196,8 +201,8 @@ export function VideoHeroCarousel() {
               <motion.div
                 className="h-full bg-white rounded-full"
                 initial={{ width: 0 }}
-                animate={{ 
-                  width: index === currentSlide ? "100%" : "0%" 
+                animate={{
+                  width: index === currentSlide ? "100%" : "0%",
                 }}
                 transition={{ duration: index === currentSlide ? 6 : 0.3 }}
               />
@@ -208,10 +213,10 @@ export function VideoHeroCarousel() {
 
       {/* Slide Counter */}
       <div className="absolute bottom-8 right-6 z-20 text-white/60 text-sm tracking-wider">
-        <span className="text-white">{String(currentSlide + 1).padStart(2, '0')}</span>
-        {' / '}
-        <span>{String(slides.length).padStart(2, '0')}</span>
+        <span className="text-white">{String(currentSlide + 1).padStart(2, "0")}</span>
+        {" / "}
+        <span>{String(slides.length).padStart(2, "0")}</span>
       </div>
     </div>
-  );
+  )
 }

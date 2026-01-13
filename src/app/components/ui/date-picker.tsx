@@ -1,66 +1,75 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
-import "react-day-picker/dist/style.css";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react"
+import * as React from "react"
+import { DayPicker } from "react-day-picker"
+import "react-day-picker/dist/style.css"
 
-import { cn } from "./utils";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover"
+import { cn } from "./utils"
 
 // Simple date formatter (since date-fns might not be installed)
 function formatDate(date: Date): string {
-    const months = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ];
-    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ]
+  return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`
 }
 
 interface DatePickerProps {
-    value?: Date;
-    onChange?: (date: Date | undefined) => void;
-    placeholder?: string;
-    className?: string;
-    disabled?: boolean;
+  value?: Date
+  onChange?: (date: Date | undefined) => void
+  placeholder?: string
+  className?: string
+  disabled?: boolean
 }
 
 export function DatePicker({
-    value,
-    onChange,
-    placeholder = "Select date",
-    className,
-    disabled,
+  value,
+  onChange,
+  placeholder = "Select date",
+  className,
+  disabled,
 }: DatePickerProps) {
-    const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false)
 
-    return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <button
-                    type="button"
-                    disabled={disabled}
-                    className={cn(
-                        "font-din-arabic w-full px-4 py-3.5 border bg-transparent text-left text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300 flex items-center justify-between",
-                        !value && "text-black/50",
-                        className
-                    )}
-                    style={{ borderColor: "#D8D2C7" }}
-                >
-                    <span>
-                        {value ? formatDate(value) : placeholder}
-                    </span>
-                    <CalendarIcon className="h-4 w-4 opacity-50" />
-                </button>
-            </PopoverTrigger>
-            <PopoverContent
-                className="w-auto p-0 border shadow-lg !bg-white !text-black rounded-none"
-                style={{ borderColor: "#D8D2C7" }}
-                align="start"
-                sideOffset={4}
-            >
-                <style dangerouslySetInnerHTML={{
-                    __html: `
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          disabled={disabled}
+          className={cn(
+            "font-din-arabic w-full px-4 py-3.5 border bg-transparent text-left text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300 flex items-center justify-between",
+            !value && "text-black/50",
+            className
+          )}
+          style={{ borderColor: "#D8D2C7" }}
+        >
+          <span>{value ? formatDate(value) : placeholder}</span>
+          <CalendarIcon className="h-4 w-4 opacity-50" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-auto p-0 border shadow-lg !bg-white !text-black rounded-none"
+        style={{ borderColor: "#D8D2C7" }}
+        align="start"
+        sideOffset={4}
+      >
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
             @supports (color: color-mix(in lab, red, red)) {
               .rdp * {
                 outline-color: #333 !important;
@@ -152,30 +161,32 @@ export function DatePicker({
               letter-spacing: 0.1em !important;
               font-weight: 400 !important;
               }
-          `
-                }} />
-                <DayPicker
-                    mode="single"
-                    selected={value}
-                    onSelect={(date) => {
-                        onChange?.(date);
-                        setOpen(false);
-                    }}
-                    captionLayout="dropdown"
-                    fromYear={1900}
-                    toYear={new Date().getFullYear() + 10}
-                    className="p-5 bg-[#e3e3d8] rounded-none"
-                    components={{
-                        IconLeft: ({ className, ...props }: { className?: string }) => (
-                            <ChevronLeft className={cn("h-4 w-4 text-black", className)} {...props} />
-                        ),
-                        IconRight: ({ className, ...props }: { className?: string }) => (
-                            <ChevronRight className={cn("h-4 w-4 text-black", className)} {...props} />
-                        ),
-                    } as any}
-                />
-            </PopoverContent>
-        </Popover>
-    );
+          `,
+          }}
+        />
+        <DayPicker
+          mode="single"
+          selected={value}
+          onSelect={(date) => {
+            onChange?.(date)
+            setOpen(false)
+          }}
+          captionLayout="dropdown"
+          fromYear={1900}
+          toYear={new Date().getFullYear() + 10}
+          className="p-5 bg-[#e3e3d8] rounded-none"
+          components={
+            {
+              IconLeft: ({ className, ...props }: { className?: string }) => (
+                <ChevronLeft className={cn("h-4 w-4 text-black", className)} {...props} />
+              ),
+              IconRight: ({ className, ...props }: { className?: string }) => (
+                <ChevronRight className={cn("h-4 w-4 text-black", className)} {...props} />
+              ),
+            } as any
+          }
+        />
+      </PopoverContent>
+    </Popover>
+  )
 }
-

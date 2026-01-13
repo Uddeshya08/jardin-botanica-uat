@@ -1,21 +1,21 @@
-import { Metadata } from "next"
-import { notFound } from "next/navigation"
-import { listProducts } from "@lib/data/products"
-import { getRegion, listRegions } from "@lib/data/regions"
 import {
-  getProductContentByHandle,
-  getFeaturedSectionByKey,
-  getTestimonialsSectionByKey,
-  getTestimonialsSectionByProductHandle,
+  getAfterlifeSectionByKey,
+  getAfterlifeSectionByProductHandle,
   getFeaturedRitualTwoSectionByKey,
   getFeaturedRitualTwoSectionByProductHandle,
-  getAfterlifeSectionByProductHandle,
-  getAfterlifeSectionByKey,
-  getProductInfoPanelsByHandle,
-  getFromTheLabSectionByProductHandle,
+  getFeaturedSectionByKey,
   getFromTheLabSectionByKey,
+  getFromTheLabSectionByProductHandle,
+  getProductContentByHandle,
+  getProductInfoPanelsByHandle,
+  getTestimonialsSectionByKey,
+  getTestimonialsSectionByProductHandle,
 } from "@lib/data/contentful"
+import { listProducts } from "@lib/data/products"
+import { getRegion, listRegions } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
@@ -26,7 +26,7 @@ export const dynamicParams = true
 export async function generateStaticParams() {
   try {
     const countryCodes = await listRegions().then((regions) =>
-      regions?.map((r) => r.countries?.map((c) => c.iso_2)).flat()
+      regions?.flatMap((r) => r.countries?.map((c) => c.iso_2))
     )
 
     if (!countryCodes) {
@@ -123,16 +123,12 @@ export default async function ProductPage(props: Props) {
 
   // Fetch testimonials section content from Contentful
   // Try product-specific testimonials by productHandle first
-  let testimonialsContent = await getTestimonialsSectionByProductHandle(
-    params.handle
-  )
+  let testimonialsContent = await getTestimonialsSectionByProductHandle(params.handle)
 
   // Fall back to section key approach if product handle search doesn't find anything
   if (!testimonialsContent) {
     const productTestimonialsKey = `${params.handle}-testimonials`
-    testimonialsContent = await getTestimonialsSectionByKey(
-      productTestimonialsKey
-    )
+    testimonialsContent = await getTestimonialsSectionByKey(productTestimonialsKey)
   }
 
   // Final fallback to generic PDP testimonials if product-specific not found
@@ -142,22 +138,17 @@ export default async function ProductPage(props: Props) {
 
   // Fetch featured ritual two section content from Contentful
   // Try product-specific featured ritual two by productHandle first
-  let featuredRitualTwoContent =
-    await getFeaturedRitualTwoSectionByProductHandle(params.handle)
+  let featuredRitualTwoContent = await getFeaturedRitualTwoSectionByProductHandle(params.handle)
 
   // Fall back to section key approach if product handle search doesn't find anything
   if (!featuredRitualTwoContent) {
     const productFeaturedRitualTwoKey = `${params.handle}-featured-ritual-two`
-    featuredRitualTwoContent = await getFeaturedRitualTwoSectionByKey(
-      productFeaturedRitualTwoKey
-    )
+    featuredRitualTwoContent = await getFeaturedRitualTwoSectionByKey(productFeaturedRitualTwoKey)
   }
 
   // Final fallback to generic PDP featured ritual two if product-specific not found
   if (!featuredRitualTwoContent) {
-    featuredRitualTwoContent = await getFeaturedRitualTwoSectionByKey(
-      "pdp-featured-ritual-two"
-    )
+    featuredRitualTwoContent = await getFeaturedRitualTwoSectionByKey("pdp-featured-ritual-two")
   }
 
   // Fetch ritual product if available in product metadata
@@ -201,9 +192,7 @@ export default async function ProductPage(props: Props) {
 
           // Look for products with matching handle in title or metadata
           const possibleMatches = allProducts.filter((prod) => {
-            const titleMatch = prod.title
-              ?.toLowerCase()
-              .includes(ritualProductHandle.toLowerCase())
+            const titleMatch = prod.title?.toLowerCase().includes(ritualProductHandle.toLowerCase())
             const handleMatch = prod.handle
               ?.toLowerCase()
               .includes(ritualProductHandle.toLowerCase())
@@ -228,19 +217,14 @@ export default async function ProductPage(props: Props) {
         const ritualProductName = (
           ritualProd.metadata?.["product-name"] as string | undefined
         )?.trim()
-        const isMatchingRitualProduct =
-          ritualProductName === ritualProductHandle
+        const isMatchingRitualProduct = ritualProductName === ritualProductHandle
 
         // More flexible matching - check multiple criteria
         const flexibleMatch =
           isMatchingRitualProduct || // Exact metadata match
           ritualProd.handle === ritualProductHandle || // Exact handle match
-          ritualProd.title
-            ?.toLowerCase()
-            .includes(ritualProductHandle.toLowerCase()) || // Title contains handle
-          ritualProductName
-            ?.toLowerCase()
-            .includes(ritualProductHandle.toLowerCase()) // Metadata contains handle
+          ritualProd.title?.toLowerCase().includes(ritualProductHandle.toLowerCase()) || // Title contains handle
+          ritualProductName?.toLowerCase().includes(ritualProductHandle.toLowerCase()) // Metadata contains handle
 
         if (!flexibleMatch) {
           ritualProduct = null
@@ -249,8 +233,7 @@ export default async function ProductPage(props: Props) {
 
           if (variant) {
             const calculatedAmount = variant.calculated_price?.calculated_amount
-            const hasValidPrice =
-              typeof calculatedAmount === "number" && calculatedAmount > 0
+            const hasValidPrice = typeof calculatedAmount === "number" && calculatedAmount > 0
 
             ritualProduct = {
               variantId: variant.id,
@@ -288,9 +271,7 @@ export default async function ProductPage(props: Props) {
 
   // Fetch "From the Lab" section content from Contentful
   // Try product-specific "From the Lab" by productHandle first
-  let fromTheLabContent = await getFromTheLabSectionByProductHandle(
-    params.handle
-  )
+  let fromTheLabContent = await getFromTheLabSectionByProductHandle(params.handle)
 
   // Fall back to section key approach if product handle search doesn't find anything
   if (!fromTheLabContent) {

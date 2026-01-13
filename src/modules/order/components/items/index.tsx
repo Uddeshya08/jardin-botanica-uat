@@ -1,5 +1,5 @@
 import repeat from "@lib/util/repeat"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { Table } from "@medusajs/ui"
 
 import Divider from "@modules/common/components/divider"
@@ -25,13 +25,7 @@ const Items = ({ order }: ItemsProps) => {
                     return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
                   })
                   .map((item) => {
-                    return (
-                      <Item
-                        key={item.id}
-                        item={item}
-                        currencyCode={order.currency_code}
-                      />
-                    )
+                    return <Item key={item.id} item={item} currencyCode={order.currency_code} />
                   })
               : repeat(5).map((i) => {
                   return <SkeletonLineItem key={i} />

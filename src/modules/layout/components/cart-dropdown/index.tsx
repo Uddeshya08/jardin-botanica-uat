@@ -1,13 +1,8 @@
 "use client"
 
-import {
-  Popover,
-  PopoverButton,
-  PopoverPanel,
-  Transition,
-} from "@headlessui/react"
+import { Popover, PopoverButton, PopoverPanel, Transition } from "@headlessui/react"
 import { convertToLocale } from "@lib/util/money"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import DeleteButton from "@modules/common/components/delete-button"
 import LineItemOptions from "@modules/common/components/line-item-options"
@@ -17,14 +12,8 @@ import Thumbnail from "@modules/products/components/thumbnail"
 import { usePathname } from "next/navigation"
 import { Fragment, useEffect, useRef, useState } from "react"
 
-const CartDropdown = ({
-  cart: cartState,
-}: {
-  cart?: HttpTypes.StoreCart | null
-}) => {
-  const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(
-    undefined
-  )
+const CartDropdown = ({ cart: cartState }: { cart?: HttpTypes.StoreCart | null }) => {
+  const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(undefined)
   const [cartDropdownOpen, setCartDropdownOpen] = useState(false)
 
   const open = () => setCartDropdownOpen(true)
@@ -74,11 +63,7 @@ const CartDropdown = ({
   }, [totalItems, itemRef.current])
 
   return (
-    <div
-      className="h-full z-50"
-      onMouseEnter={openAndCancel}
-      onMouseLeave={close}
-    >
+    <div className="h-full z-50" onMouseEnter={openAndCancel} onMouseLeave={close}>
       <Popover className="relative h-full">
         <PopoverButton className="h-full">
           <LocalizedClientLink
@@ -110,9 +95,7 @@ const CartDropdown = ({
                 <div className="overflow-y-scroll max-h-[402px] px-4 grid grid-cols-1 gap-y-8 no-scrollbar p-px">
                   {cartState.items
                     .sort((a, b) => {
-                      return (a.created_at ?? "") > (b.created_at ?? "")
-                        ? -1
-                        : 1
+                      return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
                     })
                     .map((item) => (
                       <div
@@ -147,10 +130,7 @@ const CartDropdown = ({
                                   data-testid="cart-item-variant"
                                   data-value={item.variant}
                                 />
-                                <span
-                                  data-testid="cart-item-quantity"
-                                  data-value={item.quantity}
-                                >
+                                <span data-testid="cart-item-quantity" data-value={item.quantity}>
                                   Quantity: {item.quantity}
                                 </span>
                               </div>
@@ -177,8 +157,7 @@ const CartDropdown = ({
                 <div className="p-4 flex flex-col gap-y-4 text-small-regular">
                   <div className="flex items-center justify-between">
                     <span className="font-din-arabic text-sm text-black/70 tracking-wide font-semibold">
-                      Subtotal{" "}
-                      <span className="font-normal">(excl. taxes)</span>
+                      Subtotal <span className="font-normal">(excl. taxes)</span>
                     </span>
                     <span
                       className="font-din-arabic text-base text-black tracking-wide mb-2"
@@ -192,11 +171,7 @@ const CartDropdown = ({
                     </span>
                   </div>
                   <LocalizedClientLink href="/cart" passHref>
-                    <Button
-                      className="w-full"
-                      size="large"
-                      data-testid="go-to-cart-button"
-                    >
+                    <Button className="w-full" size="large" data-testid="go-to-cart-button">
                       Go to cart
                     </Button>
                   </LocalizedClientLink>

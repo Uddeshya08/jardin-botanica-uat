@@ -1,11 +1,10 @@
 "use client"
 
+import type { HttpTypes } from "@medusajs/types"
 import Back from "@modules/common/icons/back"
 import FastDelivery from "@modules/common/icons/fast-delivery"
 import Refresh from "@modules/common/icons/refresh"
-
 import Accordion from "./accordion"
-import { HttpTypes } from "@medusajs/types"
 
 type ProductTabsProps = {
   product: HttpTypes.StoreProduct
@@ -27,12 +26,7 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
     <div className="w-full">
       <Accordion type="multiple">
         {tabs.map((tab, i) => (
-          <Accordion.Item
-            key={i}
-            title={tab.label}
-            headingSize="medium"
-            value={tab.label}
-          >
+          <Accordion.Item key={i} title={tab.label} headingSize="medium" value={tab.label}>
             {tab.component}
           </Accordion.Item>
         ))}
@@ -87,8 +81,8 @@ const ShippingInfoTab = () => {
           <div>
             <span className="font-semibold">Fast delivery</span>
             <p className="max-w-sm">
-              Your package will arrive in 3-5 business days at your pick up
-              location or in the comfort of your home.
+              Your package will arrive in 3-5 business days at your pick up location or in the
+              comfort of your home.
             </p>
           </div>
         </div>
@@ -97,8 +91,8 @@ const ShippingInfoTab = () => {
           <div>
             <span className="font-semibold">Simple exchanges</span>
             <p className="max-w-sm">
-              Is the fit not quite right? No worries - we&apos;ll exchange your
-              product for a new one.
+              Is the fit not quite right? No worries - we&apos;ll exchange your product for a new
+              one.
             </p>
           </div>
         </div>
@@ -107,9 +101,8 @@ const ShippingInfoTab = () => {
           <div>
             <span className="font-semibold">Easy returns</span>
             <p className="max-w-sm">
-              Just return your product and we&apos;ll refund your money. No
-              questions asked – we&apos;ll do our best to make sure your return
-              is hassle-free.
+              Just return your product and we&apos;ll refund your money. No questions asked –
+              we&apos;ll do our best to make sure your return is hassle-free.
             </p>
           </div>
         </div>

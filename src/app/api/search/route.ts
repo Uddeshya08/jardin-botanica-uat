@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server"
 import { searchProducts } from "@lib/data/search"
+import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,10 +37,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-
-
-
-
-
-
-

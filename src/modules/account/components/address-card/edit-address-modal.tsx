@@ -1,12 +1,16 @@
 "use client"
 
-import React, { useEffect, useState, useActionState } from "react"
-import { PencilSquare as Edit, Trash } from "@medusajs/icons"
-import { Button, Heading, Text, clx } from "@medusajs/ui"
-
+import { deleteCustomerAddress, updateCustomerAddress } from "@lib/data/customer"
 import useToggleState from "@lib/hooks/use-toggle-state"
+import { PencilSquare as Edit, Trash } from "@medusajs/icons"
+import type { HttpTypes } from "@medusajs/types"
+import { Button, clx, Heading, Text } from "@medusajs/ui"
 import CountrySelect from "@modules/checkout/components/country-select"
+import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
+import Spinner from "@modules/common/icons/spinner"
+import type React from "react"
+import { useActionState, useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -14,13 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../../app/components/ui/dialog"
-import Spinner from "@modules/common/icons/spinner"
-import { SubmitButton } from "@modules/checkout/components/submit-button"
-import { HttpTypes } from "@medusajs/types"
-import {
-  deleteCustomerAddress,
-  updateCustomerAddress,
-} from "@lib/data/customer"
 
 type EditAddressProps = {
   region: HttpTypes.StoreRegion
@@ -28,17 +25,13 @@ type EditAddressProps = {
   isActive?: boolean
 }
 
-const EditAddress: React.FC<EditAddressProps> = ({
-  region,
-  address,
-  isActive = false,
-}) => {
+const EditAddress: React.FC<EditAddressProps> = ({ region, address, isActive = false }) => {
   const [removing, setRemoving] = useState(false)
   const [successState, setSuccessState] = useState(false)
   const { state, open, close: closeModal } = useToggleState(false)
-  const [postalCode, setPostalCode] = useState(address.postal_code || '')
-  const [city, setCity] = useState(address.city || '')
-  const [province, setProvince] = useState(address.province || '')
+  const [postalCode, setPostalCode] = useState(address.postal_code || "")
+  const [city, setCity] = useState(address.city || "")
+  const [province, setProvince] = useState(address.province || "")
   const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
 
   const [formState, formAction] = useActionState(updateCustomerAddress, {
@@ -50,9 +43,9 @@ const EditAddress: React.FC<EditAddressProps> = ({
   const close = () => {
     setSuccessState(false)
     // Reset to original values when closing
-    setPostalCode(address.postal_code || '')
-    setCity(address.city || '')
-    setProvince(address.province || '')
+    setPostalCode(address.postal_code || "")
+    setCity(address.city || "")
+    setProvince(address.province || "")
     closeModal()
   }
 
@@ -63,14 +56,14 @@ const EditAddress: React.FC<EditAddressProps> = ({
       try {
         const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`)
         const data = await response.json()
-        
-        if (data && data[0]?.Status === 'Success' && data[0]?.PostOffice?.length > 0) {
+
+        if (data && data[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
           const postOffice = data[0].PostOffice[0]
-          setCity(postOffice.District || postOffice.Name || '')
-          setProvince(postOffice.State || '')
+          setCity(postOffice.District || postOffice.Name || "")
+          setProvince(postOffice.State || "")
         }
       } catch (error) {
-        console.error('Error fetching postal code data:', error)
+        console.error("Error fetching postal code data:", error)
       } finally {
         setIsLoadingPostalData(false)
       }
@@ -99,9 +92,9 @@ const EditAddress: React.FC<EditAddressProps> = ({
 
   // Reset form fields when address changes (e.g., when opening modal for different address)
   useEffect(() => {
-    setPostalCode(address.postal_code || '')
-    setCity(address.city || '')
-    setProvince(address.province || '')
+    setPostalCode(address.postal_code || "")
+    setCity(address.city || "")
+    setProvince(address.province || "")
   }, [address])
 
   const removeAddress = async () => {
@@ -123,9 +116,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="font-din-arabic">
-              {address.company || "Home"}
-            </span>
+            <span className="font-din-arabic">{address.company || "Home"}</span>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -147,15 +138,10 @@ const EditAddress: React.FC<EditAddressProps> = ({
           </div>
         </div>
         {address.is_default_shipping && (
-          <span className="text-sm tracking-wide text-ui-fg-subtle uppercase">
-            Default Address
-          </span>
+          <span className="text-sm tracking-wide text-ui-fg-subtle uppercase">Default Address</span>
         )}
         <div className="flex flex-col">
-          <Heading
-            className="text-left text-md font-din-arabic"
-            data-testid="address-name"
-          >
+          <Heading className="text-left text-md font-din-arabic" data-testid="address-name">
             {address.first_name} {address.last_name}
           </Heading>
           <Text className="flex flex-col text-left font-din-arabic mt-2">
@@ -274,9 +260,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
               />
             </div>
             {formState.error && (
-              <div className="text-rose-500 text-small-regular py-2">
-                {formState.error}
-              </div>
+              <div className="text-rose-500 text-small-regular py-2">{formState.error}</div>
             )}
             <DialogFooter>
               <div className="flex gap-3 mt-6">

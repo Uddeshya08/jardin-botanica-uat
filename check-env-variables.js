@@ -10,16 +10,12 @@ const requiredEnvs = [
 ]
 
 function checkEnvVariables() {
-  const missingEnvs = requiredEnvs.filter(function (env) {
-    return !process.env[env.key]
-  })
+  const missingEnvs = requiredEnvs.filter((env) => !process.env[env.key])
 
   if (missingEnvs.length > 0) {
-    console.error(
-      c.red.bold("\n🚫 Error: Missing required environment variables\n")
-    )
+    console.error(c.red.bold("\n🚫 Error: Missing required environment variables\n"))
 
-    missingEnvs.forEach(function (env) {
+    missingEnvs.forEach((env) => {
       console.error(c.yellow(`  ${c.bold(env.key)}`))
       if (env.description) {
         console.error(c.dim(`    ${env.description}\n`))

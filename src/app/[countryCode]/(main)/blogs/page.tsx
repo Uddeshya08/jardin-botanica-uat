@@ -1,17 +1,10 @@
 // blogs/page.tsx
-'use client'
-import {
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Facebook,
-  Instagram,
-  Twitter,
-} from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
-import { RippleEffect } from 'app/components/RippleEffect'
-import { Navigation } from 'app/components/Navigation'
+"use client"
+import { Navigation } from "app/components/Navigation"
+import { RippleEffect } from "app/components/RippleEffect"
+import { ChevronLeft, ChevronRight, Facebook, Instagram, Search, Twitter } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
+import { useEffect, useState } from "react"
 
 interface CartItem {
   id: string
@@ -38,128 +31,127 @@ interface FeaturedArticle {
 }
 
 const Home = () => {
-  const [email, setEmail] = useState('')
-  const [activeTab, setActiveTab] = useState('HOME')
+  const [email, setEmail] = useState("")
+  const [activeTab, setActiveTab] = useState("HOME")
 
   // Custom styles object
   const styles = {
     bannerHeading: {
       fontFamily: '"American Typewriter"',
-      fontSize: '42px',
-      letterSpacing: '5px',
-      color: '#4f5864',
+      fontSize: "42px",
+      letterSpacing: "5px",
+      color: "#4f5864",
     },
     subCopy: {
       fontFamily: '"font-din-arabic"',
-      fontSize: '16px',
-      letterSpacing: '1px',
-      color: '#626262',
+      fontSize: "16px",
+      letterSpacing: "1px",
+      color: "#626262",
     },
     subsequentHeading: {
       fontFamily: '"American Typewriter"',
-      fontSize: '48px',
-      letterSpacing: '2px',
-      color: '#000',
-      fontWeight: '600',
+      fontSize: "48px",
+      letterSpacing: "2px",
+      color: "#000",
+      fontWeight: "600",
     },
     subsequentHeading3: {
       fontFamily: '"American Typewriter"',
-      fontSize: '14px',
-      letterSpacing: '1px',
-      color: '#000000',
-      fontWeight: '600',
+      fontSize: "14px",
+      letterSpacing: "1px",
+      color: "#000000",
+      fontWeight: "600",
     },
     subsequentHeading2: {
       fontFamily: '"font-dinBold"',
-      fontSize: '20px',
-      letterSpacing: '1px',
-      color: '#403F3F',
+      fontSize: "20px",
+      letterSpacing: "1px",
+      color: "#403F3F",
     },
     newspaperSerif: {
       fontFamily: '"American Typewriter"',
-      fontSize: '24px',
-      letterSpacing: '5px',
-      color: '#4f5864',
+      fontSize: "24px",
+      letterSpacing: "5px",
+      color: "#4f5864",
     },
     newspaperSpacing: {
-      lineHeight: '1.6',
+      lineHeight: "1.6",
     },
     tightSpacing: {
-      lineHeight: '1.3',
+      lineHeight: "1.3",
     },
     trackingNewspaper: {
       fontFamily: '"DIN Arabic Regular"',
-      letterSpacing: '0.1em',
+      letterSpacing: "0.1em",
     },
     trackingWideNewspaper: {
       fontFamily: '"DIN Arabic Regular"',
-      letterSpacing: '0.15em',
+      letterSpacing: "0.15em",
     },
   }
 
   const dailyFeedArticles: DailyFeedArticle[] = [
     {
-      id: '1',
-      categories: ['LIFESTYLE', 'TECHNOLOGY'],
-      title: 'How to be as Productive as a Google Employee',
+      id: "1",
+      categories: ["LIFESTYLE", "TECHNOLOGY"],
+      title: "How to be as Productive as a Google Employee",
       excerpt:
-        'Suspendisse quis orci ut orci pulvinar eleifend. Nulla eu mattis ipsum. Integer eget sagittis nulla praesent et maximus.',
+        "Suspendisse quis orci ut orci pulvinar eleifend. Nulla eu mattis ipsum. Integer eget sagittis nulla praesent et maximus.",
     },
     {
-      id: '2',
-      categories: ['HEALTH'],
-      title: 'How Exercise Could Help You Learn a New Language',
+      id: "2",
+      categories: ["HEALTH"],
+      title: "How Exercise Could Help You Learn a New Language",
       excerpt:
-        'Etiam eu molestie eros, commodo hendrerit sapien. Nunc pretium tortor felis, eget cursus magna egetnec imperdiet ornare.',
+        "Etiam eu molestie eros, commodo hendrerit sapien. Nunc pretium tortor felis, eget cursus magna egetnec imperdiet ornare.",
     },
     {
-      id: '3',
-      categories: ['LIFESTYLE', 'MAIN'],
-      title: 'Get the Best Catering for Your Summer Wedding in Philly',
+      id: "3",
+      categories: ["LIFESTYLE", "MAIN"],
+      title: "Get the Best Catering for Your Summer Wedding in Philly",
       excerpt:
-        'Etiam eu molestie eros, commodo nec turpis hendrerit sapien. Maecenas tempus leo ac nisi iaculis porta. Sed sapien tempus.',
+        "Etiam eu molestie eros, commodo nec turpis hendrerit sapien. Maecenas tempus leo ac nisi iaculis porta. Sed sapien tempus.",
     },
   ]
 
   const featuredArticles: FeaturedArticle[] = [
     {
-      id: '1',
-      title:
-        "US Open 2017 latest: Women's semi-final results and Nadal vs Del Potro",
-      author: 'Alice Bohn',
+      id: "1",
+      title: "US Open 2017 latest: Women's semi-final results and Nadal vs Del Potro",
+      author: "Alice Bohn",
       excerpt:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt porta velit, sed suscipit massa consequat sed. Integer est ante, dictum quis metus non, rhoncus accumsan ante.',
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt porta velit, sed suscipit massa consequat sed. Integer est ante, dictum quis metus non, rhoncus accumsan ante.",
       imageUrl:
-        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=300',
-      imageAlt: 'Tennis player celebration',
+        "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=300",
+      imageAlt: "Tennis player celebration",
     },
     {
-      id: '2',
+      id: "2",
       title: "Renounce City's Vote to Drop References",
-      author: 'Thomas Williams',
+      author: "Thomas Williams",
       excerpt:
-        'Sometimes it is easier to learn which advisors you should avoid versus learning how to select the best advisors. This can be tougher than it sounds because good and bad advisors look and sound a lot alike...',
+        "Sometimes it is easier to learn which advisors you should avoid versus learning how to select the best advisors. This can be tougher than it sounds because good and bad advisors look and sound a lot alike...",
       imageUrl:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=200',
-      imageAlt: 'Business conference',
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=200",
+      imageAlt: "Business conference",
     },
     {
-      id: '3',
-      title: 'Simone Rocha on the Importance of Shoes',
-      author: 'Amy Adams',
+      id: "3",
+      title: "Simone Rocha on the Importance of Shoes",
+      author: "Amy Adams",
       excerpt:
-        'In the latest installment of this series that goes inside the private working worlds of designers, Simone Rocha, founder and creative director of her own fashion line, discusses life in East London, the importance of shoes you can walk in, and fighting with her father.',
+        "In the latest installment of this series that goes inside the private working worlds of designers, Simone Rocha, founder and creative director of her own fashion line, discusses life in East London, the importance of shoes you can walk in, and fighting with her father.",
       imageUrl:
-        'https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=300',
-      imageAlt: 'Designer shoes',
+        "https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=300",
+      imageAlt: "Designer shoes",
     },
   ]
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (email) {
-      console.log('Newsletter signup:', email)
-      setEmail('')
+      console.log("Newsletter signup:", email)
+      setEmail("")
       // TODO: Implement newsletter subscription API call
     }
   }
@@ -195,20 +187,15 @@ const Home = () => {
 
       // Show sticky cart after scrolling past the ProductHero section (approximately 450px for compact height)
       // Show by default, hide only when heroCartItem exists and quantity is explicitly 0
-      const shouldShowCart =
-        scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0)
+      const shouldShowCart = scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0)
 
       // Hide sticky cart when footer copyright is visible
-      const footerElement = document.querySelector('footer')
-      const copyrightElement = footerElement?.querySelector('p')
+      const footerElement = document.querySelector("footer")
+      const copyrightElement = footerElement?.querySelector("p")
 
-      if (
-        copyrightElement &&
-        copyrightElement.textContent?.includes('© 2025 Jardin Botanica')
-      ) {
+      if (copyrightElement && copyrightElement.textContent?.includes("© 2025 Jardin Botanica")) {
         const copyrightRect = copyrightElement.getBoundingClientRect()
-        const isFooterVisible =
-          copyrightRect.top < window.innerHeight && copyrightRect.bottom > 0
+        const isFooterVisible = copyrightRect.top < window.innerHeight && copyrightRect.bottom > 0
 
         setShowStickyCart(shouldShowCart && !isFooterVisible)
       } else {
@@ -216,8 +203,8 @@ const Home = () => {
       }
     }
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   return (
@@ -241,86 +228,83 @@ const Home = () => {
             </h1>
 
             {/* Sticky Navigation Tabs */}
-            <div className="w-full mt-2 md:mt-4 lg:mt-8 pt-2" style={{ boxShadow: "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca" }}>
+            <div
+              className="w-full mt-2 md:mt-4 lg:mt-8 pt-2"
+              style={{
+                boxShadow:
+                  "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca",
+              }}
+            >
               <div className="flex justify-start lg:justify-center items-center space-x-4 md:space-x-6 lg:space-x-8 mb-3 lg:mb-4 mt-2 lg:mt-4 overflow-x-auto lg:overflow-x-visible scrollbar-hide">
                 <button
-                  onClick={() => setActiveTab('HOME')}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'HOME'
-                    ? 'text-[#4f5864]'
-                    : 'text-[#4f5864] hover:text-[#626262]'
-                    }`}
+                  onClick={() => setActiveTab("HOME")}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "HOME" ? "text-[#4f5864]" : "text-[#4f5864] hover:text-[#626262]"
+                  }`}
                 >
                   HOME
                 </button>
                 <button
-                  onClick={() => setActiveTab('POLITICS')}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'POLITICS'
-                    ? 'text-[#000]'
-                    : 'text-[#000] hover:text-[#626262]'
-                    }`}
+                  onClick={() => setActiveTab("POLITICS")}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "POLITICS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   POLITICS
                 </button>
                 <button
-                  onClick={() => setActiveTab('TECHNOLOGY')}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'TECHNOLOGY'
-                    ? 'text-[#000]'
-                    : 'text-[#000] hover:text-[#626262]'
-                    }`}
+                  onClick={() => setActiveTab("TECHNOLOGY")}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "TECHNOLOGY" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   TECHNOLOGY
                 </button>
                 <button
-                  onClick={() => setActiveTab('SPORTS')}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'SPORTS'
-                    ? 'text-[#000]'
-                    : 'text-[#000] hover:text-[#626262]'
-                    }`}
+                  onClick={() => setActiveTab("SPORTS")}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "SPORTS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   SPORTS
                 </button>
                 <button
-                  onClick={() => setActiveTab('FASHION')}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'FASHION'
-                    ? 'text-[#000]'
-                    : 'text-[#000] hover:text-[#626262]'
-                    }`}
+                  onClick={() => setActiveTab("FASHION")}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "FASHION" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   FASHION
                 </button>
                 <button
-                  onClick={() => setActiveTab('FOOD')}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'FOOD'
-                    ? 'text-[#000]'
-                    : 'text-[#000] hover:text-[#626262]'
-                    }`}
+                  onClick={() => setActiveTab("FOOD")}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "FOOD" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   FOOD
                 </button>
                 <button
-                  onClick={() => setActiveTab('SHORTCODES')}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'SHORTCODES'
-                    ? 'text-[#000]'
-                    : 'text-[#000] hover:text-[#626262]'
-                    }`}
+                  onClick={() => setActiveTab("SHORTCODES")}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "SHORTCODES" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   SHORTCODES
                 </button>
                 <button
-                  onClick={() => setActiveTab('POST TYPES')}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'POST TYPES'
-                    ? 'text-[#000]'
-                    : 'text-[#000] hover:text-[#626262]'
-                    }`}
+                  onClick={() => setActiveTab("POST TYPES")}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "POST TYPES" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   POST TYPES
                 </button>
                 <button
-                  onClick={() => setActiveTab('CONTACTS')}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'CONTACTS'
-                    ? 'text-[#000]'
-                    : 'text-[#000] hover:text-[#626262]'
-                    }`}
+                  onClick={() => setActiveTab("CONTACTS")}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "CONTACTS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   CONTACTS
                 </button>
@@ -348,9 +332,7 @@ const Home = () => {
       )}
 
       {/* first section */}
-      <div
-        className="w-full bg-[#FEFDF3] relative"
-      >
+      <div className="w-full bg-[#FEFDF3] relative">
         {/* Centered Journal */}
         <motion.h1
           className="font-american-typewriter text-center text-3xl md:text-5xl lg:text-7xl tracking-tight uppercase px-4 lg:px-0"
@@ -364,90 +346,84 @@ const Home = () => {
         {/* Navigation Tabs */}
         <motion.div
           className="w-full mt-4 lg:mt-8"
-          style={{ boxShadow: "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca" }}
+          style={{
+            boxShadow:
+              "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca",
+          }}
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.6 }}
         >
           <div className="flex justify-start lg:justify-center items-center space-x-4 md:space-x-6 lg:space-x-8 mb-4 pt-4 lg:pt-6 overflow-x-auto lg:overflow-x-visible scrollbar-hide px-4 lg:px-0">
             <button
-              onClick={() => setActiveTab('HOME')}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'HOME'
-                ? 'text-[#4f5864]'
-                : 'text-[#4f5864] hover:text-[#626262]'
-                }`}
+              onClick={() => setActiveTab("HOME")}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "HOME" ? "text-[#4f5864]" : "text-[#4f5864] hover:text-[#626262]"
+              }`}
             >
               HOME
             </button>
             <button
-              onClick={() => setActiveTab('POLITICS')}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'POLITICS'
-                ? 'text-[#000]'
-                : 'text-[#000] hover:text-[#626262]'
-                }`}
+              onClick={() => setActiveTab("POLITICS")}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "POLITICS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               POLITICS
             </button>
             <button
-              onClick={() => setActiveTab('TECHNOLOGY')}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'TECHNOLOGY'
-                ? 'text-[#000]'
-                : 'text-[#000] hover:text-[#626262]'
-                }`}
+              onClick={() => setActiveTab("TECHNOLOGY")}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "TECHNOLOGY" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               TECHNOLOGY
             </button>
             <button
-              onClick={() => setActiveTab('SPORTS')}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'SPORTS'
-                ? 'text-[#000]'
-                : 'text-[#000] hover:text-[#626262]'
-                }`}
+              onClick={() => setActiveTab("SPORTS")}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "SPORTS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               SPORTS
             </button>
             <button
-              onClick={() => setActiveTab('FASHION')}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'FASHION'
-                ? 'text-[#000]'
-                : 'text-[#000] hover:text-[#626262]'
-                }`}
+              onClick={() => setActiveTab("FASHION")}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "FASHION" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               FASHION
             </button>
             <button
-              onClick={() => setActiveTab('FOOD')}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'FOOD'
-                ? 'text-[#000]'
-                : 'text-[#000] hover:text-[#626262]'
-                }`}
+              onClick={() => setActiveTab("FOOD")}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "FOOD" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               FOOD
             </button>
             <button
-              onClick={() => setActiveTab('SHORTCODES')}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'SHORTCODES'
-                ? 'text-[#000]'
-                : 'text-[#000] hover:text-[#626262]'
-                }`}
+              onClick={() => setActiveTab("SHORTCODES")}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "SHORTCODES" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               SHORTCODES
             </button>
             <button
-              onClick={() => setActiveTab('POST TYPES')}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'POST TYPES'
-                ? 'text-[#000]'
-                : 'text-[#000] hover:text-[#626262]'
-                }`}
+              onClick={() => setActiveTab("POST TYPES")}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "POST TYPES" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               POST TYPES
             </button>
             <button
-              onClick={() => setActiveTab('CONTACTS')}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === 'CONTACTS'
-                ? 'text-[#000]'
-                : 'text-[#000] hover:text-[#626262]'
-                }`}
+              onClick={() => setActiveTab("CONTACTS")}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "CONTACTS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               CONTACTS
             </button>
@@ -458,7 +434,7 @@ const Home = () => {
           <motion.div
             className="w-full h-[1.5px] bg-[#4f5864]"
             initial={{ width: 0 }}
-            animate={{ width: '100%' }}
+            animate={{ width: "100%" }}
             transition={{ delay: 0.5, duration: 0.8 }}
           />
 
@@ -471,7 +447,7 @@ const Home = () => {
           >
             <p
               className="text-xs md:text-sm"
-              style={{...styles.subsequentHeading3, fontSize: undefined}}
+              style={{ ...styles.subsequentHeading3, fontSize: undefined }}
             >
               Volume 67, No.7 | September 2017
             </p>
@@ -481,7 +457,7 @@ const Home = () => {
           <motion.div
             className="w-full h-[1px] bg-[#d3d2ca] mt-4"
             initial={{ width: 0, opacity: 0 }}
-            animate={{ width: '100%', opacity: 1 }}
+            animate={{ width: "100%", opacity: 1 }}
             transition={{ delay: 0.7, duration: 0.8 }}
           />
         </motion.div>
@@ -494,7 +470,7 @@ const Home = () => {
           transition={{ delay: 0.7, duration: 0.6 }}
         >
           <AnimatePresence mode="wait">
-            {activeTab === 'HOME' && (
+            {activeTab === "HOME" && (
               <motion.div
                 key="home"
                 initial={{ opacity: 0, y: 10 }}
@@ -505,7 +481,7 @@ const Home = () => {
                 {/* All existing content goes here */}
               </motion.div>
             )}
-            {activeTab === 'POLITICS' && (
+            {activeTab === "POLITICS" && (
               <motion.div
                 key="politics"
                 initial={{ opacity: 0, y: 10 }}
@@ -518,7 +494,7 @@ const Home = () => {
                 <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
               </motion.div>
             )}
-            {activeTab === 'TECHNOLOGY' && (
+            {activeTab === "TECHNOLOGY" && (
               <motion.div
                 key="technology"
                 initial={{ opacity: 0, y: 10 }}
@@ -527,11 +503,13 @@ const Home = () => {
                 transition={{ duration: 0.3 }}
                 className="text-center py-20"
               >
-                <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">TECHNOLOGY</h3>
+                <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">
+                  TECHNOLOGY
+                </h3>
                 <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
               </motion.div>
             )}
-            {activeTab === 'SPORTS' && (
+            {activeTab === "SPORTS" && (
               <motion.div
                 key="sports"
                 initial={{ opacity: 0, y: 10 }}
@@ -544,7 +522,7 @@ const Home = () => {
                 <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
               </motion.div>
             )}
-            {activeTab === 'FASHION' && (
+            {activeTab === "FASHION" && (
               <motion.div
                 key="fashion"
                 initial={{ opacity: 0, y: 10 }}
@@ -557,7 +535,7 @@ const Home = () => {
                 <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
               </motion.div>
             )}
-            {activeTab === 'FOOD' && (
+            {activeTab === "FOOD" && (
               <motion.div
                 key="food"
                 initial={{ opacity: 0, y: 10 }}
@@ -570,7 +548,7 @@ const Home = () => {
                 <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
               </motion.div>
             )}
-            {activeTab === 'SHORTCODES' && (
+            {activeTab === "SHORTCODES" && (
               <motion.div
                 key="shortcodes"
                 initial={{ opacity: 0, y: 10 }}
@@ -579,11 +557,13 @@ const Home = () => {
                 transition={{ duration: 0.3 }}
                 className="text-center py-20"
               >
-                <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">SHORTCODES</h3>
+                <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">
+                  SHORTCODES
+                </h3>
                 <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
               </motion.div>
             )}
-            {activeTab === 'POST TYPES' && (
+            {activeTab === "POST TYPES" && (
               <motion.div
                 key="post-types"
                 initial={{ opacity: 0, y: 10 }}
@@ -592,11 +572,13 @@ const Home = () => {
                 transition={{ duration: 0.3 }}
                 className="text-center py-20"
               >
-                <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">POST TYPES</h3>
+                <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">
+                  POST TYPES
+                </h3>
                 <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
               </motion.div>
             )}
-            {activeTab === 'CONTACTS' && (
+            {activeTab === "CONTACTS" && (
               <motion.div
                 key="contacts"
                 initial={{ opacity: 0, y: 10 }}
@@ -614,7 +596,7 @@ const Home = () => {
       </div>
 
       {/* Content sections - only show when HOME tab is active */}
-      {activeTab === 'HOME' && (
+      {activeTab === "HOME" && (
         <>
           {/* second section */}
           <div className="max-w-7xl mx-auto my-8 md:my-12 lg:my-20 px-4 lg:px-0">
@@ -627,7 +609,10 @@ const Home = () => {
                 transition={{ delay: 0.6, duration: 0.8 }}
               >
                 <div className="relative">
-                  <div className="relative group w-full overflow-hidden" style={{ aspectRatio: '858/971' }}>
+                  <div
+                    className="relative group w-full overflow-hidden"
+                    style={{ aspectRatio: "858/971" }}
+                  >
                     {/* Grayscale Base Image */}
                     <motion.img
                       src="https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=858&h=971&fit=crop"
@@ -646,7 +631,6 @@ const Home = () => {
                     />
                   </div>
 
-
                   {/* Gradient Overlay */}
                   {/* <div className="absolute inset-0 bg-gradient-to-r from-[#EFEEE2] via-[#EFEEE2]/70 to-transparent"></div> */}
 
@@ -659,7 +643,7 @@ const Home = () => {
                   >
                     <motion.div
                       className="text-xs lg:text-sm text-gray-600 mb-2 lg:mb-3"
-                     style={{color: "#626262", padding:0, fontSize: '14px'}}
+                      style={{ color: "#626262", padding: 0, fontSize: "14px" }}
                       data-testid="hero-date"
                       initial={{ y: 10, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
@@ -669,7 +653,7 @@ const Home = () => {
                     </motion.div>
                     <motion.h2
                       className="text-xl md:text-2xl lg:text-[48px] text-gray-900 mb-3 lg:mb-4 font-american-typewriter leading-tight"
-                      style={{ letterSpacing: '2px', fontWeight: '600' }}
+                      style={{ letterSpacing: "2px", fontWeight: "600" }}
                       data-testid="hero-title"
                       initial={{ y: 15, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
@@ -679,20 +663,20 @@ const Home = () => {
                     </motion.h2>
                     <motion.p
                       className="mb-4 lg:mb-6 text-sm lg:text-[16px] font-din-arabic"
-                      style={{ letterSpacing: '1px', color: '#626262' }}
+                      style={{ letterSpacing: "1px", color: "#626262" }}
                       data-testid="hero-excerpt"
                       initial={{ y: 15, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 1.4, duration: 0.6 }}
                     >
-                      Every weekend, Longform shares a collection of great stories
-                      from its archive. Big waves, unlikely champs, and the "dark
-                      prince of the beach"—our favorite stories about surfers.
+                      Every weekend, Longform shares a collection of great stories from its archive.
+                      Big waves, unlikely champs, and the "dark prince of the beach"—our favorite
+                      stories about surfers.
                     </motion.p>
                     <motion.a
                       href="#"
                       className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline"
-                      style={{fontWeight: "600"}}
+                      style={{ fontWeight: "600" }}
                       initial={{ y: 10, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 1.5, duration: 0.6 }}
@@ -729,44 +713,64 @@ const Home = () => {
 
                   <motion.p
                     initial={{ width: 0 }}
-                    animate={{ width: '100%' }}
+                    animate={{ width: "100%" }}
                     transition={{ delay: 1.2, duration: 0.8 }}
                   ></motion.p>
 
-                  <div className="space-y-4 lg:space-y-5" style={{ boxShadow: "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca" }}
+                  <div
+                    className="space-y-4 lg:space-y-5"
+                    style={{
+                      boxShadow:
+                        "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca",
+                    }}
                   >
                     {dailyFeedArticles.map((article, index) => (
                       <motion.article
                         key={article.id}
-                        className={`${index < dailyFeedArticles.length - 1
-                          ? 'border-b border-gray-200 pb-3 lg:pb-4'
-                          : 'pb-3 lg:pb-4'
-                          }`}
+                        className={`${
+                          index < dailyFeedArticles.length - 1
+                            ? "border-b border-gray-200 pb-3 lg:pb-4"
+                            : "pb-3 lg:pb-4"
+                        }`}
                         data-testid={`daily-feed-article-${article.id}`}
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 1.3 + index * 0.2, duration: 0.6 }}
                       >
                         <motion.div
-                          className={`text-xs lg:text-sm text-gray-600 mb-2 ${index == 0 ? 'pt-4 lg:pt-6' : 'pt-0'}`}
-                          style={{fontFamily: '"DIN Arabic Regular"', letterSpacing: '0.1em', fontSize: '14px'}}
+                          className={`text-xs lg:text-sm text-gray-600 mb-2 ${index == 0 ? "pt-4 lg:pt-6" : "pt-0"}`}
+                          style={{
+                            fontFamily: '"DIN Arabic Regular"',
+                            letterSpacing: "0.1em",
+                            fontSize: "14px",
+                          }}
                           data-testid={`article-categories-${article.id}`}
                           initial={{ x: -10, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
-                          transition={{ delay: 1.4 + index * 0.2, duration: 0.5 }}
+                          transition={{
+                            delay: 1.4 + index * 0.2,
+                            duration: 0.5,
+                          }}
                         >
-                          in {article.categories.join(', ')}
+                          in {article.categories.join(", ")}
                         </motion.div>
                         <motion.h4
                           className="mb-2"
                           initial={{ x: -10, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
-                          transition={{ delay: 1.5 + index * 0.2, duration: 0.5 }}
+                          transition={{
+                            delay: 1.5 + index * 0.2,
+                            duration: 0.5,
+                          }}
                         >
                           <a
                             href={`/blogs/${article.id}`}
                             className="hover:underline text-base lg:text-lg font-dinBold"
-                            style={{fontSize: '20px', letterSpacing: '1px', color: '#403F3F'}}
+                            style={{
+                              fontSize: "20px",
+                              letterSpacing: "1px",
+                              color: "#403F3F",
+                            }}
                             data-testid={`article-title-${article.id}`}
                           >
                             {article.title}
@@ -774,11 +778,18 @@ const Home = () => {
                         </motion.h4>
                         <motion.p
                           className="text-sm lg:text-base font-din-arabic"
-                          style={{fontSize: '16px', letterSpacing: '1px', color: '#626262'}}
+                          style={{
+                            fontSize: "16px",
+                            letterSpacing: "1px",
+                            color: "#626262",
+                          }}
                           data-testid={`article-excerpt-${article.id}`}
                           initial={{ y: 10, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 1.6 + index * 0.2, duration: 0.5 }}
+                          transition={{
+                            delay: 1.6 + index * 0.2,
+                            duration: 0.5,
+                          }}
                         >
                           {article.excerpt}
                         </motion.p>
@@ -826,7 +837,7 @@ const Home = () => {
             >
               <motion.h2
                 className="font-american-typewriter pb-4 lg:pb-6 text-2xl md:text-3xl tracking-tight uppercase"
-                style={{ fontWeight: "bold"}}
+                style={{ fontWeight: "bold" }}
                 initial={{ x: -30, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.5, duration: 0.8 }}
@@ -835,7 +846,10 @@ const Home = () => {
               </motion.h2>
               <motion.h2
                 className="font-american-typewriter pt-2 text-3xl tracking-tight uppercase"
-                style={{ boxShadow: "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca" }}
+                style={{
+                  boxShadow:
+                    "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca",
+                }}
                 initial={{ x: -30, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.5, duration: 0.8 }}
@@ -844,12 +858,12 @@ const Home = () => {
               </motion.h2>
             </motion.div>
 
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8" >
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
               {/* Left Side - 2 Blogs (70%) */}
               <div className="flex-1 w-full lg:w-[70%]">
                 <motion.div
                   className="pb-8 lg:pb-12"
-                  style={{ paddingBottom: '40px' }}
+                  style={{ paddingBottom: "40px" }}
                   initial={{ y: 40, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.9, duration: 0.8 }}
@@ -884,7 +898,7 @@ const Home = () => {
                     {/* Text = 35 */}
                     <motion.div
                       className="w-full md:w-1/2 flex flex-col"
-                      style={{ paddingBottom: '5px', position: "relative" }}
+                      style={{ paddingBottom: "5px", position: "relative" }}
                       initial={{ x: 30, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 1.2, duration: 0.8 }}
@@ -900,7 +914,7 @@ const Home = () => {
                         </motion.h3>
                         <motion.p
                           className="text-sm lg:text-base font-dinRegular text-[#535c4a] mb-3 lg:mb-4"
-                          style={{fontSize: '16px'}}
+                          style={{ fontSize: "16px" }}
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.5, duration: 0.6 }}
@@ -909,19 +923,23 @@ const Home = () => {
                         </motion.p>
                         <motion.p
                           className="leading-relaxed text-sm lg:text-base font-din-arabic"
-                          style={{letterSpacing: '1px', color: '#626262', fontSize: '16px'}}
+                          style={{
+                            letterSpacing: "1px",
+                            color: "#626262",
+                            fontSize: "16px",
+                          }}
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.6, duration: 0.6 }}
                         >
-                          Sometimes it is easier to learn which advisors you should
-                          avoid versus learning how to select the best advisors...
+                          Sometimes it is easier to learn which advisors you should avoid versus
+                          learning how to select the best advisors...
                         </motion.p>
                       </div>
                       <motion.a
                         href="#"
                         className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline mt-4 hidden lg:block"
-                        style={{position: "absolute", bottom: "0"}}
+                        style={{ position: "absolute", bottom: "0" }}
                         initial={{ y: 10, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 1.7, duration: 0.6 }}
@@ -952,7 +970,7 @@ const Home = () => {
                     {/* Left: Title + Author + Image */}
                     <motion.div
                       className="w-full md:w-1/2 flex flex-col"
-                      style={{ borderTop: '1px solid #D3D2CA' }}
+                      style={{ borderTop: "1px solid #D3D2CA" }}
                       initial={{ x: -30, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 1.5, duration: 0.8 }}
@@ -965,8 +983,7 @@ const Home = () => {
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.7, duration: 0.6 }}
                         >
-                          US Open 2017 latest: Women's semi-final results and Nadal
-                          vs Del Potro
+                          US Open 2017 latest: Women's semi-final results and Nadal vs Del Potro
                         </motion.h3>
                         <motion.p
                           className="text-xs lg:text-sm italic text-gray-600"
@@ -1008,8 +1025,8 @@ const Home = () => {
                     <motion.div
                       className="w-full md:w-1/2 flex flex-col justify-between pb-6 lg:pb-10"
                       style={{
-                        borderTop: '1px solid #D3D2CA',
-                        paddingBottom: '5px',
+                        borderTop: "1px solid #D3D2CA",
+                        paddingBottom: "5px",
                       }}
                       initial={{ x: 30, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
@@ -1018,35 +1035,45 @@ const Home = () => {
                       <div>
                         <motion.p
                           className="leading-relaxed mb-3 lg:mb-4 pt-4 lg:pt-6 text-sm lg:text-base font-din-arabic"
-                          style={{letterSpacing: '1px', color: '#626262', fontSize: '16px'}}
+                          style={{
+                            letterSpacing: "1px",
+                            color: "#626262",
+                            fontSize: "16px",
+                          }}
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.8, duration: 0.6 }}
                         >
-                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          Sed tincidunt porta velit, sed suscipit massa consequat
-                          sed.
+                          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt
+                          porta velit, sed suscipit massa consequat sed.
                         </motion.p>
                         <motion.p
                           className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic"
-                          style={{letterSpacing: '1px', color: '#626262', fontSize: '16px'}}
+                          style={{
+                            letterSpacing: "1px",
+                            color: "#626262",
+                            fontSize: "16px",
+                          }}
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.9, duration: 0.6 }}
                         >
-                          Quisque auctor justo eu odio tincidunt, vitae consectetur
-                          nulla consequat. Nam vel aliquet turpis, ac sollicitudin
-                          nisl.
+                          Quisque auctor justo eu odio tincidunt, vitae consectetur nulla consequat.
+                          Nam vel aliquet turpis, ac sollicitudin nisl.
                         </motion.p>
                         <motion.p
                           className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic"
-                          style={{letterSpacing: '1px', color: '#626262', fontSize: '16px'}}
+                          style={{
+                            letterSpacing: "1px",
+                            color: "#626262",
+                            fontSize: "16px",
+                          }}
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 2.0, duration: 0.6 }}
                         >
-                          Cras erat leo, mollis sit amet lacus a, tristique euismod
-                          quam. Suspendisse viverra a turpis in sodales.
+                          Cras erat leo, mollis sit amet lacus a, tristique euismod quam.
+                          Suspendisse viverra a turpis in sodales.
                         </motion.p>
                       </div>
                       <motion.a
@@ -1113,16 +1140,19 @@ const Home = () => {
                     </motion.p>
                     <motion.p
                       className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic"
-                      style={{letterSpacing: '1px', color: '#626262', fontSize: '16px'}}
+                      style={{
+                        letterSpacing: "1px",
+                        color: "#626262",
+                        fontSize: "16px",
+                      }}
                       initial={{ y: 15, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 1.9, duration: 0.6 }}
                     >
-                      In the latest installment of this series that goes inside the
-                      private working worlds of designers, Simone Rocha, founder and
-                      creative director of her own fashion line, discusses life in
-                      East London, the importance of shoes you can walk in, and
-                      fighting with her father.
+                      In the latest installment of this series that goes inside the private working
+                      worlds of designers, Simone Rocha, founder and creative director of her own
+                      fashion line, discusses life in East London, the importance of shoes you can
+                      walk in, and fighting with her father.
                     </motion.p>
                     <motion.a
                       href="#"
@@ -1145,10 +1175,7 @@ const Home = () => {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 2.3, duration: 0.8 }}
             >
-              <a
-                href="#"
-                className="text-xs lg:text-sm font-medium text-gray-900 hover:underline"
-              >
+              <a href="#" className="text-xs lg:text-sm font-medium text-gray-900 hover:underline">
                 VIEW MORE POSTS
               </a>
             </motion.div>
@@ -1171,7 +1198,7 @@ const Home = () => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
-            > 
+            >
               The Botanist’s Circle
             </motion.h2>
             <motion.p
@@ -1179,7 +1206,7 @@ const Home = () => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
-            > 
+            >
               Newsletter dispatches from the lab — when there’s something worth sharing.
             </motion.p>
 
@@ -1201,12 +1228,14 @@ const Home = () => {
                 className="flex-1 w-full px-4 py-3 border border-gray-300 bg-white text-black placeholder-gray-500 italic focus:outline-none focus:border-black transition-colors"
                 style={{ fontFamily: '"font-din-arabic"' }}
               />
-              
+
               {/* Subscribe Button */}
               <button
                 type="submit"
                 className="w-full sm:w-auto px-8 py-3 bg-black text-white font-american-typewriter font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors"
-              >Join the Circle              </button>
+              >
+                Join the Circle{" "}
+              </button>
             </motion.form>
           </motion.div>
         </div>
@@ -1216,7 +1245,7 @@ const Home = () => {
       <motion.div
         className="w-full h-1 bg-black"
         initial={{ width: 0 }}
-        animate={{ width: '100%' }}
+        animate={{ width: "100%" }}
         transition={{ delay: 0.8, duration: 1.0 }}
       />
     </div>

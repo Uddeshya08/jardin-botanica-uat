@@ -1,7 +1,8 @@
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import Input from "@modules/common/components/input"
-import React, { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
+import type React from "react"
+import { useEffect, useState } from "react"
 import { Label } from "../../../../app/components/ui/label"
 import {
   Select,
@@ -125,17 +126,18 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
       try {
         const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`)
         const data = await response.json()
-        
-        if (data && data[0]?.Status === 'Success' && data[0]?.PostOffice?.length > 0) {
+
+        if (data && data[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
           const postOffice = data[0].PostOffice[0]
           setFormData((prev: any) => ({
             ...prev,
-            "billing_address.city": postOffice.District || postOffice.Name || prev["billing_address.city"],
-            "billing_address.province": postOffice.State || prev["billing_address.province"]
+            "billing_address.city":
+              postOffice.District || postOffice.Name || prev["billing_address.city"],
+            "billing_address.province": postOffice.State || prev["billing_address.province"],
           }))
         }
       } catch (error) {
-        console.error('Error fetching postal code data:', error)
+        console.error("Error fetching postal code data:", error)
       } finally {
         setIsLoadingPostalData(false)
       }
@@ -151,9 +153,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
   }, [formData["billing_address.postal_code"]])
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLInputElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLInputElement | HTMLSelectElement>
   ) => {
     if (e.target.name === "fullName") {
       const fullName = e.target.value

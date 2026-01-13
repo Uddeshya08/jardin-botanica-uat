@@ -1,9 +1,6 @@
-import { RefObject, useEffect, useState } from "react"
+import { type RefObject, useEffect, useState } from "react"
 
-export const useIntersection = (
-  element: RefObject<HTMLDivElement | null>,
-  rootMargin: string
-) => {
+export const useIntersection = (element: RefObject<HTMLDivElement | null>, rootMargin: string) => {
   const [isVisible, setState] = useState(false)
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 "use server"
 
 import { sdk } from "@lib/config"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { getRegion } from "./regions"
 
@@ -109,10 +109,7 @@ export const searchProducts = async ({
 /**
  * Generate suggested search terms based on query and products
  */
-function generateSuggestedTerms(
-  query: string,
-  products: HttpTypes.StoreProduct[]
-): string[] {
+function generateSuggestedTerms(query: string, products: HttpTypes.StoreProduct[]): string[] {
   const suggestions = new Set<string>()
   const queryLower = query.toLowerCase()
 
@@ -154,26 +151,16 @@ function generateSuggestedTerms(
 /**
  * Get all available categories for search
  */
-export const getAllCategories = async (
-  countryCode: string
-): Promise<string[]> => {
+export const getAllCategories = async (countryCode: string): Promise<string[]> => {
   try {
     const region = await getRegion(countryCode)
     if (!region) return []
 
     // This would fetch all categories from your backend
     // For now, return common categories
-    return [
-      "Hair Care",
-      "Hand Care",
-      "Body Care",
-      "Home Creations",
-      "Gift Sets",
-      "Candles",
-    ]
+    return ["Hair Care", "Hand Care", "Body Care", "Home Creations", "Gift Sets", "Candles"]
   } catch (error) {
     console.error("Error fetching categories:", error)
     return []
   }
 }
-

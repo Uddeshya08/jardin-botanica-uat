@@ -3,18 +3,18 @@
 import { listCartOptions, setShippingMethod, updateCart } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
 import { CheckCircleSolid } from "@medusajs/icons"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { Button, Heading, Text, useToggleState } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
 import { ChevronLeft } from "lucide-react"
+import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
-import Link from "next/link"
 
 const Addresses = ({
   cart,
@@ -73,19 +73,14 @@ const Addresses = ({
       // Step 1: Set addresses first using updateCart (without redirect)
       const addressData = {
         shipping_address: {
-          first_name:
-            formData.get("shipping_address.first_name")?.toString() || "",
-          last_name:
-            formData.get("shipping_address.last_name")?.toString() || "",
-          address_1:
-            formData.get("shipping_address.address_1")?.toString() || "",
+          first_name: formData.get("shipping_address.first_name")?.toString() || "",
+          last_name: formData.get("shipping_address.last_name")?.toString() || "",
+          address_1: formData.get("shipping_address.address_1")?.toString() || "",
           address_2: "",
           company: formData.get("shipping_address.company")?.toString() || "",
-          postal_code:
-            formData.get("shipping_address.postal_code")?.toString() || "",
+          postal_code: formData.get("shipping_address.postal_code")?.toString() || "",
           city: formData.get("shipping_address.city")?.toString() || "",
-          country_code:
-            formData.get("shipping_address.country_code")?.toString() || "",
+          country_code: formData.get("shipping_address.country_code")?.toString() || "",
           province: formData.get("shipping_address.province")?.toString() || "",
           phone: formData.get("shipping_address.phone")?.toString() || "",
         },
@@ -97,19 +92,14 @@ const Addresses = ({
         addressData.billing_address = addressData.shipping_address
       } else {
         addressData.billing_address = {
-          first_name:
-            formData.get("billing_address.first_name")?.toString() || "",
-          last_name:
-            formData.get("billing_address.last_name")?.toString() || "",
-          address_1:
-            formData.get("billing_address.address_1")?.toString() || "",
+          first_name: formData.get("billing_address.first_name")?.toString() || "",
+          last_name: formData.get("billing_address.last_name")?.toString() || "",
+          address_1: formData.get("billing_address.address_1")?.toString() || "",
           address_2: "",
           company: formData.get("billing_address.company")?.toString() || "",
-          postal_code:
-            formData.get("billing_address.postal_code")?.toString() || "",
+          postal_code: formData.get("billing_address.postal_code")?.toString() || "",
           city: formData.get("billing_address.city")?.toString() || "",
-          country_code:
-            formData.get("billing_address.country_code")?.toString() || "",
+          country_code: formData.get("billing_address.country_code")?.toString() || "",
           province: formData.get("billing_address.province")?.toString() || "",
           phone: formData.get("billing_address.phone")?.toString() || "",
         }
@@ -152,9 +142,7 @@ const Addresses = ({
     } catch (error: any) {
       console.error("Error submitting form:", error)
       const errorMessage =
-        error?.message ||
-        error?.toString() ||
-        "An error occurred. Please try again."
+        error?.message || error?.toString() || "An error occurred. Please try again."
       setSubmitError(errorMessage)
       setIsSubmitting(false)
     }
@@ -201,15 +189,8 @@ const Addresses = ({
 
             {!sameAsBilling && <BillingAddress cart={cart} />}
             {/* Hidden input to indicate if billing address is same as shipping */}
-            <input
-              type="hidden"
-              name="same_as_billing"
-              value={sameAsBilling ? "on" : ""}
-            />
-            <ErrorMessage
-              error={submitError}
-              data-testid="address-error-message"
-            />
+            <input type="hidden" name="same_as_billing" value={sameAsBilling ? "on" : ""} />
+            <ErrorMessage error={submitError} data-testid="address-error-message" />
           </div>
           <div className="flex items-center justify-between pt-4">
             {items && items.length > 0 ? (
@@ -238,49 +219,35 @@ const Addresses = ({
             {cart && cart.shipping_address ? (
               <div className="flex items-start gap-x-8">
                 <div className="flex items-start gap-x-1 w-full">
-                  <div
-                    className="flex flex-col w-1/3"
-                    data-testid="shipping-address-summary"
-                  >
+                  <div className="flex flex-col w-1/3" data-testid="shipping-address-summary">
                     <Text className="txt-medium-plus font-din-arabic text-sm text-black/70 tracking-wide mb-1">
                       Shipping Address
                     </Text>
                     <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.first_name}{" "}
-                      {cart.shipping_address.last_name}
+                      {cart.shipping_address.first_name} {cart.shipping_address.last_name}
                     </Text>
                     <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.address_1}{" "}
-                      {cart.shipping_address.address_2}
+                      {cart.shipping_address.address_1} {cart.shipping_address.address_2}
                     </Text>
                     <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.postal_code},{" "}
-                      {cart.shipping_address.city}
+                      {cart.shipping_address.postal_code}, {cart.shipping_address.city}
                     </Text>
                     <Text className="txt-medium text-ui-fg-subtle">
                       {cart.shipping_address.country_code?.toUpperCase()}
                     </Text>
                   </div>
 
-                  <div
-                    className="flex flex-col w-1/3 "
-                    data-testid="shipping-contact-summary"
-                  >
+                  <div className="flex flex-col w-1/3 " data-testid="shipping-contact-summary">
                     <Text className="txt-medium-plus font-din-arabic text-sm text-black/70 tracking-wide mb-1">
                       Contact
                     </Text>
                     <Text className="txt-medium text-ui-fg-subtle">
                       {cart.shipping_address.phone}
                     </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.email}
-                    </Text>
+                    <Text className="txt-medium text-ui-fg-subtle">{cart.email}</Text>
                   </div>
 
-                  <div
-                    className="flex flex-col w-1/3"
-                    data-testid="billing-address-summary"
-                  >
+                  <div className="flex flex-col w-1/3" data-testid="billing-address-summary">
                     <Text
                       style={{ padding: "2rem 0" }}
                       className="font-medium h2-core flex flex-row text-3xl-regular gap-x-2 items-baseline font-american-typewriter text-xl sm:text-2xl md:text-3xl tracking-wide"
@@ -295,16 +262,13 @@ const Addresses = ({
                     ) : (
                       <>
                         <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.first_name}{" "}
-                          {cart.billing_address?.last_name}
+                          {cart.billing_address?.first_name} {cart.billing_address?.last_name}
                         </Text>
                         <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.address_1}{" "}
-                          {cart.billing_address?.address_2}
+                          {cart.billing_address?.address_1} {cart.billing_address?.address_2}
                         </Text>
                         <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.postal_code},{" "}
-                          {cart.billing_address?.city}
+                          {cart.billing_address?.postal_code}, {cart.billing_address?.city}
                         </Text>
                         <Text className="txt-medium text-ui-fg-subtle">
                           {cart.billing_address?.country_code?.toUpperCase()}

@@ -1,12 +1,13 @@
 "use client"
 
-import React, { useEffect, useState, useActionState } from "react"
-import { useRouter, useParams, useSearchParams } from "next/navigation"
-import { motion } from "motion/react"
-import { Eye, EyeOff, Lock, CheckCircle } from "lucide-react"
 import { resetPassword } from "@lib/data/customer"
-import { RippleEffect } from "app/components/RippleEffect"
 import { Navigation } from "app/components/Navigation"
+import { RippleEffect } from "app/components/RippleEffect"
+import { CheckCircle, Eye, EyeOff, Lock } from "lucide-react"
+import { motion } from "motion/react"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
+import type React from "react"
+import { useActionState, useEffect, useState } from "react"
 
 interface CartItem {
   id: string
@@ -26,11 +27,11 @@ export default function ResetPasswordPage() {
   const router = useRouter()
   const params = useParams()
   const searchParams = useSearchParams()
-  const countryCode = params?.countryCode as string || 'us'
-  
+  const countryCode = (params?.countryCode as string) || "us"
+
   const email = searchParams.get("email") || ""
   const token = searchParams.get("token") || ""
-  
+
   const [isScrolled, setIsScrolled] = useState(false)
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [showPassword, setShowPassword] = useState(false)
@@ -104,11 +105,7 @@ export default function ResetPasswordPage() {
   return (
     <div>
       <RippleEffect />
-      <Navigation
-        isScrolled={isScrolled}
-        cartItems={cartItems}
-        onCartUpdate={handleCartUpdate}
-      />
+      <Navigation isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} />
 
       <div className="min-h-screen pt-44 pb-12" style={{ backgroundColor: "#e3e3d8" }}>
         <div className="container mx-auto px-4 lg:px-12">
@@ -159,7 +156,11 @@ export default function ResetPasswordPage() {
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-black/40 hover:text-black"
                         aria-label="Toggle password visibility"
                       >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -185,15 +186,15 @@ export default function ResetPasswordPage() {
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-black/40 hover:text-black"
                         aria-label="Toggle password visibility"
                       >
-                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showConfirmPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
-                    {!passwordsMatch && (
-                      <ErrorText error="Passwords do not match" />
-                    )}
-                    {formState && !formState.success && (
-                      <ErrorText error={formState.message} />
-                    )}
+                    {!passwordsMatch && <ErrorText error="Passwords do not match" />}
+                    {formState && !formState.success && <ErrorText error={formState.message} />}
                   </div>
 
                   <div className="bg-black/5 rounded-lg p-4">
@@ -236,7 +237,7 @@ export default function ResetPasswordPage() {
                 <h2 className="font-american-typewriter text-2xl mb-4 text-black">
                   Password Reset Successfully
                 </h2>
-                
+
                 <p className="font-din-arabic text-sm text-black/70 leading-relaxed mb-8">
                   Your password has been updated. You can now sign in with your new password.
                 </p>
@@ -261,4 +262,3 @@ export default function ResetPasswordPage() {
     </div>
   )
 }
-

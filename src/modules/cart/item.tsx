@@ -1,6 +1,6 @@
 "use client"
-import { useRouter } from "next/navigation"
 import { updateLineItemAction } from "@lib/data/cart-actions"
+import { useRouter } from "next/navigation"
 
 // inside component:
 const router = useRouter()

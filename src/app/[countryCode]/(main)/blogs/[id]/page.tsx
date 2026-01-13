@@ -1,7 +1,7 @@
 "use client"
-import React from "react"
-import { motion, AnimatePresence } from "motion/react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
+import React from "react"
 
 const SingleBlogPage = () => {
   // Custom styles object - copied from your blogs page
@@ -159,10 +159,7 @@ const SingleBlogPage = () => {
 
   return (
     <div className="bg-[#FEFDF3] min-h-screen">
-      <div
-        className="max-w-7xl mx-auto py-12 px-4 md:px-6"
-        style={{ marginTop: "70px" }}
-      >
+      <div className="max-w-7xl mx-auto py-12 px-4 md:px-6" style={{ marginTop: "70px" }}>
         <div className="flex flex-col md:flex-row gap-6 md:gap-16">
           {/* Main Content - Left Side */}
           <div
@@ -344,18 +341,15 @@ const SingleBlogPage = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 1.2, duration: 0.6 }}
                 >
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-                  ultrices ipsum non mattis pharetra. Integer blandit non felis
-                  sit amet pharetra. Integer mollis eget felis non finibus.
-                  Nullam nibh mauris, fermentum vitae felis vehicula, aliquam
-                  bibendum sapien. In euismod velit vitae neque rhoncus congue.
-                  Aliquam luctus, sapien in consectetur cursus, quam urna
-                  euismod magna, sed pellentesque massa libero eu lorem. Aenean
-                  rhoncus gravida nisl vel pretium. Nam ac nisl non ipsum
-                  vestibulum vehicula vulputate sagittis magna. Aenean est nisl,
-                  convallis volutpat tempor ac, tempus ac ante. Class aptent
-                  taciti sociosqu ad litora torquent per conubia nostra, per
-                  inceptos himenaeos. Fusce rhoncus sodales tempor. Nunc pretium
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ultrices ipsum non
+                  mattis pharetra. Integer blandit non felis sit amet pharetra. Integer mollis eget
+                  felis non finibus. Nullam nibh mauris, fermentum vitae felis vehicula, aliquam
+                  bibendum sapien. In euismod velit vitae neque rhoncus congue. Aliquam luctus,
+                  sapien in consectetur cursus, quam urna euismod magna, sed pellentesque massa
+                  libero eu lorem. Aenean rhoncus gravida nisl vel pretium. Nam ac nisl non ipsum
+                  vestibulum vehicula vulputate sagittis magna. Aenean est nisl, convallis volutpat
+                  tempor ac, tempus ac ante. Class aptent taciti sociosqu ad litora torquent per
+                  conubia nostra, per inceptos himenaeos. Fusce rhoncus sodales tempor. Nunc pretium
                   tortor felis, eget cursus magna accumsan a.
                 </motion.p>
 
@@ -370,13 +364,12 @@ const SingleBlogPage = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 1.3, duration: 0.6 }}
                 >
-                  Etiam eu molestie eros, commodo hendrerit sapien. Maecenas
-                  tempus leo ac nisi iaculis porta. Sed sapien tortor, aliquet a
-                  velit ut, lacinia molestie velit. Maecenas ornare consequat
-                  massa ullamcorper dapibus. Aliquam auctor, sapien sit amet
-                  accumsan facilisis, enim enim aliquet arcu, tincidunt
-                  pellentesque justo turpis id neque. Duis eleifend nunc sit
-                  amet mi dapibus ornare. Suspendisse vel libero sem.
+                  Etiam eu molestie eros, commodo hendrerit sapien. Maecenas tempus leo ac nisi
+                  iaculis porta. Sed sapien tortor, aliquet a velit ut, lacinia molestie velit.
+                  Maecenas ornare consequat massa ullamcorper dapibus. Aliquam auctor, sapien sit
+                  amet accumsan facilisis, enim enim aliquet arcu, tincidunt pellentesque justo
+                  turpis id neque. Duis eleifend nunc sit amet mi dapibus ornare. Suspendisse vel
+                  libero sem.
                 </motion.p>
 
                 <motion.p
@@ -390,13 +383,12 @@ const SingleBlogPage = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 1.4, duration: 0.6 }}
                 >
-                  Sed nec blandit nibh. Pellentesque commodo suscipit gravida.
-                  Sed sit amet ex sed mi dignissim elementum in ut quam. Vivamus
-                  laoreet non mauris eget mattis. Nam turpis orci, consectetur
-                  vel accumsan sed, condimentum et sapien. Nunc ut egestas
-                  neque, eu hendrerit lacus. Suspendisse fermentum congue dui
-                  nec fringilla. Duis volutpat nunc lectus. Suspendisse potenti.
-                  Suspendisse egestas venenatis nunc. Donec et laoreet lacus.
+                  Sed nec blandit nibh. Pellentesque commodo suscipit gravida. Sed sit amet ex sed
+                  mi dignissim elementum in ut quam. Vivamus laoreet non mauris eget mattis. Nam
+                  turpis orci, consectetur vel accumsan sed, condimentum et sapien. Nunc ut egestas
+                  neque, eu hendrerit lacus. Suspendisse fermentum congue dui nec fringilla. Duis
+                  volutpat nunc lectus. Suspendisse potenti. Suspendisse egestas venenatis nunc.
+                  Donec et laoreet lacus.
                 </motion.p>
 
                 <motion.p
@@ -410,18 +402,15 @@ const SingleBlogPage = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 1.5, duration: 0.6 }}
                 >
-                  Pellentesque habitant morbi tristique senectus et netus et
-                  malesuada fames ac turpis egestas. Aliquam quam elit, mollis
-                  at odio gravida, ultrices pulvinar justo. Vivamus eleifend
-                  mollis dolor, et ornare turpis vehicula in. Pellentesque
-                  auctor ac enim sit amet euismod. Ut eu accumsan nunc. Nam
-                  ultrices, orci a volutpat molestie, ipsum magna posuere ex,
-                  vel lobortis dolor purus tristique purus. Integer arcu libero,
-                  feugiat non eros vel, aliquet sodales justo. Aliquam lobortis
-                  efficitur velit, vel tempor dui iaculis non. Mauris non
-                  ullamcorper leo. Nulla consectetur arcu eget condimentum
-                  auctor. Aliquam sagittis dictum augue. Duis fringilla nec
-                  augue eu laoreet.
+                  Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac
+                  turpis egestas. Aliquam quam elit, mollis at odio gravida, ultrices pulvinar
+                  justo. Vivamus eleifend mollis dolor, et ornare turpis vehicula in. Pellentesque
+                  auctor ac enim sit amet euismod. Ut eu accumsan nunc. Nam ultrices, orci a
+                  volutpat molestie, ipsum magna posuere ex, vel lobortis dolor purus tristique
+                  purus. Integer arcu libero, feugiat non eros vel, aliquet sodales justo. Aliquam
+                  lobortis efficitur velit, vel tempor dui iaculis non. Mauris non ullamcorper leo.
+                  Nulla consectetur arcu eget condimentum auctor. Aliquam sagittis dictum augue.
+                  Duis fringilla nec augue eu laoreet.
                 </motion.p>
 
                 {/* Tags */}
@@ -543,11 +532,10 @@ const SingleBlogPage = () => {
                     cmsmasters
                   </h2>
                   <p style={styles.subCopy}>
-                    Cmsmasters Studio is a union of 25 people who are completely
-                    into innovative website design and progressive website
-                    development. Yes, we believe we can make the world be more
-                    beautiful. And as we specialize on WordPress themes, we do
-                    our job the best way it can be done.
+                    Cmsmasters Studio is a union of 25 people who are completely into innovative
+                    website design and progressive website development. Yes, we believe we can make
+                    the world be more beautiful. And as we specialize on WordPress themes, we do our
+                    job the best way it can be done.
                   </p>
                 </div>
               </div>
@@ -560,10 +548,7 @@ const SingleBlogPage = () => {
               </div>
 
               {/* blogs */}
-              <div
-                className="flex justify-between gap-4"
-                style={{ marginTop: "20px" }}
-              >
+              <div className="flex justify-between gap-4" style={{ marginTop: "20px" }}>
                 {/* first */}
                 <div className="flex flex-col gap-4">
                   <p>August 24, 2017</p>
@@ -571,9 +556,8 @@ const SingleBlogPage = () => {
                     Want to Make Creamed Corn Into a Meal? Add Shrimp
                   </h2>
                   <p style={styles.subCopy}>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem
-                    architecto ratione similique non quidem quaerat odio
-                    nesciunt enim fuga totam?
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem architecto ratione
+                    similique non quidem quaerat odio nesciunt enim fuga totam?
                   </p>
                   <h3 style={styles.subsequentHeading3} className="uppercase">
                     Read more
@@ -587,9 +571,8 @@ const SingleBlogPage = () => {
                     Want to Make Creamed Corn Into a Meal? Add Shrimp
                   </h2>
                   <p style={styles.subCopy}>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem
-                    architecto ratione similique non quidem quaerat odio
-                    nesciunt enim fuga totam?
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem architecto ratione
+                    similique non quidem quaerat odio nesciunt enim fuga totam?
                   </p>
                   <h3 style={styles.subsequentHeading3} className="uppercase">
                     Read more
@@ -603,9 +586,8 @@ const SingleBlogPage = () => {
                     Want to Make Creamed Corn Into a Meal? Add Shrimp
                   </h2>
                   <p style={styles.subCopy}>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem
-                    architecto ratione similique non quidem quaerat odio
-                    nesciunt enim fuga totam?
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem architecto ratione
+                    similique non quidem quaerat odio nesciunt enim fuga totam?
                   </p>
                   <h3 style={styles.subsequentHeading3} className="uppercase">
                     Read more
@@ -615,12 +597,7 @@ const SingleBlogPage = () => {
             </div>
           </div>
 
-          <motion.div
-            className=""
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
+          <motion.div className="" variants={containerVariants} initial="hidden" animate="visible">
             <div className="p-6" style={{ width: "300px" }}>
               {/* Latest Articles Section */}
               <motion.div variants={itemVariants}>
@@ -629,15 +606,8 @@ const SingleBlogPage = () => {
                 </h2>
                 <motion.ul className="space-y-3">
                   {latestArticles.map((article, index) => (
-                    <motion.li
-                      key={index}
-                      variants={itemVariants}
-                      whileHover="hover"
-                    >
-                      <motion.div
-                        className="flex items-start"
-                        variants={textHoverVariants}
-                      >
+                    <motion.li key={index} variants={itemVariants} whileHover="hover">
+                      <motion.div className="flex items-start" variants={textHoverVariants}>
                         <span className=" mr-2 mt-1">•</span>
                         <motion.a
                           href="#"
@@ -677,11 +647,7 @@ const SingleBlogPage = () => {
                   </div>
                 </div>
 
-                <motion.div
-                  className="overflow-hidden"
-                  variants={imageVariants}
-                  whileHover="hover"
-                >
+                <motion.div className="overflow-hidden" variants={imageVariants} whileHover="hover">
                   <motion.img
                     src="/assets/car.jpg"
                     alt="Recommended article"
@@ -702,11 +668,7 @@ const SingleBlogPage = () => {
               </motion.div>
 
               {/* Top Searches Section */}
-              <motion.div
-                className="mt-12"
-                variants={itemVariants}
-                style={{ marginTop: "10px" }}
-              >
+              <motion.div className="mt-12" variants={itemVariants} style={{ marginTop: "10px" }}>
                 <h2 style={styles.subsequentHeading3} className=" mb-4">
                   TOP SEARCHES
                 </h2>

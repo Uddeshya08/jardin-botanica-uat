@@ -1,5 +1,5 @@
-import { HttpTypes } from "@medusajs/types"
-import { NextRequest, NextResponse } from "next/server"
+import type { HttpTypes } from "@medusajs/types"
+import { type NextRequest, NextResponse } from "next/server"
 
 const BACKEND_URL = process.env.MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
@@ -19,10 +19,7 @@ async function getRegionMap(cacheId: string) {
     )
   }
 
-  if (
-    !regionMap.keys().next().value ||
-    regionMapUpdated < Date.now() - 3600 * 1000
-  ) {
+  if (!regionMap.keys().next().value || regionMapUpdated < Date.now() - 3600 * 1000) {
     // Fetch regions from Medusa. We can't use the JS client here because middleware is running on Edge and the client needs a Node environment.
     const { regions } = await fetch(`${BACKEND_URL}/store/regions`, {
       headers: {
@@ -42,12 +39,9 @@ async function getRegionMap(cacheId: string) {
 
       return json
     })
-    
 
     if (!regions?.length) {
-      throw new Error(
-        "No regions found. Please set up regions in your Medusa Admin."
-      )
+      throw new Error("No regions found. Please set up regions in your Medusa Admin.")
     }
 
     // Create a map of country codes to regions.
@@ -75,9 +69,7 @@ async function getCountryCode(
   try {
     let countryCode
 
-    const vercelCountryCode = request.headers
-      .get("x-vercel-ip-country")
-      ?.toLowerCase()
+    const vercelCountryCode = request.headers.get("x-vercel-ip-country")?.toLowerCase()
 
     const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
 
@@ -109,9 +101,9 @@ export async function middleware(request: NextRequest) {
 
   let response = NextResponse.redirect(redirectUrl, 307)
 
-  let cacheIdCookie = request.cookies.get("_medusa_cache_id")
+  const cacheIdCookie = request.cookies.get("_medusa_cache_id")
 
-  let cacheId = cacheIdCookie?.value || crypto.randomUUID()
+  const cacheId = cacheIdCookie?.value || crypto.randomUUID()
 
   const regionMap = await getRegionMap(cacheId)
 
@@ -139,8 +131,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const redirectPath =
-    request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
+  const redirectPath = request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
 
   const queryString = request.nextUrl.search ? request.nextUrl.search : ""
 

@@ -7,13 +7,12 @@ import {
   ListboxOptions,
   Transition,
 } from "@headlessui/react"
+import { updateRegion } from "@lib/data/cart"
+import type { StateType } from "@lib/hooks/use-toggle-state"
+import type { HttpTypes } from "@medusajs/types"
+import { useParams, usePathname } from "next/navigation"
 import { Fragment, useEffect, useMemo, useState } from "react"
 import ReactCountryFlag from "react-country-flag"
-
-import { StateType } from "@lib/hooks/use-toggle-state"
-import { useParams, usePathname } from "next/navigation"
-import { updateRegion } from "@lib/data/cart"
-import { HttpTypes } from "@medusajs/types"
 
 type CountryOption = {
   country: string
@@ -28,8 +27,7 @@ type CountrySelectProps = {
 
 const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
   const [current, setCurrent] = useState<
-    | { country: string | undefined; region: string; label: string | undefined }
-    | undefined
+    { country: string | undefined; region: string; label: string | undefined } | undefined
   >(undefined)
 
   const { countryCode } = useParams()
@@ -39,14 +37,13 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
 
   const options = useMemo(() => {
     return regions
-      ?.map((r) => {
+      ?.flatMap((r) => {
         return r.countries?.map((c) => ({
           country: c.iso_2,
           region: r.id,
           label: c.display_name,
         }))
       })
-      .flat()
       .sort((a, b) => (a?.label ?? "").localeCompare(b?.label ?? ""))
   }, [regions])
 
@@ -67,11 +64,7 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
       <Listbox
         as="span"
         onChange={handleChange}
-        defaultValue={
-          countryCode
-            ? options?.find((o) => o?.country === countryCode)
-            : undefined
-        }
+        defaultValue={countryCode ? options?.find((o) => o?.country === countryCode) : undefined}
       >
         <ListboxButton className="py-1 w-full">
           <div className="txt-compact-small flex items-start gap-x-2">

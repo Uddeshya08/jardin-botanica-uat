@@ -1,21 +1,21 @@
-import React, { useState } from 'react'
-import { motion } from 'motion/react'
-import { useRouter } from 'next/navigation'
+import { motion } from "motion/react"
+import { useRouter } from "next/navigation"
+import React, { useState } from "react"
 
 export function FeaturedRitual() {
   const router = useRouter()
-  const [isPressed, setIsPressed] = useState(false);
+  const [isPressed, setIsPressed] = useState(false)
 
   const handleBuildRitual = () => {
-    router.push('/in/body-hands')
+    router.push("/in/body-hands")
   }
 
   const handleShopSet = () => {
-    router.push('in/gift-sets')
+    router.push("in/gift-sets")
   }
 
   return (
-    <section className="py-8 md:py-12 lg:py-20" style={{ backgroundColor: '#e3e3d8' }}>
+    <section className="py-8 md:py-12 lg:py-20" style={{ backgroundColor: "#e3e3d8" }}>
       <div className="flex flex-col md:flex-row">
         {/* Content - Left Side (40% width on desktop, full width on mobile) */}
         <motion.div
@@ -46,8 +46,8 @@ export function FeaturedRitual() {
           >
             Clean that isn't squeaky; softness that isn't sticky.
             <br />
-            Our signature hand care ritual combines purifying botanicals with
-            protective nourishment.
+            Our signature hand care ritual combines purifying botanicals with protective
+            nourishment.
           </motion.p>
 
           {/* Dual CTAs */}
@@ -94,7 +94,7 @@ export function FeaturedRitual() {
               className="w-full h-full object-cover"
               whileHover={{ scale: 1.03 }}
               animate={{ scale: isPressed ? 1.03 : 1 }}
-              transition={{ duration: 0.9, ease: 'easeOut' }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
               onTouchStart={() => setIsPressed(true)}
               onTouchEnd={() => setIsPressed(false)}
               onTouchCancel={() => setIsPressed(false)}

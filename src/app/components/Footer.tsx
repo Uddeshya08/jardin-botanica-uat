@@ -1,58 +1,72 @@
-'use client'
-import React from 'react'
-import { motion } from 'motion/react'
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
-import Link from 'next/link'
+"use client"
+import { motion } from "motion/react"
+import Image from "next/image"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import React from "react"
 
 export function Footer() {
   const pathname = usePathname()
-  
+
   // Get country code from pathname
   const getCountryCode = () => {
     if (pathname) {
-      const pathParts = pathname.split('/')
-      return pathParts[1] || 'in'
+      const pathParts = pathname.split("/")
+      return pathParts[1] || "in"
     }
-    return 'in'
+    return "in"
   }
 
   const countryCode = getCountryCode()
 
   const footerSections = [
     {
-      title: 'About Us',
+      title: "About Us",
       links: [
-        { name: 'Brand', href: `/${countryCode}/the-lab` },
-        { name: 'Journal', href: `/${countryCode}/blogs` },
-        { name: 'Careers', href: `/${countryCode}/careers` },
+        { name: "Brand", href: `/${countryCode}/the-lab` },
+        { name: "Journal", href: `/${countryCode}/blogs` },
+        { name: "Careers", href: `/${countryCode}/careers` },
       ],
     },
     {
-      title: 'Shop',
+      title: "Shop",
       links: [
-        { name: 'Body Hands', href: `/${countryCode}/body-hands` },
-        { name: 'Home Creations', href: `/${countryCode}/home-creations` },
-        
-        { name: 'Gift Sets', href: `/${countryCode}/gift-sets` },
+        { name: "Body Hands", href: `/${countryCode}/body-hands` },
+        { name: "Home Creations", href: `/${countryCode}/home-creations` },
+
+        { name: "Gift Sets", href: `/${countryCode}/gift-sets` },
       ],
     },
     {
-      title: 'Orders and Support',
+      title: "Orders and Support",
       links: [
-        { name: 'Order History', href: '/account/orders' },
-        { name: 'Track Your Order', href: '#' },
-        { name: 'Help & FAQs', href: `/${countryCode}/help-and-faqs` },
-        { name: 'Returns & Exchanges', href: `/${countryCode}/returns-and-exchanges` },
-        { name: 'Terms & Conditions', href: `/${countryCode}/terms-and-conditions` },
-        { name: 'Privacy Policy', href: `/${countryCode}/privacy-policy` },
+        { name: "Order History", href: "/account/orders" },
+        { name: "Track Your Order", href: "#" },
+        { name: "Help & FAQs", href: `/${countryCode}/help-and-faqs` },
+        {
+          name: "Returns & Exchanges",
+          href: `/${countryCode}/returns-and-exchanges`,
+        },
+        {
+          name: "Terms & Conditions",
+          href: `/${countryCode}/terms-and-conditions`,
+        },
+        { name: "Privacy Policy", href: `/${countryCode}/privacy-policy` },
       ],
     },
     {
-      title: 'Follow Us',
+      title: "Follow Us",
       links: [
-        { name: 'Instagram', href: 'https://instagram.com/jardinbotanica', external: true },
-        { name: 'Facebook', href: 'https://facebook.com/jardinbotanica', external: true },
+        {
+          name: "Instagram",
+          href: "https://instagram.com/jardinbotanica",
+          external: true,
+        },
+        {
+          name: "Facebook",
+          href: "https://facebook.com/jardinbotanica",
+          external: true,
+        },
       ],
     },
   ]
@@ -111,7 +125,7 @@ export function Footer() {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        whileHover={{ x: 4, color: '#ffffff' }}
+                        whileHover={{ x: 4, color: "#ffffff" }}
                         className="font-din-arabic text-sm text-white/60 hover:text-white transition-all duration-300 block"
                       >
                         {link.name}
@@ -119,7 +133,7 @@ export function Footer() {
                     ) : (
                       <Link href={link.href}>
                         <motion.span
-                          whileHover={{ x: 4, color: '#ffffff' }}
+                          whileHover={{ x: 4, color: "#ffffff" }}
                           className="font-din-arabic text-sm text-white/60 hover:text-white transition-all duration-300 block cursor-pointer"
                         >
                           {link.name}
@@ -162,20 +176,14 @@ export function Footer() {
             viewport={{ once: true }}
             className="flex items-center gap-2"
           >
-            <span className="font-din-arabic text-md text-white/60 ">
-              We accept:
-            </span>
+            <span className="font-din-arabic text-md text-white/60 ">We accept:</span>
             <div className="flex gap-3">
               {/* American Express */}
               <motion.div
                 whileHover={{ scale: 1.1 }}
                 className="w-10 h-8 bg-white rounded flex items-center justify-center"
               >
-                <img
-                  src="/assets/payment-amex.svg"
-                  alt="American Express"
-                  className="w-10 h-8"
-                />
+                <img src="/assets/payment-amex.svg" alt="American Express" className="w-10 h-8" />
               </motion.div>
 
               {/* PayPal */}
@@ -183,11 +191,7 @@ export function Footer() {
                 whileHover={{ scale: 1.1 }}
                 className="w-10 h-8 bg-white rounded flex items-center justify-center"
               >
-                <img
-                  src="/assets/payment-upi.svg"
-                  alt="PayPal"
-                  className="w-10 h-8"
-                />
+                <img src="/assets/payment-upi.svg" alt="PayPal" className="w-10 h-8" />
               </motion.div>
 
               {/* Visa */}
@@ -195,11 +199,7 @@ export function Footer() {
                 whileHover={{ scale: 1.1 }}
                 className="w-10 h-8 bg-white rounded flex items-center justify-center"
               >
-                <img
-                  src="/assets/payment-visa.svg"
-                  alt="Visa"
-                  className="w-10 h-8"
-                />
+                <img src="/assets/payment-visa.svg" alt="Visa" className="w-10 h-8" />
               </motion.div>
 
               {/* Mastercard */}
@@ -207,11 +207,7 @@ export function Footer() {
                 whileHover={{ scale: 1.1 }}
                 className="w-10 h-8 bg-white rounded flex items-center justify-center"
               >
-                <img
-                  src="/assets/payment-mastercard.svg"
-                  alt="Mastercard"
-                  className="w-10 h-8"
-                />
+                <img src="/assets/payment-mastercard.svg" alt="Mastercard" className="w-10 h-8" />
               </motion.div>
             </div>
           </motion.div>

@@ -1,16 +1,16 @@
 "use client"
-import React, { useState } from "react"
 import { motion } from "motion/react"
+import React, { useState } from "react"
 
 export function BespokeGifting() {
-  const [isPressed, setIsPressed] = useState(false);
+  const [isPressed, setIsPressed] = useState(false)
 
   const handleBeginConsultation = () => {
-    const email = 'hello@jardinbotanica.com';
-    const subject = 'Business Enquiry';
-    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
-  };
-  
+    const email = "hello@jardinbotanica.com"
+    const subject = "Business Enquiry"
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}`
+  }
+
   return (
     <section className="pt-8 md:pt-12 lg:pt-20 pb-0" style={{ backgroundColor: "#e3e3d8" }}>
       <div className="flex flex-col-reverse md:flex-row">
@@ -67,8 +67,8 @@ export function BespokeGifting() {
             viewport={{ once: true }}
             className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-6 md:mb-8"
           >
-            Every detail leaves an impression. We help you create tailored
-            offerings with curated selections and artisan finishing.
+            Every detail leaves an impression. We help you create tailored offerings with curated
+            selections and artisan finishing.
           </motion.p>
 
           {/* Personal Consultation Text */}
@@ -79,8 +79,8 @@ export function BespokeGifting() {
             viewport={{ once: true }}
             className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8 md:mb-12"
           >
-            Our specialists design solutions aligned with your brand, your
-            ideas, and the moments you want to elevate.
+            Our specialists design solutions aligned with your brand, your ideas, and the moments
+            you want to elevate.
           </motion.p>
 
           {/* Bottom Link */}

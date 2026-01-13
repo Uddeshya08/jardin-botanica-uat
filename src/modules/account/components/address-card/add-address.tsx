@@ -1,12 +1,14 @@
 "use client"
 
-import { Plus } from "@medusajs/icons"
-import { Button, Heading } from "@medusajs/ui"
-import { useEffect, useState, useActionState } from "react"
-
+import { addCustomerAddress } from "@lib/data/customer"
 import useToggleState from "@lib/hooks/use-toggle-state"
+import { Plus } from "@medusajs/icons"
+import type { HttpTypes } from "@medusajs/types"
+import { Button, Heading } from "@medusajs/ui"
 import CountrySelect from "@modules/checkout/components/country-select"
+import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
+import { useActionState, useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -14,9 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../../app/components/ui/dialog"
-import { SubmitButton } from "@modules/checkout/components/submit-button"
-import { HttpTypes } from "@medusajs/types"
-import { addCustomerAddress } from "@lib/data/customer"
 
 const AddAddress = ({
   region,
@@ -27,9 +26,9 @@ const AddAddress = ({
 }) => {
   const [successState, setSuccessState] = useState(false)
   const { state, open, close: closeModal } = useToggleState(false)
-  const [postalCode, setPostalCode] = useState('')
-  const [city, setCity] = useState('')
-  const [province, setProvince] = useState('')
+  const [postalCode, setPostalCode] = useState("")
+  const [city, setCity] = useState("")
+  const [province, setProvince] = useState("")
   const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
 
   const [formState, formAction] = useActionState(addCustomerAddress, {
@@ -40,9 +39,9 @@ const AddAddress = ({
 
   const close = () => {
     setSuccessState(false)
-    setPostalCode('')
-    setCity('')
-    setProvince('')
+    setPostalCode("")
+    setCity("")
+    setProvince("")
     closeModal()
   }
 
@@ -53,18 +52,18 @@ const AddAddress = ({
       try {
         const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`)
         const data = await response.json()
-        
-        if (data && data[0]?.Status === 'Success' && data[0]?.PostOffice?.length > 0) {
+
+        if (data && data[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
           const postOffice = data[0].PostOffice[0]
-          setCity(postOffice.District || postOffice.Name || '')
-          setProvince(postOffice.State || '')
+          setCity(postOffice.District || postOffice.Name || "")
+          setProvince(postOffice.State || "")
         } else {
           // Reset if postal code not found
-          setCity('')
-          setProvince('')
+          setCity("")
+          setProvince("")
         }
       } catch (error) {
-        console.error('Error fetching postal code data:', error)
+        console.error("Error fetching postal code data:", error)
       } finally {
         setIsLoadingPostalData(false)
       }
@@ -175,18 +174,10 @@ const AddAddress = ({
                 autoComplete="country"
                 data-testid="country-select"
               />
-              <Input
-                label="Phone"
-                name="phone"
-                autoComplete="phone"
-                data-testid="phone-input"
-              />
+              <Input label="Phone" name="phone" autoComplete="phone" data-testid="phone-input" />
             </div>
             {formState.error && (
-              <div
-                className="text-rose-500 text-small-regular py-2"
-                data-testid="address-error"
-              >
+              <div className="text-rose-500 text-small-regular py-2" data-testid="address-error">
                 {formState.error}
               </div>
             )}

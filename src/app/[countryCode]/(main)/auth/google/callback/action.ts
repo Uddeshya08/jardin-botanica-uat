@@ -1,12 +1,10 @@
 "use server"
 
 import { sdk } from "@lib/config"
-import { setAuthToken, getCacheTag } from "@lib/data/cookies"
+import { getCacheTag, setAuthToken } from "@lib/data/cookies"
 import { revalidateTag } from "next/cache"
 
-export async function handleGoogleCallback(
-  queryParams: Record<string, string>
-) {
+export async function handleGoogleCallback(queryParams: Record<string, string>) {
   try {
     // Validate callback with Medusa
     const token = await sdk.auth.callback("customer", "google", queryParams)
@@ -19,8 +17,7 @@ export async function handleGoogleCallback(
       Buffer.from((token as string).split(".")[1], "base64").toString()
     )
 
-    const shouldCreateCustomer =
-      !tokenPayload.actor_id || tokenPayload.actor_id === ""
+    const shouldCreateCustomer = !tokenPayload.actor_id || tokenPayload.actor_id === ""
 
     console.log("Token payload:", tokenPayload)
 

@@ -1,10 +1,10 @@
 // app/[countryCode]/account/(main)/account/_client-account-shell.tsx
 "use client"
 
-import { useEffect, useState } from "react"
 import AccountLayout from "@modules/account/templates/account-layout"
 import { Navigation } from "app/components/Navigation"
 import { RippleEffect } from "app/components/RippleEffect"
+import { useEffect, useState } from "react"
 
 interface CartItem {
   id: string
@@ -57,15 +57,11 @@ export default function ClientAccountShell({
       const scrollY = window.scrollY
       setIsScrolled(scrollY > 50)
 
-      const shouldShowCart =
-        scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0)
+      const shouldShowCart = scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0)
 
       const footerElement = document.querySelector("footer")
       const copyrightElement = footerElement?.querySelector("p")
-      if (
-        copyrightElement &&
-        copyrightElement.textContent?.includes("© 2025 Jardin Botanica")
-      ) {
+      if (copyrightElement && copyrightElement.textContent?.includes("© 2025 Jardin Botanica")) {
         const rect = copyrightElement.getBoundingClientRect()
         const footerVisible = rect.top < window.innerHeight && rect.bottom > 0
         setShowStickyCart(shouldShowCart && !footerVisible)

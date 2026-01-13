@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // 'use client'
 
 // import React, { useState, useEffect, useRef } from 'react'
@@ -40,7 +24,7 @@
 //   isScrolled = false,
 //   cartItems = []
 // }: NavigationProps) {
-  
+
 //   const [isMenuOpen, setIsMenuOpen] = useState(false)
 //   const [isCartOpen, setIsCartOpen] = useState(false)
 //   const [isWishlisted, setIsWishlisted] = useState(false)
@@ -58,11 +42,11 @@
 //   // Handle component mounting and home page detection
 //   useEffect(() => {
 //     setMounted(true)
-    
+
 //     const checkAndSetHomePage = () => {
 //       const currentPath = window.location.pathname
 //       const isHome = currentPath === '/'
-      
+
 //       // Set body class for CSS styling
 //       if (isHome) {
 //         document.body.classList.add('home-page')
@@ -70,52 +54,52 @@
 //         document.body.classList.remove('home-page')
 //       }
 //     }
-    
+
 //     // Initial check
 //     checkAndSetHomePage()
-    
+
 //     // Listen for navigation changes
 //     const handleNavigation = () => {
 //       setTimeout(checkAndSetHomePage, 10)
 //     }
-    
+
 //     // Listen for visibility change (tab switching)
 //     const handleVisibilityChange = () => {
 //       if (!document.hidden) {
 //         setTimeout(checkAndSetHomePage, 10)
 //       }
 //     }
-    
+
 //     // Listen for focus events (tab switching fallback)
 //     const handleFocus = () => {
 //       setTimeout(checkAndSetHomePage, 10)
 //     }
-    
+
 //     window.addEventListener('popstate', handleNavigation)
 //     document.addEventListener('visibilitychange', handleVisibilityChange)
 //     window.addEventListener('focus', handleFocus)
-    
+
 //     // Also listen for route changes in Next.js
 //     const handleRouteChange = () => {
 //       setTimeout(checkAndSetHomePage, 10)
 //     }
-    
+
 //     // If Next.js router is available
 //     if (typeof window !== 'undefined' && window.history) {
 //       const originalPushState = window.history.pushState
 //       const originalReplaceState = window.history.replaceState
-      
+
 //       window.history.pushState = function(...args) {
 //         originalPushState.apply(this, args)
 //         handleRouteChange()
 //       }
-      
+
 //       window.history.replaceState = function(...args) {
 //         originalReplaceState.apply(this, args)
 //         handleRouteChange()
 //       }
 //     }
-    
+
 //     return () => {
 //       window.removeEventListener('popstate', handleNavigation)
 //       document.removeEventListener('visibilitychange', handleVisibilityChange)
@@ -232,69 +216,69 @@
 //           body.home-page .nav-search-input {
 //             color: white !important;
 //           }
-          
+
 //           body.home-page .nav-search-input {
 //             border-color: rgba(255, 255, 255, 0.3) !important;
 //           }
-          
+
 //           body.home-page .nav-search-input::placeholder {
 //             color: rgba(255, 255, 255, 0.5) !important;
 //           }
-          
+
 //           /* Home page logo - always white version */
 //           body.home-page .nav-logo {
 //             content: url('/Images/Jardinlogo.svg') !important;
 //           }
-          
+
 //           /* Non-home page styles */
 //           body:not(.home-page) .nav-menu-item:not(.glassy-active),
 //           body:not(.home-page) .nav-action-button:not(.glassy-active) {
 //             color: black !important;
 //           }
-          
+
 //           body:not(.home-page) .nav-search-input:not(.glassy-active) {
 //             color: black !important;
 //             border-color: rgba(0, 0, 0, 0.3) !important;
 //           }
-          
+
 //           body:not(.home-page) .nav-search-input:not(.glassy-active)::placeholder {
 //             color: rgba(0, 0, 0, 0.5) !important;
 //           }
-          
+
 //           /* Non-home page logo - black version when not glassy */
 //           body:not(.home-page) .nav-logo:not(.glassy-active) {
 //             content: url('/Images/Jardinlogoblack.svg') !important;
 //           }
-          
+
 //           /* Glassy state overrides for non-home pages */
 //           body:not(.home-page) .nav-menu-item.glassy-active,
 //           body:not(.home-page) .nav-action-button.glassy-active {
 //             color: white !important;
 //           }
-          
+
 //           body:not(.home-page) .nav-search-input.glassy-active {
 //             color: white !important;
 //             border-color: rgba(255, 255, 255, 0.3) !important;
 //           }
-          
+
 //           body:not(.home-page) .nav-search-input.glassy-active::placeholder {
 //             color: rgba(255, 255, 255, 0.5) !important;
 //           }
-          
+
 //           /* Non-home page logo - white version when glassy */
 //           body:not(.home-page) .nav-logo.glassy-active {
 //             content: url('/Images/Jardinlogo.svg') !important;
 //           }
-          
+
 //           /* Custom font classes */
 //           .font-din-arabic {
 //             font-family: 'DIN Arabic', 'Arial', sans-serif;
 //           }
-          
+
 //           .font-american-typewriter {
 //             font-family: 'American Typewriter', 'Courier New', monospace;
 //           }
-          
+
 //           /* Custom glassmorphism backdrop */
 //           .glassy-nav {
 //             background: rgba(0, 0, 0, 0.65);
@@ -303,29 +287,29 @@
 //             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 //             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 //           }
-          
+
 //           /* Custom gradient overlay */
 //           .glassy-overlay {
 //             background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 100%);
 //           }
-          
+
 //           /* Custom accent color */
 //           .accent-color {
 //             background-color: #e58a4d;
 //           }
-          
+
 //           .accent-color-text {
 //             color: #e58a4d;
 //           }
-          
+
 //           .accent-hover:hover {
 //             background-color: #e58a4d;
 //           }
-          
+
 //           .shipping-bg {
 //             background-color: #545d4a;
 //           }
-          
+
 //           .cart-bg {
 //             background-color: #e3e3d8;
 //           }
@@ -361,7 +345,7 @@
 //           {shouldShowGlassyState && (
 //             <div className="glassy-overlay absolute top-0 left-0 right-0 bottom-0 pointer-events-none z-10" />
 //           )}
-          
+
 //           <div className="px-6 lg:px-48 pl-10 relative z-20">
 //             <div className="flex items-center justify-between py-6 relative">
 //               {/* Logo */}
@@ -382,7 +366,6 @@
 //     />
 //   </Link>
 // </motion.div>
-
 
 //               {/* Absolutely Centered Navigation Menu */}
 //               <motion.div

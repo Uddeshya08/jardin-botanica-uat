@@ -1,11 +1,11 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import { HomeCreationsPage } from "app/components/HomeCreationsPage"
 
 import { Navigation } from "app/components/Navigation"
 import { RippleEffect } from "app/components/RippleEffect"
-import { HomeCreationsPage } from "app/components/HomeCreationsPage"
 import { useCartItems } from "app/context/cart-items-context"
+import React, { useEffect, useState } from "react"
 
 type CartItem = {
   id: string
@@ -30,7 +30,12 @@ export default function HomeCreationsRoutePage() {
   return (
     <div className="min-h-screen">
       <RippleEffect />
-      <Navigation isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} forceWhiteText />
+      <Navigation
+        isScrolled={isScrolled}
+        cartItems={cartItems}
+        onCartUpdate={handleCartUpdate}
+        forceWhiteText
+      />
       <div className="h-4" />
       <HomeCreationsPage
         onAddToCart={(item: CartItem) => {

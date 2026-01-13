@@ -1,16 +1,15 @@
 "use client"
 
+import { deleteLineItem, updateLineItem } from "@lib/data/cart"
+import type { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
-import { updateLineItem } from "@lib/data/cart"
-import { HttpTypes } from "@medusajs/types"
-import { deleteLineItem } from "@lib/data/cart"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Spinner from "@modules/common/icons/spinner"
 import Thumbnail from "@modules/products/components/thumbnail"
-import { useState } from "react"
 import { motion } from "framer-motion"
 import { X } from "lucide-react"
+import { useState } from "react"
 
 type ItemProps = {
   item: HttpTypes.StoreCartLineItem
@@ -25,16 +24,15 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
 
   const changeQuantity = async (quantity: number) => {
     if (quantity < 1) return
-    
+
     setUpdating(true)
 
     await updateLineItem({
       lineId: item.id,
       quantity,
+    }).finally(() => {
+      setUpdating(false)
     })
-      .finally(() => {
-        setUpdating(false)
-      })
   }
 
   const handleDelete = async () => {
@@ -80,21 +78,14 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
       </LocalizedClientLink>
 
       <div className="flex-1 min-w-0">
-        <span
-          className="font-din-arabic-bold truncate"
-          data-testid="product-title"
-        >
+        <span className="font-din-arabic-bold truncate" data-testid="product-title">
           {item.product_title}
         </span>
-        
+
         {type === "preview" ? (
           <>
             <span className="font-din-arabic text-sm text-black/60 mt-1">
-              <LineItemUnitPrice
-                item={item}
-                style="tight"
-                currencyCode={currencyCode}
-              />
+              <LineItemUnitPrice item={item} style="tight" currencyCode={currencyCode} />
             </span>
             <div className="flex items-center gap-3 space-between mt-3">
               <motion.button
@@ -111,9 +102,7 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
               {updating ? (
                 <Spinner className="w-4 h-4" />
               ) : (
-                <span className="font-din-arabic text-sm w-8 text-center">
-                  {item.quantity}
-                </span>
+                <span className="font-din-arabic text-sm w-8 text-center">{item.quantity}</span>
               )}
 
               <motion.button
@@ -135,22 +124,14 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
                 className="ml-auto text-black/40 hover:text-red-500 transition-colors disabled:opacity-50"
                 data-testid="product-delete-button"
               >
-                {isDeleting ? (
-                  <Spinner className="w-4 h-4" />
-                ) : (
-                  <X className="w-4 h-4" />
-                )}
+                {isDeleting ? <Spinner className="w-4 h-4" /> : <X className="w-4 h-4" />}
               </motion.button>
             </div>
           </>
         ) : (
           <>
             <span className="font-din-arabic text-sm text-black/60 mt-1">
-              <LineItemUnitPrice
-                item={item}
-                style="tight"
-                currencyCode={currencyCode}
-              />
+              <LineItemUnitPrice item={item} style="tight" currencyCode={currencyCode} />
             </span>
             <div className="flex items-center gap-3 space-between mt-3">
               <motion.button
@@ -167,9 +148,7 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
               {updating ? (
                 <Spinner className="w-4 h-4" />
               ) : (
-                <span className="font-din-arabic text-sm w-10 text-center">
-                  {item.quantity}
-                </span>
+                <span className="font-din-arabic text-sm w-10 text-center">{item.quantity}</span>
               )}
 
               <motion.button
@@ -191,11 +170,7 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
                 className="ml-auto text-black/40 hover:text-red-500 transition-colors disabled:opacity-50"
                 data-testid="product-delete-button"
               >
-                {isDeleting ? (
-                  <Spinner className="w-4 h-4" />
-                ) : (
-                  <X className="w-4 h-4" />
-                )}
+                {isDeleting ? <Spinner className="w-4 h-4" /> : <X className="w-4 h-4" />}
               </motion.button>
             </div>
           </>

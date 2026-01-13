@@ -1,16 +1,15 @@
-import { Metadata } from "next"
-
 import { listCartOptions, retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { getBaseURL } from "@lib/util/env"
-import { StoreCartShippingOption } from "@medusajs/types"
+import type { StoreCartShippingOption } from "@medusajs/types"
+import ScrollIndicator from "@modules/common/components/scroll-indicator"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
-import { LedgerProvider } from "app/context/ledger-context"
-import { AuthProvider } from "app/context/auth-context"
-import { CartItemsProvider } from "app/context/cart-items-context"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 import { Footer } from "app/components/Footer"
-import ScrollIndicator from "@modules/common/components/scroll-indicator"
+import { AuthProvider } from "app/context/auth-context"
+import { CartItemsProvider } from "app/context/cart-items-context"
+import { LedgerProvider } from "app/context/ledger-context"
+import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -26,8 +25,9 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
 
     shippingOptions = shipping_options
   }
-    const cartItems = cart?.items?.map(item => {
-      console.log('🔍 Layout - Server cart item unit_price:', {
+  const cartItems =
+    cart?.items?.map((item) => {
+      console.log("🔍 Layout - Server cart item unit_price:", {
         id: item.id,
         title: item.title,
         unit_price: item.unit_price,
@@ -53,16 +53,10 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
     <>
       {/* <Nav  cartItems={cartItems}
         /> */}
-      {customer && cart && (
-        <CartMismatchBanner customer={customer} cart={cart} />
-      )}
+      {customer && cart && <CartMismatchBanner customer={customer} cart={cart} />}
 
       {cart && (
-        <FreeShippingPriceNudge
-          variant="popup"
-          cart={cart}
-          shippingOptions={shippingOptions}
-        />
+        <FreeShippingPriceNudge variant="popup" cart={cart} shippingOptions={shippingOptions} />
       )}
       <AuthProvider customer={customer}>
         <LedgerProvider>

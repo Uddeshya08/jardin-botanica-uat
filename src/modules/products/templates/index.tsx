@@ -1,29 +1,27 @@
 "use client"
-import React, { useEffect, useState, useCallback } from "react"
-
-import { notFound } from "next/navigation"
-import { HttpTypes } from "@medusajs/types"
-import {
-  ProductContent,
-  FeaturedSection,
-  TestimonialsSection,
-  FeaturedRitualTwoSection,
-  AfterlifeSection,
-  ProductInfoPanels,
-  FromTheLabSection,
-} from "../../../types/contentful"
-import { Navigation } from "app/components/Navigation"
-import { ProductHero } from "app/components/ProductHero"
-import { StickyCartBar } from "app/components/StickyCartBar"
+import type { HttpTypes } from "@medusajs/types"
 import { Afterlife } from "app/components/Afterlife"
-import { PeopleAlsoBought } from "app/components/PeopleAlsoBought"
-
 import { CustomerTestimonials } from "app/components/CustomerTestimonials"
-import { RippleEffect } from "app/components/RippleEffect"
-import { FeaturedRitualTwo } from "app/components/FeaturedRitualTwo"
 import Featured from "app/components/Featured"
-import { useCartItems } from "app/context/cart-items-context"
-import { CartItem } from "app/context/cart-items-context"
+import { FeaturedRitualTwo } from "app/components/FeaturedRitualTwo"
+import { Navigation } from "app/components/Navigation"
+import { PeopleAlsoBought } from "app/components/PeopleAlsoBought"
+import { ProductHero } from "app/components/ProductHero"
+import { RippleEffect } from "app/components/RippleEffect"
+import { StickyCartBar } from "app/components/StickyCartBar"
+import { type CartItem, useCartItems } from "app/context/cart-items-context"
+import { notFound } from "next/navigation"
+import type React from "react"
+import { useCallback, useEffect, useState } from "react"
+import type {
+  AfterlifeSection,
+  FeaturedRitualTwoSection,
+  FeaturedSection,
+  FromTheLabSection,
+  ProductContent,
+  ProductInfoPanels,
+  TestimonialsSection,
+} from "../../../types/contentful"
 
 interface RitualProduct {
   variantId: string
@@ -70,9 +68,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   const [isScrolled, setIsScrolled] = useState(false)
   const [showStickyCart, setShowStickyCart] = useState(false)
   const [heroCartItem, setHeroCartItem] = useState<CartItem | null>(null)
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-    null
-  )
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
 
   // Wrapper function to update both heroCartItem and context
   const handleCartUpdateWrapper = (item: CartItem | null) => {
@@ -97,20 +93,15 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
       // Show sticky cart after scrolling past the ProductHero section (approximately 450px for compact height)
       // Show by default, hide only when heroCartItem exists and quantity is explicitly 0
-      const shouldShowCart =
-        scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0)
+      const shouldShowCart = scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0)
 
       // Hide sticky cart when footer copyright is visible
       const footerElement = document.querySelector("footer")
       const copyrightElement = footerElement?.querySelector("p")
 
-      if (
-        copyrightElement &&
-        copyrightElement.textContent?.includes("© 2025 Jardin Botanica")
-      ) {
+      if (copyrightElement && copyrightElement.textContent?.includes("© 2025 Jardin Botanica")) {
         const copyrightRect = copyrightElement.getBoundingClientRect()
-        const isFooterVisible =
-          copyrightRect.top < window.innerHeight && copyrightRect.bottom > 0
+        const isFooterVisible = copyrightRect.top < window.innerHeight && copyrightRect.bottom > 0
 
         setShowStickyCart(shouldShowCart && !isFooterVisible)
       } else {
@@ -152,10 +143,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         />
 
         <Afterlife afterlifeContent={afterlifeContent} />
-        <PeopleAlsoBought
-          product={product as any}
-          fromTheLabContent={fromTheLabContent}
-        />
+        <PeopleAlsoBought product={product as any} fromTheLabContent={fromTheLabContent} />
         <FeaturedRitualTwo
           key={`featured-ritual-two-${
             featuredRitualTwoContent?.productHandle ||
@@ -166,9 +154,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         />
         <CustomerTestimonials
           key={`customer-testimonials-${
-            testimonialsContent?.productHandle ||
-            testimonialsContent?.sectionKey ||
-            "default"
+            testimonialsContent?.productHandle || testimonialsContent?.sectionKey || "default"
           }`}
           testimonialsContent={testimonialsContent}
         />

@@ -1,5 +1,5 @@
 "use client"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import Addresses from "@modules/checkout/components/addresses"
 import Payment from "@modules/checkout/components/payment"
 import Review from "@modules/checkout/components/review"
@@ -31,9 +31,7 @@ export default function CheckoutFormClient({
   return (
     <div className="lg:col-span-2 space-y-4 lg:space-y-6">
       <div>
-        {currentStep === "address" && (
-          <Addresses cart={cart} customer={customer} />
-        )}
+        {currentStep === "address" && <Addresses cart={cart} customer={customer} />}
 
         {/*{currentStep === "delivery" && (
           <Shipping cart={cart} availableShippingMethods={shippingMethods} />

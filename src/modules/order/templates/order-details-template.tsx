@@ -1,26 +1,26 @@
 "use client"
 
 import { XMark } from "@medusajs/icons"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Help from "@modules/order/components/help"
 import Items from "@modules/order/components/items"
 import OrderDetails from "@modules/order/components/order-details"
 import OrderSummary from "@modules/order/components/order-summary"
 import ShippingDetails from "@modules/order/components/shipping-details"
-import React from "react"
+import type React from "react"
 
 type OrderDetailsTemplateProps = {
   order: HttpTypes.StoreOrder
 }
 
-const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
-  order,
-}) => {
+const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({ order }) => {
   return (
     <div className="flex flex-col justify-center gap-y-6">
       <div className="flex flex-row items-center justify-between gap-4 mb-6 lg:mb-8">
-        <h1 className="font-american-typewriter text-xl sm:text-2xl lg:text-3xl text-black">Order Details</h1>
+        <h1 className="font-american-typewriter text-xl sm:text-2xl lg:text-3xl text-black">
+          Order Details
+        </h1>
         <LocalizedClientLink
           href="/account/orders"
           aria-label="Back to orders overview"
@@ -34,13 +34,13 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
         className="flex h-full w-full flex-col divide-y divide-ui-border-base rounded-xl border border-ui-border-base bg-[#e3e3d8]"
         data-testid="order-details-container"
       >
-          <div className="py-2 md:py-2">
+        <div className="py-2 md:py-2">
           <Items order={order} />
         </div>
         <div className="pb-3 md:pb-6">
           <OrderDetails order={order} showStatus />
         </div>
-      
+
         <div className="py-3 md:py-3">
           <ShippingDetails order={order} />
         </div>

@@ -1,4 +1,4 @@
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { Table, Text } from "@medusajs/ui"
 
 import LineItemOptions from "@modules/common/components/line-item-options"
@@ -36,18 +36,10 @@ const Item = ({ item, currencyCode }: ItemProps) => {
             <Text className="text-ui-fg-muted">
               <span data-testid="product-quantity">{item.quantity}</span>x{" "}
             </Text>
-            <LineItemUnitPrice
-              item={item}
-              style="tight"
-              currencyCode={currencyCode}
-            />
+            <LineItemUnitPrice item={item} style="tight" currencyCode={currencyCode} />
           </span>
 
-          <LineItemPrice
-            item={item}
-            style="tight"
-            currencyCode={currencyCode}
-          />
+          <LineItemPrice item={item} style="tight" currencyCode={currencyCode} />
         </span>
       </Table.Cell>
     </Table.Row>

@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { motion } from "motion/react"
+import React, { useState } from "react"
+import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 export function DesignPhilosophy() {
-  const [isPressed, setIsPressed] = useState(false);
-  
+  const [isPressed, setIsPressed] = useState(false)
+
   return (
-    <section 
-      className="py-20 lg:py-32"
-      style={{ backgroundColor: '#edede2' }}
-    >
+    <section className="py-20 lg:py-32" style={{ backgroundColor: "#edede2" }}>
       <div className="w-full md:container md:mx-auto px-0 md:px-8 lg:px-16">
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Heading Section - First on mobile */}
@@ -31,7 +28,7 @@ export function DesignPhilosophy() {
               viewport={{ once: true }}
             >
               <h2 className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 md:mb-8 text-black leading-tight">
-              From Kyoto’s Moss Gardens to Kew’s Glasshouses
+                From Kyoto’s Moss Gardens to Kew’s Glasshouses
               </h2>
             </motion.div>
           </div>
@@ -60,7 +57,7 @@ export function DesignPhilosophy() {
                   className="w-full h-full object-cover transition-all duration-600 group-hover:brightness-110"
                 />
               </motion.div>
-              
+
               {/* Subtle overlay that appears on hover */}
               <motion.div
                 initial={{ opacity: 0 }}
@@ -68,7 +65,7 @@ export function DesignPhilosophy() {
                 transition={{ duration: 0.4 }}
                 className="absolute inset-0 bg-black/10 pointer-events-none"
               />
-              
+
               {/* Elegant corner accent */}
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
@@ -109,7 +106,7 @@ export function DesignPhilosophy() {
               className="hidden lg:block"
             >
               <h2 className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 md:mb-8 text-black leading-tight">
-              From Kyoto’s Moss Gardens to Kew’s Glasshouses
+                From Kyoto’s Moss Gardens to Kew’s Glasshouses
               </h2>
             </motion.div>
 
@@ -122,7 +119,9 @@ export function DesignPhilosophy() {
               className="space-y-4"
             >
               <p className="font-din-arabic text-lg text-black/75 leading-relaxed max-w-lg">
-                We study living collections and translate them into disciplined blends measured actives, climate-smart bases. Design carries it home the weight in your palm, the arc of a pump, the soft dry-down turning daily gestures into deliberate pleasure.
+                We study living collections and translate them into disciplined blends measured
+                actives, climate-smart bases. Design carries it home the weight in your palm, the
+                arc of a pump, the soft dry-down turning daily gestures into deliberate pleasure.
               </p>
             </motion.div>
 
@@ -133,13 +132,9 @@ export function DesignPhilosophy() {
               transition={{ duration: 0.8, delay: 0.6 }}
               viewport={{ once: true }}
             >
-              <motion.button 
-                className="font-din-arabic inline-flex items-center px-8 py-3 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide group"
-              >
+              <motion.button className="font-din-arabic inline-flex items-center px-8 py-3 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide group">
                 Explore more
-                <motion.span 
-                  className="ml-2 transition-transform duration-300 group-hover:translate-x-1"
-                >
+                <motion.span className="ml-2 transition-transform duration-300 group-hover:translate-x-1">
                   →
                 </motion.span>
               </motion.button>
@@ -148,5 +143,5 @@ export function DesignPhilosophy() {
         </div>
       </div>
     </section>
-  );
+  )
 }

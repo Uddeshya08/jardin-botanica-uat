@@ -1,10 +1,10 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import { BotanistLabPage } from "app/components/BotanistLabPage"
 
 import { Navigation } from "app/components/Navigation"
 import { RippleEffect } from "app/components/RippleEffect"
-import { BotanistLabPage } from "app/components/BotanistLabPage"
+import React, { useEffect, useState } from "react"
 
 type CartItem = {
   id: string

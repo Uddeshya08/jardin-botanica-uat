@@ -1,4 +1,4 @@
-import { EntrySkeletonType } from "contentful"
+import type { EntrySkeletonType } from "contentful"
 
 // Contentful Product Content Fields
 export interface ProductContentFields {
@@ -158,7 +158,7 @@ export interface FeaturedRitualTwoFields {
   imageAlt?: string
   ctaLabel?: string
   ctaLink?: string
-  imagePosition?: 'left' | 'right'
+  imagePosition?: "left" | "right"
   active: boolean
 }
 
@@ -178,16 +178,18 @@ export interface FeaturedRitualTwoSection {
   imageUrl: string // This will be the processed URL from Contentful Asset
   imageAlt: string
   cta: FeaturedRitualTwoCTA
-  imagePosition: 'left' | 'right'
+  imagePosition: "left" | "right"
   active: boolean
 }
 
 // Afterlife Section Content Types
 export interface AfterlifeItem {
-  icon?: string | {
-    src: string
-    alt: string
-  }
+  icon?:
+    | string
+    | {
+        src: string
+        alt: string
+      }
   title?: string
   text: string
 }
@@ -230,12 +232,12 @@ export interface FragranceNote {
 }
 
 // Dynamic Panel Types - for future extensibility
-export type PanelContentType = 
-  | "text"           // Simple text content
-  | "actives"        // List of active items with name/description
-  | "fragrance"      // Fragrance notes
-  | "ingredients"    // Ingredients list
-  | "structured"      // Custom structured content (JSON)
+export type PanelContentType =
+  | "text" // Simple text content
+  | "actives" // List of active items with name/description
+  | "fragrance" // Fragrance notes
+  | "ingredients" // Ingredients list
+  | "structured" // Custom structured content (JSON)
 
 export interface DynamicPanel {
   id: string // Unique identifier for the panel
@@ -360,9 +362,9 @@ export interface FromTheLabSection {
 export interface PageBannerFields {
   title: string
   description: string
-  mediaType: "video" | "image" 
-  video?: ContentfulAsset 
-  image?: ContentfulAsset 
+  mediaType: "video" | "image"
+  video?: ContentfulAsset
+  image?: ContentfulAsset
   fallbackImage?: ContentfulAsset
   isActive: boolean
   pageKey: string // Required: Identifies which page this banner is for (e.g., "candles", "home", "about", "hand-care")
@@ -378,9 +380,9 @@ export interface PageBanner {
   title: string
   description: string
   mediaType: "video" | "image"
-  videoUrl?: string 
-  imageUrl?: string 
-  fallbackImageUrl?: string 
+  videoUrl?: string
+  imageUrl?: string
+  fallbackImageUrl?: string
   isActive: boolean
   pageKey: string
 }

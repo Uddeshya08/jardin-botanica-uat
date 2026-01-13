@@ -13,11 +13,10 @@ const Login = ({ setCurrentView }: Props) => {
   const [message, formAction] = useActionState(login, null)
 
   return (
-    <div
-      className="max-w-sm w-full flex flex-col items-center"
-      data-testid="login-page"
-    >
-      <h1 className="font-din-arabic text-base text-black tracking-wide mb-2 uppercase mb-6">Welcome back</h1>
+    <div className="max-w-sm w-full flex flex-col items-center" data-testid="login-page">
+      <h1 className="font-din-arabic text-base text-black tracking-wide mb-2 uppercase mb-6">
+        Welcome back
+      </h1>
       <p className="text-center text-base-regular font-din-arabic text-sm text-black/70 tracking-wide mb-8">
         Sign in to access an enhanced shopping experience.
       </p>

@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "motion/react"
 import { Cookie, X } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
 import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 
 export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false)
@@ -13,10 +13,10 @@ export default function CookieConsent() {
   // Get country code from pathname
   const getCountryCode = () => {
     if (pathname) {
-      const pathParts = pathname.split('/')
-      return pathParts[1] || 'in'
+      const pathParts = pathname.split("/")
+      return pathParts[1] || "in"
     }
-    return 'in'
+    return "in"
   }
 
   const countryCode = getCountryCode()
@@ -97,9 +97,9 @@ export default function CookieConsent() {
                       We Value Your Privacy
                     </h3>
                     <p className="font-din-arabic text-sm md:text-base text-black/70 leading-relaxed tracking-wide">
-                      We use cookies to enhance your browsing experience, serve personalized content, 
-                      and analyze our traffic. By clicking "Accept All", you consent to our use of cookies. 
-                      You can manage your preferences or learn more in our{" "}
+                      We use cookies to enhance your browsing experience, serve personalized
+                      content, and analyze our traffic. By clicking "Accept All", you consent to our
+                      use of cookies. You can manage your preferences or learn more in our{" "}
                       <a
                         href={`/${countryCode}/privacy-policy`}
                         className="underline hover:text-black transition-colors"
@@ -138,5 +138,3 @@ export default function CookieConsent() {
     </AnimatePresence>
   )
 }
-
-

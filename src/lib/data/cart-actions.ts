@@ -14,11 +14,7 @@ type AddPayload = {
  * - retries once on inventory error (common while stock-location links update)
  * - returns quickly to the client
  */
-export async function addToCartAction({
-  variantId,
-  quantity,
-  countryCode,
-}: AddPayload) {
+export async function addToCartAction({ variantId, quantity, countryCode }: AddPayload) {
   if (!variantId) throw new Error("Missing variantId")
   const qty = Math.max(1, Number(quantity || 1))
   const cc = (countryCode || "in").toLowerCase()
@@ -33,8 +29,7 @@ export async function addToCartAction({
       // Medusa often throws this when channel/location/region is slightly out of sync.
       const msg = String(err?.message ?? "")
       const looksLikeInventory =
-        msg.includes("required inventory") ||
-        msg.toLowerCase().includes("inventory")
+        msg.includes("required inventory") || msg.toLowerCase().includes("inventory")
 
       if (looksLikeInventory && attempt === 1) {
         // backoff: tiny delay, then retry once

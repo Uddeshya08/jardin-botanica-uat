@@ -2,7 +2,7 @@
 
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
-import { HttpTypes } from "@medusajs/types"
+import type { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import {
@@ -15,33 +15,32 @@ import {
   setAuthToken,
 } from "./cookies"
 
-export const retrieveCustomer =
-  async (): Promise<HttpTypes.StoreCustomer | null> => {
-    const authHeaders = await getAuthHeaders()
+export const retrieveCustomer = async (): Promise<HttpTypes.StoreCustomer | null> => {
+  const authHeaders = await getAuthHeaders()
 
-    if (!authHeaders) return null
+  if (!authHeaders) return null
 
-    const headers = {
-      ...authHeaders,
-    }
-
-    const next = {
-      ...(await getCacheOptions("customers")),
-    }
-
-    return await sdk.client
-      .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
-        method: "GET",
-        query: {
-          fields: "*orders",
-        },
-        headers,
-        next,
-        cache: "force-cache",
-      })
-      .then(({ customer }) => customer)
-      .catch(() => null)
+  const headers = {
+    ...authHeaders,
   }
+
+  const next = {
+    ...(await getCacheOptions("customers")),
+  }
+
+  return await sdk.client
+    .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
+      method: "GET",
+      query: {
+        fields: "*orders",
+      },
+      headers,
+      next,
+      cache: "force-cache",
+    })
+    .then(({ customer }) => customer)
+    .catch(() => null)
+}
 
 export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
   const headers = {
@@ -80,11 +79,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
       ...(await getAuthHeaders()),
     }
 
-    const { customer: createdCustomer } = await sdk.store.customer.create(
-      customerForm,
-      {},
-      headers
-    )
+    const { customer: createdCustomer } = await sdk.store.customer.create(customerForm, {}, headers)
 
     const loginToken = await sdk.auth.login("customer", "emailpass", {
       email: customerForm.email,
@@ -108,27 +103,24 @@ export async function signup(_currentState: unknown, formData: FormData) {
  * Verify Google reCAPTCHA v3 token (works for v2 as well)
  */
 async function verifyRecaptchaToken(token: string): Promise<boolean> {
-  const secretKey = process.env.RECAPTCHA_SECRET_KEY || ''
-  
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY || ""
+
   if (!secretKey) {
     console.warn("RECAPTCHA_SECRET_KEY not set, skipping verification")
     return true // Allow login if secret key is not configured
   }
 
   try {
-    const response = await fetch(
-      "https://www.google.com/recaptcha/api/siteverify",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          secret: secretKey,
-          response: token,
-        }),
-      }
-    )
+    const response = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        secret: secretKey,
+        response: token,
+      }),
+    })
 
     const data = await response.json()
     return data.success === true
@@ -152,13 +144,11 @@ export async function login(_currentState: unknown, formData: FormData) {
   }
 
   try {
-    await sdk.auth
-      .login("customer", "emailpass", { email, password })
-      .then(async (token) => {
-        await setAuthToken(token as string)
-        const customerCacheTag = await getCacheTag("customers")
-        revalidateTag(customerCacheTag)
-      })
+    await sdk.auth.login("customer", "emailpass", { email, password }).then(async (token) => {
+      await setAuthToken(token as string)
+      const customerCacheTag = await getCacheTag("customers")
+      revalidateTag(customerCacheTag)
+    })
   } catch (error: any) {
     return error.toString()
   }
@@ -186,10 +176,7 @@ export async function signout(countryCode: string) {
   redirect(`/${countryCode}/account`)
 }
 
-export async function requestPasswordReset(
-  _currentState: unknown,
-  formData: FormData
-) {
+export async function requestPasswordReset(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string
 
   if (!email) {
@@ -212,10 +199,7 @@ export async function requestPasswordReset(
   }
 }
 
-export async function resetPassword(
-  _currentState: unknown,
-  formData: FormData
-) {
+export async function resetPassword(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
   const token = formData.get("token") as string
@@ -321,9 +305,7 @@ export const addCustomerAddress = async (
     })
 }
 
-export const deleteCustomerAddress = async (
-  addressId: string
-): Promise<void> => {
+export const deleteCustomerAddress = async (addressId: string): Promise<void> => {
   const headers = {
     ...(await getAuthHeaders()),
   }
@@ -344,8 +326,7 @@ export const updateCustomerAddress = async (
   currentState: Record<string, unknown>,
   formData: FormData
 ): Promise<any> => {
-  const addressId =
-    (currentState.addressId as string) || (formData.get("addressId") as string)
+  const addressId = (currentState.addressId as string) || (formData.get("addressId") as string)
 
   if (!addressId) {
     return { success: false, error: "Address ID is required" }
@@ -405,8 +386,7 @@ export const requestEmailUpdate = async (data: {
 
     const headers = {
       "Content-Type": "application/json",
-      "x-publishable-api-key":
-        process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+      "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
       ...authHeaders,
     }
 
@@ -462,22 +442,18 @@ export const verifyEmailAndSetPassword = async (data: {
   try {
     const headers = {
       "Content-Type": "application/json",
-      "x-publishable-api-key":
-        process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+      "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
     }
 
     // Call Medusa backend to verify and update
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/store/custom/email/verify`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          token: data.token,
-          new_password: data.new_password,
-        }),
-      }
-    )
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/store/custom/email/verify`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        token: data.token,
+        new_password: data.new_password,
+      }),
+    })
 
     const result = await response.json()
 
