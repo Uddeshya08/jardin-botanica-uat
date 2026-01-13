@@ -864,7 +864,7 @@ const Candles = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: smoothEase }}
           viewport={{ once: true, amount: 0.2 }}
-          className="md:hidden relative w-full py-12 overflow-hidden bg-[#e2e2d8]"
+          className="hidden relative w-full py-12 overflow-hidden bg-[#e2e2d8]"
         >
           <motion.h2
             initial={{ opacity: 0, scale: 0.95 }}
@@ -1176,7 +1176,7 @@ const Candles = () => {
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.8, ease: smoothEase }}
           viewport={{ once: true, amount: 0.1 }}
-          className="w-full py-8 md:py-12 lg:py-16 overflow-hidden"
+          className="md:hidden w-full py-8 overflow-hidden"
         >
           <div className="relative">
             {/* Banner Carousel */}
@@ -1308,40 +1308,7 @@ const Candles = () => {
               </div>
             </div>
 
-            {/* Navigation Arrow - Right (White Circular Button) - Always visible */}
-            {bannerCarouselApi &&
-              (isMobile
-                ? bannerCurrent < candlesCollection.length - 1
-                : bannerCurrent < bannerGroups.length - 1) && (
-                <motion.button
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  onClick={() => bannerCarouselApi.scrollNext()}
-                  className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full bg-white hover:bg-white/95 border border-black/10 flex items-center justify-center transition-colors duration-300 shadow-md"
-                  aria-label="Next"
-                >
-                  <ChevronRight
-                    className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-black"
-                    strokeWidth={1.5}
-                  />
-                </motion.button>
-              )}
-
-            {/* Navigation Arrow - Left (White Circular Button) - Always visible */}
-            {bannerCarouselApi && bannerCurrent > 0 && (
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                onClick={() => bannerCarouselApi.scrollPrev()}
-                className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full bg-white hover:bg-white/95 border border-black/10 flex items-center justify-center transition-colors duration-300 shadow-md"
-                aria-label="Previous"
-              >
-                <ChevronLeft
-                  className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-black"
-                  strokeWidth={1.5}
-                />
-              </motion.button>
-            )}
+            {/* Navigation Arrows Removed for Mobile - Gesture Only */}
           </div>
         </motion.div>
       )}

@@ -1,5 +1,6 @@
 import { motion } from "motion/react"
 import React, { useState } from "react"
+import Link from "next/link"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 // import sensoralistImage from 'figma:asset/71a3ed929884384aa6617c6ae2f40a7724e33026.png';
@@ -40,74 +41,76 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
   const [isPressed, setIsPressed] = useState(false)
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: index * 0.2 }}
-      viewport={{ once: true }}
-      className="group cursor-pointer flex flex-col"
-    >
-      {/* Content - First on mobile, second on desktop */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
+    <Link href={`/blogs/${post.id}`} className="block h-full">
+      <motion.article
+        initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: index * 0.2 + 0.3 }}
+        transition={{ duration: 0.8, delay: index * 0.2 }}
         viewport={{ once: true }}
-        className="space-y-4 px-6 order-1 md:order-2 pb-10 md:pb-0"
+        className="group cursor-pointer flex flex-col h-full"
       >
-        {/* Category */}
-        <motion.span
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: index * 0.2 + 0.4 }}
-          viewport={{ once: true }}
-          className="font-din-arabic text-sm text-black/60 tracking-wide"
-        >
-          {post.category}
-        </motion.span>
-
-        {/* Title */}
-        <motion.h3
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: index * 0.2 + 0.5 }}
-          viewport={{ once: true }}
-          className="font-american-typewriter text-xl leading-tight text-black group-hover:text-black/70 transition-colors duration-300"
-        >
-          {post.title}
-        </motion.h3>
-
-        {/* Date/Read time */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: index * 0.2 + 0.6 }}
-          viewport={{ once: true }}
-          className="font-din-arabic text-sm text-black/50"
-        >
-          {post.date}
-        </motion.p>
-      </motion.div>
-
-      {/* Image - Second on mobile, first on desktop */}
-      <motion.div className="aspect-[3/4] overflow-hidden mb-6 order-2 md:order-1">
+        {/* Content - First on mobile, second on desktop */}
         <motion.div
-          whileHover={{ scale: 1.1 }} // desktop hover zoom
-          animate={{ scale: isPressed ? 1.1 : 1 }} // mobile press zoom
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          onTouchStart={() => setIsPressed(true)}
-          onTouchEnd={() => setIsPressed(false)}
-          onTouchCancel={() => setIsPressed(false)}
-          className="w-full h-full"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: index * 0.2 + 0.3 }}
+          viewport={{ once: true }}
+          className="space-y-4 px-6 order-1 md:order-2 pb-10 md:pb-0 flex-grow"
         >
-          <ImageWithFallback
-            src={post.imageUrl}
-            alt={post.title}
-            className="w-full h-full object-cover"
-          />
+          {/* Category */}
+          <motion.span
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: index * 0.2 + 0.4 }}
+            viewport={{ once: true }}
+            className="font-din-arabic text-sm text-black/60 tracking-wide"
+          >
+            {post.category}
+          </motion.span>
+
+          {/* Title */}
+          <motion.h3
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.2 + 0.5 }}
+            viewport={{ once: true }}
+            className="font-american-typewriter text-xl leading-tight text-black group-hover:text-black/70 transition-colors duration-300"
+          >
+            {post.title}
+          </motion.h3>
+
+          {/* Date/Read time */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: index * 0.2 + 0.6 }}
+            viewport={{ once: true }}
+            className="font-din-arabic text-sm text-black/50"
+          >
+            {post.date}
+          </motion.p>
         </motion.div>
-      </motion.div>
-    </motion.article>
+
+        {/* Image - Second on mobile, first on desktop */}
+        <motion.div className="aspect-[3/4] overflow-hidden mb-6 order-2 md:order-1">
+          <motion.div
+            whileHover={{ scale: 1.1 }} // desktop hover zoom
+            animate={{ scale: isPressed ? 1.1 : 1 }} // mobile press zoom
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            onTouchStart={() => setIsPressed(true)}
+            onTouchEnd={() => setIsPressed(false)}
+            onTouchCancel={() => setIsPressed(false)}
+            className="w-full h-full"
+          >
+            <ImageWithFallback
+              src={post.imageUrl}
+              alt={post.title}
+              className="w-full h-full object-cover"
+            />
+          </motion.div>
+        </motion.div>
+      </motion.article>
+    </Link>
   )
 }
 
@@ -142,13 +145,15 @@ export function JournalSection() {
             viewport={{ once: true }}
             className="text-center px-6"
           >
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="font-din-arabic px-8 py-3 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide"
-            >
-              View All
-            </motion.button>
+            <Link href="/blogs">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="font-din-arabic px-8 py-3 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide"
+              >
+                View All
+              </motion.button>
+            </Link>
           </motion.div>
         </div>
       </div>
