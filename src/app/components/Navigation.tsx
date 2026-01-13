@@ -615,9 +615,9 @@ export function Navigation({
                             disableAnimations
                               ? undefined
                               : {
-                                  duration: 0.2,
-                                  ease: "easeOut",
-                                }
+                                duration: 0.2,
+                                ease: "easeOut",
+                              }
                           }
                           className="absolute top-full left-0 pt-4 z-50"
                         >
@@ -679,22 +679,22 @@ export function Navigation({
                                 {/* fallback/default image */}
                                 {item.dropdown.filter((dItem) => dItem.label !== "All Products")[0]
                                   ?.image && (
-                                  <img
-                                    src={
-                                      item.dropdown.filter(
-                                        (dItem) => dItem.label !== "All Products"
-                                      )[0].image
-                                    }
-                                    alt="default"
-                                    className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
-                                    style={{
-                                      opacity: !hoveredItem ? 1 : 0,
-                                      transition: "opacity 0.18s ease-out",
-                                      zIndex: 0,
-                                    }}
-                                    loading="eager"
-                                  />
-                                )}
+                                    <img
+                                      src={
+                                        item.dropdown.filter(
+                                          (dItem) => dItem.label !== "All Products"
+                                        )[0].image
+                                      }
+                                      alt="default"
+                                      className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                                      style={{
+                                        opacity: !hoveredItem ? 1 : 0,
+                                        transition: "opacity 0.18s ease-out",
+                                        zIndex: 0,
+                                      }}
+                                      loading="eager"
+                                    />
+                                  )}
                               </div>
                             </div>
                           </div>
@@ -814,7 +814,7 @@ export function Navigation({
                                     <button
                                       onClick={() => handleQuantityChange(item.id, -1)}
                                       disabled={updatingCartItem === item.id}
-                                      className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 cursor-pointer"
                                     >
                                       <Minus className="w-3 h-3 text-black/70" />
                                     </button>
@@ -824,7 +824,7 @@ export function Navigation({
                                     <button
                                       onClick={() => handleQuantityChange(item.id, 1)}
                                       disabled={updatingCartItem === item.id}
-                                      className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 cursor-pointer"
                                     >
                                       <Plus className="w-3 h-3 text-black/70" />
                                     </button>
@@ -1038,7 +1038,7 @@ export function Navigation({
                                     <button
                                       onClick={() => handleQuantityChange(item.id, -1)}
                                       disabled={updatingCartItem === item.id}
-                                      className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 cursor-pointer"
                                     >
                                       <Minus className="w-3 h-3 text-black/70" />
                                     </button>
@@ -1048,7 +1048,7 @@ export function Navigation({
                                     <button
                                       onClick={() => handleQuantityChange(item.id, 1)}
                                       disabled={updatingCartItem === item.id}
-                                      className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className="p-1 hover:bg-black/10 transition-colors rounded disabled:opacity-50 cursor-pointer"
                                     >
                                       <Plus className="w-3 h-3 text-black/70" />
                                     </button>
@@ -1157,9 +1157,8 @@ export function Navigation({
                           >
                             <span>{item.name}</span>
                             <ChevronDown
-                              className={`w-4 h-4 transition-transform ${
-                                mobileActiveDropdown === item.name ? "rotate-180" : ""
-                              }`}
+                              className={`w-4 h-4 transition-transform ${mobileActiveDropdown === item.name ? "rotate-180" : ""
+                                }`}
                             />
                           </button>
                           <AnimatePresence>

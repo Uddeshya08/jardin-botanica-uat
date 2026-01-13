@@ -116,7 +116,7 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
 
 export function JournalSection() {
   return (
-    <section className="md:py-20 pb-10" style={{ backgroundColor: "#e3e3d8" }}>
+    <section className="pt-16 pb-10 md:py-20" style={{ backgroundColor: "#e3e3d8" }}>
       <div className="w-full md:container md:mx-auto px-0 md:px-6 lg:px-12">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -125,7 +125,7 @@ export function JournalSection() {
           viewport={{ once: true }}
           className="mb-12 max-w-8xl mx-auto px-6"
         >
-          <h2 className="font-american-typewriter text-center  text-3xl lg:text-4xl tracking-tight mb-6 text-black">
+          <h2 className="font-american-typewriter text-center text-2xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-black leading-tight">
             From the Journal
           </h2>
         </motion.div>
