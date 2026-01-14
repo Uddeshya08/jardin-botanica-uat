@@ -386,8 +386,8 @@ export function HeroSection() {
                   <motion.button
                     key={`cta-${activePanel}`}
                     className={`font-din-arabic inline-flex items-center px-8 py-3 transition-all duration-300 tracking-wide touch-manipulation ${currentPanel.isSpecial
-                        ? "bg-white text-black"
-                        : "text-white border border-white/30"
+                      ? "bg-white text-black"
+                      : "text-white border border-white/30"
                       }`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: isTransitioning ? 0.7 : 1 }}
@@ -441,11 +441,11 @@ export function HeroSection() {
       </div>
       {/* Gradient Blur Overlay */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-32 md:h-48 z-10 pointer-events-none"
+        className="absolute bottom-0 left-0 right-0 h-24 md:h-32 z-10 pointer-events-none"
         style={{
-          background: "linear-gradient(to bottom, transparent, #edede2)",
-          backdropFilter: "blur(2px)",
-          WebkitBackdropFilter: "blur(2px)",
+          background: "linear-gradient(to bottom, transparent, rgba(237, 237, 226, 0.3))",
+          backdropFilter: "blur(0.25px)",
+          WebkitBackdropFilter: "blur(0.25px)",
         }}
       />
     </div>

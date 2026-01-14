@@ -92,7 +92,7 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
         </motion.div>
 
         {/* Image - Second on mobile, first on desktop */}
-        <motion.div className="aspect-[3/4] overflow-hidden mb-6 order-2 md:order-1">
+        <motion.div className="aspect-[3/4] overflow-hidden mb-6 order-2 md:order-1 px-6 md:px-0">
           <motion.div
             whileHover={{ scale: 1.1 }} // desktop hover zoom
             animate={{ scale: isPressed ? 1.1 : 1 }} // mobile press zoom

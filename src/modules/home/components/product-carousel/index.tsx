@@ -261,8 +261,8 @@ export function ProductCarousel() {
     })
 
     // Ensure carousel starts at the beginning on mount (especially for mobile)
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 750
-    if (isMobile) {
+    const isMobileCheck = typeof window !== "undefined" && window.innerWidth < 750
+    if (isMobileCheck) {
       // Multiple attempts to ensure proper scroll position on mobile
       const scrollToStart = () => {
         api.scrollTo(0, true)
@@ -286,6 +286,23 @@ export function ProductCarousel() {
       }, 100)
     }
   }, [api])
+
+  // Auto-scroll effect for mobile view
+  useEffect(() => {
+    if (!api || !isMobile) return
+
+    // Don't auto-scroll while user is dragging
+    if (isDragging) return
+
+    const autoScrollInterval = setInterval(() => {
+      const currentIndex = api.selectedScrollSnap()
+      const totalSnaps = api.scrollSnapList().length
+      const nextIndex = (currentIndex + 1) % totalSnaps
+      api.scrollTo(nextIndex)
+    }, 4000) // 4 second interval
+
+    return () => clearInterval(autoScrollInterval)
+  }, [api, isMobile, isDragging])
 
   const scrollTo = (index: number) => {
     api?.scrollTo(index)
