@@ -437,7 +437,7 @@ export function ProductCarousel() {
   }
 
   return (
-    <>
+    <section style={{ backgroundColor: "#edede2" }}>
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -623,6 +623,6 @@ export function ProductCarousel() {
           </div>
         </div>
       </div>
-    </>
+    </section>
   )
 }

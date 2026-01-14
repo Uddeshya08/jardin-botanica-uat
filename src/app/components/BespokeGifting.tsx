@@ -12,7 +12,7 @@ export function BespokeGifting() {
   }
 
   return (
-    <section className="relative h-[85vh] md:h-auto md:pt-12 lg:pt-20 md:pb-0 bg-black md:bg-[#edede2]">
+    <section className="relative h-[85vh] md:h-auto md:pb-0 bg-black md:bg-[#edede2]">
       <div className="flex flex-col-reverse md:flex-row h-full">
         {/* Image - Background on mobile, Left Side on desktop */}
         <motion.div
