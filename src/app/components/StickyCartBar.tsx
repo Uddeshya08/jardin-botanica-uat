@@ -152,21 +152,38 @@ export function StickyCartBar({
     // Don't override states if ritual was just completed (to allow cart sync)
     if (ritualJustCompleted) return
 
-    if (ritualProduct && mainProductInCart && ritualProductInCart) {
-      // Both products are in cart - ritual is completed
-      console.log("✅ Ritual completed - both products in cart")
-      setRitualCompleted(true)
-      setShowGoToCart(true)
+    const cartItemsCount = cartItems.length
+
+    // Logic:
+    // 1. No product in cart → "Add to Cart"
+    // 2. 1 product in cart (main) + ritual product exists → "Complete the Ritual"
+    // 3. 2+ products + main AND ritual both in cart → "Checkout"
+    // 4. 2+ products but no ritual pair → "Add to Cart"
+
+    if (cartItemsCount === 0) {
+      // Cart is empty - show "Add to Cart"
+      console.log("🛒 Cart is empty - showing Add to Cart")
+      setRitualCompleted(false)
+      setShowGoToCart(false)
       setShowRitualSuggestion(false)
-    } else if (ritualProduct && mainProductInCart && !ritualProductInCart) {
-      // Only main product is in cart - show ritual suggestion
-      console.log("💡 Showing ritual suggestion - main product in cart, ritual product not in cart")
+    } else if (cartItemsCount === 1 && mainProductInCart && ritualProduct && !ritualProductInCart) {
+      // Only 1 product (the main one) in cart AND a ritual product exists for it
+      console.log(
+        "💡 Single main product in cart with ritual available - showing Complete the Ritual"
+      )
       setRitualCompleted(false)
       setShowGoToCart(false)
       setShowRitualSuggestion(true)
+    } else if (cartItemsCount >= 2 && ritualProduct && mainProductInCart && ritualProductInCart) {
+      // 2+ products AND they form a ritual pair (main + ritual both present)
+      console.log("✅ Ritual pair completed - showing Checkout")
+      setRitualCompleted(true)
+      setShowGoToCart(true)
+      setShowRitualSuggestion(false)
     } else {
-      // No products in cart or only ritual product - reset states
-      console.log("🔄 Resetting ritual states")
+      // Any other case: cart has items but no valid ritual pair
+      // (e.g., 2+ products without ritual pair, or only ritual product without main)
+      console.log("🔄 Cart has items but no valid ritual pair - showing Add to Cart")
       setRitualCompleted(false)
       setShowGoToCart(false)
       setShowRitualSuggestion(false)

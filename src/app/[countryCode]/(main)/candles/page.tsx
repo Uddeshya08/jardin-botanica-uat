@@ -1360,38 +1360,38 @@ const Candles = () => {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 1, ease: smoothEase }}
         viewport={{ once: true, amount: 0.1 }}
-        className="py-4 md:py-8"
+        className="py-12 md:py-20"
       >
-        <div className="flex flex-col md:flex-row px-0 md:px-0">
+        <div className="flex flex-col md:flex-row items-center justify-between px-4 md:px-12 gap-8 md:gap-16">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, ease: smoothEase }}
             viewport={{ once: true, amount: 0.2 }}
-            className="w-full md:w-[68%] h-[300px] md:h-[600px] overflow-hidden mb-6 md:mb-0 object-cover"
+            className="w-full md:w-1/2 h-[300px] md:h-[500px] overflow-hidden rounded-sm"
           >
-            <motion.img
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.6, ease: smoothEase }}
-              src="/Images/Blog.jpg"
-              alt="Soft Orris"
-              className="w-full h-full object-cover"
-            />
+            <video autoPlay loop muted playsInline className="w-full h-full object-cover">
+              <source
+                src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+                type="video/mp4"
+              />
+              Your browser does not support the video tag.
+            </video>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.2, ease: smoothEase }}
             viewport={{ once: true, amount: 0.2 }}
-            className="w-full md:w-[45%] relative md:-ml-44 z-10 md:mt-10 px-6 md:px-0"
+            className="w-full md:w-1/2 flex flex-col justify-center"
           >
-            <div className="">
+            <div className="max-w-xl">
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
-                className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-4 md:mb-6 tracking-tight leading-tight font-american-typewriter"
+                className="text-3xl md:text-4xl lg:text-5xl font-normal opacity-[50%] mb-6 tracking-tight leading-tight font-american-typewriter"
               >
                 Soft Orris - The Scent of Stillness
               </motion.h2>
@@ -1400,7 +1400,7 @@ const Candles = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
-                className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-6 md:mb-4 pr-4 line-clamp-2 md:line-clamp-none"
+                className="font-din-arabic text-lg md:text-xl text-black/70 leading-relaxed mb-8"
               >
                 Powdery, elegant, and quietly floral-Soft Orris wraps your space in a gentle hug.
                 Perfect for slow mornings, self-care rituals, or unwinding at dusk. It's calm,
@@ -1411,13 +1411,12 @@ const Candles = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
-                className="text-center md:text-right md:mr-12"
               >
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ scale: 1.02, backgroundColor: "#000", color: "#fff" }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ duration: 0.3, ease: smoothEase }}
-                  className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base"
+                  className="bg-transparent border border-black/30 text-black px-8 py-3 font-normal tracking-wide rounded-none font-din-arabic text-base transition-colors duration-300"
                 >
                   Read More
                 </motion.button>
