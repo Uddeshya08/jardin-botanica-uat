@@ -122,7 +122,7 @@ const SingleBlogPage = () => {
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { duration: 0.6, ease: "easeOut" },
+      transition: { duration: 0.6, ease: "easeOut" as const },
     },
     hover: {
       scale: 1.05,
@@ -219,7 +219,7 @@ const SingleBlogPage = () => {
                   letterSpacing: "1px",
                 }}
               >
-                MAY 15, 2017
+                AUGUST 15, 2017
               </span>
               <span
                 style={{
@@ -261,12 +261,12 @@ const SingleBlogPage = () => {
 
             {/* Share Section */}
             <motion.div
-              className="mb-8 flex"
+              className="mb-8 flex flex-col md:flex-row"
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.6 }}
             >
-              <div className="w-32 gap-8 " style={{ marginRight: "5px" }}>
+              <div className="w-full md:w-32 mb-8 md:mb-0 md:mr-[5px]">
                 <p
                   style={{
                     fontFamily: '"American Typewriter "',
@@ -277,7 +277,7 @@ const SingleBlogPage = () => {
                 >
                   SHARE THIS POST?
                 </p>
-                <div className="space-y-1">
+                <div className="flex flex-row md:flex-col gap-6 md:gap-0 md:space-y-1">
                   <motion.p
                     style={{
                       fontFamily: '"American Typewriter"',
@@ -322,13 +322,10 @@ const SingleBlogPage = () => {
 
               {/* Article Content */}
               <motion.div
-                className="flex-1 ml-12 pl-8 space-y-6"
+                className="flex-1 md:ml-12 md:pl-8 space-y-6 border-l-0 md:border-l-2 md:border-[#D3D2CA]"
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 1.0, duration: 0.8 }}
-                style={{
-                  borderLeft: "2px solid #D3D2CA",
-                }}
               >
                 <motion.p
                   style={{
@@ -341,16 +338,11 @@ const SingleBlogPage = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 1.2, duration: 0.6 }}
                 >
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ultrices ipsum non
-                  mattis pharetra. Integer blandit non felis sit amet pharetra. Integer mollis eget
-                  felis non finibus. Nullam nibh mauris, fermentum vitae felis vehicula, aliquam
-                  bibendum sapien. In euismod velit vitae neque rhoncus congue. Aliquam luctus,
-                  sapien in consectetur cursus, quam urna euismod magna, sed pellentesque massa
-                  libero eu lorem. Aenean rhoncus gravida nisl vel pretium. Nam ac nisl non ipsum
-                  vestibulum vehicula vulputate sagittis magna. Aenean est nisl, convallis volutpat
-                  tempor ac, tempus ac ante. Class aptent taciti sociosqu ad litora torquent per
-                  conubia nostra, per inceptos himenaeos. Fusce rhoncus sodales tempor. Nunc pretium
-                  tortor felis, eget cursus magna accumsan a.
+                  Trent Alexander-Arnold formally announced himself to the European stage with a
+                  stunning free-kick as Liverpool secured a crucial 2-1 victory over Hoffenheim in
+                  the first leg of their Champions League playoff. The 18-year-old local lad, making
+                  his European debut for his boyhood club, curled a magnificent effort into the
+                  bottom corner to give Jurgen Klopp's side the lead in Germany.
                 </motion.p>
 
                 <motion.p
@@ -364,31 +356,12 @@ const SingleBlogPage = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 1.3, duration: 0.6 }}
                 >
-                  Etiam eu molestie eros, commodo hendrerit sapien. Maecenas tempus leo ac nisi
-                  iaculis porta. Sed sapien tortor, aliquet a velit ut, lacinia molestie velit.
-                  Maecenas ornare consequat massa ullamcorper dapibus. Aliquam auctor, sapien sit
-                  amet accumsan facilisis, enim enim aliquet arcu, tincidunt pellentesque justo
-                  turpis id neque. Duis eleifend nunc sit amet mi dapibus ornare. Suspendisse vel
-                  libero sem.
-                </motion.p>
-
-                <motion.p
-                  style={{
-                    fontFamily: "Georgia, serif",
-                    fontSize: "16px",
-                    lineHeight: "1.8",
-                    color: "#333",
-                  }}
-                  initial={{ y: 15, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 1.4, duration: 0.6 }}
-                >
-                  Sed nec blandit nibh. Pellentesque commodo suscipit gravida. Sed sit amet ex sed
-                  mi dignissim elementum in ut quam. Vivamus laoreet non mauris eget mattis. Nam
-                  turpis orci, consectetur vel accumsan sed, condimentum et sapien. Nunc ut egestas
-                  neque, eu hendrerit lacus. Suspendisse fermentum congue dui nec fringilla. Duis
-                  volutpat nunc lectus. Suspendisse potenti. Suspendisse egestas venenatis nunc.
-                  Donec et laoreet lacus.
+                  It wasn't all smooth sailing for the Reds, however. Simon Mignolet was called into
+                  action early, saving a tame penalty from Andrej Kramaric after Dejan Lovren had
+                  clumsily brought down Serge Gnabry. The save proved pivotal, providing the
+                  platform for Alexander-Arnold's moment of magic later in the first half. James
+                  Milner's deflected cross doubled the advantage in the second half, appearing to
+                  put the tie firmly in Liverpool's control.
                 </motion.p>
 
                 <motion.p
@@ -402,15 +375,12 @@ const SingleBlogPage = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 1.5, duration: 0.6 }}
                 >
-                  Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac
-                  turpis egestas. Aliquam quam elit, mollis at odio gravida, ultrices pulvinar
-                  justo. Vivamus eleifend mollis dolor, et ornare turpis vehicula in. Pellentesque
-                  auctor ac enim sit amet euismod. Ut eu accumsan nunc. Nam ultrices, orci a
-                  volutpat molestie, ipsum magna posuere ex, vel lobortis dolor purus tristique
-                  purus. Integer arcu libero, feugiat non eros vel, aliquet sodales justo. Aliquam
-                  lobortis efficitur velit, vel tempor dui iaculis non. Mauris non ullamcorper leo.
-                  Nulla consectetur arcu eget condimentum auctor. Aliquam sagittis dictum augue.
-                  Duis fringilla nec augue eu laoreet.
+                  Hoffenheim, unbeaten at home in the Bundesliga last season, refused to capitulate.
+                  Mark Uth pulled a goal back late on with a drilled finish, giving Julian
+                  Nagelsmann's side a glimmer of hope ahead of the return leg at Anfield. Despite
+                  the late concession, Klopp will be delighted to take two away goals back to
+                  Merseyside, knowing a solid performance at home will see Liverpool return to the
+                  Champions League group stages.
                 </motion.p>
 
                 {/* Tags */}
@@ -548,16 +518,19 @@ const SingleBlogPage = () => {
               </div>
 
               {/* blogs */}
-              <div className="flex justify-between gap-4" style={{ marginTop: "20px" }}>
+              <div
+                className="flex flex-col md:flex-row justify-between gap-8 md:gap-4"
+                style={{ marginTop: "20px" }}
+              >
                 {/* first */}
                 <div className="flex flex-col gap-4">
                   <p>August 24, 2017</p>
                   <h2 style={styles.subsequentHeading3}>
-                    Want to Make Creamed Corn Into a Meal? Add Shrimp
+                    The Ultimate Guide to New York's Favorite Food
                   </h2>
                   <p style={styles.subCopy}>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem architecto ratione
-                    similique non quidem quaerat odio nesciunt enim fuga totam?
+                    From classic bagels to late-night pizza slices, discover the culinary staples
+                    that define the city that never sleeps.
                   </p>
                   <h3 style={styles.subsequentHeading3} className="uppercase">
                     Read more
@@ -566,13 +539,11 @@ const SingleBlogPage = () => {
 
                 {/* second */}
                 <div className="flex flex-col gap-4">
-                  <p>August 24, 2017</p>
-                  <h2 style={styles.subsequentHeading3}>
-                    Want to Make Creamed Corn Into a Meal? Add Shrimp
-                  </h2>
+                  <p>August 22, 2017</p>
+                  <h2 style={styles.subsequentHeading3}>Why Healthy Eating Doesn't Mean Dieting</h2>
                   <p style={styles.subCopy}>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem architecto ratione
-                    similique non quidem quaerat odio nesciunt enim fuga totam?
+                    Learn how to build a sustainable relationship with food that focuses on
+                    nourishment rather than restriction.
                   </p>
                   <h3 style={styles.subsequentHeading3} className="uppercase">
                     Read more
@@ -581,13 +552,13 @@ const SingleBlogPage = () => {
 
                 {/* third */}
                 <div className="flex flex-col gap-4">
-                  <p>August 24, 2017</p>
+                  <p>August 20, 2017</p>
                   <h2 style={styles.subsequentHeading3}>
-                    Want to Make Creamed Corn Into a Meal? Add Shrimp
+                    A Quick, Satisfying Fix for Weeknight Chicken
                   </h2>
                   <p style={styles.subCopy}>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem architecto ratione
-                    similique non quidem quaerat odio nesciunt enim fuga totam?
+                    This one-pan roasted chicken recipe delivers maximum flavor with minimal cleanup
+                    for busy weeknights.
                   </p>
                   <h3 style={styles.subsequentHeading3} className="uppercase">
                     Read more
@@ -598,7 +569,7 @@ const SingleBlogPage = () => {
           </div>
 
           <motion.div className="" variants={containerVariants} initial="hidden" animate="visible">
-            <div className="p-6" style={{ width: "300px" }}>
+            <div className="p-6 w-full md:w-[300px]">
               {/* Latest Articles Section */}
               <motion.div variants={itemVariants}>
                 <h2 style={styles.subsequentHeading} className=" mb-4 pt-4">
