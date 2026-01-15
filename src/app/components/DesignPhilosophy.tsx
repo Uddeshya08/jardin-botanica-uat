@@ -1,4 +1,5 @@
 import { motion } from "motion/react"
+import Link from "next/link"
 import React, { useState } from "react"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
@@ -6,11 +7,11 @@ export function DesignPhilosophy() {
   const [isPressed, setIsPressed] = useState(false)
 
   return (
-    <section className="py-20 lg:py-32" style={{ backgroundColor: "#edede2" }}>
+    <section className="pt-32 pb-20 lg:pt-48 lg:pb-32" style={{ backgroundColor: "#edede2" }}>
       <div className="w-full md:container md:mx-auto px-0 md:px-8 lg:px-16">
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Heading Section - First on mobile */}
-          <div className="space-y-10 px-8 md:px-0 order-1 lg:hidden pb-4 md:pb-0">
+          <div className="space-y-6 md:space-y-8 px-8 md:px-0 order-1 lg:hidden pb-4 md:pb-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -82,7 +83,7 @@ export function DesignPhilosophy() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
-            className="space-y-10 px-8 md:px-0 order-3 lg:order-2"
+            className="space-y-8 px-8 md:px-0 order-3 lg:order-2"
           >
             {/* Small Label - Hidden on mobile, shown on desktop */}
             <motion.div
@@ -105,7 +106,7 @@ export function DesignPhilosophy() {
               viewport={{ once: true }}
               className="hidden lg:block"
             >
-              <h2 className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 md:mb-8 text-black leading-tight">
+              <h2 className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-black leading-tight">
                 From Kyoto’s Moss Gardens to Kew’s Glasshouses
               </h2>
             </motion.div>
@@ -132,12 +133,14 @@ export function DesignPhilosophy() {
               transition={{ duration: 0.8, delay: 0.6 }}
               viewport={{ once: true }}
             >
-              <motion.button className="font-din-arabic inline-flex items-center px-8 py-3 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide group">
-                Explore more
-                <motion.span className="ml-2 transition-transform duration-300 group-hover:translate-x-1">
-                  →
-                </motion.span>
-              </motion.button>
+              <Link href="/the-lab" passHref>
+                <motion.button className="font-din-arabic inline-flex items-center px-8 py-3 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide group">
+                  Explore more
+                  <motion.span className="ml-2 transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </motion.span>
+                </motion.button>
+              </Link>
             </motion.div>
           </motion.div>
         </div>

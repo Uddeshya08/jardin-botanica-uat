@@ -161,9 +161,8 @@ function ProductCard({
         >
           <Heart
             size={18}
-            className={`transition-colors duration-300 ${
-              isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-            }`}
+            className={`transition-colors duration-300 ${isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
           />
         </button>
       </div>
@@ -262,8 +261,8 @@ export function ProductCarousel() {
     })
 
     // Ensure carousel starts at the beginning on mount (especially for mobile)
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 750
-    if (isMobile) {
+    const isMobileCheck = typeof window !== "undefined" && window.innerWidth < 750
+    if (isMobileCheck) {
       // Multiple attempts to ensure proper scroll position on mobile
       const scrollToStart = () => {
         api.scrollTo(0, true)
@@ -287,6 +286,23 @@ export function ProductCarousel() {
       }, 100)
     }
   }, [api])
+
+  // Auto-scroll effect for mobile view
+  useEffect(() => {
+    if (!api || !isMobile) return
+
+    // Don't auto-scroll while user is dragging
+    if (isDragging) return
+
+    const autoScrollInterval = setInterval(() => {
+      const currentIndex = api.selectedScrollSnap()
+      const totalSnaps = api.scrollSnapList().length
+      const nextIndex = (currentIndex + 1) % totalSnaps
+      api.scrollTo(nextIndex)
+    }, 4000) // 4 second interval
+
+    return () => clearInterval(autoScrollInterval)
+  }, [api, isMobile, isDragging])
 
   const scrollTo = (index: number) => {
     api?.scrollTo(index)
@@ -421,14 +437,14 @@ export function ProductCarousel() {
   }
 
   return (
-    <>
+    <section style={{ backgroundColor: "#edede2" }}>
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.4 }}
         viewport={{ once: true }}
       >
-        <h2 className="pt-16 text-center font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 md:mb-8 text-black leading-tight">
+        <h2 className="pt-16 text-center font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-black leading-tight">
           From the Botanist’s Lab
         </h2>
       </motion.div>
@@ -469,9 +485,17 @@ export function ProductCarousel() {
             gap: 0 !important;
           }
           @media (max-width: 749px) {
+            .product-carousel-item {
+              width: calc(100vw - 3rem) !important;
+              flex-basis: calc(100vw - 3rem) !important;
+              padding-left: 0 !important;
+              padding-right: 0 !important;
+              margin-left: 1.5rem !important;
+              margin-right: 1.5rem !important;
+            }
             .product-carousel-content {
               padding-left: 0 !important;
-              padding-right: 1rem !important;
+              padding-right: 1.5rem !important;
             }
             [data-slot="carousel-content"] {
               scroll-padding-left: 0 !important;
@@ -480,7 +504,7 @@ export function ProductCarousel() {
               margin-left: 0 !important;
             }
             .product-carousel-item:first-child {
-              margin-left: 0 !important;
+              margin-left: 1.5rem !important;
             }
           }
           .product-carousel-item:first-child {
@@ -512,8 +536,20 @@ export function ProductCarousel() {
           }
           @media (min-width: 1200px) {
             .product-carousel-item {
-              width: calc((min(1440px, 100vw) - 148px) * 1 / 4) !important;
-              flex-basis: calc((min(1440px, 100vw) - 148px) * 1 / 4) !important;
+              width: calc((100vw - 148px) * 1 / 4) !important;
+              flex-basis: calc((100vw - 148px) * 1 / 4) !important;
+              margin-left: 1rem !important;
+              margin-right: 1rem !important;
+            }
+            .product-carousel-content {
+              padding-left: 2rem !important;
+              padding-right: 0 !important;
+            }
+          }
+          @media (min-width: 1600px) {
+            .product-carousel-item {
+              width: calc((100vw - 180px) * 1 / 5) !important;
+              flex-basis: calc((100vw - 180px) * 1 / 5) !important;
               margin-left: 1rem !important;
               margin-right: 1rem !important;
             }
@@ -587,6 +623,6 @@ export function ProductCarousel() {
           </div>
         </div>
       </div>
-    </>
+    </section>
   )
 }

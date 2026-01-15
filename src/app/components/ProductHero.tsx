@@ -87,9 +87,9 @@ const buildSizeOptions = (product: ProductHeroProps["product"], sizeOptionId?: s
 
       return label
         ? {
-            id: variant.id,
-            label,
-          }
+          id: variant.id,
+          label,
+        }
         : null
     })
     .filter((option): option is { id: string; label: string } => Boolean(option))
@@ -286,7 +286,8 @@ export function ProductHero({
   // Dynamic panels (for future extensibility)
   const dynamicPanels = productInfoPanels?.panels || []
 
-  // Category-based breadcrumb logic using product.categories[0].name
+  // Category-based breadcrumb logic using product.categories[0].name and description
+  const breadcrumbParentCategory = (product.categories?.[0] as any)?.description || null
   const breadcrumbCategory = product.categories?.[0]?.name || "Uncategorized"
   const breadcrumbProduct = product.title || "Product"
 
@@ -439,6 +440,18 @@ export function ProductHero({
                     Home
                   </BreadcrumbLink>
                 </BreadcrumbItem>
+                {breadcrumbParentCategory && (
+                  <>
+                    <BreadcrumbSeparator>
+                      <BreadcrumbChevron className="w-3 h-3" style={{ color: "#a28b6f" }} />
+                    </BreadcrumbSeparator>
+                    <BreadcrumbItem>
+                      <BreadcrumbPage className="font-din-arabic text-xs tracking-wide text-black/80">
+                        {breadcrumbParentCategory}
+                      </BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </>
+                )}
                 <BreadcrumbSeparator>
                   <BreadcrumbChevron className="w-3 h-3" style={{ color: "#a28b6f" }} />
                 </BreadcrumbSeparator>
@@ -1121,15 +1134,13 @@ export function ProductHero({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleToggleLedger}
-            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${
-              isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"
-            }`}
+            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"
+              }`}
             aria-label={isProductInLedger ? "Remove from ledger" : "Add to ledger"}
           >
             <Heart
-              className={`w-5 h-5 transition-colors ${
-                isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"
-              }`}
+              className={`w-5 h-5 transition-colors ${isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"
+                }`}
             />
           </motion.button>
 
@@ -1202,9 +1213,8 @@ export function ProductHero({
               onClick={() => setCurrentImageIndex(index)}
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                currentImageIndex === index ? "w-8" : ""
-              }`}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${currentImageIndex === index ? "w-8" : ""
+                }`}
               style={{
                 backgroundColor: currentImageIndex === index ? "#a28b6f" : "rgba(0, 0, 0, 0.3)",
               }}

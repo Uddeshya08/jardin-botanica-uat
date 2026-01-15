@@ -12,17 +12,30 @@ export function BespokeGifting() {
   }
 
   return (
-    <section className="pt-8 md:pt-12 lg:pt-20 pb-0" style={{ backgroundColor: "#e3e3d8" }}>
-      <div className="flex flex-col-reverse md:flex-row">
-        {/* Image - Left Side (60% width on desktop, full width on mobile) */}
+    <section className="relative h-[85vh] md:h-auto md:pb-0 bg-black md:bg-[#edede2]">
+      <div className="flex flex-col-reverse md:flex-row h-full">
+        {/* Image - Background on mobile, Left Side on desktop */}
         <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="w-full md:w-3/5 relative pb-12"
+          className="absolute inset-0 z-0 h-full w-full md:relative md:w-3/5 md:pb-12 md:order-1"
         >
-          <motion.div className="h-[40vh] md:h-[60vh] lg:h-[70vh] overflow-hidden">
+          {/* Mobile Image Container - Full Screen */}
+          <div className="h-full w-full md:hidden">
+            <img
+              src="/assets/first.png"
+              alt="Hands holding botanical book with oranges and plants"
+              className="w-full h-full object-cover opacity-80"
+              style={{ objectPosition: "center" }}
+            />
+            {/* Gradient Overlay for Text Readability */}
+            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+          </div>
+
+          {/* Desktop Image Container */}
+          <div className="hidden md:block h-[40vh] md:h-[60vh] lg:h-[70vh] overflow-hidden relative">
             <motion.div
               whileHover={{ scale: 1.03 }}
               animate={{ scale: isPressed ? 1.03 : 1 }}
@@ -37,16 +50,16 @@ export function BespokeGifting() {
                 className="w-full h-full object-contain"
               />
             </motion.div>
-          </motion.div>
+          </div>
         </motion.div>
 
-        {/* Content - Right Side (40% width on desktop, full width on mobile) */}
+        {/* Content - Overlay on mobile, Right Side on desktop */}
         <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="w-full md:w-2/5 flex flex-col justify-center px-6 pt-10 pb-16 md:px-12 md:py-12"
+          className="absolute bottom-0 left-0 right-0 z-10 w-full px-6 pb-12 md:relative md:w-2/5 md:flex md:flex-col md:justify-center md:px-12 md:py-12 md:bg-transparent md:order-2"
         >
           {/* Main Title */}
           <motion.h2
@@ -54,7 +67,7 @@ export function BespokeGifting() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 md:mb-8 text-black leading-tight"
+            className="font-american-typewriter text-3xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-white md:text-black leading-tight"
           >
             Bespoke Experiences
           </motion.h2>
@@ -65,7 +78,7 @@ export function BespokeGifting() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
-            className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-6 md:mb-8"
+            className="font-din-arabic text-base md:text-lg text-white/90 md:text-black/70 leading-relaxed mb-6 md:mb-8"
           >
             Every detail leaves an impression. We help you create tailored offerings with curated
             selections and artisan finishing.
@@ -77,7 +90,7 @@ export function BespokeGifting() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8 md:mb-12"
+            className="font-din-arabic text-base md:text-lg text-white/90 md:text-black/70 leading-relaxed mb-8 md:mb-12"
           >
             Our specialists design solutions aligned with your brand, your ideas, and the moments
             you want to elevate.
@@ -94,7 +107,7 @@ export function BespokeGifting() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleBeginConsultation}
-              className="font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide text-sm md:text-base"
+              className="font-din-arabic w-full md:w-auto px-6 py-4 md:py-3 md:px-8 bg-transparent border border-white/60 md:border-black/30 text-white md:text-black hover:bg-white hover:text-black md:hover:bg-black md:hover:text-white transition-all duration-300 tracking-wide text-sm md:text-base backdrop-blur-sm md:backdrop-blur-none"
             >
               Begin Consultation
             </motion.button>
