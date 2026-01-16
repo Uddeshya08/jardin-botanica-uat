@@ -161,8 +161,9 @@ function ProductCard({
         >
           <Heart
             size={18}
-            className={`transition-colors duration-300 ${isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+            className={`transition-colors duration-300 ${
+              isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+            }`}
           />
         </button>
       </div>
@@ -191,17 +192,18 @@ function ProductCard({
             </p>
           </div>
           {/* Add to Cart Button */}
-          <div className="group/btn-wrapper flex items-center justify-center font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 hover:bg-black transition-all duration-300 tracking-wide text-sm md:text-base">
-            <button
-              onMouseEnter={() => setIsButtonHovered(true)}
-              onMouseLeave={() => setIsButtonHovered(false)}
-              onClick={(e) => {
-                e.stopPropagation()
-                onAddToCart()
-              }}
-              disabled={isAddedToCart}
-              className="relative inline-flex items-center gap-2 pb-0.5"
-            >
+          <button
+            className="group/btn-wrapper flex items-center justify-center font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 hover:bg-black transition-all duration-300 tracking-wide text-sm md:text-base cursor-pointer relative"
+            onMouseEnter={() => setIsButtonHovered(true)}
+            onMouseLeave={() => setIsButtonHovered(false)}
+            onClick={(e) => {
+              e.stopPropagation()
+              onAddToCart()
+            }}
+            disabled={isAddedToCart}
+            aria-label={isAddedToCart ? "Added to cart" : "Add to cart"}
+          >
+            <div className="relative inline-flex items-center gap-2 pb-0.5 z-10 pointer-events-none">
               <span
                 className="font-din-arabic text-black group-hover/btn-wrapper:text-white text-base transition-colors duration-300"
                 style={{ letterSpacing: "0.12em" }}
@@ -211,12 +213,15 @@ function ProductCard({
               <span className="text-black group-hover/btn-wrapper:text-white text-xs transition-colors duration-300">
                 →
               </span>
-              <span
-                className="absolute bottom-0 left-0 h-[1px] bg-black group-hover/btn-wrapper:bg-white transition-all duration-300"
-                style={{ width: isButtonHovered ? "100%" : "0%" }}
-              />
-            </button>
-          </div>
+            </div>
+            <span
+              className="absolute bottom-3 left-0 right-0 h-[1px] bg-black group-hover/btn-wrapper:bg-white transition-all duration-300 mx-auto w-[calc(100%-3rem)] md:w-[calc(100%-4rem)]"
+              style={{
+                width: isButtonHovered ? "calc(100% - 3rem)" : "0%",
+                opacity: isButtonHovered ? 1 : 0,
+              }}
+            />
+          </button>
         </div>
       </div>
     </div>
@@ -232,6 +237,7 @@ export function ProductCarousel() {
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [hasInteracted, setHasInteracted] = useState(false)
   const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null)
   const sliderRef = React.useRef<HTMLDivElement>(null)
 
@@ -289,7 +295,7 @@ export function ProductCarousel() {
 
   // Auto-scroll effect for mobile view
   useEffect(() => {
-    if (!api || !isMobile) return
+    if (!api || !isMobile || hasInteracted) return
 
     // Don't auto-scroll while user is dragging
     if (isDragging) return
@@ -302,7 +308,7 @@ export function ProductCarousel() {
     }, 4000) // 4 second interval
 
     return () => clearInterval(autoScrollInterval)
-  }, [api, isMobile, isDragging])
+  }, [api, isMobile, isDragging, hasInteracted])
 
   const scrollTo = (index: number) => {
     api?.scrollTo(index)
@@ -437,7 +443,11 @@ export function ProductCarousel() {
   }
 
   return (
-    <section style={{ backgroundColor: "#edede2" }}>
+    <section
+      style={{ backgroundColor: "#edede2" }}
+      onMouseDownCapture={() => setHasInteracted(true)}
+      onTouchStartCapture={() => setHasInteracted(true)}
+    >
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}

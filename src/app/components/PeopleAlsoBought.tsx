@@ -490,11 +490,14 @@ export function PeopleAlsoBought({
           >
             <div className="max-w-[340px] mx-auto md:max-w-none md:w-full">
               {/* Product Image */}
-              <div className="relative mb-4 md:mb-6 overflow-hidden bg-white/20 rounded-sm">
+              <div
+                className="relative mb-4 md:mb-6 overflow-hidden bg-white/20 rounded-sm"
+                style={{ paddingBottom: "125%" }}
+              >
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="relative h-[280px] md:h-[320px]"
+                  className="absolute inset-0"
                 >
                   {/* Base Image */}
                   {product.image ? (

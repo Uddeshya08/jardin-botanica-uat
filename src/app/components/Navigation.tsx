@@ -498,7 +498,7 @@ export function Navigation({
 
   return (
     <>
-      <div className={disableSticky ? "relative" : "fixed top-0 left-0 right-0 z-50"}>
+      <div className={disableSticky ? "relative z-50" : "fixed top-0 left-0 right-0 z-50"}>
         {/* Top Shipping Bar */}
         <motion.div
           initial={disableAnimations ? undefined : { y: -50, opacity: 0 }}
@@ -615,9 +615,9 @@ export function Navigation({
                             disableAnimations
                               ? undefined
                               : {
-                                duration: 0.2,
-                                ease: "easeOut",
-                              }
+                                  duration: 0.2,
+                                  ease: "easeOut",
+                                }
                           }
                           className="absolute top-full left-0 pt-4 z-50"
                         >
@@ -679,22 +679,22 @@ export function Navigation({
                                 {/* fallback/default image */}
                                 {item.dropdown.filter((dItem) => dItem.label !== "All Products")[0]
                                   ?.image && (
-                                    <img
-                                      src={
-                                        item.dropdown.filter(
-                                          (dItem) => dItem.label !== "All Products"
-                                        )[0].image
-                                      }
-                                      alt="default"
-                                      className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
-                                      style={{
-                                        opacity: !hoveredItem ? 1 : 0,
-                                        transition: "opacity 0.18s ease-out",
-                                        zIndex: 0,
-                                      }}
-                                      loading="eager"
-                                    />
-                                  )}
+                                  <img
+                                    src={
+                                      item.dropdown.filter(
+                                        (dItem) => dItem.label !== "All Products"
+                                      )[0].image
+                                    }
+                                    alt="default"
+                                    className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                                    style={{
+                                      opacity: !hoveredItem ? 1 : 0,
+                                      transition: "opacity 0.18s ease-out",
+                                      zIndex: 0,
+                                    }}
+                                    loading="eager"
+                                  />
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1157,8 +1157,9 @@ export function Navigation({
                           >
                             <span>{item.name}</span>
                             <ChevronDown
-                              className={`w-4 h-4 transition-transform ${mobileActiveDropdown === item.name ? "rotate-180" : ""
-                                }`}
+                              className={`w-4 h-4 transition-transform ${
+                                mobileActiveDropdown === item.name ? "rotate-180" : ""
+                              }`}
                             />
                           </button>
                           <AnimatePresence>

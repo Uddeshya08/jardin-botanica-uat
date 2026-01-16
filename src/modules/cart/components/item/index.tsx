@@ -10,6 +10,7 @@ import Thumbnail from "@modules/products/components/thumbnail"
 import { motion } from "framer-motion"
 import { X } from "lucide-react"
 import { useState } from "react"
+import { ProductTitleTooltip } from "./product-title-tooltip"
 
 type ItemProps = {
   item: HttpTypes.StoreCartLineItem
@@ -78,9 +79,11 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
       </LocalizedClientLink>
 
       <div className="flex-1 min-w-0">
-        <span className="font-din-arabic-bold truncate" data-testid="product-title">
-          {item.product_title}
-        </span>
+        <ProductTitleTooltip title={item.product_title || ""}>
+          <span className="font-din-arabic-bold truncate block" data-testid="product-title">
+            {item.product_title}
+          </span>
+        </ProductTitleTooltip>
 
         {type === "preview" ? (
           <>

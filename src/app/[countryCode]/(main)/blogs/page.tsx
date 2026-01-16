@@ -624,10 +624,11 @@ const Home = () => {
                       transition={{ delay: 0.8, duration: 1.0 }}
                     />
 
-                    {/* Black Overlay - Removed on hover */}
+                    {/* Cream Overlay - Lightens image for text readability */}
                     <motion.div
-                      className="absolute inset-0 bg-black group-hover:opacity-0 transition-opacity duration-500"
-                      initial={{ opacity: 0 }}
+                      className="absolute inset-0 bg-[#FEFDF3] transition-opacity duration-500"
+                      initial={{ opacity: 0.5 }}
+                      animate={{ opacity: 0.5 }}
                     />
                   </div>
 
