@@ -536,11 +536,10 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedCategory(filter.id)}
-                className={`font-din-arabic text-xs sm:text-sm transition-all duration-300 pb-1 ${
-                  selectedCategory === filter.id
-                    ? "text-black border-b-2 border-[#e58a4d]"
-                    : "text-black/50 border-b border-transparent hover:text-black hover:border-black/30"
-                }`}
+                className={`font-din-arabic text-xs sm:text-sm transition-all duration-300 pb-1 ${selectedCategory === filter.id
+                  ? "text-black border-b-2 border-[#e58a4d]"
+                  : "text-black/50 border-b border-transparent hover:text-black hover:border-black/30"
+                  }`}
                 style={{ letterSpacing: "0.15em" }}
               >
                 {filter.label}
@@ -552,7 +551,13 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
       {/* Split Hero - Two Products Side by Side */}
 
-      <section className="grid grid-cols-1 lg:grid-cols-2">
+      <section
+        className={
+          filteredProducts.length === 1
+            ? "flex flex-col items-center"
+            : "grid grid-cols-1 lg:grid-cols-2"
+        }
+      >
         {filteredProducts.slice(0, 2).map((product, index) => (
           <motion.div
             key={product.id}
@@ -560,7 +565,8 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: index * 0.2 }}
-            className="relative group overflow-hidden"
+            className={`relative group overflow-hidden ${filteredProducts.length === 1 ? "w-full lg:w-1/2" : ""
+              }`}
             onMouseEnter={() => setHoveredProduct(product.id)}
             onMouseLeave={() => setHoveredProduct(null)}
           >
@@ -600,11 +606,10 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
               {/* Overlay */}
 
               <div
-                className={`absolute inset-0 transition-all duration-500 ${
-                  hoveredProduct === product.id
-                    ? "bg-black/50"
-                    : "bg-gradient-to-t from-black/70 via-black/40 to-transparent"
-                }`}
+                className={`absolute inset-0 transition-all duration-500 ${hoveredProduct === product.id
+                  ? "bg-black/50"
+                  : "bg-gradient-to-t from-black/70 via-black/40 to-transparent"
+                  }`}
               />
 
               {/* Image Slider Dots - Show on both mobile and desktop if product has images array */}
@@ -619,11 +624,10 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
                         handleImageChange(product.id, idx)
                       }}
-                      className={`rounded-full transition-all duration-300 ${
-                        (currentImageIndex[product.id] || 0) === idx
-                          ? "bg-white w-1 h-1 sm:w-3 sm:h-0.5"
-                          : "bg-white/50 hover:bg-white/75 w-0.5 h-0.5 sm:w-0.5 sm:h-0.5"
-                      }`}
+                      className={`rounded-full transition-all duration-300 ${(currentImageIndex[product.id] || 0) === idx
+                        ? "bg-white w-1 h-1 sm:w-3 sm:h-0.5"
+                        : "bg-white/50 hover:bg-white/75 w-0.5 h-0.5 sm:w-0.5 sm:h-0.5"
+                        }`}
                       aria-label={`View image ${idx + 1}`}
                     />
                   ))}
@@ -781,11 +785,10 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                             {candleOptions.map((candle) => (
                               <label
                                 key={candle.id}
-                                className={`flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded cursor-pointer transition-all duration-200 ${
-                                  selectedCandles[product.id] === candle.id
-                                    ? "bg-[#e58a4d]/20 border border-[#e58a4d]"
-                                    : "bg-white/20 border border-transparent hover:bg-white/30"
-                                }`}
+                                className={`flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded cursor-pointer transition-all duration-200 ${selectedCandles[product.id] === candle.id
+                                  ? "bg-[#e58a4d]/20 border border-[#e58a4d]"
+                                  : "bg-white/20 border border-transparent hover:bg-white/30"
+                                  }`}
                               >
                                 <input
                                   type="radio"
