@@ -16,7 +16,7 @@ const FeaturedBlogProduct = ({
   description?: string
 }) => {
   return (
-    <div className="group cursor-pointer">
+    <div className="group cursor-pointer flex flex-col h-full">
       <div className="relative overflow-hidden mb-4 bg-[#F5F5F0]" style={{ aspectRatio: "4/5" }}>
         <img
           src={image}
@@ -25,7 +25,7 @@ const FeaturedBlogProduct = ({
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
       </div>
-      <div className="text-center px-2">
+      <div className="text-center px-2 flex flex-col flex-1 w-full">
         <h3
           className="text-lg md:text-xl mb-2 group-hover:underline decoration-1 underline-offset-4"
           style={{
@@ -38,7 +38,7 @@ const FeaturedBlogProduct = ({
         </h3>
         {description && (
           <p
-            className="text-sm md:text-base"
+            className="text-sm md:text-base mb-4"
             style={{
               fontFamily: '"DIN Arabic Regular"',
               color: "#626262",
@@ -48,6 +48,23 @@ const FeaturedBlogProduct = ({
             {description}
           </p>
         )}
+        <button
+          className="group/btn-wrapper w-full mt-auto px-4 py-2 border border-black/20 hover:bg-black transition-colors duration-300 text-sm tracking-wide flex items-center justify-center"
+          style={{
+            fontFamily: '"DIN Arabic Regular"',
+          }}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+        >
+          <span className="text-inherit group-hover/btn-wrapper:text-white transition-colors duration-300">
+            ADD TO CART
+          </span>
+          <span className="ml-2 text-inherit group-hover/btn-wrapper:text-white text-xs transition-colors duration-300">
+            →
+          </span>
+        </button>
       </div>
     </div>
   )
