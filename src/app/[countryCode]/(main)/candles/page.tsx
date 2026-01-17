@@ -31,6 +31,398 @@ interface CartItem {
   image?: string
 }
 
+const MobileProductCard = ({
+  item,
+  productId,
+}: {
+  item: CandlesCollectionItem
+  productId: string
+}) => {
+  const router = useRouter()
+  const { toggleLedgerItem, isInLedger } = useLedger()
+  const [isImageHovered, setIsImageHovered] = useState(false)
+  const isItemInLedger = isInLedger(productId)
+
+  const handleProductClick = () => {
+    if (item.url) {
+      const normalizedUrl = item.url.startsWith("/") ? item.url : `/${item.url}`
+      router.push(normalizedUrl)
+    }
+  }
+
+  const handleToggleLedger = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const alreadyInLedger = isItemInLedger
+    const ledgerItem: LedgerItem = {
+      id: productId,
+      name: item.label,
+      price: 0, // Price not available in CandlesCollectionItem
+      image: item.src,
+      description: item.label,
+      category: "Candles",
+    }
+
+    toggleLedgerItem(ledgerItem)
+    toast.success(`${item.label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+      duration: 2000,
+    })
+  }
+
+  return (
+    <div
+      className="group flex flex-col w-full mx-auto h-full"
+      style={{
+        minHeight: "460px",
+        maxWidth: "480px",
+      }}
+    >
+      {/* Product Image */}
+      <div
+        className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] sm:aspect-[3/4]"
+        style={{ marginBottom: "2.5rem" }}
+        onMouseEnter={() => setIsImageHovered(true)}
+        onMouseLeave={() => setIsImageHovered(false)}
+        onClick={handleProductClick}
+      >
+        {/* Hover Image - Behind */}
+        {item.hoverSrc && (
+          <div className="absolute inset-0">
+            <ImageWithFallback
+              src={item.hoverSrc}
+              alt={`${item.label} alternate view`}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        {/* Main Image - On Top */}
+        <div
+          className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+          style={{ opacity: isImageHovered && item.hoverSrc ? 0 : 1 }}
+        >
+          <ImageWithFallback
+            src={item.src}
+            alt={item.label}
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Ledger Icon */}
+        <button
+          className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 bg-white/20 border border-white/30 hover:bg-white/30"
+          aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
+          onClick={handleToggleLedger}
+        >
+          <Heart
+            size={18}
+            className={`transition-colors duration-300 ${
+              isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+            }`}
+          />
+        </button>
+      </div>
+
+      {/* Product Info */}
+      <div className="flex flex-col flex-grow min-h-0 md:justify-between">
+        <div>
+          <div className="flex justify-start items-center py-1 md:py-2">
+            <h3
+              className="font-american-typewriter text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity"
+              style={{ letterSpacing: "0.05em" }}
+              onClick={handleProductClick}
+            >
+              {item.label}
+            </h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const ProductCard = ({
+  src,
+  label,
+  hoverSrc,
+  url,
+  index,
+  productId,
+}: {
+  src: string
+  label: string
+  hoverSrc: string
+  url?: string
+  index: number
+  productId: string
+}) => {
+  const { toggleLedgerItem, isInLedger } = useLedger()
+  const [isImageHovered, setIsImageHovered] = useState(false)
+  const isItemInLedger = isInLedger(productId)
+
+  const handleToggleLedger = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const alreadyInLedger = isItemInLedger
+    const ledgerItem: LedgerItem = {
+      id: productId,
+      name: label,
+      price: 0, // You may want to get actual price from your data
+      image: src,
+      description: label,
+      category: "Candles",
+    }
+
+    toggleLedgerItem(ledgerItem)
+    toast.success(`${label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+      duration: 2000,
+    })
+  }
+
+  return (
+    <div
+      className="group flex flex-col w-full mx-auto"
+      style={{ width: "364px", minHeight: "455px" }}
+    >
+      {/* Product Image */}
+      {url ? (
+        <Link href={url.startsWith("/") ? url : `/${url}`}>
+          <div
+            className="relative w-full overflow-hidden cursor-pointer"
+            style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
+            onMouseEnter={() => setIsImageHovered(true)}
+            onMouseLeave={() => setIsImageHovered(false)}
+          >
+            {/* Hover Image - Behind */}
+            {hoverSrc && (
+              <div className="absolute inset-0">
+                <ImageWithFallback
+                  src={hoverSrc}
+                  alt={`${label} alternate view`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            {/* Main Image - On Top */}
+            <div
+              className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+              style={{ opacity: isImageHovered ? 0 : 1 }}
+            >
+              <ImageWithFallback
+                src={src}
+                alt={label || "Product"}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Heart Icon - Always Visible */}
+            <button
+              onClick={handleToggleLedger}
+              className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 bg-white/20 border border-white/30 hover:bg-white/30"
+              aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
+            >
+              <Heart
+                size={18}
+                className={`transition-colors duration-300 ${
+                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
+              />
+            </button>
+          </div>
+        </Link>
+      ) : (
+        <div
+          className="relative w-full overflow-hidden cursor-pointer"
+          style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
+          onMouseEnter={() => setIsImageHovered(true)}
+          onMouseLeave={() => setIsImageHovered(false)}
+        >
+          {/* Hover Image - Behind */}
+          {hoverSrc && (
+            <div className="absolute inset-0">
+              <ImageWithFallback
+                src={hoverSrc}
+                alt={`${label} alternate view`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          {/* Main Image - On Top */}
+          <div
+            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+            style={{ opacity: isImageHovered ? 0 : 1 }}
+          >
+            <ImageWithFallback
+              src={src}
+              alt={label || "Product"}
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Heart Icon - Always Visible */}
+          <button
+            onClick={handleToggleLedger}
+            className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 bg-white/20 border border-white/30 hover:bg-white/30"
+            aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
+          >
+            <Heart
+              size={18}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
+            />
+          </button>
+        </div>
+      )}
+
+      {/* Product Info */}
+      <div className="flex flex-col flex-grow">
+        {url ? (
+          <Link href={url.startsWith("/") ? url : `/${url}`}>
+            <div>
+              <h3
+                className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer"
+                style={{ letterSpacing: "0.05em" }}
+              >
+                {label && label.trim() ? label : "Product Name"}
+              </h3>
+            </div>
+          </Link>
+        ) : (
+          <div>
+            <h3
+              className="font-american-typewriter text-xl mb-1"
+              style={{ letterSpacing: "0.05em" }}
+            >
+              {label && label.trim() ? label : "Product Name"}
+            </h3>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index: number }) => {
+  const router = useRouter()
+  const [isHovered, setIsHovered] = useState(false)
+
+  const handleProductClick = () => {
+    if (item.url) {
+      const normalizedUrl = item.url.startsWith("/") ? item.url : `/${item.url}`
+      router.push(normalizedUrl)
+    }
+  }
+
+  // Group products into sets of 3 for banner display
+  const bannerIndex = Math.floor(index / 3)
+  const positionInGroup = index % 3
+
+  // Background colors/styles for each position (optional)
+  const backgroundStyles = [
+    {
+      background: "linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.5))",
+    }, // Dark
+    {
+      background: "linear-gradient(135deg, rgba(200,150,150,0.2), rgba(180,100,100,0.3))",
+    }, // Warm pinkish
+    {
+      background: "linear-gradient(135deg, rgba(150,150,150,0.3), rgba(100,100,100,0.4))",
+    }, // Grey
+  ]
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      viewport={{ once: true }}
+      className="relative flex flex-col justify-between w-full h-full min-h-[400px] md:min-h-[450px] lg:min-h-[550px] cursor-pointer group overflow-hidden"
+      onClick={handleProductClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          className="w-full h-full"
+          animate={{ scale: isHovered ? 1.1 : 1 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          style={{ willChange: "transform" }}
+        >
+          <ImageWithFallback
+            src={item.src}
+            alt={item.label}
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
+        <div
+          className="absolute inset-0 opacity-80 transition-opacity duration-700 ease-in-out group-hover:opacity-70 pointer-events-none"
+          style={backgroundStyles[positionInGroup]}
+        />
+      </div>
+
+      {/* Content Overlay */}
+      <div className="relative z-10 flex flex-col justify-between h-full p-6 md:p-8 lg:p-12 text-white">
+        {/* Top Text Section */}
+        <div className="mt-auto mb-6 md:mb-8">
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-xs md:text-sm font-normal mb-2 md:mb-3 tracking-wide opacity-90 uppercase"
+            style={{
+              fontFamily: "system-ui, -apple-system, sans-serif",
+              letterSpacing: "0.05em",
+              fontSize: "8px",
+            }}
+          >
+            {positionInGroup === 0
+              ? "MODERN LIGHTING"
+              : positionInGroup === 1
+                ? "CANDLES & REED DIFFUSERS"
+                : "GLOBALLY AWARDED"}
+          </motion.p>
+
+          <motion.h3
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            style={{ fontSize: "1.5rem" }}
+            className="text-xl md:text-2xl lg:text-3xl font-normal tracking-tight leading-tight font-american-typewriter"
+          >
+            {item.label}
+          </motion.h3>
+        </div>
+
+        {/* View Products Button */}
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.02, backgroundColor: "#000", color: "#fff" }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="bg-white/5 text-white px-4 py-2 md:px-6 md:py-2.5 font-normal tracking-wide transition-all duration-300 hover:bg-black hover:text-white border border-white/20 w-fit text-sm md:text-sm"
+          style={{
+            fontFamily: "system-ui, -apple-system, sans-serif",
+            letterSpacing: "0.05em",
+          }}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleProductClick()
+          }}
+        >
+          Explore
+        </motion.button>
+      </div>
+    </motion.div>
+  )
+}
+
 const Candles = () => {
   const router = useRouter()
 
@@ -277,281 +669,6 @@ const Candles = () => {
       .replace(/[^a-z0-9-]/g, "")
   }
 
-  // Mobile Product Card Component - ProductCarousel Style
-  function MobileProductCard({
-    item,
-    productId,
-  }: {
-    item: CandlesCollectionItem
-    productId: string
-  }) {
-    const [isImageHovered, setIsImageHovered] = useState(false)
-    const isItemInLedger = isInLedger(productId)
-
-    const handleProductClick = () => {
-      if (item.url) {
-        const normalizedUrl = item.url.startsWith("/") ? item.url : `/${item.url}`
-        router.push(normalizedUrl)
-      }
-    }
-
-    const handleToggleLedger = (e: React.MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-
-      const alreadyInLedger = isItemInLedger
-      const ledgerItem: LedgerItem = {
-        id: productId,
-        name: item.label,
-        price: 0, // Price not available in CandlesCollectionItem
-        image: item.src,
-        description: item.label,
-        category: "Candles",
-      }
-
-      toggleLedgerItem(ledgerItem)
-      toast.success(`${item.label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
-        duration: 2000,
-      })
-    }
-
-    return (
-      <div
-        className="group flex flex-col w-full mx-auto h-full"
-        style={{
-          minHeight: "460px",
-          maxWidth: "480px",
-        }}
-      >
-        {/* Product Image */}
-        <div
-          className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] sm:aspect-[3/4]"
-          style={{ marginBottom: "2.5rem" }}
-          onMouseEnter={() => setIsImageHovered(true)}
-          onMouseLeave={() => setIsImageHovered(false)}
-          onClick={handleProductClick}
-        >
-          {/* Hover Image - Behind */}
-          {item.hoverSrc && (
-            <div className="absolute inset-0">
-              <ImageWithFallback
-                src={item.hoverSrc}
-                alt={`${item.label} alternate view`}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-
-          {/* Main Image - On Top */}
-          <div
-            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-            style={{ opacity: isImageHovered && item.hoverSrc ? 0 : 1 }}
-          >
-            <ImageWithFallback
-              src={item.src}
-              alt={item.label}
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          {/* Ledger Icon */}
-          <button
-            className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 bg-white/20 border border-white/30 hover:bg-white/30"
-            aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
-            onClick={handleToggleLedger}
-          >
-            <Heart
-              size={18}
-              className={`transition-colors duration-300 ${
-                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
-            />
-          </button>
-        </div>
-
-        {/* Product Info */}
-        <div className="flex flex-col flex-grow min-h-0 md:justify-between">
-          <div>
-            <div className="flex justify-start items-center py-1 md:py-2">
-              <h3
-                className="font-american-typewriter text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity"
-                style={{ letterSpacing: "0.05em" }}
-                onClick={handleProductClick}
-              >
-                {item.label}
-              </h3>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Product Card Component - HomeCreationsPage Style
-  function ProductCard({
-    src,
-    label,
-    hoverSrc,
-    url,
-    index,
-    productId,
-  }: {
-    src: string
-    label: string
-    hoverSrc: string
-    url?: string
-    index: number
-    productId: string
-  }) {
-    const [isImageHovered, setIsImageHovered] = useState(false)
-    const isItemInLedger = isInLedger(productId)
-
-    const handleToggleLedger = (e: React.MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-
-      const alreadyInLedger = isItemInLedger
-      const ledgerItem: LedgerItem = {
-        id: productId,
-        name: label,
-        price: 0, // You may want to get actual price from your data
-        image: src,
-        description: label,
-        category: "Candles",
-      }
-
-      toggleLedgerItem(ledgerItem)
-      toast.success(`${label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
-        duration: 2000,
-      })
-    }
-
-    return (
-      <div
-        className="group flex flex-col w-full mx-auto"
-        style={{ width: "364px", minHeight: "455px" }}
-      >
-        {/* Product Image */}
-        {url ? (
-          <Link href={url.startsWith("/") ? url : `/${url}`}>
-            <div
-              className="relative w-full overflow-hidden cursor-pointer"
-              style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
-              onMouseEnter={() => setIsImageHovered(true)}
-              onMouseLeave={() => setIsImageHovered(false)}
-            >
-              {/* Hover Image - Behind */}
-              {hoverSrc && (
-                <div className="absolute inset-0">
-                  <ImageWithFallback
-                    src={hoverSrc}
-                    alt={`${label} alternate view`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-
-              {/* Main Image - On Top */}
-              <div
-                className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-                style={{ opacity: isImageHovered ? 0 : 1 }}
-              >
-                <ImageWithFallback
-                  src={src}
-                  alt={label || "Product"}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* Heart Icon - Always Visible */}
-              <button
-                onClick={handleToggleLedger}
-                className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 bg-white/20 border border-white/30 hover:bg-white/30"
-                aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
-              >
-                <Heart
-                  size={18}
-                  className={`transition-colors duration-300 ${
-                    isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                  }`}
-                />
-              </button>
-            </div>
-          </Link>
-        ) : (
-          <div
-            className="relative w-full overflow-hidden cursor-pointer"
-            style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
-            onMouseEnter={() => setIsImageHovered(true)}
-            onMouseLeave={() => setIsImageHovered(false)}
-          >
-            {/* Hover Image - Behind */}
-            {hoverSrc && (
-              <div className="absolute inset-0">
-                <ImageWithFallback
-                  src={hoverSrc}
-                  alt={`${label} alternate view`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-
-            {/* Main Image - On Top */}
-            <div
-              className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-              style={{ opacity: isImageHovered ? 0 : 1 }}
-            >
-              <ImageWithFallback
-                src={src}
-                alt={label || "Product"}
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            {/* Heart Icon - Always Visible */}
-            <button
-              onClick={handleToggleLedger}
-              className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 bg-white/20 border border-white/30 hover:bg-white/30"
-              aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
-            >
-              <Heart
-                size={18}
-                className={`transition-colors duration-300 ${
-                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
-              />
-            </button>
-          </div>
-        )}
-
-        {/* Product Info */}
-        <div className="flex flex-col flex-grow">
-          {url ? (
-            <Link href={url.startsWith("/") ? url : `/${url}`}>
-              <div>
-                <h3
-                  className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer"
-                  style={{ letterSpacing: "0.05em" }}
-                >
-                  {label && label.trim() ? label : "Product Name"}
-                </h3>
-              </div>
-            </Link>
-          ) : (
-            <div>
-              <h3
-                className="font-american-typewriter text-xl mb-1"
-                style={{ letterSpacing: "0.05em" }}
-              >
-                {label && label.trim() ? label : "Product Name"}
-              </h3>
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
-
   // Handler for navigation
   const handleItemClick = (url?: string) => {
     if (url && url.trim() !== "") {
@@ -709,122 +826,6 @@ const Candles = () => {
     })
   }, [bannerCarouselApi])
 
-  // Banner Product Card Component - Banner Style
-  function BannerProductCard({ item, index }: { item: CandlesCollectionItem; index: number }) {
-    const [isHovered, setIsHovered] = useState(false)
-
-    const handleProductClick = () => {
-      if (item.url) {
-        const normalizedUrl = item.url.startsWith("/") ? item.url : `/${item.url}`
-        router.push(normalizedUrl)
-      }
-    }
-
-    // Group products into sets of 3 for banner display
-    const bannerIndex = Math.floor(index / 3)
-    const positionInGroup = index % 3
-
-    // Background colors/styles for each position (optional)
-    const backgroundStyles = [
-      {
-        background: "linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.5))",
-      }, // Dark
-      {
-        background: "linear-gradient(135deg, rgba(200,150,150,0.2), rgba(180,100,100,0.3))",
-      }, // Warm pinkish
-      {
-        background: "linear-gradient(135deg, rgba(150,150,150,0.3), rgba(100,100,100,0.4))",
-      }, // Grey
-    ]
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: index * 0.1 }}
-        viewport={{ once: true }}
-        className="relative flex flex-col justify-between w-full h-full min-h-[400px] md:min-h-[450px] lg:min-h-[550px] cursor-pointer group overflow-hidden"
-        onClick={handleProductClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0 overflow-hidden">
-          <motion.div
-            className="w-full h-full"
-            animate={{ scale: isHovered ? 1.1 : 1 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            style={{ willChange: "transform" }}
-          >
-            <ImageWithFallback
-              src={item.src}
-              alt={item.label}
-              className="w-full h-full object-cover"
-            />
-          </motion.div>
-          <div
-            className="absolute inset-0 opacity-80 transition-opacity duration-700 ease-in-out group-hover:opacity-70 pointer-events-none"
-            style={backgroundStyles[positionInGroup]}
-          />
-        </div>
-
-        {/* Content Overlay */}
-        <div className="relative z-10 flex flex-col justify-between h-full p-6 md:p-8 lg:p-12 text-white">
-          {/* Top Text Section */}
-          <div className="mt-auto mb-6 md:mb-8">
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-xs md:text-sm font-normal mb-2 md:mb-3 tracking-wide opacity-90 uppercase"
-              style={{
-                fontFamily: "system-ui, -apple-system, sans-serif",
-                letterSpacing: "0.05em",
-                fontSize: "8px",
-              }}
-            >
-              {positionInGroup === 0
-                ? "MODERN LIGHTING"
-                : positionInGroup === 1
-                  ? "CANDLES & REED DIFFUSERS"
-                  : "GLOBALLY AWARDED"}
-            </motion.p>
-
-            <motion.h3
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              style={{ fontSize: "1.5rem" }}
-              className="text-xl md:text-2xl lg:text-3xl font-normal tracking-tight leading-tight font-american-typewriter"
-            >
-              {item.label}
-            </motion.h3>
-          </div>
-
-          {/* View Products Button */}
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            whileHover={{ scale: 1.02, backgroundColor: "#000", color: "#fff" }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="bg-white/5 text-white px-4 py-2 md:px-6 md:py-2.5 font-normal tracking-wide transition-all duration-300 hover:bg-black hover:text-white border border-white/20 w-fit text-sm md:text-sm"
-            style={{
-              fontFamily: "system-ui, -apple-system, sans-serif",
-              letterSpacing: "0.05em",
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              handleProductClick()
-            }}
-          >
-            Explore
-          </motion.button>
-        </div>
-      </motion.div>
-    )
-  }
-
   // Group products for banner display (3 per banner)
   const bannerGroups: CandlesCollectionItem[][] = []
   for (let i = 0; i < candlesCollection.length; i += 3) {
@@ -893,6 +894,15 @@ const Candles = () => {
               >
                 A story in every scent.
               </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
+                viewport={{ once: true, amount: 0.3 }}
+                className="font-din-arabic text-sm md:text-base text-black/60 tracking-wide uppercase text-center"
+              >
+                Choose a mood to light.
+              </motion.p>
             </div>
 
             {/* Mobile Carousel */}
@@ -1022,6 +1032,15 @@ const Candles = () => {
             >
               A story in every scent.
             </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
+              viewport={{ once: true, amount: 0.3 }}
+              className="font-din-arabic text-sm md:text-base text-black/60 tracking-wide mt-[-0.5rem] mb-4"
+            >
+              Choose a mood to light.
+            </motion.p>
           </div>
           {/* Desktop view - HomeCreationsPage Style Carousel */}
           <style
@@ -1045,7 +1064,7 @@ const Candles = () => {
             .candles-carousel-content {
               user-select: none !important;
               -webkit-user-select: none !important;
-              padding-left: 2rem !important;
+              padding-left: 0 !important;
               padding-right: 2rem !important;
             }
             .candles-carousel-content > div {
@@ -1061,7 +1080,7 @@ const Candles = () => {
                 margin-right: 1rem !important;
               }
               .candles-carousel-content {
-                padding-left: 2rem !important;
+                padding-left: 0 !important;
                 padding-right: 2rem !important;
               }
             }
@@ -1074,7 +1093,7 @@ const Candles = () => {
                 margin-right: 1rem !important;
               }
               .candles-carousel-content {
-                padding-left: 2rem !important;
+                padding-left: 0 !important;
                 padding-right: 2rem !important;
               }
             }
@@ -1362,13 +1381,13 @@ const Candles = () => {
         viewport={{ once: true, amount: 0.1 }}
         className="py-12 md:py-20"
       >
-        <div className="flex flex-col md:flex-row items-center justify-between px-4 md:px-12 gap-8 md:gap-16">
+        <div className="flex flex-col md:flex-row items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, ease: smoothEase }}
             viewport={{ once: true, amount: 0.2 }}
-            className="w-full md:w-1/2 h-[300px] md:h-[500px] overflow-hidden rounded-sm"
+            className="w-full md:w-[55%] h-[300px] md:h-[500px] overflow-hidden"
           >
             <video autoPlay loop muted playsInline className="w-full h-full object-cover">
               <source
@@ -1383,7 +1402,7 @@ const Candles = () => {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.2, ease: smoothEase }}
             viewport={{ once: true, amount: 0.2 }}
-            className="w-full md:w-1/2 flex flex-col justify-center"
+            className="w-full md:w-[45%] flex flex-col justify-center px-4 md:pl-12 md:pr-12"
           >
             <div className="max-w-xl">
               <motion.h2

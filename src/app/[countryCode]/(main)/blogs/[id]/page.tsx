@@ -1,9 +1,72 @@
 "use client"
+import { Navigation } from "app/components/Navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
-import React from "react"
+import Link from "next/link"
+import { useParams } from "next/navigation"
+import React, { useEffect, useState } from "react"
+
+const FeaturedBlogProduct = ({
+  image,
+  name,
+  description,
+}: {
+  image: string
+  name: string
+  description?: string
+}) => {
+  return (
+    <div className="group cursor-pointer">
+      <div className="relative overflow-hidden mb-4 bg-[#F5F5F0]" style={{ aspectRatio: "4/5" }}>
+        <img
+          src={image}
+          alt={name}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+      </div>
+      <div className="text-center px-2">
+        <h3
+          className="text-lg md:text-xl mb-2 group-hover:underline decoration-1 underline-offset-4"
+          style={{
+            fontFamily: '"American Typewriter"',
+            color: "#333",
+            lineHeight: "1.2",
+          }}
+        >
+          {name}
+        </h3>
+        {description && (
+          <p
+            className="text-sm md:text-base"
+            style={{
+              fontFamily: '"DIN Arabic Regular"',
+              color: "#626262",
+              lineHeight: "1.5",
+            }}
+          >
+            {description}
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const SingleBlogPage = () => {
+  const params = useParams()
+  const countryCode = (params?.countryCode as string) || "in"
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY
+      setIsScrolled(scrollY > 50)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   // Custom styles object - copied from your blogs page
   const styles = {
     bannerHeading: {
@@ -159,7 +222,28 @@ const SingleBlogPage = () => {
 
   return (
     <div className="bg-[#FEFDF3] min-h-screen">
-      <div className="max-w-7xl mx-auto py-12 px-4 md:px-6" style={{ marginTop: "70px" }}>
+      <Navigation isScrolled={isScrolled} disableSticky={true} />
+      <div className="max-w-7xl mx-auto py-12 px-4 md:px-6">
+        {/* Back Button */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1, duration: 0.6 }}
+        >
+          <Link
+            href={`/${countryCode}/blogs`}
+            className="inline-flex items-center text-xs md:text-sm text-[#999] hover:text-[#626262] transition-colors duration-200"
+            style={{
+              fontFamily: '"American Typewriter"',
+              letterSpacing: "1px",
+            }}
+          >
+            <ChevronLeft size={16} className="mr-1" />
+            BACK TO JOURNAL
+          </Link>
+        </motion.div>
+
         <div className="flex flex-col md:flex-row gap-6 md:gap-16">
           {/* Main Content - Left Side */}
           <div
@@ -474,6 +558,36 @@ const SingleBlogPage = () => {
               </div>
             </motion.div>
 
+            {/* From the Botanist's Shelf */}
+            <div className="mb-20 pt-16 border-t-[2px] border-[#000]">
+              <h2 style={styles.subsequentHeading} className="mb-10 text-center">
+                From the Botanist's Shelf
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                {/* Product 1 */}
+                <FeaturedBlogProduct
+                  image="https://images.ctfassets.net/1g1ws79ch8wy/5mgOtZAaZztFFtqy9Rianh/c83ce11c9e8fa8ad4162688ba8b41d4a/warm-roots-hover.jpeg"
+                  name="Warm Roots"
+                  description="Grounded in earth, rooted warmth"
+                />
+
+                {/* Product 2 */}
+                <FeaturedBlogProduct
+                  image="https://images.ctfassets.net/1g1ws79ch8wy/3OzBVSgirqWvULBbFpKoeg/e27007a388346fcb963744ebe7a11f60/scentedCandle.png"
+                  name="Soft Orris Hand Veil"
+                  description="Softness reimagined — a velvety hush that lingers."
+                />
+
+                {/* Product 3 */}
+                <FeaturedBlogProduct
+                  image="https://images.ctfassets.net/1g1ws79ch8wy/1c0c4asQNn6Ky1PzbZpTxl/82dac239f9d58dd9fc07d398684c9e89/Aqua-vitei-hover.jpeg"
+                  name="Aqua Vitei"
+                  description="Fresh as the tide, crisp notes"
+                />
+              </div>
+            </div>
+
             {/* About Author */}
             <div
               className=""
@@ -524,7 +638,15 @@ const SingleBlogPage = () => {
               >
                 {/* first */}
                 <div className="flex flex-col gap-4">
-                  <p>August 24, 2017</p>
+                  <p
+                    className="text-xs uppercase tracking-widest"
+                    style={{
+                      fontFamily: '"DIN Arabic Regular"',
+                      color: "#999",
+                    }}
+                  >
+                    August 24, 2017
+                  </p>
                   <h2 style={styles.subsequentHeading3}>
                     The Ultimate Guide to New York's Favorite Food
                   </h2>
@@ -532,27 +654,49 @@ const SingleBlogPage = () => {
                     From classic bagels to late-night pizza slices, discover the culinary staples
                     that define the city that never sleeps.
                   </p>
-                  <h3 style={styles.subsequentHeading3} className="uppercase">
+                  <h3
+                    style={styles.subsequentHeading3}
+                    className="uppercase cursor-pointer hover:underline"
+                  >
                     Read more
                   </h3>
                 </div>
 
                 {/* second */}
                 <div className="flex flex-col gap-4">
-                  <p>August 22, 2017</p>
+                  <p
+                    className="text-xs uppercase tracking-widest"
+                    style={{
+                      fontFamily: '"DIN Arabic Regular"',
+                      color: "#999",
+                    }}
+                  >
+                    August 22, 2017
+                  </p>
                   <h2 style={styles.subsequentHeading3}>Why Healthy Eating Doesn't Mean Dieting</h2>
                   <p style={styles.subCopy}>
                     Learn how to build a sustainable relationship with food that focuses on
                     nourishment rather than restriction.
                   </p>
-                  <h3 style={styles.subsequentHeading3} className="uppercase">
+                  <h3
+                    style={styles.subsequentHeading3}
+                    className="uppercase cursor-pointer hover:underline"
+                  >
                     Read more
                   </h3>
                 </div>
 
                 {/* third */}
                 <div className="flex flex-col gap-4">
-                  <p>August 20, 2017</p>
+                  <p
+                    className="text-xs uppercase tracking-widest"
+                    style={{
+                      fontFamily: '"DIN Arabic Regular"',
+                      color: "#999",
+                    }}
+                  >
+                    August 20, 2017
+                  </p>
                   <h2 style={styles.subsequentHeading3}>
                     A Quick, Satisfying Fix for Weeknight Chicken
                   </h2>
@@ -560,7 +704,10 @@ const SingleBlogPage = () => {
                     This one-pan roasted chicken recipe delivers maximum flavor with minimal cleanup
                     for busy weeknights.
                   </p>
-                  <h3 style={styles.subsequentHeading3} className="uppercase">
+                  <h3
+                    style={styles.subsequentHeading3}
+                    className="uppercase cursor-pointer hover:underline"
+                  >
                     Read more
                   </h3>
                 </div>

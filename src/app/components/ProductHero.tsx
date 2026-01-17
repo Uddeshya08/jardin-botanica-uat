@@ -87,9 +87,9 @@ const buildSizeOptions = (product: ProductHeroProps["product"], sizeOptionId?: s
 
       return label
         ? {
-          id: variant.id,
-          label,
-        }
+            id: variant.id,
+            label,
+          }
         : null
     })
     .filter((option): option is { id: string; label: string } => Boolean(option))
@@ -497,7 +497,7 @@ export function ProductHero({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="font-din-arabic text-black leading-relaxed mb-4"
+              className="font-din-arabic text-black/80 leading-relaxed mb-4"
             >
               {product.subtitle}
             </motion.p>
@@ -655,7 +655,9 @@ export function ProductHero({
               animate={{ opacity: 1, scaleX: 1 }}
               transition={{ duration: 0.6, delay: 0.9 }}
               className="w-full h-px origin-left"
-              style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
+              style={{
+                backgroundColor: "rgba(185, 168, 147, 0.22)",
+              }}
             />
           )}
 
@@ -685,9 +687,14 @@ export function ProductHero({
                   Ritual in Practice
                 </span>
                 <motion.div
-                  animate={{ rotate: openAccordionId === "ritual" ? 45 : 0 }}
+                  animate={{
+                    rotate: openAccordionId === "ritual" ? 45 : 0,
+                  }}
                   whileHover={{ rotate: 90 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  transition={{
+                    duration: 0.3,
+                    ease: "easeInOut",
+                  }}
                 >
                   {openAccordionId === "ritual" ? (
                     <X
@@ -709,7 +716,10 @@ export function ProductHero({
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    transition={{
+                      duration: 0.3,
+                      ease: "easeInOut",
+                    }}
                     className="overflow-hidden lg:hidden"
                   >
                     <div className="pt-3 pb-2">
@@ -730,7 +740,9 @@ export function ProductHero({
               animate={{ opacity: 1, scaleX: 1 }}
               transition={{ duration: 0.6, delay: 1.1 }}
               className="w-full h-px origin-left"
-              style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
+              style={{
+                backgroundColor: "rgba(185, 168, 147, 0.22)",
+              }}
             />
           )}
 
@@ -760,9 +772,14 @@ export function ProductHero({
                   Actives & Key Botanicals
                 </span>
                 <motion.div
-                  animate={{ rotate: openAccordionId === "actives" ? 45 : 0 }}
+                  animate={{
+                    rotate: openAccordionId === "actives" ? 45 : 0,
+                  }}
                   whileHover={{ rotate: 90 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  transition={{
+                    duration: 0.3,
+                    ease: "easeInOut",
+                  }}
                 >
                   {openAccordionId === "actives" ? (
                     <X
@@ -784,7 +801,10 @@ export function ProductHero({
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    transition={{
+                      duration: 0.3,
+                      ease: "easeInOut",
+                    }}
                     className="overflow-hidden lg:hidden"
                   >
                     <div className="pt-3 pb-2 space-y-4">
@@ -812,7 +832,9 @@ export function ProductHero({
               animate={{ opacity: 1, scaleX: 1 }}
               transition={{ duration: 0.6, delay: 1.3 }}
               className="w-full h-px origin-left"
-              style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
+              style={{
+                backgroundColor: "rgba(185, 168, 147, 0.22)",
+              }}
             />
           )}
 
@@ -842,9 +864,14 @@ export function ProductHero({
                   Fragrance Profile
                 </span>
                 <motion.div
-                  animate={{ rotate: openAccordionId === "fragrance" ? 45 : 0 }}
+                  animate={{
+                    rotate: openAccordionId === "fragrance" ? 45 : 0,
+                  }}
                   whileHover={{ rotate: 90 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  transition={{
+                    duration: 0.3,
+                    ease: "easeInOut",
+                  }}
                 >
                   {openAccordionId === "fragrance" ? (
                     <X
@@ -866,7 +893,10 @@ export function ProductHero({
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    transition={{
+                      duration: 0.3,
+                      ease: "easeInOut",
+                    }}
                     className="overflow-hidden lg:hidden"
                   >
                     <div className="pt-3 pb-2 space-y-4">
@@ -894,7 +924,9 @@ export function ProductHero({
               animate={{ opacity: 1, scaleX: 1 }}
               transition={{ duration: 0.6, delay: 1.5 }}
               className="w-full h-px origin-left"
-              style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
+              style={{
+                backgroundColor: "rgba(185, 168, 147, 0.22)",
+              }}
             />
           )}
 
@@ -928,7 +960,10 @@ export function ProductHero({
                     rotate: openAccordionId === "ingredients" ? 45 : 0,
                   }}
                   whileHover={{ rotate: 90 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  transition={{
+                    duration: 0.3,
+                    ease: "easeInOut",
+                  }}
                 >
                   {openAccordionId === "ingredients" ? (
                     <X
@@ -950,7 +985,10 @@ export function ProductHero({
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    transition={{
+                      duration: 0.3,
+                      ease: "easeInOut",
+                    }}
                     className="overflow-hidden lg:hidden"
                   >
                     <div className="pt-3 pb-2">
@@ -975,16 +1013,24 @@ export function ProductHero({
                   <motion.div
                     initial={{ opacity: 0, scaleX: 0 }}
                     animate={{ opacity: 1, scaleX: 1 }}
-                    transition={{ duration: 0.6, delay: 1.7 + index * 0.1 }}
+                    transition={{
+                      duration: 0.6,
+                      delay: 1.7 + index * 0.1,
+                    }}
                     className="w-full h-px origin-left"
-                    style={{ backgroundColor: "rgba(185, 168, 147, 0.22)" }}
+                    style={{
+                      backgroundColor: "rgba(185, 168, 147, 0.22)",
+                    }}
                   />
 
                   {/* Panel Button */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 1.8 + index * 0.1 }}
+                    transition={{
+                      duration: 0.6,
+                      delay: 1.8 + index * 0.1,
+                    }}
                     className="space-y-1"
                   >
                     <button
@@ -1009,17 +1055,24 @@ export function ProductHero({
                           rotate: openAccordionId === panel.id ? 45 : 0,
                         }}
                         whileHover={{ rotate: 90 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        transition={{
+                          duration: 0.3,
+                          ease: "easeInOut",
+                        }}
                       >
                         {openAccordionId === panel.id ? (
                           <X
                             className="w-4 h-4 transition-colors duration-300"
-                            style={{ color: "#a28b6f" }}
+                            style={{
+                              color: "#a28b6f",
+                            }}
                           />
                         ) : (
                           <Plus
                             className="w-4 h-4 transition-colors duration-300"
-                            style={{ color: "#a28b6f" }}
+                            style={{
+                              color: "#a28b6f",
+                            }}
                           />
                         )}
                       </motion.div>
@@ -1028,10 +1081,22 @@ export function ProductHero({
                     <AnimatePresence>
                       {openAccordionId === panel.id && (
                         <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                          initial={{
+                            height: 0,
+                            opacity: 0,
+                          }}
+                          animate={{
+                            height: "auto",
+                            opacity: 1,
+                          }}
+                          exit={{
+                            height: 0,
+                            opacity: 0,
+                          }}
+                          transition={{
+                            duration: 0.3,
+                            ease: "easeInOut",
+                          }}
                           className="overflow-hidden lg:hidden"
                         >
                           <div className="pt-3 pb-2">
@@ -1134,13 +1199,15 @@ export function ProductHero({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleToggleLedger}
-            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"
-              }`}
+            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${
+              isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"
+            }`}
             aria-label={isProductInLedger ? "Remove from ledger" : "Add to ledger"}
           >
             <Heart
-              className={`w-5 h-5 transition-colors ${isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"
-                }`}
+              className={`w-5 h-5 transition-colors ${
+                isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"
+              }`}
             />
           </motion.button>
 
@@ -1213,8 +1280,9 @@ export function ProductHero({
               onClick={() => setCurrentImageIndex(index)}
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${currentImageIndex === index ? "w-8" : ""
-                }`}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                currentImageIndex === index ? "w-8" : ""
+              }`}
               style={{
                 backgroundColor: currentImageIndex === index ? "#a28b6f" : "rgba(0, 0, 0, 0.3)",
               }}
