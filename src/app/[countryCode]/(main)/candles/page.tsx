@@ -856,7 +856,10 @@ const Candles = () => {
         forceWhiteText={true}
       />
 
-      <PageBanner pageKey="candles" />
+      <PageBanner
+        pageKey="candles"
+        containerClassName="absolute top-[37%] md:top-1/2 left-2 md:left-[70px] md:-translate-y-1/2 max-w-xs md:max-w-md"
+      />
 
       {/* Mobile Product Carousel Section - Mobile Only */}
       {!isLoadingCollection && candlesCollection.length > 0 && (
@@ -899,7 +902,7 @@ const Candles = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
-                className="font-din-arabic text-sm md:text-base text-black/60 tracking-wide uppercase text-center"
+                className="font-din-arabic text-base md:text-lg text-black/60 tracking-wide uppercase text-center"
               >
                 Choose a mood to light.
               </motion.p>
@@ -1037,7 +1040,7 @@ const Candles = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
               viewport={{ once: true, amount: 0.3 }}
-              className="font-din-arabic text-sm md:text-base text-black/60 tracking-wide mt-[-0.5rem] mb-4"
+              className="font-din-arabic text-base md:text-lg text-black/60 tracking-wide mt-[-0.5rem] mb-4"
             >
               Choose a mood to light.
             </motion.p>
@@ -1198,6 +1201,27 @@ const Candles = () => {
           className="md:hidden w-full py-8 overflow-hidden"
         >
           <div className="relative">
+            {/* Mobile Heading for Banner Carousel */}
+            <div className="pl-6 pb-6">
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: smoothEase }}
+                viewport={{ once: true, amount: 0.3 }}
+                className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter text-center"
+              >
+                A story in every scent.
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
+                viewport={{ once: true, amount: 0.3 }}
+                className="font-din-arabic text-base md:text-lg text-black/60 tracking-wide uppercase text-center"
+              >
+                Choose a mood to light.
+              </motion.p>
+            </div>
             {/* Banner Carousel */}
             <style
               dangerouslySetInnerHTML={{
