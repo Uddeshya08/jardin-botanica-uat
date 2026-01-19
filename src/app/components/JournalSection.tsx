@@ -55,7 +55,7 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: index * 0.2 + 0.3 }}
           viewport={{ once: true }}
-          className="space-y-4 px-6 order-1 md:order-2 pb-10 md:pb-0 flex-grow"
+          className="space-y-4 px-6 order-2 pb-10 md:pb-0 flex-grow"
         >
           {/* Category */}
           <motion.span
@@ -92,7 +92,7 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
         </motion.div>
 
         {/* Image - Second on mobile, first on desktop */}
-        <motion.div className="aspect-[3/4] overflow-hidden mb-6 order-2 md:order-1 px-6 md:px-0">
+        <motion.div className="aspect-[4/3] overflow-hidden mb-6 order-1 px-6 md:px-0">
           <motion.div
             whileHover={{ scale: 1.1 }} // desktop hover zoom
             animate={{ scale: isPressed ? 1.1 : 1 }} // mobile press zoom
@@ -116,7 +116,7 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
 
 export function JournalSection() {
   return (
-    <section className="pt-16 pb-10 md:py-20" style={{ backgroundColor: "#edede2" }}>
+    <section className="py-12 lg:py-16" style={{ backgroundColor: "#edede2" }}>
       <div className="w-full md:container md:mx-auto px-0 md:px-6 lg:px-12">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

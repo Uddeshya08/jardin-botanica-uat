@@ -104,7 +104,7 @@ function ProductCard({
 }) {
   const router = useRouter()
   const [isImageHovered, setIsImageHovered] = useState(false)
-  const [isButtonHovered, setIsButtonHovered] = useState(false)
+
 
   const handleProductClick = () => {
     // Normalize slug to ensure it starts with /
@@ -161,9 +161,8 @@ function ProductCard({
         >
           <Heart
             size={18}
-            className={`transition-colors duration-300 ${
-              isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-            }`}
+            className={`transition-colors duration-300 ${isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
           />
         </button>
       </div>
@@ -194,8 +193,6 @@ function ProductCard({
           {/* Add to Cart Button */}
           <button
             className="group/btn-wrapper flex items-center justify-center font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 hover:bg-black transition-all duration-300 tracking-wide text-sm md:text-base cursor-pointer relative"
-            onMouseEnter={() => setIsButtonHovered(true)}
-            onMouseLeave={() => setIsButtonHovered(false)}
             onClick={(e) => {
               e.stopPropagation()
               onAddToCart()
@@ -214,17 +211,10 @@ function ProductCard({
                 →
               </span>
             </div>
-            <span
-              className="absolute bottom-3 left-0 right-0 h-[1px] bg-black group-hover/btn-wrapper:bg-white transition-all duration-300 mx-auto w-[calc(100%-3rem)] md:w-[calc(100%-4rem)]"
-              style={{
-                width: isButtonHovered ? "calc(100% - 3rem)" : "0%",
-                opacity: isButtonHovered ? 1 : 0,
-              }}
-            />
           </button>
         </div>
       </div>
-    </div>
+    </div >
   )
 }
 
@@ -444,6 +434,7 @@ export function ProductCarousel() {
 
   return (
     <section
+      className="py-12 lg:py-16"
       style={{ backgroundColor: "#edede2" }}
       onMouseDownCapture={() => setHasInteracted(true)}
       onTouchStartCapture={() => setHasInteracted(true)}
@@ -454,7 +445,7 @@ export function ProductCarousel() {
         transition={{ duration: 0.8, delay: 0.4 }}
         viewport={{ once: true }}
       >
-        <h2 className="pt-16 text-center font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-black leading-tight">
+        <h2 className="text-center font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-black leading-tight">
           From the Botanist’s Lab
         </h2>
       </motion.div>
@@ -571,7 +562,7 @@ export function ProductCarousel() {
         `,
         }}
       />
-      <div className="pt-10 pb-0 sm:py-16 lg:py-16">
+      <div className="pt-10 pb-0">
         <div className="m-w-[180rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-10 2xl:px-15">
           <Carousel
             setApi={setApi}

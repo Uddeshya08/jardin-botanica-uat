@@ -565,14 +565,23 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: index * 0.2 }}
-            className={`relative group overflow-hidden ${filteredProducts.length === 1 ? "w-full lg:w-1/2" : ""
+            className={`relative group overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1
+              ? expandedItems[product.id]
+                ? "w-full lg:w-[96vw] lg:max-w-[1920px] lg:flex lg:flex-row shadow-2xl"
+                : "w-full lg:w-1/2 transition-all duration-700"
+              : ""
               }`}
             onMouseEnter={() => setHoveredProduct(product.id)}
             onMouseLeave={() => setHoveredProduct(null)}
           >
             {/* Image Section */}
 
-            <div className="relative h-[60vh] lg:h-[70vh] bg-black">
+            <div
+              className={`relative bg-black transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1 && expandedItems[product.id]
+                ? "h-[50vh] lg:h-[80vh] w-full lg:w-1/2"
+                : "h-[60vh] lg:h-[70vh] w-full"
+                }`}
+            >
               {/* Background Image */}
 
               <AnimatePresence initial={false}>
@@ -715,7 +724,13 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
             {/* Collapsible What's Inside Section */}
 
-            <div className="bg-white/30 backdrop-blur-md border-t-2 border-[#e58a4d]">
+            {/* Collapsible What's Inside Section */}
+            <div
+              className={`bg-white/30 backdrop-blur-md border-[#e58a4d] transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1 && expandedItems[product.id]
+                ? "border-t-2 lg:border-t-0 lg:border-l-2 w-full lg:w-1/2 flex flex-col max-h-[80vh]"
+                : "border-t-2 w-full"
+                }`}
+            >
               <button
                 onClick={(e) => {
                   e.stopPropagation()
@@ -745,8 +760,11 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-hidden"
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    className={`overflow-hidden ${filteredProducts.length === 1 && expandedItems[product.id]
+                      ? "lg:h-full lg:overflow-y-auto custom-scrollbar"
+                      : ""
+                      }`}
                   >
                     <div className="px-5 sm:px-8 md:px-12 pb-6 sm:pb-8 space-y-5 sm:space-y-6">
                       {/* Items List */}
@@ -975,7 +993,7 @@ function VideoPlaceholderSection() {
 
       {/* Gradient Overlay */}
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/35" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/75 to-black/50" />
 
       {/* Fragrance Library Content */}
 
