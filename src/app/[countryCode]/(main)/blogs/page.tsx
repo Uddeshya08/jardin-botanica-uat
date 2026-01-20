@@ -147,12 +147,34 @@ const Home = () => {
     },
   ]
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const [message, setMessage] = useState("")
+  const [isSuccess, setIsSuccess] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (email) {
-      console.log("Newsletter signup:", email)
+    if (!email) return
+
+    if (!email.includes("@")) {
+      setMessage("Please enter a valid email address")
+      setIsSuccess(false)
+      return
+    }
+
+    setIsSubmitting(true)
+
+    const { subscribeToNewsletter } = await import("@lib/data/brevo")
+    const result = await subscribeToNewsletter(email)
+
+    setIsSubmitting(false)
+    setIsSuccess(result.success)
+    setMessage(result.message)
+
+    if (result.success) {
       setEmail("")
-      // TODO: Implement newsletter subscription API call
+      setTimeout(() => {
+        setMessage("")
+      }, 5000)
     }
   }
 
@@ -1195,29 +1217,43 @@ const Home = () => {
             {/* Email Form */}
             <motion.form
               onSubmit={handleNewsletterSubmit}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto"
+              className="flex flex-col gap-4 max-w-md mx-auto"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.6 }}
             >
-              {/* Email Input */}
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your email address *"
-                required
-                className="flex-1 w-full px-4 py-3 border border-gray-300 bg-white text-black placeholder-gray-500 italic focus:outline-none focus:border-black transition-colors"
-                style={{ fontFamily: '"font-din-arabic"' }}
-              />
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                {/* Email Input */}
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Your email address *"
+                  required
+                  disabled={isSubmitting}
+                  className="flex-1 w-full px-4 py-3 border border-gray-300 bg-white text-black placeholder-gray-500 italic focus:outline-none focus:border-black transition-colors"
+                  style={{ fontFamily: '"font-din-arabic"' }}
+                />
 
-              {/* Subscribe Button */}
-              <button
-                type="submit"
-                className="w-full sm:w-auto px-8 py-3 bg-black text-white font-american-typewriter font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors"
-              >
-                Join the Circle{" "}
-              </button>
+                {/* Subscribe Button */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto px-8 py-3 bg-black text-white font-american-typewriter font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors"
+                >
+                  {isSubmitting ? "Joined" : "Join the Circle"}
+                </button>
+              </div>
+              {message && (
+                <div
+                  className={`text-sm px-4 py-2 rounded text-center ${isSuccess
+                      ? "bg-green-100 text-green-800 border border-green-300"
+                      : "bg-red-100 text-red-800 border border-red-300"
+                    }`}
+                >
+                  {message}
+                </div>
+              )}
             </motion.form>
           </motion.div>
         </div>
@@ -1233,5 +1269,10 @@ const Home = () => {
     </div>
   )
 }
+// `const [email, setEmail] = useState("")` is already there.
+
+// Let's use `multi_replace_file_content`.
+
+
 
 export default Home

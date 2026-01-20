@@ -66,13 +66,13 @@ const AccountInfo = ({
             data-testid="edit-button"
             data-active={state}
           >
-            {state ? "Cancel" : "Edit"}
+            {state ? "Cancel" : isSuccess ? "Saved" : "Edit"}
           </Button>
         </div>
       </div>
 
-      {/* Success state */}
-      <Disclosure>
+      {/* Success state - Hidden as we show 'Saved' on button */}
+      {/* <Disclosure>
         <Disclosure.Panel
           static
           className={clx(
@@ -88,7 +88,7 @@ const AccountInfo = ({
             <span>{label} updated succesfully</span>
           </Badge>
         </Disclosure.Panel>
-      </Disclosure>
+      </Disclosure> */}
 
       {/* Error state  */}
       <Disclosure>

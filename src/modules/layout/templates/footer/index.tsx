@@ -7,6 +7,40 @@ const Product = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [aromaSlide, setAromaSlide] = useState(0)
 
+  // Newsletter state
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+  const [isSuccess, setIsSuccess] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+
+    if (!email.includes("@")) {
+      setMessage("Please enter a valid email address")
+      setIsSuccess(false)
+      return
+    }
+
+    setIsSubmitting(true)
+
+    // Dynamic import to avoid server action issues if any
+    const { subscribeToNewsletter } = await import("@lib/data/brevo")
+    const result = await subscribeToNewsletter(email)
+
+    setIsSubmitting(false)
+    setIsSuccess(result.success)
+    setMessage(result.message)
+
+    if (result.success) {
+      setEmail("")
+      setTimeout(() => {
+        setMessage("")
+      }, 5000)
+    }
+  }
+
   // Product images array for the main product
   const productImages = ["/Images/GPT.png", "/Images/product1.png", "/Images/product2.png"]
 
@@ -404,9 +438,8 @@ const Product = () => {
           <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-60">
             {/* Left Side - Heading */}
             <div
-              className={`flex-shrink-0 w-full lg:w-96 transition-all duration-500 ease-in-out ${
-                aromaSlide > 0 ? "lg:opacity-0 lg:w-0 lg:overflow-hidden" : "lg:opacity-100 lg:w-96"
-              }`}
+              className={`flex-shrink-0 w-full lg:w-96 transition-all duration-500 ease-in-out ${aromaSlide > 0 ? "lg:opacity-0 lg:w-0 lg:overflow-hidden" : "lg:opacity-100 lg:w-96"
+                }`}
             >
               <h2
                 style={{
@@ -433,9 +466,8 @@ const Product = () => {
 
             {/* Right Side - Product Cards with Arrows */}
             <div
-              className={`flex-1 relative overflow-hidden transition-all duration-900 ease-in-out ${
-                aromaSlide > 0 ? "lg:ml-0" : ""
-              }`}
+              className={`flex-1 relative overflow-hidden transition-all duration-900 ease-in-out ${aromaSlide > 0 ? "lg:ml-0" : ""
+                }`}
             >
               {/* Left Arrow */}
               {aromaSlide > 0 && (
@@ -450,9 +482,8 @@ const Product = () => {
               {/* Product Cards Container */}
               <div className="relative">
                 <div
-                  className={`flex gap-4 transition-transform duration-800 ease-in-out ${
-                    aromaSlide > 0 ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex gap-4 transition-transform duration-800 ease-in-out ${aromaSlide > 0 ? "justify-end" : "justify-start"
+                    }`}
                   style={{
                     transform: `translateX(-${aromaSlide * (240 + 16)}px)`,
                     width: "max-content",
@@ -585,16 +616,28 @@ const Product = () => {
             Be the first to know our special offers for you
           </p>
 
-          <div className="flex flex-col md:flex-row max-w-lg mx-auto gap-4 md:gap-0">
+          <form onSubmit={handleNewsletterSubmit} className="flex flex-col md:flex-row max-w-lg mx-auto gap-4 md:gap-0 relative">
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email address"
+              disabled={isSubmitting}
               className="flex-1 px-4 md:px-6 py-3 md:py-1 focus:outline-none focus:border-gray-500 text-gray-700 font-din"
             />
-            <button className="bg-[#535c4a] text-white px-8 md:px-10 py-2 md:py-1 text-sm md:text-md font-medium rounded-none font-din">
-              Subscribe
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-[#535c4a] text-white px-8 md:px-10 py-2 md:py-1 text-sm md:text-md font-medium rounded-none font-din"
+            >
+              {isSubmitting ? "Subscribing..." : "Subscribe"}
             </button>
-          </div>
+          </form>
+          {message && (
+            <div className={`mt-2 text-sm ${isSuccess ? "text-green-600" : "text-red-500"}`}>
+              {message}
+            </div>
+          )}
         </div>
       </div>
 
@@ -659,7 +702,7 @@ const Product = () => {
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <a href="/account/orders" className="hover:text-white transition-colors">
                     Track Your Order
                   </a>
                 </li>

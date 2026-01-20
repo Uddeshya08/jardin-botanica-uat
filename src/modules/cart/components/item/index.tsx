@@ -80,7 +80,7 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
 
       <div className="flex-1 min-w-0">
         <ProductTitleTooltip title={item.product_title || ""}>
-          <span className="font-din-arabic-bold truncate block" data-testid="product-title">
+          <span className="font-din-arabic-bold block" data-testid="product-title">
             {item.product_title}
           </span>
         </ProductTitleTooltip>

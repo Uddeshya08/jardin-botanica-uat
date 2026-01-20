@@ -24,6 +24,7 @@ interface Product {
   price: number
   image: string
   hoverImage: string
+  video?: string
 }
 
 const products: Product[] = [
@@ -38,6 +39,8 @@ const products: Product[] = [
       "https://images.unsplash.com/photo-1696391267294-103e9c210c6b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob21lJTIwY3JlYXRpb25zJTIwaW50ZXJpb3IlMjBib3RhbmljYWx8ZW58MXx8fHwxNzYyMDA5NDI3fDA&ixlib=rb-4.1.0&q=80&w=1920&utm_source=figma&utm_medium=referral",
     hoverImage:
       "https://images.unsplash.com/photo-1576260735040-0161203bab23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzY2VudGVkJTIwY2FuZGxlJTIwdmludGFnZXxlbnwxfHx8fDE3NjIwMDk0Mjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    video:
+      "https://r2.cloudmesh.site/mixkit-a-persons-hand-accommodating-small-candles-41731-hd-ready.mp4",
   },
   {
     id: "2",
@@ -50,6 +53,8 @@ const products: Product[] = [
       "https://images.unsplash.com/photo-1580584126903-c17d41830450?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvdWQlMjBjYW5kbGV8ZW58MXx8fHwxNzYyMDIzNDY5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     hoverImage:
       "https://images.unsplash.com/photo-1621494042364-e0e6ba89c21d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYm90YW5pY2FsJTIwY2FuZGxlfGVufDF8fHx8MTc2MjAwOTQyNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    video:
+      "https://r2.cloudmesh.site/mixkit-a-persons-hand-accommodating-small-candles-41731-hd-ready.mp4",
   },
   {
     id: "3",
@@ -62,6 +67,8 @@ const products: Product[] = [
       "https://images.unsplash.com/photo-1621494042364-e0e6ba89c21d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYm90YW5pY2FsJTIwY2FuZGxlfGVufDF8fHx8MTc2MjAwOTQyNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     hoverImage:
       "https://images.unsplash.com/photo-1696391267294-103e9c210c6b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob21lJTIwY3JlYXRpb25zJTIwaW50ZXJpb3IlMjBib3RhbmljYWx8ZW58MXx8fHwxNzYyMDA5NDI3fDA&ixlib=rb-4.1.0&q=80&w=1920&utm_source=figma&utm_medium=referral",
+    video:
+      "https://r2.cloudmesh.site/mixkit-a-persons-hand-accommodating-small-candles-41731-hd-ready.mp4",
   },
   {
     id: "4",
@@ -74,6 +81,8 @@ const products: Product[] = [
       "https://images.unsplash.com/photo-1601601319316-bace8ae2b548?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBwcm9kdWN0cyUyMGxhYm9yYXRvcnklMjBncmVlbnxlbnwxfHx8fDE3NTY4OTUxMjB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     hoverImage:
       "https://images.unsplash.com/photo-1576260735040-0161203bab23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzY2VudGVkJTIwY2FuZGxlJTIwdmludGFnZXxlbnwxfHx8fDE3NjIwMDk0Mjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    video:
+      "https://r2.cloudmesh.site/mixkit-a-persons-hand-accommodating-small-candles-41731-hd-ready.mp4",
   },
   {
     id: "5",
@@ -86,6 +95,8 @@ const products: Product[] = [
       "https://images.unsplash.com/photo-1522033048162-a492b7a1bead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXZlbmRlciUyMGZpZWxkJTIwYm90YW5pY2FsfGVufDF8fHx8MTc2MTk5MTU3OXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     hoverImage:
       "https://images.unsplash.com/photo-1621494042364-e0e6ba89c21d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYm90YW5pY2FsJTIwY2FuZGxlfGVufDF8fHx8MTc2MjAwOTQyNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    video:
+      "https://r2.cloudmesh.site/mixkit-a-persons-hand-accommodating-small-candles-41731-hd-ready.mp4",
   },
 ]
 
@@ -104,12 +115,32 @@ function ProductCard({
 }) {
   const router = useRouter()
   const [isImageHovered, setIsImageHovered] = useState(false)
-
+  const [isButtonHovered, setIsButtonHovered] = useState(false)
+  const videoRef = React.useRef<HTMLVideoElement>(null)
 
   const handleProductClick = () => {
     // Normalize slug to ensure it starts with /
     const normalizedSlug = product.slug.startsWith("/") ? product.slug : `/${product.slug}`
     router.push(normalizedSlug)
+  }
+
+  const handleMouseEnter = () => {
+    setIsImageHovered(true)
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0
+      videoRef.current.play().catch((e) => {
+        // Auto-play was prevented
+        console.warn("Video autoplay prevented:", e)
+      })
+    }
+  }
+
+  const handleMouseLeave = () => {
+    setIsImageHovered(false)
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+    }
   }
 
   return (
@@ -125,17 +156,28 @@ function ProductCard({
       <div
         className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] sm:aspect-[3/4]"
         style={{ marginBottom: "2.5rem" }}
-        onMouseEnter={() => setIsImageHovered(true)}
-        onMouseLeave={() => setIsImageHovered(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         onClick={handleProductClick}
       >
-        {/* Hover Image - Behind */}
+        {/* Hover Media - Video or Image - Behind */}
         <div className="absolute inset-0">
-          <ImageWithFallback
-            src={product.hoverImage}
-            alt={`${product.name} alternate view`}
-            className="w-full h-full object-cover"
-          />
+          {product.video ? (
+            <video
+              ref={videoRef}
+              src={product.video}
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <ImageWithFallback
+              src={product.hoverImage}
+              alt={`${product.name} alternate view`}
+              className="w-full h-full object-cover"
+            />
+          )}
         </div>
 
         {/* Main Image - On Top */}

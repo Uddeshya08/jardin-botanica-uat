@@ -135,7 +135,7 @@ const PRIVACY_SECTIONS: PrivacySection[] = [
 
 export function PrivacyPolicy() {
   return (
-    <div className="min-h-screen pt-32 pb-24 px-6 md:px-12 lg:px-20">
+    <div className="min-h-screen pt-32 pb-12 px-6 md:px-12 lg:px-20">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
@@ -232,24 +232,7 @@ export function PrivacyPolicy() {
           ))}
         </div>
 
-        {/* Footer Note */}
-        <motion.div
-          className="pt-10 border-black/8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-        >
-          <div className="text-center space-y-6">
-            <div className="flex items-center justify-center gap-3">
-              <div className="h-px w-12 bg-black/8"></div>
-              <span className="font-din-arabic text-black/20 text-xs">●</span>
-              <div className="h-px w-12 bg-black/8"></div>
-            </div>
-            <p className="font-din-arabic text-black/40 tracking-wide text-sm">
-              Your privacy matters to us
-            </p>
-          </div>
-        </motion.div>
+
       </div>
     </div>
   )

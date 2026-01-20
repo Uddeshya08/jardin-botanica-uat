@@ -86,6 +86,36 @@ export default function App() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+  const [isSuccess, setIsSuccess] = useState(false)
+  const [isPending, startTransition] = React.useTransition()
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!email || !email.includes("@")) {
+      setIsSuccess(false)
+      setMessage("Please enter a valid email address")
+      return
+    }
+
+    startTransition(async () => {
+      const { subscribeToNewsletter } = await import("@lib/data/brevo")
+      const result = await subscribeToNewsletter(email)
+
+      setIsSuccess(result.success)
+      setMessage(result.message)
+
+      if (result.success) {
+        setEmail("")
+        setTimeout(() => {
+          setMessage("")
+        }, 5000)
+      }
+    })
+  }
+
   return (
     <div className="min-h-screen">
       <RippleEffect />
@@ -160,27 +190,47 @@ export default function App() {
               Subscribe to receive hand care wisdom, botanical insights, and early access to our
               latest concoctions.
             </motion.p>
-            <motion.div
+            <motion.form
+              onSubmit={handleSubscribe}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
               viewport={{ once: true }}
-              className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
+              className="flex flex-col gap-4 max-w-md mx-auto"
             >
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                type="email"
-                placeholder="Enter your email"
-                className="font-din-arabic flex-1 px-4 py-3 bg-transparent border border-black/30 text-black placeholder-black/60 focus:outline-none focus:border-black transition-all duration-300"
-              />
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="font-din-arabic px-8 py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
-              >
-                Subscribe
-              </motion.button>
-            </motion.div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <motion.input
+                  whileFocus={{ scale: 1.02 }}
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isPending}
+                  className="font-din-arabic flex-1 px-4 py-3 bg-transparent border border-black/30 text-black placeholder-black/60 focus:outline-none focus:border-black transition-all duration-300"
+                />
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  disabled={isPending}
+                  className="font-din-arabic px-8 py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
+                >
+                  {isPending ? "Subscribing..." : "Subscribe"}
+                </motion.button>
+              </div>
+              {message && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`font-din-arabic text-sm px-4 py-2 rounded ${isSuccess
+                      ? "bg-green-100 text-green-800 border border-green-300"
+                      : "bg-red-100 text-red-800 border border-red-300"
+                    }`}
+                >
+                  {message}
+                </motion.div>
+              )}
+            </motion.form>
           </div>
         </div>
       </section>

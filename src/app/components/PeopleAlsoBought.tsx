@@ -78,6 +78,33 @@ function formatPrice(price?: number, currency?: string) {
 
 const products: Card[] = []
 
+// Easing function for smoother scrolling (easeInOutQuad)
+const easeInOutQuad = (t: number) => {
+  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
+}
+
+const smoothScroll = (element: HTMLElement, to: number, duration: number) => {
+  const start = element.scrollLeft
+  const change = to - start
+  const startTime = performance.now()
+
+  const animateScroll = (currentTime: number) => {
+    const elapsed = currentTime - startTime
+
+    if (elapsed < duration) {
+      const t = elapsed / duration
+      const easedT = easeInOutQuad(t) // Apply easing
+
+      element.scrollLeft = start + change * easedT
+      requestAnimationFrame(animateScroll)
+    } else {
+      element.scrollLeft = to
+    }
+  }
+
+  requestAnimationFrame(animateScroll)
+}
+
 export function PeopleAlsoBought({
   product,
   fromTheLabContent,
@@ -97,6 +124,11 @@ export function PeopleAlsoBought({
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
   const [isDragging, setIsDragging] = useState(false)
+  const [hasInteracted, setHasInteracted] = useState(false)
+  // Use a ref for hasInteracted to access instantaneous value in interval closure if needed, 
+  // though adding it to dependency array handles it. But let's add the ref for robustness in the animation loop check if we were to expand it.
+  const hasInteractedRef = useRef(hasInteracted)
+  useEffect(() => { hasInteractedRef.current = hasInteracted }, [hasInteracted])
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const scrollBarRef = useRef<HTMLDivElement>(null)
@@ -152,19 +184,19 @@ export function PeopleAlsoBought({
       if (parsed && typeof parsed === "object") {
         const products: Card[] = Array.isArray(parsed.products)
           ? parsed.products.map(
-              (p: any, i: number): Card => ({
-                id: p?.id ?? i + 1,
-                name: String(p?.name ?? ""),
-                price: typeof p?.price === "number" ? p.price : undefined,
-                currency: typeof p?.currency === "string" ? p.currency : undefined,
-                image: typeof p?.image === "string" ? p.image : undefined,
-                hoverImage: typeof p?.hoverImage === "string" ? p.hoverImage : undefined,
-                description: typeof p?.description === "string" ? p.description : undefined,
-                badge: typeof p?.badge === "string" ? p.badge : undefined,
-                url: typeof p?.url === "string" ? p.url : undefined,
-                variantId: typeof p?.variantId === "string" ? p.variantId : undefined,
-              })
-            )
+            (p: any, i: number): Card => ({
+              id: p?.id ?? i + 1,
+              name: String(p?.name ?? ""),
+              price: typeof p?.price === "number" ? p.price : undefined,
+              currency: typeof p?.currency === "string" ? p.currency : undefined,
+              image: typeof p?.image === "string" ? p.image : undefined,
+              hoverImage: typeof p?.hoverImage === "string" ? p.hoverImage : undefined,
+              description: typeof p?.description === "string" ? p.description : undefined,
+              badge: typeof p?.badge === "string" ? p.badge : undefined,
+              url: typeof p?.url === "string" ? p.url : undefined,
+              variantId: typeof p?.variantId === "string" ? p.variantId : undefined,
+            })
+          )
           : defaults.products
 
         return {
@@ -263,6 +295,42 @@ export function PeopleAlsoBought({
       document.removeEventListener("mousemove", move)
     }
   }, [isDragging])
+
+  // Auto-scroll effect for mobile view
+  useEffect(() => {
+    // Only run on mobile (using the existing width check logic concept)
+    const isMobile = window.innerWidth < 768
+
+    if (!isMobile || hasInteracted || !scrollContainerRef.current) return
+
+    // Don't auto-scroll while user is dragging/scrolling manually
+    if (isDragging) return
+
+    const autoScrollInterval = setInterval(() => {
+      if (!scrollContainerRef.current) return
+      // Check again inside interval to be safe
+      if (hasInteractedRef.current) {
+        clearInterval(autoScrollInterval)
+        return
+      }
+
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
+      const maxScroll = scrollWidth - clientWidth
+      const isAtEnd = scrollLeft >= maxScroll - 10 // buffer
+
+      if (isAtEnd) {
+        // Scroll back to start - do this somewhat quickly but smoothly
+        smoothScroll(scrollContainerRef.current, 0, 1000)
+      } else {
+        // Scroll next item (width of screen on mobile)
+        const scrollAmount = window.innerWidth
+        // Slower duration for "drag" feel (e.g. 1.2s)
+        smoothScroll(scrollContainerRef.current, scrollLeft + scrollAmount, 1200)
+      }
+    }, 4000) // 4 second interval
+
+    return () => clearInterval(autoScrollInterval)
+  }, [hasInteracted, isDragging]) // No need to depend on 'isMobile' state as it's checked inside, and simple resize handling is enough for this simple check
 
   const handleAddToCart = async (productCard: Card) => {
     // Check if product has variantId (if added to Contentful ProductCard)
@@ -407,6 +475,8 @@ export function PeopleAlsoBought({
         backgroundColor: bg,
         overflow: "visible", // Ensure section doesn't create scroll container
       }}
+      onMouseDownCapture={() => setHasInteracted(true)}
+      onTouchStartCapture={() => setHasInteracted(true)}
     >
       {/* Heading and Subheading - Centered on Mobile, Part of Scroll on Desktop */}
       <div className="lg:hidden px-4 md:px-8 text-center py-6">
@@ -604,45 +674,7 @@ export function PeopleAlsoBought({
       </div>
 
       {/* Arrows - Always Visible on Mobile, Conditional on Desktop */}
-      <div
-        className="absolute left-2 md:hidden z-20"
-        style={{ top: "calc(50% + 40px)", transform: "translateY(-50%)" }}
-      >
-        <motion.button
-          whileHover={{ scale: 1.05, x: -2 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => scroll("left")}
-          disabled={!canScrollLeft}
-          className="group relative w-10 h-10 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed"
-          aria-label="Scroll left"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <ChevronLeft className="w-5 h-5 text-black/70 group-hover:text-black transition-all duration-300" />
-          </div>
-          <div className="absolute inset-0 rounded-full ring-1 ring-black/5 group-hover:ring-black/15 transition-all duration-300" />
-        </motion.button>
-      </div>
-
-      <div
-        className="absolute right-2 md:hidden z-20"
-        style={{ top: "calc(50% + 40px)", transform: "translateY(-50%)" }}
-      >
-        <motion.button
-          whileHover={{ scale: 1.05, x: 2 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => scroll("right")}
-          disabled={!canScrollRight}
-          className="group relative w-10 h-10 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed"
-          aria-label="Scroll right"
-        >
-          <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <ChevronRight className="w-5 h-5 text-black/70 group-hover:text-black transition-all duration-300" />
-          </div>
-          <div className="absolute inset-0 rounded-full ring-1 ring-black/5 group-hover:ring-black/15 transition-all duration-300" />
-        </motion.button>
-      </div>
+      {/* Arrows - Removed on Mobile per request */}
 
       {/* Desktop Arrows */}
       {canScrollLeft && (

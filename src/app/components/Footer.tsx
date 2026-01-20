@@ -41,7 +41,7 @@ export function Footer() {
       title: "Orders and Support",
       links: [
         { name: "Order History", href: "/account/orders" },
-        { name: "Track Your Order", href: "#" },
+        { name: "Track Your Order", href: "/account/orders" },
         { name: "Help & FAQs", href: `/${countryCode}/help-and-faqs` },
         {
           name: "Returns & Exchanges",
