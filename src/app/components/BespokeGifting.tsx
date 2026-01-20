@@ -59,7 +59,7 @@ export function BespokeGifting() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="absolute bottom-0 left-0 right-0 z-10 w-full px-6 pb-12 md:relative md:w-2/5 md:flex md:flex-col md:justify-center md:px-12 md:py-12 md:bg-transparent md:order-2"
+          className="absolute bottom-0 left-0 right-0 z-10 w-full px-6 pb-12 md:relative md:w-2/5 md:flex md:flex-col md:justify-center md:px-12 md:py-16 md:bg-transparent md:order-2"
         >
           {/* Main Title */}
           <motion.h2

@@ -117,9 +117,8 @@ const MobileProductCard = ({
         >
           <Heart
             size={18}
-            className={`transition-colors duration-300 ${
-              isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-            }`}
+            className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
           />
         </button>
       </div>
@@ -226,9 +225,8 @@ const ProductCard = ({
             >
               <Heart
                 size={18}
-                className={`transition-colors duration-300 ${
-                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+                className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                  }`}
               />
             </button>
           </div>
@@ -271,9 +269,8 @@ const ProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${
-                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
             />
           </button>
         </div>
@@ -1293,32 +1290,32 @@ const Candles = () => {
                   {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
                   {isMobile
                     ? // Mobile: One product per slide
-                      candlesCollection.map((item, index) => (
-                        <CarouselItem key={index} className="banner-carousel-item">
-                          <BannerProductCard item={item} index={index} />
-                        </CarouselItem>
-                      ))
+                    candlesCollection.map((item, index) => (
+                      <CarouselItem key={index} className="banner-carousel-item">
+                        <BannerProductCard item={item} index={index} />
+                      </CarouselItem>
+                    ))
                     : // Desktop: Groups of 3 products
-                      bannerGroups.map((group, groupIndex) => (
-                        <CarouselItem key={groupIndex} className="banner-carousel-item">
-                          <div className="flex flex-row gap-0 w-full h-auto">
-                            {group.map((item, itemIndex) => {
-                              const globalIndex = groupIndex * 3 + itemIndex
-                              return (
-                                <div key={globalIndex} className="flex-1 w-1/3">
-                                  <BannerProductCard item={item} index={globalIndex} />
-                                </div>
-                              )
-                            })}
+                    bannerGroups.map((group, groupIndex) => (
+                      <CarouselItem key={groupIndex} className="banner-carousel-item">
+                        <div className="flex flex-row gap-0 w-full h-auto">
+                          {group.map((item, itemIndex) => {
+                            const globalIndex = groupIndex * 3 + itemIndex
+                            return (
+                              <div key={globalIndex} className="flex-1 w-1/3">
+                                <BannerProductCard item={item} index={globalIndex} />
+                              </div>
+                            )
+                          })}
 
-                            {/* Fill remaining slots if group has less than 3 items */}
-                            {group.length < 3 &&
-                              Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
-                                <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
-                              ))}
-                          </div>
-                        </CarouselItem>
-                      ))}
+                          {/* Fill remaining slots if group has less than 3 items */}
+                          {group.length < 3 &&
+                            Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                              <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                            ))}
+                        </div>
+                      </CarouselItem>
+                    ))}
                 </CarouselContent>
               </Carousel>
               <div
@@ -1403,7 +1400,7 @@ const Candles = () => {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 1, ease: smoothEase }}
         viewport={{ once: true, amount: 0.1 }}
-        className="py-12 md:py-20"
+        className="py-12 lg:py-16"
       >
         <div className="flex flex-col md:flex-row items-center">
           <motion.div
@@ -1426,7 +1423,7 @@ const Candles = () => {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.2, ease: smoothEase }}
             viewport={{ once: true, amount: 0.2 }}
-            className="w-full md:w-[45%] flex flex-col justify-center px-4 md:pl-12 md:pr-12"
+            className="w-full md:w-[45%] flex flex-col justify-center px-4 pt-12 md:pt-0 md:pl-12 md:pr-12"
           >
             <div className="max-w-xl">
               <motion.h2

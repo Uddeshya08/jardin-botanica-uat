@@ -15,7 +15,7 @@ export function FeaturedRitual() {
   }
 
   return (
-    <section className="py-8 md:py-12 lg:py-20" style={{ backgroundColor: "#edede2" }}>
+    <section className="py-12 lg:py-16" style={{ backgroundColor: "#edede2" }}>
       <div className="flex flex-col-reverse md:flex-row">
         {/* Content - Left Side (40% width on desktop, full width on mobile) */}
         <motion.div
