@@ -1126,6 +1126,8 @@ export function BotanistLabPage() {
     return () => clearTimeout(timer)
   }, [])
 
+
+
   useEffect(() => {
     if (isBannerInView && phase === 0) {
       const startTimer = setTimeout(() => {
@@ -1336,27 +1338,7 @@ export function BotanistLabPage() {
           </div>
         </div>
 
-        <AnimatePresence>
-          {phase === 4 && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ delay: 1, duration: 1 }}
-              className="absolute bottom-12 left-1/2 -translate-x-1/2"
-            >
-              <motion.div
-                animate={{ y: [0, 10, 0] }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="w-px h-16 bg-white/50"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+
       </motion.div>
 
       <OriginStorySection />

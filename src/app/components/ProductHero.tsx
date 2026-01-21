@@ -87,9 +87,9 @@ const buildSizeOptions = (product: ProductHeroProps["product"], sizeOptionId?: s
 
       return label
         ? {
-            id: variant.id,
-            label,
-          }
+          id: variant.id,
+          label,
+        }
         : null
     })
     .filter((option): option is { id: string; label: string } => Boolean(option))
@@ -687,17 +687,18 @@ export function ProductHero({
                   Ritual in Practice
                 </span>
                 <motion.div
+                  initial={false}
                   animate={{
-                    rotate: openAccordionId === "ritual" ? 45 : 0,
+                    rotate: 0,
                   }}
-                  whileHover={{ rotate: 90 }}
+                  whileHover={{ rotate: 0 }}
                   transition={{
                     duration: 0.3,
                     ease: "easeInOut",
                   }}
                 >
                   {openAccordionId === "ritual" ? (
-                    <X
+                    <Minus
                       className="w-4 h-4 transition-colors duration-300"
                       style={{ color: "#a28b6f" }}
                     />
@@ -772,17 +773,18 @@ export function ProductHero({
                   Actives & Key Botanicals
                 </span>
                 <motion.div
+                  initial={false}
                   animate={{
-                    rotate: openAccordionId === "actives" ? 45 : 0,
+                    rotate: 0,
                   }}
-                  whileHover={{ rotate: 90 }}
+                  whileHover={{ rotate: 0 }}
                   transition={{
                     duration: 0.3,
                     ease: "easeInOut",
                   }}
                 >
                   {openAccordionId === "actives" ? (
-                    <X
+                    <Minus
                       className="w-4 h-4 transition-colors duration-300"
                       style={{ color: "#a28b6f" }}
                     />
@@ -864,17 +866,18 @@ export function ProductHero({
                   Fragrance Profile
                 </span>
                 <motion.div
+                  initial={false}
                   animate={{
-                    rotate: openAccordionId === "fragrance" ? 45 : 0,
+                    rotate: 0,
                   }}
-                  whileHover={{ rotate: 90 }}
+                  whileHover={{ rotate: 0 }}
                   transition={{
                     duration: 0.3,
                     ease: "easeInOut",
                   }}
                 >
                   {openAccordionId === "fragrance" ? (
-                    <X
+                    <Minus
                       className="w-4 h-4 transition-colors duration-300"
                       style={{ color: "#a28b6f" }}
                     />
@@ -956,17 +959,18 @@ export function ProductHero({
                   Full Ingredients
                 </span>
                 <motion.div
+                  initial={false}
                   animate={{
-                    rotate: openAccordionId === "ingredients" ? 45 : 0,
+                    rotate: 0,
                   }}
-                  whileHover={{ rotate: 90 }}
+                  whileHover={{ rotate: 0 }}
                   transition={{
                     duration: 0.3,
                     ease: "easeInOut",
                   }}
                 >
                   {openAccordionId === "ingredients" ? (
-                    <X
+                    <Minus
                       className="w-4 h-4 transition-colors duration-300"
                       style={{ color: "#a28b6f" }}
                     />
@@ -1051,17 +1055,18 @@ export function ProductHero({
                         {panel.title}
                       </span>
                       <motion.div
+                        initial={false}
                         animate={{
-                          rotate: openAccordionId === panel.id ? 45 : 0,
+                          rotate: 0,
                         }}
-                        whileHover={{ rotate: 90 }}
+                        whileHover={{ rotate: 0 }}
                         transition={{
                           duration: 0.3,
                           ease: "easeInOut",
                         }}
                       >
                         {openAccordionId === panel.id ? (
-                          <X
+                          <Minus
                             className="w-4 h-4 transition-colors duration-300"
                             style={{
                               color: "#a28b6f",
@@ -1199,15 +1204,13 @@ export function ProductHero({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleToggleLedger}
-            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${
-              isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"
-            }`}
+            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"
+              }`}
             aria-label={isProductInLedger ? "Remove from ledger" : "Add to ledger"}
           >
             <Heart
-              className={`w-5 h-5 transition-colors ${
-                isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"
-              }`}
+              className={`w-5 h-5 transition-colors ${isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"
+                }`}
             />
           </motion.button>
 
@@ -1215,7 +1218,14 @@ export function ProductHero({
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href)
+              toast.success("Link copied to clipboard", {
+                duration: 2000,
+              })
+            }}
             className="p-2 text-black/60 hover:text-black transition-colors bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30"
+            aria-label="Share product"
           >
             <Share2 className="w-5 h-5" />
           </motion.button>
@@ -1280,9 +1290,8 @@ export function ProductHero({
               onClick={() => setCurrentImageIndex(index)}
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                currentImageIndex === index ? "w-8" : ""
-              }`}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${currentImageIndex === index ? "w-8" : ""
+                }`}
               style={{
                 backgroundColor: currentImageIndex === index ? "#a28b6f" : "rgba(0, 0, 0, 0.3)",
               }}

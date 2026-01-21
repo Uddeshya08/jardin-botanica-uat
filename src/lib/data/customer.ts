@@ -15,6 +15,30 @@ import {
   setAuthToken,
 } from "./cookies"
 
+const mapErrorMessage = (error: any): string => {
+  const msg = error?.toString() || ""
+  if (
+    msg.includes("Invalid email or password") ||
+    msg.includes("401") ||
+    msg.includes("Unauthorized") ||
+    msg.includes("Wrong password")
+  ) {
+    return "Couldn’t sign you in. Please check your email and password."
+  }
+  if (
+    msg.includes("already exists") ||
+    msg.includes("Identity with email") ||
+    msg.includes("Duplicate entry")
+  ) {
+    return "You’re already on file. Use “Sign in” or reset your password."
+  }
+  if (msg.includes("400") || msg.includes("Invalid request")) {
+    // Basic form validation catch-all
+    return "Almost there. Some fields need a quick check."
+  }
+  return msg
+}
+
 export const retrieveCustomer = async (): Promise<HttpTypes.StoreCustomer | null> => {
   const authHeaders = await getAuthHeaders()
 
@@ -95,7 +119,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
     return createdCustomer
   } catch (error: any) {
-    return error.toString()
+    return mapErrorMessage(error)
   }
 }
 
@@ -150,13 +174,13 @@ export async function login(_currentState: unknown, formData: FormData) {
       revalidateTag(customerCacheTag)
     })
   } catch (error: any) {
-    return error.toString()
+    return mapErrorMessage(error)
   }
 
   try {
     await transferCart()
   } catch (error: any) {
-    return error.toString()
+    return mapErrorMessage(error)
   }
 }
 
@@ -195,7 +219,7 @@ export async function requestPasswordReset(_currentState: unknown, formData: For
     return { success: true, error: null }
   } catch (error: any) {
     console.error("Password reset request error:", error)
-    return { success: false, error: error.message || error.toString() }
+    return { success: false, error: mapErrorMessage(error) }
   }
 }
 
@@ -248,7 +272,7 @@ export async function resetPassword(_currentState: unknown, formData: FormData) 
     return { success: true, message: "" }
   } catch (error: any) {
     console.error("Password reset error:", error)
-    return { success: false, message: error.message || error.toString() }
+    return { success: false, message: mapErrorMessage(error) }
   }
 }
 
@@ -301,7 +325,7 @@ export const addCustomerAddress = async (
       return { success: true, error: null }
     })
     .catch((err) => {
-      return { success: false, error: err.toString() }
+      return { success: false, error: mapErrorMessage(err) }
     })
 }
 
@@ -318,7 +342,7 @@ export const deleteCustomerAddress = async (addressId: string): Promise<void> =>
       return { success: true, error: null }
     })
     .catch((err) => {
-      return { success: false, error: err.toString() }
+      return { success: false, error: mapErrorMessage(err) }
     })
 }
 
@@ -362,7 +386,7 @@ export const updateCustomerAddress = async (
       return { success: true, error: null }
     })
     .catch((err) => {
-      return { success: false, error: err.toString() }
+      return { success: false, error: mapErrorMessage(err) }
     })
 }
 

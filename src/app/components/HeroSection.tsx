@@ -2,7 +2,8 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useRouter } from "next/navigation"
 import type React from "react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
+import { toast } from "sonner"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 interface HeroPanel {
@@ -140,12 +141,27 @@ export function HeroSection() {
   }
 
   // Handle email subscription
+  const [isPending, startTransition] = useTransition()
   const handleEmailSubscription = () => {
-    // TODO: Implement email subscription logic
-    console.log("Email subscription:", email)
-    setEmail("")
-    setShowEmailForm(false)
+    if (!email || !email.includes("@")) {
+      toast.error("Please enter a valid email address")
+      return
+    }
+
+    startTransition(async () => {
+      const { subscribeToNewsletter } = await import("@lib/data/brevo")
+      const result = await subscribeToNewsletter(email)
+
+      if (result.success) {
+        toast.success(result.message)
+        setEmail("")
+        setShowEmailForm(false)
+      } else {
+        toast.error(result.message)
+      }
+    })
   }
+
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchEndX.current = null
@@ -385,11 +401,10 @@ export function HeroSection() {
                   /* Regular CTA Button */
                   <motion.button
                     key={`cta-${activePanel}`}
-                    className={`font-din-arabic inline-flex items-center px-8 py-3 transition-all duration-300 tracking-wide touch-manipulation ${
-                      currentPanel.isSpecial
-                        ? "bg-white text-black"
-                        : "text-white border border-white/30"
-                    }`}
+                    className={`font-din-arabic inline-flex items-center px-8 py-3 transition-all duration-300 tracking-wide touch-manipulation ${currentPanel.isSpecial
+                      ? "bg-white text-black"
+                      : "text-white border border-white/30"
+                      }`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: isTransitioning ? 0.7 : 1 }}
                     exit={{ opacity: 0 }}
@@ -419,9 +434,8 @@ export function HeroSection() {
               {heroPanels.map((panel) => (
                 <button
                   key={panel.id}
-                  className={`relative px-2.5 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-2.5 md:py-3 text-[10px] sm:text-xs font-din-arabic tracking-wide sm:tracking-wider transition-all duration-300 rounded-full whitespace-nowrap touch-manipulation ${
-                    activePanel === panel.id ? "bg-white/20 text-white" : "text-white/60"
-                  }`}
+                  className={`relative px-2.5 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-2.5 md:py-3 text-[10px] sm:text-xs font-din-arabic tracking-wide sm:tracking-wider transition-all duration-300 rounded-full whitespace-nowrap touch-manipulation ${activePanel === panel.id ? "bg-white/20 text-white" : "text-white/60"
+                    }`}
                   style={{
                     WebkitTapHighlightColor: "transparent",
                   }}

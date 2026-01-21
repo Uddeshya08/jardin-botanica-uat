@@ -131,7 +131,7 @@ export function JournalSection() {
         </motion.div>
 
         <div className="max-w-8xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-4 md:mb-12">
             {journalPosts.map((post, index) => {
               return <JournalPostCard key={post.id} post={post} index={index} />
             })}

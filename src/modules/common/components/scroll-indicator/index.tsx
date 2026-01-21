@@ -129,25 +129,29 @@ export default function ScrollIndicator() {
             if (Math.abs(finalScrollPosition - lastScrollPositionRef.current) < 5) {
               checkScrollPosition()
             }
-          }, 13000) // 5 seconds delay
+          }, 5000) // Reduced to 5 seconds from 13000
         }
       }, 100) // Small delay to detect scroll stop
     }
 
     // Initial check - wait 5 seconds after page load
+    const initialDelay = isBotanistLabPage ? 500 : 1000 // Fast check for Botanist Lab
     const initialTimeout = setTimeout(() => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop
       lastScrollPositionRef.current = scrollTop
 
       // Wait 5 seconds before showing indicator on initial load
+      // For Botanist Lab, show much faster (1s) after typing complete
+      const secondaryDelay = isBotanistLabPage ? 1000 : 5000
+
       scrollStopTimeoutRef.current = setTimeout(() => {
         const currentScrollTop = window.scrollY || document.documentElement.scrollTop
         // Check if user hasn't scrolled
         if (Math.abs(currentScrollTop - lastScrollPositionRef.current) < 5) {
           checkScrollPosition()
         }
-      }, 5000)
-    }, 1000) // Initial delay to allow page to load
+      }, secondaryDelay)
+    }, initialDelay) // Initial delay to allow page to load
 
     const handleResize = () => {
       // Reset on resize
@@ -176,13 +180,12 @@ export default function ScrollIndicator() {
       }
       clearTimeout(initialTimeout)
     }
-  }, [])
+  }, [isMobile, isExcludedPage, isBannerPage, isBotanistLabPage, typingComplete])
 
   return (
     <div
-      className={`fixed bottom-4 right-6 z-50 pointer-events-none ${
-        showIndicator ? "opacity-100" : "opacity-0"
-      }`}
+      className={`fixed bottom-4 right-6 z-50 pointer-events-none ${showIndicator ? "opacity-100" : "opacity-0"
+        }`}
     >
       <div className="flex flex-col items-center animate-[bounce_2s_ease-in-out_infinite]">
         <div className="flex items-center justify-center backdrop-blur-md bg-white/10 dark:bg-black/20 rounded-full w-14 h-14">
