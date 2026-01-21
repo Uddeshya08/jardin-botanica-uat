@@ -1126,13 +1126,7 @@ export function BotanistLabPage() {
     return () => clearTimeout(timer)
   }, [])
 
-  const [showArrow, setShowArrow] = useState(false)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowArrow(true)
-    }, 2000)
-    return () => clearTimeout(timer)
-  }, [])
+
 
   useEffect(() => {
     if (isBannerInView && phase === 0) {
@@ -1344,37 +1338,7 @@ export function BotanistLabPage() {
           </div>
         </div>
 
-        <AnimatePresence>
-          {showArrow && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ delay: 0.5, duration: 1 }}
-              className="absolute bottom-12 left-1/2 -translate-x-1/2"
-            >
-              <motion.div
-                animate={{ y: [0, 10, 0] }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="text-white"
-              >
-                <svg
-                  width="20"
-                  height="60"
-                  viewBox="0 0 20 60"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M10 0V58M10 58L1 48M10 58L19 48" stroke="currentColor" strokeWidth="2" />
-                </svg>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
       </motion.div>
 
       <OriginStorySection />

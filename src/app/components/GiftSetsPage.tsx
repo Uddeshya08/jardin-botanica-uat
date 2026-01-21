@@ -567,7 +567,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
             transition={{ duration: 0.8, delay: index * 0.2 }}
             className={`relative group overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1
               ? expandedItems[product.id]
-                ? "w-full lg:w-[96vw] lg:max-w-[1920px] lg:flex lg:flex-row shadow-2xl"
+                ? "w-full lg:w-[96vw] lg:max-w-[1920px] lg:flex lg:flex-row shadow-md"
                 : "w-full lg:w-1/2 transition-all duration-700"
               : ""
               }`}
@@ -804,8 +804,8 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                               <label
                                 key={candle.id}
                                 className={`flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded cursor-pointer transition-all duration-200 ${selectedCandles[product.id] === candle.id
-                                  ? "bg-[#e58a4d]/20 border border-[#e58a4d]"
-                                  : "bg-white/20 border border-transparent hover:bg-white/30"
+                                  ? "border border-[#e58a4d]"
+                                  : "border border-transparent"
                                   }`}
                               >
                                 <input

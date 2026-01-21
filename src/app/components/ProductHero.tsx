@@ -1218,7 +1218,14 @@ export function ProductHero({
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href)
+              toast.success("Link copied to clipboard", {
+                duration: 2000,
+              })
+            }}
             className="p-2 text-black/60 hover:text-black transition-colors bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30"
+            aria-label="Share product"
           >
             <Share2 className="w-5 h-5" />
           </motion.button>

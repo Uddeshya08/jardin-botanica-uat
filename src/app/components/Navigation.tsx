@@ -70,6 +70,7 @@ export function Navigation({
   const [showLoginDialog, setShowLoginDialog] = useState(false)
   const [updatingCartItem, setUpdatingCartItem] = useState<string | null>(null)
   const cartRef = useRef<HTMLDivElement>(null)
+  const cartPanelRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
 
   // Determine if user is logged in - prioritize prop, then context, then fallback to false
@@ -147,7 +148,12 @@ export function Navigation({
   // Close cart and search when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
+      // Check if click is outside both cart button and cart dropdown panel
+      const isOutsideCartButton = cartRef.current && !cartRef.current.contains(event.target as Node)
+      const isOutsideCartPanel = cartPanelRef.current && !cartPanelRef.current.contains(event.target as Node)
+      const isOutsideCart = isOutsideCartButton && (!cartPanelRef.current || isOutsideCartPanel)
+
+      if (isOutsideCart) {
         setIsCartOpen(false)
       }
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -258,9 +264,6 @@ export function Navigation({
           })
         }
       }
-
-      // Refresh the page to get updated cart data from server
-      router.refresh()
     } catch (error) {
       console.error("Failed to update cart item:", error)
       // You could show an error toast here
@@ -739,6 +742,7 @@ export function Navigation({
                   <AnimatePresence>
                     {isCartOpen && (
                       <motion.div
+                        ref={cartPanelRef}
                         initial={
                           disableAnimations ? undefined : { opacity: 0, y: -10, scale: 0.95 }
                         }
