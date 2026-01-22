@@ -488,7 +488,7 @@ export function ProductCarousel() {
         viewport={{ once: true }}
       >
         <h2 className="text-center font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-black leading-tight">
-          From the Botanist’s Lab
+          From the Botanist’s Lab<span className="font-normal text-2xl align-super">™</span>
         </h2>
       </motion.div>
       <style
