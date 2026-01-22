@@ -1015,7 +1015,7 @@ function VideoPlaceholderSection() {
 
       {/* Gradient Overlay */}
 
-      <div className="absolute inset-0 bg-black/75" />
+      <div className="absolute inset-0 bg-black/60" />
 
       {/* Fragrance Library Content */}
 
