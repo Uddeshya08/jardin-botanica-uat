@@ -127,6 +127,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         <div className="h-4"></div>
         <ProductHero
           product={product}
+          countryCode={countryCode}
           selectedVariantId={selectedVariantId}
           onUpdateHeroQuantity={handleHeroQuantityUpdate}
           onCartUpdate={handleCartUpdateWrapper}
@@ -145,17 +146,15 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         <Afterlife afterlifeContent={afterlifeContent} />
         <PeopleAlsoBought product={product as any} fromTheLabContent={fromTheLabContent} />
         <FeaturedRitualTwo
-          key={`featured-ritual-two-${
-            featuredRitualTwoContent?.productHandle ||
+          key={`featured-ritual-two-${featuredRitualTwoContent?.productHandle ||
             featuredRitualTwoContent?.sectionKey ||
             "default"
-          }`}
+            }`}
           featuredRitualTwoContent={featuredRitualTwoContent}
         />
         <CustomerTestimonials
-          key={`customer-testimonials-${
-            testimonialsContent?.productHandle || testimonialsContent?.sectionKey || "default"
-          }`}
+          key={`customer-testimonials-${testimonialsContent?.productHandle || testimonialsContent?.sectionKey || "default"
+            }`}
           testimonialsContent={testimonialsContent}
         />
         <Featured featuredContent={featuredContent} />

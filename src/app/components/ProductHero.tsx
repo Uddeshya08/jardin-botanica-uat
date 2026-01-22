@@ -287,9 +287,14 @@ export function ProductHero({
   const dynamicPanels = productInfoPanels?.panels || []
 
   // Category-based breadcrumb logic using product.categories[0].name and description
-  const breadcrumbParentCategory = (product.categories?.[0] as any)?.description || null
-  const breadcrumbCategory = product.categories?.[0]?.name || "Uncategorized"
+  const category = product.categories?.[0]
+  const breadcrumbParentCategory = (category as any)?.description || null
+  const breadcrumbCategory = category?.name || "Uncategorized"
   const breadcrumbProduct = product.title || "Product"
+
+  const metadata = category?.metadata as Record<string, any> | undefined
+  const parentCategoryUrl = metadata?.parent_category_url
+  const subCategoryUrl = metadata?.sub_category_url
 
   const handleAddToCart = () => {
     if (!selectedVariantId || adding || isPending) return
@@ -446,9 +451,18 @@ export function ProductHero({
                       <BreadcrumbChevron className="w-3 h-3" style={{ color: "#a28b6f" }} />
                     </BreadcrumbSeparator>
                     <BreadcrumbItem>
-                      <BreadcrumbPage className="font-din-arabic text-xs tracking-wide text-black/80">
-                        {breadcrumbParentCategory}
-                      </BreadcrumbPage>
+                      {parentCategoryUrl ? (
+                        <BreadcrumbLink
+                          href={parentCategoryUrl}
+                          className="font-din-arabic text-xs tracking-wide text-black/80 hover:underline"
+                        >
+                          {breadcrumbParentCategory}
+                        </BreadcrumbLink>
+                      ) : (
+                        <BreadcrumbPage className="font-din-arabic text-xs tracking-wide text-black/80">
+                          {breadcrumbParentCategory}
+                        </BreadcrumbPage>
+                      )}
                     </BreadcrumbItem>
                   </>
                 )}
@@ -456,9 +470,18 @@ export function ProductHero({
                   <BreadcrumbChevron className="w-3 h-3" style={{ color: "#a28b6f" }} />
                 </BreadcrumbSeparator>
                 <BreadcrumbItem>
-                  <BreadcrumbPage className="font-din-arabic text-xs tracking-wide text-black/80">
-                    {breadcrumbCategory}
-                  </BreadcrumbPage>
+                  {subCategoryUrl ? (
+                    <BreadcrumbLink
+                      href={subCategoryUrl}
+                      className="font-din-arabic text-xs tracking-wide text-black/80 hover:underline"
+                    >
+                      {breadcrumbCategory}
+                    </BreadcrumbLink>
+                  ) : (
+                    <BreadcrumbPage className="font-din-arabic text-xs tracking-wide text-black/80">
+                      {breadcrumbCategory}
+                    </BreadcrumbPage>
+                  )}
                 </BreadcrumbItem>
                 <BreadcrumbSeparator>
                   <BreadcrumbChevron className="w-3 h-3" style={{ color: "#a28b6f" }} />
@@ -1219,10 +1242,18 @@ export function ProductHero({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => {
-              navigator.clipboard.writeText(window.location.href)
-              toast.success("Link copied to clipboard", {
-                duration: 2000,
-              })
+              if (navigator.share) {
+                navigator.share({
+                  title: product.title,
+                  text: product.description || product.title,
+                  url: window.location.href,
+                })
+              } else {
+                navigator.clipboard.writeText(window.location.href)
+                toast.success("Link copied to clipboard", {
+                  duration: 2000,
+                })
+              }
             }}
             className="p-2 text-black/60 hover:text-black transition-colors bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30"
             aria-label="Share product"
