@@ -568,7 +568,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
             className={`relative group overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1
               ? expandedItems[product.id]
                 ? "w-full lg:w-[96vw] lg:max-w-[1920px] lg:flex lg:flex-row shadow-md"
-                : "w-full lg:w-1/2 transition-all duration-700"
+                : "w-full lg:w-[60vw] lg:flex lg:flex-row shadow-md" // Changed from w-1/2 to flex-row with strip
               : ""
               }`}
             onMouseEnter={() => setHoveredProduct(product.id)}
@@ -577,8 +577,10 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
             {/* Image Section */}
 
             <div
-              className={`relative bg-black transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1 && expandedItems[product.id]
-                ? "h-[50vh] lg:h-[80vh] w-full lg:w-1/2"
+              className={`relative bg-black overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1
+                ? expandedItems[product.id]
+                  ? "h-[50vh] lg:h-[80vh] w-full lg:w-1/2"
+                  : "h-[60vh] lg:h-[80vh] w-full lg:flex-1" // Fill available space minus strip
                 : "h-[60vh] lg:h-[70vh] w-full"
                 }`}
             >
@@ -723,13 +725,19 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
             </div>
 
             {/* Collapsible What's Inside Section */}
-
-            {/* Collapsible What's Inside Section */}
             <div
-              className={`bg-white/30 backdrop-blur-md border-[#e58a4d] transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1 && expandedItems[product.id]
-                ? "border-t-2 lg:border-t-0 lg:border-l-2 w-full lg:w-1/2 flex flex-col max-h-[80vh]"
+              className={`bg-white/30 backdrop-blur-md border-[#e58a4d] transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1
+                ? expandedItems[product.id]
+                  ? "border-t-2 lg:border-t-0 lg:border-l-2 w-full lg:w-1/2 flex flex-col max-h-[80vh] lg:h-auto"
+                  : "border-t-2 lg:border-t-0 lg:border-l-2 w-full lg:w-[60px] flex flex-col lg:items-center lg:justify-center cursor-pointer hover:bg-white/40"
                 : "border-t-2 w-full"
                 }`}
+              onClick={(e) => {
+                if (filteredProducts.length === 1 && !expandedItems[product.id]) {
+                  e.stopPropagation()
+                  toggleItemsExpanded(product.id)
+                }
+              }}
             >
               <button
                 onClick={(e) => {
@@ -737,11 +745,24 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
                   toggleItemsExpanded(product.id)
                 }}
-                className="w-full flex items-center justify-between py-4 sm:py-5 px-5 sm:px-8 md:px-12 hover:bg-white/40 transition-all duration-300"
+                className={`w-full flex items-center justify-between py-4 sm:py-5 px-5 sm:px-8 md:px-12 transition-all duration-300 ${filteredProducts.length === 1 && !expandedItems[product.id]
+                  ? "lg:p-0 lg:h-full lg:flex-col lg:items-center lg:justify-between lg:py-8 lg:w-full hover:bg-transparent" // Changed flow to col for arrow placement
+                  : "hover:bg-white/40"
+                  }`}
               >
+                {/* Vertical Strip Arrow */}
+                {filteredProducts.length === 1 && !expandedItems[product.id] && (
+                  <div className="hidden lg:block mb-4 text-[#e58a4d]">
+                    <ChevronRight size={16} strokeWidth={3} />
+                  </div>
+                )}
+
                 <span
-                  className="font-din-arabic text-black text-xs sm:text-sm"
-                  style={{ letterSpacing: "0.2em" }}
+                  className={`font-din-arabic text-black text-xs sm:text-sm whitespace-nowrap transition-all duration-300 ${filteredProducts.length === 1 && !expandedItems[product.id]
+                    ? "lg:-rotate-90 lg:text-base lg:tracking-[0.3em] lg:flex-1 lg:flex lg:items-center lg:justify-center"
+                    : ""
+                    }`}
+                  style={{ letterSpacing: filteredProducts.length === 1 && !expandedItems[product.id] ? "0.3em" : "0.2em" }}
                 >
                   WHAT'S INSIDE
                 </span>
@@ -749,6 +770,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                 <motion.div
                   animate={{ rotate: expandedItems[product.id] ? 180 : 0 }}
                   transition={{ duration: 0.3 }}
+                  className={filteredProducts.length === 1 && !expandedItems[product.id] ? "lg:hidden" : ""}
                 >
                   <ChevronDown size={18} className="sm:w-5 sm:h-5" />
                 </motion.div>
@@ -993,7 +1015,7 @@ function VideoPlaceholderSection() {
 
       {/* Gradient Overlay */}
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/75 to-black/50" />
+      <div className="absolute inset-0 bg-black/75" />
 
       {/* Fragrance Library Content */}
 
