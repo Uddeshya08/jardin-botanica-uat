@@ -40,8 +40,59 @@ const MobileProductCard = ({
 }) => {
   const router = useRouter()
   const { toggleLedgerItem, isInLedger } = useLedger()
-  const [isImageHovered, setIsImageHovered] = useState(false)
+  const { cartItems, handleCartUpdate } = useCartItems()
   const isItemInLedger = isInLedger(productId)
+
+  const [isImageHovered, setIsImageHovered] = useState(false)
+  const [isRecentlyAdded, setIsRecentlyAdded] = useState(false)
+  const [isButtonHovered, setIsButtonHovered] = useState(false)
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const itemId = productId
+
+    // Check if item already exists in cart
+    const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
+
+    let cartItem
+    if (existingItem) {
+      // Increase quantity of existing item
+      cartItem = {
+        id: itemId,
+        name: item.label,
+        price: 0,
+        quantity: existingItem.quantity + 1,
+        image: item.src,
+      }
+      toast.success(`Quantity updated: ${item.label}`, {
+        duration: 2000,
+      })
+    } else {
+      // Add new item
+      cartItem = {
+        id: itemId,
+        name: item.label,
+        price: 0,
+        quantity: 1,
+        image: item.src,
+      }
+      toast.success(`${item.label} Added To Cart`, {
+        duration: 2000,
+      })
+    }
+
+    // Add to recently added products for UI state
+    setIsRecentlyAdded(true)
+
+    // Reset the button state after 3 seconds
+    setTimeout(() => {
+      setIsRecentlyAdded(false)
+    }, 3000)
+
+    handleCartUpdate(cartItem)
+  }
 
   const handleProductClick = () => {
     if (item.url) {
@@ -79,62 +130,95 @@ const MobileProductCard = ({
       }}
     >
       {/* Product Image */}
-      <div
-        className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] sm:aspect-[3/4]"
-        style={{ marginBottom: "2.5rem" }}
-        onMouseEnter={() => setIsImageHovered(true)}
-        onMouseLeave={() => setIsImageHovered(false)}
-        onClick={handleProductClick}
-      >
-        {/* Hover Image - Behind */}
-        {item.hoverSrc && (
-          <div className="absolute inset-0">
+      <Link href={item.url && item.url.startsWith("/") ? item.url : `/${item.url || "#"}`} className="block">
+        <div
+          className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] sm:aspect-[3/4]"
+          style={{ marginBottom: "2.5rem" }}
+          onMouseEnter={() => setIsImageHovered(true)}
+          onMouseLeave={() => setIsImageHovered(false)}
+        >
+          {/* Hover Image - Behind */}
+          {item.hoverSrc && (
+            <div className="absolute inset-0">
+              <ImageWithFallback
+                src={item.hoverSrc}
+                alt={`${item.label} alternate view`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          {/* Main Image - On Top */}
+          <div
+            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+            style={{ opacity: isImageHovered && item.hoverSrc ? 0 : 1 }}
+          >
             <ImageWithFallback
-              src={item.hoverSrc}
-              alt={`${item.label} alternate view`}
+              src={item.src}
+              alt={item.label}
               className="w-full h-full object-cover"
             />
           </div>
-        )}
 
-        {/* Main Image - On Top */}
-        <div
-          className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-          style={{ opacity: isImageHovered && item.hoverSrc ? 0 : 1 }}
-        >
-          <ImageWithFallback
-            src={item.src}
-            alt={item.label}
-            className="w-full h-full object-cover"
-          />
+          {/* Ledger Icon */}
+          <button
+            className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 bg-white/20 border border-white/30 hover:bg-white/30"
+            aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
+            onClick={(e) => {
+              e.preventDefault(); // maintain e.preventDefault() for the button inside Link
+              handleToggleLedger(e);
+            }}
+          >
+            <Heart
+              size={18}
+              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
+            />
+          </button>
         </div>
-
-        {/* Ledger Icon */}
-        <button
-          className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 bg-white/20 border border-white/30 hover:bg-white/30"
-          aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
-          onClick={handleToggleLedger}
-        >
-          <Heart
-            size={18}
-            className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
-          />
-        </button>
-      </div>
+      </Link>
 
       {/* Product Info */}
       <div className="flex flex-col flex-grow min-h-0 md:justify-between">
         <div>
           <div className="flex justify-start items-center py-1 md:py-2">
-            <h3
-              className="font-american-typewriter text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity"
-              style={{ letterSpacing: "0.05em" }}
-              onClick={handleProductClick}
-            >
-              {item.label}
-            </h3>
+            <Link href={item.url && item.url.startsWith("/") ? item.url : `/${item.url || "#"}`}>
+              <h3
+                className="font-american-typewriter text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity"
+                style={{ letterSpacing: "0.05em" }}
+              >
+                {item.label}
+              </h3>
+            </Link>
           </div>
+
+        </div>
+
+        {/* Actions Row */}
+        <div className="flex items-center justify-end mt-auto pt-4">
+          {/* Add to Cart Button (Right) */}
+          <button
+            onClick={handleAddToCart}
+            onMouseEnter={() => setIsButtonHovered(true)}
+            onMouseLeave={() => setIsButtonHovered(false)}
+            className="group/btn relative inline-flex items-center gap-2 pb-0.5"
+          >
+            <span
+              className="font-din-arabic text-black text-base sm:text-sm"
+              style={{ letterSpacing: "0.12em" }}
+            >
+              {isRecentlyAdded ? "Added to cart" : "Add to cart"}
+            </span>
+            <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
+
+            {/* Animated underline */}
+            <motion.span
+              className="absolute bottom-0 left-0 h-[1px] bg-black"
+              initial={{ width: "0%" }}
+              animate={{ width: isButtonHovered ? "100%" : "0%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            />
+          </button>
         </div>
       </div>
     </div>
@@ -157,7 +241,10 @@ const ProductCard = ({
   productId: string
 }) => {
   const { toggleLedgerItem, isInLedger } = useLedger()
+  const { cartItems, handleCartUpdate } = useCartItems()
   const [isImageHovered, setIsImageHovered] = useState(false)
+  const [isRecentlyAdded, setIsRecentlyAdded] = useState(false)
+  const [isButtonHovered, setIsButtonHovered] = useState(false)
   const isItemInLedger = isInLedger(productId)
 
   const handleToggleLedger = (e: React.MouseEvent) => {
@@ -178,6 +265,53 @@ const ProductCard = ({
     toast.success(`${label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
       duration: 2000,
     })
+  }
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const itemId = productId
+
+    // Check if item already exists in cart
+    const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
+
+    let cartItem
+    if (existingItem) {
+      // Increase quantity of existing item
+      cartItem = {
+        id: itemId,
+        name: label,
+        price: 0,
+        quantity: existingItem.quantity + 1,
+        image: src,
+      }
+      toast.success(`Quantity updated: ${label}`, {
+        duration: 2000,
+      })
+    } else {
+      // Add new item
+      cartItem = {
+        id: itemId,
+        name: label,
+        price: 0,
+        quantity: 1,
+        image: src,
+      }
+      toast.success(`${label} Added To Cart`, {
+        duration: 2000,
+      })
+    }
+
+    // Add to recently added products for UI state
+    setIsRecentlyAdded(true)
+
+    // Reset the button state after 3 seconds
+    setTimeout(() => {
+      setIsRecentlyAdded(false)
+    }, 3000)
+
+    handleCartUpdate(cartItem)
   }
 
   return (
@@ -299,6 +433,33 @@ const ProductCard = ({
             </h3>
           </div>
         )}
+
+        {/* Actions Row */}
+        <div className="flex items-center justify-end mt-auto pt-4">
+          {/* Add to Cart Button (Right) */}
+          <button
+            onClick={handleAddToCart}
+            onMouseEnter={() => setIsButtonHovered(true)}
+            onMouseLeave={() => setIsButtonHovered(false)}
+            className="group/btn relative inline-flex items-center gap-2 pb-0.5"
+          >
+            <span
+              className="font-din-arabic text-black text-base sm:text-sm"
+              style={{ letterSpacing: "0.12em" }}
+            >
+              {isRecentlyAdded ? "Added to cart" : "Add to cart"}
+            </span>
+            <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
+
+            {/* Animated underline */}
+            <motion.span
+              className="absolute bottom-0 left-0 h-[1px] bg-black"
+              initial={{ width: "0%" }}
+              animate={{ width: isButtonHovered ? "100%" : "0%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            />
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -306,13 +467,65 @@ const ProductCard = ({
 
 const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index: number }) => {
   const router = useRouter()
+  const { cartItems, handleCartUpdate } = useCartItems() // Added useCartItems
   const [isHovered, setIsHovered] = useState(false)
+  const [isRecentlyAdded, setIsRecentlyAdded] = useState(false) // Added state
+  const [isButtonHovered, setIsButtonHovered] = useState(false) // Added state
 
   const handleProductClick = () => {
     if (item.url) {
       const normalizedUrl = item.url.startsWith("/") ? item.url : `/${item.url}`
       router.push(normalizedUrl)
     }
+  }
+
+  // Added handleAddToCart function
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    // Generate a simple ID if none exists (fallback)
+    const itemId = item.url || item.label.toLowerCase().replace(/\s+/g, "-")
+
+    // Check if item already exists in cart
+    const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
+
+    let cartItem
+    if (existingItem) {
+      // Increase quantity of existing item
+      cartItem = {
+        id: itemId,
+        name: item.label,
+        price: 0,
+        quantity: existingItem.quantity + 1,
+        image: item.src,
+      }
+      toast.success(`Quantity updated: ${item.label}`, {
+        duration: 2000,
+      })
+    } else {
+      // Add new item
+      cartItem = {
+        id: itemId,
+        name: item.label,
+        price: 0,
+        quantity: 1,
+        image: item.src,
+      }
+      toast.success(`${item.label} Added To Cart`, {
+        duration: 2000,
+      })
+    }
+
+    // Add to recently added products for UI state
+    setIsRecentlyAdded(true)
+
+    // Reset the button state after 3 seconds
+    setTimeout(() => {
+      setIsRecentlyAdded(false)
+    }, 3000)
+
+    handleCartUpdate(cartItem)
   }
 
   // Group products into sets of 3 for banner display
@@ -396,29 +609,36 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
           </motion.h3>
         </div>
 
-        {/* View Products Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.02, backgroundColor: "#000", color: "#fff" }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="bg-white/5 text-white px-4 py-2 md:px-6 md:py-2.5 font-normal tracking-wide transition-all duration-300 hover:bg-black hover:text-white border border-white/20 w-fit text-sm md:text-sm"
-          style={{
-            fontFamily: "system-ui, -apple-system, sans-serif",
-            letterSpacing: "0.05em",
-          }}
-          onClick={(e) => {
-            e.stopPropagation()
-            handleProductClick()
-          }}
-        >
-          Explore
-        </motion.button>
+        {/* Replaced Explore Button with Add to Cart Button */}
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={handleAddToCart}
+            onMouseEnter={() => setIsButtonHovered(true)}
+            onMouseLeave={() => setIsButtonHovered(false)}
+            className="group/btn relative inline-flex items-center gap-2 pb-0.5 text-white"
+          >
+            <span
+              className="font-din-arabic text-white text-base sm:text-sm shadow-black drop-shadow-md"
+              style={{ letterSpacing: "0.12em" }}
+            >
+              {isRecentlyAdded ? "Added to cart" : "Add to cart"}
+            </span>
+            <span className="text-white text-base sm:text-sm drop-shadow-md">{isRecentlyAdded ? "✓" : "→"}</span>
+
+            {/* Animated underline */}
+            <motion.span
+              className="absolute bottom-0 left-0 h-[1px] bg-white"
+              initial={{ width: "0%" }}
+              animate={{ width: isButtonHovered ? "100%" : "0%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            />
+          </button>
+        </div>
       </div>
     </motion.div>
   )
 }
+
 
 const Candles = () => {
   const router = useRouter()
@@ -979,35 +1199,7 @@ const Candles = () => {
                 </Carousel>
               </div>
 
-              {/* Mobile Slider Bar */}
-              <div
-                className="flex justify-center items-center w-full pt-3"
-                style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}
-              >
-                <div
-                  ref={mobileSliderRef}
-                  className="relative w-1/2 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
-                  onClick={handleMobileSliderClick}
-                >
-                  <div
-                    className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
-                    style={{
-                      left: `calc(${Math.max(0, Math.min(100, mobileSliderPercentage))}% - 16px)`,
-                      transform: "translateY(-50%)",
-                    }}
-                    onMouseDown={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleMobileMouseDown(e)
-                    }}
-                    onTouchStart={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleMobileTouchStart(e)
-                    }}
-                  />
-                </div>
-              </div>
+              {/* Mobile Slider Bar Removed */}
             </div>
           </div>
         </motion.div>
@@ -1154,36 +1346,7 @@ const Candles = () => {
               </Carousel>
             </div>
 
-            {/* Progress Scroll Bar - Slider Style */}
-            <div
-              className="flex justify-center items-center w-full pt-3"
-              style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}
-            >
-              <div
-                ref={sliderRef}
-                className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
-                onClick={handleSliderClick}
-              >
-                {/* Slider Thumb - Moves left/right based on scroll */}
-                <div
-                  className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
-                  style={{
-                    left: `calc(${Math.max(0, Math.min(100, sliderPercentage))}% - 16px)`,
-                    transform: "translateY(-50%)",
-                  }}
-                  onMouseDown={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    handleMouseDown(e)
-                  }}
-                  onTouchStart={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    handleTouchStart(e)
-                  }}
-                />
-              </div>
-            </div>
+            {/* Progress Scroll Bar Removed */}
           </div>
         </motion.div>
       )}
@@ -1318,34 +1481,7 @@ const Candles = () => {
                     ))}
                 </CarouselContent>
               </Carousel>
-              <div
-                className="flex justify-center items-center w-full"
-                style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}
-              >
-                <div
-                  ref={mobileSliderRef}
-                  className="relative w-1/2 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
-                  onClick={handleMobileSliderClick}
-                >
-                  <div
-                    className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
-                    style={{
-                      left: `calc(${Math.max(0, Math.min(100, mobileSliderPercentage))}% - 16px)`,
-                      transform: "translateY(-50%)",
-                    }}
-                    onMouseDown={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleMobileMouseDown(e)
-                    }}
-                    onTouchStart={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleMobileTouchStart(e)
-                    }}
-                  />
-                </div>
-              </div>
+              {/* Banner Carousel Slider Bar Removed */}
             </div>
 
             {/* Navigation Arrows Removed for Mobile - Gesture Only */}
