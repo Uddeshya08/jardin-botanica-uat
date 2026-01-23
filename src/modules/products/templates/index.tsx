@@ -32,6 +32,10 @@ interface RitualProduct {
   isRitualProduct?: boolean
 }
 
+interface GiftOption {
+  enabled: boolean
+}
+
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
@@ -42,6 +46,7 @@ type ProductTemplateProps = {
   testimonialsContent?: TestimonialsSection | null
   featuredRitualTwoContent?: FeaturedRitualTwoSection | null
   ritualProduct?: RitualProduct | null
+  giftOption?: GiftOption | null
   productInfoPanels?: ProductInfoPanels | null
   fromTheLabContent?: FromTheLabSection | null
 }
@@ -56,6 +61,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   testimonialsContent,
   featuredRitualTwoContent,
   ritualProduct: ritualProductProp,
+  giftOption: giftOptionProp,
   productInfoPanels,
   fromTheLabContent,
 }) => {
@@ -141,6 +147,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           onUpdateHeroQuantity={handleHeroQuantityUpdate}
           onCartUpdate={handleCartUpdateWrapper}
           ritualProduct={ritualProductProp}
+          giftOption={giftOptionProp}
         />
 
         <Afterlife afterlifeContent={afterlifeContent} />

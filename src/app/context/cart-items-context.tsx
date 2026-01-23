@@ -11,6 +11,7 @@ export interface CartItem {
   image?: string
   product_id?: string
   variant_id?: string
+  metadata?: object
 }
 
 interface CartItemsContextValue {
@@ -31,6 +32,7 @@ export function CartItemsProvider({
 
   // Sync with server cart items when they change
   useEffect(() => {
+    console.log("🔍 Initial cart items:", initialCartItems)
     setCartItems(initialCartItems)
   }, [initialCartItems])
 

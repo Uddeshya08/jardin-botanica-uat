@@ -10,6 +10,8 @@ import type React from "react"
 import { useState } from "react"
 import ErrorMessage from "../error-message"
 import { RazorpayPaymentButton } from "./razorpay-payment-button"
+import { useGiftContextSafe } from "app/context/gift-context"
+import { updateCart } from "@lib/data/cart"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -94,8 +96,23 @@ const StripePaymentButton = ({
 
   const disabled = !stripe || !elements ? true : false
 
+  const giftContext = useGiftContextSafe()
+
   const handlePayment = async () => {
     setSubmitting(true)
+
+    // Sync gift data if present
+    if (giftContext) {
+      const giftData = giftContext.giftQuantities
+      if (Object.keys(giftData).length > 0) {
+        try {
+          await updateCart({ metadata: { gift_items: giftData } })
+        } catch (e) {
+          console.error("Failed to sync gift data", e)
+          // Continue anyway or block? Continuing for now.
+        }
+      }
+    }
 
     if (!stripe || !elements || !card || !cart) {
       setSubmitting(false)
@@ -183,8 +200,22 @@ const ManualTestPaymentButton = ({
       })
   }
 
-  const handlePayment = () => {
+  const giftContext = useGiftContextSafe()
+
+  const handlePayment = async () => {
     setSubmitting(true)
+
+    // Sync gift data if present
+    if (giftContext) {
+      const giftData = giftContext.giftQuantities
+      if (Object.keys(giftData).length > 0) {
+        try {
+          await updateCart({ metadata: { gift_items: giftData } })
+        } catch (e) {
+          console.error("Failed to sync gift data", e)
+        }
+      }
+    }
 
     onPaymentCompleted()
   }

@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useState } from "react"
 import { type RazorpayOrderOptions, useRazorpay } from "react-razorpay"
 import type { CurrencyCode } from "react-razorpay/dist/constants/currency"
 import ErrorMessage from "../error-message"
+import { useGiftContextSafe } from "app/context/gift-context"
+import { updateCart } from "@lib/data/cart"
 
 export const RazorpayPaymentButton = ({
   session,
@@ -82,7 +84,20 @@ export const RazorpayPaymentButton = ({
     }
   }
 
+  const giftContext = useGiftContextSafe()
+
   const handlePayment = useCallback(async () => {
+    // Sync gift data if present
+    if (giftContext) {
+      const giftData = giftContext.giftQuantities
+      if (Object.keys(giftData).length > 0) {
+        try {
+          await updateCart({ metadata: { gift_items: giftData } })
+        } catch (e) {
+          console.error("Failed to sync gift data", e)
+        }
+      }
+    }
     const onPaymentCancelled = async () => {
       setErrorMessage("Payment Cancelled")
       setSubmitting(false)
@@ -145,6 +160,7 @@ export const RazorpayPaymentButton = ({
     orderData.razorpayOrder.id,
     session.amount,
     paymentType,
+    giftContext,
   ])
 
   return (

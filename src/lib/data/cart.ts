@@ -170,6 +170,56 @@ export async function updateLineItem({ lineId, quantity }: { lineId: string; qua
     .catch(medusaError)
 }
 
+/**
+ * Updates the gift status and quantity for a line item.
+ * Stores is_gift and gift_quantity in the line item's metadata.
+ */
+export async function updateLineItemGift({
+  lineId,
+  quantity,
+  isGift,
+  giftQuantity
+}: {
+  lineId: string
+  quantity: number
+  isGift: boolean
+  giftQuantity: number
+}) {
+  if (!lineId) {
+    throw new Error("Missing lineItem ID when updating gift status")
+  }
+
+  const cartId = await getCartId()
+
+  if (!cartId) {
+    throw new Error("Missing cart ID when updating gift status")
+  }
+
+  const headers = {
+    ...(await getAuthHeaders()),
+  }
+
+  await sdk.store.cart
+    .updateLineItem(
+      cartId,
+      lineId,
+      {
+        quantity,
+        metadata: {
+          is_gift: isGift,
+          gift_quantity: giftQuantity
+        }
+      },
+      {},
+      headers
+    )
+    .then(async () => {
+      const cartCacheTag = await getCacheTag("carts")
+      revalidateTag(cartCacheTag)
+    })
+    .catch(medusaError)
+}
+
 export async function deleteLineItem(lineId: string) {
   if (!lineId) {
     throw new Error("Missing lineItem ID when deleting line item")
