@@ -17,13 +17,13 @@ export function FeaturedRitual() {
   return (
     <section className="py-12 lg:py-16" style={{ backgroundColor: "#edede2" }}>
       <div className="flex flex-col-reverse md:flex-row">
-        {/* Content - Left Side (40% width on desktop, full width on mobile) */}
+        {/* Content - Left Side (50% width on desktop, full width on mobile) */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="w-full md:w-2/5 flex flex-col justify-center px-6 py-8 md:pl-20 md:pr-16 md:py-17"
+          className="w-full md:w-1/2 flex flex-col justify-center px-6 py-8 md:pl-20 md:pr-16 md:py-17"
         >
           {/* Main Title - The Botanist's Hand Ritual */}
           <motion.h2
@@ -77,13 +77,13 @@ export function FeaturedRitual() {
           </motion.div>
         </motion.div>
 
-        {/* Image - Right Side (60% width on desktop, full width on mobile) */}
+        {/* Image - Right Side (50% width on desktop, full width on mobile) */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="relative w-full md:w-[60%]"
+          className="relative w-full md:w-1/2"
         >
           {/* Fixed-size container */}
           <div className="h-[40vh] md:h-[60vh] overflow-hidden">
