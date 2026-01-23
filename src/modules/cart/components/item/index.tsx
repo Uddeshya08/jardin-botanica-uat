@@ -8,8 +8,9 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Spinner from "@modules/common/icons/spinner"
 import Thumbnail from "@modules/products/components/thumbnail"
 import { motion } from "framer-motion"
-import { X } from "lucide-react"
-import { useState } from "react"
+import { Gift, X } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useGiftContextSafe } from "app/context/gift-context"
 import { ProductTitleTooltip } from "./product-title-tooltip"
 
 type ItemProps = {
@@ -22,6 +23,23 @@ type ItemProps = {
 const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
   const [updating, setUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const giftContext = useGiftContextSafe()
+  const giftQty = giftContext?.getGiftQuantity(item.id) || 0
+
+  // Ensure gift quantity doesn't exceed total quantity
+  useEffect(() => {
+    if (giftQty > item.quantity && giftContext) {
+      giftContext.setGiftQuantity(item.id, item.quantity)
+    }
+  }, [item.quantity, giftQty, giftContext, item.id])
+
+  const handleGiftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value)
+    if (!isNaN(val) && giftContext) {
+      giftContext.setGiftQuantity(item.id, val)
+    }
+  }
 
   const changeQuantity = async (quantity: number) => {
     if (quantity < 1) return
@@ -58,7 +76,7 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
     >
       <LocalizedClientLink
         href={`/products/${item.product_handle}`}
-        className={clx("relative overflow-hidden rounded-lg flex-shrink-0", {
+        className={clx("relative overflow-hidden rounded-lg flex-shrink-0 bg-gray-100", {
           "w-16 h-16": type === "preview",
           "w-20 h-20": type === "full",
         })}
@@ -72,7 +90,7 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
             thumbnail={item.thumbnail}
             images={item.variant?.product?.images}
             size="square"
-            className="!p-0 w-full h-full"
+            className="!p-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg pointer-events-none" />
         </motion.div>
@@ -130,6 +148,42 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
                 {isDeleting ? <Spinner className="w-4 h-4" /> : <X className="w-4 h-4" />}
               </motion.button>
             </div>
+
+            {/* Gift Bifurcation UI */}
+            {giftContext && (
+              <div className="mt-5 pt-3 border-t border-black/5">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2 text-black/80">
+                    <Gift className="w-3.5 h-3.5" />
+                    <span className="font-din-arabic text-xs uppercase tracking-wider">Mark as Gift</span>
+                  </div>
+                  <span className="font-din-arabic text-xs text-black/60">
+                    {giftQty} / {item.quantity}
+                  </span>
+                </div>
+
+                <div className="relative h-6 flex items-center">
+                  <input
+                    type="range"
+                    min="0"
+                    max={item.quantity}
+                    step="1"
+                    value={giftQty}
+                    onChange={handleGiftChange}
+                    className="w-full h-1.5 bg-black/10 rounded-full appearance-none cursor-pointer accent-black focus:outline-none focus:ring-1 focus:ring-black/20"
+                  />
+                </div>
+
+                <div className="flex justify-between items-center text-[10px] md:text-xs font-din-arabic mt-1">
+                  <span className={giftQty < item.quantity ? "text-black" : "text-black/40"}>
+                    For You: {item.quantity - giftQty}
+                  </span>
+                  <span className={giftQty > 0 ? "text-black" : "text-black/40"}>
+                    Gift: {giftQty}
+                  </span>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <>

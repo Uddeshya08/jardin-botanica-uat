@@ -57,8 +57,7 @@ export async function generateStaticParams() {
       .filter((param) => param.handle)
   } catch (error) {
     console.error(
-      `Failed to generate static paths for product pages: ${
-        error instanceof Error ? error.message : "Unknown error"
+      `Failed to generate static paths for product pages: ${error instanceof Error ? error.message : "Unknown error"
       }.`
     )
     return []
@@ -284,6 +283,14 @@ export default async function ProductPage(props: Props) {
     fromTheLabContent = await getFromTheLabSectionByKey("pdp-from-the-lab")
   }
 
+  // Check for gift option in product metadata
+  // Gift option takes priority over ritual product (mutual exclusivity)
+  const hasGiftOption = true // TEMPORARY: Enable for all products
+  // const hasGiftOption = pricedProduct?.metadata?.gift_option === true ||
+  //   pricedProduct?.metadata?.gift_option === "true"
+
+  const giftOption = hasGiftOption ? { enabled: true } : null
+
   return (
     <ProductTemplate
       product={pricedProduct}
@@ -294,7 +301,8 @@ export default async function ProductPage(props: Props) {
       afterlifeContent={afterlifeContent}
       testimonialsContent={testimonialsContent}
       featuredRitualTwoContent={featuredRitualTwoContent}
-      ritualProduct={ritualProduct}
+      ritualProduct={hasGiftOption ? null : ritualProduct}
+      giftOption={giftOption}
       productInfoPanels={productInfoPanels}
       fromTheLabContent={fromTheLabContent}
     />
