@@ -1,6 +1,6 @@
 "use client"
 
-import { deleteLineItem, updateLineItem } from "@lib/data/cart"
+import { deleteLineItem, updateLineItem, updateLineItemGift } from "@lib/data/cart"
 import type { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
@@ -9,8 +9,7 @@ import Spinner from "@modules/common/icons/spinner"
 import Thumbnail from "@modules/products/components/thumbnail"
 import { motion } from "framer-motion"
 import { Gift, X } from "lucide-react"
-import { useEffect, useState } from "react"
-import { useGiftContextSafe } from "app/context/gift-context"
+import { useState } from "react"
 import { ProductTitleTooltip } from "./product-title-tooltip"
 
 type ItemProps = {
@@ -23,21 +22,32 @@ type ItemProps = {
 const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
   const [updating, setUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [giftUpdating, setGiftUpdating] = useState(false)
 
-  const giftContext = useGiftContextSafe()
-  const giftQty = giftContext?.getGiftQuantity(item.id) || 0
+  // Read gift data from line item metadata (persisted in database)
+  const itemMetadata = (item as any).metadata || {}
+  const isGift = itemMetadata.is_gift === true || itemMetadata.is_gift === "true"
+  const giftQty = typeof itemMetadata.gift_quantity === 'number'
+    ? itemMetadata.gift_quantity
+    : (isGift ? item.quantity : 0)
 
-  // Ensure gift quantity doesn't exceed total quantity
-  useEffect(() => {
-    if (giftQty > item.quantity && giftContext) {
-      giftContext.setGiftQuantity(item.id, item.quantity)
-    }
-  }, [item.quantity, giftQty, giftContext, item.id])
-
-  const handleGiftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Update gift quantity in database
+  const handleGiftChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value)
-    if (!isNaN(val) && giftContext) {
-      giftContext.setGiftQuantity(item.id, val)
+    if (isNaN(val) || giftUpdating) return
+
+    setGiftUpdating(true)
+    try {
+      await updateLineItemGift({
+        lineId: item.id,
+        quantity: item.quantity,
+        isGift: val > 0,
+        giftQuantity: val,
+      })
+    } catch (error) {
+      console.error("Failed to update gift quantity:", error)
+    } finally {
+      setGiftUpdating(false)
     }
   }
 
@@ -149,8 +159,8 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
               </motion.button>
             </div>
 
-            {/* Gift Bifurcation UI */}
-            {giftContext && (
+            {/* Gift Bifurcation UI - Only show for items marked as gift */}
+            {isGift && (
               <div className="mt-5 pt-3 border-t border-black/5">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-2 text-black/80">

@@ -9,6 +9,7 @@ import { Footer } from "app/components/Footer"
 import { AuthProvider } from "app/context/auth-context"
 import { CartItemsProvider } from "app/context/cart-items-context"
 import { LedgerProvider } from "app/context/ledger-context"
+import { GiftProvider } from "app/context/gift-context"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -60,11 +61,13 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       )}
       <AuthProvider customer={customer}>
         <LedgerProvider>
-          <CartItemsProvider initialCartItems={cartItems}>
-            {props.children}
-            <Footer />
-            <ScrollIndicator />
-          </CartItemsProvider>
+          <GiftProvider>
+            <CartItemsProvider initialCartItems={cartItems}>
+              {props.children}
+              <Footer />
+              <ScrollIndicator />
+            </CartItemsProvider>
+          </GiftProvider>
         </LedgerProvider>
       </AuthProvider>
     </>

@@ -1,6 +1,7 @@
 "use client"
 
 import { addToCartAction } from "@lib/data/cart-actions"
+import { updateLineItemGift } from "@lib/data/cart"
 import { emitCartUpdated } from "@lib/util/cart-client"
 import type { HttpTypes } from "@medusajs/types"
 import { useCartItemsSafe } from "app/context/cart-items-context"
@@ -554,19 +555,36 @@ export function StickyCartBar({
 
     const productId = product?.id ?? variant.id
 
-    // Find existing item in cart
+    // Find existing item in cart (need the line item ID for API call)
     const existingItem = cartItems.find((item) => {
       const itemVariantId = (item as any).variant_id || item.id
       return item.id === productId || item.id === variant.id || itemVariantId === variant.id
     })
 
-    // Update cart item with gift flag
+    // Update cart item with gift flag - optimistic UI update
     if (existingItem) {
       console.log("🎁 Marking item as gift in cart")
       onCartUpdate?.({
         ...existingItem,
         isGift: true,
       } as any)
+
+      // Persist gift selection to database via server action
+      const itemQuantity = existingItem.quantity || quantity
+      startTransition(async () => {
+        try {
+          await updateLineItemGift({
+            lineId: existingItem.id,
+            quantity: itemQuantity,
+            isGift: true,
+            giftQuantity: itemQuantity, // All items marked as gift
+          })
+          console.log("🎁 Persisted gift selection to database:", existingItem.id, itemQuantity)
+        } catch (e) {
+          console.error("Failed to persist gift selection:", e)
+          // Don't rollback UI, the optimistic update is good enough
+        }
+      })
     }
 
     // Show toast with gift confirmation

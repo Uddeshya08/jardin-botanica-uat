@@ -283,11 +283,14 @@ export default async function ProductPage(props: Props) {
     fromTheLabContent = await getFromTheLabSectionByKey("pdp-from-the-lab")
   }
 
-  // Check for gift option in product metadata
+  // Check for gift option in category metadata
   // Gift option takes priority over ritual product (mutual exclusivity)
-  const hasGiftOption = true // TEMPORARY: Enable for all products
-  // const hasGiftOption = pricedProduct?.metadata?.gift_option === true ||
-  //   pricedProduct?.metadata?.gift_option === "true"
+  // Check if any of the product's categories have can_be_gifted set to true
+  const hasGiftOption = pricedProduct?.categories?.some((category: any) => {
+    const categoryMetadata = category?.metadata as Record<string, any> | undefined
+    return categoryMetadata?.can_be_gifted === true ||
+      categoryMetadata?.can_be_gifted === "true"
+  }) ?? false
 
   const giftOption = hasGiftOption ? { enabled: true } : null
 
