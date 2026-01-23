@@ -799,7 +799,7 @@ export function Navigation({
                                     <img
                                       src={item.image}
                                       alt={item.name}
-                                      className="w-16 h-16 object-cover"
+                                      className="w-16 h-16 object-contain"
                                     />
                                   )}
                                   <div className="flex-1 min-w-0">
@@ -1023,7 +1023,7 @@ export function Navigation({
                                     <img
                                       src={item.image}
                                       alt={item.name}
-                                      className="w-16 h-16 object-cover"
+                                      className="w-16 h-16 object-contain"
                                     />
                                   )}
                                   <div className="flex-1">
