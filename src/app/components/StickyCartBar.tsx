@@ -364,7 +364,12 @@ export function StickyCartBar({
     // background network
     startTransition(async () => {
       try {
-        await addToCartAction({ variantId: variant.id, quantity, countryCode })
+        await addToCartAction({
+          variantId: variant.id,
+          quantity,
+          countryCode,
+          canBeGifted: giftOption?.enabled,
+        })
 
         // After successful add to cart, show ritual suggestion if available
         if (ritualProduct && !ritualCompleted) {

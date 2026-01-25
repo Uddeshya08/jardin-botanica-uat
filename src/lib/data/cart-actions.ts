@@ -1,20 +1,23 @@
 "use server"
 
-import { addToCart } from "@lib/data/cart"
+import { addOrUpdateLineItem } from "@lib/data/cart"
 
 type AddPayload = {
   variantId: string
   quantity: number
   countryCode: string
+  canBeGifted?: boolean
 }
 
 /**
- * Lightweight wrapper around addToCart that:
+ * Lightweight wrapper around addOrUpdateLineItem that:
  * - normalizes params
  * - retries once on inventory error (common while stock-location links update)
  * - returns quickly to the client
+ * - merges with existing cart items to preserve gift metadata
+ * - stores canBeGifted flag in metadata for checkout gift option
  */
-export async function addToCartAction({ variantId, quantity, countryCode }: AddPayload) {
+export async function addToCartAction({ variantId, quantity, countryCode, canBeGifted }: AddPayload) {
   if (!variantId) throw new Error("Missing variantId")
   const qty = Math.max(1, Number(quantity || 1))
   const cc = (countryCode || "in").toLowerCase()
@@ -23,7 +26,7 @@ export async function addToCartAction({ variantId, quantity, countryCode }: AddP
 
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      await addToCart({ variantId, quantity: qty, countryCode: cc })
+      await addOrUpdateLineItem({ variantId, quantity: qty, countryCode: cc, canBeGifted })
       return { ok: true, quantity: qty }
     } catch (err: any) {
       // Medusa often throws this when channel/location/region is slightly out of sync.

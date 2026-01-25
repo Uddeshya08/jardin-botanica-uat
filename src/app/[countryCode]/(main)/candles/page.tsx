@@ -181,10 +181,10 @@ const MobileProductCard = ({
       {/* Product Info */}
       <div className="flex flex-col flex-grow min-h-0 md:justify-between">
         <div>
-          <div className="flex justify-start items-center py-1 md:py-2">
+          <div className="flex justify-center items-center py-1 md:py-2">
             <Link href={item.url && item.url.startsWith("/") ? item.url : `/${item.url || "#"}`}>
               <h3
-                className="font-american-typewriter text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity"
+                className="font-american-typewriter text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity text-center"
                 style={{ letterSpacing: "0.05em" }}
               >
                 {item.label}
@@ -414,9 +414,9 @@ const ProductCard = ({
       <div className="flex flex-col flex-grow">
         {url ? (
           <Link href={url.startsWith("/") ? url : `/${url}`}>
-            <div>
+            <div className="text-center">
               <h3
-                className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer"
+                className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer text-center"
                 style={{ letterSpacing: "0.05em" }}
               >
                 {label && label.trim() ? label : "Product Name"}
@@ -424,9 +424,9 @@ const ProductCard = ({
             </div>
           </Link>
         ) : (
-          <div>
+          <div className="text-center">
             <h3
-              className="font-american-typewriter text-xl mb-1"
+              className="font-american-typewriter text-xl mb-1 text-center"
               style={{ letterSpacing: "0.05em" }}
             >
               {label && label.trim() ? label : "Product Name"}
