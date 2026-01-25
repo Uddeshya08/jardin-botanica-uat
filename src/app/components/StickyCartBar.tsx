@@ -172,6 +172,9 @@ export function StickyCartBar({
     // 4. Gift selected OR Ritual completed → "Checkout"
     // 5. 2+ products but no valid pair → "Add to Cart"
 
+    console.log("MAIN PRODUCT IN CART")
+    console.log(mainProductInCart)
+
     if (cartItemsCount === 0) {
       // Cart is empty - show "Add to Cart"
       console.log("🛒 Cart is empty - showing Add to Cart")
@@ -180,6 +183,13 @@ export function StickyCartBar({
       setShowRitualSuggestion(false)
       setShowGiftOption(false)
       setGiftSelected(false)
+    } else if (mainProductInCart && (mainProductInCart as any)?.metadata?.is_gift === true) {
+      // Item was previously marked as gift (persisted in metadata) - restore that state
+      console.log("🎁 Restoring gift state from metadata")
+      setGiftSelected(true)
+      setShowGoToCart(true)
+      setShowGiftOption(false)
+      setShowRitualSuggestion(false)
     } else if (cartItemsCount >= 1 && mainProductInCart && giftOption?.enabled && !giftSelected) {
       // Product in cart AND gift option is enabled - show "This is a Gift" button
       console.log("🎁 Product in cart with gift option - showing This is a Gift")
