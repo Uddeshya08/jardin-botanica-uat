@@ -67,7 +67,7 @@ export function BespokeGifting() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="font-american-typewriter text-3xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-white md:text-black leading-tight"
+            className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-white md:text-black leading-tight"
           >
             Bespoke Experiences
           </motion.h2>

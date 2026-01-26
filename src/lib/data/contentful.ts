@@ -15,6 +15,7 @@ import {
     type ContentfulFeaturedRitualTwo,
     type ContentfulFeaturedSection,
     type ContentfulFromTheLabSection,
+    type ContentfulGiftSet,
     type ContentfulPageBanner,
     ContentfulProductCard,
     type ContentfulProductContent,
@@ -26,6 +27,9 @@ import {
     type FragranceNote,
     type FromTheLabProduct,
     type FromTheLabSection,
+    type GiftSet,
+    type GiftSetQuestion,
+    type GiftSetQuestionOption,
     type PageBanner,
     type ProductContent,
     type ProductImage,
@@ -443,21 +447,21 @@ function transformTestimonialsSectionEntry(
         // Parse testimonials array
         const items: TestimonialItem[] = Array.isArray(fields.testimonials)
             ? fields.testimonials.map((t: any, index: number) => {
-                  // Handle both JSON objects and stringified JSON
-                  const testimonial = typeof t === "string" ? JSON.parse(t) : t;
+                // Handle both JSON objects and stringified JSON
+                const testimonial = typeof t === "string" ? JSON.parse(t) : t;
 
-                  return {
-                      id: testimonial.id ?? index + 1,
-                      name: testimonial.name || "",
-                      initials: testimonial.initials || "",
-                      location: testimonial.location || "",
-                      rating: testimonial.rating ?? 5,
-                      review: testimonial.review || "",
-                      product: testimonial.product || undefined,
-                      purchaseDate: testimonial.purchaseDate || undefined,
-                      verified: testimonial.verified ?? true,
-                  };
-              })
+                return {
+                    id: testimonial.id ?? index + 1,
+                    name: testimonial.name || "",
+                    initials: testimonial.initials || "",
+                    location: testimonial.location || "",
+                    rating: testimonial.rating ?? 5,
+                    review: testimonial.review || "",
+                    product: testimonial.product || undefined,
+                    purchaseDate: testimonial.purchaseDate || undefined,
+                    verified: testimonial.verified ?? true,
+                };
+            })
             : [];
 
         // Provide defaults for optional fields
@@ -663,7 +667,7 @@ function transformFeaturedRitualTwoSectionEntry(
             },
             imagePosition:
                 fields.imagePosition === "left" ||
-                fields.imagePosition === "right"
+                    fields.imagePosition === "right"
                     ? fields.imagePosition
                     : "left",
             active: fields.active ?? true,
@@ -1272,9 +1276,9 @@ export async function getPageBanner(
             ) {
                 console.error(
                     `\n[SOLUTION] ❌ Content Type "pageBanner" not found in Contentful!\n` +
-                        `Please create a content type with:\n` +
-                        `- Content Type ID (API Identifier): "pageBanner"\n` +
-                        `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey\n\n`,
+                    `Please create a content type with:\n` +
+                    `- Content Type ID (API Identifier): "pageBanner"\n` +
+                    `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey\n\n`,
                 );
                 return null; // Return null instead of throwing
             }
@@ -1287,9 +1291,9 @@ export async function getPageBanner(
             ) {
                 console.error(
                     `\n[SOLUTION] ❌ Field "pageKey" not found in "pageBanner" content type!\n` +
-                        `Please add a field with:\n` +
-                        `- Field ID: "pageKey"\n` +
-                        `- Field Type: Short text\n\n`,
+                    `Please add a field with:\n` +
+                    `- Field ID: "pageKey"\n` +
+                    `- Field Type: Short text\n\n`,
                 );
                 return null;
             }
@@ -1336,8 +1340,8 @@ export async function getPageBanner(
 
             console.warn(
                 `No active page banner found for pageKey: "${pageKey}". ` +
-                    `Make sure you have an active banner entry with pageKey="${pageKey}" in Contentful. ` +
-                    `Content Type ID should be "pageBanner" and field should be "pageKey" (camelCase).`,
+                `Make sure you have an active banner entry with pageKey="${pageKey}" in Contentful. ` +
+                `Content Type ID should be "pageBanner" and field should be "pageKey" (camelCase).`,
             );
             return null;
         }
@@ -1366,9 +1370,9 @@ export async function getPageBanner(
         ) {
             console.error(
                 `\n[SOLUTION] Content Type "pageBanner" doesn't exist in Contentful.\n` +
-                    `Please create it with:\n` +
-                    `- Content Type ID: "pageBanner"\n` +
-                    `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey`,
+                `Please create it with:\n` +
+                `- Content Type ID: "pageBanner"\n` +
+                `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey`,
             );
         }
 
@@ -1708,6 +1712,147 @@ function transformCandlesCollectionItemEntry(
             "Error transforming candles collection item entry:",
             error,
         );
+        return null;
+    }
+}
+
+/**
+ * Fetch all gift sets from Contentful
+ * @returns Array of GiftSet
+ */
+export async function getAllGiftSets(): Promise<GiftSet[]> {
+    try {
+        const client = getContentfulClient();
+
+        const response = await client.getEntries({
+            content_type: "giftSets",
+            include: 2, // Include linked Question entries
+            limit: 100,
+        });
+
+        console.log("RESPONSE")
+        console.log(response)
+
+        if (!response.items || response.items.length === 0) {
+            return [];
+        }
+
+        return response.items
+            .map((item) =>
+                transformGiftSetEntry(
+                    item as unknown as Entry<ContentfulGiftSet>,
+                ),
+            )
+            .filter((item): item is GiftSet => item !== null);
+    } catch (error) {
+        console.error("Error fetching all gift sets from Contentful:", error);
+        return [];
+    }
+}
+
+/**
+ * Fetch a gift set from Contentful by handle
+ * @param handle - The handle/slug of the gift set
+ * @returns GiftSet or null if not found
+ */
+export async function getGiftSetByHandle(
+    handle: string,
+): Promise<GiftSet | null> {
+    try {
+        const client = getContentfulClient();
+
+        const response = await client.getEntries({
+            content_type: "Gift Sets",
+            "fields.handle": handle,
+            include: 2, // Include linked Question entries
+            limit: 1,
+        });
+
+        if (!response.items || response.items.length === 0) {
+            console.warn(`No gift set found for handle: ${handle}`);
+            return null;
+        }
+
+        const entry = response.items[0] as unknown as Entry<ContentfulGiftSet>;
+        return transformGiftSetEntry(entry);
+    } catch (error) {
+        console.error("Error fetching gift set from Contentful:", error);
+        return null;
+    }
+}
+
+/**
+ * Transform Contentful gift set entry to simplified GiftSet type
+ */
+function transformGiftSetEntry(
+    entry: Entry<ContentfulGiftSet>,
+): GiftSet | null {
+    try {
+        const fields = entry.fields as any;
+
+        // Transform questions - Array of references to GiftSetQuestion entries
+        const questions: GiftSetQuestion[] = [];
+        if (Array.isArray(fields.questions)) {
+            fields.questions.forEach((q: any) => {
+                // Handle GiftSetQuestion entry (from References field)
+                if (q.fields) {
+                    // Transform options - Array of references with name/size fields
+                    const options: GiftSetQuestionOption[] = [];
+                    if (Array.isArray(q.fields.options)) {
+                        q.fields.options.forEach((opt: any) => {
+                            if (opt.fields) {
+                                options.push({
+                                    name: opt.fields.name || "",
+                                    size: opt.fields.size || "",
+                                });
+                            }
+                        });
+                    }
+                    questions.push({
+                        question: q.fields.question || "",
+                        options,
+                    });
+                }
+            });
+        }
+
+        // Transform productSetsIncluded - Short text, list
+        const productSetsIncluded: string[] = Array.isArray(
+            fields.productSetsIncluded,
+        )
+            ? fields.productSetsIncluded
+            : [];
+
+        // Transform coverImage - Media
+        const coverImage = getAssetUrl(fields.coverImage) || "";
+
+        // Transform images - Media, many files
+        const images: string[] = [];
+        if (Array.isArray(fields.images)) {
+            fields.images.forEach((img: any) => {
+                const url = getAssetUrl(img);
+                if (url) images.push(url);
+            });
+        }
+
+        // Transform hoverImage - Media
+        const hoverImage = getAssetUrl(fields.hoverImage) || "";
+
+        return {
+            handle: fields.handle || "",
+            title: fields.title || "",
+            description: extractTextFromRichText(fields.description) || "",
+            category: fields.category || "",
+            productSetsIncluded,
+            price: typeof fields.price === "number" ? fields.price : 0,
+            questions,
+            featured: fields.featured ?? false,
+            coverImage,
+            images,
+            hoverImage,
+        };
+    } catch (error) {
+        console.error("Error transforming gift set entry:", error);
         return null;
     }
 }

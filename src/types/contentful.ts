@@ -437,3 +437,61 @@ export interface ContentfulCandlesCollectionItem extends EntrySkeletonType {
     contentTypeId: "candlesCollectionItem";
     fields: CandlesCollectionItemFields;
 }
+
+// Gift Set Question Content Types
+export interface GiftSetQuestionFields {
+    question: string;
+    options: any[]; // References to option entries with name, size fields
+}
+
+export interface ContentfulGiftSetQuestion extends EntrySkeletonType {
+    contentTypeId: "giftSetQuestion";
+    fields: GiftSetQuestionFields;
+}
+
+// Option item in a question (e.g., candle options)
+export interface GiftSetQuestionOption {
+    name: string;
+    size: string;
+}
+
+// Simplified type for use in components
+export interface GiftSetQuestion {
+    question: string;
+    options: GiftSetQuestionOption[];
+}
+
+// Gift Set Content Types
+export interface GiftSetFields {
+    handle: string;
+    title: string;
+    description: string;
+    category: string; // Short text - for filtering
+    productSetsIncluded: string[]; // Short text, list
+    price: number;
+    questions: ContentfulGiftSetQuestion[]; // References, many
+    featured: boolean;
+    coverImage: ContentfulAsset; // Media
+    images: ContentfulAsset[]; // Media, many files
+    hoverImage: ContentfulAsset; // Media
+}
+
+export interface ContentfulGiftSet extends EntrySkeletonType {
+    contentTypeId: "giftSets";
+    fields: GiftSetFields;
+}
+
+// Simplified type for use in components
+export interface GiftSet {
+    handle: string;
+    title: string;
+    description: string;
+    category: string;
+    productSetsIncluded: string[];
+    price: number;
+    questions: GiftSetQuestion[];
+    featured: boolean;
+    coverImage: string; // URL
+    images: string[]; // URLs
+    hoverImage: string; // URL
+}
