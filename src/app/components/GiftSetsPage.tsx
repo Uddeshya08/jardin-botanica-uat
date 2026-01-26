@@ -759,7 +759,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
                 <span
                   className={`font-din-arabic text-black text-xs sm:text-sm whitespace-nowrap transition-all duration-300 ${filteredProducts.length === 1 && !expandedItems[product.id]
-                    ? "lg:-rotate-90 lg:text-base lg:tracking-[0.3em] lg:flex-1 lg:flex lg:items-center lg:justify-center"
+                    ? "lg:-rotate-90 lg:text-base lg:tracking-[0.3em] lg:flex lg:items-center lg:mb-24"
                     : ""
                     }`}
                   style={{ letterSpacing: filteredProducts.length === 1 && !expandedItems[product.id] ? "0.3em" : "0.2em" }}

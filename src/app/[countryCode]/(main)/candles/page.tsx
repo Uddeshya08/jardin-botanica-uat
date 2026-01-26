@@ -1567,7 +1567,7 @@ const Candles = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
-                className="text-3xl md:text-4xl lg:text-5xl font-normal opacity-[50%] mb-6 tracking-tight leading-tight font-american-typewriter"
+                className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-6 tracking-tight leading-tight font-american-typewriter"
               >
                 Soft Orris - The Scent of Stillness
               </motion.h2>
