@@ -23,15 +23,16 @@ export function BespokeGifting() {
           className="absolute inset-0 z-0 h-full w-full md:relative md:w-3/5 md:pb-12 md:order-1"
         >
           {/* Mobile Image Container - Full Screen */}
-          <div className="h-full w-full md:hidden">
+          <div className="relative h-full w-full md:hidden">
+            <div className="absolute inset-0 bg-black/60 z-10" />
             <img
               src="/assets/first.png"
               alt="Hands holding botanical book with oranges and plants"
-              className="w-full h-full object-cover opacity-80"
+              className="w-full h-full object-cover"
               style={{ objectPosition: "center" }}
             />
             {/* Gradient Overlay for Text Readability */}
-            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-20" />
           </div>
 
           {/* Desktop Image Container */}
