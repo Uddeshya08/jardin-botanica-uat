@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import type { CandlesCollectionItem } from "../../../../types/contentful"
+import InstagramEmbed2 from "./test"
 
 interface CartItem {
   id: string
@@ -130,7 +131,10 @@ const MobileProductCard = ({
       }}
     >
       {/* Product Image */}
-      <Link href={item.url && item.url.startsWith("/") ? item.url : `/${item.url || "#"}`} className="block">
+      <Link
+        href={item.url && item.url.startsWith("/") ? item.url : `/${item.url || "#"}`}
+        className="block"
+      >
         <div
           className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] sm:aspect-[3/4]"
           style={{ marginBottom: "2.5rem" }}
@@ -165,14 +169,15 @@ const MobileProductCard = ({
             className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 bg-white/20 border border-white/30 hover:bg-white/30"
             aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
             onClick={(e) => {
-              e.preventDefault(); // maintain e.preventDefault() for the button inside Link
-              handleToggleLedger(e);
+              e.preventDefault() // maintain e.preventDefault() for the button inside Link
+              handleToggleLedger(e)
             }}
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -191,7 +196,6 @@ const MobileProductCard = ({
               </h3>
             </Link>
           </div>
-
         </div>
 
         {/* Actions Row */}
@@ -359,8 +363,9 @@ const ProductCard = ({
             >
               <Heart
                 size={18}
-                className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                  }`}
+                className={`transition-colors duration-300 ${
+                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
               />
             </button>
           </div>
@@ -403,8 +408,9 @@ const ProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -623,7 +629,9 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
             >
               {isRecentlyAdded ? "Added to cart" : "Add to cart"}
             </span>
-            <span className="text-white text-base sm:text-sm drop-shadow-md">{isRecentlyAdded ? "✓" : "→"}</span>
+            <span className="text-white text-base sm:text-sm drop-shadow-md">
+              {isRecentlyAdded ? "✓" : "→"}
+            </span>
 
             {/* Animated underline */}
             <motion.span
@@ -638,7 +646,6 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
     </motion.div>
   )
 }
-
 
 const Candles = () => {
   const router = useRouter()
@@ -1072,12 +1079,10 @@ const Candles = () => {
         onCartUpdate={handleCartUpdate}
         forceWhiteText={true}
       />
-
       <PageBanner
         pageKey="candles"
         containerClassName="absolute top-[37%] md:top-1/2 left-2 md:left-[70px] md:-translate-y-1/2 max-w-xs md:max-w-md"
       />
-
       {/* Mobile Product Carousel Section - Mobile Only */}
       {!isLoadingCollection && candlesCollection.length > 0 && (
         <motion.div
@@ -1204,7 +1209,6 @@ const Candles = () => {
           </div>
         </motion.div>
       )}
-
       {/* mid section - product grid with PAB hover effects - Desktop Only */}
       {!isLoadingCollection && products.length > 0 && (
         <motion.div
@@ -1350,7 +1354,6 @@ const Candles = () => {
           </div>
         </motion.div>
       )}
-
       {/* Banner Carousel Section - Shows 3 products side by side */}
       {!isLoadingCollection && candlesCollection.length > 0 && (
         <motion.div
@@ -1453,32 +1456,32 @@ const Candles = () => {
                   {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
                   {isMobile
                     ? // Mobile: One product per slide
-                    candlesCollection.map((item, index) => (
-                      <CarouselItem key={index} className="banner-carousel-item">
-                        <BannerProductCard item={item} index={index} />
-                      </CarouselItem>
-                    ))
+                      candlesCollection.map((item, index) => (
+                        <CarouselItem key={index} className="banner-carousel-item">
+                          <BannerProductCard item={item} index={index} />
+                        </CarouselItem>
+                      ))
                     : // Desktop: Groups of 3 products
-                    bannerGroups.map((group, groupIndex) => (
-                      <CarouselItem key={groupIndex} className="banner-carousel-item">
-                        <div className="flex flex-row gap-0 w-full h-auto">
-                          {group.map((item, itemIndex) => {
-                            const globalIndex = groupIndex * 3 + itemIndex
-                            return (
-                              <div key={globalIndex} className="flex-1 w-1/3">
-                                <BannerProductCard item={item} index={globalIndex} />
-                              </div>
-                            )
-                          })}
+                      bannerGroups.map((group, groupIndex) => (
+                        <CarouselItem key={groupIndex} className="banner-carousel-item">
+                          <div className="flex flex-row gap-0 w-full h-auto">
+                            {group.map((item, itemIndex) => {
+                              const globalIndex = groupIndex * 3 + itemIndex
+                              return (
+                                <div key={globalIndex} className="flex-1 w-1/3">
+                                  <BannerProductCard item={item} index={globalIndex} />
+                                </div>
+                              )
+                            })}
 
-                          {/* Fill remaining slots if group has less than 3 items */}
-                          {group.length < 3 &&
-                            Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
-                              <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
-                            ))}
-                        </div>
-                      </CarouselItem>
-                    ))}
+                            {/* Fill remaining slots if group has less than 3 items */}
+                            {group.length < 3 &&
+                              Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                                <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                              ))}
+                          </div>
+                        </CarouselItem>
+                      ))}
                 </CarouselContent>
               </Carousel>
               {/* Banner Carousel Slider Bar Removed */}
@@ -1488,7 +1491,6 @@ const Candles = () => {
           </div>
         </motion.div>
       )}
-
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -1529,7 +1531,6 @@ const Candles = () => {
           </motion.button>
         </div>
       </motion.div>
-
       {/* Soft Orris Section */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -1601,7 +1602,6 @@ const Candles = () => {
           </motion.div>
         </div>
       </motion.div>
-
       {/* Let's Stay in Touch Section */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
@@ -1724,8 +1724,8 @@ const Candles = () => {
           </div>
         </div>
       </motion.div>
-
-      {/* Newsletter Section */}
+      <InstagramEmbed2 />
+      {/* Newsletter Section */};
       <section className="py-20 relative overflow-hidden" style={{ backgroundColor: "#e3e3d8" }}>
         <motion.div
           className="absolute inset-0 opacity-15"

@@ -125,10 +125,12 @@ export function PeopleAlsoBought({
   const [canScrollRight, setCanScrollRight] = useState(true)
   const [isDragging, setIsDragging] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
-  // Use a ref for hasInteracted to access instantaneous value in interval closure if needed, 
+  // Use a ref for hasInteracted to access instantaneous value in interval closure if needed,
   // though adding it to dependency array handles it. But let's add the ref for robustness in the animation loop check if we were to expand it.
   const hasInteractedRef = useRef(hasInteracted)
-  useEffect(() => { hasInteractedRef.current = hasInteracted }, [hasInteracted])
+  useEffect(() => {
+    hasInteractedRef.current = hasInteracted
+  }, [hasInteracted])
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const scrollBarRef = useRef<HTMLDivElement>(null)
@@ -184,19 +186,19 @@ export function PeopleAlsoBought({
       if (parsed && typeof parsed === "object") {
         const products: Card[] = Array.isArray(parsed.products)
           ? parsed.products.map(
-            (p: any, i: number): Card => ({
-              id: p?.id ?? i + 1,
-              name: String(p?.name ?? ""),
-              price: typeof p?.price === "number" ? p.price : undefined,
-              currency: typeof p?.currency === "string" ? p.currency : undefined,
-              image: typeof p?.image === "string" ? p.image : undefined,
-              hoverImage: typeof p?.hoverImage === "string" ? p.hoverImage : undefined,
-              description: typeof p?.description === "string" ? p.description : undefined,
-              badge: typeof p?.badge === "string" ? p.badge : undefined,
-              url: typeof p?.url === "string" ? p.url : undefined,
-              variantId: typeof p?.variantId === "string" ? p.variantId : undefined,
-            })
-          )
+              (p: any, i: number): Card => ({
+                id: p?.id ?? i + 1,
+                name: String(p?.name ?? ""),
+                price: typeof p?.price === "number" ? p.price : undefined,
+                currency: typeof p?.currency === "string" ? p.currency : undefined,
+                image: typeof p?.image === "string" ? p.image : undefined,
+                hoverImage: typeof p?.hoverImage === "string" ? p.hoverImage : undefined,
+                description: typeof p?.description === "string" ? p.description : undefined,
+                badge: typeof p?.badge === "string" ? p.badge : undefined,
+                url: typeof p?.url === "string" ? p.url : undefined,
+                variantId: typeof p?.variantId === "string" ? p.variantId : undefined,
+              })
+            )
           : defaults.products
 
         return {
@@ -228,7 +230,7 @@ export function PeopleAlsoBought({
 
   const { heading, subheading, bg, products: cards } = meta
 
-  // ------- SCROLL BAR / PROGRESS logic -------
+  // ------- SCROLL / DRAG logic (unchanged) -------
   const updateScrollProgress = () => {
     if (scrollContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
@@ -239,7 +241,6 @@ export function PeopleAlsoBought({
       setCanScrollRight(scrollLeft < maxScroll - 10)
     }
   }
-
   const scroll = (dir: "left" | "right") => {
     const sc = scrollContainerRef.current
     if (!sc) return
@@ -250,7 +251,6 @@ export function PeopleAlsoBought({
       dir === "left" ? Math.max(0, sc.scrollLeft - scrollAmount) : sc.scrollLeft + scrollAmount
     sc.scrollTo({ left: target, behavior: "smooth" })
   }
-
   const handleScrollBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!scrollBarRef.current || !scrollContainerRef.current) return
     const rect = scrollBarRef.current.getBoundingClientRect()
@@ -261,7 +261,6 @@ export function PeopleAlsoBought({
       behavior: "smooth",
     })
   }
-
   const handleScrollBarDrag = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isDragging || !scrollBarRef.current || !scrollContainerRef.current) return
     const rect = scrollBarRef.current.getBoundingClientRect()
@@ -275,7 +274,7 @@ export function PeopleAlsoBought({
     if (!sc) return
 
     const handleScroll = (e: Event) => {
-      // e.stopPropagation() // Optional, removed to allow bubbling if needed, but keeping separate logic
+      e.stopPropagation() // Prevent scroll event from bubbling up
       updateScrollProgress()
     }
 
@@ -286,7 +285,6 @@ export function PeopleAlsoBought({
       sc.removeEventListener("scroll", handleScroll)
     }
   }, [])
-
   useEffect(() => {
     const up = () => setIsDragging(false)
     const move = (e: MouseEvent) => handleScrollBarDrag(e as any)
@@ -300,7 +298,41 @@ export function PeopleAlsoBought({
     }
   }, [isDragging])
 
-  // Removed auto-scroll logic as requested (manual control desired)
+  // Auto-scroll effect for mobile view
+  useEffect(() => {
+    // Only run on mobile (using the existing width check logic concept)
+    const isMobile = window.innerWidth < 768
+
+    if (!isMobile || hasInteracted || !scrollContainerRef.current) return
+
+    // Don't auto-scroll while user is dragging/scrolling manually
+    if (isDragging) return
+
+    const autoScrollInterval = setInterval(() => {
+      if (!scrollContainerRef.current) return
+      // Check again inside interval to be safe
+      if (hasInteractedRef.current) {
+        clearInterval(autoScrollInterval)
+        return
+      }
+
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
+      const maxScroll = scrollWidth - clientWidth
+      const isAtEnd = scrollLeft >= maxScroll - 10 // buffer
+
+      if (isAtEnd) {
+        // Scroll back to start - do this somewhat quickly but smoothly
+        smoothScroll(scrollContainerRef.current, 0, 1000)
+      } else {
+        // Scroll next item (width of screen on mobile)
+        const scrollAmount = window.innerWidth
+        // Slower duration for "drag" feel (e.g. 1.2s)
+        smoothScroll(scrollContainerRef.current, scrollLeft + scrollAmount, 1200)
+      }
+    }, 4000) // 4 second interval
+
+    return () => clearInterval(autoScrollInterval)
+  }, [hasInteracted, isDragging]) // No need to depend on 'isMobile' state as it's checked inside, and simple resize handling is enough for this simple check
 
   const handleAddToCart = async (productCard: Card) => {
     // Check if product has variantId (if added to Contentful ProductCard)
@@ -438,18 +470,17 @@ export function PeopleAlsoBought({
     }
   }
 
-
   return (
     <section
-      className="pt-8 pb-8 lg:pt-12 lg:pb-12 relative"
+      className="pt-8 lg:pt-12 relative"
       style={{
         backgroundColor: bg,
-        overflow: "visible",
+        overflow: "visible", // Ensure section doesn't create scroll container
       }}
       onMouseDownCapture={() => setHasInteracted(true)}
       onTouchStartCapture={() => setHasInteracted(true)}
     >
-      {/* Mobile Heading (unchanged) */}
+      {/* Heading and Subheading - Centered on Mobile, Part of Scroll on Desktop */}
       <div className="lg:hidden px-4 md:px-8 text-center py-6">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -473,15 +504,25 @@ export function PeopleAlsoBought({
         )}
       </div>
 
-      <div className="flex flex-col lg:flex-row">
-        {/* Desktop Static Header Panel (Moved outside scroll container) */}
+      <div
+        ref={scrollContainerRef}
+        className="flex overflow-x-auto scrollbar-hide py-8 relative"
+        style={{
+          scrollSnapType: "x mandatory",
+          WebkitOverflowScrolling: "touch",
+          overscrollBehaviorX: "contain", // Prevent horizontal scroll chaining
+          overscrollBehaviorY: "auto", // Allow vertical scroll to pass through to page
+          overflowY: "hidden", // Explicitly prevent vertical scroll in this container
+        }}
+      >
+        {/* Left intro column - Hidden on Mobile, Visible on Desktop */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
           className="hidden lg:flex flex-shrink-0 w-2/5 flex-col px-8 lg:pl-20 lg:pr-16"
-          style={{ paddingTop: "60px" }}
+          style={{ scrollSnapAlign: "start", paddingTop: "60px" }}
         >
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -505,229 +546,214 @@ export function PeopleAlsoBought({
           )}
         </motion.div>
 
-        {/* Carousel Wrapper - handles positioning for arrows relative to just this section */}
-        <div className="relative flex-1 min-w-0 flex flex-col">
-          {/* Scrollable Product Container */}
-          <div
-            ref={scrollContainerRef}
-            className="flex overflow-x-auto scrollbar-hide py-8 relative"
+        {cards.map((product, index) => (
+          <motion.div
+            key={`product-${product.id ?? index}-${index}`}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: index * 0.08 }}
+            viewport={{ once: true }}
+            className="flex-shrink-0 group cursor-pointer relative w-full px-6 md:w-[280px] md:px-0 md:mr-8"
             style={{
-              scrollSnapType: "x mandatory",
-              WebkitOverflowScrolling: "touch",
-              overscrollBehaviorX: "contain",
-              overscrollBehaviorY: "auto",
-              overflowY: "hidden",
-              // Make sure this takes remaining width on desktop
-              flexGrow: 1,
-              width: "100%", // essential for mobile full width
+              scrollSnapAlign: "center",
             }}
+            onMouseEnter={() => setHoveredProduct(product.id ?? null)}
+            onMouseLeave={() => setHoveredProduct(null)}
           >
-            {cards.map((product, index) => (
-              <motion.div
-                key={`product-${product.id ?? index}-${index}`}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.08 }}
-                viewport={{ once: true }}
-                className="flex-shrink-0 group cursor-pointer relative w-full px-6 md:w-[280px] md:px-0 md:mr-8"
-                style={{
-                  scrollSnapAlign: "center",
-                }}
-                onMouseEnter={() => setHoveredProduct(product.id ?? null)}
-                onMouseLeave={() => setHoveredProduct(null)}
-              // Prevent click event when dragging logic (optional refinement but simplified here)
-              >
-                <div className="max-w-[340px] mx-auto md:max-w-none md:w-full">
-                  {/* Product Image */}
-                  <div
-                    className="relative mb-4 md:mb-6 overflow-hidden bg-white/20 rounded-sm"
-                    style={{ paddingBottom: "125%" }}
-                  >
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      className="absolute inset-0"
-                    >
-                      {/* Base Image */}
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover transition-opacity duration-300"
-                          style={{
-                            opacity: hoveredProduct === product.id ? 0 : 1,
-                            userSelect: "none",
-                            WebkitUserSelect: "none",
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-400 text-sm">No image</span>
-                        </div>
-                      )}
-
-                      {/* Hover Image */}
-                      {product.hoverImage && (
-                        <img
-                          src={product.hoverImage}
-                          alt={`${product.name} alternative view`}
-                          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
-                          style={{
-                            opacity: hoveredProduct === product.id ? 1 : 0,
-                            userSelect: "none",
-                            WebkitUserSelect: "none",
-                          }}
-                        />
-                      )}
-
-                      {/* Badge */}
-                      {product.badge && (
-                        <div className="absolute top-3 md:top-4 left-3 md:left-4">
-                          <span
-                            className="px-2 md:px-3 py-1 text-xs font-din-arabic tracking-wide font-medium"
-                            style={{
-                              backgroundColor: "rgba(255, 255, 255, 0.9)",
-                              color: "#000",
-                              borderRadius: "12px",
-                            }}
-                          >
-                            {product.badge}
-                          </span>
-                        </div>
-                      )}
-                    </motion.div>
-                  </div>
-
-                  {/* Product Details */}
-                  <div className="space-y-3">
-                    {/* Product Name and Price */}
-                    <div className="flex items-start justify-between gap-2">
-                      <h3
-                        className="font-american-typewriter text-black group-hover:text-black/80 transition-colors duration-200 flex-1 text-base md:text-lg"
-                        style={{ lineHeight: "1.3", letterSpacing: "0.05em" }}
-                      >
-                        {product.name}
-                      </h3>
-
-                      {product.price && (
-                        <span
-                          className="font-din-arabic text-black flex-shrink-0 group-hover:text-black/80 transition-colors duration-200 text-sm md:text-base"
-                          style={{ lineHeight: "1.3", letterSpacing: "0.1em" }}
-                        >
-                          {formatPrice(product.price, product.currency)}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Product Description */}
-                    <p
-                      className="font-din-arabic text-black/70 group-hover:text-black/60 transition-colors duration-200 text-xs md:text-sm"
-                      style={{ lineHeight: "1.4", letterSpacing: "0.1em" }}
-                    >
-                      {product.description}
-                    </p>
-
-                    {/* Quick Add Button */}
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleAddToCart(product)
-                      }}
-                      className="w-full mt-3 md:mt-4 px-3 md:px-4 py-2 bg-transparent border border-black/20 text-black hover:bg-black hover:text-white transition-all duration-300 font-din-arabic text-xs md:text-sm tracking-wide opacity-0 md:group-hover:opacity-100 text-center disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={(adding === product.id || isPending) && !product.variantId}
-                    >
-                      {adding === product.id || (isPending && addedToCart === product.id)
-                        ? "Adding..."
-                        : addedToCart === product.id
-                          ? "✓ Added"
-                          : "Quick Add"}
-                    </motion.button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Desktop Arrows - Positioned relative to this wrapper */}
-          {canScrollLeft && (
-            <div
-              className="hidden md:block absolute left-4 lg:left-0 z-20"
-              style={{ top: "calc(50% - 40px)", transform: "translateY(-50%)" }}
-            >
-              <motion.button
-                whileHover={{ scale: 1.05, x: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => scroll("left")}
-                className="group relative w-12 h-12 lg:w-14 lg:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden"
-                aria-label="Scroll left"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ChevronLeft className="w-6 h-6 text-black/70 group-hover:text-black transition-all duration-300" />
-                </div>
-                <div className="absolute inset-0 rounded-full ring-1 ring-black/5 group-hover:ring-black/15 transition-all duration-300" />
-              </motion.button>
-            </div>
-          )}
-          {canScrollRight && (
-            <div
-              className="hidden md:block absolute right-4 lg:right-6 z-20"
-              style={{ top: "calc(50% - 40px)", transform: "translateY(-50%)" }}
-            >
-              <motion.button
-                whileHover={{ scale: 1.05, x: 2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => scroll("right")}
-                className="group relative w-12 h-12 lg:w-14 lg:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden"
-                aria-label="Scroll right"
-              >
-                <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ChevronRight className="w-6 h-6 text-black/70 group-hover:text-black transition-all duration-300" />
-                </div>
-                <div className="absolute inset-0 rounded-full ring-1 ring-black/5 group-hover:ring-black/15 transition-all duration-300" />
-              </motion.button>
-            </div>
-          )}
-
-          {/* Restored Scroll Bar - Positioned at bottom of right col */}
-          <div
-            className="px-4 md:px-0 lg:pr-12 relative w-full"
-            style={{ paddingTop: "0px", paddingBottom: "20px" }}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
-              className="w-full space-y-3"
-            >
+            <div className="max-w-[340px] mx-auto md:max-w-none md:w-full">
+              {/* Product Image */}
               <div
-                ref={scrollBarRef}
-                className="relative w-full md:w-full lg:w-full h-0.5 bg-black/10 rounded-full overflow-hidden cursor-pointer group select-none"
-                onClick={handleScrollBarClick}
-                onMouseMove={handleScrollBarDrag}
-                onMouseDown={(e) => e.preventDefault()}
+                className="relative mb-4 md:mb-6 overflow-hidden bg-white/20 rounded-sm"
+                style={{ paddingBottom: "125%" }}
               >
                 <motion.div
-                  className="h-full rounded-full cursor-grab active:cursor-grabbing transition-all duration-200 group-hover:h-1 select-none absolute"
-                  style={{
-                    background: "#a28b6f",
-                    width: "20%",
-                    left: `${scrollProgress * 0.8}%`,
-                  }}
-                  onMouseDown={(e) => {
-                    e.preventDefault()
-                    setIsDragging(true)
-                  }}
-                  transition={{ duration: 0.1, ease: "easeOut" }}
-                />
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="absolute inset-0"
+                >
+                  {/* Base Image */}
+                  {product.image ? (
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover transition-opacity duration-300"
+                      style={{
+                        opacity: hoveredProduct === product.id ? 0 : 1,
+                        userSelect: "none", // Prevent text selection
+                        WebkitUserSelect: "none",
+                      }}
+                      draggable={false} // Prevent image dragging
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400 text-sm">No image</span>
+                    </div>
+                  )}
+
+                  {/* Hover Image */}
+                  {product.hoverImage && (
+                    <img
+                      src={product.hoverImage}
+                      alt={`${product.name} alternative view`}
+                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                      style={{
+                        opacity: hoveredProduct === product.id ? 1 : 0,
+                        userSelect: "none",
+                        WebkitUserSelect: "none",
+                      }}
+                      draggable={false} // Prevent image dragging
+                    />
+                  )}
+
+                  {/* Badge */}
+                  {product.badge && (
+                    <div className="absolute top-3 md:top-4 left-3 md:left-4">
+                      <span
+                        className="px-2 md:px-3 py-1 text-xs font-din-arabic tracking-wide font-medium"
+                        style={{
+                          backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          color: "#000",
+                          borderRadius: "12px",
+                        }}
+                      >
+                        {product.badge}
+                      </span>
+                    </div>
+                  )}
+                </motion.div>
               </div>
-            </motion.div>
-          </div>
+
+              {/* Product Details */}
+              <div className="space-y-3">
+                {/* Product Name and Price */}
+                <div className="flex items-start justify-between gap-2">
+                  <h3
+                    className="font-american-typewriter text-black group-hover:text-black/80 transition-colors duration-200 flex-1 text-base md:text-lg"
+                    style={{ lineHeight: "1.3", letterSpacing: "0.05em" }}
+                  >
+                    {product.name}
+                  </h3>
+
+                  {product.price && (
+                    <span
+                      className="font-din-arabic text-black flex-shrink-0 group-hover:text-black/80 transition-colors duration-200 text-sm md:text-base"
+                      style={{ lineHeight: "1.3", letterSpacing: "0.1em" }}
+                    >
+                      {formatPrice(product.price, product.currency)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Product Description */}
+                <p
+                  className="font-din-arabic text-black/70 group-hover:text-black/60 transition-colors duration-200 text-xs md:text-sm"
+                  style={{ lineHeight: "1.4", letterSpacing: "0.1em" }}
+                >
+                  {product.description}
+                </p>
+
+                {/* Quick Add Button */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleAddToCart(product)
+                  }}
+                  className="w-full mt-3 md:mt-4 px-3 md:px-4 py-2 bg-transparent border border-black/20 text-black hover:bg-black hover:text-white transition-all duration-300 font-din-arabic text-xs md:text-sm tracking-wide opacity-0 md:group-hover:opacity-100 text-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={(adding === product.id || isPending) && !product.variantId}
+                >
+                  {adding === product.id || (isPending && addedToCart === product.id)
+                    ? "Adding..."
+                    : addedToCart === product.id
+                      ? "✓ Added"
+                      : "Quick Add"}
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Arrows - Always Visible on Mobile, Conditional on Desktop */}
+      {/* Arrows - Removed on Mobile per request */}
+
+      {/* Desktop Arrows */}
+      {canScrollLeft && (
+        <div
+          className="hidden md:block absolute left-4 lg:left-6 z-20"
+          style={{ top: "calc(50% - 40px)", transform: "translateY(-50%)" }}
+        >
+          <motion.button
+            whileHover={{ scale: 1.05, x: -2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => scroll("left")}
+            className="group relative w-12 h-12 lg:w-14 lg:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden"
+            aria-label="Scroll left"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <ChevronLeft className="w-6 h-6 text-black/70 group-hover:text-black transition-all duration-300" />
+            </div>
+            <div className="absolute inset-0 rounded-full ring-1 ring-black/5 group-hover:ring-black/15 transition-all duration-300" />
+          </motion.button>
         </div>
+      )}
+      {canScrollRight && (
+        <div
+          className="hidden md:block absolute right-4 lg:right-6 z-20"
+          style={{ top: "calc(50% - 40px)", transform: "translateY(-50%)" }}
+        >
+          <motion.button
+            whileHover={{ scale: 1.05, x: 2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => scroll("right")}
+            className="group relative w-12 h-12 lg:w-14 lg:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-black/5 hover:bg-black/10 border border-black/10 hover:border-black/20 shadow-2xl hover:shadow-3xl overflow-hidden"
+            aria-label="Scroll right"
+          >
+            <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <ChevronRight className="w-6 h-6 text-black/70 group-hover:text-black transition-all duration-300" />
+            </div>
+            <div className="absolute inset-0 rounded-full ring-1 ring-black/5 group-hover:ring-black/15 transition-all duration-300" />
+          </motion.button>
+        </div>
+      )}
+
+      {/* Scroll bar */}
+      <div
+        className="px-4 md:px-6 lg:px-12 relative"
+        style={{ paddingTop: "24px", paddingBottom: "20px" }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true }}
+          className="w-full space-y-3"
+        >
+          <div
+            ref={scrollBarRef}
+            className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full overflow-hidden cursor-pointer group select-none mx-auto"
+            onClick={handleScrollBarClick}
+            onMouseMove={handleScrollBarDrag}
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            <motion.div
+              className="h-full rounded-full cursor-grab active:cursor-grabbing transition-all duration-200 group-hover:h-1 select-none absolute"
+              style={{
+                background: "#a28b6f",
+                width: "20%",
+                left: `${scrollProgress * 0.8}%`,
+              }}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                setIsDragging(true)
+              }}
+              transition={{ duration: 0.1, ease: "easeOut" }}
+            />
+          </div>
+        </motion.div>
       </div>
     </section>
   )
