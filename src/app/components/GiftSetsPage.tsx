@@ -5,6 +5,8 @@ import { ChevronDown, ChevronRight, Star } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import React, { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { getAllGiftSets } from "@lib/data/contentful"
+import type { GiftSet } from "../../types/contentful"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 // Placeholder images - replace with actual images when available
@@ -60,268 +62,29 @@ interface GiftSetsPageProps {
   onAddToCart: (item: any) => void
 }
 
-const candleOptions = [
-  { id: "candle-1", name: "Saffron Jasmine Amberwood", size: "250g" },
-
-  { id: "candle-2", name: "Oud Waters", size: "250g" },
-
-  { id: "candle-3", name: "Cedarwood Rose", size: "300g" },
-
-  { id: "candle-4", name: "Santal Pepper", size: "300g" },
-]
-
-const products: Product[] = [
-  {
-    id: "gift-set-discovery",
-
-    name: "Discovery Set",
-
-    category: "discovery",
-
-    price: 5200,
-
-    size: "Hand Care + Candle",
-
-    description:
-      "A complete hand care ritual featuring cleansing and nourishing botanical formulations with your choice of signature candle",
-
-    image:
-      "https://images.unsplash.com/photo-1603561128891-a78e0f61a52b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBnaWZ0JTIwc2V0JTIwY2FuZGxlcyUyMGJvdGFuaWNhbHxlbnwxfHx8fDE3NjI4NDYyMzl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-    images: [
-      "https://images.unsplash.com/photo-1603561128891-a78e0f61a52b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBnaWZ0JTIwc2V0JTIwY2FuZGxlcyUyMGJvdGFuaWNhbHxlbnwxfHx8fDE3NjI4NDYyMzl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-      "https://images.unsplash.com/photo-1706884597675-c79067fec450?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBnaWZ0JTIwc2V0JTIwY2FuZGxlcyUyMGJvdGFuaWNhbHxlbnwxfHx8fDE3NjI4NDYyMzl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-      "https://images.unsplash.com/photo-1713100585019-16f2132c7828?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBkaXNjb3ZlcnklMjBzZXQlMjBib3R0bGVzfGVufDF8fHx8MTc2MzM3MDEyNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    ],
-
-    hoverImage:
-      "https://images.unsplash.com/photo-1580680849668-45d32df32e67?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYW5kbGUlMjBnaWZ0JTIwc2V0JTIwbHV4dXJ5JTIwcGFja2FnaW5nfGVufDF8fHx8MTc2Mjg4MTI3MHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-    botanical: "Discovery Collection",
-
-    property: "Curated & Personal",
-
-    featured: true,
-
-    savings: 700,
-
-    priceRange: "premium",
-
-    bestFor: "Thoughtful gifting",
-
-    layout: "large",
-
-    hasCandles: true,
-
-    items: [
-      "Black Tea Hand Wash (250ml)",
-
-      "Soft Orris Hand Lotion (500ml)",
-
-      "One signature candle of your choice",
-    ],
-  },
-
-  {
-    id: "gift-set-hand-care-ritual",
-
-    name: "Silk Wrap",
-
-    category: "silk-wrap",
-
-    price: 5200,
-
-    size: "Luxurious Silk Scarf",
-
-    description:
-      "An artisan silk scarf handcrafted to elegantly wrap your gift, transforming presentation into an unforgettable experience",
-
-    image:
-      "https://images.unsplash.com/photo-1759563874745-47e35c0a9572?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnaWZ0JTIwYm94JTIwaGFuZCUyMGNhcmUlMjBsdXh1cnl8ZW58MXx8fHwxNzYyODQ2MjM5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-    images: [
-      "https://images.unsplash.com/photo-1759563874745-47e35c0a9572?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnaWZ0JTIwYm94JTIwaGFuZCUyMGNhcmUlMjBsdXh1cnl8ZW58MXx8fHwxNzYyODQ2MjM5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-      "https://images.unsplash.com/photo-1591176134674-87e8f7c73ce9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzaWxrJTIwc2NhcmYlMjBsdXh1cnklMjB3cmFwcGluZ3xlbnwxfHx8fDE3NjMzNzAxMjZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-      "https://images.unsplash.com/photo-1652385748879-cd7a0cdf466c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxKYXBhbmVzZSUyMGZ1cm9zaGlraSUyMHNpbGslMjB3cmFwfGVufDF8fHx8MTc2MzM3MDEyNnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    ],
-
-    hoverImage:
-      "https://images.unsplash.com/photo-1761479258387-9542d09a5f47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnaWZ0JTIwYm94JTIwYm90YW5pY2FsJTIwbWluaW1hbGlzdHxlbnwxfHx8fDE3NjI4ODEyNzB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-    botanical: "Japanese Silk Tradition",
-
-    property: "Elegant & Artisanal",
-
-    savings: 300,
-
-    priceRange: "mid",
-
-    bestFor: "Memorable gifting",
-
-    items: [
-      "Limited-edition Jardin Botanica silk scarf",
-
-      "Traditional furoshiki wrapping technique",
-
-      "Botanical-inspired patterns",
-
-      "Our silk scarf can wrap most items from your order. If an item is too large, we'll present the scarf-wrapped gift alongside the remaining pieces inside your Jardin Botanica box.",
-    ],
-  },
-
-  {
-    id: "gift-set-travel-essentials",
-
-    name: "Botanical Traveler Set",
-
-    category: "travel",
-
-    price: 3800,
-
-    size: "Five 50ml Bottles",
-
-    description:
-      "Essential botanical formulations for the mindful traveler, perfectly sized for journeys near and far",
-
-    image:
-      "https://images.unsplash.com/photo-1753071921478-6c160645579f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBnaWZ0JTIwdHJhdmVsJTIwc2V0fGVufDF8fHx8MTc2MzIyNzIwNnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-    hoverImage:
-      "https://images.unsplash.com/photo-1566977806197-b52b166f231f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBza2luY2FyZSUyMGdpZnQlMjBzZXR8ZW58MXx8fHwxNzYzMTYzODM1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-    botanical: "Nomadic Botanicals",
-
-    property: "Travel-Ready & Essential",
-
-    priceRange: "accessible",
-
-    bestFor: "Frequent travelers",
-
-    items: [
-      "Geranium Body Cleanser (50ml)",
-
-      "Resurrection Hand Balm (50ml)",
-
-      "Facial Hydrating Cream (50ml)",
-
-      "Protective Body Lotion (50ml)",
-
-      "Herbal Hair Treatment (50ml)",
-    ],
-  },
-
-  {
-    id: "gift-set-botanical-discovery",
-
-    name: "Botanical Discovery Collection",
-
-    category: "seasonal",
-
-    price: 6500,
-
-    size: "Eight 30ml Bottles",
-
-    description:
-      "An exploratory journey through our most celebrated botanical formulations, ideal for the curious mind",
-
-    image:
-      "https://images.unsplash.com/photo-1760373071711-960143464e34?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBnaWZ0JTIwYm90YW5pY2FsJTIwZmVzdGl2ZXxlbnwxfHx8fDE3NjMyMjcyMDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-    botanical: "Botanical Anthology",
-
-    property: "Explorative & Diverse",
-
-    featured: true,
-
-    priceRange: "mid",
-
-    bestFor: "The curious explorer",
-
-    layout: "large",
-
-    items: [
-      "Discovery fragrance collection (8 x 30ml)",
-
-      "Botanical identification cards",
-
-      "Aromatic journey guide",
-    ],
-  },
-
-  {
-    id: "gift-set-festive-duo",
-
-    name: "Festive Duo Collection",
-
-    category: "seasonal",
-
-    price: 4200,
-
-    size: "Two 300g Candles",
-
-    description:
-      "A seasonal pairing of warming spice and winter botanicals, celebrating the spirit of togetherness",
-
-    image:
-      "https://images.unsplash.com/photo-1603561128891-a78e0f61a52b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBnaWZ0JTIwc2V0JTIwY2FuZGxlcyUyMGJvdGFuaWNhbHxlbnwxfHx8fDE3NjI4NDYyMzl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-    botanical: "Winter Anthology",
-
-    property: "Warming & Festive",
-
-    savings: 400,
-
-    priceRange: "mid",
-
-    bestFor: "Festive gatherings",
-
-    items: [
-      "Cinnamon Cedar Candle (300g)",
-
-      "Frankincense Myrrh Candle (300g)",
-    ],
-  },
-
-  {
-    id: "gift-set-luxury-skincare",
-
-    name: "Luxury Skin Ritual Set",
-
-    category: "skincare",
-
-    price: 8900,
-
-    size: "Four Full-Size Products",
-
-    description:
-      "A comprehensive skincare ritual featuring our most revered botanical formulations for radiant skin",
-
-    image:
-      "https://images.unsplash.com/photo-1566977806197-b52b166f231f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBza2luY2FyZSUyMGdpZnQlMjBzZXR8ZW58MXx8fHwxNzYzMTYzODM1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-
-    botanical: "Complexion Botanicals",
-
-    property: "Nourishing & Transformative",
-
-    priceRange: "premium",
-
-    bestFor: "Skincare aficionados",
-
-    items: [
-      "Parsley Seed Facial Cleanser (200ml)",
-
-      "B & Tea Balancing Toner (200ml)",
-
-      "Damascan Rose Treatment (60ml)",
-
-      "Vitamin C Facial Serum (50ml)",
-    ],
-  },
-]
+// Product interface extended for UI display
+interface Product {
+  id: string
+  name: string
+  category: string
+  price: number
+  size: string
+  description: string
+  image: string
+  images?: string[]
+  hoverImage?: string
+  botanical: string
+  property: string
+  items?: string[]
+  savings?: number
+  featured?: boolean
+  priceRange?: string
+  bestFor?: string
+  layout?: "large" | "standard"
+  hasCandles?: boolean
+  // Dynamic candle options from Contentful
+  candleOptions?: { name: string; size: string }[]
+}
 
 export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: GiftSetsPageProps) {
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
@@ -344,9 +107,52 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
     [key: string]: number
   }>({})
 
+  // Dynamic state for products from Contentful
+  const [products, setProducts] = useState<Product[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch gift sets from Contentful
+  useEffect(() => {
+    const fetchGiftSets = async () => {
+      setIsLoading(true)
+      try {
+        const giftSets = await getAllGiftSets()
+        const mapped: Product[] = giftSets.map((gs) => ({
+          id: gs.handle,
+          name: gs.title,
+          description: gs.description,
+          category: gs.category,
+          price: gs.price,
+          image: gs.coverImage,
+          images: gs.images.length > 0 ? gs.images : undefined,
+          hoverImage: gs.hoverImage || undefined,
+          featured: gs.featured,
+          items: gs.productSetsIncluded,
+          // Derived fields
+          hasCandles: gs.questions.length > 0,
+          layout: gs.featured ? "large" as const : "standard" as const,
+          // Dynamic candle options from questions
+          candleOptions: gs.questions[0]?.options || [],
+          // Default empty values for fields not in Contentful
+          size: "",
+          botanical: "",
+          property: "",
+        }))
+        setProducts(mapped)
+      } catch (error) {
+        console.error("Error fetching gift sets:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchGiftSets()
+  }, [])
+
   // Auto-scroll images on mobile every 2 seconds
 
   useEffect(() => {
+    if (products.length === 0) return
+
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => {
         const newIndex: { [key: string]: number } = {}
@@ -374,7 +180,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
     }, 1000) // Check every second for smoother transitions
 
     return () => clearInterval(interval)
-  }, [])
+  }, [products])
 
   const isInLedger = (productId: string) => {
     return ledger.some((item) => item.id === productId)
@@ -450,6 +256,20 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
   const filteredProducts =
     selectedCategory === "all" ? products : products.filter((p) => p.category === selectedCategory)
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#e3e3d8" }}>
+        <div className="text-center">
+          <div className="w-12 h-12 border-2 border-black/20 border-t-black rounded-full animate-spin mx-auto mb-4" />
+          <p className="font-din-arabic text-black/60 text-sm" style={{ letterSpacing: "0.1em" }}>
+            Loading gift sets...
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#e3e3d8" }}>
@@ -759,7 +579,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
                 <span
                   className={`font-din-arabic text-black text-xs sm:text-sm whitespace-nowrap transition-all duration-300 ${filteredProducts.length === 1 && !expandedItems[product.id]
-                    ? "lg:-rotate-90 lg:text-base lg:tracking-[0.3em] lg:flex-1 lg:flex lg:items-center lg:justify-center"
+                    ? "lg:-rotate-90 lg:text-base lg:tracking-[0.3em] lg:flex lg:items-center lg:mb-24"
                     : ""
                     }`}
                   style={{ letterSpacing: filteredProducts.length === 1 && !expandedItems[product.id] ? "0.3em" : "0.2em" }}
@@ -812,7 +632,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
                       {/* Candle Selection */}
 
-                      {product.hasCandles && (
+                      {product.hasCandles && product.candleOptions && product.candleOptions.length > 0 && (
                         <div className="space-y-3 pt-4 border-t border-black/10">
                           <p
                             className="font-din-arabic text-black/70 text-[10px] sm:text-xs"
@@ -822,10 +642,10 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                           </p>
 
                           <div className="space-y-2">
-                            {candleOptions.map((candle) => (
+                            {product.candleOptions.map((candle, idx) => (
                               <label
-                                key={candle.id}
-                                className={`flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded cursor-pointer transition-all duration-200 ${selectedCandles[product.id] === candle.id
+                                key={`${product.id}-candle-${idx}`}
+                                className={`flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded cursor-pointer transition-all duration-200 ${selectedCandles[product.id] === candle.name
                                   ? "border border-[#e58a4d]"
                                   : "border border-transparent"
                                   }`}
@@ -833,9 +653,9 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                                 <input
                                   type="radio"
                                   name={`candle-${product.id}`}
-                                  value={candle.id}
-                                  checked={selectedCandles[product.id] === candle.id}
-                                  onChange={() => handleCandleSelect(product.id, candle.id)}
+                                  value={candle.name}
+                                  checked={selectedCandles[product.id] === candle.name}
+                                  onChange={() => handleCandleSelect(product.id, candle.name)}
                                   className="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-[#e58a4d]"
                                 />
 

@@ -11,7 +11,7 @@ export interface CartItem {
   image?: string
   product_id?: string
   variant_id?: string
-  metadata?: object
+  metadata?: Record<string, unknown> | null
 }
 
 interface CartItemsContextValue {

@@ -7,7 +7,7 @@ export function DesignPhilosophy() {
   const [isPressed, setIsPressed] = useState(false)
 
   return (
-    <section className="py-12 lg:py-16" style={{ backgroundColor: "#edede2" }}>
+    <section className="pt-12 lg:pt-16 pb-0" style={{ backgroundColor: "#edede2" }}>
       <div className="w-full md:container md:mx-auto px-0 md:px-8 lg:px-16">
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Heading Section - First on mobile */}

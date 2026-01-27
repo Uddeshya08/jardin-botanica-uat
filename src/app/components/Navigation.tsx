@@ -14,6 +14,7 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { SearchMegaMenu } from "./SearchMegaMenu"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
+import { getNavigation } from "@lib/data/contentful"
 
 interface DropdownItem {
   label: string
@@ -79,7 +80,27 @@ export function Navigation({
   // --- Mega menu state & refs ---
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Fetch navigation from Contentful
+  useEffect(() => {
+    const fetchNav = async () => {
+      const navItems = await getNavigation()
+      if (navItems.length > 0) {
+        setMenuItems(navItems.map(item => ({
+          name: item.name,
+          href: item.href,
+          dropdown: item.dropdown?.map(d => ({
+            label: d.label,
+            href: d.href,
+            image: d.image,
+          })),
+        })))
+      }
+    }
+    fetchNav()
+  }, [])
 
   // Handle component mounting and home page detection
   useEffect(() => {
@@ -373,60 +394,7 @@ export function Navigation({
     setHoveredItem(label)
   }
 
-  // --- Menu items with dropdown structure ---
-  const menuItems: MenuItem[] = [
-    {
-      name: "BODY & HANDS",
-      href: "/body-hands",
-      dropdown: [
-        {
-          label: "All Products",
-          href: "/body-hands",
-          image:
-            "https://images.unsplash.com/photo-1743597979473-5b1c0cae1bce?auto=format&fit=crop&w=1080&q=80",
-        },
-        {
-          label: "Cleansers & Exfoliants",
-          href: "/products/tea-exfoliant-rinse",
-          image:
-            "https://images.unsplash.com/photo-1743597979473-5b1c0cae1bce?auto=format&fit=crop&w=1080&q=80",
-        },
-        {
-          label: "Lotions & Moisturizers",
-          href: "/products/soft-orris",
-          image:
-            "https://images.unsplash.com/photo-1660675558428-5a7a1b8546f4?auto=format&fit=crop&w=1080&q=80",
-        },
-      ],
-    },
-    {
-      name: "HOME CREATIONS",
-      href: "/home-creations",
-      dropdown: [
-        {
-          label: "All Products",
-          href: "/home-creations",
-          image:
-            "https://images.unsplash.com/photo-1648310379950-2773bb5d2525?auto=format&fit=crop&w=1080&q=80",
-        },
-        {
-          label: "Candles",
-          href: "/candles",
-          image:
-            "https://images.unsplash.com/photo-1648310379950-2773bb5d2525?auto=format&fit=crop&w=1080&q=80",
-        },
-        /* {
-          label: "Lava Rock Diffusers",
-          href: "/products/diffusers",
-          image:
-            "https://images.unsplash.com/photo-1747198919508-a7657e63d4f9?auto=format&fit=crop&w=1080&q=80",
-        }, */
-      ],
-    },
-    { name: "JOURNAL", href: "/blogs" },
-    { name: "BOTANIST'S LAB", href: "/the-lab" },
-    // { name: 'PRODUCTS', href: '/store' },
-  ]
+  // Menu items are now fetched from Contentful via useEffect above
 
   // Determine navigation background and text styling
   const getNavStyles = () => {
@@ -935,9 +903,9 @@ export function Navigation({
                   style={{ color: navStyles.textColor }}
                   aria-label="Profile"
                 >
-                  <a href="/account">
+                  <Link href="/account">
                     <User className="w-5 h-5" />
-                  </a>
+                  </Link>
                 </motion.button>
 
                 <div className="relative" ref={cartRef}>

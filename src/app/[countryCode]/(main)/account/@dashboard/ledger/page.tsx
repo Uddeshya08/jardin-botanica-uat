@@ -651,7 +651,8 @@ export default function LedgerPage() {
                           <button
                             onClick={() => handleAddToCartClick(item)}
                             disabled={addingItems.has(item.id) || isPending}
-                            className="font-din-arabic text-xs text-black/60 hover:!text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{ cursor: "pointer" }}
+                            className="font-din-arabic text-xs text-black/60 hover:!text-black transition-colors disabled:opacity-50"
                           >
                             {addingItems.has(item.id) ? "[Adding...]" : "[Add to Cart]"}
                           </button>
@@ -671,7 +672,8 @@ export default function LedgerPage() {
                       <button
                         onClick={() => handleAddToCartClick(item)}
                         disabled={addingItems.has(item.id) || isPending}
-                        className="font-din-arabic text-sm text-black/60 hover:!text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ cursor: "pointer" }}
+                        className="font-din-arabic text-sm text-black/60 hover:!text-black transition-colors disabled:opacity-50"
                       >
                         {addingItems.has(item.id) ? "[Adding...]" : "[Add to Cart]"}
                       </button>

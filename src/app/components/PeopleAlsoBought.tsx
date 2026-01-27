@@ -125,10 +125,12 @@ export function PeopleAlsoBought({
   const [canScrollRight, setCanScrollRight] = useState(true)
   const [isDragging, setIsDragging] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
-  // Use a ref for hasInteracted to access instantaneous value in interval closure if needed, 
+  // Use a ref for hasInteracted to access instantaneous value in interval closure if needed,
   // though adding it to dependency array handles it. But let's add the ref for robustness in the animation loop check if we were to expand it.
   const hasInteractedRef = useRef(hasInteracted)
-  useEffect(() => { hasInteractedRef.current = hasInteracted }, [hasInteracted])
+  useEffect(() => {
+    hasInteractedRef.current = hasInteracted
+  }, [hasInteracted])
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const scrollBarRef = useRef<HTMLDivElement>(null)
@@ -184,19 +186,19 @@ export function PeopleAlsoBought({
       if (parsed && typeof parsed === "object") {
         const products: Card[] = Array.isArray(parsed.products)
           ? parsed.products.map(
-            (p: any, i: number): Card => ({
-              id: p?.id ?? i + 1,
-              name: String(p?.name ?? ""),
-              price: typeof p?.price === "number" ? p.price : undefined,
-              currency: typeof p?.currency === "string" ? p.currency : undefined,
-              image: typeof p?.image === "string" ? p.image : undefined,
-              hoverImage: typeof p?.hoverImage === "string" ? p.hoverImage : undefined,
-              description: typeof p?.description === "string" ? p.description : undefined,
-              badge: typeof p?.badge === "string" ? p.badge : undefined,
-              url: typeof p?.url === "string" ? p.url : undefined,
-              variantId: typeof p?.variantId === "string" ? p.variantId : undefined,
-            })
-          )
+              (p: any, i: number): Card => ({
+                id: p?.id ?? i + 1,
+                name: String(p?.name ?? ""),
+                price: typeof p?.price === "number" ? p.price : undefined,
+                currency: typeof p?.currency === "string" ? p.currency : undefined,
+                image: typeof p?.image === "string" ? p.image : undefined,
+                hoverImage: typeof p?.hoverImage === "string" ? p.hoverImage : undefined,
+                description: typeof p?.description === "string" ? p.description : undefined,
+                badge: typeof p?.badge === "string" ? p.badge : undefined,
+                url: typeof p?.url === "string" ? p.url : undefined,
+                variantId: typeof p?.variantId === "string" ? p.variantId : undefined,
+              })
+            )
           : defaults.products
 
         return {

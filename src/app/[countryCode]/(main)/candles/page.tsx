@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import type { CandlesCollectionItem } from "../../../../types/contentful"
+import InstagramEmbed2 from "./test"
 
 interface CartItem {
   id: string
@@ -130,7 +131,10 @@ const MobileProductCard = ({
       }}
     >
       {/* Product Image */}
-      <Link href={item.url && item.url.startsWith("/") ? item.url : `/${item.url || "#"}`} className="block">
+      <Link
+        href={item.url && item.url.startsWith("/") ? item.url : `/${item.url || "#"}`}
+        className="block"
+      >
         <div
           className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] sm:aspect-[3/4]"
           style={{ marginBottom: "2.5rem" }}
@@ -165,14 +169,15 @@ const MobileProductCard = ({
             className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 bg-white/20 border border-white/30 hover:bg-white/30"
             aria-label={`${isItemInLedger ? "Remove from" : "Add to"} ledger`}
             onClick={(e) => {
-              e.preventDefault(); // maintain e.preventDefault() for the button inside Link
-              handleToggleLedger(e);
+              e.preventDefault() // maintain e.preventDefault() for the button inside Link
+              handleToggleLedger(e)
             }}
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -181,17 +186,16 @@ const MobileProductCard = ({
       {/* Product Info */}
       <div className="flex flex-col flex-grow min-h-0 md:justify-between">
         <div>
-          <div className="flex justify-start items-center py-1 md:py-2">
+          <div className="flex justify-center items-center py-1 md:py-2">
             <Link href={item.url && item.url.startsWith("/") ? item.url : `/${item.url || "#"}`}>
               <h3
-                className="font-american-typewriter text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity"
+                className="font-american-typewriter text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity text-center"
                 style={{ letterSpacing: "0.05em" }}
               >
                 {item.label}
               </h3>
             </Link>
           </div>
-
         </div>
 
         {/* Actions Row */}
@@ -359,8 +363,9 @@ const ProductCard = ({
             >
               <Heart
                 size={18}
-                className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                  }`}
+                className={`transition-colors duration-300 ${
+                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
               />
             </button>
           </div>
@@ -403,8 +408,9 @@ const ProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -414,9 +420,9 @@ const ProductCard = ({
       <div className="flex flex-col flex-grow">
         {url ? (
           <Link href={url.startsWith("/") ? url : `/${url}`}>
-            <div>
+            <div className="text-center">
               <h3
-                className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer"
+                className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer text-center"
                 style={{ letterSpacing: "0.05em" }}
               >
                 {label && label.trim() ? label : "Product Name"}
@@ -424,9 +430,9 @@ const ProductCard = ({
             </div>
           </Link>
         ) : (
-          <div>
+          <div className="text-center">
             <h3
-              className="font-american-typewriter text-xl mb-1"
+              className="font-american-typewriter text-xl mb-1 text-center"
               style={{ letterSpacing: "0.05em" }}
             >
               {label && label.trim() ? label : "Product Name"}
@@ -623,7 +629,9 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
             >
               {isRecentlyAdded ? "Added to cart" : "Add to cart"}
             </span>
-            <span className="text-white text-base sm:text-sm drop-shadow-md">{isRecentlyAdded ? "✓" : "→"}</span>
+            <span className="text-white text-base sm:text-sm drop-shadow-md">
+              {isRecentlyAdded ? "✓" : "→"}
+            </span>
 
             {/* Animated underline */}
             <motion.span
@@ -638,7 +646,6 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
     </motion.div>
   )
 }
-
 
 const Candles = () => {
   const router = useRouter()
@@ -1072,12 +1079,10 @@ const Candles = () => {
         onCartUpdate={handleCartUpdate}
         forceWhiteText={true}
       />
-
       <PageBanner
         pageKey="candles"
         containerClassName="absolute top-[37%] md:top-1/2 left-2 md:left-[70px] md:-translate-y-1/2 max-w-xs md:max-w-md"
       />
-
       {/* Mobile Product Carousel Section - Mobile Only */}
       {!isLoadingCollection && candlesCollection.length > 0 && (
         <motion.div
@@ -1204,7 +1209,6 @@ const Candles = () => {
           </div>
         </motion.div>
       )}
-
       {/* mid section - product grid with PAB hover effects - Desktop Only */}
       {!isLoadingCollection && products.length > 0 && (
         <motion.div
@@ -1350,7 +1354,6 @@ const Candles = () => {
           </div>
         </motion.div>
       )}
-
       {/* Banner Carousel Section - Shows 3 products side by side */}
       {!isLoadingCollection && candlesCollection.length > 0 && (
         <motion.div
@@ -1453,32 +1456,32 @@ const Candles = () => {
                   {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
                   {isMobile
                     ? // Mobile: One product per slide
-                    candlesCollection.map((item, index) => (
-                      <CarouselItem key={index} className="banner-carousel-item">
-                        <BannerProductCard item={item} index={index} />
-                      </CarouselItem>
-                    ))
+                      candlesCollection.map((item, index) => (
+                        <CarouselItem key={index} className="banner-carousel-item">
+                          <BannerProductCard item={item} index={index} />
+                        </CarouselItem>
+                      ))
                     : // Desktop: Groups of 3 products
-                    bannerGroups.map((group, groupIndex) => (
-                      <CarouselItem key={groupIndex} className="banner-carousel-item">
-                        <div className="flex flex-row gap-0 w-full h-auto">
-                          {group.map((item, itemIndex) => {
-                            const globalIndex = groupIndex * 3 + itemIndex
-                            return (
-                              <div key={globalIndex} className="flex-1 w-1/3">
-                                <BannerProductCard item={item} index={globalIndex} />
-                              </div>
-                            )
-                          })}
+                      bannerGroups.map((group, groupIndex) => (
+                        <CarouselItem key={groupIndex} className="banner-carousel-item">
+                          <div className="flex flex-row gap-0 w-full h-auto">
+                            {group.map((item, itemIndex) => {
+                              const globalIndex = groupIndex * 3 + itemIndex
+                              return (
+                                <div key={globalIndex} className="flex-1 w-1/3">
+                                  <BannerProductCard item={item} index={globalIndex} />
+                                </div>
+                              )
+                            })}
 
-                          {/* Fill remaining slots if group has less than 3 items */}
-                          {group.length < 3 &&
-                            Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
-                              <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
-                            ))}
-                        </div>
-                      </CarouselItem>
-                    ))}
+                            {/* Fill remaining slots if group has less than 3 items */}
+                            {group.length < 3 &&
+                              Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                                <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                              ))}
+                          </div>
+                        </CarouselItem>
+                      ))}
                 </CarouselContent>
               </Carousel>
               {/* Banner Carousel Slider Bar Removed */}
@@ -1488,7 +1491,6 @@ const Candles = () => {
           </div>
         </motion.div>
       )}
-
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -1529,7 +1531,6 @@ const Candles = () => {
           </motion.button>
         </div>
       </motion.div>
-
       {/* Soft Orris Section */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -1567,7 +1568,7 @@ const Candles = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
-                className="text-3xl md:text-4xl lg:text-5xl font-normal opacity-[50%] mb-6 tracking-tight leading-tight font-american-typewriter"
+                className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-6 tracking-tight leading-tight font-american-typewriter"
               >
                 Soft Orris - The Scent of Stillness
               </motion.h2>
@@ -1601,7 +1602,6 @@ const Candles = () => {
           </motion.div>
         </div>
       </motion.div>
-
       {/* Let's Stay in Touch Section */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
@@ -1724,8 +1724,8 @@ const Candles = () => {
           </div>
         </div>
       </motion.div>
-
-      {/* Newsletter Section */}
+      <InstagramEmbed2 />
+      {/* Newsletter Section */};
       <section className="py-20 relative overflow-hidden" style={{ backgroundColor: "#e3e3d8" }}>
         <motion.div
           className="absolute inset-0 opacity-15"

@@ -258,11 +258,11 @@ const Payment = ({
       if (!shouldInputCard) {
         return router.push(
           pathname +
-            "?" +
-            updateQueryParams({
-              step: "review",
-              paymenttype: selectedPaymentType,
-            }),
+          "?" +
+          updateQueryParams({
+            step: "review",
+            paymenttype: selectedPaymentType,
+          }),
           {
             scroll: false,
           }
@@ -358,14 +358,12 @@ const Payment = ({
                         data-testid={`payment-type-${type.id}`}
                       >
                         <div
-                          className={`w-12 h-12 ${
-                            selectedPaymentType === type.id ? "bg-green-100" : "bg-white"
-                          } rounded-lg flex items-center justify-center flex-shrink-0`}
+                          className={`w-12 h-12 ${selectedPaymentType === type.id ? "bg-green-100" : "bg-white"
+                            } rounded-lg flex items-center justify-center flex-shrink-0`}
                         >
                           <Icon
-                            className={`w-6 h-6 ${
-                              selectedPaymentType === type.id ? "text-green-700" : "text-black"
-                            }`}
+                            className={`w-6 h-6 ${selectedPaymentType === type.id ? "text-green-700" : "text-black"
+                              }`}
                           />
                         </div>
 

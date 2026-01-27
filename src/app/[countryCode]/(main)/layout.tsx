@@ -47,6 +47,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
         image: item.thumbnail,
         product_id: item?.product_id,
         variant_id: item?.variant_id,
+        metadata: item?.metadata,
       }
     }) || []
 

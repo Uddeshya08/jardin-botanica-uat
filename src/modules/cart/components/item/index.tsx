@@ -6,7 +6,6 @@ import { clx } from "@medusajs/ui"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Spinner from "@modules/common/icons/spinner"
-import Thumbnail from "@modules/products/components/thumbnail"
 import { motion } from "framer-motion"
 import { Gift, X } from "lucide-react"
 import { useState } from "react"
@@ -27,9 +26,38 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
   // Read gift data from line item metadata (persisted in database)
   const itemMetadata = (item as any).metadata || {}
   const isGift = itemMetadata.is_gift === true || itemMetadata.is_gift === "true"
+
+  // Check gift eligibility: first from line item metadata, then from product categories
+  const canBeGiftedFromMetadata = itemMetadata.can_be_gifted === true || itemMetadata.can_be_gifted === "true"
+  const canBeGiftedFromCategory = (item as any).product?.categories?.some((category: any) => {
+    const categoryMetadata = category?.metadata as Record<string, any> | undefined
+    return categoryMetadata?.can_be_gifted === true || categoryMetadata?.can_be_gifted === "true"
+  }) ?? false
+  const canBeGifted = canBeGiftedFromMetadata || canBeGiftedFromCategory
+
   const giftQty = typeof itemMetadata.gift_quantity === 'number'
     ? itemMetadata.gift_quantity
     : (isGift ? item.quantity : 0)
+
+  // Toggle marking item as gift
+  const handleToggleGift = async () => {
+    if (giftUpdating) return
+
+    setGiftUpdating(true)
+    try {
+      const newIsGift = !isGift
+      await updateLineItemGift({
+        lineId: item.id,
+        quantity: item.quantity,
+        isGift: newIsGift,
+        giftQuantity: newIsGift ? item.quantity : 0,
+      })
+    } catch (error) {
+      console.error("Failed to toggle gift status:", error)
+    } finally {
+      setGiftUpdating(false)
+    }
+  }
 
   // Update gift quantity in database
   const handleGiftChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +114,7 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
     >
       <LocalizedClientLink
         href={`/products/${item.product_handle}`}
-        className={clx("relative overflow-hidden rounded-lg flex-shrink-0 bg-gray-100", {
+        className={clx("relative overflow-hidden rounded-lg flex-shrink-0 bg-[#e3e3d8]", {
           "w-16 h-16": type === "preview",
           "w-20 h-20": type === "full",
         })}
@@ -94,14 +122,19 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
         <motion.div
           whileHover={{ scale: 1.03 }}
           transition={{ duration: 0.2 }}
-          className="relative w-full h-full"
+          className="relative w-full h-full overflow-hidden rounded-lg"
         >
-          <Thumbnail
-            thumbnail={item.thumbnail}
-            images={item.variant?.product?.images}
-            size="square"
-            className="!p-0 w-full h-full object-cover"
-          />
+          {(item.thumbnail || item.variant?.product?.images?.[0]?.url) ? (
+            <img
+              src={item.thumbnail || item.variant?.product?.images?.[0]?.url}
+              alt={item.product_title || "Product"}
+              className="w-full h-full object-contain object-center"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+              <span className="text-gray-400 text-xs">No image</span>
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg pointer-events-none" />
         </motion.div>
       </LocalizedClientLink>
@@ -159,7 +192,23 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
               </motion.button>
             </div>
 
-            {/* Gift Bifurcation UI - Only show for items marked as gift */}
+            {/* Gift Toggle - Show for gift-eligible items */}
+            {canBeGifted && !isGift && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleToggleGift}
+                disabled={giftUpdating}
+                className="mt-3 w-full flex items-center justify-center space-x-2 px-3 py-2 bg-black/5 hover:bg-black/10 rounded-lg transition-colors disabled:opacity-50"
+              >
+                <Gift className="w-4 h-4 text-black/70" />
+                <span className="font-din-arabic text-xs text-black/70">
+                  {giftUpdating ? "Marking..." : "Mark as Gift"}
+                </span>
+              </motion.button>
+            )}
+
+            {/* Gift Bifurcation UI - Show for items marked as gift */}
             {isGift && (
               <div className="mt-5 pt-3 border-t border-black/5">
                 <div className="flex items-center justify-between mb-2">

@@ -148,7 +148,7 @@ const Addresses = ({
     }
   }
 
-  useEffect(() => {}, [cart?.shipping_address?.postal_code])
+  useEffect(() => { }, [cart?.shipping_address?.postal_code])
 
   return (
     <div>

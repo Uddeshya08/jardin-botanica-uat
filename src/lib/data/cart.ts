@@ -34,7 +34,7 @@ export async function retrieveCart(cartId?: string) {
       method: "GET",
       query: {
         fields:
-          "*items, *region, *items.product, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name",
+          "*items, *region, *items.product, *items.product.categories, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name",
       },
       headers,
       cache: "no-store",
@@ -142,6 +142,90 @@ export async function addToCart({
     })
     .catch(medusaError)
 }
+
+/**
+ * Adds a variant to cart, or updates the quantity if the variant already exists.
+ * This preserves existing metadata (like gift flags) on the line item.
+ * @param variantId - The ID of the variant to add
+ * @param quantity - The quantity to add
+ * @param countryCode - The country code for the cart region
+ * @param canBeGifted - Optional flag indicating if the product can be marked as a gift
+ */
+export async function addOrUpdateLineItem({
+  variantId,
+  quantity,
+  countryCode,
+  canBeGifted,
+}: {
+  variantId: string
+  quantity: number
+  countryCode: string
+  canBeGifted?: boolean
+}) {
+  if (!variantId) {
+    throw new Error("Missing variant ID when adding to cart")
+  }
+
+  const cart = await getOrSetCart(countryCode)
+
+  if (!cart) {
+    throw new Error("Error retrieving or creating cart")
+  }
+
+  // Check if a line item with the same variant already exists
+  const existingLineItem = cart.items?.find(
+    (item) => item.variant_id === variantId
+  )
+
+  const headers = {
+    ...(await getAuthHeaders()),
+  }
+
+  if (existingLineItem) {
+    // Update existing line item quantity (preserves metadata including gift flags)
+    const newQuantity = existingLineItem.quantity + quantity
+    await sdk.store.cart
+      .updateLineItem(cart.id, existingLineItem.id, { quantity: newQuantity }, {}, headers)
+      .then(async () => {
+        const cartCacheTag = await getCacheTag("carts")
+        revalidateTag(cartCacheTag)
+
+        const fulfillmentCacheTag = await getCacheTag("fulfillment")
+        revalidateTag(fulfillmentCacheTag)
+      })
+      .catch(medusaError)
+  } else {
+    // Create new line item with optional gift eligibility metadata
+    const lineItemData: { variant_id: string; quantity: number; metadata?: Record<string, any> } = {
+      variant_id: variantId,
+      quantity,
+    }
+
+    // Store canBeGifted flag in metadata if provided
+    if (canBeGifted !== undefined) {
+      lineItemData.metadata = {
+        can_be_gifted: canBeGifted,
+      }
+    }
+
+    await sdk.store.cart
+      .createLineItem(
+        cart.id,
+        lineItemData,
+        {},
+        headers
+      )
+      .then(async () => {
+        const cartCacheTag = await getCacheTag("carts")
+        revalidateTag(cartCacheTag)
+
+        const fulfillmentCacheTag = await getCacheTag("fulfillment")
+        revalidateTag(fulfillmentCacheTag)
+      })
+      .catch(medusaError)
+  }
+}
+
 
 export async function updateLineItem({ lineId, quantity }: { lineId: string; quantity: number }) {
   if (!lineId) {
