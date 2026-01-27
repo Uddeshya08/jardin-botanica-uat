@@ -495,3 +495,56 @@ export interface GiftSet {
     images: string[]; // URLs
     hoverImage: string; // URL
 }
+
+// Page Link Content Types (for navigation)
+export interface PageLinkFields {
+    title: string;
+    url: string;
+    image?: ContentfulAsset;
+}
+
+export interface ContentfulPageLink extends EntrySkeletonType {
+    contentTypeId: "pageLink";
+    fields: PageLinkFields;
+}
+
+export interface PageLink {
+    title: string;
+    url: string;
+    image?: string;
+}
+
+// Product Category Content Types (for navigation)
+export interface ProductCategoryFields {
+    name: string;
+    url?: string;
+    subCategory?: ContentfulPageLink[];
+}
+
+export interface ContentfulProductCategory extends EntrySkeletonType {
+    contentTypeId: "productCategory";
+    fields: ProductCategoryFields;
+}
+
+export interface ProductCategory {
+    name: string;
+    url?: string;
+    subCategory: PageLink[];
+}
+
+// Navigation Content Types
+export interface NavigationFields {
+    items: (ContentfulProductCategory | ContentfulPageLink)[];
+}
+
+export interface ContentfulNavigation extends EntrySkeletonType {
+    contentTypeId: "navigation";
+    fields: NavigationFields;
+}
+
+// Simplified navigation item for component use
+export interface NavigationItem {
+    name: string;
+    href?: string;
+    dropdown?: { label: string; href: string; image?: string }[];
+}

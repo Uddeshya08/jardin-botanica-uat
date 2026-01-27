@@ -1856,3 +1856,72 @@ function transformGiftSetEntry(
         return null;
     }
 }
+
+// ============================================================
+// NAVIGATION FUNCTIONS
+// ============================================================
+
+import type { NavigationItem } from "../../types/contentful";
+
+/**
+ * Transform navigation items from Contentful to simplified format
+ */
+function transformNavigationItems(items: any[]): NavigationItem[] {
+    const result: NavigationItem[] = [];
+
+    for (const item of items) {
+        const contentType = item.sys?.contentType?.sys?.id;
+
+        if (contentType === "productCategory") {
+            // Product Category → MenuItem with dropdown
+            const subCategories = item.fields?.subCategory || [];
+            result.push({
+                name: (item.fields?.name || "").toUpperCase(),
+                href: item.fields?.url || subCategories[0]?.fields?.url || undefined,
+                dropdown: subCategories.map((sub: any) => ({
+                    label: sub.fields?.title || "",
+                    href: sub.fields?.url || "",
+                    image: sub.fields?.image?.fields?.file?.url
+                        ? `https:${sub.fields.image.fields.file.url}`
+                        : undefined,
+                })),
+            });
+        } else if (contentType === "pageLink") {
+            // Page Link → Simple menu item (no dropdown)
+            result.push({
+                name: (item.fields?.title || "").toUpperCase(),
+                href: item.fields?.url || "",
+            });
+        }
+    }
+
+    return result;
+}
+
+
+/**
+ * Fetch navigation from Contentful
+ */
+export async function getNavigation(): Promise<NavigationItem[]> {
+    try {
+        const client = getContentfulClient();
+        const response = await client.getEntries({
+            content_type: "navigation",
+            include: 3, // Include nested subCategory refs
+            limit: 1,
+        });
+
+        console.log("Navigation response:", JSON.stringify(response, null, 2));
+
+        if (!response.items.length) return [];
+        const nav = response.items[0].fields as any;
+
+        const result = transformNavigationItems(nav.items || []);
+        console.log("Transformed navigation:", JSON.stringify(result, null, 2));
+
+        return result;
+    } catch (error) {
+        console.error("Error fetching navigation:", error);
+        return [];
+    }
+}
