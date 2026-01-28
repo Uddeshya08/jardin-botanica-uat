@@ -52,60 +52,7 @@ const Home = () => {
   }, [])
 
   // Custom styles object
-  const styles = {
-    bannerHeading: {
-      fontFamily: '"American Typewriter"',
-      fontSize: "42px",
-      letterSpacing: "5px",
-      color: "#4f5864",
-    },
-    subCopy: {
-      fontFamily: '"font-din-arabic"',
-      fontSize: "16px",
-      letterSpacing: "1px",
-      color: "#626262",
-    },
-    subsequentHeading: {
-      fontFamily: '"American Typewriter"',
-      fontSize: "48px",
-      letterSpacing: "2px",
-      color: "#000",
-      fontWeight: "600",
-    },
-    subsequentHeading3: {
-      fontFamily: '"American Typewriter"',
-      fontSize: "14px",
-      letterSpacing: "1px",
-      color: "#000000",
-      fontWeight: "600",
-    },
-    subsequentHeading2: {
-      fontFamily: '"font-dinBold"',
-      fontSize: "20px",
-      letterSpacing: "1px",
-      color: "#403F3F",
-    },
-    newspaperSerif: {
-      fontFamily: '"American Typewriter"',
-      fontSize: "24px",
-      letterSpacing: "5px",
-      color: "#4f5864",
-    },
-    newspaperSpacing: {
-      lineHeight: "1.6",
-    },
-    tightSpacing: {
-      lineHeight: "1.3",
-    },
-    trackingNewspaper: {
-      fontFamily: '"DIN Arabic Regular"',
-      letterSpacing: "0.1em",
-    },
-    trackingWideNewspaper: {
-      fontFamily: '"DIN Arabic Regular"',
-      letterSpacing: "0.15em",
-    },
-  }
+
 
   const dailyFeedArticles: DailyFeedArticle[] = [
     {
@@ -352,7 +299,7 @@ const Home = () => {
       {showStickyHeader && (
         <div className="w-full bg-[#FEFDF3] pt-3 md:pt-4 pb-3 md:pb-4">
           <div className="w-full flex justify-end px-4 lg:pr-40">
-            <p className="text-xs lg:text-sm" style={styles.subsequentHeading3}>
+            <p className="text-xs lg:text-sm font-american-typewriter text-black font-semibold tracking-[1px]">
               Volume 67, No.7 | September 2017
             </p>
           </div>
@@ -467,8 +414,7 @@ const Home = () => {
             transition={{ delay: 0.6, duration: 0.6 }}
           >
             <p
-              className="text-xs md:text-sm"
-              style={{ ...styles.subsequentHeading3, fontSize: undefined }}
+              className="text-xs md:text-sm font-american-typewriter text-black font-semibold tracking-[1px]"
             >
               Volume 67, No.7 | September 2017
             </p>
@@ -512,7 +458,7 @@ const Home = () => {
                 className="text-center py-20"
               >
                 <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">POLITICS</h3>
-                <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
+                <p className="text-[#626262] font-din-arabic">No content available at the moment</p>
               </motion.div>
             )}
             {activeTab === "TECHNOLOGY" && (
@@ -527,7 +473,7 @@ const Home = () => {
                 <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">
                   TECHNOLOGY
                 </h3>
-                <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
+                <p className="text-[#626262] font-din-arabic">No content available at the moment</p>
               </motion.div>
             )}
             {activeTab === "SPORTS" && (
@@ -540,7 +486,7 @@ const Home = () => {
                 className="text-center py-20"
               >
                 <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">SPORTS</h3>
-                <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
+                <p className="text-[#626262] font-din-arabic">No content available at the moment</p>
               </motion.div>
             )}
             {activeTab === "FASHION" && (
@@ -553,7 +499,7 @@ const Home = () => {
                 className="text-center py-20"
               >
                 <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">FASHION</h3>
-                <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
+                <p className="text-[#626262] font-din-arabic">No content available at the moment</p>
               </motion.div>
             )}
             {activeTab === "FOOD" && (
@@ -566,7 +512,7 @@ const Home = () => {
                 className="text-center py-20"
               >
                 <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">FOOD</h3>
-                <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
+                <p className="text-[#626262] font-din-arabic">No content available at the moment</p>
               </motion.div>
             )}
             {activeTab === "SHORTCODES" && (
@@ -581,7 +527,7 @@ const Home = () => {
                 <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">
                   SHORTCODES
                 </h3>
-                <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
+                <p className="text-[#626262] font-din-arabic">No content available at the moment</p>
               </motion.div>
             )}
             {activeTab === "POST TYPES" && (
@@ -596,7 +542,7 @@ const Home = () => {
                 <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">
                   POST TYPES
                 </h3>
-                <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
+                <p className="text-[#626262] font-din-arabic">No content available at the moment</p>
               </motion.div>
             )}
             {activeTab === "CONTACTS" && (
@@ -609,7 +555,7 @@ const Home = () => {
                 className="text-center py-20"
               >
                 <h3 className="text-2xl font-american-typewriter text-[#4f5864] mb-4">CONTACTS</h3>
-                <p className="text-[#626262] font-dinRegular">No content available at the moment</p>
+                <p className="text-[#626262] font-din-arabic">No content available at the moment</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -666,8 +612,7 @@ const Home = () => {
                         transition={{ delay: 1.0, duration: 0.8 }}
                       >
                         <motion.div
-                          className="text-xs lg:text-sm text-gray-600 mb-2 lg:mb-3"
-                          style={{ color: "#626262", padding: 0, fontSize: "14px" }}
+                          className="text-xs lg:text-sm text-gray-600 mb-2 lg:mb-3 text-[#626262] p-0 text-[14px]"
                           data-testid="hero-date"
                           initial={{ y: 10, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
@@ -690,8 +635,7 @@ const Home = () => {
                           {blogs[0].title}
                         </motion.h2>
                         <motion.p
-                          className="mb-4 lg:mb-6 text-sm lg:text-[16px] font-din-arabic"
-                          style={{ letterSpacing: "1px", color: "#626262" }}
+                          className="mb-4 lg:mb-6 text-sm lg:text-[16px] font-din-arabic tracking-[1px] text-[#626262]"
                           data-testid="hero-excerpt"
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
@@ -723,14 +667,8 @@ const Home = () => {
               >
                 <div className="bg-[#FEFDF3] px-4 lg:px-6 h-fit">
                   <motion.h3
-                    className="mb-4 lg:mb-6 text-2xl lg:text-3xl font-american-typewriter font-bold italic"
+                    className="mb-4 lg:mb-6 text-2xl lg:text-[36px] font-american-typewriter font-bold italic tracking-[2px]"
                     data-testid="daily-feed-title"
-                    style={{
-                      fontFamily: "American Typewriter",
-                      fontSize: "36px",
-                      letterSpacing: "2px",
-                      fontWeight: "bold",
-                    }}
                     initial={{ y: -10, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 1.0, duration: 0.6 }}
@@ -764,12 +702,7 @@ const Home = () => {
                         transition={{ delay: 1.3 + index * 0.2, duration: 0.6 }}
                       >
                         <motion.div
-                          className={`text-xs lg:text-sm text-gray-600 mb-2 ${index == 0 ? "pt-4 lg:pt-6" : "pt-0"}`}
-                          style={{
-                            fontFamily: '"DIN Arabic Regular"',
-                            letterSpacing: "0.1em",
-                            fontSize: "14px",
-                          }}
+                          className={`text-xs lg:text-sm text-gray-600 mb-2 font-din-arabic tracking-[0.1em] text-[14px] ${index == 0 ? "pt-4 lg:pt-6" : "pt-0"}`}
                           data-testid={`article-date-${blog.slug}`}
                           initial={{ x: -10, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
@@ -795,24 +728,14 @@ const Home = () => {
                         >
                           <Link
                             href={`/${countryCode}/blogs/${blog.slug}`}
-                            className="hover:underline text-base lg:text-lg font-dinBold"
-                            style={{
-                              fontSize: "20px",
-                              letterSpacing: "1px",
-                              color: "#403F3F",
-                            }}
+                            className="hover:underline text-base lg:text-lg font-din-arabic font-bold text-[20px] tracking-[1px] text-[#403F3F]"
                             data-testid={`article-title-${blog.slug}`}
                           >
                             {blog.title}
                           </Link>
                         </motion.h4>
                         <motion.p
-                          className="text-sm lg:text-base font-din-arabic"
-                          style={{
-                            fontSize: "16px",
-                            letterSpacing: "1px",
-                            color: "#626262",
-                          }}
+                          className="text-sm lg:text-base font-din-arabic text-[16px] tracking-[1px] text-[#626262]"
                           data-testid={`article-excerpt-${blog.slug}`}
                           initial={{ y: 10, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
@@ -836,8 +759,7 @@ const Home = () => {
                   >
                     <a
                       href="#"
-                      className="text-[14px] font-medium text-[#535c4a] hover:underline"
-                      style={styles.subsequentHeading3}
+                      className="text-[14px] font-medium text-[#535c4a] hover:underline font-american-typewriter tracking-[1px] font-semibold"
                       data-testid="view-more-posts"
                     >
                       VIEW MORE POSTS
@@ -943,8 +865,7 @@ const Home = () => {
                           Renounce City's Vote to Drop References
                         </motion.h3>
                         <motion.p
-                          className="text-sm lg:text-base font-dinRegular text-[#535c4a] mb-3 lg:mb-4"
-                          style={{ fontSize: "16px" }}
+                          className="text-sm lg:text-base font-din-arabic text-[#535c4a] mb-3 lg:mb-4 text-[16px]"
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.5, duration: 0.6 }}
@@ -952,12 +873,7 @@ const Home = () => {
                           by Thomas Williams
                         </motion.p>
                         <motion.p
-                          className="leading-relaxed text-sm lg:text-base font-din-arabic"
-                          style={{
-                            letterSpacing: "1px",
-                            color: "#626262",
-                            fontSize: "16px",
-                          }}
+                          className="leading-relaxed text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px]"
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.6, duration: 0.6 }}
@@ -1064,12 +980,7 @@ const Home = () => {
                     >
                       <div>
                         <motion.p
-                          className="leading-relaxed mb-3 lg:mb-4 pt-4 lg:pt-6 text-sm lg:text-base font-din-arabic"
-                          style={{
-                            letterSpacing: "1px",
-                            color: "#626262",
-                            fontSize: "16px",
-                          }}
+                          className="leading-relaxed mb-3 lg:mb-4 pt-4 lg:pt-6 text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px]"
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.8, duration: 0.6 }}
@@ -1078,12 +989,7 @@ const Home = () => {
                           porta velit, sed suscipit massa consequat sed.
                         </motion.p>
                         <motion.p
-                          className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic"
-                          style={{
-                            letterSpacing: "1px",
-                            color: "#626262",
-                            fontSize: "16px",
-                          }}
+                          className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px]"
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.9, duration: 0.6 }}
@@ -1092,12 +998,7 @@ const Home = () => {
                           Nam vel aliquet turpis, ac sollicitudin nisl.
                         </motion.p>
                         <motion.p
-                          className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic"
-                          style={{
-                            letterSpacing: "1px",
-                            color: "#626262",
-                            fontSize: "16px",
-                          }}
+                          className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px]"
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 2.0, duration: 0.6 }}
@@ -1257,8 +1158,7 @@ const Home = () => {
                   placeholder="Your email address *"
                   required
                   disabled={isSubmitting}
-                  className="flex-1 w-full px-4 py-3 border border-gray-300 bg-white text-black placeholder-gray-500 italic focus:outline-none focus:border-black transition-colors"
-                  style={{ fontFamily: '"font-din-arabic"' }}
+                  className="flex-1 w-full px-4 py-3 border border-gray-300 bg-white text-black placeholder-gray-500 italic focus:outline-none focus:border-black transition-colors font-din-arabic"
                 />
 
                 {/* Subscribe Button */}

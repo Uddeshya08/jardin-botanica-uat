@@ -1,7 +1,5 @@
-// import { listCollections } from "@lib/data/collections"
-// import { getRegion } from "@lib/data/regions"
-// import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
+import { listProducts } from "@lib/data/products"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -10,28 +8,23 @@ export const metadata: Metadata = {
 }
 
 export default async function Home(props: { params: Promise<{ countryCode: string }> }) {
-  // const params = await props.params
+  const params = await props.params
+  const { countryCode } = params
 
-  // const { countryCode } = params
+  // Fetch products for the carousel
+  const { response: { products } } = await listProducts({
+    countryCode,
+    queryParams: {
+      limit: 10,
+    }
+  })
 
-  // const region = await getRegion(countryCode)
-
-  // const { collections } = await listCollections({
-  //   fields: "id, handle, title",
-  // })
-
-  // if (!collections || !region) {
-  //   return null
-  // }
+  // Filter for specific products if needed, otherwise pass all
+  // For now, passing all fetched products to be filtered/mapped by the carousel
 
   return (
     <>
-      <Hero />
-      {/* <div className="">
-        <ul className="flex flex-col gap-x-6">
-          <FeaturedProducts collections={collections} region={region} />
-        </ul>
-      </div> */}
+      <Hero products={products} countryCode={countryCode} />
     </>
   )
 }
