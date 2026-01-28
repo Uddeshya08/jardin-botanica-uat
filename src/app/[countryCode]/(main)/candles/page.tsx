@@ -1121,7 +1121,7 @@ const Candles = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
-                className="font-din-arabic text-base md:text-lg text-black/60 tracking-wide uppercase text-center"
+                className="font-din-arabic text-base md:text-lg text-black/60 tracking-wide text-center"
               >
                 Choose a mood to light.
               </motion.p>
@@ -1377,7 +1377,7 @@ const Candles = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
-                className="font-din-arabic text-base md:text-lg text-black/60 tracking-wide uppercase text-center"
+                className="font-din-arabic text-base md:text-lg text-black/60 tracking-wide text-center"
               >
                 Choose a mood to light.
               </motion.p>
@@ -1515,17 +1515,18 @@ const Candles = () => {
             Connect with one of our experts for personalized guidance and thoughtful product
             recommendations-crafted just for your skin, your rituals, your glow.
           </motion.p>
-          <motion.button
+          <motion.a
+            href="mailto:hello@jardinbotanica.com"
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.8, delay: 0.5, ease: smoothEase }}
             viewport={{ once: true, amount: 0.3 }}
-            className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base"
+            className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base inline-block"
           >
             Speak With Us
-          </motion.button>
+          </motion.a>
         </div>
       </motion.div>
       {/* Soft Orris Section */}
