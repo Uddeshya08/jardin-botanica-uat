@@ -1911,13 +1911,13 @@ export async function getNavigation(): Promise<NavigationItem[]> {
             limit: 1,
         });
 
-        console.log("Navigation response:", JSON.stringify(response, null, 2));
+        // console.log("Navigation response:", JSON.stringify(response, null, 2));
 
         if (!response.items.length) return [];
         const nav = response.items[0].fields as any;
 
         const result = transformNavigationItems(nav.items || []);
-        console.log("Transformed navigation:", JSON.stringify(result, null, 2));
+        // console.log("Transformed navigation:", JSON.stringify(result, null, 2));
 
         return result;
     } catch (error) {
@@ -1930,6 +1930,7 @@ export async function getNavigation(): Promise<NavigationItem[]> {
 // BLOG FUNCTIONS
 // ============================================================
 
+import type { Document } from "@contentful/rich-text-types";
 import type { Author, Blog } from "../../types/contentful";
 
 /**
@@ -1983,7 +1984,7 @@ function transformBlogEntry(entry: any): Blog | null {
             title: fields.title || "",
             slug: fields.slug || "",
             description: fields.description || "",
-            content: extractTextFromRichText(fields.content) || "",
+            content: (fields.content as unknown as Document) || null,
             publishedDate: fields.publishedDate || "",
             image: fields.image?.fields?.file?.url
                 ? `https:${fields.image.fields.file.url}`
@@ -2020,7 +2021,6 @@ export async function getAllBlogs(limit: number = 4): Promise<Blog[]> {
             limit,
         });
 
-        console.log("Blogs response:", response.items.length, "items");
 
         return response.items
             .map(transformBlogEntry)
@@ -2043,8 +2043,6 @@ export async function getBlogBySlug(slug: string): Promise<Blog | null> {
             include: 2,
             limit: 1,
         });
-
-        console.log("Blog by slug response:", slug, response.items.length);
 
         if (!response.items.length) return null;
         return transformBlogEntry(response.items[0]);

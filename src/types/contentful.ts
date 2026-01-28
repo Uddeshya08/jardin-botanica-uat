@@ -1,4 +1,23 @@
 import type { EntrySkeletonType } from "contentful";
+import type { Document } from "@contentful/rich-text-types";
+
+// ... (keep existing imports)
+
+// ...
+
+export interface Blog {
+    title: string;
+    slug: string;
+    description: string;
+    content: Document; // Rich text document
+    publishedDate: string;
+    image?: string;
+    imagealt?: string;
+    categories: string[];
+    author?: Author;
+    featuredProducts: { handle: string; title: string; image?: string }[];
+    tags: string[];
+}
 
 // Contentful Product Content Fields
 export interface ProductContentFields {

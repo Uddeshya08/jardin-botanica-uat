@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "motion/react"
 import Link from "next/link"
 import React, { useEffect, useState } from "react"
 import type { Blog } from "types/contentful"
+import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
+import { BLOCKS, INLINES } from "@contentful/rich-text-types"
 
 const FeaturedBlogProduct = ({
   image,
@@ -182,6 +184,38 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
     },
   }
 
+  const renderOptions = {
+    renderNode: {
+      [BLOCKS.EMBEDDED_ASSET]: (node: any) => {
+        const { file, title } = node.data.target.fields
+        const imageUrl = `https:${file.url}`
+        const alt = title || "Blog Image"
+        return (
+          <div className="my-8">
+            <img
+              src={imageUrl}
+              alt={alt}
+              className="w-full h-auto object-cover rounded-sm"
+            />
+          </div>
+        )
+      },
+      [BLOCKS.PARAGRAPH]: (node: any, children: any) => (
+        <p className="mb-6">{children}</p>
+      ),
+      [INLINES.HYPERLINK]: (node: any, children: any) => (
+        <a
+          href={node.data.uri}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#4f5864] underline hover:text-black transition-colors duration-200"
+        >
+          {children}
+        </a>
+      ),
+    },
+  }
+
   if (!blog) {
     return null
   }
@@ -271,12 +305,12 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
               >
                 {blog?.publishedDate
                   ? new Date(blog.publishedDate)
-                      .toLocaleDateString("en-US", {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                      })
-                      .toUpperCase()
+                    .toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })
+                    .toUpperCase()
                   : ""}
               </span>
               <span
@@ -385,20 +419,20 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 1.0, duration: 0.8 }}
               >
-                <motion.p
+                <motion.div
                   style={{
                     fontFamily: "Georgia, serif",
                     fontSize: "16px",
                     lineHeight: "1.8",
                     color: "#333",
-                    whiteSpace: "pre-wrap",
+                    // whiteSpace: "pre-wrap", // contentful rich text handles this
                   }}
                   initial={{ y: 15, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 1.2, duration: 0.6 }}
                 >
-                  {blog?.content}
-                </motion.p>
+                  {documentToReactComponents(blog?.content, renderOptions)}
+                </motion.div>
 
                 {/* Tags */}
                 <motion.div
