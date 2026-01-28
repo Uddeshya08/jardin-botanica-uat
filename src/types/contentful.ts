@@ -548,3 +548,55 @@ export interface NavigationItem {
     href?: string;
     dropdown?: { label: string; href: string; image?: string }[];
 }
+
+// Author Content Types
+export interface AuthorFields {
+    name: string;
+    profilePic?: ContentfulAsset;
+    socialLinks?: string[];
+}
+
+export interface ContentfulAuthor extends EntrySkeletonType {
+    contentTypeId: "author";
+    fields: AuthorFields;
+}
+
+export interface Author {
+    name: string;
+    profilePic?: string;
+    socialLinks: string[];
+}
+
+// Blog Content Types
+export interface BlogFields {
+    title: string;
+    slug: string;
+    description: string;
+    content: any; // Rich text
+    publishedDate: string;
+    image?: ContentfulAsset;
+    imagealt?: string;
+    category?: any[]; // References
+    author?: ContentfulAuthor;
+    featuredProducts?: any[]; // References
+    tags?: string[];
+}
+
+export interface ContentfulBlog extends EntrySkeletonType {
+    contentTypeId: "blog";
+    fields: BlogFields;
+}
+
+export interface Blog {
+    title: string;
+    slug: string;
+    description: string;
+    content: string; // Extracted text
+    publishedDate: string;
+    image?: string;
+    imagealt?: string;
+    categories: string[];
+    author?: Author;
+    featuredProducts: { handle: string; title: string; image?: string }[];
+    tags: string[];
+}

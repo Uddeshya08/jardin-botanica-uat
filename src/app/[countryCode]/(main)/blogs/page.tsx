@@ -5,6 +5,10 @@ import { RippleEffect } from "app/components/RippleEffect"
 import { ChevronLeft, ChevronRight, Facebook, Instagram, Search, Twitter } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useState } from "react"
+import { getAllBlogs } from "@lib/data/contentful"
+import type { Blog } from "types/contentful"
+import Link from "next/link"
+import { useParams } from "next/navigation"
 
 interface CartItem {
   id: string
@@ -31,8 +35,21 @@ interface FeaturedArticle {
 }
 
 const Home = () => {
+  const params = useParams()
+  const countryCode = (params?.countryCode as string) || "in"
   const [email, setEmail] = useState("")
   const [activeTab, setActiveTab] = useState("HOME")
+  const [blogs, setBlogs] = useState<Blog[]>([])
+
+  // Fetch blogs from Contentful
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      const allBlogs = await getAllBlogs()
+      console.log("=== BLOGS FROM CONTENTFUL ===", allBlogs)
+      setBlogs(allBlogs)
+    }
+    fetchBlogs()
+  }, [])
 
   // Custom styles object
   const styles = {
@@ -606,91 +623,96 @@ const Home = () => {
           <div className="max-w-7xl mx-auto my-8 md:my-12 lg:my-20 px-4 lg:px-0">
             <div className="flex flex-col lg:flex-row justify-between gap-6 lg:gap-8">
               {/* Hero Article - 75% width */}
-              <motion.div
-                className="w-full lg:w-[70%] flex-shrink-0"
-                initial={{ x: -50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
-              >
-                <div className="relative">
-                  <div
-                    className="relative group w-full overflow-hidden"
-                    style={{ aspectRatio: "858/971" }}
-                  >
-                    {/* Grayscale Base Image */}
-                    <motion.img
-                      src="https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=858&h=971&fit=crop"
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                      alt="Surfing big waves"
-                      data-testid="hero-image"
-                      initial={{ scale: 1.1, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: 0.8, duration: 1.0 }}
-                    />
+              {blogs.length > 0 && (
+                <motion.div
+                  className="w-full lg:w-[70%] flex-shrink-0"
+                  initial={{ x: -50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.6, duration: 0.8 }}
+                >
+                  <Link href={`/${countryCode}/blogs/${blogs[0].slug}`}>
+                    <div className="relative cursor-pointer">
+                      <div
+                        className="relative group w-full overflow-hidden"
+                        style={{ aspectRatio: "858/971" }}
+                      >
+                        {/* Grayscale Base Image */}
+                        <motion.img
+                          src={blogs[0].image || "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=858&h=971&fit=crop"}
+                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                          alt={blogs[0].imagealt || blogs[0].title}
+                          data-testid="hero-image"
+                          initial={{ scale: 1.1, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.8, duration: 1.0 }}
+                        />
 
-                    {/* Cream Overlay - Lightens image for text readability */}
-                    <motion.div
-                      className="absolute inset-0 bg-[#FEFDF3] transition-opacity duration-500"
-                      initial={{ opacity: 0.5 }}
-                      animate={{ opacity: 0.5 }}
-                    />
-                  </div>
+                        {/* Cream Overlay - Lightens image for text readability */}
+                        <motion.div
+                          className="absolute inset-0 bg-[#FEFDF3] transition-opacity duration-500"
+                          initial={{ opacity: 0.5 }}
+                          animate={{ opacity: 0.5 }}
+                        />
+                      </div>
 
-                  {/* Gradient Overlay */}
-                  {/* <div className="absolute inset-0 bg-gradient-to-r from-[#EFEEE2] via-[#EFEEE2]/70 to-transparent"></div> */}
+                      {/* Gradient Overlay */}
+                      {/* <div className="absolute inset-0 bg-gradient-to-r from-[#EFEEE2] via-[#EFEEE2]/70 to-transparent"></div> */}
 
-                  {/* Article Overlay - vertically centered, left aligned */}
-                  <motion.div
-                    className="absolute top-1/2 left-4 md:left-8 lg:left-12 transform -translate-y-1/2 max-w-xs md:max-w-md lg:max-w-lg px-4 md:px-6 lg:px-8"
-                    initial={{ x: -30, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 1.0, duration: 0.8 }}
-                  >
-                    <motion.div
-                      className="text-xs lg:text-sm text-gray-600 mb-2 lg:mb-3"
-                      style={{ color: "#626262", padding: 0, fontSize: "14px" }}
-                      data-testid="hero-date"
-                      initial={{ y: 10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 1.2, duration: 0.6 }}
-                    >
-                      APRIL 27, 2017 | SPORTS
-                    </motion.div>
-                    <motion.h2
-                      className="text-xl md:text-2xl lg:text-[48px] text-gray-900 mb-3 lg:mb-4 font-american-typewriter leading-tight"
-                      style={{ letterSpacing: "2px", fontWeight: "600" }}
-                      data-testid="hero-title"
-                      initial={{ y: 15, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 1.3, duration: 0.6 }}
-                    >
-                      The Longform Guide to Surfing: Great Stories About Big Waves
-                    </motion.h2>
-                    <motion.p
-                      className="mb-4 lg:mb-6 text-sm lg:text-[16px] font-din-arabic"
-                      style={{ letterSpacing: "1px", color: "#626262" }}
-                      data-testid="hero-excerpt"
-                      initial={{ y: 15, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 1.4, duration: 0.6 }}
-                    >
-                      Every weekend, Longform shares a collection of great stories from its archive.
-                      Big waves, unlikely champs, and the "dark prince of the beach"—our favorite
-                      stories about surfers.
-                    </motion.p>
-                    <motion.a
-                      href="#"
-                      className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline"
-                      style={{ fontWeight: "600" }}
-                      initial={{ y: 10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 1.5, duration: 0.6 }}
-                    >
-                      READ MORE...
-                    </motion.a>
-                  </motion.div>
-                </div>
-              </motion.div>
+                      {/* Article Overlay - vertically centered, left aligned */}
+                      <motion.div
+                        className="absolute top-1/2 left-4 md:left-8 lg:left-12 transform -translate-y-1/2 max-w-xs md:max-w-md lg:max-w-lg px-4 md:px-6 lg:px-8"
+                        initial={{ x: -30, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 1.0, duration: 0.8 }}
+                      >
+                        <motion.div
+                          className="text-xs lg:text-sm text-gray-600 mb-2 lg:mb-3"
+                          style={{ color: "#626262", padding: 0, fontSize: "14px" }}
+                          data-testid="hero-date"
+                          initial={{ y: 10, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 1.2, duration: 0.6 }}
+                        >
+                          {blogs[0].publishedDate ? new Date(blogs[0].publishedDate).toLocaleDateString('en-US', {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric'
+                          }).toUpperCase() : ""}
+                        </motion.div>
+                        <motion.h2
+                          className="text-xl md:text-2xl lg:text-[48px] text-gray-900 mb-3 lg:mb-4 font-american-typewriter leading-tight"
+                          style={{ letterSpacing: "2px", fontWeight: "600" }}
+                          data-testid="hero-title"
+                          initial={{ y: 15, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 1.3, duration: 0.6 }}
+                        >
+                          {blogs[0].title}
+                        </motion.h2>
+                        <motion.p
+                          className="mb-4 lg:mb-6 text-sm lg:text-[16px] font-din-arabic"
+                          style={{ letterSpacing: "1px", color: "#626262" }}
+                          data-testid="hero-excerpt"
+                          initial={{ y: 15, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 1.4, duration: 0.6 }}
+                        >
+                          {blogs[0].description}
+                        </motion.p>
+                        <motion.span
+                          className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline"
+                          style={{ fontWeight: "600" }}
+                          initial={{ y: 10, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 1.5, duration: 0.6 }}
+                        >
+                          READ MORE...
+                        </motion.span>
+                      </motion.div>
+                    </div>
+                  </Link>
+                </motion.div>
+              )}
 
               {/* Daily Feed Sidebar - 25% width */}
               <motion.div
@@ -729,14 +751,14 @@ const Home = () => {
                         "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca",
                     }}
                   >
-                    {dailyFeedArticles.map((article, index) => (
+                    {blogs.slice(1).map((blog, index) => (
                       <motion.article
-                        key={article.id}
-                        className={`${index < dailyFeedArticles.length - 1
+                        key={blog.slug}
+                        className={`${index < blogs.slice(1).length - 1
                           ? "border-b border-gray-200 pb-3 lg:pb-4"
                           : "pb-3 lg:pb-4"
                           }`}
-                        data-testid={`daily-feed-article-${article.id}`}
+                        data-testid={`daily-feed-article-${blog.slug}`}
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 1.3 + index * 0.2, duration: 0.6 }}
@@ -748,7 +770,7 @@ const Home = () => {
                             letterSpacing: "0.1em",
                             fontSize: "14px",
                           }}
-                          data-testid={`article-categories-${article.id}`}
+                          data-testid={`article-date-${blog.slug}`}
                           initial={{ x: -10, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           transition={{
@@ -756,7 +778,11 @@ const Home = () => {
                             duration: 0.5,
                           }}
                         >
-                          in {article.categories.join(", ")}
+                          {blog.publishedDate ? new Date(blog.publishedDate).toLocaleDateString('en-US', {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric'
+                          }).toUpperCase() : ""}
                         </motion.div>
                         <motion.h4
                           className="mb-2"
@@ -767,18 +793,18 @@ const Home = () => {
                             duration: 0.5,
                           }}
                         >
-                          <a
-                            href={`/blogs/${article.id}`}
+                          <Link
+                            href={`/${countryCode}/blogs/${blog.slug}`}
                             className="hover:underline text-base lg:text-lg font-dinBold"
                             style={{
                               fontSize: "20px",
                               letterSpacing: "1px",
                               color: "#403F3F",
                             }}
-                            data-testid={`article-title-${article.id}`}
+                            data-testid={`article-title-${blog.slug}`}
                           >
-                            {article.title}
-                          </a>
+                            {blog.title}
+                          </Link>
                         </motion.h4>
                         <motion.p
                           className="text-sm lg:text-base font-din-arabic"
@@ -787,7 +813,7 @@ const Home = () => {
                             letterSpacing: "1px",
                             color: "#626262",
                           }}
-                          data-testid={`article-excerpt-${article.id}`}
+                          data-testid={`article-excerpt-${blog.slug}`}
                           initial={{ y: 10, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{
@@ -795,7 +821,7 @@ const Home = () => {
                             duration: 0.5,
                           }}
                         >
-                          {article.excerpt}
+                          {blog.description}
                         </motion.p>
                       </motion.article>
                     ))}
@@ -1247,8 +1273,8 @@ const Home = () => {
               {message && (
                 <div
                   className={`text-sm px-4 py-2 rounded text-center ${isSuccess
-                      ? "bg-green-100 text-green-800 border border-green-300"
-                      : "bg-red-100 text-red-800 border border-red-300"
+                    ? "bg-green-100 text-green-800 border border-green-300"
+                    : "bg-red-100 text-red-800 border border-red-300"
                     }`}
                 >
                   {message}

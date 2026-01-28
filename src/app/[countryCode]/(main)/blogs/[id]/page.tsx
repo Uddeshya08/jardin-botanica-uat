@@ -3,8 +3,10 @@ import { Navigation } from "app/components/Navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, notFound } from "next/navigation"
 import React, { useEffect, useState } from "react"
+import { getBlogBySlug } from "@lib/data/contentful"
+import type { Blog } from "types/contentful"
 
 const FeaturedBlogProduct = ({
   image,
@@ -73,7 +75,26 @@ const FeaturedBlogProduct = ({
 const SingleBlogPage = () => {
   const params = useParams()
   const countryCode = (params?.countryCode as string) || "in"
+  const slug = params?.id as string
   const [isScrolled, setIsScrolled] = useState(false)
+  const [blog, setBlog] = useState<Blog | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  // Fetch blog by slug
+  useEffect(() => {
+    const fetchBlog = async () => {
+      console.log("=== FETCHING SLUG ===", slug)
+      const data = await getBlogBySlug(slug)
+      console.log("=== BLOG DATA ===", data)
+      if (!data) {
+        notFound()
+        return
+      }
+      setBlog(data)
+      setLoading(false)
+    }
+    if (slug) fetchBlog()
+  }, [slug])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -237,6 +258,18 @@ const SingleBlogPage = () => {
   //   "Travel", "U.S.", "Videos", "World"
   // ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FEFDF3] flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-4 w-32 bg-gray-300 rounded mb-4"></div>
+          <div className="h-8 w-64 bg-gray-300 rounded mb-4"></div>
+          <div className="h-4 w-48 bg-gray-300 rounded"></div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-[#FEFDF3] min-h-screen">
       <Navigation isScrolled={isScrolled} disableSticky={true} />
@@ -282,7 +315,7 @@ const SingleBlogPage = () => {
                   letterSpacing: "2px",
                 }}
               >
-                SPORTS
+                {blog?.categories?.[0] || 'BLOG'}
               </p>
             </motion.div>
 
@@ -301,7 +334,7 @@ const SingleBlogPage = () => {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.8 }}
             >
-              Liverpool Tops Hoffenheim in First Leg of Champions League Playoff
+              {blog?.title}
             </motion.h1>
 
             {/* Date, Author and Comment Count */}
@@ -320,7 +353,11 @@ const SingleBlogPage = () => {
                   letterSpacing: "1px",
                 }}
               >
-                AUGUST 15, 2017
+                {blog?.publishedDate ? new Date(blog.publishedDate).toLocaleDateString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric'
+                }).toUpperCase() : ""}
               </span>
               <span
                 style={{
@@ -330,7 +367,7 @@ const SingleBlogPage = () => {
                   letterSpacing: "1px",
                 }}
               >
-                BY CMSMASTERS
+                BY {blog?.author?.name?.toUpperCase() || 'JARDIN BOTANICA'}
               </span>
               <div className="ml-auto flex items-center gap-2">
                 <span
@@ -353,8 +390,8 @@ const SingleBlogPage = () => {
               transition={{ delay: 0.6, duration: 0.8 }}
             >
               <img
-                src="/assets/football.jpg"
-                alt="Soccer player with ball"
+                src={blog?.image || "/assets/football.jpg"}
+                alt={blog?.imagealt || blog?.title}
                 className="w-full h-auto object-cover"
                 style={{ filter: "grayscale(100%)" }}
               />
@@ -434,54 +471,13 @@ const SingleBlogPage = () => {
                     fontSize: "16px",
                     lineHeight: "1.8",
                     color: "#333",
+                    whiteSpace: "pre-wrap"
                   }}
                   initial={{ y: 15, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 1.2, duration: 0.6 }}
                 >
-                  Trent Alexander-Arnold formally announced himself to the European stage with a
-                  stunning free-kick as Liverpool secured a crucial 2-1 victory over Hoffenheim in
-                  the first leg of their Champions League playoff. The 18-year-old local lad, making
-                  his European debut for his boyhood club, curled a magnificent effort into the
-                  bottom corner to give Jurgen Klopp's side the lead in Germany.
-                </motion.p>
-
-                <motion.p
-                  style={{
-                    fontFamily: "Georgia, serif",
-                    fontSize: "16px",
-                    lineHeight: "1.8",
-                    color: "#333",
-                  }}
-                  initial={{ y: 15, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 1.3, duration: 0.6 }}
-                >
-                  It wasn't all smooth sailing for the Reds, however. Simon Mignolet was called into
-                  action early, saving a tame penalty from Andrej Kramaric after Dejan Lovren had
-                  clumsily brought down Serge Gnabry. The save proved pivotal, providing the
-                  platform for Alexander-Arnold's moment of magic later in the first half. James
-                  Milner's deflected cross doubled the advantage in the second half, appearing to
-                  put the tie firmly in Liverpool's control.
-                </motion.p>
-
-                <motion.p
-                  style={{
-                    fontFamily: "Georgia, serif",
-                    fontSize: "16px",
-                    lineHeight: "1.8",
-                    color: "#333",
-                  }}
-                  initial={{ y: 15, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 1.5, duration: 0.6 }}
-                >
-                  Hoffenheim, unbeaten at home in the Bundesliga last season, refused to capitulate.
-                  Mark Uth pulled a goal back late on with a drilled finish, giving Julian
-                  Nagelsmann's side a glimmer of hope ahead of the return leg at Anfield. Despite
-                  the late concession, Klopp will be delighted to take two away goals back to
-                  Merseyside, knowing a solid performance at home will see Liverpool return to the
-                  Champions League group stages.
+                  {blog?.content}
                 </motion.p>
 
                 {/* Tags */}
@@ -499,7 +495,7 @@ const SingleBlogPage = () => {
                       fontStyle: "italic",
                     }}
                   >
-                    Blog, Lifestyle, Sports
+                    {blog?.tags?.join(", ") || blog?.categories?.join(", ")}
                   </p>
                 </motion.div>
               </motion.div>
@@ -618,42 +614,30 @@ const SingleBlogPage = () => {
                   About author
                 </h2>
               </div>
-              <div className="flex justify-around gap-2">
-                {/* Left */}
-                <div>
-                  <img
-                    src="https://secure.gravatar.com/avatar/36e2a7ea656db63c186eb0a02e7fe5c656ed25665db2154081aff88f2f5671c4?s=180&d=mm&r=g"
-                    alt="author"
-                    className="rounded-full"
-                  />
-                </div>
-                {/* right */}
-                <div className="flex flex-col gap-2 pl-4">
-                  <h2 className="uppercase" style={styles.subsequentHeading}>
-                    cmsmasters
-                  </h2>
-                  <p style={styles.subCopy}>
-                    Cmsmasters Studio is a union of 25 people who are completely into innovative
-                    website design and progressive website development. Yes, we believe we can make
-                    the world be more beautiful. And as we specialize on WordPress themes, we do our
-                    job the best way it can be done.
-                  </p>
-                </div>
+              <div className="flex items-center gap-4">
+                {/* Profile Pic */}
+                <img
+                  src={blog?.author?.profilePic || "https://secure.gravatar.com/avatar/36e2a7ea656db63c186eb0a02e7fe5c656ed25665db2154081aff88f2f5671c4?s=180&d=mm&r=g"}
+                  alt={blog?.author?.name || "author"}
+                  className="rounded-full w-20 h-20 object-cover"
+                />
+                {/* Name */}
+                <h2 className="uppercase" style={styles.subsequentHeading}>
+                  {blog?.author?.name || "cmsmasters"}
+                </h2>
               </div>
             </div>
 
-            {/* More post */}
+            {/* More post - COMMENTED OUT
             <div className="mt-20" style={{ marginTop: "30px" }}>
               <div>
                 <h2 style={styles.subsequentHeading}>More posts</h2>
               </div>
 
-              {/* blogs */}
               <div
                 className="flex flex-col md:flex-row justify-between gap-8 md:gap-4"
                 style={{ marginTop: "20px" }}
               >
-                {/* first */}
                 <div className="flex flex-col gap-4">
                   <p
                     className="text-xs uppercase tracking-widest"
@@ -679,7 +663,6 @@ const SingleBlogPage = () => {
                   </h3>
                 </div>
 
-                {/* second */}
                 <div className="flex flex-col gap-4">
                   <p
                     className="text-xs uppercase tracking-widest"
@@ -703,7 +686,6 @@ const SingleBlogPage = () => {
                   </h3>
                 </div>
 
-                {/* third */}
                 <div className="flex flex-col gap-4">
                   <p
                     className="text-xs uppercase tracking-widest"
@@ -730,6 +712,7 @@ const SingleBlogPage = () => {
                 </div>
               </div>
             </div>
+            */}
           </div>
 
           <motion.div className="" variants={containerVariants} initial="hidden" animate="visible">
@@ -758,7 +741,7 @@ const SingleBlogPage = () => {
                 </motion.ul>
               </motion.div>
 
-              {/* Recommended Section */}
+              {/* Recommended Section - COMMENTED OUT
               <motion.div className="mt-12" variants={itemVariants}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 style={styles.subsequentHeading3} className=" py-2">
@@ -801,8 +784,9 @@ const SingleBlogPage = () => {
                   </div>
                 </motion.div>
               </motion.div>
+              */}
 
-              {/* Top Searches Section */}
+              {/* Top Searches Section - COMMENTED OUT
               <motion.div className="mt-12" variants={itemVariants} style={{ marginTop: "10px" }}>
                 <h2 style={styles.subsequentHeading3} className=" mb-4">
                   TOP SEARCHES
@@ -830,6 +814,7 @@ const SingleBlogPage = () => {
                   ))}
                 </motion.div>
               </motion.div>
+              */}
             </div>
           </motion.div>
         </div>
