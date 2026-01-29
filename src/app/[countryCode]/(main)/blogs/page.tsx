@@ -1,14 +1,14 @@
 // blogs/page.tsx
 "use client"
+import { getAllBlogs } from "@lib/data/contentful"
 import { Navigation } from "app/components/Navigation"
 import { RippleEffect } from "app/components/RippleEffect"
 import { ChevronLeft, ChevronRight, Facebook, Instagram, Search, Twitter } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useState } from "react"
-import { getAllBlogs } from "@lib/data/contentful"
-import type { Blog } from "types/contentful"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import type { Blog } from "types/contentful"
 
 interface CartItem {
   id: string
@@ -44,15 +44,14 @@ const Home = () => {
   // Fetch blogs from Contentful
   useEffect(() => {
     const fetchBlogs = async () => {
-      const allBlogs = await getAllBlogs()
+      const allBlogs = await getAllBlogs(undefined, countryCode)
       console.log("=== BLOGS FROM CONTENTFUL ===", allBlogs)
       setBlogs(allBlogs)
     }
     fetchBlogs()
-  }, [])
+  }, [countryCode])
 
   // Custom styles object
-
 
   const dailyFeedArticles: DailyFeedArticle[] = [
     {
@@ -224,64 +223,73 @@ const Home = () => {
               <div className="flex justify-start lg:justify-center items-center space-x-4 md:space-x-6 lg:space-x-8 mb-3 lg:mb-4 mt-2 lg:mt-4 overflow-x-auto lg:overflow-x-visible scrollbar-hide">
                 <button
                   onClick={() => setActiveTab("HOME")}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "HOME" ? "text-[#4f5864]" : "text-[#4f5864] hover:text-[#626262]"
-                    }`}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "HOME" ? "text-[#4f5864]" : "text-[#4f5864] hover:text-[#626262]"
+                  }`}
                 >
                   HOME
                 </button>
                 <button
                   onClick={() => setActiveTab("POLITICS")}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "POLITICS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                    }`}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "POLITICS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   POLITICS
                 </button>
                 <button
                   onClick={() => setActiveTab("TECHNOLOGY")}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "TECHNOLOGY" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                    }`}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "TECHNOLOGY" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   TECHNOLOGY
                 </button>
                 <button
                   onClick={() => setActiveTab("SPORTS")}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "SPORTS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                    }`}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "SPORTS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   SPORTS
                 </button>
                 <button
                   onClick={() => setActiveTab("FASHION")}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "FASHION" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                    }`}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "FASHION" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   FASHION
                 </button>
                 <button
                   onClick={() => setActiveTab("FOOD")}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "FOOD" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                    }`}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "FOOD" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   FOOD
                 </button>
                 <button
                   onClick={() => setActiveTab("SHORTCODES")}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "SHORTCODES" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                    }`}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "SHORTCODES" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   SHORTCODES
                 </button>
                 <button
                   onClick={() => setActiveTab("POST TYPES")}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "POST TYPES" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                    }`}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "POST TYPES" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   POST TYPES
                 </button>
                 <button
                   onClick={() => setActiveTab("CONTACTS")}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "CONTACTS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                    }`}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "CONTACTS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                  }`}
                 >
                   CONTACTS
                 </button>
@@ -334,64 +342,73 @@ const Home = () => {
           <div className="flex justify-start lg:justify-center items-center space-x-4 md:space-x-6 lg:space-x-8 mb-4 pt-4 lg:pt-6 overflow-x-auto lg:overflow-x-visible scrollbar-hide px-4 lg:px-0">
             <button
               onClick={() => setActiveTab("HOME")}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "HOME" ? "text-[#4f5864]" : "text-[#4f5864] hover:text-[#626262]"
-                }`}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "HOME" ? "text-[#4f5864]" : "text-[#4f5864] hover:text-[#626262]"
+              }`}
             >
               HOME
             </button>
             <button
               onClick={() => setActiveTab("POLITICS")}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "POLITICS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                }`}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "POLITICS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               POLITICS
             </button>
             <button
               onClick={() => setActiveTab("TECHNOLOGY")}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "TECHNOLOGY" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                }`}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "TECHNOLOGY" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               TECHNOLOGY
             </button>
             <button
               onClick={() => setActiveTab("SPORTS")}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "SPORTS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                }`}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "SPORTS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               SPORTS
             </button>
             <button
               onClick={() => setActiveTab("FASHION")}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "FASHION" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                }`}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "FASHION" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               FASHION
             </button>
             <button
               onClick={() => setActiveTab("FOOD")}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "FOOD" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                }`}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "FOOD" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               FOOD
             </button>
             <button
               onClick={() => setActiveTab("SHORTCODES")}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "SHORTCODES" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                }`}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "SHORTCODES" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               SHORTCODES
             </button>
             <button
               onClick={() => setActiveTab("POST TYPES")}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "POST TYPES" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                }`}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "POST TYPES" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               POST TYPES
             </button>
             <button
               onClick={() => setActiveTab("CONTACTS")}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "CONTACTS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                }`}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "CONTACTS" ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+              }`}
             >
               CONTACTS
             </button>
@@ -413,9 +430,7 @@ const Home = () => {
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.6 }}
           >
-            <p
-              className="text-xs md:text-sm font-american-typewriter text-black font-semibold tracking-[1px]"
-            >
+            <p className="text-xs md:text-sm font-american-typewriter text-black font-semibold tracking-[1px]">
               Volume 67, No.7 | September 2017
             </p>
           </motion.div>
@@ -584,7 +599,10 @@ const Home = () => {
                       >
                         {/* Grayscale Base Image */}
                         <motion.img
-                          src={blogs[0].image || "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=858&h=971&fit=crop"}
+                          src={
+                            blogs[0].image ||
+                            "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=858&h=971&fit=crop"
+                          }
                           className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                           alt={blogs[0].imagealt || blogs[0].title}
                           data-testid="hero-image"
@@ -618,11 +636,15 @@ const Home = () => {
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.2, duration: 0.6 }}
                         >
-                          {blogs[0].publishedDate ? new Date(blogs[0].publishedDate).toLocaleDateString('en-US', {
-                            month: 'long',
-                            day: 'numeric',
-                            year: 'numeric'
-                          }).toUpperCase() : ""}
+                          {blogs[0].publishedDate
+                            ? new Date(blogs[0].publishedDate)
+                                .toLocaleDateString("en-US", {
+                                  month: "long",
+                                  day: "numeric",
+                                  year: "numeric",
+                                })
+                                .toUpperCase()
+                            : ""}
                         </motion.div>
                         <motion.h2
                           className="text-xl md:text-2xl lg:text-[48px] text-gray-900 mb-3 lg:mb-4 font-american-typewriter leading-tight"
@@ -692,10 +714,11 @@ const Home = () => {
                     {blogs.slice(1).map((blog, index) => (
                       <motion.article
                         key={blog.slug}
-                        className={`${index < blogs.slice(1).length - 1
-                          ? "border-b border-gray-200 pb-3 lg:pb-4"
-                          : "pb-3 lg:pb-4"
-                          }`}
+                        className={`${
+                          index < blogs.slice(1).length - 1
+                            ? "border-b border-gray-200 pb-3 lg:pb-4"
+                            : "pb-3 lg:pb-4"
+                        }`}
                         data-testid={`daily-feed-article-${blog.slug}`}
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
@@ -711,11 +734,15 @@ const Home = () => {
                             duration: 0.5,
                           }}
                         >
-                          {blog.publishedDate ? new Date(blog.publishedDate).toLocaleDateString('en-US', {
-                            month: 'long',
-                            day: 'numeric',
-                            year: 'numeric'
-                          }).toUpperCase() : ""}
+                          {blog.publishedDate
+                            ? new Date(blog.publishedDate)
+                                .toLocaleDateString("en-US", {
+                                  month: "long",
+                                  day: "numeric",
+                                  year: "numeric",
+                                })
+                                .toUpperCase()
+                            : ""}
                         </motion.div>
                         <motion.h4
                           className="mb-2"
@@ -1172,10 +1199,11 @@ const Home = () => {
               </div>
               {message && (
                 <div
-                  className={`text-sm px-4 py-2 rounded text-center ${isSuccess
-                    ? "bg-green-100 text-green-800 border border-green-300"
-                    : "bg-red-100 text-red-800 border border-red-300"
-                    }`}
+                  className={`text-sm px-4 py-2 rounded text-center ${
+                    isSuccess
+                      ? "bg-green-100 text-green-800 border border-green-300"
+                      : "bg-red-100 text-red-800 border border-red-300"
+                  }`}
                 >
                   {message}
                 </div>
@@ -1198,7 +1226,5 @@ const Home = () => {
 // `const [email, setEmail] = useState("")` is already there.
 
 // Let's use `multi_replace_file_content`.
-
-
 
 export default Home
