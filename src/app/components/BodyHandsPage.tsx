@@ -5,10 +5,13 @@ import { useLedger } from "app/context/ledger-context"
 import { Heart, ShoppingBag, X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import { toast } from "sonner"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 import { HandCareRitualSection } from "./HandCareRitual"
+import { HttpTypes } from "@medusajs/types"
+import { Navigation } from "app/components/Navigation"
+import { RippleEffect } from "app/components/RippleEffect"
 
 const HERO_IMAGE = "/assets/body-hand-banner.png"
 const SKIN_CARE_IMAGE = "/assets/body-hand-girl-feel.png"
@@ -19,8 +22,11 @@ interface Product {
   slug: string
   category: "lotion" | "wash"
   price: number
-  price250ml?: number
-  price500ml?: number
+  variants: Array<{
+    id: string
+    size: string
+    price: number
+  }>
   size: string
   availableSizes?: string[]
   description: string
@@ -31,7 +37,7 @@ interface Product {
 }
 
 interface BodyHandsPageProps {
-  onAddToCart: (item: any) => void
+  storeProducts: HttpTypes.StoreProduct[]
 }
 
 interface FullWidthFeature {
@@ -43,44 +49,6 @@ interface FullWidthFeature {
   image: string
   imagePosition: "left" | "right"
 }
-const products: Product[] = [
-  {
-    id: "1",
-    name: "Soft Orris Hand Lotion",
-    slug: "soft-orris",
-    category: "lotion",
-    price: 2850,
-    price250ml: 1850,
-    price500ml: 2850,
-    size: "500ml",
-    availableSizes: ["250ml", "500ml"],
-    description: "A soothing blend enriched with lavender and chamomile extract",
-    image:
-      "https://images.unsplash.com/photo-1522033048162-a492b7a1bead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXZlbmRlciUyMGZpZWxkJTIwYm90YW5pY2FsfGVufDF8fHx8MTc2MTk5MTU3OXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1631292621942-de5582ec1604?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXZlbmRlciUyMGJvdHRsZSUyMHNraW5jYXJlfGVufDF8fHx8MTc2MjAwODQzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    botanical: "Lavandula Angustifolia",
-    property: "Calming & Restorative",
-  },
-  {
-    id: "2",
-    name: "Black Tea Hand Wash",
-    slug: "black-tea-hand-wash",
-    category: "wash",
-    price: 2650,
-    price250ml: 1750,
-    price500ml: 2650,
-    size: "500ml",
-    availableSizes: ["250ml", "500ml"],
-    description: "Gentle cleansing with rose geranium and aloe vera",
-    image:
-      "https://images.unsplash.com/photo-1584283626804-30ba59e636fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyb3NlJTIwc2tpbmNhcmUlMjBib3RhbmljYWx8ZW58MXx8fHwxNzYxOTkwNjgzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1697652440819-32ae57842e4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyb3NlJTIwc2tpbmNhcmUlMjBwcm9kdWN0fGVufDF8fHx8MTc2MjAwODQzMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    botanical: "Pelargonium Graveolens",
-    property: "Balancing & Purifying",
-  },
-]
 
 // Helper function to convert product name to URL slug
 function getProductSlug(productName: string): string {
@@ -90,19 +58,101 @@ function getProductSlug(productName: string): string {
     .replace(/[^a-z0-9-]/g, "")
 }
 
-export function BodyHandsPage({ onAddToCart }: BodyHandsPageProps) {
+function mapMedusaProductToInternalProduct(storeProduct: HttpTypes.StoreProduct): Product {
+  // Determine category from metadata or title
+  let category: "lotion" | "wash" = "lotion"
+  const lowerTitle = storeProduct.title?.toLowerCase() || ""
+  const type = (storeProduct.metadata?.type as string)?.toLowerCase()
+
+  if (type === "wash" || lowerTitle.includes("wash") || lowerTitle.includes("cleanser")) {
+    category = "wash"
+  } else if (type === "lotion" || lowerTitle.includes("balm") || lowerTitle.includes("hydrator")) {
+    category = "lotion"
+  }
+
+  // Get description
+  const description = storeProduct.description || (storeProduct.metadata?.description as string) || ""
+
+  // Get images
+  const image = storeProduct.thumbnail || storeProduct.images?.[0]?.url || ""
+  const hoverImage = storeProduct.images?.[1]?.url || storeProduct.images?.[0]?.url || ""
+
+  // Get Metadata fields
+  const botanical = (storeProduct.metadata?.botanical as string) || "Botanical Blend"
+  const property = (storeProduct.metadata?.property as string) || "Nourishing & Protective"
+
+  // Process variants for sizes and prices
+  const variants = (storeProduct.variants || []).map((v) => {
+    const size = (v.title || "").toLowerCase().replace(/size:\s*/i, "").trim()
+    return {
+      id: v.id,
+      size: size,
+      price: v.calculated_price?.calculated_amount || 0,
+    }
+  })
+
+  // Sort variants: treat 'ml' as standard, 'l' as x1000. Simple generic sort.
+  variants.sort((a, b) => {
+    const getVal = (s: string) => {
+      if (s.includes("l") && !s.includes("ml")) return parseInt(s) * 1000
+      return parseInt(s) || 999999
+    }
+    return getVal(a.size) - getVal(b.size)
+  })
+
+  const availableSizes = variants.map((v) => v.size)
+
+  // Determine default variant (prefer 500ml, then 250ml, then first available)
+  const defaultVariant =
+    variants.find(v => v.size.includes("500")) ||
+    variants.find(v => v.size.includes("250")) ||
+    variants[0]
+
+  const defaultPrice = defaultVariant?.price || 0
+  const defaultSize = defaultVariant?.size || "standard"
+
+  return {
+    id: storeProduct.id,
+    name: storeProduct.title || "",
+    slug: storeProduct.handle || "",
+    category,
+    price: defaultPrice,
+    size: defaultSize,
+    availableSizes,
+    variants,
+    description,
+    image,
+    hoverImage,
+    botanical,
+    property
+  }
+}
+
+export function BodyHandsPage({ storeProducts }: BodyHandsPageProps) {
   const [selectedFilter, setSelectedFilter] = useState<"all" | "lotion" | "wash">("all")
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
   const [isLedgerOpen, setIsLedgerOpen] = useState(false)
   const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
   const { ledger, toggleLedgerItem, isInLedger, removeFromLedger } = useLedger()
-  const { cartItems } = useCartItems()
+  const { cartItems, handleCartUpdate } = useCartItems()
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 50)
+    window.addEventListener("scroll", onScroll)
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
+  const products = useMemo(() => {
+    if (!storeProducts) return []
+    return storeProducts.map(mapMedusaProductToInternalProduct)
+  }, [storeProducts])
 
   const filteredProducts = useMemo(() => {
     return selectedFilter === "all"
       ? products
       : products.filter((p) => p.category === selectedFilter)
-  }, [selectedFilter])
+  }, [selectedFilter, products])
 
   const handleToggleLedger = (product: Product) => {
     const alreadyInLedger = isInLedger(product.id)
@@ -137,9 +187,9 @@ export function BodyHandsPage({ onAddToCart }: BodyHandsPageProps) {
         id: itemId,
         name: product.name,
         price,
-        size,
         quantity: 1,
         image: product.image,
+        metadata: { size },
       }
       toast.success(`${product.name} Added To Cart`, { duration: 2000 })
     }
@@ -156,7 +206,7 @@ export function BodyHandsPage({ onAddToCart }: BodyHandsPageProps) {
       })
     }, 3000)
 
-    onAddToCart(item)
+    handleCartUpdate(item)
   }
 
   const ledgerCount = ledger.length
@@ -167,6 +217,14 @@ export function BodyHandsPage({ onAddToCart }: BodyHandsPageProps) {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#e3e3d8" }}>
+      <RippleEffect />
+      <Navigation
+        isScrolled={isScrolled}
+        cartItems={cartItems}
+        onCartUpdate={handleCartUpdate}
+        forceWhiteText={true}
+      />
+      <div className="h-4" />
       {/* Hero Banner */}
       <section className="relative h-screen sm:h-[65vh] lg:h-[75vh] overflow-hidden">
         <motion.div
@@ -243,11 +301,10 @@ export function BodyHandsPage({ onAddToCart }: BodyHandsPageProps) {
                 <button
                   key={filter.value}
                   onClick={() => setSelectedFilter(filter.value)}
-                  className={`font-din-arabic text-sm transition-colors duration-300 ${
-                    selectedFilter === filter.value
+                  className={`font-din-arabic text-sm transition-colors duration-300 ${selectedFilter === filter.value
                       ? "text-black border-b border-black"
                       : "text-black/40 hover:text-black/70"
-                  }`}
+                    }`}
                   style={{ letterSpacing: "0.15em" }}
                 >
                   {filter.label}
@@ -411,13 +468,8 @@ function ProductCard({
   const isRecentlyAdded = recentlyAddedProducts.has(itemId)
 
   const getCurrentPrice = () => {
-    if (selectedSize === "250ml" && product.price250ml) {
-      return product.price250ml
-    }
-    if (selectedSize === "500ml" && product.price500ml) {
-      return product.price500ml
-    }
-    return product.price
+    const variant = product.variants.find((v) => v.size === selectedSize)
+    return variant ? variant.price : product.price
   }
 
   return (
@@ -441,11 +493,14 @@ function ProductCard({
         >
           {/* Hover Image - Behind */}
           {product.hoverImage && (
-            <div className="absolute inset-0">
+            <div
+              className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+              style={{ opacity: isImageHovered ? 1 : 0 }}
+            >
               <ImageWithFallback
                 src={product.hoverImage}
                 alt={`${product.name} alternate view`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </div>
           )}
@@ -458,7 +513,7 @@ function ProductCard({
             <ImageWithFallback
               src={product.image}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
 
@@ -473,11 +528,10 @@ function ProductCard({
               e.stopPropagation()
               handleToggleLedger(product)
             }}
-            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
-              isInLedger(product.id)
+            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${isInLedger(product.id)
                 ? "bg-white/20 border border-white/30"
                 : "bg-white/20 border border-white/30 hover:bg-white/30"
-            }`}
+              }`}
           >
             <Heart
               size={18}
@@ -529,11 +583,10 @@ function ProductCard({
                       className="sr-only"
                     />
                     <div
-                      className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
-                        selectedSize === size
+                      className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${selectedSize === size
                           ? "border-black bg-black"
                           : "border-black/30 group-hover:border-black/50"
-                      }`}
+                        }`}
                     >
                       {selectedSize === size && (
                         <div className="w-full h-full rounded-full bg-white scale-[0.4]"></div>
@@ -541,11 +594,10 @@ function ProductCard({
                     </div>
                   </div>
                   <span
-                    className={`font-din-arabic text-sm transition-colors ${
-                      selectedSize === size
+                    className={`font-din-arabic text-sm transition-colors ${selectedSize === size
                         ? "text-black"
                         : "text-black/60 group-hover:text-black/80"
-                    }`}
+                      }`}
                     style={{ letterSpacing: "0.1em" }}
                   >
                     {size}
@@ -611,9 +663,8 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[650px] overflow-hidden ${
-            feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
-          }`}
+          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[650px] overflow-hidden ${feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
+            }`}
         >
           <ImageWithFallback
             src={feature.image}
@@ -632,11 +683,10 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className={`flex items-center bg-white/10 p-8 sm:p-12 lg:p-20 ${
-            feature.imagePosition === "left"
+          className={`flex items-center bg-white/10 p-8 sm:p-12 lg:p-20 ${feature.imagePosition === "left"
               ? "lg:col-start-2 lg:row-start-1"
               : "lg:col-start-1 lg:row-start-1"
-          }`}
+            }`}
         >
           <div className="max-w-md">
             <p

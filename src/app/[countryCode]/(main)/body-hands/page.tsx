@@ -1,40 +1,40 @@
-"use client"
 import { BodyHandsPage } from "app/components/BodyHandsPage"
-import { Navigation } from "app/components/Navigation"
-import { RippleEffect } from "app/components/RippleEffect"
-import { useCartItems } from "app/context/cart-items-context"
-import React, { useEffect, useState } from "react"
+import { getCategoryByHandle } from "@lib/data/categories"
+import { listProducts } from "@lib/data/products"
+import { getRegion } from "@lib/data/regions"
+import { notFound } from "next/navigation"
 
-type CartItem = {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  image?: string
-  size?: string
+type Props = {
+  params: Promise<{ countryCode: string }>
 }
 
-export default function BodyHandsRoutePage() {
-  const [isScrolled, setIsScrolled] = useState(false)
-  const { cartItems, handleCartUpdate } = useCartItems()
+export default async function BodyHandsRoutePage(props: Props) {
+  const params = await props.params
+  const { countryCode } = params
 
-  useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 50)
-    window.addEventListener("scroll", onScroll)
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [])
+  const region = await getRegion(countryCode)
+
+  if (!region) {
+    notFound()
+  }
+
+  // Fetch the category
+  const category = await getCategoryByHandle(["body-hands"])
+
+  // Fetch products for the category
+  const { response: { products } } = await listProducts({
+    countryCode,
+    queryParams: {
+      category_id: category ? [category.id] : [],
+      limit: 100,
+    } as any
+  })
+
+  // If category is not found, products might be empty which is fine, 
+  // or we might want to show all products if that's the intended fallback.
+  // For now, assuming if category exists we filter by it.
 
   return (
-    <div className="min-h-screen">
-      <RippleEffect />
-      <Navigation
-        isScrolled={isScrolled}
-        cartItems={cartItems}
-        onCartUpdate={handleCartUpdate}
-        forceWhiteText={true}
-      />
-      <div className="h-4" />
-      <BodyHandsPage onAddToCart={handleCartUpdate} />
-    </div>
+    <BodyHandsPage storeProducts={products} />
   )
 }
