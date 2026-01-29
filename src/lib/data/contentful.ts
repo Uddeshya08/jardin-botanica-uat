@@ -1911,17 +1911,143 @@ export async function getNavigation(): Promise<NavigationItem[]> {
             limit: 1,
         });
 
-        console.log("Navigation response:", JSON.stringify(response, null, 2));
+        // console.log("Navigation response:", JSON.stringify(response, null, 2));
 
         if (!response.items.length) return [];
         const nav = response.items[0].fields as any;
 
         const result = transformNavigationItems(nav.items || []);
-        console.log("Transformed navigation:", JSON.stringify(result, null, 2));
+        // console.log("Transformed navigation:", JSON.stringify(result, null, 2));
 
         return result;
     } catch (error) {
         console.error("Error fetching navigation:", error);
         return [];
+    }
+}
+
+// ============================================================
+// BLOG FUNCTIONS
+// ============================================================
+
+import type { Document } from "@contentful/rich-text-types";
+import type { Author, Blog } from "../../types/contentful";
+
+/**
+ * Transform a Contentful blog entry to simplified Blog type
+ */
+function transformBlogEntry(entry: any): Blog | null {
+    try {
+        const fields = entry.fields;
+
+        // Transform author
+        let author: Author | undefined;
+        if (fields.author?.fields) {
+            author = {
+                name: fields.author.fields.name || "",
+                profilePic: fields.author.fields.profilePic?.fields?.file?.url
+                    ? `https:${fields.author.fields.profilePic.fields.file.url}`
+                    : undefined,
+                socialLinks: fields.author.fields.socialLinks || [],
+            };
+        }
+
+        // Transform categories
+        const categories: string[] = [];
+        if (Array.isArray(fields.category)) {
+            fields.category.forEach((cat: any) => {
+                if (cat.fields?.name) categories.push(cat.fields.name);
+            });
+        }
+
+        // Transform featured products
+        const featuredProducts: {
+            handle: string;
+            title: string;
+            image?: string;
+        }[] = [];
+        if (Array.isArray(fields.featuredProducts)) {
+            fields.featuredProducts.forEach((prod: any) => {
+                if (prod.fields) {
+                    featuredProducts.push({
+                        handle: prod.fields.handle || "",
+                        title: prod.fields.title || "",
+                        image: prod.fields.image?.fields?.file?.url
+                            ? `https:${prod.fields.image.fields.file.url}`
+                            : undefined,
+                    });
+                }
+            });
+        }
+
+        return {
+            title: fields.title || "",
+            slug: fields.slug || "",
+            description: fields.description || "",
+            content: (fields.content as unknown as Document) || null,
+            publishedDate: fields.publishedDate || "",
+            image: fields.image?.fields?.file?.url
+                ? `https:${fields.image.fields.file.url}`
+                : undefined,
+            imagealt: fields.imagealt || "",
+            categories,
+            author,
+            featuredProducts,
+            tags: fields.tags || [],
+        };
+    } catch (error) {
+        console.error("Error transforming blog entry:", error);
+        return null;
+    }
+}
+
+/**
+ * Fetch all blogs from Contentful
+ */
+export async function getAllBlogs(limit: number = 4): Promise<Blog[]> {
+    try {
+        const client = getContentfulClient();
+        const response = await client.getEntries({
+            content_type: "blog",
+            select: [
+                "fields.title",
+                "fields.slug",
+                "fields.description",
+                "fields.publishedDate",
+                "fields.image",
+                "fields.imagealt",
+            ],
+            order: ["-fields.publishedDate"],
+            limit,
+        });
+
+
+        return response.items
+            .map(transformBlogEntry)
+            .filter((b): b is Blog => b !== null);
+    } catch (error) {
+        console.error("Error fetching all blogs:", error);
+        return [];
+    }
+}
+
+/**
+ * Fetch a single blog by slug from Contentful
+ */
+export async function getBlogBySlug(slug: string): Promise<Blog | null> {
+    try {
+        const client = getContentfulClient();
+        const response = await client.getEntries({
+            content_type: "blog",
+            "fields.slug": slug,
+            include: 2,
+            limit: 1,
+        });
+
+        if (!response.items.length) return null;
+        return transformBlogEntry(response.items[0]);
+    } catch (error) {
+        console.error("Error fetching blog by slug:", error);
+        return null;
     }
 }

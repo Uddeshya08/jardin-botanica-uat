@@ -18,6 +18,8 @@
     "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
+    "@contentful/rich-text-react-renderer": "^16.1.6",
+    "@contentful/rich-text-types": "^17.2.5",
     "@headlessui/react": "^2.2.0",
     "@medusajs/js-sdk": "latest",
     "@medusajs/ui": "latest",

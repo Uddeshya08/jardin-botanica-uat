@@ -25,6 +25,8 @@ interface Product {
   image: string
   hoverImage: string
   video?: string
+  variantId?: string
+  medusaId?: string
 }
 
 const products: Product[] = [
@@ -260,7 +262,7 @@ function ProductCard({
   )
 }
 
-export function ProductCarousel() {
+export function ProductCarousel({ products: sourceProducts, countryCode }: { products?: any[], countryCode?: string }) {
   const router = useRouter()
   const { cartItems, handleCartUpdate } = useCartItems()
   const { toggleLedgerItem, isInLedger } = useLedger()
@@ -272,6 +274,40 @@ export function ProductCarousel() {
   const [hasInteracted, setHasInteracted] = useState(false)
   const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null)
   const sliderRef = React.useRef<HTMLDivElement>(null)
+  const [isPending, startTransition] = React.useTransition()
+
+  // Merge hardcoded aesthetic data with real Medusa product data
+  const mergedProducts: Product[] = React.useMemo(() => {
+    // Only map if we have source products
+    if (!sourceProducts?.length) return products;
+
+    return products.map(staticProduct => {
+      // Find matching Medusa product by handle (derived from slug)
+      // staticProduct.slug is like "in/products/saffron-jasmine-amberwood" or "/in/products/cedarwood-rose"
+      const handle = staticProduct.slug.split('/').pop();
+      const medusaProduct = sourceProducts.find(p => p.handle === handle);
+
+      if (medusaProduct) {
+        // Get the first variant ID and calculated price
+        const variant = medusaProduct.variants?.[0];
+        const calculatedPrice = variant?.calculated_price?.calculated_amount;
+        // Price should be divided by 100 if it's in cents (standard Medusa behavior), 
+        // but checking the layout.tsx logic: "price = item.unit_price > 10000 ? item.unit_price / 100 : item.unit_price"
+        // It seems safer to use the value as is or check typical magnitude.
+        // Assuming calculated_amount is correct based on ProductHero usage.
+
+        return {
+          ...staticProduct,
+          id: staticProduct.id, // KEEP STATIC UNIQUE ID for rendering keys
+          variantId: variant?.id, // Capture real variant ID for cart
+          medusaId: medusaProduct.id, // Capture real product ID for ledger
+          price: calculatedPrice || staticProduct.price,
+          // We keep the static image/video for aesthetic consistency unless missing
+        };
+      }
+      return staticProduct; // Fallback to static if not found
+    });
+  }, [sourceProducts]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -347,17 +383,21 @@ export function ProductCarousel() {
   }
 
   const handleAddToCart = (product: Product) => {
-    // Check if item already exists in cart
-    const existingItem = cartItems.find((item) => item.id === product.id)
+    // Optimistic Update
+    // Use variantId for identification if available (real product), else id (fallback)
+    const targetId = product.variantId || product.id
+
+    const existingItem = cartItems.find((item) => item.id === targetId)
     const isExisting = !!existingItem
 
     const cartItem = {
-      id: product.id,
+      id: targetId,
       name: product.name,
       price: product.price,
       quantity: isExisting ? existingItem!.quantity + 1 : 1,
       image: product.image,
       size: product.size,
+      variant_id: targetId // important for cart cleanup/matching
     }
 
     handleCartUpdate(cartItem)
@@ -370,15 +410,44 @@ export function ProductCarousel() {
     toast.success(message, { duration: 2000 })
 
     // Show temporary message on the button
-    setAddedToCartMessage(product.id)
+    setAddedToCartMessage(product.id) // This matches the key/id used in render
     setTimeout(() => setAddedToCartMessage(null), 2000)
+
+    // Server Action
+    startTransition(async () => {
+      try {
+        // Import dynamically or if imported at top, use it.
+        // importing here to avoid server-action-in-client issues depending on build setup,
+        // but standard is importing at top if "use server" is in file.
+        // Actually, server actions can be imported in client components.
+        const { addToCartAction } = await import("@lib/data/cart-actions");
+        const { emitCartUpdated } = await import("@lib/util/cart-client");
+
+        if (product.variantId) {
+          await addToCartAction({
+            variantId: product.variantId,
+            quantity: 1,
+            countryCode: countryCode || "in",
+          });
+          emitCartUpdated({ quantityDelta: 1 });
+        }
+      } catch (error) {
+        console.error("Failed to add to cart on server:", error);
+        toast.error("Failed to save to cart. Please try again.");
+        // Optionally rollback optimistic update here if needed
+      }
+    });
   }
 
   const handleToggleLedger = (product: Product) => {
-    const alreadyInLedger = isInLedger(product.id)
+    // Use medusaId (Product ID) for ledger if available, else static ID
+    const targetId = product.medusaId || product.id
+    const alreadyInLedger = isInLedger(targetId)
+
     const ledgerItem: LedgerItem = {
-      id: product.id,
+      id: targetId,
       name: product.name,
+      // ...
       price: product.price,
       image: product.image,
       description: product.description,
@@ -392,7 +461,7 @@ export function ProductCarousel() {
   }
 
   // Calculate slider position based on current slide position
-  const totalSlides = products.length
+  const totalSlides = mergedProducts.length
 
   console.log(products, "products----")
   console.log(totalSlides, "totalSlides----")
@@ -620,14 +689,14 @@ export function ProductCarousel() {
             className="w-full"
           >
             <CarouselContent className="product-carousel-content">
-              {products.map((product) => (
+              {mergedProducts.map((product) => (
                 <CarouselItem key={product.id} className="product-carousel-item">
                   <ProductCard
                     product={product}
                     onAddToCart={() => handleAddToCart(product)}
                     onToggleLedger={() => handleToggleLedger(product)}
                     isAddedToCart={addedToCartMessage === product.id}
-                    isInLedger={isInLedger(product.id)}
+                    isInLedger={isInLedger(product.medusaId || product.id)}
                   />
                 </CarouselItem>
               ))}

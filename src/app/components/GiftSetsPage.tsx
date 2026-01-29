@@ -381,10 +381,10 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
         {filteredProducts.slice(0, 2).map((product, index) => (
           <motion.div
             key={product.id}
-            initial={{ opacity: 0, x: index === 0 ? -50 : 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: index * 0.2 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
             className={`relative group overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1
               ? expandedItems[product.id]
                 ? "w-full lg:w-[96vw] lg:max-w-[1920px] lg:flex lg:flex-row shadow-md"
@@ -549,7 +549,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
               className={`bg-white/30 backdrop-blur-md border-[#e58a4d] transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1
                 ? expandedItems[product.id]
                   ? "border-t-2 lg:border-t-0 lg:border-l-2 w-full lg:w-1/2 flex flex-col max-h-[80vh] lg:h-auto"
-                  : "border-t-2 lg:border-t-0 lg:border-l-2 w-full lg:w-[60px] flex flex-col lg:items-center lg:justify-center cursor-pointer hover:bg-white/40"
+                  : "border-t-2 lg:border-t-0 lg:border-l-2 w-full lg:w-[40px] flex flex-col lg:items-center lg:justify-center cursor-pointer hover:bg-white/40"
                 : "border-t-2 w-full"
                 }`}
               onClick={(e) => {
@@ -578,8 +578,8 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                 )}
 
                 <span
-                  className={`font-din-arabic text-black text-xs sm:text-sm whitespace-nowrap transition-all duration-300 ${filteredProducts.length === 1 && !expandedItems[product.id]
-                    ? "lg:-rotate-90 lg:text-base lg:tracking-[0.3em] lg:flex lg:items-center lg:mb-24"
+                  className={`font-din-arabic text-[10px] sm:text-xs whitespace-nowrap transition-all duration-300 ${filteredProducts.length === 1 && !expandedItems[product.id]
+                    ? "lg:-rotate-90 lg:text-sm lg:tracking-[0.3em] lg:flex lg:items-center lg:mb-24"
                     : ""
                     }`}
                   style={{ letterSpacing: filteredProducts.length === 1 && !expandedItems[product.id] ? "0.3em" : "0.2em" }}
@@ -619,7 +619,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: idx * 0.05 }}
-                              className="font-din-arabic text-black/70 text-xs sm:text-sm flex items-start gap-2"
+                              className="font-din-arabic text-black/70 text-[10px] sm:text-xs flex items-start gap-2"
                               style={{ letterSpacing: "0.1em" }}
                             >
                               <span className="text-[#e58a4d] mt-1">•</span>

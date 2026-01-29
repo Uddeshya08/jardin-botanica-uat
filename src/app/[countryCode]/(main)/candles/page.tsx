@@ -175,9 +175,8 @@ const MobileProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${
-                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
             />
           </button>
         </div>
@@ -363,9 +362,8 @@ const ProductCard = ({
             >
               <Heart
                 size={18}
-                className={`transition-colors duration-300 ${
-                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+                className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                  }`}
               />
             </button>
           </div>
@@ -408,9 +406,8 @@ const ProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${
-                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
             />
           </button>
         </div>
@@ -1124,7 +1121,7 @@ const Candles = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
-                className="font-din-arabic text-base md:text-lg text-black/60 tracking-wide uppercase text-center"
+                className="font-din-arabic text-base md:text-lg text-black/60 tracking-wide text-center"
               >
                 Choose a mood to light.
               </motion.p>
@@ -1380,7 +1377,7 @@ const Candles = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
-                className="font-din-arabic text-base md:text-lg text-black/60 tracking-wide uppercase text-center"
+                className="font-din-arabic text-base md:text-lg text-black/60 tracking-wide text-center"
               >
                 Choose a mood to light.
               </motion.p>
@@ -1456,32 +1453,32 @@ const Candles = () => {
                   {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
                   {isMobile
                     ? // Mobile: One product per slide
-                      candlesCollection.map((item, index) => (
-                        <CarouselItem key={index} className="banner-carousel-item">
-                          <BannerProductCard item={item} index={index} />
-                        </CarouselItem>
-                      ))
+                    candlesCollection.map((item, index) => (
+                      <CarouselItem key={index} className="banner-carousel-item">
+                        <BannerProductCard item={item} index={index} />
+                      </CarouselItem>
+                    ))
                     : // Desktop: Groups of 3 products
-                      bannerGroups.map((group, groupIndex) => (
-                        <CarouselItem key={groupIndex} className="banner-carousel-item">
-                          <div className="flex flex-row gap-0 w-full h-auto">
-                            {group.map((item, itemIndex) => {
-                              const globalIndex = groupIndex * 3 + itemIndex
-                              return (
-                                <div key={globalIndex} className="flex-1 w-1/3">
-                                  <BannerProductCard item={item} index={globalIndex} />
-                                </div>
-                              )
-                            })}
+                    bannerGroups.map((group, groupIndex) => (
+                      <CarouselItem key={groupIndex} className="banner-carousel-item">
+                        <div className="flex flex-row gap-0 w-full h-auto">
+                          {group.map((item, itemIndex) => {
+                            const globalIndex = groupIndex * 3 + itemIndex
+                            return (
+                              <div key={globalIndex} className="flex-1 w-1/3">
+                                <BannerProductCard item={item} index={globalIndex} />
+                              </div>
+                            )
+                          })}
 
-                            {/* Fill remaining slots if group has less than 3 items */}
-                            {group.length < 3 &&
-                              Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
-                                <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
-                              ))}
-                          </div>
-                        </CarouselItem>
-                      ))}
+                          {/* Fill remaining slots if group has less than 3 items */}
+                          {group.length < 3 &&
+                            Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                              <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                            ))}
+                        </div>
+                      </CarouselItem>
+                    ))}
                 </CarouselContent>
               </Carousel>
               {/* Banner Carousel Slider Bar Removed */}
@@ -1518,17 +1515,18 @@ const Candles = () => {
             Connect with one of our experts for personalized guidance and thoughtful product
             recommendations-crafted just for your skin, your rituals, your glow.
           </motion.p>
-          <motion.button
+          <motion.a
+            href="mailto:hello@jardinbotanica.com"
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.8, delay: 0.5, ease: smoothEase }}
             viewport={{ once: true, amount: 0.3 }}
-            className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base"
+            className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base inline-block"
           >
             Speak With Us
-          </motion.button>
+          </motion.a>
         </div>
       </motion.div>
       {/* Soft Orris Section */}

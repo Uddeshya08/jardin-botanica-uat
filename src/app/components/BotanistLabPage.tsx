@@ -23,163 +23,15 @@ const OVERLAY_GRADIENT_STYLE = {
   pointerEvents: "none" as const,
 }
 
-// Web Audio API for typewriter sound - perfect sync with no latency
-let audioContext: AudioContext | null = null
-
-// Initialize AudioContext (must be done after user interaction)
-const initializeAudioContext = () => {
-  if (audioContext) return
-  if (typeof window === "undefined") return
-
-  try {
-    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-    console.log("AudioContext created, state:", audioContext.state)
-  } catch (error) {
-    console.warn("Web Audio API not supported", error)
-  }
-}
-
-// Unlock audio with user interaction
-const unlockAudio = async () => {
-  if (typeof window === "undefined") return
-
-  initializeAudioContext()
-
-  if (audioContext && audioContext.state === "suspended") {
-    console.log("Resuming suspended AudioContext...")
-    await audioContext.resume()
-    console.log("AudioContext resumed, state:", audioContext.state)
-  }
-}
-
-// Initialize sound pool (kept for compatibility, now initializes AudioContext)
-const initializeSoundPool = () => {
-  initializeAudioContext()
-}
-
-// Function to play typing sound using Web Audio API oscillator
-const playTypingSound = async () => {
-  // Initialize if not done
-  if (!audioContext) {
-    initializeAudioContext()
-  }
-
-  if (!audioContext) {
-    console.log("No audioContext available")
-    return
-  }
-
-  // Try to resume if suspended (needs user interaction first)
-  if (audioContext.state === "suspended") {
-    try {
-      await audioContext.resume()
-      console.log("AudioContext resumed to:", audioContext.state)
-    } catch (e) {
-      console.log("Failed to resume AudioContext")
-      return
-    }
-  }
-
-  if (audioContext.state !== "running") {
-    return
-  }
-
-  try {
-    const now = audioContext.currentTime
-
-    // Create a noise buffer for the "clack" sound
-    const bufferSize = audioContext.sampleRate * 0.03 // 30ms of noise
-    const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate)
-    const output = noiseBuffer.getChannelData(0)
-
-    // Fill with noise
-    for (let i = 0; i < bufferSize; i++) {
-      output[i] = Math.random() * 2 - 1
-    }
-
-    // Noise source for the "clack"
-    const noiseSource = audioContext.createBufferSource()
-    noiseSource.buffer = noiseBuffer
-
-    // Bandpass filter to shape the noise into a typewriter click
-    const filter = audioContext.createBiquadFilter()
-    filter.type = "bandpass"
-    filter.frequency.value = 3000 // High-mid frequency for metallic click
-    filter.Q.value = 1.5
-
-    // Gain for noise
-    const noiseGain = audioContext.createGain()
-    noiseGain.gain.setValueAtTime(1, now)
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.025)
-
-    // Low thud oscillator for the mechanical "thump"
-    const thudOsc = audioContext.createOscillator()
-    thudOsc.type = "sine"
-    thudOsc.frequency.setValueAtTime(150, now)
-    thudOsc.frequency.exponentialRampToValueAtTime(50, now + 0.03)
-
-    const thudGain = audioContext.createGain()
-    thudGain.gain.setValueAtTime(1, now)
-    thudGain.gain.exponentialRampToValueAtTime(0.001, now + 0.03)
-
-    // Connect noise path
-    noiseSource.connect(filter)
-    filter.connect(noiseGain)
-    noiseGain.connect(audioContext.destination)
-
-    // Connect thud path
-    thudOsc.connect(thudGain)
-    thudGain.connect(audioContext.destination)
-
-    // Play
-    noiseSource.start(now)
-    thudOsc.start(now)
-    thudOsc.stop(now + 0.03)
-  } catch (error) {
-    console.error("Error playing typing sound:", error)
-  }
-}
-
-const stopAllTypingSound = () => {
-  // Not needed with oscillator approach - sounds are very short
-}
-
 export const useTypewriter = (
   text: string,
   baseSpeed = 90,
   pauseAt?: number,
-  isActive = true,
-  enableSound = false
+  isActive = true
 ) => {
   const [displayedText, setDisplayedText] = useState("")
   const [index, setIndex] = useState(0)
   const [complete, setComplete] = useState(false)
-
-  // SOUND SLOW FACTOR
-  const playSoundEvery = 2 // ✔ sound har 2 letters me
-
-  // Initialize sound pool and set up audio unlock on first user interaction
-  useEffect(() => {
-    if (!enableSound) return
-
-    // Initialize sound pool
-    initializeSoundPool()
-
-    // Set up audio unlock on user interaction
-    const handleInteraction = () => {
-      unlockAudio()
-    }
-
-    document.addEventListener("click", handleInteraction)
-    document.addEventListener("touchstart", handleInteraction)
-    document.addEventListener("keydown", handleInteraction)
-
-    return () => {
-      document.removeEventListener("click", handleInteraction)
-      document.removeEventListener("touchstart", handleInteraction)
-      document.removeEventListener("keydown", handleInteraction)
-    }
-  }, [enableSound])
 
   useEffect(() => {
     if (!isActive) return
@@ -191,11 +43,6 @@ export const useTypewriter = (
       if (".,:".includes(char)) delay += 400
 
       const timer = setTimeout(() => {
-        // Play sound only for non-space chars AND slower
-        if (enableSound && char !== " " && index % playSoundEvery === 0) {
-          playTypingSound()
-        }
-
         setDisplayedText((prev) => prev + char)
         setIndex((prev) => prev + 1)
 
@@ -208,7 +55,7 @@ export const useTypewriter = (
     } else {
       setComplete(true)
     }
-  }, [index, isActive, text, enableSound])
+  }, [index, isActive, text, baseSpeed, pauseAt])
 
   // Reset when re-triggered
   useEffect(() => {
@@ -1098,22 +945,19 @@ export function BotanistLabPage() {
     questionText,
     90,
     undefined,
-    phase === 1,
-    true // Sound enabled for hero
+    phase === 1
   )
   const { displayedText: displayedPart1, isComplete: part1Complete } = useTypewriter(
     answerPart1,
     90,
     undefined,
-    phase === 2,
-    true // Sound enabled
+    phase === 2
   )
   const { displayedText: displayedPart2, isComplete: part2Complete } = useTypewriter(
     answerPart2,
     90,
     pausePosition,
-    phase === 3,
-    true // Sound enabled
+    phase === 3
   )
 
   // Start animation immediately when page loads
