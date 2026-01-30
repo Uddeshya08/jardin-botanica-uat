@@ -10,27 +10,30 @@ import React, { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
-interface Product {
+export interface Product {
   id: string
   name: string
-  category: "candle" | "diffuser"
+  subCategoryName: string // From Contentful subCategory name (e.g., "Candles", "Diffusers")
   price: number
   size: string
   description: string
-  image: string
+  image: string | null
   hoverImage?: string
   botanical: string
   property: string
 }
 
 interface HomeCreationsPageProps {
+  products: Product[]
+  filterOptions: string[] // Dynamic filter names from Contentful (e.g., ["Candles", "Diffusers"])
+  isLoading?: boolean
   onAddToCart: (item: {
     id: string
     name: string
     price: number
     size: string
     quantity: number
-    image: string
+    image: string | null
     category: string
   }) => void
 }
@@ -49,79 +52,6 @@ const HERO_IMAGE =
   "https://images.unsplash.com/photo-1632118588340-c4c7a674c707?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncmVlbmhvdXNlJTIwYm90YW5pY2FsJTIwdmludGFnZXxlbnwxfHx8fDE3NjIwMDk0Mjh8MA&ixlib=rb-4.1.0&q=80&w=1920&utm_source=figma&utm_medium=referral"
 
 const EDITORIAL_IMAGE = "/assets/99b7e68b7e2b2dbbfbf85a52e8237ce212b58258.png"
-
-const products: Product[] = [
-  {
-    id: "atmos-01-saffron-jasmine",
-    name: "Saffron Jasmine Amberwood",
-    category: "candle",
-    price: 3200,
-    size: "250g",
-    description: "Hand-poured soy candle with saffron, jasmine and amberwood",
-    image:
-      "https://images.unsplash.com/photo-1696391267294-103e9c210c6b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob21lJTIwY3JlYXRpb25zJTIwaW50ZXJpb3IlMjBib3RhbmljYWx8ZW58MXx8fHwxNzYyMDA5NDI3fDA&ixlib=rb-4.1.0&q=80&w=1920&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1576260735040-0161203bab23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzY2VudGVkJTIwY2FuZGxlJTIwdmludGFnZXxlbnwxfHx8fDE3NjIwMDk0Mjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    botanical: "Crocus Sativus",
-    property: "Exotic & Luxurious",
-  },
-  {
-    id: "atmos-02-oud-waters",
-    name: "Oud Waters",
-    category: "candle",
-    price: 3400,
-    size: "250g",
-    description: "Hand-poured soy candle with rare oud and aquatic notes",
-    image:
-      "https://images.unsplash.com/photo-1580584126903-c17d41830450?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvdWQlMjBjYW5kbGV8ZW58MXx8fHwxNzYyMDIzNDY5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1621494042364-e0e6ba89c21d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYm90YW5pY2FsJTIwY2FuZGxlfGVufDF8fHx8MTc2MjAwOTQyNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    botanical: "Aquilaria Malaccensis",
-    property: "Deep & Mysterious",
-  },
-  {
-    id: "atmos-03-cedarwood-rose",
-    name: "Cedarwood Rose",
-    category: "candle",
-    price: 3400,
-    size: "300g",
-    description: "Hand-poured soy candle with cedarwood and damask rose",
-    image:
-      "https://images.unsplash.com/photo-1696391267294-103e9c210c6b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob21lJTIwY3JlYXRpb25zJTIwaW50ZXJpb3IlMjBib3RhbmljYWx8ZW58MXx8fHwxNzYyMDA5NDI3fDA&ixlib=rb-4.1.0&q=80&w=1920&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1621494042364-e0e6ba89c21d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYm90YW5pY2FsJTIwY2FuZGxlfGVufDF8fHx8MTc2MjAwOTQyNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    botanical: "Cedrus Atlantica",
-    property: "Woody & Romantic",
-  },
-  {
-    id: "atmos-04-santal-pepper",
-    name: "Santal Pepper",
-    category: "candle",
-    price: 3500,
-    size: "300g",
-    description: "Hand-poured soy candle with sandalwood and black pepper",
-    image:
-      "https://images.unsplash.com/photo-1696391267294-103e9c210c6b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob21lJTIwY3JlYXRpb25zJTIwaW50ZXJpb3IlMjBib3RhbmljYWx8ZW58MXx8fHwxNzYyMDA5NDI3fDA&ixlib=rb-4.1.0&q=80&w=1920&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1621494042364-e0e6ba89c21d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYm90YW5pY2FsJTIwY2FuZGxlfGVufDF8fHx8MTc2MjAwOTQyNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    botanical: "Santalum Album",
-    property: "Spicy & Grounding",
-  },
-  {
-    id: "lava-rock-diffuser",
-    name: "Lava Rock Diffuser",
-    category: "diffuser",
-    price: 2850,
-    size: "Set",
-    description: "Natural lava stone diffuser with essential oil blend",
-    image:
-      "https://images.unsplash.com/photo-1597239164203-0b0b9fec6040?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXZhJTIwcm9jayUyMGRpZmZ1c2VyJTIwaG9tZXxlbnwxfHx8fDE3NjIwMDk0MjV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1747198919508-a7657e63d4f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXZhJTIwcm9jayUyMGRpZmZ1c2VyJTIwYXJvbWF0aGVyYXB5fGVufDF8fHx8MTc1OTc2ODkyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    botanical: "Volcanic Stone",
-    property: "Aromatic & Purifying",
-  },
-]
 
 const fullWidthFeatures: FullWidthFeature[] = [
   {
@@ -156,8 +86,13 @@ function getProductSlug(productName: string): string {
     .replace(/[^a-z0-9-]/g, "")
 }
 
-export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
-  const [selectedFilter, setSelectedFilter] = useState<"all" | "candle" | "diffuser">("all")
+export function HomeCreationsPage({
+  products,
+  filterOptions,
+  isLoading = false,
+  onAddToCart,
+}: HomeCreationsPageProps) {
+  const [selectedFilter, setSelectedFilter] = useState<string>("all")
   const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
   const searchParams = useSearchParams()
   const { toggleLedgerItem, isInLedger } = useLedger()
@@ -165,19 +100,20 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
 
   useEffect(() => {
     const filter = searchParams?.get("filter")
-    if (filter === "candle" || filter === "diffuser") {
+    console.log(filterOptions)
+    if (filter && filterOptions.includes(filter)) {
       setSelectedFilter(filter)
     } else {
       setSelectedFilter("all")
     }
-  }, [searchParams])
+  }, [searchParams, filterOptions])
 
   const filteredProducts = useMemo(() => {
     if (selectedFilter === "all") {
       return products
     }
-    return products.filter((product) => product.category === selectedFilter)
-  }, [selectedFilter])
+    return products.filter((product) => product.subCategoryName === selectedFilter)
+  }, [selectedFilter, products])
 
   const handleToggleLedger = (product: Product) => {
     const alreadyInLedger = isInLedger(product.id)
@@ -187,7 +123,7 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
       price: product.price,
       image: product.image,
       description: product.description,
-      category: product.category,
+      category: product.subCategoryName,
       size: product.size,
       botanical: product.botanical,
       property: product.property,
@@ -214,7 +150,7 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
         size: product.size,
         quantity: existingItem.quantity + 1,
         image: product.image,
-        category: product.category,
+        category: product.subCategoryName,
       }
       toast.success(`Quantity updated: ${product.name}`, {
         duration: 2000,
@@ -228,7 +164,7 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
         size: product.size,
         quantity: 1,
         image: product.image,
-        category: product.category,
+        category: product.subCategoryName,
       }
       toast.success(`${product.name} Added To Cart`, {
         duration: 2000,
@@ -321,9 +257,11 @@ export function HomeCreationsPage({ onAddToCart }: HomeCreationsPageProps) {
               className="flex flex-wrap gap-4 sm:gap-6"
             >
               {[
-                { label: "All products", value: "all" as const },
-                { label: "Candles", value: "candle" as const },
-                { label: "Diffusers", value: "diffuser" as const },
+                { label: "All products", value: "all" },
+                ...filterOptions.map((name) => ({
+                  label: name.charAt(0).toUpperCase() + name.slice(1),
+                  value: name,
+                })),
               ].map((filter) => (
                 <button
                   key={filter.value}
@@ -464,7 +402,7 @@ function ProductCard({
               <ImageWithFallback
                 src={product.hoverImage}
                 alt={`${product.name} alternate view`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </div>
           )}
@@ -477,7 +415,7 @@ function ProductCard({
             <ImageWithFallback
               src={product.image}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
 

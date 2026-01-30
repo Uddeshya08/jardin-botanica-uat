@@ -543,8 +543,10 @@ export interface PageLink {
 // Product Category Content Types (for navigation)
 export interface ProductCategoryFields {
   name: string
+  handle: string // Unique identifier for querying
   url?: string
-  subCategory?: ContentfulPageLink[]
+  productHandles?: string[] // List of Medusa product handles associated with this category
+  subCategory?: (ContentfulPageLink | ContentfulProductCategory)[] // Can reference either PageLink or ProductCategory
 }
 
 export interface ContentfulProductCategory extends EntrySkeletonType {
@@ -552,10 +554,13 @@ export interface ContentfulProductCategory extends EntrySkeletonType {
   fields: ProductCategoryFields
 }
 
+// Recursive ProductCategory structure for nested categories
 export interface ProductCategory {
   name: string
+  handle: string
   url?: string
-  subCategory: PageLink[]
+  productHandles: string[] // Medusa product handles to fetch
+  subCategories: ProductCategory[] // Only nested ProductCategory items (filtered from subCategory)
 }
 
 // Navigation Content Types

@@ -1804,3 +1804,81 @@ export async function getBlogBySlug(slug: string, countryCode?: string): Promise
     return null
   }
 }
+
+// ============================================================
+// PRODUCT CATEGORY FUNCTIONS
+// ============================================================
+
+import type { ContentfulProductCategory, ProductCategory } from "../../types/contentful"
+
+/**
+ * Transform a Contentful ProductCategory entry to simplified ProductCategory type
+ * Filters subCategory to only include nested ProductCategory references (not PageLink)
+ * Recursively transforms nested ProductCategories
+ */
+function transformProductCategoryEntry(
+  entry: Entry<ContentfulProductCategory>
+): ProductCategory | null {
+  try {
+    const fields = entry.fields as any
+
+    // Transform subCategory - filter only ProductCategory references
+    const subCategories: ProductCategory[] = []
+    if (Array.isArray(fields.subCategory)) {
+      fields.subCategory.forEach((item: any) => {
+        // Check if this is a ProductCategory reference (not PageLink)
+        const contentTypeId = item.sys?.contentType?.sys?.id
+        if (contentTypeId === "productCategory" && item.fields) {
+          // Recursively transform nested ProductCategory
+          const nestedCategory = transformProductCategoryEntry(
+            item as Entry<ContentfulProductCategory>
+          )
+          if (nestedCategory) {
+            subCategories.push(nestedCategory)
+          }
+        }
+      })
+    }
+
+    return {
+      name: fields.name || "",
+      handle: fields.handle || "",
+      url: fields.url || undefined,
+      productHandles: Array.isArray(fields.productHandles) ? fields.productHandles : [],
+      subCategories,
+    }
+  } catch (error) {
+    console.error("Error transforming ProductCategory entry:", error)
+    return null
+  }
+}
+
+/**
+ * Fetch a product category from Contentful by handle
+ * @param handle - The unique handle identifier for the category (e.g., "home-creations")
+ * @returns ProductCategory or null if not found
+ */
+export async function getProductCategoryByHandle(handle: string): Promise<ProductCategory | null> {
+  try {
+    const client = getContentfulClient()
+
+    // Query Contentful for entries with matching handle
+    // include: 2 to resolve nested ProductCategory references in subCategory
+    const response = await client.getEntries({
+      content_type: "productCategory",
+      "fields.handle": handle,
+      include: 2,
+    })
+
+    if (!response.items || response.items.length === 0) {
+      console.warn(`No product category found for handle: ${handle}`)
+      return null
+    }
+
+    const entry = response.items[0] as unknown as Entry<ContentfulProductCategory>
+    return transformProductCategoryEntry(entry)
+  } catch (error) {
+    console.error(`Error fetching product category by handle "${handle}" from Contentful:`, error)
+    return null
+  }
+}
