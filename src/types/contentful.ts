@@ -445,6 +445,7 @@ export interface CandlesCollectionItem {
   url?: string // URL to navigate to when clicked
   order: number
   isActive: boolean
+  price?: number // Optional price from Medusa
 }
 
 // Legacy type - kept for backward compatibility but deprecated

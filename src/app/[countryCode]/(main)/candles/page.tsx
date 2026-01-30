@@ -1,8 +1,7 @@
 // HERO COMPONENT with Motion Animations (Updated with PeopleAlsoBought effects)
 "use client"
-import { getCandlesCollection } from "@lib/data/contentful"
-import { Github } from "@medusajs/icons"
-import { Heading } from "@medusajs/ui"
+import { getProductCategoryByHandle } from "@lib/data/contentful"
+import { getProductByHandle } from "@lib/data/products"
 import { ImageWithFallback } from "app/components/figma/ImageWithFallback"
 import { Navigation } from "app/components/Navigation"
 import { PageBanner } from "app/components/PageBanner"
@@ -16,9 +15,9 @@ import {
 import { useCartItems } from "app/context/cart-items-context"
 import { type LedgerItem, useLedger } from "app/context/ledger-context"
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
-import { motion, useScroll, useSpring, useTransform } from "motion/react"
+import { motion, useScroll, useSpring } from "motion/react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import type { CandlesCollectionItem } from "../../../../types/contentful"
@@ -63,7 +62,7 @@ const MobileProductCard = ({
       cartItem = {
         id: itemId,
         name: item.label,
-        price: 0,
+        price: item.price || 0,
         quantity: existingItem.quantity + 1,
         image: item.src,
       }
@@ -75,7 +74,7 @@ const MobileProductCard = ({
       cartItem = {
         id: itemId,
         name: item.label,
-        price: 0,
+        price: item.price || 0,
         quantity: 1,
         image: item.src,
       }
@@ -110,7 +109,7 @@ const MobileProductCard = ({
     const ledgerItem: LedgerItem = {
       id: productId,
       name: item.label,
-      price: 0, // Price not available in CandlesCollectionItem
+      price: item.price || 0,
       image: item.src,
       description: item.label,
       category: "Candles",
@@ -175,8 +174,9 @@ const MobileProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -235,6 +235,7 @@ const ProductCard = ({
   url,
   index,
   productId,
+  price,
 }: {
   src: string
   label: string
@@ -242,6 +243,7 @@ const ProductCard = ({
   url?: string
   index: number
   productId: string
+  price: number
 }) => {
   const { toggleLedgerItem, isInLedger } = useLedger()
   const { cartItems, handleCartUpdate } = useCartItems()
@@ -258,7 +260,7 @@ const ProductCard = ({
     const ledgerItem: LedgerItem = {
       id: productId,
       name: label,
-      price: 0, // You may want to get actual price from your data
+      price: price,
       image: src,
       description: label,
       category: "Candles",
@@ -285,7 +287,7 @@ const ProductCard = ({
       cartItem = {
         id: itemId,
         name: label,
-        price: 0,
+        price: price,
         quantity: existingItem.quantity + 1,
         image: src,
       }
@@ -297,7 +299,7 @@ const ProductCard = ({
       cartItem = {
         id: itemId,
         name: label,
-        price: 0,
+        price: price,
         quantity: 1,
         image: src,
       }
@@ -362,8 +364,9 @@ const ProductCard = ({
             >
               <Heart
                 size={18}
-                className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                  }`}
+                className={`transition-colors duration-300 ${
+                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
               />
             </button>
           </div>
@@ -406,8 +409,9 @@ const ProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -499,7 +503,7 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
       cartItem = {
         id: itemId,
         name: item.label,
-        price: 0,
+        price: item.price || 0,
         quantity: existingItem.quantity + 1,
         image: item.src,
       }
@@ -511,7 +515,7 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
       cartItem = {
         id: itemId,
         name: item.label,
-        price: 0,
+        price: item.price || 0,
         quantity: 1,
         image: item.src,
       }
@@ -855,12 +859,45 @@ const Candles = () => {
     return visible
   }
 
-  // Fetch candles collection from Contentful
+  // Fetch candles collection from Medusa via Contentful category
+  const params = useParams()
+  const countryCode = (params?.countryCode as string) || "us"
+
   useEffect(() => {
     const fetchCandlesCollection = async () => {
       setIsLoadingCollection(true)
       try {
-        const collection = await getCandlesCollection()
+        const category = await getProductCategoryByHandle("candles")
+        if (!category?.productHandles?.length) {
+          setCandlesCollection([])
+          return
+        }
+
+        const productHandles = category.productHandles
+        const products = await Promise.all(
+          productHandles.map((handle) => getProductByHandle({ handle, countryCode }))
+        )
+
+        const collection: CandlesCollectionItem[] = products
+          .filter((product): product is NonNullable<typeof product> => !!product)
+          .map((product, index) => {
+            const cheapestVariant = product.variants?.reduce((cheapest, variant) => {
+              const price = variant.calculated_price?.calculated_amount || 0
+              const cheapestPrice = cheapest?.calculated_price?.calculated_amount || 0
+              return price < cheapestPrice ? variant : cheapest
+            }, product.variants?.[0])
+
+            return {
+              label: product.title,
+              src: product.thumbnail || "",
+              hoverSrc: product.images?.[1]?.url || product.thumbnail || undefined,
+              url: `/products/${product.handle}`,
+              order: index,
+              isActive: true,
+              price: cheapestVariant?.calculated_price?.calculated_amount || undefined,
+            }
+          })
+
         setCandlesCollection(collection)
       } catch (error) {
         console.error("Error fetching candles collection:", error)
@@ -869,7 +906,7 @@ const Candles = () => {
       }
     }
     fetchCandlesCollection()
-  }, [])
+  }, [countryCode])
 
   // Transform collection items for desktop products view (with hover images)
   const products = candlesCollection.map((item) => ({
@@ -877,6 +914,7 @@ const Candles = () => {
     label: item.label,
     hoverSrc: item.hoverSrc || item.src, // Fallback to main image if no hover image
     url: item.url,
+    price: item.price,
   }))
 
   // Calculate slider position based on scroll progress
@@ -1328,7 +1366,7 @@ const Candles = () => {
                 className="w-full"
               >
                 <CarouselContent className="candles-carousel-content -ml-0">
-                  {products.map(({ src, label, hoverSrc, url }, i) => {
+                  {products.map(({ src, label, hoverSrc, url, price }, i) => {
                     const productId = url || label.toLowerCase().replace(/\s+/g, "-")
                     return (
                       <CarouselItem key={i} className="candles-carousel-item pl-0">
@@ -1339,6 +1377,7 @@ const Candles = () => {
                           hoverSrc={hoverSrc}
                           url={url}
                           productId={productId}
+                          price={price || 0}
                         />
                       </CarouselItem>
                     )
@@ -1453,32 +1492,32 @@ const Candles = () => {
                   {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
                   {isMobile
                     ? // Mobile: One product per slide
-                    candlesCollection.map((item, index) => (
-                      <CarouselItem key={index} className="banner-carousel-item">
-                        <BannerProductCard item={item} index={index} />
-                      </CarouselItem>
-                    ))
+                      candlesCollection.map((item, index) => (
+                        <CarouselItem key={index} className="banner-carousel-item">
+                          <BannerProductCard item={item} index={index} />
+                        </CarouselItem>
+                      ))
                     : // Desktop: Groups of 3 products
-                    bannerGroups.map((group, groupIndex) => (
-                      <CarouselItem key={groupIndex} className="banner-carousel-item">
-                        <div className="flex flex-row gap-0 w-full h-auto">
-                          {group.map((item, itemIndex) => {
-                            const globalIndex = groupIndex * 3 + itemIndex
-                            return (
-                              <div key={globalIndex} className="flex-1 w-1/3">
-                                <BannerProductCard item={item} index={globalIndex} />
-                              </div>
-                            )
-                          })}
+                      bannerGroups.map((group, groupIndex) => (
+                        <CarouselItem key={groupIndex} className="banner-carousel-item">
+                          <div className="flex flex-row gap-0 w-full h-auto">
+                            {group.map((item, itemIndex) => {
+                              const globalIndex = groupIndex * 3 + itemIndex
+                              return (
+                                <div key={globalIndex} className="flex-1 w-1/3">
+                                  <BannerProductCard item={item} index={globalIndex} />
+                                </div>
+                              )
+                            })}
 
-                          {/* Fill remaining slots if group has less than 3 items */}
-                          {group.length < 3 &&
-                            Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
-                              <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
-                            ))}
-                        </div>
-                      </CarouselItem>
-                    ))}
+                            {/* Fill remaining slots if group has less than 3 items */}
+                            {group.length < 3 &&
+                              Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                                <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                              ))}
+                          </div>
+                        </CarouselItem>
+                      ))}
                 </CarouselContent>
               </Carousel>
               {/* Banner Carousel Slider Bar Removed */}
