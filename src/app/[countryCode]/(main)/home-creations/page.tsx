@@ -10,16 +10,6 @@ import { useParams } from "next/navigation"
 import React, { useEffect, useState } from "react"
 import type { ProductCategory } from "../../../../types/contentful"
 
-type CartItem = {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  image: string | null
-  size?: string
-  category?: string
-}
-
 // Track which products we've already seen to avoid duplicates
 // Returns only the subCategories with their product handles, filtering out duplicates
 function getSubCategoriesWithProducts(
@@ -84,12 +74,36 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string): Pr
     size = metadata.weight
   }
 
+  // Normalize the size to match variant size format
+  size = size
+    .toLowerCase()
+    .replace(/size:\s*/i, "")
+    .trim()
+
   // Get images
   const image = medusaProduct.thumbnail || null
   const hoverImage =
     medusaProduct.images && medusaProduct.images.length > 1
       ? medusaProduct.images[1].url
       : undefined
+
+  // Process variants for cart
+  const variants = (medusaProduct.variants || []).map((v: any) => {
+    const variantSize = (v.title || "")
+      .toLowerCase()
+      .replace(/size:\s*/i, "")
+      .trim()
+    return {
+      id: v.id,
+      size: variantSize,
+      price: v.calculated_price?.calculated_amount || 0,
+    }
+  })
+
+  // If no size found, default to first variant's size
+  if (!size && variants.length > 0) {
+    size = variants[0].size
+  }
 
   return {
     id: medusaProduct.id,
@@ -102,6 +116,7 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string): Pr
     hoverImage,
     botanical: metadata.botanical || "",
     property: metadata.property || "",
+    variants,
   }
 }
 
@@ -199,9 +214,7 @@ export default function HomeCreationsRoutePage() {
         products={products}
         filterOptions={filterOptions}
         isLoading={isLoading}
-        onAddToCart={(item: CartItem) => {
-          handleCartUpdate(item)
-        }}
+        countryCode={countryCode}
       />
     </div>
   )

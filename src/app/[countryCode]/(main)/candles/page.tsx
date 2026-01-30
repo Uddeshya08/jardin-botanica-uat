@@ -1,5 +1,6 @@
 // HERO COMPONENT with Motion Animations (Updated with PeopleAlsoBought effects)
 "use client"
+import { addToCartAction } from "@lib/data/cart-actions"
 import { getProductCategoryByHandle } from "@lib/data/contentful"
 import { getProductByHandle } from "@lib/data/products"
 import { ImageWithFallback } from "app/components/figma/ImageWithFallback"
@@ -18,30 +19,25 @@ import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
 import { motion, useScroll, useSpring } from "motion/react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { toast } from "sonner"
 import type { CandlesCollectionItem } from "../../../../types/contentful"
 import InstagramEmbed2 from "./test"
 
-interface CartItem {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  image?: string
-}
-
 const MobileProductCard = ({
   item,
   productId,
+  countryCode,
 }: {
   item: CandlesCollectionItem
   productId: string
+  countryCode: string
 }) => {
   const router = useRouter()
   const { toggleLedgerItem, isInLedger } = useLedger()
   const { cartItems, handleCartUpdate } = useCartItems()
   const isItemInLedger = isInLedger(productId)
+  const [isPending, startTransition] = useTransition()
 
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isRecentlyAdded, setIsRecentlyAdded] = useState(false)
@@ -52,6 +48,13 @@ const MobileProductCard = ({
     e.stopPropagation()
 
     const itemId = productId
+    const variantId = item.variantId
+
+    if (!variantId) {
+      console.error("No variantId found for product:", item.label)
+      toast.error("Could not add to cart - variant not found")
+      return
+    }
 
     // Check if item already exists in cart
     const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
@@ -65,6 +68,7 @@ const MobileProductCard = ({
         price: item.price || 0,
         quantity: existingItem.quantity + 1,
         image: item.src,
+        variant_id: variantId,
       }
       toast.success(`Quantity updated: ${item.label}`, {
         duration: 2000,
@@ -77,6 +81,7 @@ const MobileProductCard = ({
         price: item.price || 0,
         quantity: 1,
         image: item.src,
+        variant_id: variantId,
       }
       toast.success(`${item.label} Added To Cart`, {
         duration: 2000,
@@ -92,6 +97,20 @@ const MobileProductCard = ({
     }, 3000)
 
     handleCartUpdate(cartItem)
+
+    // Server Action - persist cart to backend
+    startTransition(async () => {
+      try {
+        await addToCartAction({
+          variantId,
+          quantity: existingItem ? existingItem.quantity + 1 : 1,
+          countryCode: countryCode || "in",
+        })
+      } catch (error) {
+        console.error("Failed to add to cart on server:", error)
+        toast.error("Failed to save to cart. Please try again.")
+      }
+    })
   }
 
   const handleProductClick = () => {
@@ -236,6 +255,8 @@ const ProductCard = ({
   index,
   productId,
   price,
+  variantId,
+  countryCode,
 }: {
   src: string
   label: string
@@ -244,6 +265,8 @@ const ProductCard = ({
   index: number
   productId: string
   price: number
+  variantId?: string
+  countryCode: string
 }) => {
   const { toggleLedgerItem, isInLedger } = useLedger()
   const { cartItems, handleCartUpdate } = useCartItems()
@@ -251,6 +274,7 @@ const ProductCard = ({
   const [isRecentlyAdded, setIsRecentlyAdded] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const isItemInLedger = isInLedger(productId)
+  const [isPending, startTransition] = useTransition()
 
   const handleToggleLedger = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -278,6 +302,12 @@ const ProductCard = ({
 
     const itemId = productId
 
+    if (!variantId) {
+      console.error("No variantId found for product:", label)
+      toast.error("Could not add to cart - variant not found")
+      return
+    }
+
     // Check if item already exists in cart
     const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
 
@@ -290,6 +320,7 @@ const ProductCard = ({
         price: price,
         quantity: existingItem.quantity + 1,
         image: src,
+        variant_id: variantId,
       }
       toast.success(`Quantity updated: ${label}`, {
         duration: 2000,
@@ -302,6 +333,7 @@ const ProductCard = ({
         price: price,
         quantity: 1,
         image: src,
+        variant_id: variantId,
       }
       toast.success(`${label} Added To Cart`, {
         duration: 2000,
@@ -317,6 +349,20 @@ const ProductCard = ({
     }, 3000)
 
     handleCartUpdate(cartItem)
+
+    // Server Action - persist cart to backend
+    startTransition(async () => {
+      try {
+        await addToCartAction({
+          variantId,
+          quantity: existingItem ? existingItem.quantity + 1 : 1,
+          countryCode: countryCode || "in",
+        })
+      } catch (error) {
+        console.error("Failed to add to cart on server:", error)
+        toast.error("Failed to save to cart. Please try again.")
+      }
+    })
   }
 
   return (
@@ -472,12 +518,21 @@ const ProductCard = ({
   )
 }
 
-const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index: number }) => {
+const BannerProductCard = ({
+  item,
+  index,
+  countryCode,
+}: {
+  item: CandlesCollectionItem
+  index: number
+  countryCode: string
+}) => {
   const router = useRouter()
   const { cartItems, handleCartUpdate } = useCartItems() // Added useCartItems
   const [isHovered, setIsHovered] = useState(false)
   const [isRecentlyAdded, setIsRecentlyAdded] = useState(false) // Added state
   const [isButtonHovered, setIsButtonHovered] = useState(false) // Added state
+  const [isPending, startTransition] = useTransition()
 
   const handleProductClick = () => {
     if (item.url) {
@@ -493,6 +548,13 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
 
     // Generate a simple ID if none exists (fallback)
     const itemId = item.url || item.label.toLowerCase().replace(/\s+/g, "-")
+    const variantId = item.variantId
+
+    if (!variantId) {
+      console.error("No variantId found for product:", item.label)
+      toast.error("Could not add to cart - variant not found")
+      return
+    }
 
     // Check if item already exists in cart
     const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
@@ -506,6 +568,7 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
         price: item.price || 0,
         quantity: existingItem.quantity + 1,
         image: item.src,
+        variant_id: variantId,
       }
       toast.success(`Quantity updated: ${item.label}`, {
         duration: 2000,
@@ -518,6 +581,7 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
         price: item.price || 0,
         quantity: 1,
         image: item.src,
+        variant_id: variantId,
       }
       toast.success(`${item.label} Added To Cart`, {
         duration: 2000,
@@ -533,6 +597,20 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
     }, 3000)
 
     handleCartUpdate(cartItem)
+
+    // Server Action - persist cart to backend
+    startTransition(async () => {
+      try {
+        await addToCartAction({
+          variantId,
+          quantity: existingItem ? existingItem.quantity + 1 : 1,
+          countryCode: countryCode || "in",
+        })
+      } catch (error) {
+        console.error("Failed to add to cart on server:", error)
+        toast.error("Failed to save to cart. Please try again.")
+      }
+    })
   }
 
   // Group products into sets of 3 for banner display
@@ -895,6 +973,7 @@ const Candles = () => {
               order: index,
               isActive: true,
               price: cheapestVariant?.calculated_price?.calculated_amount || undefined,
+              variantId: cheapestVariant?.id,
             }
           })
 
@@ -915,6 +994,7 @@ const Candles = () => {
     hoverSrc: item.hoverSrc || item.src, // Fallback to main image if no hover image
     url: item.url,
     price: item.price,
+    variantId: item.variantId,
   }))
 
   // Calculate slider position based on scroll progress
@@ -1231,7 +1311,11 @@ const Candles = () => {
                       const productId = item.url || item.label.toLowerCase().replace(/\s+/g, "-")
                       return (
                         <CarouselItem key={i} className="mobile-candles-carousel-item">
-                          <MobileProductCard item={item} productId={productId} />
+                          <MobileProductCard
+                            item={item}
+                            productId={productId}
+                            countryCode={countryCode}
+                          />
                         </CarouselItem>
                       )
                     })}
@@ -1366,7 +1450,7 @@ const Candles = () => {
                 className="w-full"
               >
                 <CarouselContent className="candles-carousel-content -ml-0">
-                  {products.map(({ src, label, hoverSrc, url, price }, i) => {
+                  {products.map(({ src, label, hoverSrc, url, price, variantId }, i) => {
                     const productId = url || label.toLowerCase().replace(/\s+/g, "-")
                     return (
                       <CarouselItem key={i} className="candles-carousel-item pl-0">
@@ -1378,6 +1462,8 @@ const Candles = () => {
                           url={url}
                           productId={productId}
                           price={price || 0}
+                          variantId={variantId}
+                          countryCode={countryCode}
                         />
                       </CarouselItem>
                     )
@@ -1494,7 +1580,7 @@ const Candles = () => {
                     ? // Mobile: One product per slide
                       candlesCollection.map((item, index) => (
                         <CarouselItem key={index} className="banner-carousel-item">
-                          <BannerProductCard item={item} index={index} />
+                          <BannerProductCard item={item} index={index} countryCode={countryCode} />
                         </CarouselItem>
                       ))
                     : // Desktop: Groups of 3 products
@@ -1505,7 +1591,11 @@ const Candles = () => {
                               const globalIndex = groupIndex * 3 + itemIndex
                               return (
                                 <div key={globalIndex} className="flex-1 w-1/3">
-                                  <BannerProductCard item={item} index={globalIndex} />
+                                  <BannerProductCard
+                                    item={item}
+                                    index={globalIndex}
+                                    countryCode={countryCode}
+                                  />
                                 </div>
                               )
                             })}

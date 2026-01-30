@@ -1,11 +1,12 @@
 "use client"
 
+import { addToCartAction } from "@lib/data/cart-actions"
 import { useCartItems } from "app/context/cart-items-context"
 import { useLedger } from "app/context/ledger-context"
 import { Heart, X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useTransition } from "react"
 import { toast } from "sonner"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 import { HandCareRitualSection } from "./HandCareRitual"
@@ -37,6 +38,7 @@ interface BodyHandsPageProps {
   products: Product[]
   filterOptions: string[]
   isLoading?: boolean
+  countryCode?: string
 }
 
 interface FullWidthFeature {
@@ -57,13 +59,19 @@ function getProductSlug(productName: string): string {
     .replace(/[^a-z0-9-]/g, "")
 }
 
-export function BodyHandsPage({ products, filterOptions, isLoading }: BodyHandsPageProps) {
+export function BodyHandsPage({
+  products,
+  filterOptions,
+  isLoading,
+  countryCode,
+}: BodyHandsPageProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>("all")
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
   const [isLedgerOpen, setIsLedgerOpen] = useState(false)
   const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
   const { ledger, toggleLedgerItem, isInLedger, removeFromLedger } = useLedger()
   const { cartItems, handleCartUpdate } = useCartItems()
+  const [isPending, startTransition] = useTransition()
 
   const filteredProducts = useMemo(() => {
     return selectedFilter === "all"
@@ -87,6 +95,24 @@ export function BodyHandsPage({ products, filterOptions, isLoading }: BodyHandsP
   const handleAddToCart = (product: Product, size: string, price: number) => {
     const itemId = `${product.id}-${size}`
 
+    // Find the variant ID based on the selected size
+    const selectedVariant = product.variants.find((v) => v.size === size)
+    const variantId = selectedVariant?.id
+
+    console.log("🛒 Add to cart clicked:", {
+      productName: product.name,
+      selectedSize: size,
+      availableVariants: product.variants,
+      foundVariant: selectedVariant,
+      variantId,
+    })
+
+    if (!variantId) {
+      console.error("❌ No variantId found for size:", size)
+      toast.error("Could not add to cart - variant not found")
+      return
+    }
+
     // Check if item already exists in cart
     const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
 
@@ -107,6 +133,7 @@ export function BodyHandsPage({ products, filterOptions, isLoading }: BodyHandsP
         quantity: 1,
         image: product.image,
         metadata: { size },
+        variant_id: variantId,
       }
       toast.success(`${product.name} Added To Cart`, { duration: 2000 })
     }
@@ -124,6 +151,21 @@ export function BodyHandsPage({ products, filterOptions, isLoading }: BodyHandsP
     }, 3000)
 
     handleCartUpdate(item)
+
+    // Server Action - persist cart to backend
+    startTransition(async () => {
+      try {
+        await addToCartAction({
+          variantId: variantId!,
+          quantity: existingItem ? existingItem.quantity + 1 : 1,
+          countryCode: countryCode || "in",
+        })
+        console.log("✅ Server action completed successfully")
+      } catch (error) {
+        console.error("Failed to add to cart on server:", error)
+        toast.error("Failed to save to cart. Please try again.")
+      }
+    })
   }
 
   const ledgerCount = ledger.length
@@ -378,7 +420,9 @@ function ProductCard({
 }) {
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
-  const [selectedSize, setSelectedSize] = useState(product.size)
+  const [selectedSize, setSelectedSize] = useState(
+    product.variants.length > 0 ? product.variants[0].size : product.size
+  )
   const isHovered = hoveredProduct === product.id
   const productSlug = getProductSlug(product.slug)
   const itemId = `${product.id}-${selectedSize}`

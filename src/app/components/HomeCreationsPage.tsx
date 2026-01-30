@@ -1,12 +1,13 @@
 "use client"
 
+import { addToCartAction } from "@lib/data/cart-actions"
 import { useCartItems } from "app/context/cart-items-context"
 import { type LedgerItem, useLedger } from "app/context/ledger-context"
 import { Heart } from "lucide-react"
 import { motion } from "motion/react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState, useTransition } from "react"
 import { toast } from "sonner"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
@@ -21,21 +22,18 @@ export interface Product {
   hoverImage?: string
   botanical: string
   property: string
+  variants: Array<{
+    id: string
+    size: string
+    price: number
+  }>
 }
 
 interface HomeCreationsPageProps {
   products: Product[]
   filterOptions: string[] // Dynamic filter names from Contentful (e.g., ["Candles", "Diffusers"])
   isLoading?: boolean
-  onAddToCart: (item: {
-    id: string
-    name: string
-    price: number
-    size: string
-    quantity: number
-    image: string | null
-    category: string
-  }) => void
+  countryCode?: string
 }
 
 interface FullWidthFeature {
@@ -90,13 +88,14 @@ export function HomeCreationsPage({
   products,
   filterOptions,
   isLoading = false,
-  onAddToCart,
+  countryCode,
 }: HomeCreationsPageProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>("all")
   const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
   const searchParams = useSearchParams()
   const { toggleLedgerItem, isInLedger } = useLedger()
-  const { cartItems } = useCartItems()
+  const { cartItems, handleCartUpdate } = useCartItems()
+  const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
     const filter = searchParams?.get("filter")
@@ -137,6 +136,10 @@ export function HomeCreationsPage({
   const handleAddToCart = (product: Product) => {
     const itemId = product.id
 
+    // Find the first variant (HomeCreations products have single size, use first variant)
+    const variant = product.variants[0]
+    const variantId = variant?.id
+
     // Check if item already exists in cart
     const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
 
@@ -147,10 +150,10 @@ export function HomeCreationsPage({
         id: itemId,
         name: product.name,
         price: product.price,
-        size: product.size,
         quantity: existingItem.quantity + 1,
         image: product.image,
-        category: product.subCategoryName,
+        variant_id: variantId,
+        metadata: { size: product.size, category: product.subCategoryName },
       }
       toast.success(`Quantity updated: ${product.name}`, {
         duration: 2000,
@@ -161,10 +164,10 @@ export function HomeCreationsPage({
         id: itemId,
         name: product.name,
         price: product.price,
-        size: product.size,
         quantity: 1,
         image: product.image,
-        category: product.subCategoryName,
+        variant_id: variantId,
+        metadata: { size: product.size, category: product.subCategoryName },
       }
       toast.success(`${product.name} Added To Cart`, {
         duration: 2000,
@@ -183,7 +186,23 @@ export function HomeCreationsPage({
       })
     }, 3000)
 
-    onAddToCart(item)
+    handleCartUpdate(item)
+
+    // Server Action - persist cart to backend
+    if (variantId) {
+      startTransition(async () => {
+        try {
+          await addToCartAction({
+            variantId,
+            quantity: existingItem ? existingItem.quantity + 1 : 1,
+            countryCode: countryCode || "in",
+          })
+        } catch (error) {
+          console.error("Failed to add to cart on server:", error)
+          toast.error("Failed to save to cart. Please try again.")
+        }
+      })
+    }
   }
 
   return (

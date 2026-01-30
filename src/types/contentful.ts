@@ -446,6 +446,7 @@ export interface CandlesCollectionItem {
   order: number
   isActive: boolean
   price?: number // Optional price from Medusa
+  variantId?: string // Medusa variant ID for cart
 }
 
 // Legacy type - kept for backward compatibility but deprecated

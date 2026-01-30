@@ -77,6 +77,12 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string) {
     size = metadata.weight
   }
 
+  // Normalize the size to match variant size format
+  size = size
+    .toLowerCase()
+    .replace(/size:\s*/i, "")
+    .trim()
+
   // Get images
   const image = medusaProduct.thumbnail || null
   const hoverImage =
@@ -109,6 +115,11 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string) {
   // Get available sizes
   const availableSizes = variants.map((v: any) => v.size)
 
+  // If no size found, default to first variant's size
+  if (!size && variants.length > 0) {
+    size = variants[0].size
+  }
+
   return {
     id: medusaProduct.id,
     name: medusaProduct.title || "",
@@ -124,16 +135,6 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string) {
     botanical: (metadata.botanical as string) || "Botanical Blend",
     property: (metadata.property as string) || "Nourishing & Protective",
   }
-}
-
-type CartItem = {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  image: string | null
-  size?: string
-  category?: string
 }
 
 export default function BodyHandsRoutePage() {
@@ -229,9 +230,7 @@ export default function BodyHandsRoutePage() {
         products={products}
         filterOptions={filterOptions}
         isLoading={isLoading}
-        onAddToCart={(item: CartItem) => {
-          handleCartUpdate(item)
-        }}
+        countryCode={countryCode}
       />
     </div>
   )
