@@ -6,6 +6,7 @@ import {
   type ActiveItem,
   type AfterlifeItem,
   type AfterlifeSection,
+  type BreadcrumbItem,
   type CandlesCollectionItem,
   CandlesPageBanner, // For backward compatibility
   type ContentfulAfterlifeSection,
@@ -94,6 +95,9 @@ export async function getProductContentByHandle(
       limit: 1,
     })
 
+    console.log("PRODUCT CONTENT RESPONSE")
+    console.log(response.items[0].fields)
+
     if (!response.items || response.items.length === 0) {
       console.warn(`No content found for product handle: ${productHandle}`)
       return null
@@ -163,6 +167,13 @@ function transformContentfulEntry(entry: Entry<ContentfulProductContent>): Produ
       ...details.fields,
     }))
 
+    // Transform breadcrumbs array if it exists
+    const breadCrumbs =
+      fields?.breadCrumbs?.map((crumb: any) => ({
+        title: crumb?.fields?.title || crumb?.title || "",
+        url: crumb?.fields?.url || crumb?.url || "",
+      })) || []
+
     return {
       title: fields.title || "",
       slug: fields.slug || "",
@@ -171,6 +182,7 @@ function transformContentfulEntry(entry: Entry<ContentfulProductContent>): Produ
       productHandle: fields.productHandle || fields.product_handle || "",
       features: fields.features || {},
       productAccordion: accordionItems || [],
+      breadCrumbs,
     }
   } catch (error) {
     console.error("Error transforming Contentful entry:", error)

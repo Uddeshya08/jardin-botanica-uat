@@ -34,6 +34,12 @@ export interface ProductContentFields {
   images: ContentfulAsset[]
   productHandle: string // Note: Contentful uses camelCase
   features: ContentfulFeatures
+  breadCrumbs?: Array<{
+    fields: {
+      title: string
+      url: string
+    }
+  }>
   // productAccordions: ProductAccordion[];
 }
 
@@ -83,6 +89,7 @@ export interface ProductContent {
   productHandle: string
   features: ContentfulFeatures
   productAccordion: ProductAccordion[]
+  breadCrumbs?: BreadcrumbItem[]
 }
 
 export interface ProductImage {
@@ -90,6 +97,11 @@ export interface ProductImage {
   title: string
   width?: number
   height?: number
+}
+
+export interface BreadcrumbItem {
+  title: string
+  url: string
 }
 
 // Featured Section Content Types
