@@ -7,6 +7,57 @@ import type { SortOptions } from "@modules/store/components/refinement-list/sort
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { getRegion, retrieveRegion } from "./regions"
 
+export const getProductByHandle = async ({
+  handle,
+  countryCode,
+  regionId,
+}: {
+  handle: string
+  countryCode?: string
+  regionId?: string
+}): Promise<HttpTypes.StoreProduct | null> => {
+  if (!countryCode && !regionId) {
+    throw new Error("Country code or region ID is required")
+  }
+
+  let region: HttpTypes.StoreRegion | undefined | null
+
+  if (countryCode) {
+    region = await getRegion(countryCode)
+  } else {
+    region = await retrieveRegion(regionId!)
+  }
+
+  if (!region) {
+    return null
+  }
+
+  const headers = {
+    ...(await getAuthHeaders()),
+  }
+
+  const next = {
+    ...(await getCacheOptions("products")),
+  }
+
+  return sdk.client
+    .fetch<{ products: HttpTypes.StoreProduct[] }>(`/store/products`, {
+      method: "GET",
+      query: {
+        handle,
+        region_id: region?.id,
+        fields:
+          "*variants.calculated_price,+variants.inventory_quantity,*metadata,+tags,*categories,*images",
+      },
+      headers,
+      next,
+      cache: "force-cache",
+    })
+    .then(({ products }) => {
+      return products.length > 0 ? products[0] : null
+    })
+}
+
 export const listProducts = async ({
   pageParam = 1,
   queryParams,

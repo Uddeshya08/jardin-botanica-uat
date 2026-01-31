@@ -1,11 +1,12 @@
 "use client"
 
+import { addToCartAction } from "@lib/data/cart-actions"
 import { useCartItems } from "app/context/cart-items-context"
 import { useLedger } from "app/context/ledger-context"
-import { Heart, ShoppingBag, X } from "lucide-react"
+import { Heart, X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useTransition } from "react"
 import { toast } from "sonner"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 import { HandCareRitualSection } from "./HandCareRitual"
@@ -13,25 +14,31 @@ import { HandCareRitualSection } from "./HandCareRitual"
 const HERO_IMAGE = "/assets/body-hand-banner.png"
 const SKIN_CARE_IMAGE = "/assets/body-hand-girl-feel.png"
 
-interface Product {
+export interface Product {
   id: string
   name: string
   slug: string
-  category: "lotion" | "wash"
+  subCategoryName: string
   price: number
-  price250ml?: number
-  price500ml?: number
+  variants: Array<{
+    id: string
+    size: string
+    price: number
+  }>
   size: string
   availableSizes?: string[]
   description: string
-  image: string
+  image: string | null
   hoverImage?: string
   botanical: string
   property: string
 }
 
 interface BodyHandsPageProps {
-  onAddToCart: (item: any) => void
+  products: Product[]
+  filterOptions: string[]
+  isLoading?: boolean
+  countryCode?: string
 }
 
 interface FullWidthFeature {
@@ -43,44 +50,6 @@ interface FullWidthFeature {
   image: string
   imagePosition: "left" | "right"
 }
-const products: Product[] = [
-  {
-    id: "1",
-    name: "Soft Orris Hand Lotion",
-    slug: "soft-orris",
-    category: "lotion",
-    price: 2850,
-    price250ml: 1850,
-    price500ml: 2850,
-    size: "500ml",
-    availableSizes: ["250ml", "500ml"],
-    description: "A soothing blend enriched with lavender and chamomile extract",
-    image:
-      "https://images.unsplash.com/photo-1522033048162-a492b7a1bead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXZlbmRlciUyMGZpZWxkJTIwYm90YW5pY2FsfGVufDF8fHx8MTc2MTk5MTU3OXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1631292621942-de5582ec1604?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXZlbmRlciUyMGJvdHRsZSUyMHNraW5jYXJlfGVufDF8fHx8MTc2MjAwODQzMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    botanical: "Lavandula Angustifolia",
-    property: "Calming & Restorative",
-  },
-  {
-    id: "2",
-    name: "Black Tea Hand Wash",
-    slug: "black-tea-hand-wash",
-    category: "wash",
-    price: 2650,
-    price250ml: 1750,
-    price500ml: 2650,
-    size: "500ml",
-    availableSizes: ["250ml", "500ml"],
-    description: "Gentle cleansing with rose geranium and aloe vera",
-    image:
-      "https://images.unsplash.com/photo-1584283626804-30ba59e636fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyb3NlJTIwc2tpbmNhcmUlMjBib3RhbmljYWx8ZW58MXx8fHwxNzYxOTkwNjgzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1697652440819-32ae57842e4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyb3NlJTIwc2tpbmNhcmUlMjBwcm9kdWN0fGVufDF8fHx8MTc2MjAwODQzMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    botanical: "Pelargonium Graveolens",
-    property: "Balancing & Purifying",
-  },
-]
 
 // Helper function to convert product name to URL slug
 function getProductSlug(productName: string): string {
@@ -90,19 +59,25 @@ function getProductSlug(productName: string): string {
     .replace(/[^a-z0-9-]/g, "")
 }
 
-export function BodyHandsPage({ onAddToCart }: BodyHandsPageProps) {
-  const [selectedFilter, setSelectedFilter] = useState<"all" | "lotion" | "wash">("all")
+export function BodyHandsPage({
+  products,
+  filterOptions,
+  isLoading,
+  countryCode,
+}: BodyHandsPageProps) {
+  const [selectedFilter, setSelectedFilter] = useState<string>("all")
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
   const [isLedgerOpen, setIsLedgerOpen] = useState(false)
   const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
   const { ledger, toggleLedgerItem, isInLedger, removeFromLedger } = useLedger()
-  const { cartItems } = useCartItems()
+  const { cartItems, handleCartUpdate } = useCartItems()
+  const [isPending, startTransition] = useTransition()
 
   const filteredProducts = useMemo(() => {
     return selectedFilter === "all"
       ? products
-      : products.filter((p) => p.category === selectedFilter)
-  }, [selectedFilter])
+      : products.filter((p) => p.subCategoryName === selectedFilter)
+  }, [selectedFilter, products])
 
   const handleToggleLedger = (product: Product) => {
     const alreadyInLedger = isInLedger(product.id)
@@ -119,6 +94,24 @@ export function BodyHandsPage({ onAddToCart }: BodyHandsPageProps) {
 
   const handleAddToCart = (product: Product, size: string, price: number) => {
     const itemId = `${product.id}-${size}`
+
+    // Find the variant ID based on the selected size
+    const selectedVariant = product.variants.find((v) => v.size === size)
+    const variantId = selectedVariant?.id
+
+    console.log("🛒 Add to cart clicked:", {
+      productName: product.name,
+      selectedSize: size,
+      availableVariants: product.variants,
+      foundVariant: selectedVariant,
+      variantId,
+    })
+
+    if (!variantId) {
+      console.error("❌ No variantId found for size:", size)
+      toast.error("Could not add to cart - variant not found")
+      return
+    }
 
     // Check if item already exists in cart
     const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
@@ -137,9 +130,10 @@ export function BodyHandsPage({ onAddToCart }: BodyHandsPageProps) {
         id: itemId,
         name: product.name,
         price,
-        size,
         quantity: 1,
         image: product.image,
+        metadata: { size },
+        variant_id: variantId,
       }
       toast.success(`${product.name} Added To Cart`, { duration: 2000 })
     }
@@ -156,7 +150,22 @@ export function BodyHandsPage({ onAddToCart }: BodyHandsPageProps) {
       })
     }, 3000)
 
-    onAddToCart(item)
+    handleCartUpdate(item)
+
+    // Server Action - persist cart to backend
+    startTransition(async () => {
+      try {
+        await addToCartAction({
+          variantId: variantId!,
+          quantity: existingItem ? existingItem.quantity + 1 : 1,
+          countryCode: countryCode || "in",
+        })
+        console.log("✅ Server action completed successfully")
+      } catch (error) {
+        console.error("Failed to add to cart on server:", error)
+        toast.error("Failed to save to cart. Please try again.")
+      }
+    })
   }
 
   const ledgerCount = ledger.length
@@ -235,22 +244,29 @@ export function BodyHandsPage({ onAddToCart }: BodyHandsPageProps) {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="flex flex-wrap gap-4 sm:gap-6"
             >
-              {[
-                { label: "All Products", value: "all" as const },
-                { label: "Hand Wash", value: "wash" as const },
-                { label: "Hand Lotion", value: "lotion" as const },
-              ].map((filter) => (
+              <button
+                onClick={() => setSelectedFilter("all")}
+                className={`font-din-arabic text-sm transition-colors duration-300 ${
+                  selectedFilter === "all"
+                    ? "text-black border-b border-black"
+                    : "text-black/40 hover:text-black/70"
+                }`}
+                style={{ letterSpacing: "0.15em" }}
+              >
+                All Products
+              </button>
+              {filterOptions.map((filter) => (
                 <button
-                  key={filter.value}
-                  onClick={() => setSelectedFilter(filter.value)}
+                  key={filter}
+                  onClick={() => setSelectedFilter(filter)}
                   className={`font-din-arabic text-sm transition-colors duration-300 ${
-                    selectedFilter === filter.value
+                    selectedFilter === filter
                       ? "text-black border-b border-black"
                       : "text-black/40 hover:text-black/70"
                   }`}
                   style={{ letterSpacing: "0.15em" }}
                 >
-                  {filter.label}
+                  {filter}
                 </button>
               ))}
             </motion.div>
@@ -404,20 +420,17 @@ function ProductCard({
 }) {
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
-  const [selectedSize, setSelectedSize] = useState(product.size)
+  const [selectedSize, setSelectedSize] = useState(
+    product.variants.length > 0 ? product.variants[0].size : product.size
+  )
   const isHovered = hoveredProduct === product.id
   const productSlug = getProductSlug(product.slug)
   const itemId = `${product.id}-${selectedSize}`
   const isRecentlyAdded = recentlyAddedProducts.has(itemId)
 
   const getCurrentPrice = () => {
-    if (selectedSize === "250ml" && product.price250ml) {
-      return product.price250ml
-    }
-    if (selectedSize === "500ml" && product.price500ml) {
-      return product.price500ml
-    }
-    return product.price
+    const variant = product.variants.find((v) => v.size === selectedSize)
+    return variant ? variant.price : product.price
   }
 
   return (
@@ -441,11 +454,14 @@ function ProductCard({
         >
           {/* Hover Image - Behind */}
           {product.hoverImage && (
-            <div className="absolute inset-0">
+            <div
+              className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+              style={{ opacity: isImageHovered ? 1 : 0 }}
+            >
               <ImageWithFallback
                 src={product.hoverImage}
                 alt={`${product.name} alternate view`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </div>
           )}
@@ -458,7 +474,7 @@ function ProductCard({
             <ImageWithFallback
               src={product.image}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
 

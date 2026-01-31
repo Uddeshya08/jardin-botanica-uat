@@ -1,73 +1,119 @@
 "use client"
-import { Navigation } from "app/components/Navigation"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { motion, AnimatePresence } from "motion/react"
-import Link from "next/link"
-import React, { useEffect, useState } from "react"
-import type { Blog } from "types/contentful"
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
 import { BLOCKS, INLINES } from "@contentful/rich-text-types"
+import { addToCart } from "@lib/data/cart"
+import type { HttpTypes } from "@medusajs/types"
+import { Navigation } from "app/components/Navigation"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
+import Link from "next/link"
+import React, { useEffect, useState } from "react"
+import { toast } from "sonner"
+import type { Blog } from "types/contentful"
 
 const FeaturedBlogProduct = ({
-  image,
+  id,
   name,
+  image,
   description,
+  handle,
+  countryCode,
+  variants,
 }: {
-  image: string
+  id: string
   name: string
+  image?: string
   description?: string
+  handle: string
+  countryCode: string
+  variants?: any[]
 }) => {
+  const [isAdding, setIsAdding] = useState(false)
+
+  // Get the first available variant for simplicity
+  const selectedVariant = variants?.[0]
+
+  const handleAddToCart = async () => {
+    if (!selectedVariant?.id) {
+      toast.error("Product variant not available")
+      return
+    }
+
+    setIsAdding(true)
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: 1,
+        countryCode,
+      })
+      toast.success(`${name} added to cart`, { duration: 2000 })
+    } catch (error) {
+      console.error("Error adding to cart:", error)
+      toast.error((error as Error)?.message || "Failed to add to cart")
+    } finally {
+      setIsAdding(false)
+    }
+  }
+
   return (
-    <div className="group cursor-pointer flex flex-col h-full">
-      <div className="relative overflow-hidden mb-4 bg-[#F5F5F0]" style={{ aspectRatio: "4/5" }}>
-        <img
-          src={image}
-          alt={name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
-      </div>
-      <div className="text-center px-2 flex flex-col flex-1 w-full">
-        <h3
-          className="text-lg md:text-xl mb-2 group-hover:underline decoration-1 underline-offset-4"
-          style={{
-            fontFamily: '"American Typewriter"',
-            color: "#333",
-            lineHeight: "1.2",
-          }}
-        >
-          {name}
-        </h3>
-        {description && (
-          <p
-            className="text-sm md:text-base mb-4"
+    <div className="group flex flex-col h-full">
+      <Link href={`/${countryCode}/products/${handle}`} className="cursor-pointer flex-1">
+        <div className="relative overflow-hidden mb-4 bg-[#F5F5F0]">
+          <div className="relative overflow-hidden" style={{ aspectRatio: "4/5" }}>
+            <img
+              src={image || "/assets/placeholder-product.jpg"}
+              alt={name}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              style={{
+                objectFit: "contain",
+                maxWidth: "100%",
+                maxHeight: "100%",
+              }}
+            />
+          </div>
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+        </div>
+        <div className="text-center px-2 flex flex-col flex-1 w-full">
+          <h3
+            className="text-lg md:text-xl mb-2 group-hover:underline decoration-1 underline-offset-4"
             style={{
-              fontFamily: '"DIN Arabic Regular"',
-              color: "#626262",
-              lineHeight: "1.5",
+              fontFamily: '"American Typewriter"',
+              color: "#333",
+              lineHeight: "1.2",
             }}
           >
-            {description}
-          </p>
-        )}
-        <button
-          className="group/btn-wrapper w-full mt-auto px-4 py-2 border border-black/20 hover:bg-black transition-colors duration-300 text-sm tracking-wide flex items-center justify-center"
-          style={{
-            fontFamily: '"DIN Arabic Regular"',
-          }}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-          }}
-        >
-          <span className="text-inherit group-hover/btn-wrapper:text-white transition-colors duration-300">
-            Add to cart
-          </span>
-          <span className="ml-2 text-inherit group-hover/btn-wrapper:text-white text-xs transition-colors duration-300">
-            →
-          </span>
-        </button>
-      </div>
+            {name}
+          </h3>
+          {description && (
+            <p
+              className="text-sm md:text-base mb-4"
+              style={{
+                fontFamily: '"DIN Arabic Regular"',
+                color: "#626262",
+                lineHeight: "1.5",
+              }}
+            >
+              {description}
+            </p>
+          )}
+        </div>
+      </Link>
+      <button
+        type="button"
+        className="group/btn-wrapper w-full mt-auto px-4 py-2 border border-black/20 hover:bg-black transition-colors duration-300 text-sm tracking-wide flex items-center justify-center"
+        style={{
+          fontFamily: '"DIN Arabic Regular"',
+        }}
+        onClick={handleAddToCart}
+        disabled={!selectedVariant || isAdding}
+      >
+        <span className="text-inherit group-hover/btn-wrapper:text-white transition-colors duration-300">
+          {isAdding ? "Adding..." : "Add to cart"}
+        </span>
+        <span className="ml-2 text-inherit group-hover/btn-wrapper:text-white text-xs transition-colors duration-300">
+          →
+        </span>
+      </button>
     </div>
   )
 }
@@ -79,6 +125,9 @@ interface SingleBlogTemplateProps {
 
 export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProps) => {
   const [isScrolled, setIsScrolled] = useState(false)
+
+  console.log("BLOG CONTENT")
+  console.log(blog)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -192,17 +241,11 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
         const alt = title || "Blog Image"
         return (
           <div className="my-8">
-            <img
-              src={imageUrl}
-              alt={alt}
-              className="w-full h-auto object-cover rounded-sm"
-            />
+            <img src={imageUrl} alt={alt} className="w-full h-auto object-cover rounded-sm" />
           </div>
         )
       },
-      [BLOCKS.PARAGRAPH]: (node: any, children: any) => (
-        <p className="mb-6">{children}</p>
-      ),
+      [BLOCKS.PARAGRAPH]: (node: any, children: any) => <p className="mb-6">{children}</p>,
       [INLINES.HYPERLINK]: (node: any, children: any) => (
         <a
           href={node.data.uri}
@@ -305,12 +348,12 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
               >
                 {blog?.publishedDate
                   ? new Date(blog.publishedDate)
-                    .toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                    .toUpperCase()
+                      .toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                      .toUpperCase()
                   : ""}
               </span>
               <span
@@ -526,34 +569,28 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
             </motion.div>
 
             {/* From the Botanist's Shelf */}
-            <div className="mb-20 pt-16 border-t-[2px] border-[#000]">
-              <h2 style={styles.subsequentHeading} className="mb-10 text-center">
-                From the Botanist's Shelf
-              </h2>
+            {blog?.featuredProducts && blog.featuredProducts.length > 0 && (
+              <div className="mb-20 pt-16 border-t-[2px] border-[#000]">
+                <h2 style={styles.subsequentHeading} className="mb-10 text-center">
+                  From the Botanist's Shelf
+                </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-                {/* Product 1 */}
-                <FeaturedBlogProduct
-                  image="https://images.ctfassets.net/1g1ws79ch8wy/5mgOtZAaZztFFtqy9Rianh/c83ce11c9e8fa8ad4162688ba8b41d4a/warm-roots-hover.jpeg"
-                  name="Warm Roots"
-                  description="Grounded in earth, rooted warmth"
-                />
-
-                {/* Product 2 */}
-                <FeaturedBlogProduct
-                  image="https://images.ctfassets.net/1g1ws79ch8wy/3OzBVSgirqWvULBbFpKoeg/e27007a388346fcb963744ebe7a11f60/scentedCandle.png"
-                  name="Soft Orris Hand Veil"
-                  description="Softness reimagined — a velvety hush that lingers."
-                />
-
-                {/* Product 3 */}
-                <FeaturedBlogProduct
-                  image="https://images.ctfassets.net/1g1ws79ch8wy/1c0c4asQNn6Ky1PzbZpTxl/82dac239f9d58dd9fc07d398684c9e89/Aqua-vitei-hover.jpeg"
-                  name="Aqua Vitei"
-                  description="Fresh as the tide, crisp notes"
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                  {blog.featuredProducts.map((product) => (
+                    <FeaturedBlogProduct
+                      key={product.id}
+                      id={product.id}
+                      name={product.name}
+                      image={product.image}
+                      description={product.description}
+                      handle={product.handle}
+                      countryCode={countryCode}
+                      variants={product.variants || []}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* About Author */}
             <div
@@ -599,8 +636,8 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
                       <motion.div className="flex items-start" variants={textHoverVariants}>
                         <span className=" mr-2 mt-1">•</span>
                         <motion.a
-                          href="#"
-                          className=" leading-relaxed"
+                          href={`/${countryCode}/blogs`}
+                          className="leading-relaxed"
                           whileHover={{ color: "#111827" }}
                           style={styles.subCopy}
                         >

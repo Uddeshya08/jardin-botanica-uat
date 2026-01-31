@@ -1,8 +1,8 @@
 // HERO COMPONENT with Motion Animations (Updated with PeopleAlsoBought effects)
 "use client"
-import { getCandlesCollection } from "@lib/data/contentful"
-import { Github } from "@medusajs/icons"
-import { Heading } from "@medusajs/ui"
+import { addToCartAction } from "@lib/data/cart-actions"
+import { getProductCategoryByHandle } from "@lib/data/contentful"
+import { getProductByHandle } from "@lib/data/products"
 import { ImageWithFallback } from "app/components/figma/ImageWithFallback"
 import { Navigation } from "app/components/Navigation"
 import { PageBanner } from "app/components/PageBanner"
@@ -16,33 +16,28 @@ import {
 import { useCartItems } from "app/context/cart-items-context"
 import { type LedgerItem, useLedger } from "app/context/ledger-context"
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
-import { motion, useScroll, useSpring, useTransform } from "motion/react"
+import { motion, useScroll, useSpring } from "motion/react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useParams, useRouter } from "next/navigation"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { toast } from "sonner"
 import type { CandlesCollectionItem } from "../../../../types/contentful"
 import InstagramEmbed2 from "./test"
 
-interface CartItem {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  image?: string
-}
-
 const MobileProductCard = ({
   item,
   productId,
+  countryCode,
 }: {
   item: CandlesCollectionItem
   productId: string
+  countryCode: string
 }) => {
   const router = useRouter()
   const { toggleLedgerItem, isInLedger } = useLedger()
   const { cartItems, handleCartUpdate } = useCartItems()
   const isItemInLedger = isInLedger(productId)
+  const [isPending, startTransition] = useTransition()
 
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isRecentlyAdded, setIsRecentlyAdded] = useState(false)
@@ -53,6 +48,13 @@ const MobileProductCard = ({
     e.stopPropagation()
 
     const itemId = productId
+    const variantId = item.variantId
+
+    if (!variantId) {
+      console.error("No variantId found for product:", item.label)
+      toast.error("Could not add to cart - variant not found")
+      return
+    }
 
     // Check if item already exists in cart
     const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
@@ -63,9 +65,10 @@ const MobileProductCard = ({
       cartItem = {
         id: itemId,
         name: item.label,
-        price: 0,
+        price: item.price || 0,
         quantity: existingItem.quantity + 1,
         image: item.src,
+        variant_id: variantId,
       }
       toast.success(`Quantity updated: ${item.label}`, {
         duration: 2000,
@@ -75,9 +78,10 @@ const MobileProductCard = ({
       cartItem = {
         id: itemId,
         name: item.label,
-        price: 0,
+        price: item.price || 0,
         quantity: 1,
         image: item.src,
+        variant_id: variantId,
       }
       toast.success(`${item.label} Added To Cart`, {
         duration: 2000,
@@ -93,6 +97,20 @@ const MobileProductCard = ({
     }, 3000)
 
     handleCartUpdate(cartItem)
+
+    // Server Action - persist cart to backend
+    startTransition(async () => {
+      try {
+        await addToCartAction({
+          variantId,
+          quantity: existingItem ? existingItem.quantity + 1 : 1,
+          countryCode: countryCode || "in",
+        })
+      } catch (error) {
+        console.error("Failed to add to cart on server:", error)
+        toast.error("Failed to save to cart. Please try again.")
+      }
+    })
   }
 
   const handleProductClick = () => {
@@ -110,7 +128,7 @@ const MobileProductCard = ({
     const ledgerItem: LedgerItem = {
       id: productId,
       name: item.label,
-      price: 0, // Price not available in CandlesCollectionItem
+      price: item.price || 0,
       image: item.src,
       description: item.label,
       category: "Candles",
@@ -175,8 +193,9 @@ const MobileProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -235,6 +254,9 @@ const ProductCard = ({
   url,
   index,
   productId,
+  price,
+  variantId,
+  countryCode,
 }: {
   src: string
   label: string
@@ -242,6 +264,9 @@ const ProductCard = ({
   url?: string
   index: number
   productId: string
+  price: number
+  variantId?: string
+  countryCode: string
 }) => {
   const { toggleLedgerItem, isInLedger } = useLedger()
   const { cartItems, handleCartUpdate } = useCartItems()
@@ -249,6 +274,7 @@ const ProductCard = ({
   const [isRecentlyAdded, setIsRecentlyAdded] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const isItemInLedger = isInLedger(productId)
+  const [isPending, startTransition] = useTransition()
 
   const handleToggleLedger = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -258,7 +284,7 @@ const ProductCard = ({
     const ledgerItem: LedgerItem = {
       id: productId,
       name: label,
-      price: 0, // You may want to get actual price from your data
+      price: price,
       image: src,
       description: label,
       category: "Candles",
@@ -276,6 +302,12 @@ const ProductCard = ({
 
     const itemId = productId
 
+    if (!variantId) {
+      console.error("No variantId found for product:", label)
+      toast.error("Could not add to cart - variant not found")
+      return
+    }
+
     // Check if item already exists in cart
     const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
 
@@ -285,9 +317,10 @@ const ProductCard = ({
       cartItem = {
         id: itemId,
         name: label,
-        price: 0,
+        price: price,
         quantity: existingItem.quantity + 1,
         image: src,
+        variant_id: variantId,
       }
       toast.success(`Quantity updated: ${label}`, {
         duration: 2000,
@@ -297,9 +330,10 @@ const ProductCard = ({
       cartItem = {
         id: itemId,
         name: label,
-        price: 0,
+        price: price,
         quantity: 1,
         image: src,
+        variant_id: variantId,
       }
       toast.success(`${label} Added To Cart`, {
         duration: 2000,
@@ -315,6 +349,20 @@ const ProductCard = ({
     }, 3000)
 
     handleCartUpdate(cartItem)
+
+    // Server Action - persist cart to backend
+    startTransition(async () => {
+      try {
+        await addToCartAction({
+          variantId,
+          quantity: existingItem ? existingItem.quantity + 1 : 1,
+          countryCode: countryCode || "in",
+        })
+      } catch (error) {
+        console.error("Failed to add to cart on server:", error)
+        toast.error("Failed to save to cart. Please try again.")
+      }
+    })
   }
 
   return (
@@ -362,8 +410,9 @@ const ProductCard = ({
             >
               <Heart
                 size={18}
-                className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                  }`}
+                className={`transition-colors duration-300 ${
+                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
               />
             </button>
           </div>
@@ -406,8 +455,9 @@ const ProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -468,12 +518,21 @@ const ProductCard = ({
   )
 }
 
-const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index: number }) => {
+const BannerProductCard = ({
+  item,
+  index,
+  countryCode,
+}: {
+  item: CandlesCollectionItem
+  index: number
+  countryCode: string
+}) => {
   const router = useRouter()
   const { cartItems, handleCartUpdate } = useCartItems() // Added useCartItems
   const [isHovered, setIsHovered] = useState(false)
   const [isRecentlyAdded, setIsRecentlyAdded] = useState(false) // Added state
   const [isButtonHovered, setIsButtonHovered] = useState(false) // Added state
+  const [isPending, startTransition] = useTransition()
 
   const handleProductClick = () => {
     if (item.url) {
@@ -489,6 +548,13 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
 
     // Generate a simple ID if none exists (fallback)
     const itemId = item.url || item.label.toLowerCase().replace(/\s+/g, "-")
+    const variantId = item.variantId
+
+    if (!variantId) {
+      console.error("No variantId found for product:", item.label)
+      toast.error("Could not add to cart - variant not found")
+      return
+    }
 
     // Check if item already exists in cart
     const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
@@ -499,9 +565,10 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
       cartItem = {
         id: itemId,
         name: item.label,
-        price: 0,
+        price: item.price || 0,
         quantity: existingItem.quantity + 1,
         image: item.src,
+        variant_id: variantId,
       }
       toast.success(`Quantity updated: ${item.label}`, {
         duration: 2000,
@@ -511,9 +578,10 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
       cartItem = {
         id: itemId,
         name: item.label,
-        price: 0,
+        price: item.price || 0,
         quantity: 1,
         image: item.src,
+        variant_id: variantId,
       }
       toast.success(`${item.label} Added To Cart`, {
         duration: 2000,
@@ -529,6 +597,20 @@ const BannerProductCard = ({ item, index }: { item: CandlesCollectionItem; index
     }, 3000)
 
     handleCartUpdate(cartItem)
+
+    // Server Action - persist cart to backend
+    startTransition(async () => {
+      try {
+        await addToCartAction({
+          variantId,
+          quantity: existingItem ? existingItem.quantity + 1 : 1,
+          countryCode: countryCode || "in",
+        })
+      } catch (error) {
+        console.error("Failed to add to cart on server:", error)
+        toast.error("Failed to save to cart. Please try again.")
+      }
+    })
   }
 
   // Group products into sets of 3 for banner display
@@ -855,12 +937,46 @@ const Candles = () => {
     return visible
   }
 
-  // Fetch candles collection from Contentful
+  // Fetch candles collection from Medusa via Contentful category
+  const params = useParams()
+  const countryCode = (params?.countryCode as string) || "us"
+
   useEffect(() => {
     const fetchCandlesCollection = async () => {
       setIsLoadingCollection(true)
       try {
-        const collection = await getCandlesCollection()
+        const category = await getProductCategoryByHandle("candles")
+        if (!category?.productHandles?.length) {
+          setCandlesCollection([])
+          return
+        }
+
+        const productHandles = category.productHandles
+        const products = await Promise.all(
+          productHandles.map((handle) => getProductByHandle({ handle, countryCode }))
+        )
+
+        const collection: CandlesCollectionItem[] = products
+          .filter((product): product is NonNullable<typeof product> => !!product)
+          .map((product, index) => {
+            const cheapestVariant = product.variants?.reduce((cheapest, variant) => {
+              const price = variant.calculated_price?.calculated_amount || 0
+              const cheapestPrice = cheapest?.calculated_price?.calculated_amount || 0
+              return price < cheapestPrice ? variant : cheapest
+            }, product.variants?.[0])
+
+            return {
+              label: product.title,
+              src: product.thumbnail || "",
+              hoverSrc: product.images?.[1]?.url || product.thumbnail || undefined,
+              url: `/products/${product.handle}`,
+              order: index,
+              isActive: true,
+              price: cheapestVariant?.calculated_price?.calculated_amount || undefined,
+              variantId: cheapestVariant?.id,
+            }
+          })
+
         setCandlesCollection(collection)
       } catch (error) {
         console.error("Error fetching candles collection:", error)
@@ -869,7 +985,7 @@ const Candles = () => {
       }
     }
     fetchCandlesCollection()
-  }, [])
+  }, [countryCode])
 
   // Transform collection items for desktop products view (with hover images)
   const products = candlesCollection.map((item) => ({
@@ -877,6 +993,8 @@ const Candles = () => {
     label: item.label,
     hoverSrc: item.hoverSrc || item.src, // Fallback to main image if no hover image
     url: item.url,
+    price: item.price,
+    variantId: item.variantId,
   }))
 
   // Calculate slider position based on scroll progress
@@ -1193,7 +1311,11 @@ const Candles = () => {
                       const productId = item.url || item.label.toLowerCase().replace(/\s+/g, "-")
                       return (
                         <CarouselItem key={i} className="mobile-candles-carousel-item">
-                          <MobileProductCard item={item} productId={productId} />
+                          <MobileProductCard
+                            item={item}
+                            productId={productId}
+                            countryCode={countryCode}
+                          />
                         </CarouselItem>
                       )
                     })}
@@ -1328,7 +1450,7 @@ const Candles = () => {
                 className="w-full"
               >
                 <CarouselContent className="candles-carousel-content -ml-0">
-                  {products.map(({ src, label, hoverSrc, url }, i) => {
+                  {products.map(({ src, label, hoverSrc, url, price, variantId }, i) => {
                     const productId = url || label.toLowerCase().replace(/\s+/g, "-")
                     return (
                       <CarouselItem key={i} className="candles-carousel-item pl-0">
@@ -1339,6 +1461,9 @@ const Candles = () => {
                           hoverSrc={hoverSrc}
                           url={url}
                           productId={productId}
+                          price={price || 0}
+                          variantId={variantId}
+                          countryCode={countryCode}
                         />
                       </CarouselItem>
                     )
@@ -1453,32 +1578,36 @@ const Candles = () => {
                   {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
                   {isMobile
                     ? // Mobile: One product per slide
-                    candlesCollection.map((item, index) => (
-                      <CarouselItem key={index} className="banner-carousel-item">
-                        <BannerProductCard item={item} index={index} />
-                      </CarouselItem>
-                    ))
+                      candlesCollection.map((item, index) => (
+                        <CarouselItem key={index} className="banner-carousel-item">
+                          <BannerProductCard item={item} index={index} countryCode={countryCode} />
+                        </CarouselItem>
+                      ))
                     : // Desktop: Groups of 3 products
-                    bannerGroups.map((group, groupIndex) => (
-                      <CarouselItem key={groupIndex} className="banner-carousel-item">
-                        <div className="flex flex-row gap-0 w-full h-auto">
-                          {group.map((item, itemIndex) => {
-                            const globalIndex = groupIndex * 3 + itemIndex
-                            return (
-                              <div key={globalIndex} className="flex-1 w-1/3">
-                                <BannerProductCard item={item} index={globalIndex} />
-                              </div>
-                            )
-                          })}
+                      bannerGroups.map((group, groupIndex) => (
+                        <CarouselItem key={groupIndex} className="banner-carousel-item">
+                          <div className="flex flex-row gap-0 w-full h-auto">
+                            {group.map((item, itemIndex) => {
+                              const globalIndex = groupIndex * 3 + itemIndex
+                              return (
+                                <div key={globalIndex} className="flex-1 w-1/3">
+                                  <BannerProductCard
+                                    item={item}
+                                    index={globalIndex}
+                                    countryCode={countryCode}
+                                  />
+                                </div>
+                              )
+                            })}
 
-                          {/* Fill remaining slots if group has less than 3 items */}
-                          {group.length < 3 &&
-                            Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
-                              <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
-                            ))}
-                        </div>
-                      </CarouselItem>
-                    ))}
+                            {/* Fill remaining slots if group has less than 3 items */}
+                            {group.length < 3 &&
+                              Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                                <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                              ))}
+                          </div>
+                        </CarouselItem>
+                      ))}
                 </CarouselContent>
               </Carousel>
               {/* Banner Carousel Slider Bar Removed */}

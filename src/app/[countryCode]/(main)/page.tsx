@@ -1,5 +1,5 @@
-import Hero from "@modules/home/components/hero"
 import { listProducts } from "@lib/data/products"
+import Hero from "@modules/home/components/hero"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -12,11 +12,13 @@ export default async function Home(props: { params: Promise<{ countryCode: strin
   const { countryCode } = params
 
   // Fetch products for the carousel
-  const { response: { products } } = await listProducts({
+  const {
+    response: { products },
+  } = await listProducts({
     countryCode,
     queryParams: {
       limit: 10,
-    }
+    },
   })
 
   // Filter for specific products if needed, otherwise pass all

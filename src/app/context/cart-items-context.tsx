@@ -8,7 +8,7 @@ export interface CartItem {
   name: string
   price: number
   quantity: number
-  image?: string
+  image?: string | null
   product_id?: string
   variant_id?: string
   metadata?: Record<string, unknown> | null
