@@ -261,14 +261,17 @@ export function Navigation({
     setUpdatingCartItem(itemId)
     const newQuantity = Math.max(0, item.quantity + change)
 
+    // Use line_item_id for server operations if available, otherwise fall back to item.id
+    const serverLineId = item.line_item_id || itemId
+
     try {
       if (newQuantity === 0) {
         // Delete the line item if quantity becomes 0
-        await deleteLineItem(itemId)
+        await deleteLineItem(serverLineId)
       } else {
         // Update the line item quantity in Medusa
         await updateLineItem({
-          lineId: itemId,
+          lineId: serverLineId,
           quantity: newQuantity,
         })
       }

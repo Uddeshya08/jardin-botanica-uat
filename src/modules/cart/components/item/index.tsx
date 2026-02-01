@@ -151,6 +151,16 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
           </span>
         </ProductTitleTooltip>
 
+        {/* Display variant title if available */}
+        {item.variant?.title && (
+          <span
+            className="font-din-arabic text-sm text-black/60 block"
+            data-testid="product-variant"
+          >
+            {item.variant.title}
+          </span>
+        )}
+
         {type === "preview" ? (
           <>
             <span className="font-din-arabic text-sm text-black/60 mt-1">
@@ -162,7 +172,8 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => changeQuantity(item.quantity - 1)}
                 disabled={updating || item.quantity <= 1}
-                className="w-7 h-7 rounded-lg bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ cursor: "pointer" }}
+                className="w-7 h-7 rounded-lg bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors disabled:opacity-50"
                 data-testid="product-decrease-button"
               >
                 <span className="font-din-arabic text-sm">-</span>
@@ -179,7 +190,8 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => changeQuantity(item.quantity + 1)}
                 disabled={updating || !canIncrease}
-                className="w-7 h-7 rounded-lg bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ cursor: "pointer" }}
+                className="w-7 h-7 rounded-lg bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors disabled:opacity-50"
                 data-testid="product-increase-button"
               >
                 <span className="font-din-arabic text-sm">+</span>

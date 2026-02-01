@@ -13,6 +13,7 @@ export interface CartItem {
   variant_id?: string
   handle?: string
   metadata?: Record<string, unknown> | null
+  line_item_id?: string // Medusa line item ID for server operations
 }
 
 interface CartItemsContextValue {
@@ -53,40 +54,15 @@ export function CartItemsProvider({
     // Update cartItems array for navigation
     if (item && item.quantity > 0) {
       setCartItems((prevItems) => {
-        // Improved matching: check by ID, variant_id, or name to prevent duplicates
+        // Match by exact ID only - different variants should be separate cart items
         const existingIndex = prevItems.findIndex((cartItem) => {
-          const itemVariantId = (item as any).variant_id
-          const cartItemVariantId = (cartItem as any).variant_id
-          const itemIsRitual = (item as any).isRitualProduct
-          const cartItemIsRitual = (cartItem as any).isRitualProduct
-
-          // Match by exact ID
+          // Exact ID match (includes productId-variantId format)
           if (cartItem.id === item.id) return true
 
-          // Match by variant_id if present (for main products)
-          if (!itemIsRitual && !cartItemIsRitual && itemVariantId && cartItemVariantId) {
-            if (
-              itemVariantId === cartItemVariantId ||
-              cartItem.id === itemVariantId ||
-              item.id === cartItemVariantId
-            ) {
-              return true
-            }
-          }
-
-          // Match by name for ritual products
-          if (itemIsRitual && cartItemIsRitual && cartItem.name === item.name) {
-            return true
-          }
-
-          // Match by name for main products (fallback)
-          if (
-            !itemIsRitual &&
-            !cartItemIsRitual &&
-            cartItem.name === item.name &&
-            !itemVariantId &&
-            !cartItemVariantId
-          ) {
+          // If both have variant_id, match only if they are the same variant
+          const itemVariantId = item.variant_id
+          const cartItemVariantId = cartItem.variant_id
+          if (itemVariantId && cartItemVariantId && itemVariantId === cartItemVariantId) {
             return true
           }
 
@@ -114,20 +90,14 @@ export function CartItemsProvider({
         }
       })
     } else if (item && item.quantity === 0) {
-      // Remove item if quantity is 0 - improved matching
+      // Remove item if quantity is 0 - match by exact ID only
       console.log("🗑️ Removing cart item:", item.id)
       setCartItems((prevItems) => {
-        const itemVariantId = (item as any).variant_id
         return prevItems.filter((cartItem) => {
-          // Remove by exact ID or variant_id match
+          // Remove only exact ID match
           if (cartItem.id === item.id) return false
-          const cartItemVariantId = (cartItem as any).variant_id
-          if (
-            itemVariantId &&
-            (cartItem.id === itemVariantId ||
-              cartItemVariantId === item.id ||
-              cartItemVariantId === itemVariantId)
-          ) {
+          // Also remove if same variant_id
+          if (item.variant_id && cartItem.variant_id && cartItem.variant_id === item.variant_id) {
             return false
           }
           return true

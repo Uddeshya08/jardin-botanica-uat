@@ -39,9 +39,14 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       // If unit_price > 10000, likely in minor units (paise), divide by 100
       // Otherwise, it's already in major units (rupees)
       const price = item.unit_price > 10000 ? item.unit_price / 100 : item.unit_price
+
+      // Get variant title if available and construct name with variant info
+      const variantTitle = (item as any).variant?.title
+      const displayName = variantTitle ? `${item.title} (${variantTitle})` : item.title
+
       return {
         id: item.id,
-        name: item.title,
+        name: displayName,
         price: price,
         quantity: item.quantity,
         image: item.thumbnail,

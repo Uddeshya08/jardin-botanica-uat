@@ -279,10 +279,14 @@ export function ProductHero({
   const handleAddToCart = () => {
     if (!selectedVariantId || adding || isPending) return
 
-    // instant UI — don’t block on network
+    // instant UI — don't block on network
     setAdding(true)
     setUiError(null)
     setIsAddedToCart(true)
+
+    // Get variant title for display
+    const variantTitle = selectedSizeLabel || selectedVariant?.title || "Default"
+    const itemId = `${product.id}-${selectedVariantId}`
 
     // optimistic nav/sticky updates if parent listens (regular product - no image in nav)
     // calculated_amount is already in major units (rupees), no conversion needed
@@ -290,26 +294,49 @@ export function ProductHero({
       minorAmount,
       calculated_amount: selectedVariant?.calculated_price?.calculated_amount,
       variantId: selectedVariantId,
+      itemId,
+      variantTitle,
     })
     onCartUpdate?.({
-      id: selectedVariantId,
-      name: product.title,
+      id: itemId,
+      name: `${product.title} (${variantTitle})`,
       price: minorAmount,
       quantity,
       image: fallbackImg,
       isRitualProduct: false,
       variant_id: selectedVariantId,
+      product_id: product.id,
+      handle: product.handle,
+      metadata: { variantTitle, variantId: selectedVariantId },
     } as any)
     emitCartUpdated({ quantityDelta: quantity })
 
     // network in the background
     startTransition(async () => {
       try {
-        await addToCartAction({
+        const result = await addToCartAction({
           variantId: selectedVariantId,
           quantity,
           countryCode: (countryCode || "in").toLowerCase(),
         })
+        console.log("✅ Server action completed successfully:", result)
+
+        // Update the cart item with the server line item ID for future updates
+        if (result?.lineItemId) {
+          onCartUpdate?.({
+            id: itemId,
+            name: `${product.title} (${variantTitle})`,
+            price: minorAmount,
+            quantity,
+            image: fallbackImg,
+            isRitualProduct: false,
+            variant_id: selectedVariantId,
+            product_id: product.id,
+            handle: product.handle,
+            metadata: { variantTitle, variantId: selectedVariantId },
+            line_item_id: result.lineItemId,
+          } as any)
+        }
       } catch (e: any) {
         // roll back optimistic message
         setIsAddedToCart(false)
@@ -351,14 +378,19 @@ export function ProductHero({
     // keep parent UI synced while changing qty (optional)
     // calculated_amount is already in major units (rupees), no conversion needed
     if (selectedVariantId) {
+      const variantTitle = selectedSizeLabel || selectedVariant?.title || "Default"
+      const itemId = `${product.id}-${selectedVariantId}`
       onCartUpdate?.({
-        id: selectedVariantId,
-        name: product.title,
+        id: itemId,
+        name: `${product.title} (${variantTitle})`,
         price: minorAmount,
         quantity: newQuantity,
         image: fallbackImg,
         isRitualProduct: false,
         variant_id: selectedVariantId,
+        product_id: product.id,
+        handle: product.handle,
+        metadata: { variantTitle, variantId: selectedVariantId },
       } as any)
     }
   }

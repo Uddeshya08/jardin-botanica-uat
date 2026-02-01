@@ -93,8 +93,6 @@ export function BodyHandsPage({
   }
 
   const handleAddToCart = (product: Product, size: string, price: number) => {
-    const itemId = `${product.id}-${size}`
-
     // Find the variant ID based on the selected size
     const selectedVariant = product.variants.find((v) => v.size === size)
     const variantId = selectedVariant?.id
@@ -113,6 +111,9 @@ export function BodyHandsPage({
       return
     }
 
+    // Create unique item ID using product ID and variant ID
+    const itemId = `${product.id}-${variantId}`
+
     // Check if item already exists in cart
     const existingItem = cartItems.find((cartItem) => cartItem.id === itemId)
 
@@ -123,19 +124,21 @@ export function BodyHandsPage({
         ...existingItem,
         quantity: existingItem.quantity + 1,
       }
-      toast.success(`Quantity updated — ${product.name}`, { duration: 2000 })
+      toast.success(`Quantity updated — ${product.name} (${size})`, { duration: 2000 })
     } else {
-      // Add new item
+      // Add new item with variant info in name
       item = {
         id: itemId,
-        name: product.name,
+        name: `${product.name} (${size})`,
         price,
         quantity: 1,
         image: product.image,
-        metadata: { size },
+        metadata: { size, variantId },
         variant_id: variantId,
+        product_id: product.id,
+        handle: product.slug,
       }
-      toast.success(`${product.name} Added To Cart`, { duration: 2000 })
+      toast.success(`${product.name} (${size}) Added To Cart`, { duration: 2000 })
     }
 
     // Add to recently added products for UI state
@@ -155,12 +158,21 @@ export function BodyHandsPage({
     // Server Action - persist cart to backend
     startTransition(async () => {
       try {
-        await addToCartAction({
+        const result = await addToCartAction({
           variantId: variantId!,
           quantity: existingItem ? existingItem.quantity + 1 : 1,
           countryCode: countryCode || "in",
         })
-        console.log("✅ Server action completed successfully")
+        console.log("✅ Server action completed successfully:", result)
+
+        // Update the cart item with the server line item ID for future updates
+        if (result?.lineItemId) {
+          const updatedItem = {
+            ...item,
+            line_item_id: result.lineItemId,
+          }
+          handleCartUpdate(updatedItem)
+        }
       } catch (error) {
         console.error("Failed to add to cart on server:", error)
         toast.error("Failed to save to cart. Please try again.")
@@ -365,7 +377,7 @@ export function BodyHandsPage({
                       />
                     </div>
                     <div className="flex-1">
-                      <p className="font-din-arabic text-xs uppercase tracking-[0.3em] text-black/50">
+                      <p className="font-din-arabic text-xs uppercase tracking-[0.3em] text-black/50 italic">
                         {item.botanical}
                       </p>
                       <h4
@@ -514,7 +526,7 @@ function ProductCard({
               {product.name}
             </h3>
             <p
-              className="font-din-arabic text-black/60 text-sm mb-2"
+              className="font-din-arabic text-black/60 text-sm mb-2 italic"
               style={{ letterSpacing: "0.1em" }}
             >
               {product.botanical}
