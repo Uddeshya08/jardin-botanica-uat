@@ -191,6 +191,19 @@ export function ProductHero({
   }, [defaultVariantId])
   const selectedVariant =
     product.variants?.find((v) => v.id === selectedVariantId) ?? product.variants?.[0]
+
+  // Check if variant is in stock
+  const isOutOfStock = useMemo(() => {
+    if (!selectedVariant) return true
+    // If inventory is not managed, consider it in stock
+    if (!selectedVariant.manage_inventory) return false
+    // If backorders are allowed, consider it in stock
+    if (selectedVariant.allow_backorder) return false
+    // Check inventory quantity
+    const inventoryQty = selectedVariant.inventory_quantity ?? 0
+    return inventoryQty <= 0
+  }, [selectedVariant])
+
   const minorAmount = selectedVariant?.calculated_price?.calculated_amount ?? 0
   console.log("🔍 ProductHero - minorAmount:", {
     minorAmount,
@@ -671,37 +684,46 @@ export function ProductHero({
                 <IoIosArrowDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-black/60 pointer-events-none" />
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleAddToCart}
-                className="font-din-arabic px-6 md:px-8 py-3 bg-black text-white hover:bg-black/90 transition-all duration-300 tracking-wide relative overflow-hidden w-full sm:w-auto"
-                disabled={!selectedVariantId || adding || isPending}
-              >
-                <AnimatePresence mode="wait">
-                  {isAddedToCart ? (
-                    <motion.span
-                      key="added"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -20, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      Added to Cart
-                    </motion.span>
-                  ) : (
-                    <motion.span
-                      key="add"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -20, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      Add to cart
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.button>
+              {isOutOfStock ? (
+                <button
+                  disabled
+                  className="font-din-arabic px-6 md:px-8 py-3 bg-[#a28b6f]/30 text-black/50 border border-[#a28b6f]/40 cursor-not-allowed tracking-wide w-full sm:w-auto transition-all duration-300"
+                >
+                  Out of Stock
+                </button>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleAddToCart}
+                  className="font-din-arabic px-6 md:px-8 py-3 bg-black text-white hover:bg-black/90 transition-all duration-300 tracking-wide relative overflow-hidden w-full sm:w-auto"
+                  disabled={!selectedVariantId || adding || isPending}
+                >
+                  <AnimatePresence mode="wait">
+                    {isAddedToCart ? (
+                      <motion.span
+                        key="added"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -20, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        Added to Cart
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="add"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -20, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        Add to cart
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              )}
               {uiError && (
                 <p className="text-xs mt-2" style={{ color: "#b42318" }}>
                   {uiError}

@@ -1302,7 +1302,8 @@ const Candles = () => {
                     dragFree: true,
                     containScroll: "trimSnaps",
                     watchDrag: true,
-                    duration: 40,
+                    duration: 15,
+                    dragThreshold: 5,
                   }}
                   className="w-full"
                 >

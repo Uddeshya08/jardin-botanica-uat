@@ -21,6 +21,7 @@ export interface Blog {
     handle: string
     image?: string
     description?: string
+    subtitle?: string | null
     variants?: import("@medusajs/types").HttpTypes.StoreProductVariant[]
   }[]
   tags: string[]

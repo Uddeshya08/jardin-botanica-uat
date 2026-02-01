@@ -3,7 +3,7 @@
 import { getAllBlogs } from "@lib/data/contentful"
 import { Navigation } from "app/components/Navigation"
 import { RippleEffect } from "app/components/RippleEffect"
-import { ChevronLeft, ChevronRight, Facebook, Instagram, Search, Twitter } from "lucide-react"
+import { ChevronLeft, ChevronRight, Facebook, Instagram, Search, Twitter, X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
@@ -40,6 +40,9 @@ const Home = () => {
   const [email, setEmail] = useState("")
   const [activeTab, setActiveTab] = useState("HOME")
   const [blogs, setBlogs] = useState<Blog[]>([])
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([])
 
   // Fetch blogs from Contentful
   useEffect(() => {
@@ -50,6 +53,22 @@ const Home = () => {
     }
     fetchBlogs()
   }, [countryCode])
+
+  // Filter blogs based on search query
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredBlogs(blogs)
+    } else {
+      const query = searchQuery.toLowerCase()
+      const filtered = blogs.filter(
+        (blog) =>
+          blog.title.toLowerCase().includes(query) ||
+          (blog.description && blog.description.toLowerCase().includes(query)) ||
+          (blog.author && blog.author.name && blog.author.name.toLowerCase().includes(query))
+      )
+      setFilteredBlogs(filtered)
+    }
+  }, [searchQuery, blogs])
 
   // Custom styles object
 
@@ -293,11 +312,51 @@ const Home = () => {
                 >
                   CONTACTS
                 </button>
-                <Search className="w-4 h-4 lg:w-5 lg:h-5 text-[#4f5864] ml-4 hover:text-[#626262] transition-colors duration-200 cursor-pointer flex-shrink-0" />
+                <button
+                  onClick={() => setIsSearchOpen(!isSearchOpen)}
+                  className="ml-4 p-1 hover:text-[#626262] transition-colors duration-200 flex-shrink-0"
+                  aria-label={isSearchOpen ? "Close search" : "Open search"}
+                >
+                  {isSearchOpen ? (
+                    <X className="w-4 h-4 lg:w-5 lg:h-5 text-[#4f5864]" />
+                  ) : (
+                    <Search className="w-4 h-4 lg:w-5 lg:h-5 text-[#4f5864]" />
+                  )}
+                </button>
               </div>
 
               {/* Sticky Horizontal Line */}
               <div className="w-full h-[1.5px] bg-[#4f5864]"></div>
+
+              {/* Sticky Search Input - Appears when search is open */}
+              <AnimatePresence>
+                {isSearchOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="w-full overflow-hidden"
+                    style={{
+                      boxShadow:
+                        "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca",
+                    }}
+                  >
+                    <div className="px-4 md:px-8 lg:px-12 py-2 md:py-3">
+                      <div className="relative max-w-2xl mx-auto lg:mx-0 lg:max-w-none">
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search articles..."
+                          className="w-full bg-transparent border-b-2 border-[#4f5864] pb-2 text-sm md:text-base font-din-arabic text-[#4f5864] placeholder:text-[#4f5864]/50 focus:outline-none focus:border-[#000] transition-colors duration-200"
+                        />
+                        <Search className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-[#4f5864] pointer-events-none" />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -412,7 +471,17 @@ const Home = () => {
             >
               CONTACTS
             </button>
-            <Search className="w-4 h-4 lg:w-5 lg:h-5 text-[#4f5864] ml-4 hover:text-[#626262] transition-colors duration-200 cursor-pointer flex-shrink-0" />
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="ml-4 p-1 hover:text-[#626262] transition-colors duration-200 flex-shrink-0"
+              aria-label={isSearchOpen ? "Close search" : "Open search"}
+            >
+              {isSearchOpen ? (
+                <X className="w-4 h-4 lg:w-5 lg:h-5 text-[#4f5864]" />
+              ) : (
+                <Search className="w-4 h-4 lg:w-5 lg:h-5 text-[#4f5864]" />
+              )}
+            </button>
           </div>
 
           {/* Horizontal Line - Full Width */}
@@ -422,6 +491,37 @@ const Home = () => {
             animate={{ width: "100%" }}
             transition={{ delay: 0.5, duration: 0.8 }}
           />
+
+          {/* Search Input - Appears when search is open */}
+          <AnimatePresence>
+            {isSearchOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="w-full overflow-hidden"
+                style={{
+                  boxShadow:
+                    "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca",
+                }}
+              >
+                <div className="px-4 md:px-8 lg:px-12 py-3 md:py-4">
+                  <div className="relative max-w-2xl mx-auto lg:mx-0 lg:max-w-none">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search articles..."
+                      className="w-full bg-transparent border-b-2 border-[#4f5864] pb-2 text-base md:text-lg font-din-arabic text-[#4f5864] placeholder:text-[#4f5864]/50 focus:outline-none focus:border-[#000] transition-colors duration-200"
+                      autoFocus
+                    />
+                    <Search className="absolute right-0 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4f5864] pointer-events-none" />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Volume Text - Directly below separator */}
           <motion.div
@@ -580,287 +680,559 @@ const Home = () => {
       {/* Content sections - only show when HOME tab is active */}
       {activeTab === "HOME" && (
         <>
-          {/* second section */}
-          <div className="max-w-7xl mx-auto my-8 md:my-12 lg:my-20 px-4 lg:px-0">
-            <div className="flex flex-col lg:flex-row justify-between gap-6 lg:gap-8">
-              {/* Hero Article - 75% width */}
-              {blogs.length > 0 && (
-                <motion.div
-                  className="w-full lg:w-[70%] flex-shrink-0"
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.6, duration: 0.8 }}
-                >
-                  <Link href={`/${countryCode}/blogs/${blogs[0].slug}`}>
-                    <div className="relative cursor-pointer">
-                      <div
-                        className="relative group w-full overflow-hidden"
-                        style={{ aspectRatio: "858/971" }}
-                      >
-                        {/* Grayscale Base Image */}
-                        <motion.img
-                          src={
-                            blogs[0].image ||
-                            "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=858&h=971&fit=crop"
-                          }
-                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                          alt={blogs[0].imagealt || blogs[0].title}
-                          data-testid="hero-image"
-                          initial={{ scale: 1.1, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.8, duration: 1.0 }}
-                        />
+          {/* Search Results - Show when search is active */}
+          {isSearchOpen && searchQuery.trim() !== "" && (
+            <div className="max-w-7xl mx-auto my-8 md:my-12 lg:my-20 px-4 lg:px-0">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <h2 className="font-american-typewriter text-2xl md:text-3xl mb-6 text-[#4f5864]">
+                  Search Results {filteredBlogs.length > 0 && `(${filteredBlogs.length})`}
+                </h2>
 
-                        {/* Cream Overlay - Lightens image for text readability */}
-                        <motion.div
-                          className="absolute inset-0 bg-[#FEFDF3] transition-opacity duration-500"
-                          initial={{ opacity: 0.5 }}
-                          animate={{ opacity: 0.5 }}
-                        />
+                {filteredBlogs.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-[#626262] font-din-arabic text-lg">
+                      No articles found matching &quot;{searchQuery}&quot;
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                    {filteredBlogs.map((blog, index) => (
+                      <motion.article
+                        key={blog.slug}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1, duration: 0.5 }}
+                        className="group"
+                      >
+                        <Link href={`/${countryCode}/blogs/${blog.slug}`}>
+                          <div
+                            className="relative overflow-hidden mb-4"
+                            style={{ aspectRatio: "16/10" }}
+                          >
+                            <img
+                              src={
+                                blog.image ||
+                                "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=800&h=500&fit=crop"
+                              }
+                              alt={blog.imagealt || blog.title}
+                              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                            />
+                          </div>
+                          <div className="text-xs text-[#626262] mb-2 font-din-arabic tracking-[0.1em]">
+                            {blog.publishedDate
+                              ? new Date(blog.publishedDate)
+                                  .toLocaleDateString("en-US", {
+                                    month: "long",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })
+                                  .toUpperCase()
+                              : ""}
+                          </div>
+                          <h3 className="font-american-typewriter text-lg mb-2 group-hover:underline">
+                            {blog.title}
+                          </h3>
+                          <p className="text-sm font-din-arabic text-[#626262] line-clamp-2">
+                            {blog.description}
+                          </p>
+                        </Link>
+                      </motion.article>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            </div>
+          )}
+
+          {/* Default Layout - Show when search is not active or empty */}
+          {(!isSearchOpen || searchQuery.trim() === "") && (
+            <>
+              {/* second section */}
+              <div className="max-w-7xl mx-auto my-8 md:my-12 lg:my-20 px-4 lg:px-0">
+                <div className="flex flex-col lg:flex-row justify-between gap-6 lg:gap-8">
+                  {/* Hero Article - 75% width */}
+                  {blogs.length > 0 && (
+                    <motion.div
+                      className="w-full lg:w-[70%] flex-shrink-0"
+                      initial={{ x: -50, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.6, duration: 0.8 }}
+                    >
+                      <Link href={`/${countryCode}/blogs/${blogs[0].slug}`}>
+                        <div className="relative cursor-pointer">
+                          <div
+                            className="relative group w-full overflow-hidden"
+                            style={{ aspectRatio: "858/971" }}
+                          >
+                            {/* Grayscale Base Image */}
+                            <motion.img
+                              src={
+                                blogs[0].image ||
+                                "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=858&h=971&fit=crop"
+                              }
+                              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                              alt={blogs[0].imagealt || blogs[0].title}
+                              data-testid="hero-image"
+                              initial={{ scale: 1.1, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ delay: 0.8, duration: 1.0 }}
+                            />
+
+                            {/* Cream Overlay - Lightens image for text readability */}
+                            <motion.div
+                              className="absolute inset-0 bg-[#FEFDF3] transition-opacity duration-500"
+                              initial={{ opacity: 0.5 }}
+                              animate={{ opacity: 0.5 }}
+                            />
+                          </div>
+
+                          {/* Gradient Overlay */}
+                          {/* <div className="absolute inset-0 bg-gradient-to-r from-[#EFEEE2] via-[#EFEEE2]/70 to-transparent"></div> */}
+
+                          {/* Article Overlay - vertically centered, left aligned */}
+                          <motion.div
+                            className="absolute top-1/2 left-4 md:left-8 lg:left-12 transform -translate-y-1/2 max-w-xs md:max-w-md lg:max-w-lg px-4 md:px-6 lg:px-8"
+                            initial={{ x: -30, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 1.0, duration: 0.8 }}
+                          >
+                            <motion.div
+                              className="text-xs lg:text-sm text-gray-600 mb-2 lg:mb-3 text-[#626262] p-0 text-[14px]"
+                              data-testid="hero-date"
+                              initial={{ y: 10, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 1.2, duration: 0.6 }}
+                            >
+                              {blogs[0].publishedDate
+                                ? new Date(blogs[0].publishedDate)
+                                    .toLocaleDateString("en-US", {
+                                      month: "long",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    })
+                                    .toUpperCase()
+                                : ""}
+                            </motion.div>
+                            <motion.h2
+                              className="text-xl md:text-2xl lg:text-[48px] text-gray-900 mb-3 lg:mb-4 font-american-typewriter leading-tight"
+                              style={{ letterSpacing: "2px", fontWeight: "600" }}
+                              data-testid="hero-title"
+                              initial={{ y: 15, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 1.3, duration: 0.6 }}
+                            >
+                              {blogs[0].title}
+                            </motion.h2>
+                            <motion.p
+                              className="mb-4 lg:mb-6 text-sm lg:text-[16px] font-din-arabic tracking-[1px] text-[#626262]"
+                              data-testid="hero-excerpt"
+                              initial={{ y: 15, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 1.4, duration: 0.6 }}
+                            >
+                              {blogs[0].description}
+                            </motion.p>
+                            <motion.span
+                              className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline"
+                              style={{ fontWeight: "600" }}
+                              initial={{ y: 10, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 1.5, duration: 0.6 }}
+                            >
+                              Read more...
+                            </motion.span>
+                          </motion.div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  )}
+
+                  {/* Daily Feed Sidebar - 25% width */}
+                  <motion.div
+                    className="w-full lg:w-[30%]"
+                    initial={{ x: 50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.8, duration: 0.8 }}
+                  >
+                    <div className="bg-[#FEFDF3] px-4 lg:px-6 h-fit">
+                      <motion.h3
+                        className="mb-4 lg:mb-6 text-2xl lg:text-[36px] font-american-typewriter font-bold italic tracking-[2px]"
+                        data-testid="daily-feed-title"
+                        initial={{ y: -10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 1.0, duration: 0.6 }}
+                      >
+                        Daily Feed
+                      </motion.h3>
+
+                      <motion.p
+                        initial={{ width: 0 }}
+                        animate={{ width: "100%" }}
+                        transition={{ delay: 1.2, duration: 0.8 }}
+                      ></motion.p>
+
+                      <div
+                        className="space-y-4 lg:space-y-5"
+                        style={{
+                          boxShadow:
+                            "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca",
+                        }}
+                      >
+                        {blogs.slice(1).map((blog, index) => (
+                          <motion.article
+                            key={blog.slug}
+                            className={`${
+                              index < blogs.slice(1).length - 1
+                                ? "border-b border-gray-200 pb-3 lg:pb-4"
+                                : "pb-3 lg:pb-4"
+                            }`}
+                            data-testid={`daily-feed-article-${blog.slug}`}
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 1.3 + index * 0.2, duration: 0.6 }}
+                          >
+                            <motion.div
+                              className={`text-xs lg:text-sm text-gray-600 mb-2 font-din-arabic tracking-[0.1em] text-[14px] ${index == 0 ? "pt-4 lg:pt-6" : "pt-0"}`}
+                              data-testid={`article-date-${blog.slug}`}
+                              initial={{ x: -10, opacity: 0 }}
+                              animate={{ x: 0, opacity: 1 }}
+                              transition={{
+                                delay: 1.4 + index * 0.2,
+                                duration: 0.5,
+                              }}
+                            >
+                              {blog.publishedDate
+                                ? new Date(blog.publishedDate)
+                                    .toLocaleDateString("en-US", {
+                                      month: "long",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    })
+                                    .toUpperCase()
+                                : ""}
+                            </motion.div>
+                            <motion.h4
+                              className="mb-2"
+                              initial={{ x: -10, opacity: 0 }}
+                              animate={{ x: 0, opacity: 1 }}
+                              transition={{
+                                delay: 1.5 + index * 0.2,
+                                duration: 0.5,
+                              }}
+                            >
+                              <Link
+                                href={`/${countryCode}/blogs/${blog.slug}`}
+                                className="hover:underline text-base lg:text-lg font-din-arabic font-bold text-[20px] tracking-[1px] text-[#403F3F]"
+                                data-testid={`article-title-${blog.slug}`}
+                              >
+                                {blog.title}
+                              </Link>
+                            </motion.h4>
+                            <motion.p
+                              className="text-sm lg:text-base font-din-arabic text-[16px] tracking-[1px] text-[#626262]"
+                              data-testid={`article-excerpt-${blog.slug}`}
+                              initial={{ y: 10, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{
+                                delay: 1.6 + index * 0.2,
+                                duration: 0.5,
+                              }}
+                            >
+                              {blog.description}
+                            </motion.p>
+                          </motion.article>
+                        ))}
                       </div>
 
-                      {/* Gradient Overlay */}
-                      {/* <div className="absolute inset-0 bg-gradient-to-r from-[#EFEEE2] via-[#EFEEE2]/70 to-transparent"></div> */}
-
-                      {/* Article Overlay - vertically centered, left aligned */}
+                      {/* View More */}
                       <motion.div
-                        className="absolute top-1/2 left-4 md:left-8 lg:left-12 transform -translate-y-1/2 max-w-xs md:max-w-md lg:max-w-lg px-4 md:px-6 lg:px-8"
-                        initial={{ x: -30, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: 1.0, duration: 0.8 }}
+                        className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 2.2, duration: 0.6 }}
                       >
-                        <motion.div
-                          className="text-xs lg:text-sm text-gray-600 mb-2 lg:mb-3 text-[#626262] p-0 text-[14px]"
-                          data-testid="hero-date"
-                          initial={{ y: 10, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 1.2, duration: 0.6 }}
+                        <a
+                          href="#"
+                          className="text-[14px] font-medium text-[#535c4a] hover:underline font-american-typewriter tracking-[1px] font-semibold"
+                          data-testid="view-more-posts"
                         >
-                          {blogs[0].publishedDate
-                            ? new Date(blogs[0].publishedDate)
-                                .toLocaleDateString("en-US", {
-                                  month: "long",
-                                  day: "numeric",
-                                  year: "numeric",
-                                })
-                                .toUpperCase()
-                            : ""}
-                        </motion.div>
-                        <motion.h2
-                          className="text-xl md:text-2xl lg:text-[48px] text-gray-900 mb-3 lg:mb-4 font-american-typewriter leading-tight"
-                          style={{ letterSpacing: "2px", fontWeight: "600" }}
-                          data-testid="hero-title"
-                          initial={{ y: 15, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 1.3, duration: 0.6 }}
-                        >
-                          {blogs[0].title}
-                        </motion.h2>
-                        <motion.p
-                          className="mb-4 lg:mb-6 text-sm lg:text-[16px] font-din-arabic tracking-[1px] text-[#626262]"
-                          data-testid="hero-excerpt"
-                          initial={{ y: 15, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 1.4, duration: 0.6 }}
-                        >
-                          {blogs[0].description}
-                        </motion.p>
-                        <motion.span
-                          className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline"
-                          style={{ fontWeight: "600" }}
-                          initial={{ y: 10, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 1.5, duration: 0.6 }}
-                        >
-                          Read more...
-                        </motion.span>
+                          View more posts
+                        </a>
+                        <div className="flex space-x-2">
+                          <ChevronLeft
+                            className="w-4 h-4 text-gray-600"
+                            data-testid="pagination-prev"
+                          />
+                          <ChevronRight
+                            className="w-4 h-4 text-gray-600"
+                            data-testid="pagination-next"
+                          />
+                        </div>
                       </motion.div>
                     </div>
-                  </Link>
-                </motion.div>
-              )}
+                  </motion.div>
+                </div>
+              </div>
 
-              {/* Daily Feed Sidebar - 25% width */}
-              <motion.div
-                className="w-full lg:w-[30%]"
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.8, duration: 0.8 }}
-              >
-                <div className="bg-[#FEFDF3] px-4 lg:px-6 h-fit">
-                  <motion.h3
-                    className="mb-4 lg:mb-6 text-2xl lg:text-[36px] font-american-typewriter font-bold italic tracking-[2px]"
-                    data-testid="daily-feed-title"
-                    initial={{ y: -10, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 1.0, duration: 0.6 }}
+              <div className="max-w-7xl mx-auto my-8 md:my-12 lg:my-20 px-4 lg:px-0">
+                <motion.div
+                  className="text-left mb-6 lg:mb-10"
+                  initial={{ y: 30, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
+                >
+                  <motion.h2
+                    className="font-american-typewriter pb-4 lg:pb-6 text-2xl md:text-3xl tracking-tight uppercase"
+                    style={{ fontWeight: "bold" }}
+                    initial={{ x: -30, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.8 }}
                   >
-                    Daily Feed
-                  </motion.h3>
-
-                  <motion.p
-                    initial={{ width: 0 }}
-                    animate={{ width: "100%" }}
-                    transition={{ delay: 1.2, duration: 0.8 }}
-                  ></motion.p>
-
-                  <div
-                    className="space-y-4 lg:space-y-5"
+                    Featured News
+                  </motion.h2>
+                  <motion.h2
+                    className="font-american-typewriter pt-2 text-3xl tracking-tight uppercase"
                     style={{
                       boxShadow:
                         "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca",
                     }}
+                    initial={{ x: -30, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.8 }}
                   >
-                    {blogs.slice(1).map((blog, index) => (
-                      <motion.article
-                        key={blog.slug}
-                        className={`${
-                          index < blogs.slice(1).length - 1
-                            ? "border-b border-gray-200 pb-3 lg:pb-4"
-                            : "pb-3 lg:pb-4"
-                        }`}
-                        data-testid={`daily-feed-article-${blog.slug}`}
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 1.3 + index * 0.2, duration: 0.6 }}
-                      >
+                    {/* Featured News */}
+                  </motion.h2>
+                </motion.div>
+
+                <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                  {/* Left Side - 2 Blogs (70%) */}
+                  <div className="flex-1 w-full lg:w-[70%]">
+                    <motion.div
+                      className="pb-8 lg:pb-12"
+                      style={{ paddingBottom: "40px" }}
+                      initial={{ y: 40, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.9, duration: 0.8 }}
+                    >
+                      <div className="flex flex-col md:flex-row gap-4 lg:gap-6">
+                        {/* Image = 65 */}
                         <motion.div
-                          className={`text-xs lg:text-sm text-gray-600 mb-2 font-din-arabic tracking-[0.1em] text-[14px] ${index == 0 ? "pt-4 lg:pt-6" : "pt-0"}`}
-                          data-testid={`article-date-${blog.slug}`}
-                          initial={{ x: -10, opacity: 0 }}
+                          className="w-full md:w-1/2 flex flex-col"
+                          initial={{ x: -30, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
-                          transition={{
-                            delay: 1.4 + index * 0.2,
-                            duration: 0.5,
-                          }}
+                          transition={{ delay: 1.1, duration: 0.8 }}
                         >
-                          {blog.publishedDate
-                            ? new Date(blog.publishedDate)
-                                .toLocaleDateString("en-US", {
-                                  month: "long",
-                                  day: "numeric",
-                                  year: "numeric",
-                                })
-                                .toUpperCase()
-                            : ""}
+                          <div className="relative group w-full h-auto overflow-hidden">
+                            {/* Grayscale Base Image */}
+                            <motion.img
+                              src="https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?w=800&h=600&fit=crop"
+                              alt="Business conference and networking"
+                              className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                              initial={{ scale: 1.1, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ delay: 1.3, duration: 0.8 }}
+                            />
+
+                            {/* Black Overlay - Removed on hover */}
+                            <motion.div
+                              className="absolute inset-0 bg-black group-hover:opacity-0 transition-opacity duration-500"
+                              initial={{ opacity: 0 }}
+                            />
+                          </div>
                         </motion.div>
-                        <motion.h4
-                          className="mb-2"
-                          initial={{ x: -10, opacity: 0 }}
+
+                        {/* Text = 35 */}
+                        <motion.div
+                          className="w-full md:w-1/2 flex flex-col"
+                          style={{ paddingBottom: "5px", position: "relative" }}
+                          initial={{ x: 30, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
-                          transition={{
-                            delay: 1.5 + index * 0.2,
-                            duration: 0.5,
-                          }}
+                          transition={{ delay: 1.2, duration: 0.8 }}
                         >
-                          <Link
-                            href={`/${countryCode}/blogs/${blog.slug}`}
-                            className="hover:underline text-base lg:text-lg font-din-arabic font-bold text-[20px] tracking-[1px] text-[#403F3F]"
-                            data-testid={`article-title-${blog.slug}`}
+                          <div>
+                            <motion.h3
+                              className="font-american-typewriter text-lg lg:text-xl mb-2 lg:mb-3"
+                              initial={{ y: 15, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 1.4, duration: 0.6 }}
+                            >
+                              Renounce City's Vote to Drop References
+                            </motion.h3>
+                            <motion.p
+                              className="text-sm lg:text-base font-din-arabic text-[#535c4a] mb-3 lg:mb-4 text-[16px]"
+                              initial={{ y: 15, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 1.5, duration: 0.6 }}
+                            >
+                              by Thomas Williams
+                            </motion.p>
+                            <motion.p
+                              className="leading-relaxed text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px]"
+                              initial={{ y: 15, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 1.6, duration: 0.6 }}
+                            >
+                              Sometimes it is easier to learn which advisors you should avoid versus
+                              learning how to select the best advisors...
+                            </motion.p>
+                          </div>
+                          <motion.a
+                            href="#"
+                            className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline mt-4 hidden lg:block"
+                            style={{ position: "absolute", bottom: "0" }}
+                            initial={{ y: 10, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 1.7, duration: 0.6 }}
                           >
-                            {blog.title}
-                          </Link>
-                        </motion.h4>
-                        <motion.p
-                          className="text-sm lg:text-base font-din-arabic text-[16px] tracking-[1px] text-[#626262]"
-                          data-testid={`article-excerpt-${blog.slug}`}
-                          initial={{ y: 10, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{
-                            delay: 1.6 + index * 0.2,
-                            duration: 0.5,
-                          }}
+                            Read more...
+                          </motion.a>
+                          <motion.a
+                            href="#"
+                            className="text-sm font-american-typewriter font-medium text-gray-600 hover:underline mt-4 lg:hidden"
+                            initial={{ y: 10, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 1.7, duration: 0.6 }}
+                          >
+                            Read more...
+                          </motion.a>
+                        </motion.div>
+                      </div>
+                    </motion.div>
+
+                    {/* Second Blog */}
+                    <motion.div
+                      className=""
+                      initial={{ y: 40, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 1.3, duration: 0.8 }}
+                    >
+                      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                        {/* Left: Title + Author + Image */}
+                        <motion.div
+                          className="w-full md:w-1/2 flex flex-col"
+                          style={{ borderTop: "1px solid #D3D2CA" }}
+                          initial={{ x: -30, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 1.5, duration: 0.8 }}
                         >
-                          {blog.description}
-                        </motion.p>
-                      </motion.article>
-                    ))}
+                          {/* Title + Author */}
+                          <div className="mb-3 lg:mb-4">
+                            <motion.h3
+                              className="font-american-typewriter text-lg lg:text-xl mb-2 leading-tight pt-4 lg:pt-6"
+                              initial={{ y: 15, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 1.7, duration: 0.6 }}
+                            >
+                              US Open 2017 latest: Women's semi-final results and Nadal vs Del Potro
+                            </motion.h3>
+                            <motion.p
+                              className="text-xs lg:text-sm italic text-gray-600"
+                              initial={{ y: 10, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 1.8, duration: 0.6 }}
+                            >
+                              by Alice Bohn
+                            </motion.p>
+                          </div>
+                          {/* Image */}
+                          <motion.div
+                            className="flex-1"
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 1.9, duration: 0.8 }}
+                          >
+                            <div className="relative group w-full h-48 lg:h-64 overflow-hidden">
+                              {/* Grayscale Base Image */}
+                              <motion.img
+                                src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&h=600&fit=crop"
+                                alt="Tennis player in action"
+                                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                                initial={{ scale: 1.1, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ delay: 2.1, duration: 0.8 }}
+                              />
+
+                              {/* Black Overlay - Removed on hover */}
+                              <motion.div
+                                className="absolute inset-0 bg-black group-hover:opacity-0 transition-opacity duration-500"
+                                initial={{ opacity: 0 }}
+                              />
+                            </div>
+                          </motion.div>
+                        </motion.div>
+
+                        {/* Right: Description + Read More */}
+                        <motion.div
+                          className="w-full md:w-1/2 flex flex-col justify-between pb-6 lg:pb-10"
+                          style={{
+                            borderTop: "1px solid #D3D2CA",
+                            paddingBottom: "5px",
+                          }}
+                          initial={{ x: 30, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 1.6, duration: 0.8 }}
+                        >
+                          <div>
+                            <motion.p
+                              className="leading-relaxed mb-3 lg:mb-4 pt-4 lg:pt-6 text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px]"
+                              initial={{ y: 15, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 1.8, duration: 0.6 }}
+                            >
+                              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt
+                              porta velit, sed suscipit massa consequat sed.
+                            </motion.p>
+                            <motion.p
+                              className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px]"
+                              initial={{ y: 15, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 1.9, duration: 0.6 }}
+                            >
+                              Quisque auctor justo eu odio tincidunt, vitae consectetur nulla
+                              consequat. Nam vel aliquet turpis, ac sollicitudin nisl.
+                            </motion.p>
+                            <motion.p
+                              className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px]"
+                              initial={{ y: 15, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 2.0, duration: 0.6 }}
+                            >
+                              Cras erat leo, mollis sit amet lacus a, tristique euismod quam.
+                              Suspendisse viverra a turpis in sodales.
+                            </motion.p>
+                          </div>
+                          <motion.a
+                            href="#"
+                            className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline"
+                            initial={{ y: 10, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 2.1, duration: 0.6 }}
+                          >
+                            Read more...
+                          </motion.a>
+                        </motion.div>
+                      </div>
+                    </motion.div>
                   </div>
 
-                  {/* View More */}
+                  {/* Right Side - 1 Blog (30%) */}
                   <motion.div
-                    className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200"
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 2.2, duration: 0.6 }}
+                    className="w-full lg:w-[30%]"
+                    initial={{ x: 40, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 1.1, duration: 0.8 }}
                   >
-                    <a
-                      href="#"
-                      className="text-[14px] font-medium text-[#535c4a] hover:underline font-american-typewriter tracking-[1px] font-semibold"
-                      data-testid="view-more-posts"
-                    >
-                      View more posts
-                    </a>
-                    <div className="flex space-x-2">
-                      <ChevronLeft
-                        className="w-4 h-4 text-gray-600"
-                        data-testid="pagination-prev"
-                      />
-                      <ChevronRight
-                        className="w-4 h-4 text-gray-600"
-                        data-testid="pagination-next"
-                      />
-                    </div>
-                  </motion.div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-
-          <div className="max-w-7xl mx-auto my-8 md:my-12 lg:my-20 px-4 lg:px-0">
-            <motion.div
-              className="text-left mb-6 lg:mb-10"
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-            >
-              <motion.h2
-                className="font-american-typewriter pb-4 lg:pb-6 text-2xl md:text-3xl tracking-tight uppercase"
-                style={{ fontWeight: "bold" }}
-                initial={{ x: -30, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-              >
-                Featured News
-              </motion.h2>
-              <motion.h2
-                className="font-american-typewriter pt-2 text-3xl tracking-tight uppercase"
-                style={{
-                  boxShadow:
-                    "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca",
-                }}
-                initial={{ x: -30, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-              >
-                {/* Featured News */}
-              </motion.h2>
-            </motion.div>
-
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-              {/* Left Side - 2 Blogs (70%) */}
-              <div className="flex-1 w-full lg:w-[70%]">
-                <motion.div
-                  className="pb-8 lg:pb-12"
-                  style={{ paddingBottom: "40px" }}
-                  initial={{ y: 40, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.9, duration: 0.8 }}
-                >
-                  <div className="flex flex-col md:flex-row gap-4 lg:gap-6">
-                    {/* Image = 65 */}
-                    <motion.div
-                      className="w-full md:w-1/2 flex flex-col"
-                      initial={{ x: -30, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 1.1, duration: 0.8 }}
-                    >
-                      <div className="relative group w-full h-auto overflow-hidden">
+                    <div className="">
+                      <div className="relative group w-full h-64 md:h-80 lg:h-96 mb-4 lg:mb-6 overflow-hidden">
                         {/* Grayscale Base Image */}
                         <motion.img
-                          src="https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?w=800&h=600&fit=crop"
-                          alt="Business conference and networking"
-                          className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                          src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&h=600&fit=crop"
+                          alt="Fashion designer shoes and accessories"
+                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                           initial={{ scale: 1.1, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
                           transition={{ delay: 1.3, duration: 0.8 }}
@@ -872,272 +1244,76 @@ const Home = () => {
                           initial={{ opacity: 0 }}
                         />
                       </div>
-                    </motion.div>
 
-                    {/* Text = 35 */}
-                    <motion.div
-                      className="w-full md:w-1/2 flex flex-col"
-                      style={{ paddingBottom: "5px", position: "relative" }}
-                      initial={{ x: 30, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 1.2, duration: 0.8 }}
-                    >
-                      <div>
-                        <motion.h3
-                          className="font-american-typewriter text-lg lg:text-xl mb-2 lg:mb-3"
-                          initial={{ y: 15, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 1.4, duration: 0.6 }}
-                        >
-                          Renounce City's Vote to Drop References
-                        </motion.h3>
-                        <motion.p
-                          className="text-sm lg:text-base font-din-arabic text-[#535c4a] mb-3 lg:mb-4 text-[16px]"
-                          initial={{ y: 15, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 1.5, duration: 0.6 }}
-                        >
-                          by Thomas Williams
-                        </motion.p>
-                        <motion.p
-                          className="leading-relaxed text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px]"
-                          initial={{ y: 15, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 1.6, duration: 0.6 }}
-                        >
-                          Sometimes it is easier to learn which advisors you should avoid versus
-                          learning how to select the best advisors...
-                        </motion.p>
-                      </div>
-                      <motion.a
-                        href="#"
-                        className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline mt-4 hidden lg:block"
-                        style={{ position: "absolute", bottom: "0" }}
-                        initial={{ y: 10, opacity: 0 }}
+                      <motion.div
+                        className="px-2"
+                        initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 1.7, duration: 0.6 }}
+                        transition={{ delay: 1.5, duration: 0.8 }}
                       >
-                        Read more...
-                      </motion.a>
-                      <motion.a
-                        href="#"
-                        className="text-sm font-american-typewriter font-medium text-gray-600 hover:underline mt-4 lg:hidden"
-                        initial={{ y: 10, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 1.7, duration: 0.6 }}
-                      >
-                        Read more...
-                      </motion.a>
-                    </motion.div>
-                  </div>
-                </motion.div>
-
-                {/* Second Blog */}
-                <motion.div
-                  className=""
-                  initial={{ y: 40, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 1.3, duration: 0.8 }}
-                >
-                  <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                    {/* Left: Title + Author + Image */}
-                    <motion.div
-                      className="w-full md:w-1/2 flex flex-col"
-                      style={{ borderTop: "1px solid #D3D2CA" }}
-                      initial={{ x: -30, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 1.5, duration: 0.8 }}
-                    >
-                      {/* Title + Author */}
-                      <div className="mb-3 lg:mb-4">
                         <motion.h3
-                          className="font-american-typewriter text-lg lg:text-xl mb-2 leading-tight pt-4 lg:pt-6"
+                          className="text-xl lg:text-2xl font-american-typewriter mb-2 lg:mb-3 leading-tight"
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.7, duration: 0.6 }}
                         >
-                          US Open 2017 latest: Women's semi-final results and Nadal vs Del Potro
+                          Simone Rocha on the Importance of Shoes
                         </motion.h3>
                         <motion.p
-                          className="text-xs lg:text-sm italic text-gray-600"
+                          className="text-xs lg:text-sm italic text-gray-600 mb-3 lg:mb-4"
                           initial={{ y: 10, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.8, duration: 0.6 }}
                         >
-                          by Alice Bohn
-                        </motion.p>
-                      </div>
-                      {/* Image */}
-                      <motion.div
-                        className="flex-1"
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 1.9, duration: 0.8 }}
-                      >
-                        <div className="relative group w-full h-48 lg:h-64 overflow-hidden">
-                          {/* Grayscale Base Image */}
-                          <motion.img
-                            src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&h=600&fit=crop"
-                            alt="Tennis player in action"
-                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                            initial={{ scale: 1.1, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: 2.1, duration: 0.8 }}
-                          />
-
-                          {/* Black Overlay - Removed on hover */}
-                          <motion.div
-                            className="absolute inset-0 bg-black group-hover:opacity-0 transition-opacity duration-500"
-                            initial={{ opacity: 0 }}
-                          />
-                        </div>
-                      </motion.div>
-                    </motion.div>
-
-                    {/* Right: Description + Read More */}
-                    <motion.div
-                      className="w-full md:w-1/2 flex flex-col justify-between pb-6 lg:pb-10"
-                      style={{
-                        borderTop: "1px solid #D3D2CA",
-                        paddingBottom: "5px",
-                      }}
-                      initial={{ x: 30, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 1.6, duration: 0.8 }}
-                    >
-                      <div>
-                        <motion.p
-                          className="leading-relaxed mb-3 lg:mb-4 pt-4 lg:pt-6 text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px]"
-                          initial={{ y: 15, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 1.8, duration: 0.6 }}
-                        >
-                          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt
-                          porta velit, sed suscipit massa consequat sed.
+                          by Amy Adams
                         </motion.p>
                         <motion.p
-                          className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px]"
+                          className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic"
+                          style={{
+                            letterSpacing: "1px",
+                            color: "#626262",
+                            fontSize: "16px",
+                          }}
                           initial={{ y: 15, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.9, duration: 0.6 }}
                         >
-                          Quisque auctor justo eu odio tincidunt, vitae consectetur nulla consequat.
-                          Nam vel aliquet turpis, ac sollicitudin nisl.
+                          In the latest installment of this series that goes inside the private
+                          working worlds of designers, Simone Rocha, founder and creative director
+                          of her own fashion line, discusses life in East London, the importance of
+                          shoes you can walk in, and fighting with her father.
                         </motion.p>
-                        <motion.p
-                          className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px]"
-                          initial={{ y: 15, opacity: 0 }}
+                        <motion.a
+                          href="#"
+                          className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline"
+                          initial={{ y: 10, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 2.0, duration: 0.6 }}
                         >
-                          Cras erat leo, mollis sit amet lacus a, tristique euismod quam.
-                          Suspendisse viverra a turpis in sodales.
-                        </motion.p>
-                      </div>
-                      <motion.a
-                        href="#"
-                        className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline"
-                        initial={{ y: 10, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 2.1, duration: 0.6 }}
-                      >
-                        Read more...
-                      </motion.a>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Right Side - 1 Blog (30%) */}
-              <motion.div
-                className="w-full lg:w-[30%]"
-                initial={{ x: 40, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 1.1, duration: 0.8 }}
-              >
-                <div className="">
-                  <div className="relative group w-full h-64 md:h-80 lg:h-96 mb-4 lg:mb-6 overflow-hidden">
-                    {/* Grayscale Base Image */}
-                    <motion.img
-                      src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&h=600&fit=crop"
-                      alt="Fashion designer shoes and accessories"
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                      initial={{ scale: 1.1, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: 1.3, duration: 0.8 }}
-                    />
-
-                    {/* Black Overlay - Removed on hover */}
-                    <motion.div
-                      className="absolute inset-0 bg-black group-hover:opacity-0 transition-opacity duration-500"
-                      initial={{ opacity: 0 }}
-                    />
-                  </div>
-
-                  <motion.div
-                    className="px-2"
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 1.5, duration: 0.8 }}
-                  >
-                    <motion.h3
-                      className="text-xl lg:text-2xl font-american-typewriter mb-2 lg:mb-3 leading-tight"
-                      initial={{ y: 15, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 1.7, duration: 0.6 }}
-                    >
-                      Simone Rocha on the Importance of Shoes
-                    </motion.h3>
-                    <motion.p
-                      className="text-xs lg:text-sm italic text-gray-600 mb-3 lg:mb-4"
-                      initial={{ y: 10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 1.8, duration: 0.6 }}
-                    >
-                      by Amy Adams
-                    </motion.p>
-                    <motion.p
-                      className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic"
-                      style={{
-                        letterSpacing: "1px",
-                        color: "#626262",
-                        fontSize: "16px",
-                      }}
-                      initial={{ y: 15, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 1.9, duration: 0.6 }}
-                    >
-                      In the latest installment of this series that goes inside the private working
-                      worlds of designers, Simone Rocha, founder and creative director of her own
-                      fashion line, discusses life in East London, the importance of shoes you can
-                      walk in, and fighting with her father.
-                    </motion.p>
-                    <motion.a
-                      href="#"
-                      className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline"
-                      initial={{ y: 10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 2.0, duration: 0.6 }}
-                    >
-                      READ MORE...
-                    </motion.a>
+                          READ MORE...
+                        </motion.a>
+                      </motion.div>
+                    </div>
                   </motion.div>
                 </div>
-              </motion.div>
-            </div>
 
-            {/* View More Posts */}
-            <motion.div
-              className="mt-8 md:mt-12 lg:mt-16 pt-6 lg:pt-8 border-t border-gray-300 pb-4 lg:pb-6"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 2.3, duration: 0.8 }}
-            >
-              <a href="#" className="text-xs lg:text-sm font-medium text-gray-900 hover:underline">
-                VIEW MORE POSTS
-              </a>
-            </motion.div>
-          </div>
+                {/* View More Posts */}
+                <motion.div
+                  className="mt-8 md:mt-12 lg:mt-16 pt-6 lg:pt-8 border-t border-gray-300 pb-4 lg:pb-6"
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 2.3, duration: 0.8 }}
+                >
+                  <a
+                    href="#"
+                    className="text-xs lg:text-sm font-medium text-gray-900 hover:underline"
+                  >
+                    VIEW MORE POSTS
+                  </a>
+                </motion.div>
+              </div>
+            </>
+          )}
         </>
       )}
 

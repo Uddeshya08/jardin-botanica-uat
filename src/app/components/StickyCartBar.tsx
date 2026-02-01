@@ -662,7 +662,7 @@ export function StickyCartBar({
                         <img
                           src={ritualProduct.image}
                           alt={ritualProduct.name}
-                          className="w-8 h-8 md:w-10 md:h-10 object-cover rounded-lg md:rounded-xl"
+                          className="w-8 h-8 md:w-10 md:h-10 object-contain rounded-lg md:rounded-xl"
                         />
                       ) : (
                         <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-black/70" />
@@ -671,7 +671,7 @@ export function StickyCartBar({
                       <img
                         src={image}
                         alt={name}
-                        className="w-8 h-8 md:w-10 md:h-10 object-cover rounded-lg md:rounded-xl"
+                        className="w-8 h-8 md:w-10 md:h-10 object-contain rounded-lg md:rounded-xl"
                       />
                     ) : (
                       <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-black/70" />

@@ -16,6 +16,7 @@ const FeaturedBlogProduct = ({
   name,
   image,
   description,
+  subtitle,
   handle,
   countryCode,
   variants,
@@ -24,6 +25,7 @@ const FeaturedBlogProduct = ({
   name: string
   image?: string
   description?: string
+  subtitle?: string | null
   handle: string
   countryCode: string
   variants?: any[]
@@ -32,6 +34,9 @@ const FeaturedBlogProduct = ({
 
   // Get the first available variant for simplicity
   const selectedVariant = variants?.[0]
+
+  // Use subtitle if available, otherwise fall back to description
+  const displayText = subtitle || description
 
   const handleAddToCart = async () => {
     if (!selectedVariant?.id) {
@@ -84,16 +89,16 @@ const FeaturedBlogProduct = ({
           >
             {name}
           </h3>
-          {description && (
+          {displayText && (
             <p
-              className="text-sm md:text-base mb-4"
+              className="text-sm md:text-base mb-4 line-clamp-2"
               style={{
                 fontFamily: '"DIN Arabic Regular"',
                 color: "#626262",
                 lineHeight: "1.5",
               }}
             >
-              {description}
+              {displayText}
             </p>
           )}
         </div>
@@ -583,6 +588,7 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
                       name={product.name}
                       image={product.image}
                       description={product.description}
+                      subtitle={product.subtitle}
                       handle={product.handle}
                       countryCode={countryCode}
                       variants={product.variants || []}
