@@ -205,8 +205,9 @@ function ProductCard({
         >
           <Heart
             size={18}
-            className={`transition-colors duration-300 ${isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+            className={`transition-colors duration-300 ${
+              isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+            }`}
           />
         </button>
       </div>
@@ -258,11 +259,17 @@ function ProductCard({
           </button>
         </div>
       </div>
-    </div >
+    </div>
   )
 }
 
-export function ProductCarousel({ products: sourceProducts, countryCode }: { products?: any[], countryCode?: string }) {
+export function ProductCarousel({
+  products: sourceProducts,
+  countryCode,
+}: {
+  products?: any[]
+  countryCode?: string
+}) {
   const router = useRouter()
   const { cartItems, handleCartUpdate } = useCartItems()
   const { toggleLedgerItem, isInLedger } = useLedger()
@@ -279,19 +286,19 @@ export function ProductCarousel({ products: sourceProducts, countryCode }: { pro
   // Merge hardcoded aesthetic data with real Medusa product data
   const mergedProducts: Product[] = React.useMemo(() => {
     // Only map if we have source products
-    if (!sourceProducts?.length) return products;
+    if (!sourceProducts?.length) return products
 
-    return products.map(staticProduct => {
+    return products.map((staticProduct) => {
       // Find matching Medusa product by handle (derived from slug)
       // staticProduct.slug is like "in/products/saffron-jasmine-amberwood" or "/in/products/cedarwood-rose"
-      const handle = staticProduct.slug.split('/').pop();
-      const medusaProduct = sourceProducts.find(p => p.handle === handle);
+      const handle = staticProduct.slug.split("/").pop()
+      const medusaProduct = sourceProducts.find((p) => p.handle === handle)
 
       if (medusaProduct) {
         // Get the first variant ID and calculated price
-        const variant = medusaProduct.variants?.[0];
-        const calculatedPrice = variant?.calculated_price?.calculated_amount;
-        // Price should be divided by 100 if it's in cents (standard Medusa behavior), 
+        const variant = medusaProduct.variants?.[0]
+        const calculatedPrice = variant?.calculated_price?.calculated_amount
+        // Price should be divided by 100 if it's in cents (standard Medusa behavior),
         // but checking the layout.tsx logic: "price = item.unit_price > 10000 ? item.unit_price / 100 : item.unit_price"
         // It seems safer to use the value as is or check typical magnitude.
         // Assuming calculated_amount is correct based on ProductHero usage.
@@ -303,11 +310,11 @@ export function ProductCarousel({ products: sourceProducts, countryCode }: { pro
           medusaId: medusaProduct.id, // Capture real product ID for ledger
           price: calculatedPrice || staticProduct.price,
           // We keep the static image/video for aesthetic consistency unless missing
-        };
+        }
       }
-      return staticProduct; // Fallback to static if not found
-    });
-  }, [sourceProducts]);
+      return staticProduct // Fallback to static if not found
+    })
+  }, [sourceProducts])
 
   useEffect(() => {
     const checkMobile = () => {
@@ -397,7 +404,7 @@ export function ProductCarousel({ products: sourceProducts, countryCode }: { pro
       quantity: isExisting ? existingItem!.quantity + 1 : 1,
       image: product.image,
       size: product.size,
-      variant_id: targetId // important for cart cleanup/matching
+      variant_id: targetId, // important for cart cleanup/matching
     }
 
     handleCartUpdate(cartItem)
@@ -420,23 +427,23 @@ export function ProductCarousel({ products: sourceProducts, countryCode }: { pro
         // importing here to avoid server-action-in-client issues depending on build setup,
         // but standard is importing at top if "use server" is in file.
         // Actually, server actions can be imported in client components.
-        const { addToCartAction } = await import("@lib/data/cart-actions");
-        const { emitCartUpdated } = await import("@lib/util/cart-client");
+        const { addToCartAction } = await import("@lib/data/cart-actions")
+        const { emitCartUpdated } = await import("@lib/util/cart-client")
 
         if (product.variantId) {
           await addToCartAction({
             variantId: product.variantId,
             quantity: 1,
             countryCode: countryCode || "in",
-          });
-          emitCartUpdated({ quantityDelta: 1 });
+          })
+          emitCartUpdated({ quantityDelta: 1 })
         }
       } catch (error) {
-        console.error("Failed to add to cart on server:", error);
-        toast.error("Failed to save to cart. Please try again.");
+        console.error("Failed to add to cart on server:", error)
+        toast.error("Failed to save to cart. Please try again.")
         // Optionally rollback optimistic update here if needed
       }
-    });
+    })
   }
 
   const handleToggleLedger = (product: Product) => {
@@ -707,7 +714,7 @@ export function ProductCarousel({ products: sourceProducts, countryCode }: { pro
         {/* Slider Bar - Web and Mobile - Centered */}
         <div
           className="flex justify-center items-center w-full pt-3"
-          style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}
+          style={{ paddingTop: "1.5rem" }}
         >
           <div
             ref={sliderRef}

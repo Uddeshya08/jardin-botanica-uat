@@ -24,7 +24,11 @@ const Newsletter = () => {
       const result = await subscribeToNewsletter(email)
 
       setIsSuccess(result.success)
-      setMessage(result.message)
+      setMessage(
+        result.success
+          ? result.message
+          : "Couldn't sign you up right now — please try again in a moment"
+      )
 
       if (result.success) {
         setEmail("")

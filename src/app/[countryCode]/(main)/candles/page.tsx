@@ -1472,7 +1472,36 @@ const Candles = () => {
               </Carousel>
             </div>
 
-            {/* Progress Scroll Bar Removed */}
+            {/* Progress Scroll Bar - Slider Style */}
+            <div
+              className="flex justify-center items-center w-full pt-3"
+              style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}
+            >
+              <div
+                ref={sliderRef}
+                className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
+                onClick={handleSliderClick}
+              >
+                {/* Slider Thumb - Moves left/right based on scroll */}
+                <div
+                  className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
+                  style={{
+                    left: `calc(${Math.max(0, Math.min(100, sliderPercentage))}% - 16px)`,
+                    transform: "translateY(-50%)",
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleMouseDown(e)
+                  }}
+                  onTouchStart={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleTouchStart(e)
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </motion.div>
       )}
@@ -1617,6 +1646,7 @@ const Candles = () => {
           </div>
         </motion.div>
       )}
+      ;
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -1658,7 +1688,7 @@ const Candles = () => {
           </motion.a>
         </div>
       </motion.div>
-      {/* Soft Orris Section */}
+      {/* Soft Orris Section */};
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -1853,7 +1883,7 @@ const Candles = () => {
         </div>
       </motion.div>
       <InstagramEmbed2 />
-      {/* Newsletter Section */};
+      {/* Newsletter Section */}; ;
       <section className="py-20 relative overflow-hiddenen" style={{ backgroundColor: "#e3e3d8" }}>
         <motion.div
           className="absolute inset-0 opacity-15"
