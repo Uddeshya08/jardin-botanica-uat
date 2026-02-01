@@ -37,7 +37,10 @@ const Newsletter = () => {
   }
 
   return (
-    <section className="py-12 lg:py-16 relative overflow-hidden" style={{ backgroundColor: "#e3e3d8" }}>
+    <section
+      className="py-12 lg:py-16 relative overflow-hidden"
+      style={{ backgroundColor: "#e3e3d8" }}
+    >
       {/* Smooth Animated Gradient Background */}
       <motion.div
         className="absolute inset-0 opacity-15"
@@ -79,7 +82,7 @@ const Newsletter = () => {
             viewport={{ once: true }}
             className="font-american-typewriter text-3xl lg:text-4xl tracking-tight mb-6 text-black"
           >
-            Join the Circle
+            Join the circle
           </motion.h3>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -124,10 +127,11 @@ const Newsletter = () => {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`font-din-arabic text-sm px-4 py-2 rounded ${isSuccess
-                  ? "bg-green-100 text-green-800 border border-green-300"
-                  : "bg-red-100 text-red-800 border border-red-300"
-                  }`}
+                className={`font-din-arabic text-sm px-4 py-2 rounded ${
+                  isSuccess
+                    ? "bg-green-100 text-green-800 border border-green-300"
+                    : "bg-red-100 text-red-800 border border-red-300"
+                }`}
               >
                 {message}
               </motion.div>

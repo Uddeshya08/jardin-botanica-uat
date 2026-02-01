@@ -70,7 +70,7 @@ export function AccountPage() {
             className="p-8 lg:p-10"
           >
             <h2 className="font-american-typewriter text-2xl mb-8 text-black text-center">
-              Sign In
+              Sign in
             </h2>
 
             <form onSubmit={handleSignInSubmit} className="space-y-5">
@@ -138,7 +138,7 @@ export function AccountPage() {
                 type="submit"
                 className="font-din-arabic w-full py-4 bg-black text-white hover:bg-black/90 transition-all duration-300 text-center"
               >
-                Sign In
+                Sign in
               </motion.button>
 
               {/* Divider */}
@@ -225,7 +225,7 @@ export function AccountPage() {
             className="p-8 lg:p-10"
           >
             <h2 className="font-american-typewriter text-2xl mb-8 text-black text-center">
-              Create Account
+              Create account
             </h2>
 
             <form onSubmit={handleCreateAccountSubmit} className="space-y-5">
@@ -374,7 +374,7 @@ export function AccountPage() {
                   type="submit"
                   className="font-din-arabic w-full py-4 bg-black text-white hover:bg-black/90 transition-all duration-300 text-center"
                 >
-                  Create Account
+                  Create account
                 </motion.button>
               </div>
             </form>

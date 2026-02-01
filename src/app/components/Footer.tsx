@@ -31,7 +31,7 @@ export function Footer() {
     {
       title: "Shop",
       links: [
-        { name: "Body Hands", href: `/${countryCode}/body-hands` },
+        { name: "Body & Hands", href: `/${countryCode}/body-hands` },
         { name: "Home Creations", href: `/${countryCode}/home-creations` },
 
         { name: "Gift Sets", href: `/${countryCode}/gift-sets` },
@@ -164,7 +164,7 @@ export function Footer() {
             className="mb-4 md:mb-0"
           >
             <p className="font-din-arabic text-sm text-white/60">
-              © 2025 Jardin Botanica. All rights reserved.
+              © {new Date().getFullYear()} Jardin Botanica. All rights reserved.
             </p>
           </motion.div>
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { deleteLineItem, updateLineItem } from "@lib/data/cart"
+import { getNavigation } from "@lib/data/contentful"
 import { convertToLocale } from "@lib/util/money"
 import type { HttpTypes } from "@medusajs/types"
 import { useAuth } from "app/context/auth-context"
@@ -14,7 +15,6 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { SearchMegaMenu } from "./SearchMegaMenu"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
-import { getNavigation } from "@lib/data/contentful"
 
 interface DropdownItem {
   label: string
@@ -88,15 +88,17 @@ export function Navigation({
     const fetchNav = async () => {
       const navItems = await getNavigation()
       if (navItems.length > 0) {
-        setMenuItems(navItems.map(item => ({
-          name: item.name,
-          href: item.href,
-          dropdown: item.dropdown?.map(d => ({
-            label: d.label,
-            href: d.href,
-            image: d.image,
-          })),
-        })))
+        setMenuItems(
+          navItems.map((item) => ({
+            name: item.name,
+            href: item.href,
+            dropdown: item.dropdown?.map((d) => ({
+              label: d.label,
+              href: d.href,
+              image: d.image,
+            })),
+          }))
+        )
       }
     }
     fetchNav()
@@ -171,7 +173,8 @@ export function Navigation({
     function handleClickOutside(event: MouseEvent) {
       // Check if click is outside both cart button and cart dropdown panel
       const isOutsideCartButton = cartRef.current && !cartRef.current.contains(event.target as Node)
-      const isOutsideCartPanel = cartPanelRef.current && !cartPanelRef.current.contains(event.target as Node)
+      const isOutsideCartPanel =
+        cartPanelRef.current && !cartPanelRef.current.contains(event.target as Node)
       const isOutsideCart = isOutsideCartButton && (!cartPanelRef.current || isOutsideCartPanel)
 
       if (isOutsideCart) {
@@ -586,9 +589,9 @@ export function Navigation({
                             disableAnimations
                               ? undefined
                               : {
-                                duration: 0.2,
-                                ease: "easeOut",
-                              }
+                                  duration: 0.2,
+                                  ease: "easeOut",
+                                }
                           }
                           className="absolute top-full left-0 pt-4 z-50"
                         >
@@ -650,22 +653,22 @@ export function Navigation({
                                 {/* fallback/default image */}
                                 {item.dropdown.filter((dItem) => dItem.label !== "All Products")[0]
                                   ?.image && (
-                                    <img
-                                      src={
-                                        item.dropdown.filter(
-                                          (dItem) => dItem.label !== "All Products"
-                                        )[0].image
-                                      }
-                                      alt="default"
-                                      className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
-                                      style={{
-                                        opacity: !hoveredItem ? 1 : 0,
-                                        transition: "opacity 0.18s ease-out",
-                                        zIndex: 0,
-                                      }}
-                                      loading="eager"
-                                    />
-                                  )}
+                                  <img
+                                    src={
+                                      item.dropdown.filter(
+                                        (dItem) => dItem.label !== "All Products"
+                                      )[0].image
+                                    }
+                                    alt="default"
+                                    className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                                    style={{
+                                      opacity: !hoveredItem ? 1 : 0,
+                                      transition: "opacity 0.18s ease-out",
+                                      zIndex: 0,
+                                    }}
+                                    loading="eager"
+                                  />
+                                )}
                               </div>
                             </div>
                           </div>
@@ -752,7 +755,7 @@ export function Navigation({
                                 onClick={() => setIsCartOpen(false)}
                                 className="font-din-arabic px-6 py-2 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
                               >
-                                Continue Shopping
+                                Continue shopping
                               </button>
                             </div>
                           ) : (
@@ -763,25 +766,31 @@ export function Navigation({
                                   className="flex items-center space-x-3 p-3 bg-white/50 border"
                                   style={{ borderColor: "rgba(0, 0, 0, 0.05)" }}
                                 >
-                                  {item.image && (
-                                    <img
-                                      src={item.image}
-                                      alt={item.name}
-                                      className="w-16 h-16 object-contain"
-                                    />
-                                  )}
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="font-din-arabic text-black font-medium truncate">
-                                      {item.name}
-                                    </h4>
-                                    <p className="font-din-arabic text-black/70 text-sm">
-                                      {convertToLocale({
-                                        amount: item.price,
-                                        currency_code: "INR",
-                                        maximumFractionDigits: 0,
-                                      })}
-                                    </p>
-                                  </div>
+                                  <Link
+                                    href={item.handle ? `/products/${item.handle}` : "#"}
+                                    className="flex items-center space-x-3 flex-1 min-w-0"
+                                    onClick={() => setIsCartOpen(false)}
+                                  >
+                                    {item.image && (
+                                      <img
+                                        src={item.image}
+                                        alt={item.name}
+                                        className="w-16 h-16 object-contain"
+                                      />
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <h4 className="font-din-arabic text-black font-medium truncate">
+                                        {item.name}
+                                      </h4>
+                                      <p className="font-din-arabic text-black/70 text-sm">
+                                        {convertToLocale({
+                                          amount: item.price,
+                                          currency_code: "INR",
+                                          maximumFractionDigits: 0,
+                                        })}
+                                      </p>
+                                    </div>
+                                  </Link>
                                   <div className="flex items-center space-x-2">
                                     <button
                                       onClick={() => handleQuantityChange(item.id, -1)}
@@ -837,7 +846,7 @@ export function Navigation({
                                 className="w-full font-din-arabic py-2 border text-black hover:bg-black/5 transition-colors tracking-wide text-center"
                                 style={{ borderColor: "rgba(0, 0, 0, 0.2)" }}
                               >
-                                Continue Shopping
+                                Continue shopping
                               </button>
                             </div>
                           </div>
@@ -976,7 +985,7 @@ export function Navigation({
                                 onClick={() => setIsCartOpen(false)}
                                 className="font-din-arabic px-6 py-2 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
                               >
-                                Continue Shopping
+                                Continue shopping
                               </button>
                             </div>
                           ) : (
@@ -987,25 +996,31 @@ export function Navigation({
                                   className="flex items-center gap-3 p-3 bg-white/50 border"
                                   style={{ borderColor: "rgba(0, 0, 0, 0.05)" }}
                                 >
-                                  {item.image && (
-                                    <img
-                                      src={item.image}
-                                      alt={item.name}
-                                      className="w-16 h-16 object-contain"
-                                    />
-                                  )}
-                                  <div className="flex-1">
-                                    <h4 className="font-din-arabic text-black font-medium">
-                                      {item.name}
-                                    </h4>
-                                    <p className="font-din-arabic text-black/70 text-sm">
-                                      {convertToLocale({
-                                        amount: item.price,
-                                        currency_code: "INR",
-                                        maximumFractionDigits: 0,
-                                      })}
-                                    </p>
-                                  </div>
+                                  <Link
+                                    href={item.handle ? `/products/${item.handle}` : "#"}
+                                    className="flex items-center gap-3 flex-1"
+                                    onClick={() => setIsCartOpen(false)}
+                                  >
+                                    {item.image && (
+                                      <img
+                                        src={item.image}
+                                        alt={item.name}
+                                        className="w-16 h-16 object-contain"
+                                      />
+                                    )}
+                                    <div className="flex-1">
+                                      <h4 className="font-din-arabic text-black font-medium">
+                                        {item.name}
+                                      </h4>
+                                      <p className="font-din-arabic text-black/70 text-sm">
+                                        {convertToLocale({
+                                          amount: item.price,
+                                          currency_code: "INR",
+                                          maximumFractionDigits: 0,
+                                        })}
+                                      </p>
+                                    </div>
+                                  </Link>
                                   <div className="flex items-center gap-2">
                                     <button
                                       onClick={() => handleQuantityChange(item.id, -1)}
@@ -1058,7 +1073,7 @@ export function Navigation({
                                 className="w-full font-din-arabic py-2 border text-black hover:bg-black/5 transition-colors tracking-wide text-center"
                                 style={{ borderColor: "rgba(0, 0, 0, 0.2)" }}
                               >
-                                Continue Shopping
+                                Continue shopping
                               </button>
                             </div>
                           </div>
@@ -1129,8 +1144,9 @@ export function Navigation({
                           >
                             <span>{item.name}</span>
                             <ChevronDown
-                              className={`w-4 h-4 transition-transform ${mobileActiveDropdown === item.name ? "rotate-180" : ""
-                                }`}
+                              className={`w-4 h-4 transition-transform ${
+                                mobileActiveDropdown === item.name ? "rotate-180" : ""
+                              }`}
                             />
                           </button>
                           <AnimatePresence>
@@ -1218,7 +1234,7 @@ export function Navigation({
               Open Your Ledger
             </DialogTitle>
             <DialogDescription className="font-din-arabic text-black/70 pt-2">
-              Sign in to view and save your favourites.
+              Sign in to add favourites to your Ledger.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 pt-4">
@@ -1232,7 +1248,7 @@ export function Navigation({
               }}
               className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
             >
-              Sign In
+              Sign in
             </button>
             <button
               onClick={() => setShowLoginDialog(false)}

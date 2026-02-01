@@ -1,17 +1,16 @@
 "use client"
 
 import { isManual, isRazorpay, isStripe } from "@lib/constants"
-import { placeOrder } from "@lib/data/cart"
+import { placeOrder, updateCart } from "@lib/data/cart"
 import type { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
+import { useGiftContextSafe } from "app/context/gift-context"
 import { Lock, Sparkles } from "lucide-react"
 import type React from "react"
 import { useState } from "react"
 import ErrorMessage from "../error-message"
 import { RazorpayPaymentButton } from "./razorpay-payment-button"
-import { useGiftContextSafe } from "app/context/gift-context"
-import { updateCart } from "@lib/data/cart"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -172,7 +171,7 @@ const StripePaymentButton = ({
         className="w-full px-8 py-4 bg-black text-white rounded-xl font-din-arabic disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl flex items-center justify-center space-x-3"
       >
         <Lock className="w-5 h-5" />
-        <span>{submitting ? "Processing..." : "Place Order"}</span>
+        <span>{submitting ? "Processing..." : "Place order"}</span>
         <Sparkles className="w-5 h-5" />
       </Button>
       <ErrorMessage error={errorMessage} data-testid="stripe-payment-error-message" />
@@ -231,7 +230,7 @@ const ManualTestPaymentButton = ({
         data-testid={dataTestId || "submit-order-button"}
       >
         <Lock className="w-5 h-5" />
-        <span>{submitting ? "Processing..." : "Place Order"}</span>
+        <span>{submitting ? "Processing..." : "Place order"}</span>
         <Sparkles className="w-5 h-5" />
       </Button>
       <ErrorMessage error={errorMessage} data-testid="manual-payment-error-message" />

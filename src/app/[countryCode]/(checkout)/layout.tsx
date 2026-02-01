@@ -24,6 +24,7 @@ export default async function CheckoutLayout({ children }: { children: React.Rea
         image: item.thumbnail,
         product_id: item?.product_id,
         variant_id: item?.variant_id,
+        handle: (item as any).product?.handle,
         metadata: item?.metadata ?? {},
       }
     }) || []

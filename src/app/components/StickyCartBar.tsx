@@ -1,7 +1,7 @@
 "use client"
 
-import { addToCartAction } from "@lib/data/cart-actions"
 import { updateLineItemGift } from "@lib/data/cart"
+import { addToCartAction } from "@lib/data/cart-actions"
 import { emitCartUpdated } from "@lib/util/cart-client"
 import type { HttpTypes } from "@medusajs/types"
 import { useCartItemsSafe } from "app/context/cart-items-context"
@@ -467,9 +467,9 @@ export function StickyCartBar({
       ritualProductId: ritualProduct.variantId,
       existingRitualProduct: existingRitualProduct
         ? {
-          id: existingRitualProduct.id,
-          quantity: existingRitualProduct.quantity,
-        }
+            id: existingRitualProduct.id,
+            quantity: existingRitualProduct.quantity,
+          }
         : null,
     })
 
@@ -681,7 +681,7 @@ export function StickyCartBar({
                           }}
                         >
                           {showRitualSuggestion && !ritualCompleted
-                            ? "Complete Your Ritual"
+                            ? "Complete your ritual"
                             : showGoToCart
                               ? "Order Qualifies For Complimentary Shipping"
                               : "Order Qualifies For Complimentary Shipping"}
@@ -834,7 +834,7 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <span className="hidden sm:inline">Complete the Ritual</span>
+                          <span className="hidden sm:inline">Complete the ritual</span>
                           <span className="sm:hidden">Ritual</span>
                         </motion.span>
                       )}
@@ -859,7 +859,7 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <span className="hidden sm:inline">Marked as Gift</span>
+                          <span className="hidden sm:inline">Marked as gift</span>
                           <span className="sm:hidden">Gift ✓</span>
                         </motion.span>
                       ) : (
@@ -870,7 +870,7 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <span className="hidden sm:inline">This is a Gift</span>
+                          <span className="hidden sm:inline">This is a gift</span>
                           <span className="sm:hidden">Gift</span>
                         </motion.span>
                       )}

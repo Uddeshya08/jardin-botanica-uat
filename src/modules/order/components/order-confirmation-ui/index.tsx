@@ -289,7 +289,7 @@ export function OrderConfirmationUI({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            Continue Shopping
+            Continue shopping
           </motion.button>
 
           <motion.button

@@ -123,7 +123,7 @@ export function BodyHandsPage({
         ...existingItem,
         quantity: existingItem.quantity + 1,
       }
-      toast.success(`Quantity updated: ${product.name}`, { duration: 2000 })
+      toast.success(`Quantity updated — ${product.name}`, { duration: 2000 })
     } else {
       // Add new item
       item = {
@@ -253,7 +253,7 @@ export function BodyHandsPage({
                 }`}
                 style={{ letterSpacing: "0.15em" }}
               >
-                All Products
+                All products
               </button>
               {filterOptions.map((filter) => (
                 <button

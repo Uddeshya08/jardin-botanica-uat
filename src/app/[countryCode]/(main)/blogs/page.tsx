@@ -672,7 +672,7 @@ const Home = () => {
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 1.5, duration: 0.6 }}
                         >
-                          READ MORE...
+                          Read more...
                         </motion.span>
                       </motion.div>
                     </div>
@@ -789,7 +789,7 @@ const Home = () => {
                       className="text-[14px] font-medium text-[#535c4a] hover:underline font-american-typewriter tracking-[1px] font-semibold"
                       data-testid="view-more-posts"
                     >
-                      VIEW MORE POSTS
+                      View more posts
                     </a>
                     <div className="flex space-x-2">
                       <ChevronLeft
@@ -917,7 +917,7 @@ const Home = () => {
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 1.7, duration: 0.6 }}
                       >
-                        READ MORE...
+                        Read more...
                       </motion.a>
                       <motion.a
                         href="#"
@@ -926,7 +926,7 @@ const Home = () => {
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 1.7, duration: 0.6 }}
                       >
-                        READ MORE...
+                        Read more...
                       </motion.a>
                     </motion.div>
                   </div>
@@ -1041,7 +1041,7 @@ const Home = () => {
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 2.1, duration: 0.6 }}
                       >
-                        READ MORE...
+                        Read more...
                       </motion.a>
                     </motion.div>
                   </div>
@@ -1194,7 +1194,7 @@ const Home = () => {
                   disabled={isSubmitting}
                   className="w-full sm:w-auto px-8 py-3 bg-black text-white font-american-typewriter font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors"
                 >
-                  {isSubmitting ? "Joined" : "Join the Circle"}
+                  {isSubmitting ? "Joined" : "Join the circle"}
                 </button>
               </div>
               {message && (

@@ -31,7 +31,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
 
     console.log("status", status)
     console.log("order", order)
-    if (!status) return { label: "", className: "", buttonText: "View Details" }
+    if (!status) return { label: "", className: "", buttonText: "View details" }
 
     // Map Medusa fulfillment statuses to UI labels/colors
     switch (status) {
@@ -39,13 +39,13 @@ const OrderCard = ({ order }: OrderCardProps) => {
         return {
           label: "SHIPPED",
           className: "text-blue-600",
-          buttonText: "View Details",
+          buttonText: "View details",
         }
       case "delivered":
         return {
           label: "DELIVERED",
           className: "text-green-600",
-          buttonText: "View Details",
+          buttonText: "View details",
         }
       case "shipped":
       case "partially_shipped":
@@ -58,14 +58,14 @@ const OrderCard = ({ order }: OrderCardProps) => {
         return {
           label: "CANCELLED",
           className: "text-red-600",
-          buttonText: "View Details",
+          buttonText: "View details",
         }
       case "not_fulfilled":
       default:
         return {
           label: "PROCESSING",
           className: "text-yellow-600",
-          buttonText: "View Details",
+          buttonText: "View details",
         }
     }
   }, [order])

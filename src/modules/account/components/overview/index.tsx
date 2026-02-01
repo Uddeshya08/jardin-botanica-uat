@@ -220,7 +220,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                   <DialogContent className="sm:max-w-md" style={{ backgroundColor: "#e3e3d8" }}>
                     <DialogHeader className="pb-6">
                       <DialogTitle className="font-american-typewriter text-2xl text-black tracking-wide">
-                        Update Email Address
+                        Update email address
                       </DialogTitle>
                       <DialogDescription className="font-din-arabic text-black/60 tracking-wide">
                         Enter your current password and new email. You'll receive a verification

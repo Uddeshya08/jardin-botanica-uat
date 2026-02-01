@@ -148,7 +148,7 @@ const Addresses = ({
     }
   }
 
-  useEffect(() => { }, [cart?.shipping_address?.postal_code])
+  useEffect(() => {}, [cart?.shipping_address?.postal_code])
 
   return (
     <div>
@@ -206,7 +206,7 @@ const Addresses = ({
               <div className="ml-auto">
                 <Link href="/">
                   <button className="px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2">
-                    Continue Shopping
+                    Continue shopping
                   </button>
                 </Link>
               </div>

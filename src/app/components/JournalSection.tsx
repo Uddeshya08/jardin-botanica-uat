@@ -1,6 +1,6 @@
 import { motion } from "motion/react"
-import React, { useState } from "react"
 import Link from "next/link"
+import React, { useState } from "react"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 // import sensoralistImage from 'figma:asset/71a3ed929884384aa6617c6ae2f40a7724e33026.png';
@@ -151,7 +151,7 @@ export function JournalSection() {
                 whileTap={{ scale: 0.98 }}
                 className="font-din-arabic px-8 py-3 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide"
               >
-                View All
+                View all
               </motion.button>
             </Link>
           </motion.div>

@@ -23,12 +23,7 @@ const OVERLAY_GRADIENT_STYLE = {
   pointerEvents: "none" as const,
 }
 
-export const useTypewriter = (
-  text: string,
-  baseSpeed = 90,
-  pauseAt?: number,
-  isActive = true
-) => {
+export const useTypewriter = (text: string, baseSpeed = 90, pauseAt?: number, isActive = true) => {
   const [displayedText, setDisplayedText] = useState("")
   const [index, setIndex] = useState(0)
   const [complete, setComplete] = useState(false)
@@ -47,7 +42,7 @@ export const useTypewriter = (
         setIndex((prev) => prev + 1)
 
         if (pauseAt && index === pauseAt) {
-          setTimeout(() => { }, 1200)
+          setTimeout(() => {}, 1200)
         }
       }, delay)
 
@@ -431,8 +426,9 @@ function InteractiveLabImage() {
                       stiffness: 100,
                       damping: 28,
                     }}
-                    className={`absolute ${hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-4" : "top-full mt-4"
-                      } w-72 sm:w-80 bg-white/95 backdrop-blur-md rounded-sm shadow-2xl p-5 sm:p-6 max-w-[calc(100vw-2rem)] pointer-events-none`}
+                    className={`absolute ${
+                      hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-4" : "top-full mt-4"
+                    } w-72 sm:w-80 bg-white/95 backdrop-blur-md rounded-sm shadow-2xl p-5 sm:p-6 max-w-[calc(100vw-2rem)] pointer-events-none`}
                     style={{
                       left: hotspot.id === 3 ? "0" : hotspot.position.left ? "0" : "auto",
                       right: hotspot.id === 4 ? "0" : hotspot.position.right ? "0" : "auto",
@@ -446,8 +442,9 @@ function InteractiveLabImage() {
                     }}
                   >
                     <div
-                      className={`absolute ${hotspot.id === 3 || hotspot.id === 4 ? "-bottom-2" : "-top-2"
-                        } w-4 h-4 bg-white shadow-xl`}
+                      className={`absolute ${
+                        hotspot.id === 3 || hotspot.id === 4 ? "-bottom-2" : "-top-2"
+                      } w-4 h-4 bg-white shadow-xl`}
                       style={{
                         left: hotspot.id === 3 ? "24px" : hotspot.position.left ? "24px" : "auto",
                         right: hotspot.id === 4 ? "24px" : hotspot.position.right ? "24px" : "auto",
@@ -462,11 +459,13 @@ function InteractiveLabImage() {
                       animate={{ opacity: 1, scaleY: 1 }}
                       exit={{ opacity: 0, scaleY: 0 }}
                       transition={{ duration: 0.3, delay: 0.1 }}
-                      className={`absolute ${hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-0" : "top-full mt-0"
-                        } left-1/2 -translate-x-1/2 w-0.5 bg-gradient-to-b ${hotspot.id === 3 || hotspot.id === 4
+                      className={`absolute ${
+                        hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-0" : "top-full mt-0"
+                      } left-1/2 -translate-x-1/2 w-0.5 bg-gradient-to-b ${
+                        hotspot.id === 3 || hotspot.id === 4
                           ? "from-white/95 to-[#a28b6f]/40"
                           : "from-[#a28b6f]/40 to-white/95"
-                        }`}
+                      }`}
                       style={{
                         height: hotspot.id === 3 || hotspot.id === 4 ? "16px" : "16px",
                       }}
@@ -970,8 +969,6 @@ export function BotanistLabPage() {
     return () => clearTimeout(timer)
   }, [])
 
-
-
   useEffect(() => {
     if (isBannerInView && phase === 0) {
       const startTimer = setTimeout(() => {
@@ -1181,8 +1178,6 @@ export function BotanistLabPage() {
             </AnimatePresence>
           </div>
         </div>
-
-
       </motion.div>
 
       <OriginStorySection />
@@ -1241,7 +1236,7 @@ export function BotanistLabPage() {
               className="px-8 py-4 bg-black text-white font-din-arabic transition-all duration-300"
               style={{ letterSpacing: "0.1em" }}
             >
-              Explore the Journal
+              Explore the journal
             </motion.button>
             <motion.button
               whileHover={{
@@ -1253,7 +1248,7 @@ export function BotanistLabPage() {
               className="px-8 py-4 bg-transparent text-black font-din-arabic transition-all duration-300 border border-black/20"
               style={{ letterSpacing: "0.1em" }}
             >
-              View Current Studies
+              View current studies
             </motion.button>
           </motion.div>
         </div>

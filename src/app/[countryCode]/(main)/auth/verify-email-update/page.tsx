@@ -219,7 +219,7 @@ const VerifyEmailUpdate = () => {
               className="w-full px-6 py-4 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ borderColor: "#D8D2C7" }}
             >
-              {loading ? "Updating..." : "Update Email & Password"}
+              {loading ? "Updating..." : "Update email & password"}
             </motion.button>
           </form>
 

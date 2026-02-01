@@ -1,11 +1,10 @@
 "use client"
 
+import { getAllGiftSets } from "@lib/data/contentful"
 import { ChevronDown, ChevronRight, Star } from "lucide-react"
-
 import { AnimatePresence, motion } from "motion/react"
 import React, { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { getAllGiftSets } from "@lib/data/contentful"
 import type { GiftSet } from "../../types/contentful"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
@@ -130,7 +129,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
           items: gs.productSetsIncluded,
           // Derived fields
           hasCandles: gs.questions.length > 0,
-          layout: gs.featured ? "large" as const : "standard" as const,
+          layout: gs.featured ? ("large" as const) : ("standard" as const),
           // Dynamic candle options from questions
           candleOptions: gs.questions[0]?.options || [],
           // Default empty values for fields not in Contentful
@@ -260,7 +259,10 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#e3e3d8" }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "#e3e3d8" }}
+      >
         <div className="text-center">
           <div className="w-12 h-12 border-2 border-black/20 border-t-black rounded-full animate-spin mx-auto mb-4" />
           <p className="font-din-arabic text-black/60 text-sm" style={{ letterSpacing: "0.1em" }}>
@@ -356,10 +358,11 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedCategory(filter.id)}
-                className={`font-din-arabic text-xs sm:text-sm transition-all duration-300 pb-1 ${selectedCategory === filter.id
-                  ? "text-black border-b-2 border-[#e58a4d]"
-                  : "text-black/50 border-b border-transparent hover:text-black hover:border-black/30"
-                  }`}
+                className={`font-din-arabic text-xs sm:text-sm transition-all duration-300 pb-1 ${
+                  selectedCategory === filter.id
+                    ? "text-black border-b-2 border-[#e58a4d]"
+                    : "text-black/50 border-b border-transparent hover:text-black hover:border-black/30"
+                }`}
                 style={{ letterSpacing: "0.15em" }}
               >
                 {filter.label}
@@ -385,24 +388,26 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            className={`relative group overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1
-              ? expandedItems[product.id]
-                ? "w-full lg:w-[96vw] lg:max-w-[1920px] lg:flex lg:flex-row shadow-md"
-                : "w-full lg:w-[60vw] lg:flex lg:flex-row shadow-md" // Changed from w-1/2 to flex-row with strip
-              : ""
-              }`}
+            className={`relative group overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+              filteredProducts.length === 1
+                ? expandedItems[product.id]
+                  ? "w-full lg:w-[96vw] lg:max-w-[1920px] lg:flex lg:flex-row shadow-md"
+                  : "w-full lg:w-[60vw] lg:flex lg:flex-row shadow-md" // Changed from w-1/2 to flex-row with strip
+                : ""
+            }`}
             onMouseEnter={() => setHoveredProduct(product.id)}
             onMouseLeave={() => setHoveredProduct(null)}
           >
             {/* Image Section */}
 
             <div
-              className={`relative bg-black overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1
-                ? expandedItems[product.id]
-                  ? "h-[50vh] lg:h-[80vh] w-full lg:w-1/2"
-                  : "h-[60vh] lg:h-[80vh] w-full lg:flex-1" // Fill available space minus strip
-                : "h-[60vh] lg:h-[70vh] w-full"
-                }`}
+              className={`relative bg-black overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+                filteredProducts.length === 1
+                  ? expandedItems[product.id]
+                    ? "h-[50vh] lg:h-[80vh] w-full lg:w-1/2"
+                    : "h-[60vh] lg:h-[80vh] w-full lg:flex-1" // Fill available space minus strip
+                  : "h-[60vh] lg:h-[70vh] w-full"
+              }`}
             >
               {/* Background Image */}
 
@@ -437,10 +442,11 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
               {/* Overlay */}
 
               <div
-                className={`absolute inset-0 transition-all duration-500 ${hoveredProduct === product.id
-                  ? "bg-black/50"
-                  : "bg-gradient-to-t from-black/70 via-black/40 to-transparent"
-                  }`}
+                className={`absolute inset-0 transition-all duration-500 ${
+                  hoveredProduct === product.id
+                    ? "bg-black/50"
+                    : "bg-gradient-to-t from-black/70 via-black/40 to-transparent"
+                }`}
               />
 
               {/* Image Slider Dots - Show on both mobile and desktop if product has images array */}
@@ -455,10 +461,11 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
                         handleImageChange(product.id, idx)
                       }}
-                      className={`rounded-full transition-all duration-300 ${(currentImageIndex[product.id] || 0) === idx
-                        ? "bg-white w-1 h-1 sm:w-3 sm:h-0.5"
-                        : "bg-white/50 hover:bg-white/75 w-0.5 h-0.5 sm:w-0.5 sm:h-0.5"
-                        }`}
+                      className={`rounded-full transition-all duration-300 ${
+                        (currentImageIndex[product.id] || 0) === idx
+                          ? "bg-white w-1 h-1 sm:w-3 sm:h-0.5"
+                          : "bg-white/50 hover:bg-white/75 w-0.5 h-0.5 sm:w-0.5 sm:h-0.5"
+                      }`}
                       aria-label={`View image ${idx + 1}`}
                     />
                   ))}
@@ -535,7 +542,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                       className="font-din-arabic text-xs sm:text-sm"
                       style={{ letterSpacing: "0.12em" }}
                     >
-                      View Details
+                      View details
                     </span>
 
                     <ChevronRight size={14} className="sm:w-4 sm:h-4" />
@@ -546,12 +553,13 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
             {/* Collapsible What's Inside Section */}
             <div
-              className={`bg-white/30 backdrop-blur-md border-[#e58a4d] transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${filteredProducts.length === 1
-                ? expandedItems[product.id]
-                  ? "border-t-2 lg:border-t-0 lg:border-l-2 w-full lg:w-1/2 flex flex-col max-h-[80vh] lg:h-auto"
-                  : "border-t-2 lg:border-t-0 lg:border-l-2 w-full lg:w-[40px] flex flex-col lg:items-center lg:justify-center cursor-pointer hover:bg-white/40"
-                : "border-t-2 w-full"
-                }`}
+              className={`bg-white/30 backdrop-blur-md border-[#e58a4d] transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+                filteredProducts.length === 1
+                  ? expandedItems[product.id]
+                    ? "border-t-2 lg:border-t-0 lg:border-l-2 w-full lg:w-1/2 flex flex-col max-h-[80vh] lg:h-auto"
+                    : "border-t-2 lg:border-t-0 lg:border-l-2 w-full lg:w-[40px] flex flex-col lg:items-center lg:justify-center cursor-pointer hover:bg-white/40"
+                  : "border-t-2 w-full"
+              }`}
               onClick={(e) => {
                 if (filteredProducts.length === 1 && !expandedItems[product.id]) {
                   e.stopPropagation()
@@ -565,10 +573,11 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
                   toggleItemsExpanded(product.id)
                 }}
-                className={`w-full flex items-center justify-between py-4 sm:py-5 px-5 sm:px-8 md:px-12 transition-all duration-300 ${filteredProducts.length === 1 && !expandedItems[product.id]
-                  ? "lg:p-0 lg:h-full lg:flex-col lg:items-center lg:justify-between lg:py-8 lg:w-full hover:bg-transparent" // Changed flow to col for arrow placement
-                  : "hover:bg-white/40"
-                  }`}
+                className={`w-full flex items-center justify-between py-4 sm:py-5 px-5 sm:px-8 md:px-12 transition-all duration-300 ${
+                  filteredProducts.length === 1 && !expandedItems[product.id]
+                    ? "lg:p-0 lg:h-full lg:flex-col lg:items-center lg:justify-between lg:py-8 lg:w-full hover:bg-transparent" // Changed flow to col for arrow placement
+                    : "hover:bg-white/40"
+                }`}
               >
                 {/* Vertical Strip Arrow */}
                 {filteredProducts.length === 1 && !expandedItems[product.id] && (
@@ -578,19 +587,27 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                 )}
 
                 <span
-                  className={`font-din-arabic text-[10px] sm:text-xs whitespace-nowrap transition-all duration-300 ${filteredProducts.length === 1 && !expandedItems[product.id]
-                    ? "lg:-rotate-90 lg:text-sm lg:tracking-[0.3em] lg:flex lg:items-center lg:mb-24"
-                    : ""
-                    }`}
-                  style={{ letterSpacing: filteredProducts.length === 1 && !expandedItems[product.id] ? "0.3em" : "0.2em" }}
+                  className={`font-din-arabic text-[10px] sm:text-xs whitespace-nowrap transition-all duration-300 ${
+                    filteredProducts.length === 1 && !expandedItems[product.id]
+                      ? "lg:-rotate-90 lg:text-sm lg:tracking-[0.3em] lg:flex lg:items-center lg:mb-24"
+                      : ""
+                  }`}
+                  style={{
+                    letterSpacing:
+                      filteredProducts.length === 1 && !expandedItems[product.id]
+                        ? "0.3em"
+                        : "0.2em",
+                  }}
                 >
-                  WHAT'S INSIDE
+                  What's inside
                 </span>
 
                 <motion.div
                   animate={{ rotate: expandedItems[product.id] ? 180 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className={filteredProducts.length === 1 && !expandedItems[product.id] ? "lg:hidden" : ""}
+                  className={
+                    filteredProducts.length === 1 && !expandedItems[product.id] ? "lg:hidden" : ""
+                  }
                 >
                   <ChevronDown size={18} className="sm:w-5 sm:h-5" />
                 </motion.div>
@@ -603,10 +620,11 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.5, ease: "easeInOut" }}
-                    className={`overflow-hidden ${filteredProducts.length === 1 && expandedItems[product.id]
-                      ? "lg:h-full lg:overflow-y-auto custom-scrollbar"
-                      : ""
-                      }`}
+                    className={`overflow-hidden ${
+                      filteredProducts.length === 1 && expandedItems[product.id]
+                        ? "lg:h-full lg:overflow-y-auto custom-scrollbar"
+                        : ""
+                    }`}
                   >
                     <div className="px-5 sm:px-8 md:px-12 pb-6 sm:pb-8 space-y-5 sm:space-y-6">
                       {/* Items List */}
@@ -632,44 +650,47 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
                       {/* Candle Selection */}
 
-                      {product.hasCandles && product.candleOptions && product.candleOptions.length > 0 && (
-                        <div className="space-y-3 pt-4 border-t border-black/10">
-                          <p
-                            className="font-din-arabic text-black/70 text-[10px] sm:text-xs"
-                            style={{ letterSpacing: "0.15em" }}
-                          >
-                            CHOOSE YOUR CANDLE
-                          </p>
+                      {product.hasCandles &&
+                        product.candleOptions &&
+                        product.candleOptions.length > 0 && (
+                          <div className="space-y-3 pt-4 border-t border-black/10">
+                            <p
+                              className="font-din-arabic text-black/70 text-[10px] sm:text-xs"
+                              style={{ letterSpacing: "0.15em" }}
+                            >
+                              CHOOSE YOUR CANDLE
+                            </p>
 
-                          <div className="space-y-2">
-                            {product.candleOptions.map((candle, idx) => (
-                              <label
-                                key={`${product.id}-candle-${idx}`}
-                                className={`flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded cursor-pointer transition-all duration-200 ${selectedCandles[product.id] === candle.name
-                                  ? "border border-[#e58a4d]"
-                                  : "border border-transparent"
+                            <div className="space-y-2">
+                              {product.candleOptions.map((candle, idx) => (
+                                <label
+                                  key={`${product.id}-candle-${idx}`}
+                                  className={`flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded cursor-pointer transition-all duration-200 ${
+                                    selectedCandles[product.id] === candle.name
+                                      ? "border border-[#e58a4d]"
+                                      : "border border-transparent"
                                   }`}
-                              >
-                                <input
-                                  type="radio"
-                                  name={`candle-${product.id}`}
-                                  value={candle.name}
-                                  checked={selectedCandles[product.id] === candle.name}
-                                  onChange={() => handleCandleSelect(product.id, candle.name)}
-                                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-[#e58a4d]"
-                                />
-
-                                <span
-                                  className="font-din-arabic text-black/80 text-xs sm:text-sm"
-                                  style={{ letterSpacing: "0.1em" }}
                                 >
-                                  {candle.name} ({candle.size})
-                                </span>
-                              </label>
-                            ))}
+                                  <input
+                                    type="radio"
+                                    name={`candle-${product.id}`}
+                                    value={candle.name}
+                                    checked={selectedCandles[product.id] === candle.name}
+                                    onChange={() => handleCandleSelect(product.id, candle.name)}
+                                    className="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-[#e58a4d]"
+                                  />
+
+                                  <span
+                                    className="font-din-arabic text-black/80 text-xs sm:text-sm"
+                                    style={{ letterSpacing: "0.1em" }}
+                                  >
+                                    {candle.name} ({candle.size})
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
                       {/* Personalized Notes */}
 
@@ -719,7 +740,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                           className="font-din-arabic text-xs sm:text-sm"
                           style={{ letterSpacing: "0.15em" }}
                         >
-                          ADD TO CART
+                          Add to cart
                         </span>
 
                         <ChevronRight size={16} className="sm:w-[18px] sm:h-[18px]" />

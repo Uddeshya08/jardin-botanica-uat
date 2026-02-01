@@ -64,7 +64,7 @@ export function FeaturedRitual() {
               onClick={handleBuildRitual}
               className="font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide text-sm md:text-base"
             >
-              Build Your Ritual
+              Build your ritual
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -72,7 +72,7 @@ export function FeaturedRitual() {
               onClick={handleShopSet}
               className="font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide text-sm md:text-base"
             >
-              Shop the Set
+              Shop the set
             </motion.button>
           </motion.div>
         </motion.div>

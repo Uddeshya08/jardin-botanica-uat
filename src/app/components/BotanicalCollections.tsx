@@ -95,7 +95,7 @@ export function BotanicalCollections() {
           className="text-center mt-16"
         >
           <button className="inline-flex items-center px-8 py-3 border border-black/20 hover:bg-black hover:text-white transition-all duration-300 tracking-wide">
-            View All Collections
+            View all collections
           </button>
         </motion.div>
       </div>

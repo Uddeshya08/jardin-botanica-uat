@@ -25,7 +25,7 @@ const heroPanels: HeroPanel[] = [
     description: "",
     imageUrl: "https://images.unsplash.com/photo-1674620305515-1394fe40c634",
     videoUrl: "/assets/video-banner.mp4",
-    cta: "Build Your Set",
+    cta: "Build your set",
   },
   {
     id: 2,
@@ -34,7 +34,7 @@ const heroPanels: HeroPanel[] = [
     description: "A gentle glow, a scent that stays close.",
     imageUrl: "https://images.unsplash.com/photo-1650482713537-8de547ea7a16",
     // videoUrl: "/assets/video-banner.mp4",
-    cta: "Shop Candles",
+    cta: "Shop candles",
   },
   {
     id: 3,
@@ -44,7 +44,7 @@ const heroPanels: HeroPanel[] = [
       "Formulas with measured actives and climate-smart bases—finished with design you can feel.",
     imageUrl: "https://images.unsplash.com/photo-1720275273886-89966091ce4d",
     // videoUrl: "/assets/video-banner.mp4",
-    cta: "Enter The Lab",
+    cta: "Enter the lab",
   },
   {
     id: 4,
@@ -54,7 +54,7 @@ const heroPanels: HeroPanel[] = [
       "An invitation to the inner world.\nEarly access. Limited blends. Private gatherings.",
     imageUrl: "https://images.unsplash.com/photo-1740513348123-72148a7dbf5b",
     // videoUrl: "/assets/video-banner.mp4",
-    cta: "Join the Circle",
+    cta: "Join the circle",
   },
 ]
 
@@ -161,7 +161,6 @@ export function HeroSection() {
       }
     })
   }
-
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchEndX.current = null
@@ -401,10 +400,11 @@ export function HeroSection() {
                   /* Regular CTA Button */
                   <motion.button
                     key={`cta-${activePanel}`}
-                    className={`font-din-arabic inline-flex items-center px-8 py-3 transition-all duration-300 tracking-wide touch-manipulation ${currentPanel.isSpecial
-                      ? "bg-white text-black"
-                      : "text-white border border-white/30"
-                      }`}
+                    className={`font-din-arabic inline-flex items-center px-8 py-3 transition-all duration-300 tracking-wide touch-manipulation ${
+                      currentPanel.isSpecial
+                        ? "bg-white text-black"
+                        : "text-white border border-white/30"
+                    }`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: isTransitioning ? 0.7 : 1 }}
                     exit={{ opacity: 0 }}
@@ -434,8 +434,9 @@ export function HeroSection() {
               {heroPanels.map((panel) => (
                 <button
                   key={panel.id}
-                  className={`relative px-2.5 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-2.5 md:py-3 text-[10px] sm:text-xs font-din-arabic tracking-wide sm:tracking-wider transition-all duration-300 rounded-full whitespace-nowrap touch-manipulation ${activePanel === panel.id ? "bg-white/20 text-white" : "text-white/60"
-                    }`}
+                  className={`relative px-2.5 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-2.5 md:py-3 text-[10px] sm:text-xs font-din-arabic tracking-wide sm:tracking-wider transition-all duration-300 rounded-full whitespace-nowrap touch-manipulation ${
+                    activePanel === panel.id ? "bg-white/20 text-white" : "text-white/60"
+                  }`}
                   style={{
                     WebkitTapHighlightColor: "transparent",
                   }}

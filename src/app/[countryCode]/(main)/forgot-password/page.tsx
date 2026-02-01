@@ -92,7 +92,7 @@ export default function ForgotPasswordPage() {
                   className="flex items-center gap-2 text-black/60 hover:text-black mb-8 font-din-arabic transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  <span>Back to Sign In</span>
+                  <span>Back to sign in</span>
                 </button>
 
                 {/* Header */}
@@ -133,7 +133,7 @@ export default function ForgotPasswordPage() {
                     type="submit"
                     className="font-din-arabic w-full py-4 bg-black text-white hover:bg-black/90 transition-all duration-300 text-center"
                   >
-                    Send Reset Instructions
+                    Send reset instructions
                   </motion.button>
                 </form>
               </motion.div>
@@ -182,7 +182,7 @@ export default function ForgotPasswordPage() {
                       className="flex-1 px-6 py-3 border text-black font-din-arabic tracking-wide hover:bg-black/5 transition-all duration-300"
                       style={{ borderColor: "#D8D2C7" }}
                     >
-                      Try Again
+                      Try again
                     </motion.button>
 
                     <motion.button
@@ -191,7 +191,7 @@ export default function ForgotPasswordPage() {
                       onClick={() => router.push(`/${countryCode}/account`)}
                       className="flex-1 px-6 py-3 bg-black text-white font-din-arabic tracking-wide hover:bg-black/90 transition-all duration-300"
                     >
-                      Back to Sign In
+                      Back to sign in
                     </motion.button>
                   </div>
                 </div>

@@ -28,16 +28,21 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
   const isGift = itemMetadata.is_gift === true || itemMetadata.is_gift === "true"
 
   // Check gift eligibility: first from line item metadata, then from product categories
-  const canBeGiftedFromMetadata = itemMetadata.can_be_gifted === true || itemMetadata.can_be_gifted === "true"
-  const canBeGiftedFromCategory = (item as any).product?.categories?.some((category: any) => {
-    const categoryMetadata = category?.metadata as Record<string, any> | undefined
-    return categoryMetadata?.can_be_gifted === true || categoryMetadata?.can_be_gifted === "true"
-  }) ?? false
+  const canBeGiftedFromMetadata =
+    itemMetadata.can_be_gifted === true || itemMetadata.can_be_gifted === "true"
+  const canBeGiftedFromCategory =
+    (item as any).product?.categories?.some((category: any) => {
+      const categoryMetadata = category?.metadata as Record<string, any> | undefined
+      return categoryMetadata?.can_be_gifted === true || categoryMetadata?.can_be_gifted === "true"
+    }) ?? false
   const canBeGifted = canBeGiftedFromMetadata || canBeGiftedFromCategory
 
-  const giftQty = typeof itemMetadata.gift_quantity === 'number'
-    ? itemMetadata.gift_quantity
-    : (isGift ? item.quantity : 0)
+  const giftQty =
+    typeof itemMetadata.gift_quantity === "number"
+      ? itemMetadata.gift_quantity
+      : isGift
+        ? item.quantity
+        : 0
 
   // Toggle marking item as gift
   const handleToggleGift = async () => {
@@ -124,7 +129,7 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
           transition={{ duration: 0.2 }}
           className="relative w-full h-full overflow-hidden rounded-lg"
         >
-          {(item.thumbnail || item.variant?.product?.images?.[0]?.url) ? (
+          {item.thumbnail || item.variant?.product?.images?.[0]?.url ? (
             <img
               src={item.thumbnail || item.variant?.product?.images?.[0]?.url}
               alt={item.product_title || "Product"}
@@ -203,7 +208,7 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
               >
                 <Gift className="w-4 h-4 text-black/70" />
                 <span className="font-din-arabic text-xs text-black/70">
-                  {giftUpdating ? "Marking..." : "Mark as Gift"}
+                  {giftUpdating ? "Marking..." : "Mark as gift"}
                 </span>
               </motion.button>
             )}
@@ -214,7 +219,9 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-2 text-black/80">
                     <Gift className="w-3.5 h-3.5" />
-                    <span className="font-din-arabic text-xs uppercase tracking-wider">Mark as Gift</span>
+                    <span className="font-din-arabic text-xs uppercase tracking-wider">
+                      Mark as gift
+                    </span>
                   </div>
                   <span className="font-din-arabic text-xs text-black/60">
                     {giftQty} / {item.quantity}

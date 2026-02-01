@@ -11,6 +11,7 @@ export interface CartItem {
   image?: string | null
   product_id?: string
   variant_id?: string
+  handle?: string
   metadata?: Record<string, unknown> | null
 }
 

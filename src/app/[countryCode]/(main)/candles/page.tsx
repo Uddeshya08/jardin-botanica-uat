@@ -70,7 +70,7 @@ const MobileProductCard = ({
         image: item.src,
         variant_id: variantId,
       }
-      toast.success(`Quantity updated: ${item.label}`, {
+      toast.success(`Quantity updated — ${item.label}`, {
         duration: 2000,
       })
     } else {
@@ -322,7 +322,7 @@ const ProductCard = ({
         image: src,
         variant_id: variantId,
       }
-      toast.success(`Quantity updated: ${label}`, {
+      toast.success(`Quantity updated — ${label}`, {
         duration: 2000,
       })
     } else {
@@ -570,7 +570,7 @@ const BannerProductCard = ({
         image: item.src,
         variant_id: variantId,
       }
-      toast.success(`Quantity updated: ${item.label}`, {
+      toast.success(`Quantity updated — ${item.label}`, {
         duration: 2000,
       })
     } else {
@@ -1196,7 +1196,7 @@ const Candles = () => {
       />
       <PageBanner
         pageKey="candles"
-        containerClassName="absolute top-[37%] md:top-1/2 left-2 md:left-[70px] md:-translate-y-1/2 max-w-xs md:max-w-md"
+        containerClassName="absolute top-[37%] md:top-1/2 left-4 md:left-[70px] md:-translate-y-1/2 max-w-xs md:max-w-md"
       />
       {/* Mobile Product Carousel Section - Mobile Only */}
       {!isLoadingCollection && candlesCollection.length > 0 && (
@@ -1654,7 +1654,7 @@ const Candles = () => {
             viewport={{ once: true, amount: 0.3 }}
             className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base inline-block"
           >
-            Speak With Us
+            Speak with us
           </motion.a>
         </div>
       </motion.div>
@@ -1704,7 +1704,7 @@ const Candles = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
-                className="font-din-arabic text-lg md:text-xl text-black/70 leading-relaxed mb-8"
+                className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8"
               >
                 Powdery, elegant, and quietly floral-Soft Orris wraps your space in a gentle hug.
                 Perfect for slow mornings, self-care rituals, or unwinding at dusk. It's calm,
@@ -1722,7 +1722,7 @@ const Candles = () => {
                   transition={{ duration: 0.3, ease: smoothEase }}
                   className="bg-transparent border border-black/30 text-black px-8 py-3 font-normal tracking-wide rounded-none font-din-arabic text-base transition-colors duration-300"
                 >
-                  Read More
+                  Read more
                 </motion.button>
               </motion.div>
             </div>
@@ -1774,8 +1774,9 @@ const Candles = () => {
                 candlelight rituals, and a peek behind the scenes{" "}
                 <span className="text-orange-500 font-din-arabic">@</span>
                 <span className="text-orange-500 font-din-arabic border-b-[1px] border-orange-500">
-                  JardinBotanica.
+                  JardinBotanica
                 </span>
+                .
               </motion.p>
             </motion.div>
             <motion.div
@@ -1853,7 +1854,7 @@ const Candles = () => {
       </motion.div>
       <InstagramEmbed2 />
       {/* Newsletter Section */};
-      <section className="py-20 relative overflow-hidden" style={{ backgroundColor: "#e3e3d8" }}>
+      <section className="py-20 relative overflow-hiddenen" style={{ backgroundColor: "#e3e3d8" }}>
         <motion.div
           className="absolute inset-0 opacity-15"
           style={{
@@ -1893,7 +1894,7 @@ const Candles = () => {
               viewport={{ once: true, amount: 0.3 }}
               className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 text-black"
             >
-              Join the Circle
+              Join the circle
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}

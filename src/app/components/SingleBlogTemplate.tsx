@@ -283,7 +283,7 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
             }}
           >
             <ChevronLeft size={16} className="mr-1" />
-            BACK TO JOURNAL
+            Back to Journal
           </Link>
         </motion.div>
 

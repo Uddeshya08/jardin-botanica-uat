@@ -224,6 +224,8 @@ const ShippingAddress = ({
           if (defaultAddr && !cart?.shipping_address) {
             populateAddressFields(defaultAddr)
             setSelectedAddressId(defaultAddr.id)
+          } else {
+            setSelectedAddressId(parsed[0].id)
           }
         } catch (e) {
           console.error("Error loading saved addresses:", e)

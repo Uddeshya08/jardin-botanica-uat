@@ -436,7 +436,7 @@ export default function AuthPage() {
                   borderBottomColor: activeTab === "signin" ? "#000" : "transparent",
                 }}
               >
-                Sign In
+                Sign in
               </button>
               <button
                 type="button"
@@ -450,7 +450,7 @@ export default function AuthPage() {
                   borderBottomColor: activeTab === "signup" ? "#000" : "transparent",
                 }}
               >
-                Create Account
+                Create account
               </button>
             </div>
           </div>
@@ -464,7 +464,7 @@ export default function AuthPage() {
               className={`p-8 lg:p-10 ${activeTab !== "signin" ? "hidden lg:block" : ""}`}
             >
               <h2 className="font-american-typewriter text-2xl mb-8 text-black text-center">
-                Sign In
+                Sign in
               </h2>
 
               {isLockedOut ? (
@@ -481,7 +481,7 @@ export default function AuthPage() {
                       type="button"
                       className="font-din-arabic w-full py-4 bg-black text-white hover:bg-black/90 transition-all duration-300 text-center"
                     >
-                      Reset Password
+                      Reset password
                     </motion.button>
                   </a>
                 </div>
@@ -614,7 +614,7 @@ export default function AuthPage() {
                       ? `Please wait ${delaySeconds}s...`
                       : showCaptcha && !captchaToken
                         ? "Complete verification to continue"
-                        : "Sign In"}
+                        : "Sign in"}
                   </motion.button>
 
                   {/* Divider + SSO (stub) */}
@@ -627,7 +627,7 @@ export default function AuthPage() {
                         className="font-din-arabic text-sm text-black/70 px-4"
                         style={{ backgroundColor: "#e3e3d8" }}
                       >
-                        Or Sign In With
+                        Or sign in with
                       </span>
                     </div>
                   </div>
@@ -698,7 +698,7 @@ export default function AuthPage() {
               className={`p-8 lg:p-10 ${activeTab !== "signup" ? "hidden lg:block" : ""}`}
             >
               <h2 className="font-american-typewriter text-2xl mb-8 text-black text-center">
-                Create Account
+                Create account
               </h2>
 
               <form
@@ -859,7 +859,7 @@ export default function AuthPage() {
                   type="submit"
                   className="font-din-arabic w-full py-4 bg-black text-white hover:bg-black/90 transition-all duration-300 text-center"
                 >
-                  Create Account
+                  Create account
                 </motion.button>
               </form>
             </motion.div>

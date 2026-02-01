@@ -665,7 +665,7 @@ export function ProductHero({
                       exit={{ y: -20, opacity: 0 }}
                       transition={{ duration: 0.2 }}
                     >
-                      Add to Cart
+                      Add to cart
                     </motion.span>
                   )}
                 </AnimatePresence>
@@ -775,9 +775,10 @@ export function ProductHero({
                       className="overflow-hidden lg:hidden"
                     >
                       <div className="pt-3 pb-2">
-                        <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
-                          {item.contentText}
-                        </p>
+                        <div
+                          className="font-din-arabic text-black/80 leading-relaxed text-sm prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: item.contentText }}
+                        />
                       </div>
                     </motion.div>
                   )}
@@ -1147,7 +1148,10 @@ export function ProductHero({
           onClose={() => setOpenPanelId(null)}
           title={item.title}
         >
-          <p className="font-din-arabic text-black/80 leading-relaxed">{item.contentText}</p>
+          <div
+            className="font-din-arabic text-black/80 leading-relaxed prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: item.contentText }}
+          />
         </InfoPanel>
       ))}
     </div>
