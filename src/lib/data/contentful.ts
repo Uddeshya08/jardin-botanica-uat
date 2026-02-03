@@ -1719,6 +1719,7 @@ async function transformBlogEntry(entry: any, countryCode?: string): Promise<Blo
       handle: string
       image?: string
       description?: string
+      subtitle?: string | null
       variants?: any[]
     }[] = []
     if (Array.isArray(fields.featuredProducts)) {
@@ -1737,6 +1738,7 @@ async function transformBlogEntry(entry: any, countryCode?: string): Promise<Blo
                 handle: prodRef.fields.productHandle,
                 image: medusaProduct.thumbnail || undefined,
                 description: medusaProduct.description || undefined,
+                subtitle: medusaProduct.subtitle || undefined,
                 variants: medusaProduct.variants || [],
               })
             }

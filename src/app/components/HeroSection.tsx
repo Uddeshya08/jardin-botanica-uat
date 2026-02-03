@@ -12,7 +12,7 @@ interface HeroPanel {
   subtitle: string
   description: string
   imageUrl: string
-  videoUrl?: string // ✅ Added for background video
+  videoUrl?: string
   cta: string
   isSpecial?: boolean
 }
@@ -25,7 +25,7 @@ const heroPanels: HeroPanel[] = [
     description: "",
     imageUrl: "https://images.unsplash.com/photo-1674620305515-1394fe40c634",
     videoUrl: "/assets/video-banner.mp4",
-    cta: "Build Your Set",
+    cta: "Build your set",
   },
   {
     id: 2,
@@ -33,8 +33,7 @@ const heroPanels: HeroPanel[] = [
     subtitle: "Evenings that hold you a little longer.",
     description: "A gentle glow, a scent that stays close.",
     imageUrl: "https://images.unsplash.com/photo-1650482713537-8de547ea7a16",
-    // videoUrl: "/assets/video-banner.mp4",
-    cta: "Shop Candles",
+    cta: "Shop candles",
   },
   {
     id: 3,
@@ -43,8 +42,7 @@ const heroPanels: HeroPanel[] = [
     description:
       "Formulas with measured actives and climate-smart bases—finished with design you can feel.",
     imageUrl: "https://images.unsplash.com/photo-1720275273886-89966091ce4d",
-    // videoUrl: "/assets/video-banner.mp4",
-    cta: "Enter The Lab",
+    cta: "Enter the lab",
   },
   {
     id: 4,
@@ -53,19 +51,17 @@ const heroPanels: HeroPanel[] = [
     description:
       "An invitation to the inner world.\nEarly access. Limited blends. Private gatherings.",
     imageUrl: "https://images.unsplash.com/photo-1740513348123-72148a7dbf5b",
-    // videoUrl: "/assets/video-banner.mp4",
-    cta: "Join the Circle",
+    cta: "Join the circle",
   },
 ]
 
 export function HeroSection() {
   const router = useRouter()
   const [activePanel, setActivePanel] = useState(1)
-  const [videoError, setVideoError] = useState(false)
-  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [videoError, setVideoError] = useState<Record<number, boolean>>({})
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)
-  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({})
   const [swipeOffset, setSwipeOffset] = useState(0)
   const [isSwiping, setIsSwiping] = useState(false)
   const [showEmailForm, setShowEmailForm] = useState(false)
@@ -77,71 +73,54 @@ export function HeroSection() {
 
   const currentPanel = heroPanels.find((p) => p.id === activePanel) || heroPanels[0]
 
-  // Reset transitioning state when panel changes and handle video cleanup
+  // Play video when panel becomes active
   useEffect(() => {
-    setIsTransitioning(false)
-    setVideoError(false)
-
-    // Reset email form when switching panels
-    setShowEmailForm(false)
-    setEmail("")
-
-    // Play video when panel changes (if video exists)
     const panel = heroPanels.find((p) => p.id === activePanel)
-    if (videoRef.current && panel?.videoUrl) {
-      videoRef.current.currentTime = 0
-      videoRef.current.play().catch(() => {
-        // Handle autoplay restrictions gracefully
-        setVideoError(true)
+    if (videoRefs.current[activePanel] && panel?.videoUrl) {
+      videoRefs.current[activePanel]!.currentTime = 0
+      videoRefs.current[activePanel]!.play().catch(() => {
+        setVideoError((prev) => ({ ...prev, [activePanel]: true }))
       })
     }
   }, [activePanel])
 
-  // Function to transition to next panel with smooth delay
+  // Function to transition to next panel
   const goToNextPanel = () => {
-    if (isTransitioning) return // Prevent multiple transitions
-
-    setIsTransitioning(true)
-
-    // Small delay to allow video's last frame to render smoothly
-    setTimeout(() => {
-      const currentIndex = heroPanels.findIndex((p) => p.id === activePanel)
-      const nextIndex = (currentIndex + 1) % heroPanels.length
-      setActivePanel(heroPanels[nextIndex].id)
-    }, 300) // 300ms delay for smooth transition
+    const currentIndex = heroPanels.findIndex((p) => p.id === activePanel)
+    const nextIndex = (currentIndex + 1) % heroPanels.length
+    setActivePanel(heroPanels[nextIndex].id)
   }
 
-  // Handle video end - pause on last frame (no auto-transition)
-  const handleVideoEnd = () => {
-    if (videoRef.current) {
-      // Pause on last frame - user must manually navigate
-      videoRef.current.pause()
+  // Handle video end - pause on last frame
+  const handleVideoEnd = (panelId: number) => () => {
+    if (videoRefs.current[panelId]) {
+      videoRefs.current[panelId]!.pause()
     }
   }
 
-  // Minimum swipe distance (in pixels) to trigger panel change
+  // Minimum swipe distance
   const minSwipeDistance = 80
 
   // Handle CTA button clicks
   const handleCTAClick = (panelId: number) => {
     switch (panelId) {
-      case 1: // Rituals - Build Your Set
+      case 1:
         router.push("/body-hands")
         break
-      case 2: // Atmosphere - Shop Candles
+      case 2:
         router.push("/candles")
         break
-      case 3: // The Lab - Enter The Lab
+      case 3:
         router.push("/the-lab")
         break
-      case 4: // Circle - Join the Circle
+      case 4:
         setShowEmailForm(true)
         break
     }
   }
 
   // Handle email subscription
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const handleEmailSubscription = () => {
     if (!email || !email.includes("@")) {
       toast.error("Please enter a valid email address")
@@ -162,7 +141,6 @@ export function HeroSection() {
     })
   }
 
-
   const handleTouchStart = (e: React.TouchEvent) => {
     touchEndX.current = null
     touchStartX.current = e.targetTouches[0].clientX
@@ -175,8 +153,6 @@ export function HeroSection() {
 
     const currentX = e.targetTouches[0].clientX
     touchEndX.current = currentX
-
-    // Calculate swipe offset for visual feedback
     const offset = currentX - touchStartX.current
     setSwipeOffset(offset)
   }
@@ -189,25 +165,28 @@ export function HeroSection() {
     }
 
     const distance = touchStartX.current - touchEndX.current
-    const isLeftSwipe = distance > minSwipeDistance // Finger moved left = next panel
-    const isRightSwipe = distance < -minSwipeDistance // Finger moved right = previous panel
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
 
     if (isLeftSwipe) {
-      // Swipe left (finger moved left) - go to next panel
       goToNextPanel()
     } else if (isRightSwipe) {
-      // Swipe right (finger moved right) - go to previous panel
       const currentIndex = heroPanels.findIndex((p) => p.id === activePanel)
       const prevIndex = (currentIndex - 1 + heroPanels.length) % heroPanels.length
       setActivePanel(heroPanels[prevIndex].id)
-      setVideoError(false)
     }
 
-    // Reset swipe state
     setIsSwiping(false)
     setSwipeOffset(0)
     touchStartX.current = null
     touchEndX.current = null
+  }
+
+  // Spring transition config for smooth motion
+  const springTransition = {
+    type: "spring" as const,
+    stiffness: 300,
+    damping: 30,
   }
 
   return (
@@ -233,89 +212,82 @@ export function HeroSection() {
         }}
       />
 
-      {/* ✅ Background Video/Image Section */}
+      {/* ✅ Preloaded Background Layers - All panels rendered, opacity controls visibility */}
       <div className="absolute inset-0 z-0">
-        <AnimatePresence mode="wait">
+        {heroPanels.map((panel) => (
           <motion.div
-            key={activePanel}
-            initial={{ opacity: 0 }}
+            key={panel.id}
+            initial={false}
             animate={{
-              opacity: 1,
-              x: isSwiping ? swipeOffset * 0.3 : 0,
-              scale: isTransitioning ? 1.02 : 1,
-            }}
-            exit={{
-              opacity: 0,
-              scale: 0.98,
+              opacity: activePanel === panel.id ? 1 : 0,
+              scale: activePanel === panel.id ? 1 : 1.05,
             }}
             transition={{
-              duration: 0.7,
-              ease: [0.4, 0, 0.2, 1], // Custom easing for smoother transitions
+              opacity: { duration: 0.5, ease: "easeInOut" },
+              scale: { duration: 0.6, ease: "easeOut" },
             }}
             className="absolute inset-0"
+            style={{ pointerEvents: activePanel === panel.id ? "auto" : "none" }}
           >
             <div className="w-full h-full relative overflow-hidden">
-              {!videoError && currentPanel.videoUrl ? (
+              {!videoError[panel.id] && panel.videoUrl ? (
                 <video
-                  ref={videoRef}
-                  key={`video-${activePanel}`}
-                  src={currentPanel.videoUrl}
-                  autoPlay
+                  ref={(el) => {
+                    videoRefs.current[panel.id] = el
+                  }}
+                  src={panel.videoUrl}
                   muted
                   playsInline
                   preload="auto"
-                  onEnded={handleVideoEnd}
-                  onError={() => setVideoError(true)}
+                  onEnded={handleVideoEnd(panel.id)}
+                  onError={() => setVideoError((prev) => ({ ...prev, [panel.id]: true }))}
                   onLoadedData={() => {
-                    // Ensure smooth playback start
-                    if (videoRef.current) {
-                      videoRef.current.currentTime = 0
-                      videoRef.current.play()
+                    if (activePanel === panel.id && videoRefs.current[panel.id]) {
+                      videoRefs.current[panel.id]!.currentTime = 0
+                      videoRefs.current[panel.id]!.play()
                     }
                   }}
-                  className="w-full h-full object-cover transition-opacity duration-500"
-                  style={{
-                    minHeight: "100vh",
-                    opacity: isTransitioning ? 0.8 : 1,
-                  }}
+                  className="w-full h-full object-cover"
+                  style={{ minHeight: "100vh" }}
                 />
               ) : (
                 <ImageWithFallback
-                  src={currentPanel.imageUrl}
-                  alt={currentPanel.title}
-                  className="w-full h-full object-cover transition-opacity duration-500"
-                  style={{
-                    minHeight: "100vh",
-                    opacity: isTransitioning ? 0.8 : 1,
-                  }}
+                  src={panel.imageUrl}
+                  alt={panel.title}
+                  className="w-full h-full object-cover"
+                  style={{ minHeight: "100vh" }}
                 />
               )}
             </div>
             <div className="absolute inset-0 bg-black/50" />
           </motion.div>
-        </AnimatePresence>
+        ))}
       </div>
 
-      {/* ✅ Content Overlay */}
+      {/* ✅ Content Overlay with Spring Physics */}
       <div className="absolute inset-0 z-20">
         <div className="px-6 md:pl-20 h-full flex items-center">
           <motion.div
             className="max-w-2xl text-white"
             animate={{
               x: isSwiping ? swipeOffset * 0.2 : 0,
-              opacity: isSwiping ? 1 - Math.abs(swipeOffset) / 300 : isTransitioning ? 0.8 : 1,
+              opacity: isSwiping ? 1 - Math.abs(swipeOffset) / 500 : 1,
             }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            transition={springTransition}
           >
             <div className="min-h-[200px] md:min-h-[250px] lg:min-h-[300px]">
               <AnimatePresence mode="wait">
                 <motion.h1
                   key={`title-${activePanel}`}
                   className="font-american-typewriter text-5xl md:text-6xl lg:text-7xl mb-6 tracking-tight"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: isTransitioning ? 0.7 : 1, y: 0 }}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                  transition={{
+                    ...springTransition,
+                    stiffness: 250,
+                    damping: 25,
+                  }}
                 >
                   {currentPanel.subtitle}
                 </motion.h1>
@@ -329,12 +301,13 @@ export function HeroSection() {
                       key={`description-${activePanel}`}
                       className="font-din-arabic text-xl md:text-2xl text-white/90 leading-relaxed"
                       initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: isTransitioning ? 0.7 : 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -15 }}
                       transition={{
-                        duration: 0.5,
-                        ease: [0.4, 0, 0.2, 1],
-                        delay: 0.1,
+                        ...springTransition,
+                        stiffness: 250,
+                        damping: 25,
+                        delay: 0.08,
                       }}
                     >
                       {currentPanel.description.split("\n").map((line, i) => (
@@ -359,17 +332,13 @@ export function HeroSection() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                    transition={springTransition}
                     className="flex items-center gap-4"
                   >
                     <motion.input
-                      initial={{ x: -50, opacity: 0 }}
+                      initial={{ x: -30, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
-                      transition={{
-                        duration: 0.5,
-                        delay: 0.1,
-                        ease: [0.4, 0, 0.2, 1],
-                      }}
+                      transition={{ ...springTransition, delay: 0.1 }}
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -383,13 +352,9 @@ export function HeroSection() {
                       autoFocus
                     />
                     <motion.button
-                      initial={{ x: 50, opacity: 0 }}
+                      initial={{ x: 30, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
-                      transition={{
-                        duration: 0.5,
-                        delay: 0.2,
-                        ease: [0.4, 0, 0.2, 1],
-                      }}
+                      transition={{ ...springTransition, delay: 0.15 }}
                       className="font-din-arabic inline-flex items-center px-8 py-3 bg-white text-black hover:bg-white/90 transition-all duration-300 tracking-wide"
                       onClick={handleEmailSubscription}
                       disabled={!email.trim()}
@@ -401,14 +366,15 @@ export function HeroSection() {
                   /* Regular CTA Button */
                   <motion.button
                     key={`cta-${activePanel}`}
-                    className={`font-din-arabic inline-flex items-center px-8 py-3 transition-all duration-300 tracking-wide touch-manipulation ${currentPanel.isSpecial
-                      ? "bg-white text-black"
-                      : "text-white border border-white/30"
-                      }`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: isTransitioning ? 0.7 : 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                    className={`font-din-arabic inline-flex items-center px-8 py-3 transition-all duration-300 tracking-wide touch-manipulation ${
+                      currentPanel.isSpecial
+                        ? "bg-white text-black"
+                        : "text-white border border-white/30"
+                    }`}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    transition={{ ...springTransition, delay: 0.15 }}
                     onClick={() => handleCTAClick(activePanel)}
                     style={{
                       WebkitTapHighlightColor: "transparent",
@@ -434,17 +400,17 @@ export function HeroSection() {
               {heroPanels.map((panel) => (
                 <button
                   key={panel.id}
-                  className={`relative px-2.5 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-2.5 md:py-3 text-[10px] sm:text-xs font-din-arabic tracking-wide sm:tracking-wider transition-all duration-300 rounded-full whitespace-nowrap touch-manipulation ${activePanel === panel.id ? "bg-white/20 text-white" : "text-white/60"
-                    }`}
+                  className={`relative px-2.5 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-2.5 md:py-3 text-[10px] sm:text-xs font-din-arabic tracking-wide sm:tracking-wider transition-all duration-300 rounded-full whitespace-nowrap touch-manipulation ${
+                    activePanel === panel.id ? "bg-white/20 text-white" : "text-white/60"
+                  }`}
                   style={{
                     WebkitTapHighlightColor: "transparent",
                   }}
+                  type="button"
                   onMouseEnter={() => {
-                    setVideoError(false)
                     setActivePanel(panel.id)
                   }}
                   onClick={() => {
-                    setVideoError(false)
                     setActivePanel(panel.id)
                   }}
                 >

@@ -8,8 +8,8 @@ import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-p
 import { Footer } from "app/components/Footer"
 import { AuthProvider } from "app/context/auth-context"
 import { CartItemsProvider } from "app/context/cart-items-context"
-import { LedgerProvider } from "app/context/ledger-context"
 import { GiftProvider } from "app/context/gift-context"
+import { LedgerProvider } from "app/context/ledger-context"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -39,14 +39,20 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       // If unit_price > 10000, likely in minor units (paise), divide by 100
       // Otherwise, it's already in major units (rupees)
       const price = item.unit_price > 10000 ? item.unit_price / 100 : item.unit_price
+
+      // Get variant title if available and construct name with variant info
+      const variantTitle = (item as any).variant?.title
+      const displayName = variantTitle ? `${item.title} (${variantTitle})` : item.title
+
       return {
         id: item.id,
-        name: item.title,
+        name: displayName,
         price: price,
         quantity: item.quantity,
         image: item.thumbnail,
         product_id: item?.product_id,
         variant_id: item?.variant_id,
+        handle: (item as any).product?.handle,
         metadata: item?.metadata,
       }
     }) || []

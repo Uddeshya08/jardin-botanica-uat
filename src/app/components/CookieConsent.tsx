@@ -126,7 +126,7 @@ export default function CookieConsent() {
                       onClick={handleAccept}
                       className="px-6 py-3 rounded-xl bg-black text-white font-din-arabic tracking-wide hover:bg-black/90 transition-all duration-300 shadow-lg hover:shadow-xl whitespace-nowrap"
                     >
-                      Accept All
+                      Accept all
                     </motion.button>
                   </div>
                 </div>

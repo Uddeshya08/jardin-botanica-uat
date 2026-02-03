@@ -155,7 +155,7 @@ export function HomeCreationsPage({
         variant_id: variantId,
         metadata: { size: product.size, category: product.subCategoryName },
       }
-      toast.success(`Quantity updated: ${product.name}`, {
+      toast.success(`Quantity updated — ${product.name}`, {
         duration: 2000,
       })
     } else {

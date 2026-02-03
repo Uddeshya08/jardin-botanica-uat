@@ -49,6 +49,8 @@ function getSubCategoriesWithProducts(
 function transformMedusaProduct(medusaProduct: any, subCategoryName: string) {
   const metadata = medusaProduct.metadata || {}
 
+  console.log(metadata)
+
   // Get price from cheapest variant
   let price = 0
   if (medusaProduct.variants && medusaProduct.variants.length > 0) {

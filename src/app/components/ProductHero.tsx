@@ -191,6 +191,19 @@ export function ProductHero({
   }, [defaultVariantId])
   const selectedVariant =
     product.variants?.find((v) => v.id === selectedVariantId) ?? product.variants?.[0]
+
+  // Check if variant is in stock
+  const isOutOfStock = useMemo(() => {
+    if (!selectedVariant) return true
+    // If inventory is not managed, consider it in stock
+    if (!selectedVariant.manage_inventory) return false
+    // If backorders are allowed, consider it in stock
+    if (selectedVariant.allow_backorder) return false
+    // Check inventory quantity
+    const inventoryQty = selectedVariant.inventory_quantity ?? 0
+    return inventoryQty <= 0
+  }, [selectedVariant])
+
   const minorAmount = selectedVariant?.calculated_price?.calculated_amount ?? 0
   console.log("🔍 ProductHero - minorAmount:", {
     minorAmount,
@@ -279,10 +292,14 @@ export function ProductHero({
   const handleAddToCart = () => {
     if (!selectedVariantId || adding || isPending) return
 
-    // instant UI — don’t block on network
+    // instant UI — don't block on network
     setAdding(true)
     setUiError(null)
     setIsAddedToCart(true)
+
+    // Get variant title for display
+    const variantTitle = selectedSizeLabel || selectedVariant?.title || "Default"
+    const itemId = `${product.id}-${selectedVariantId}`
 
     // optimistic nav/sticky updates if parent listens (regular product - no image in nav)
     // calculated_amount is already in major units (rupees), no conversion needed
@@ -290,26 +307,49 @@ export function ProductHero({
       minorAmount,
       calculated_amount: selectedVariant?.calculated_price?.calculated_amount,
       variantId: selectedVariantId,
+      itemId,
+      variantTitle,
     })
     onCartUpdate?.({
-      id: selectedVariantId,
-      name: product.title,
+      id: itemId,
+      name: `${product.title} (${variantTitle})`,
       price: minorAmount,
       quantity,
       image: fallbackImg,
       isRitualProduct: false,
       variant_id: selectedVariantId,
+      product_id: product.id,
+      handle: product.handle,
+      metadata: { variantTitle, variantId: selectedVariantId },
     } as any)
     emitCartUpdated({ quantityDelta: quantity })
 
     // network in the background
     startTransition(async () => {
       try {
-        await addToCartAction({
+        const result = await addToCartAction({
           variantId: selectedVariantId,
           quantity,
           countryCode: (countryCode || "in").toLowerCase(),
         })
+        console.log("✅ Server action completed successfully:", result)
+
+        // Update the cart item with the server line item ID for future updates
+        if (result?.lineItemId) {
+          onCartUpdate?.({
+            id: itemId,
+            name: `${product.title} (${variantTitle})`,
+            price: minorAmount,
+            quantity,
+            image: fallbackImg,
+            isRitualProduct: false,
+            variant_id: selectedVariantId,
+            product_id: product.id,
+            handle: product.handle,
+            metadata: { variantTitle, variantId: selectedVariantId },
+            line_item_id: result.lineItemId,
+          } as any)
+        }
       } catch (e: any) {
         // roll back optimistic message
         setIsAddedToCart(false)
@@ -351,14 +391,19 @@ export function ProductHero({
     // keep parent UI synced while changing qty (optional)
     // calculated_amount is already in major units (rupees), no conversion needed
     if (selectedVariantId) {
+      const variantTitle = selectedSizeLabel || selectedVariant?.title || "Default"
+      const itemId = `${product.id}-${selectedVariantId}`
       onCartUpdate?.({
-        id: selectedVariantId,
-        name: product.title,
+        id: itemId,
+        name: `${product.title} (${variantTitle})`,
         price: minorAmount,
         quantity: newQuantity,
         image: fallbackImg,
         isRitualProduct: false,
         variant_id: selectedVariantId,
+        product_id: product.id,
+        handle: product.handle,
+        metadata: { variantTitle, variantId: selectedVariantId },
       } as any)
     }
   }
@@ -639,37 +684,46 @@ export function ProductHero({
                 <IoIosArrowDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-black/60 pointer-events-none" />
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleAddToCart}
-                className="font-din-arabic px-6 md:px-8 py-3 bg-black text-white hover:bg-black/90 transition-all duration-300 tracking-wide relative overflow-hidden w-full sm:w-auto"
-                disabled={!selectedVariantId || adding || isPending}
-              >
-                <AnimatePresence mode="wait">
-                  {isAddedToCart ? (
-                    <motion.span
-                      key="added"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -20, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      Added to Cart
-                    </motion.span>
-                  ) : (
-                    <motion.span
-                      key="add"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -20, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      Add to Cart
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.button>
+              {isOutOfStock ? (
+                <button
+                  disabled
+                  className="font-din-arabic px-6 md:px-8 py-3 bg-[#a28b6f]/30 text-black/50 border border-[#a28b6f]/40 cursor-not-allowed tracking-wide w-full sm:w-auto transition-all duration-300"
+                >
+                  Out of Stock
+                </button>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleAddToCart}
+                  className="font-din-arabic px-6 md:px-8 py-3 bg-black text-white hover:bg-black/90 transition-all duration-300 tracking-wide relative overflow-hidden w-full sm:w-auto"
+                  disabled={!selectedVariantId || adding || isPending}
+                >
+                  <AnimatePresence mode="wait">
+                    {isAddedToCart ? (
+                      <motion.span
+                        key="added"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -20, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        Added to Cart
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="add"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -20, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        Add to cart
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              )}
               {uiError && (
                 <p className="text-xs mt-2" style={{ color: "#b42318" }}>
                   {uiError}
@@ -775,9 +829,10 @@ export function ProductHero({
                       className="overflow-hidden lg:hidden"
                     >
                       <div className="pt-3 pb-2">
-                        <p className="font-din-arabic text-black/80 leading-relaxed text-sm">
-                          {item.contentText}
-                        </p>
+                        <div
+                          className="font-din-arabic text-black/80 leading-relaxed text-sm prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: item.contentText }}
+                        />
                       </div>
                     </motion.div>
                   )}
@@ -1147,7 +1202,10 @@ export function ProductHero({
           onClose={() => setOpenPanelId(null)}
           title={item.title}
         >
-          <p className="font-din-arabic text-black/80 leading-relaxed">{item.contentText}</p>
+          <div
+            className="font-din-arabic text-black/80 leading-relaxed prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: item.contentText }}
+          />
         </InfoPanel>
       ))}
     </div>

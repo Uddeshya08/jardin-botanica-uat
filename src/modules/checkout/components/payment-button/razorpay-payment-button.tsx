@@ -1,16 +1,15 @@
 "use client"
 
-import { placeOrder } from "@lib/data/cart"
+import { placeOrder, updateCart } from "@lib/data/cart"
 import type { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
+import { useGiftContextSafe } from "app/context/gift-context"
 import { Lock, Sparkles } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import React, { useCallback, useEffect, useState } from "react"
 import { type RazorpayOrderOptions, useRazorpay } from "react-razorpay"
 import type { CurrencyCode } from "react-razorpay/dist/constants/currency"
 import ErrorMessage from "../error-message"
-import { useGiftContextSafe } from "app/context/gift-context"
-import { updateCart } from "@lib/data/cart"
 
 export const RazorpayPaymentButton = ({
   session,
@@ -180,7 +179,7 @@ export const RazorpayPaymentButton = ({
         data-testid={dataTestId}
       >
         <Lock className="w-5 h-5" />
-        <span>{submitting ? "Processing..." : "Place Order"}</span>
+        <span>{submitting ? "Processing..." : "Place order"}</span>
         <Sparkles className="w-5 h-5" />
       </Button>
       <ErrorMessage error={errorMessage} data-testid="razorpay-payment-error-message" />

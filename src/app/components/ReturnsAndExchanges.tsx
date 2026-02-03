@@ -140,7 +140,7 @@ export function ReturnsAndExchanges() {
           transition={{ duration: 0.5, delay: 0.5 }}
         >
           <div className="mb-5">
-            <h2 className="font-american-typewriter text-black font-bold">
+            <h2 className="font-american-typewriter text-lg text-black font-bold">
               Questions or Concerns?
             </h2>
           </div>

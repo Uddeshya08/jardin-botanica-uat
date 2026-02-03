@@ -92,7 +92,7 @@ export default function GoogleCallbackPage() {
               onClick={() => router.push("/login")}
               className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              Back to Login
+              Back to login
             </button>
           </div>
         )}

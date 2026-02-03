@@ -567,7 +567,7 @@ const Category = () => {
             viewport={{ once: true }}
             className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base"
           >
-            Speak With Us
+            Speak with us
           </motion.button>
         </div>
       </motion.div>
@@ -636,7 +636,7 @@ const Category = () => {
                   whileTap={{ scale: 0.98 }}
                   className="bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 md:px-8 font-normal tracking-wide rounded-none font-din-arabic text-sm md:text-base"
                 >
-                  Read More
+                  Read more
                 </motion.button>
               </motion.div>
             </div>
@@ -804,7 +804,7 @@ const Category = () => {
               viewport={{ once: true }}
               className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 text-black"
             >
-              Join the Circle
+              Join the circle
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}

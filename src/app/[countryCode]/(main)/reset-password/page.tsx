@@ -213,7 +213,7 @@ export default function ResetPasswordPage() {
                     type="submit"
                     className="font-din-arabic w-full py-4 bg-black text-white hover:bg-black/90 transition-all duration-300 text-center"
                   >
-                    Reset Password
+                    Reset password
                   </motion.button>
                 </form>
               </motion.div>
@@ -248,7 +248,7 @@ export default function ResetPasswordPage() {
                   onClick={() => router.push(`/${countryCode}/account`)}
                   className="px-8 py-3 bg-black text-white font-din-arabic tracking-wide hover:bg-black/90 transition-all duration-300"
                 >
-                  Go to Sign In
+                  Go to sign in
                 </motion.button>
 
                 <p className="font-din-arabic text-xs text-black/50 mt-4">

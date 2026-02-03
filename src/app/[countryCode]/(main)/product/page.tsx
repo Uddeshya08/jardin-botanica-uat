@@ -298,7 +298,7 @@ const Product = () => {
                     </select>
 
                     <button className="bg-[#535c4a] text-white px-8 md:px-16 py-3 md:py-[14px] text-sm md:text-[20px] font-medium tracking-wide transition-colors duration-300 rounded-none font-dinRegular">
-                      Add To Cart
+                      Add to cart
                     </button>
                   </div>
                 </div>

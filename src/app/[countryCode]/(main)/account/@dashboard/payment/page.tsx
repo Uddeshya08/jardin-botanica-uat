@@ -260,13 +260,13 @@ export default function PaymentPage() {
               style={{ borderColor: "#D8D2C7" }}
             >
               <Plus className="w-4 h-4" />
-              Add Payment Method
+              Add payment method
             </motion.button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md" style={{ backgroundColor: "#e3e3d8" }}>
             <DialogHeader className="pb-6">
               <DialogTitle className="font-american-typewriter text-2xl text-black tracking-wide">
-                Add Payment Method
+                Add payment method
               </DialogTitle>
               <DialogDescription className="font-din-arabic text-black/60 tracking-wide">
                 Add a new payment method to your account.

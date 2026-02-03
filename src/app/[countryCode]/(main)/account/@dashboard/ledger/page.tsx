@@ -394,7 +394,7 @@ export default function LedgerPage() {
               className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-full bg-black text-white font-din-arabic tracking-wide text-xs sm:text-sm hover:bg-black/90 transition-colors"
               style={{ letterSpacing: "0.1em" }}
             >
-              Browse the Collection →
+              Browse the collection →
             </motion.button>
           </LocalizedClientLink>
         </motion.div>
@@ -654,7 +654,7 @@ export default function LedgerPage() {
                             style={{ cursor: "pointer" }}
                             className="font-din-arabic text-xs text-black/60 hover:!text-black transition-colors disabled:opacity-50"
                           >
-                            {addingItems.has(item.id) ? "[Adding...]" : "[Add to Cart]"}
+                            {addingItems.has(item.id) ? "[Adding...]" : "[Add to cart]"}
                           </button>
 
                           <button
@@ -675,7 +675,7 @@ export default function LedgerPage() {
                         style={{ cursor: "pointer" }}
                         className="font-din-arabic text-sm text-black/60 hover:!text-black transition-colors disabled:opacity-50"
                       >
-                        {addingItems.has(item.id) ? "[Adding...]" : "[Add to Cart]"}
+                        {addingItems.has(item.id) ? "[Adding...]" : "[Add to cart]"}
                       </button>
 
                       <button

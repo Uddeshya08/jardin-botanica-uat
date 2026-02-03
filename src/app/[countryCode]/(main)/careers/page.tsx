@@ -73,7 +73,7 @@ export default function CareersPage() {
                 className="font-american-typewriter mb-4 text-3xl text-center"
                 style={{ letterSpacing: "0.05em" }}
               >
-                Work with the Botanist's Lab
+                Work With the Botanist's Lab
               </h1>
               <p className="font-din-arabic text-black/60" style={{ letterSpacing: "0.1em" }}>
                 Join our team of curious minds and restless hands
@@ -301,7 +301,7 @@ export default function CareersPage() {
                     className="inline-flex items-center gap-3 px-8 py-4 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
                     style={{ borderColor: "#D8D2C7", letterSpacing: "0.1em" }}
                   >
-                    Return to Home
+                    Return to home
                     <ArrowRight className="w-5 h-5" />
                   </motion.button>
                 </Link>

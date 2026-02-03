@@ -69,8 +69,8 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
     subheading: "Real experiences from those who have made our product part of their daily ritual.",
     backgroundColor: "#e3e3d8",
     cta: {
-      showMore: "View All Reviews",
-      showLess: "Show Less Reviews",
+      showMore: "View all reviews",
+      showLess: "Show less reviews",
       initialCount: 3,
     },
     items: [],

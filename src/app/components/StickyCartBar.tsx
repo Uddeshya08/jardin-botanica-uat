@@ -1,7 +1,7 @@
 "use client"
 
-import { addToCartAction } from "@lib/data/cart-actions"
 import { updateLineItemGift } from "@lib/data/cart"
+import { addToCartAction } from "@lib/data/cart-actions"
 import { emitCartUpdated } from "@lib/util/cart-client"
 import type { HttpTypes } from "@medusajs/types"
 import { useCartItemsSafe } from "app/context/cart-items-context"
@@ -116,20 +116,23 @@ export function StickyCartBar({
     if (!product || !variant?.id) return
 
     const productId = product.id ?? variant.id
-    // Match main product: check by product ID, variant ID, or item.id (which might be variant ID from ProductHero)
+    // Match main product: check by composite ID (productId-variantId), product ID, variant ID
     const mainProductInCart = cartItems.find((item) => {
-      const itemVariantId = (item as any).variant_id || item.id
+      const itemVariantId = (item as any).variant_id
       const isNotRitual = !(item as any).isRitualProduct
-      // Match if: item.id matches productId, item.id matches variant.id, or variant_id matches variant.id
-      // Also check if item name matches product title (fallback for edge cases)
-      const nameMatch = item.name === product.title || item.name === (product as any).title
-      return (
-        (item.id === productId ||
-          item.id === variant.id ||
-          itemVariantId === variant.id ||
-          nameMatch) &&
-        isNotRitual
-      )
+
+      // Check for composite ID format: "productId-variantId"
+      const isCompositeMatch =
+        item.id.startsWith(`${productId}-`) || item.id.includes(`-${variant.id}`)
+      // Check for exact product ID match (for legacy items)
+      const isProductMatch = item.id === productId || item.product_id === productId
+      // Check for variant ID match
+      const isVariantMatch = itemVariantId === variant.id || item.id === variant.id
+      // Check if item name contains product title (composite names include variant)
+      const nameMatch =
+        item.name?.includes(product.title) || item.name?.includes((product as any).title)
+
+      return (isCompositeMatch || isProductMatch || isVariantMatch || nameMatch) && isNotRitual
     })
     // Match ritual product by variant_id or id - don't require isRitualProduct flag
     // since that's only set on optimistic local state, not on server-loaded cart data
@@ -341,9 +344,14 @@ export function StickyCartBar({
 
     // Check if item already exists in cart
     const productId = product?.id ?? variant.id
-    const existingItem = cartItems.find(
-      (item) => item.id === productId || item.variant_id === variant.id
-    )
+    const existingItem = cartItems.find((item) => {
+      // Check for composite ID format: "productId-variantId"
+      const isCompositeMatch =
+        item.id.startsWith(`${productId}-`) || item.id.includes(`-${variant.id}`)
+      // Check for exact ID or variant_id match
+      const isExactMatch = item.id === productId || item.variant_id === variant.id
+      return isCompositeMatch || isExactMatch
+    })
 
     // optimistic updates for nav / other UIs
     if (existingItem) {
@@ -433,13 +441,19 @@ export function StickyCartBar({
 
     const productId = product?.id ?? variant.id
 
-    // Check if main product already exists in cart by checking both id and variant_id
+    // Check if main product already exists in cart by checking composite ID, product_id, and variant_id
     const existingMainProduct = cartItems.find((item) => {
-      const itemVariantId = (item as any).variant_id || item.id
-      const matchesId = item?.product_id === productId || item?.variant_id === variant.id
-      const matchesVariantId = itemVariantId === variant.id
+      const itemVariantId = (item as any).variant_id
       const isNotRitual = !(item as any).isRitualProduct
-      return (matchesId || matchesVariantId) && isNotRitual
+
+      // Check for composite ID format: "productId-variantId"
+      const isCompositeMatch =
+        item.id.startsWith(`${productId}-`) || item.id.includes(`-${variant.id}`)
+      // Check for product_id or variant_id match
+      const matchesId = item?.product_id === productId || item?.variant_id === variant.id
+      const matchesVariantId = itemVariantId === variant.id || item.id === variant.id
+
+      return (isCompositeMatch || matchesId || matchesVariantId) && isNotRitual
     })
 
     // DO NOT add main product if it already exists - only add ritual product
@@ -467,9 +481,9 @@ export function StickyCartBar({
       ritualProductId: ritualProduct.variantId,
       existingRitualProduct: existingRitualProduct
         ? {
-          id: existingRitualProduct.id,
-          quantity: existingRitualProduct.quantity,
-        }
+            id: existingRitualProduct.id,
+            quantity: existingRitualProduct.quantity,
+          }
         : null,
     })
 
@@ -572,8 +586,14 @@ export function StickyCartBar({
 
     // Find existing item in cart (need the line item ID for API call)
     const existingItem = cartItems.find((item) => {
-      const itemVariantId = (item as any).variant_id || item.id
-      return item.id === productId || item.id === variant.id || itemVariantId === variant.id
+      const itemVariantId = (item as any).variant_id
+      // Check for composite ID format: "productId-variantId"
+      const isCompositeMatch =
+        item.id.startsWith(`${productId}-`) || item.id.includes(`-${variant.id}`)
+      // Check for exact ID or variant_id match
+      const isExactMatch =
+        item.id === productId || item.id === variant.id || itemVariantId === variant.id
+      return isCompositeMatch || isExactMatch
     })
 
     // Update cart item with gift flag - optimistic UI update
@@ -642,7 +662,7 @@ export function StickyCartBar({
                         <img
                           src={ritualProduct.image}
                           alt={ritualProduct.name}
-                          className="w-8 h-8 md:w-10 md:h-10 object-cover rounded-lg md:rounded-xl"
+                          className="w-8 h-8 md:w-10 md:h-10 object-contain rounded-lg md:rounded-xl"
                         />
                       ) : (
                         <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-black/70" />
@@ -651,7 +671,7 @@ export function StickyCartBar({
                       <img
                         src={image}
                         alt={name}
-                        className="w-8 h-8 md:w-10 md:h-10 object-cover rounded-lg md:rounded-xl"
+                        className="w-8 h-8 md:w-10 md:h-10 object-contain rounded-lg md:rounded-xl"
                       />
                     ) : (
                       <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-black/70" />
@@ -681,7 +701,7 @@ export function StickyCartBar({
                           }}
                         >
                           {showRitualSuggestion && !ritualCompleted
-                            ? "Complete Your Ritual"
+                            ? "Complete your ritual"
                             : showGoToCart
                               ? "Order Qualifies For Complimentary Shipping"
                               : "Order Qualifies For Complimentary Shipping"}
@@ -834,7 +854,7 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <span className="hidden sm:inline">Complete the Ritual</span>
+                          <span className="hidden sm:inline">Complete the ritual</span>
                           <span className="sm:hidden">Ritual</span>
                         </motion.span>
                       )}
@@ -859,7 +879,7 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <span className="hidden sm:inline">Marked as Gift</span>
+                          <span className="hidden sm:inline">Marked as gift</span>
                           <span className="sm:hidden">Gift ✓</span>
                         </motion.span>
                       ) : (
@@ -870,7 +890,7 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <span className="hidden sm:inline">This is a Gift</span>
+                          <span className="hidden sm:inline">This is a gift</span>
                           <span className="sm:hidden">Gift</span>
                         </motion.span>
                       )}

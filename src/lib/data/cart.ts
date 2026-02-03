@@ -161,7 +161,7 @@ export async function addOrUpdateLineItem({
   quantity: number
   countryCode: string
   canBeGifted?: boolean
-}) {
+}): Promise<{ lineItemId: string; cartId: string }> {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
   }
@@ -173,17 +173,18 @@ export async function addOrUpdateLineItem({
   }
 
   // Check if a line item with the same variant already exists
-  const existingLineItem = cart.items?.find(
-    (item) => item.variant_id === variantId
-  )
+  const existingLineItem = cart.items?.find((item) => item.variant_id === variantId)
 
   const headers = {
     ...(await getAuthHeaders()),
   }
 
+  let lineItemId: string
+
   if (existingLineItem) {
     // Update existing line item quantity (preserves metadata including gift flags)
     const newQuantity = existingLineItem.quantity + quantity
+    lineItemId = existingLineItem.id
     await sdk.store.cart
       .updateLineItem(cart.id, existingLineItem.id, { quantity: newQuantity }, {}, headers)
       .then(async () => {
@@ -209,12 +210,7 @@ export async function addOrUpdateLineItem({
     }
 
     await sdk.store.cart
-      .createLineItem(
-        cart.id,
-        lineItemData,
-        {},
-        headers
-      )
+      .createLineItem(cart.id, lineItemData, {}, headers)
       .then(async () => {
         const cartCacheTag = await getCacheTag("carts")
         revalidateTag(cartCacheTag)
@@ -223,9 +219,15 @@ export async function addOrUpdateLineItem({
         revalidateTag(fulfillmentCacheTag)
       })
       .catch(medusaError)
-  }
-}
 
+    // Fetch the cart to get the new line item ID
+    const updatedCart = await retrieveCart()
+    const newLineItem = updatedCart?.items?.find((item) => item.variant_id === variantId)
+    lineItemId = newLineItem?.id || ""
+  }
+
+  return { lineItemId, cartId: cart.id }
+}
 
 export async function updateLineItem({ lineId, quantity }: { lineId: string; quantity: number }) {
   if (!lineId) {
@@ -262,7 +264,7 @@ export async function updateLineItemGift({
   lineId,
   quantity,
   isGift,
-  giftQuantity
+  giftQuantity,
 }: {
   lineId: string
   quantity: number
@@ -291,8 +293,8 @@ export async function updateLineItemGift({
         quantity,
         metadata: {
           is_gift: isGift,
-          gift_quantity: giftQuantity
-        }
+          gift_quantity: giftQuantity,
+        },
       },
       {},
       headers

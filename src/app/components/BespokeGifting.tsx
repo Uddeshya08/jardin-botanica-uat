@@ -110,7 +110,7 @@ export function BespokeGifting() {
               onClick={handleBeginConsultation}
               className="font-din-arabic w-full md:w-auto px-6 py-4 md:py-3 md:px-8 bg-transparent border border-white/60 md:border-black/30 text-white md:text-black hover:bg-white hover:text-black md:hover:bg-black md:hover:text-white transition-all duration-300 tracking-wide text-sm md:text-base backdrop-blur-sm md:backdrop-blur-none"
             >
-              Begin Consultation
+              Begin consultation
             </motion.button>
           </motion.div>
         </motion.div>
