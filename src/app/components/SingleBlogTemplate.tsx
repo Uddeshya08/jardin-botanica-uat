@@ -4,6 +4,12 @@ import { BLOCKS, INLINES } from "@contentful/rich-text-types"
 import { addToCart } from "@lib/data/cart"
 import type { HttpTypes } from "@medusajs/types"
 import { Navigation } from "app/components/Navigation"
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+} from "app/components/ui/carousel"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
@@ -15,28 +21,66 @@ const FeaturedBlogProduct = ({
   id,
   name,
   image,
+  hoverImage,
   description,
   subtitle,
   handle,
   countryCode,
   variants,
+  isMobile = false,
 }: {
   id: string
   name: string
   image?: string
+  hoverImage?: string
   description?: string
   subtitle?: string | null
   handle: string
   countryCode: string
   variants?: any[]
+  isMobile?: boolean
 }) => {
   const [isAdding, setIsAdding] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const cardRef = React.useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
   // Get the first available variant for simplicity
   const selectedVariant = variants?.[0]
 
   // Use subtitle if available, otherwise fall back to description
   const displayText = subtitle || description
+
+  // Mobile auto-rotate effect
+  useEffect(() => {
+    if (!isMobile || !cardRef.current) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting)
+      },
+      { threshold: 0.5 }
+    )
+
+    observer.observe(cardRef.current)
+    return () => observer.disconnect()
+  }, [isMobile])
+
+  useEffect(() => {
+    if (!isMobile || !isVisible) {
+      // Only reset to main image when scrolling out of view, not when scrolling into view
+      if (!isVisible) {
+        setIsHovered(false)
+      }
+      return
+    }
+
+    const interval = setInterval(() => {
+      setIsHovered((prev) => !prev)
+    }, 2500)
+
+    return () => clearInterval(interval)
+  }, [isMobile, isVisible])
 
   const handleAddToCart = async () => {
     if (!selectedVariant?.id) {
@@ -61,20 +105,40 @@ const FeaturedBlogProduct = ({
   }
 
   return (
-    <div className="group flex flex-col h-full">
+    <div ref={cardRef} className="group flex flex-col h-full">
       <Link href={`/${countryCode}/products/${handle}`} className="cursor-pointer flex-1">
         <div className="relative overflow-hidden mb-4 bg-[#F5F5F0]">
           <div className="relative overflow-hidden" style={{ aspectRatio: "4/5" }}>
-            <img
-              src={image || "/assets/placeholder-product.jpg"}
-              alt={name}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              style={{
-                objectFit: "contain",
-                maxWidth: "100%",
-                maxHeight: "100%",
-              }}
-            />
+            {/* Main Image - Always base layer */}
+            <div className="absolute inset-0">
+              <img
+                src={image || "/assets/placeholder-product.jpg"}
+                alt={name}
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{
+                  objectFit: "contain",
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                }}
+              />
+            </div>
+
+            {/* Hover/Second Image - Fades IN over main (cyclic feel) */}
+            <div
+              className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+              style={{ opacity: isHovered ? 1 : 0 }}
+            >
+              <img
+                src={hoverImage || image || "/assets/placeholder-product.jpg"}
+                alt={`${name} alternate view`}
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{
+                  objectFit: "contain",
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                }}
+              />
+            </div>
           </div>
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
         </div>
@@ -130,6 +194,8 @@ interface SingleBlogTemplateProps {
 
 export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProps) => {
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>()
 
   console.log("BLOG CONTENT")
   console.log(blog)
@@ -142,6 +208,27 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
+  // Mobile carousel auto-scroll
+  useEffect(() => {
+    if (!carouselApi || !isMobile) return
+    const interval = setInterval(() => {
+      const current = carouselApi.selectedScrollSnap()
+      const total = carouselApi.scrollSnapList().length
+      carouselApi.scrollTo((current + 1) % total)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [carouselApi, isMobile])
 
   // Custom styles object - copied from your blogs page
   const styles = {
@@ -580,20 +667,98 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
                   From the Botanist's Shelf
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                {/* Desktop Grid */}
+                <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
                   {blog.featuredProducts.map((product) => (
                     <FeaturedBlogProduct
                       key={product.id}
                       id={product.id}
                       name={product.name}
                       image={product.image}
+                      hoverImage={product.hoverImage}
                       description={product.description}
                       subtitle={product.subtitle}
                       handle={product.handle}
                       countryCode={countryCode}
                       variants={product.variants || []}
+                      isMobile={false}
                     />
                   ))}
+                </div>
+
+                {/* Mobile Carousel */}
+                <div className="md:hidden">
+                  <style
+                    dangerouslySetInnerHTML={{
+                      __html: `
+                        .blog-carousel-item {
+                          width: calc(85vw) !important;
+                          flex-basis: calc(85vw) !important;
+                          flex-shrink: 0 !important;
+                          margin-left: 0.75rem !important;
+                          margin-right: 0.75rem !important;
+                        }
+                        .blog-carousel-content {
+                          user-select: none !important;
+                          -webkit-user-select: none !important;
+                          padding-left: 0 !important;
+                          padding-right: 1.5rem !important;
+                        }
+                        .blog-carousel-content > div {
+                          margin-left: 0 !important;
+                          gap: 0 !important;
+                        }
+                        .blog-carousel-wrapper [data-slot="carousel-content"] {
+                          cursor: grab !important;
+                          -webkit-overflow-scrolling: touch !important;
+                          scroll-behavior: smooth !important;
+                          scroll-snap-type: x mandatory !important;
+                          scrollbar-width: none !important;
+                          -ms-overflow-style: none !important;
+                          overflow-x: auto !important;
+                        }
+                        .blog-carousel-wrapper [data-slot="carousel-content"]::-webkit-scrollbar {
+                          display: none !important;
+                        }
+                        .blog-carousel-wrapper [data-slot="carousel-content"]:active {
+                          cursor: grabbing !important;
+                        }
+                      `,
+                    }}
+                  />
+                  <div className="blog-carousel-wrapper">
+                    <Carousel
+                      setApi={setCarouselApi}
+                      opts={{
+                        align: "center",
+                        loop: true,
+                        dragFree: true,
+                        watchDrag: true,
+                        duration: 30,
+                        startIndex: 0,
+                      }}
+                      className="w-full"
+                    >
+                      <CarouselContent className="blog-carousel-content">
+                        {blog.featuredProducts.map((product) => (
+                          <CarouselItem key={product.id} className="blog-carousel-item">
+                            <FeaturedBlogProduct
+                              id={product.id}
+                              name={product.name}
+                              image={product.image}
+                              hoverImage={product.hoverImage}
+                              description={product.description}
+                              subtitle={product.subtitle}
+                              handle={product.handle}
+                              countryCode={countryCode}
+                              variants={product.variants || []}
+                              isMobile={true}
+                            />
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                    </Carousel>
+                  </div>
                 </div>
               </div>
             )}

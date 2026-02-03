@@ -42,7 +42,7 @@ export const useTypewriter = (text: string, baseSpeed = 90, pauseAt?: number, is
         setIndex((prev) => prev + 1)
 
         if (pauseAt && index === pauseAt) {
-          setTimeout(() => {}, 1200)
+          setTimeout(() => { }, 1200)
         }
       }, delay)
 
@@ -67,6 +67,11 @@ export const useTypewriter = (text: string, baseSpeed = 90, pauseAt?: number, is
 function InteractiveLabImage() {
   const [activePoint, setActivePoint] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const prevActivePointRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    prevActivePointRef.current = activePoint
+  }, [activePoint])
 
   useEffect(() => {
     const checkMobile = () => {
@@ -341,7 +346,11 @@ function InteractiveLabImage() {
               className={`absolute z-30`}
               initial={hotspot.position}
               animate={finalPosition}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              transition={{
+                duration: 0.3,
+                ease: "easeInOut",
+                delay: isMobile && prevActivePointRef.current !== null ? 0.4 : 0,
+              }}
             >
               <div className={`relative w-12 h-12 z-30`}>
                 <motion.div
@@ -426,9 +435,8 @@ function InteractiveLabImage() {
                       stiffness: 100,
                       damping: 28,
                     }}
-                    className={`absolute ${
-                      hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-4" : "top-full mt-4"
-                    } w-72 sm:w-80 max-w-[calc(100vw-2rem)] pointer-events-none`}
+                    className={`absolute ${hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-4" : "top-full mt-4"
+                      } w-72 sm:w-80 max-w-[calc(100vw-2rem)] pointer-events-none`}
                     style={{
                       left: hotspot.position.left ? "0" : "auto",
                       right: hotspot.position.right ? "0" : "auto",
@@ -443,9 +451,8 @@ function InteractiveLabImage() {
                     {/* Popup content with pointer-events-auto to receive hover */}
                     <div className="bg-white/95 backdrop-blur-md rounded-sm shadow-2xl p-5 sm:p-6 pointer-events-auto">
                       <div
-                        className={`absolute ${
-                          hotspot.id === 3 || hotspot.id === 4 ? "-bottom-2" : "-top-2"
-                        } w-4 h-4 bg-white shadow-xl`}
+                        className={`absolute ${hotspot.id === 3 || hotspot.id === 4 ? "-bottom-2" : "-top-2"
+                          } w-4 h-4 bg-white shadow-xl`}
                         style={{
                           left: hotspot.id === 3 ? "24px" : hotspot.position.left ? "24px" : "auto",
                           right:
@@ -461,15 +468,13 @@ function InteractiveLabImage() {
                         animate={{ opacity: 1, scaleY: 1 }}
                         exit={{ opacity: 0, scaleY: 0 }}
                         transition={{ duration: 0.3, delay: 0.1 }}
-                        className={`absolute ${
-                          hotspot.id === 3 || hotspot.id === 4
-                            ? "bottom-full mb-0"
-                            : "top-full mt-0"
-                        } left-1/2 -translate-x-1/2 w-0.5 bg-gradient-to-b ${
-                          hotspot.id === 3 || hotspot.id === 4
+                        className={`absolute ${hotspot.id === 3 || hotspot.id === 4
+                          ? "bottom-full mb-0"
+                          : "top-full mt-0"
+                          } left-1/2 -translate-x-1/2 w-0.5 bg-gradient-to-b ${hotspot.id === 3 || hotspot.id === 4
                             ? "from-white/95 to-[#a28b6f]/40"
                             : "from-[#a28b6f]/40 to-white/95"
-                        }`}
+                          }`}
                         style={{
                           height: hotspot.id === 3 || hotspot.id === 4 ? "16px" : "16px",
                         }}
@@ -542,7 +547,7 @@ function InteractiveLabImage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className="absolute inset-x-0 bottom-16 sm:bottom-24 lg:bottom-32 px-4 sm:px-6 flex justify-center z-30"
+              className="absolute inset-x-0 bottom-16 sm:bottom-24 lg:bottom-32 px-4 sm:px-6 flex justify-center z-30 pointer-events-none"
             >
               <div className="bg-white/90 backdrop-blur-sm px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg">
                 <p

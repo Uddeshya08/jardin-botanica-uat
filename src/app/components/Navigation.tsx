@@ -7,6 +7,9 @@ import type { HttpTypes } from "@medusajs/types"
 import { useAuth } from "app/context/auth-context"
 import { type CartItem, useCartItemsSafe } from "app/context/cart-items-context"
 import { ChevronDown, Heart, Menu, Minus, Plus, Search, ShoppingBag, User, X } from "lucide-react"
+import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
+import { BLOCKS } from "@contentful/rich-text-types"
+import type { Document } from "@contentful/rich-text-types"
 import { AnimatePresence, motion } from "motion/react"
 import Image from "next/image"
 import Link from "next/link"
@@ -20,6 +23,7 @@ interface DropdownItem {
   label: string
   href: string
   image?: string
+  titleContent?: Document
 }
 
 interface MenuItem {
@@ -96,6 +100,7 @@ export function Navigation({
               label: d.label,
               href: d.href,
               image: d.image,
+              titleContent: d.titleContent,
             })),
           }))
         )
@@ -592,9 +597,9 @@ export function Navigation({
                             disableAnimations
                               ? undefined
                               : {
-                                  duration: 0.2,
-                                  ease: "easeOut",
-                                }
+                                duration: 0.2,
+                                ease: "easeOut",
+                              }
                           }
                           className="absolute top-full left-0 pt-4 z-50"
                         >
@@ -622,7 +627,17 @@ export function Navigation({
                                       onMouseEnter={() => handleDropdownItemHover(dItem.label)}
                                     >
                                       <span className="relative inline-block">
-                                        {dItem.label}
+                                        {dItem.titleContent ? (
+                                          documentToReactComponents(dItem.titleContent, {
+                                            renderNode: {
+                                              [BLOCKS.PARAGRAPH]: (node: any, children: any) => (
+                                                <span className="inline-block">{children}</span>
+                                              ),
+                                            },
+                                          })
+                                        ) : (
+                                          dItem.label
+                                        )}
                                         <span
                                           className="absolute bottom-[-2px] left-0 w-0 h-[1px] transition-all duration-300 group-hover/dropdown-item:w-full"
                                           style={{ backgroundColor: "#e58a4d" }}
@@ -639,39 +654,41 @@ export function Navigation({
                               >
                                 {item.dropdown
                                   .filter((dItem) => dItem.label !== "All Products")
-                                  .map((dItem) => (
-                                    <img
-                                      key={dItem.label}
-                                      src={dItem.image}
-                                      alt={dItem.label}
-                                      className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
-                                      style={{
-                                        opacity: hoveredItem === dItem.label ? 1 : 0,
-                                        transition: "opacity 0.18s ease-out",
-                                        zIndex: hoveredItem === dItem.label ? 2 : 1,
-                                      }}
-                                      loading="eager"
-                                    />
-                                  ))}
+                                  .map((dItem) =>
+                                    dItem.image ? (
+                                      <img
+                                        key={dItem.label}
+                                        src={dItem.image}
+                                        alt={dItem.label}
+                                        className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                                        style={{
+                                          opacity: hoveredItem === dItem.label ? 1 : 0,
+                                          transition: "opacity 0.18s ease-out",
+                                          zIndex: hoveredItem === dItem.label ? 2 : 1,
+                                        }}
+                                        loading="eager"
+                                      />
+                                    ) : null
+                                  )}
                                 {/* fallback/default image */}
                                 {item.dropdown.filter((dItem) => dItem.label !== "All Products")[0]
                                   ?.image && (
-                                  <img
-                                    src={
-                                      item.dropdown.filter(
-                                        (dItem) => dItem.label !== "All Products"
-                                      )[0].image
-                                    }
-                                    alt="default"
-                                    className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
-                                    style={{
-                                      opacity: !hoveredItem ? 1 : 0,
-                                      transition: "opacity 0.18s ease-out",
-                                      zIndex: 0,
-                                    }}
-                                    loading="eager"
-                                  />
-                                )}
+                                    <img
+                                      src={
+                                        item.dropdown.filter(
+                                          (dItem) => dItem.label !== "All Products"
+                                        )[0].image
+                                      }
+                                      alt="default"
+                                      className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                                      style={{
+                                        opacity: !hoveredItem ? 1 : 0,
+                                        transition: "opacity 0.18s ease-out",
+                                        zIndex: 0,
+                                      }}
+                                      loading="eager"
+                                    />
+                                  )}
                               </div>
                             </div>
                           </div>
@@ -1147,9 +1164,8 @@ export function Navigation({
                           >
                             <span>{item.name}</span>
                             <ChevronDown
-                              className={`w-4 h-4 transition-transform ${
-                                mobileActiveDropdown === item.name ? "rotate-180" : ""
-                              }`}
+                              className={`w-4 h-4 transition-transform ${mobileActiveDropdown === item.name ? "rotate-180" : ""
+                                }`}
                             />
                           </button>
                           <AnimatePresence>

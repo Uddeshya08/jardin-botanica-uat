@@ -20,6 +20,7 @@ export interface Blog {
     name: string
     handle: string
     image?: string
+    hoverImage?: string
     description?: string
     subtitle?: string | null
     variants?: import("@medusajs/types").HttpTypes.StoreProductVariant[]
@@ -79,6 +80,7 @@ export interface ContentfulFeatures {
 export interface ProductAccordion {
   title: string
   contentText: string
+  content?: any // Rich text content from Contentful (Document type)
 }
 
 // Simplified type for use in components
@@ -231,11 +233,11 @@ export interface FeaturedRitualTwoSection {
 // Afterlife Section Content Types
 export interface AfterlifeItem {
   icon?:
-    | string
-    | {
-        src: string
-        alt: string
-      }
+  | string
+  | {
+    src: string
+    alt: string
+  }
   title?: string
   text: string
 }
@@ -542,6 +544,7 @@ export interface PageLinkFields {
   title: string
   url: string
   image?: ContentfulAsset
+  titleContent?: Document
 }
 
 export interface ContentfulPageLink extends EntrySkeletonType {
@@ -553,6 +556,7 @@ export interface PageLink {
   title: string
   url: string
   image?: string
+  titleContent?: Document
 }
 
 // Product Category Content Types (for navigation)
@@ -592,7 +596,7 @@ export interface ContentfulNavigation extends EntrySkeletonType {
 export interface NavigationItem {
   name: string
   href?: string
-  dropdown?: { label: string; href: string; image?: string }[]
+  dropdown?: { label: string; href: string; image?: string; titleContent?: Document }[]
 }
 
 // Author Content Types

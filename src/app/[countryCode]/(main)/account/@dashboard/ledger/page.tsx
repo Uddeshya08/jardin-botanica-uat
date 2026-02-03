@@ -257,7 +257,7 @@ export default function LedgerPage() {
           toggleLedgerItem(updatedItem as any)
 
           toast.dismiss(`finding-${itemId}`)
-          toast.success("Product found! Adding to cart...", { duration: 1000 })
+          toast.success("Product found — adding to cart", { duration: 1000 })
         } else {
           setAddingItems((prev) => {
             const next = new Set(prev)

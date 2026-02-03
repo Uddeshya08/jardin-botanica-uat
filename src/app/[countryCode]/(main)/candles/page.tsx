@@ -43,6 +43,10 @@ const MobileProductCard = ({
   const [isRecentlyAdded, setIsRecentlyAdded] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
 
+  const itemId = productId
+  const variantId = item.variantId
+  const isInCart = cartItems.some((cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId))
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -52,7 +56,7 @@ const MobileProductCard = ({
 
     if (!variantId) {
       console.error("No variantId found for product:", item.label)
-      toast.error("Could not add to cart - variant not found")
+      toast.error("Could not add to cart — variant not found")
       return
     }
 
@@ -83,7 +87,7 @@ const MobileProductCard = ({
         image: item.src,
         variant_id: variantId,
       }
-      toast.success(`${item.label} Added To Cart`, {
+      toast.success(`${item.label} added to cart`, {
         duration: 2000,
       })
     }
@@ -135,7 +139,7 @@ const MobileProductCard = ({
     }
 
     toggleLedgerItem(ledgerItem)
-    toast.success(`${item.label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+    toast.success(`${item.label} ${alreadyInLedger ? "removed from" : "added to"} Ledger`, {
       duration: 2000,
     })
   }
@@ -193,9 +197,8 @@ const MobileProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${
-                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
             />
           </button>
         </div>
@@ -220,26 +223,31 @@ const MobileProductCard = ({
         <div className="flex items-center justify-end mt-auto pt-4">
           {/* Add to Cart Button (Right) */}
           <button
-            onClick={handleAddToCart}
+            onClick={(e) => !isInCart && handleAddToCart(e)}
             onMouseEnter={() => setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
-            className="group/btn relative inline-flex items-center gap-2 pb-0.5"
+            disabled={isInCart}
+            className={`group/btn relative inline-flex items-center gap-2 pb-0.5 ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
           >
             <span
               className="font-din-arabic text-black text-base sm:text-sm"
               style={{ letterSpacing: "0.12em" }}
             >
-              {isRecentlyAdded ? "Added to cart" : "Add to cart"}
+              {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
             </span>
-            <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
+            <span className="text-black text-base sm:text-sm">
+              {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
+            </span>
 
-            {/* Animated underline */}
-            <motion.span
-              className="absolute bottom-0 left-0 h-[1px] bg-black"
-              initial={{ width: "0%" }}
-              animate={{ width: isButtonHovered ? "100%" : "0%" }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            />
+            {/* Animated underline - only if not in cart */}
+            {!isInCart && (
+              <motion.span
+                className="absolute bottom-0 left-0 h-[1px] bg-black"
+                initial={{ width: "0%" }}
+                animate={{ width: isButtonHovered ? "100%" : "0%" }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              />
+            )}
           </button>
         </div>
       </div>
@@ -276,6 +284,9 @@ const ProductCard = ({
   const isItemInLedger = isInLedger(productId)
   const [isPending, startTransition] = useTransition()
 
+  const itemId = productId
+  const isInCart = cartItems.some((cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId))
+
   const handleToggleLedger = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -291,7 +302,7 @@ const ProductCard = ({
     }
 
     toggleLedgerItem(ledgerItem)
-    toast.success(`${label} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+    toast.success(`${label} ${alreadyInLedger ? "removed from" : "added to"} Ledger`, {
       duration: 2000,
     })
   }
@@ -304,7 +315,7 @@ const ProductCard = ({
 
     if (!variantId) {
       console.error("No variantId found for product:", label)
-      toast.error("Could not add to cart - variant not found")
+      toast.error("Could not add to cart — variant not found")
       return
     }
 
@@ -335,7 +346,7 @@ const ProductCard = ({
         image: src,
         variant_id: variantId,
       }
-      toast.success(`${label} Added To Cart`, {
+      toast.success(`${label} added to cart`, {
         duration: 2000,
       })
     }
@@ -410,9 +421,8 @@ const ProductCard = ({
             >
               <Heart
                 size={18}
-                className={`transition-colors duration-300 ${
-                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+                className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                  }`}
               />
             </button>
           </div>
@@ -455,9 +465,8 @@ const ProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${
-                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
             />
           </button>
         </div>
@@ -491,26 +500,31 @@ const ProductCard = ({
         <div className="flex items-center justify-end mt-auto pt-4">
           {/* Add to Cart Button (Right) */}
           <button
-            onClick={handleAddToCart}
+            onClick={(e) => !isInCart && handleAddToCart(e)}
             onMouseEnter={() => setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
-            className="group/btn relative inline-flex items-center gap-2 pb-0.5"
+            disabled={isInCart}
+            className={`group/btn relative inline-flex items-center gap-2 pb-0.5 ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
           >
             <span
               className="font-din-arabic text-black text-base sm:text-sm"
               style={{ letterSpacing: "0.12em" }}
             >
-              {isRecentlyAdded ? "Added to cart" : "Add to cart"}
+              {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
             </span>
-            <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
+            <span className="text-black text-base sm:text-sm">
+              {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
+            </span>
 
-            {/* Animated underline */}
-            <motion.span
-              className="absolute bottom-0 left-0 h-[1px] bg-black"
-              initial={{ width: "0%" }}
-              animate={{ width: isButtonHovered ? "100%" : "0%" }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            />
+            {/* Animated underline - only if not in cart */}
+            {!isInCart && (
+              <motion.span
+                className="absolute bottom-0 left-0 h-[1px] bg-black"
+                initial={{ width: "0%" }}
+                animate={{ width: isButtonHovered ? "100%" : "0%" }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              />
+            )}
           </button>
         </div>
       </div>
@@ -534,6 +548,10 @@ const BannerProductCard = ({
   const [isButtonHovered, setIsButtonHovered] = useState(false) // Added state
   const [isPending, startTransition] = useTransition()
 
+  const itemId = item.url || item.label.toLowerCase().replace(/\s+/g, "-")
+  const variantId = item.variantId
+  const isInCart = cartItems.some((cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId)) || (variantId && cartItem.variant_id === variantId)
+
   const handleProductClick = () => {
     if (item.url) {
       const normalizedUrl = item.url.startsWith("/") ? item.url : `/${item.url}`
@@ -552,7 +570,7 @@ const BannerProductCard = ({
 
     if (!variantId) {
       console.error("No variantId found for product:", item.label)
-      toast.error("Could not add to cart - variant not found")
+      toast.error("Could not add to cart — variant not found")
       return
     }
 
@@ -583,7 +601,7 @@ const BannerProductCard = ({
         image: item.src,
         variant_id: variantId,
       }
-      toast.success(`${item.label} Added To Cart`, {
+      toast.success(`${item.label} added to cart`, {
         duration: 2000,
       })
     }
@@ -697,28 +715,31 @@ const BannerProductCard = ({
         {/* Replaced Explore Button with Add to Cart Button */}
         <div className="flex justify-end mt-4">
           <button
-            onClick={handleAddToCart}
+            onClick={(e) => !isInCart && handleAddToCart(e)}
             onMouseEnter={() => setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
-            className="group/btn relative inline-flex items-center gap-2 pb-0.5 text-white"
+            disabled={isInCart}
+            className={`group/btn relative inline-flex items-center gap-2 pb-0.5 text-white ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
           >
             <span
               className="font-din-arabic text-white text-base sm:text-sm shadow-black drop-shadow-md"
               style={{ letterSpacing: "0.12em" }}
             >
-              {isRecentlyAdded ? "Added to cart" : "Add to cart"}
+              {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
             </span>
             <span className="text-white text-base sm:text-sm drop-shadow-md">
-              {isRecentlyAdded ? "✓" : "→"}
+              {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
             </span>
 
-            {/* Animated underline */}
-            <motion.span
-              className="absolute bottom-0 left-0 h-[1px] bg-white"
-              initial={{ width: "0%" }}
-              animate={{ width: isButtonHovered ? "100%" : "0%" }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            />
+            {/* Animated underline - only if not in cart */}
+            {!isInCart && (
+              <motion.span
+                className="absolute bottom-0 left-0 h-[1px] bg-white"
+                initial={{ width: "0%" }}
+                animate={{ width: isButtonHovered ? "100%" : "0%" }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              />
+            )}
           </button>
         </div>
       </div>
@@ -1196,7 +1217,7 @@ const Candles = () => {
       />
       <PageBanner
         pageKey="candles"
-        containerClassName="absolute top-[37%] md:top-1/2 left-4 md:left-[70px] md:-translate-y-1/2 max-w-xs md:max-w-md"
+        containerClassName="absolute top-[37%] md:top-1/2 ps-6 md:left-[70px] md:-translate-y-1/2 max-w-xs md:max-w-md"
       />
       {/* Mobile Product Carousel Section - Mobile Only */}
       {!isLoadingCollection && candlesCollection.length > 0 && (
@@ -1608,36 +1629,36 @@ const Candles = () => {
                   {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
                   {isMobile
                     ? // Mobile: One product per slide
-                      candlesCollection.map((item, index) => (
-                        <CarouselItem key={index} className="banner-carousel-item">
-                          <BannerProductCard item={item} index={index} countryCode={countryCode} />
-                        </CarouselItem>
-                      ))
+                    candlesCollection.map((item, index) => (
+                      <CarouselItem key={index} className="banner-carousel-item">
+                        <BannerProductCard item={item} index={index} countryCode={countryCode} />
+                      </CarouselItem>
+                    ))
                     : // Desktop: Groups of 3 products
-                      bannerGroups.map((group, groupIndex) => (
-                        <CarouselItem key={groupIndex} className="banner-carousel-item">
-                          <div className="flex flex-row gap-0 w-full h-auto">
-                            {group.map((item, itemIndex) => {
-                              const globalIndex = groupIndex * 3 + itemIndex
-                              return (
-                                <div key={globalIndex} className="flex-1 w-1/3">
-                                  <BannerProductCard
-                                    item={item}
-                                    index={globalIndex}
-                                    countryCode={countryCode}
-                                  />
-                                </div>
-                              )
-                            })}
+                    bannerGroups.map((group, groupIndex) => (
+                      <CarouselItem key={groupIndex} className="banner-carousel-item">
+                        <div className="flex flex-row gap-0 w-full h-auto">
+                          {group.map((item, itemIndex) => {
+                            const globalIndex = groupIndex * 3 + itemIndex
+                            return (
+                              <div key={globalIndex} className="flex-1 w-1/3">
+                                <BannerProductCard
+                                  item={item}
+                                  index={globalIndex}
+                                  countryCode={countryCode}
+                                />
+                              </div>
+                            )
+                          })}
 
-                            {/* Fill remaining slots if group has less than 3 items */}
-                            {group.length < 3 &&
-                              Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
-                                <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
-                              ))}
-                          </div>
-                        </CarouselItem>
-                      ))}
+                          {/* Fill remaining slots if group has less than 3 items */}
+                          {group.length < 3 &&
+                            Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                              <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                            ))}
+                        </div>
+                      </CarouselItem>
+                    ))}
                 </CarouselContent>
               </Carousel>
               {/* Banner Carousel Slider Bar Removed */}
@@ -1817,73 +1838,117 @@ const Candles = () => {
               viewport={{ once: true, amount: 0.2 }}
               className="w-full md:w-[60%] relative mt-8 md:mt-0"
             >
-              <div className="flex gap-2 md:gap-4 overflow-hidden relative px-2 md:px-12">
-                {/* Left Navigation Button */}
-                <div className="hidden md:block absolute left-0 md:left-4 top-1/2 -translate-y-1/2 mt-8 z-20">
-                  <motion.button
-                    whileHover={{ scale: 1.05, x: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={prevImages}
-                    className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl overflow-hidden"
-                    aria-label="Scroll left"
+              {isMobile ? (
+                // Mobile View - Carousel
+                <>
+                  <style
+                    dangerouslySetInnerHTML={{
+                      __html: `
+                        .stay-in-touch-carousel-item {
+                          flex-basis: 40% !important;
+                          padding-left: 0 !important;
+                          margin-right: 0.5rem !important;
+                        }
+                        .stay-in-touch-carousel-content {
+                          margin-left: 0 !important;
+                          gap: 0 !important;
+                        }
+                      `,
+                    }}
+                  />
+                  <Carousel
+                    opts={{
+                      align: "start",
+                      loop: false,
+                      dragFree: true,
+                      containScroll: "trimSnaps",
+                    }}
+                    className="w-full"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-white transition-all duration-300" />
-                    </div>
-                    <div className="absolute inset-0 rounded-full ring-1 ring-white/30 group-hover:ring-white/50 transition-all duration-300" />
-                  </motion.button>
-                </div>
-                <div className="flex gap-2 md:gap-4 w-full transition-all duration-300 ease-in-out">
-                  {getVisibleImages().map((imageSrc, index) => (
-                    <motion.div
-                      key={`${currentImageIndex}-${index}`}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{
-                        duration: 0.6,
-                        delay: index * 0.1,
-                        ease: smoothEase,
-                      }}
-                      viewport={{ once: true, amount: 0.2 }}
-                      className="w-full h-auto aspect-square overflow-hidden rounded-lg relative"
+                    <CarouselContent className="stay-in-touch-carousel-content">
+                      {carouselImages.map((imageSrc, index) => (
+                        <CarouselItem key={index} className="stay-in-touch-carousel-item pl-0">
+                          <div className="w-full h-auto aspect-square overflow-hidden rounded-lg relative">
+                            <img
+                              src={imageSrc}
+                              alt={`Instagram post ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                  </Carousel>
+                </>
+              ) : (
+                // Desktop View - Existing Slider
+                <div className="flex gap-2 md:gap-4 overflow-hidden relative px-2 md:px-12">
+                  {/* Left Navigation Button */}
+                  <div className="hidden md:block absolute left-0 md:left-4 top-1/2 -translate-y-1/2 mt-8 z-20">
+                    <motion.button
+                      whileHover={{ scale: 1.05, x: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={prevImages}
+                      className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl overflow-hidden"
+                      aria-label="Scroll left"
                     >
-                      <motion.img
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.4, ease: smoothEase }}
-                        src={imageSrc}
-                        alt={`Instagram post ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      {/* Vertical Divider - only between 2nd and 3rd images */}
-                      {index === 1 && (
-                        <div className="absolute right-0 top-0 bottom-0 w-px bg-gray-300 z-10"></div>
-                      )}
-                    </motion.div>
-                  ))}
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-white transition-all duration-300" />
+                      </div>
+                      <div className="absolute inset-0 rounded-full ring-1 ring-white/30 group-hover:ring-white/50 transition-all duration-300" />
+                    </motion.button>
+                  </div>
+                  <div className="flex gap-2 md:gap-4 w-full transition-all duration-300 ease-in-out">
+                    {getVisibleImages().map((imageSrc, index) => (
+                      <motion.div
+                        key={`${currentImageIndex}-${index}`}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        transition={{
+                          duration: 0.6,
+                          delay: index * 0.1,
+                          ease: smoothEase,
+                        }}
+                        viewport={{ once: true, amount: 0.2 }}
+                        className="w-full h-auto aspect-square overflow-hidden rounded-lg relative"
+                      >
+                        <motion.img
+                          whileHover={{ scale: 1.05 }}
+                          transition={{ duration: 0.4, ease: smoothEase }}
+                          src={imageSrc}
+                          alt={`Instagram post ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Vertical Divider - only between 2nd and 3rd images */}
+                        {index === 1 && (
+                          <div className="absolute right-0 top-0 bottom-0 w-px bg-gray-300 z-10"></div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                  {/* Right Navigation Button */}
+                  <div className="hidden md:block absolute right-0 md:right-4 top-1/2 -translate-y-1/2 mt-8 z-20">
+                    <motion.button
+                      whileHover={{ scale: 1.05, x: 2 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={nextImages}
+                      className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl overflow-hidden"
+                      aria-label="Scroll right"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-white transition-all duration-300" />
+                      </div>
+                      <div className="absolute inset-0 rounded-full ring-1 ring-white/30 group-hover:ring-white/50 transition-all duration-300" />
+                    </motion.button>
+                  </div>
                 </div>
-                {/* Right Navigation Button */}
-                <div className="hidden md:block absolute right-0 md:right-4 top-1/2 -translate-y-1/2 mt-8 z-20">
-                  <motion.button
-                    whileHover={{ scale: 1.05, x: 2 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={nextImages}
-                    className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl overflow-hidden"
-                    aria-label="Scroll right"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-white transition-all duration-300" />
-                    </div>
-                    <div className="absolute inset-0 rounded-full ring-1 ring-white/30 group-hover:ring-white/50 transition-all duration-300" />
-                  </motion.button>
-                </div>
-              </div>
+              )}
             </motion.div>
           </div>
         </div>
       </motion.div>
-      <InstagramEmbed2 />
       {/* Newsletter Section */}; ;
       <section className="py-20 relative overflow-hiddenen" style={{ backgroundColor: "#e3e3d8" }}>
         <motion.div

@@ -18,6 +18,7 @@ export interface Product {
   price: number
   size: string
   description: string
+  subtitle?: string
   image: string | null
   hoverImage?: string
   botanical: string
@@ -114,13 +115,21 @@ export function HomeCreationsPage({
     return products.filter((product) => product.subCategoryName === selectedFilter)
   }, [selectedFilter, products])
 
+  const categoryProductCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: products.length }
+    filterOptions.forEach((category) => {
+      counts[category] = products.filter((p) => p.subCategoryName === category).length
+    })
+    return counts
+  }, [products, filterOptions])
+
   const handleToggleLedger = (product: Product) => {
     const alreadyInLedger = isInLedger(product.id)
     const ledgerItem: LedgerItem = {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: product.image || "",
       description: product.description,
       category: product.subCategoryName,
       size: product.size,
@@ -128,7 +137,7 @@ export function HomeCreationsPage({
       property: product.property,
     }
     toggleLedgerItem(ledgerItem)
-    toast.success(`${product.name} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+    toast.success(`${product.name} ${alreadyInLedger ? "removed from" : "added to"} Ledger`, {
       duration: 2000,
     })
   }
@@ -169,7 +178,7 @@ export function HomeCreationsPage({
         variant_id: variantId,
         metadata: { size: product.size, category: product.subCategoryName },
       }
-      toast.success(`${product.name} Added To Cart`, {
+      toast.success(`${product.name} added to cart`, {
         duration: 2000,
       })
     }
@@ -281,20 +290,26 @@ export function HomeCreationsPage({
                   label: name.charAt(0).toUpperCase() + name.slice(1),
                   value: name,
                 })),
-              ].map((filter) => (
-                <button
-                  key={filter.value}
-                  onClick={() => setSelectedFilter(filter.value)}
-                  className={`font-din-arabic text-sm transition-colors duration-300 ${
-                    selectedFilter === filter.value
-                      ? "text-black border-b border-black"
-                      : "text-black/40 hover:text-black/70"
-                  }`}
-                  style={{ letterSpacing: "0.15em" }}
-                >
-                  {filter.label}
-                </button>
-              ))}
+              ].map((filter) => {
+                const productCount = categoryProductCounts[filter.value] || 0
+                const isDisabled = filter.value !== "all" && productCount === 0
+                return (
+                  <button
+                    key={filter.value}
+                    onClick={() => !isDisabled && setSelectedFilter(filter.value)}
+                    disabled={isDisabled}
+                    className={`font-din-arabic text-sm transition-colors duration-300 ${isDisabled
+                      ? "text-black/20"
+                      : selectedFilter === filter.value
+                        ? "text-black border-b border-black"
+                        : "text-black/40 hover:text-black/70"
+                      }`}
+                    style={{ letterSpacing: "0.15em" }}
+                  >
+                    {filter.label}
+                  </button>
+                )
+              })}
             </motion.div>
           </div>
         </div>
@@ -313,6 +328,7 @@ export function HomeCreationsPage({
                 handleToggleLedger={handleToggleLedger}
                 handleAddToCart={handleAddToCart}
                 recentlyAddedProducts={recentlyAddedProducts}
+                cartItems={cartItems}
               />
             ))}
 
@@ -325,6 +341,7 @@ export function HomeCreationsPage({
                 handleToggleLedger={handleToggleLedger}
                 handleAddToCart={handleAddToCart}
                 recentlyAddedProducts={recentlyAddedProducts}
+                cartItems={cartItems}
               />
             ))}
           </div>
@@ -357,6 +374,7 @@ export function HomeCreationsPage({
                     handleToggleLedger={handleToggleLedger}
                     handleAddToCart={handleAddToCart}
                     recentlyAddedProducts={recentlyAddedProducts}
+                    cartItems={cartItems}
                   />
                 ))}
               </div>
@@ -383,6 +401,7 @@ interface ProductCardProps {
   handleToggleLedger: (product: Product) => void
   handleAddToCart: (product: Product) => void
   recentlyAddedProducts: Set<string>
+  cartItems: any[]
 }
 
 function ProductCard({
@@ -392,11 +411,18 @@ function ProductCard({
   handleToggleLedger,
   handleAddToCart,
   recentlyAddedProducts,
+  cartItems,
 }: ProductCardProps) {
   const [isImageHovered, setIsImageHovered] = useState(false)
   const isRecentlyAdded = recentlyAddedProducts.has(product.id)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const productSlug = getProductSlug(product.name)
+
+  // Check if item is in cart
+  // Check both variant ID and product ID
+  const itemId = product.id
+  const variantId = product.variants[0]?.id
+  const isInCart = cartItems.some((item) => item.id === itemId || (variantId && item.variant_id === variantId))
 
   return (
     <motion.div
@@ -419,7 +445,7 @@ function ProductCard({
           {product.hoverImage && (
             <div className="absolute inset-0">
               <ImageWithFallback
-                src={product.hoverImage}
+                src={product.hoverImage || ""}
                 alt={`${product.name} alternate view`}
                 className="w-full h-full object-contain"
               />
@@ -432,7 +458,7 @@ function ProductCard({
             style={{ opacity: isImageHovered ? 0 : 1 }}
           >
             <ImageWithFallback
-              src={product.image}
+              src={product.image || ""}
               alt={product.name}
               className="w-full h-full object-contain"
             />
@@ -449,11 +475,10 @@ function ProductCard({
               e.stopPropagation()
               handleToggleLedger(product)
             }}
-            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
-              isInLedger(product.id)
-                ? "bg-white/20 border border-white/30"
-                : "bg-white/20 border border-white/30 hover:bg-white/30"
-            }`}
+            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${isInLedger(product.id)
+              ? "bg-white/20 border border-white/30"
+              : "bg-white/20 border border-white/30 hover:bg-white/30"
+              }`}
             aria-label={`${isInLedger(product.id) ? "Remove from" : "Add to"} ledger`}
           >
             <Heart
@@ -483,12 +508,14 @@ function ProductCard({
           </div>
         </Link>
 
-        <p
-          className="font-din-arabic text-black/70 leading-relaxed mt-3"
-          style={{ letterSpacing: "0.1em" }}
-        >
-          {product.description}
-        </p>
+        {product.subtitle && (
+          <p
+            className="font-din-arabic text-black/70 leading-relaxed mt-3"
+            style={{ letterSpacing: "0.1em" }}
+          >
+            {product.subtitle}
+          </p>
+        )}
 
         <div className="mt-auto pt-4">
           <p className="font-din-arabic text-black text-sm mb-4" style={{ letterSpacing: "0.1em" }}>
@@ -498,26 +525,31 @@ function ProductCard({
           {/* Minimal Add to Cart Button - Aesop Style */}
           <div className="flex items-center justify-end">
             <button
-              onClick={() => handleAddToCart(product)}
+              onClick={() => !isInCart && handleAddToCart(product)}
               onMouseEnter={() => setIsButtonHovered(true)}
               onMouseLeave={() => setIsButtonHovered(false)}
-              className="group/btn relative inline-flex items-center gap-2 pb-0.5"
+              disabled={isInCart}
+              className={`group/btn relative inline-flex items-center gap-2 pb-0.5 ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
             >
               <span
                 className="font-din-arabic text-black text-base sm:text-sm"
                 style={{ letterSpacing: "0.12em" }}
               >
-                {isRecentlyAdded ? "Added to cart" : "Add to cart"}
+                {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
               </span>
-              <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
+              <span className="text-black text-base sm:text-sm">
+                {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
+              </span>
 
-              {/* Animated underline */}
-              <motion.span
-                className="absolute bottom-0 left-0 h-[1px] bg-black"
-                initial={{ width: "0%" }}
-                animate={{ width: isButtonHovered ? "100%" : "0%" }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              />
+              {/* Animated underline - only if not in cart */}
+              {!isInCart && (
+                <motion.span
+                  className="absolute bottom-0 left-0 h-[1px] bg-black"
+                  initial={{ width: "0%" }}
+                  animate={{ width: isButtonHovered ? "100%" : "0%" }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                />
+              )}
             </button>
           </div>
         </div>
@@ -656,9 +688,8 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[500px] overflow-hidden ${
-            feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
-          }`}
+          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[500px] overflow-hidden ${feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
+            }`}
         >
           <ImageWithFallback
             src={feature.image}

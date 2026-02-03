@@ -418,7 +418,7 @@ export function PeopleAlsoBought({
             errorMsg.includes("stock") ||
             errorMsg.includes("variant does not have")
           ) {
-            toast.error("Inventory Error", {
+            toast.error("Inventory error", {
               description:
                 "This product is currently out of stock or unavailable. Please try again later.",
               duration: 5000,
