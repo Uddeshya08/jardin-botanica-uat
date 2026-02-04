@@ -1,7 +1,7 @@
 "use client"
 import { Check, Quote, Star } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { TestimonialItem, type TestimonialsSection } from "../../types/contentful"
 
 // --------- UI bits you already had ----------
@@ -93,6 +93,24 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
     return null
   }
 
+  useEffect(() => {
+    // Show all reviews on mobile by default
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setVisibleCount(items.length)
+      } else if (!isExpanded) {
+        // Reset to initial count on desktop if not expanded
+        setVisibleCount(cta.initialCount)
+      }
+    }
+
+    // Initial check
+    handleResize()
+
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [items.length, cta.initialCount, isExpanded])
+
   const handleShowMore = () => {
     setVisibleCount(items.length)
     setIsExpanded(true)
@@ -162,11 +180,13 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
             style={{ width: "120px" }}
           />
         </motion.div>
+      </div>
 
-        {/* Testimonials Grid */}
+      {/* Testimonials Grid / Carousel */}
+      <div className="w-full md:container md:mx-auto md:px-6 lg:px-12 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <AnimatePresence>
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 px-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-8 md:px-0 md:mx-0 md:pb-0 no-scrollbar">
+            <AnimatePresence mode="popLayout">
               {items.slice(0, visibleCount).map((t, index) => (
                 <motion.div
                   key={t.id}
@@ -182,12 +202,13 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
                     damping: 15,
                   }}
                   viewport={{ once: true }}
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  className="group"
+                  className="group flex-shrink-0 w-[90vw] md:w-auto snap-start"
                 >
                   <motion.div
-                    className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-4 md:p-6 shadow-xl shadow-black/5 relative overflow-hidden min-h-[280px] md:min-h-[300px] max-h-[400px] flex flex-col"
+                    className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-4 md:p-6 shadow-xl shadow-black/5 relative overflow-hidden h-full min-h-[280px] md:min-h-[300px] max-h-[400px] flex flex-col"
                     whileHover={{
+                      y: -8,
+                      scale: 1.02,
                       boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)",
                       borderColor: "rgba(255, 255, 255, 0.4)",
                     }}
@@ -243,14 +264,14 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
             </AnimatePresence>
           </div>
 
-          {/* Show More/Less Button */}
+          {/* Show More/Less Button - Desktop Only */}
           {items.length > cta.initialCount && (
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
               viewport={{ once: true }}
-              className="text-center mt-12"
+              className="text-center mt-12 hidden md:block"
             >
               <motion.button
                 onClick={isExpanded ? handleShowLess : handleShowMore}

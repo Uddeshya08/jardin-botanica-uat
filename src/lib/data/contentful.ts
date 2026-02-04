@@ -1,6 +1,7 @@
 "use server"
 
 import { getContentfulClient } from "@lib/contentful"
+import type { HttpTypes } from "@medusajs/types"
 import type { Entry } from "contentful"
 import {
   type ActiveItem,
@@ -162,6 +163,9 @@ function transformContentfulEntry(entry: Entry<ContentfulProductContent>): Produ
         }
       })
     }
+
+    console.log("PRODUCT ACCORDIONS")
+    console.log(fields.productAccordion)
 
     const accordionItems = fields?.productAccordion?.map((details: any) => ({
       ...details.fields,
@@ -1637,6 +1641,7 @@ function transformNavigationItems(items: any[]): NavigationItem[] {
           image: sub.fields?.image?.fields?.file?.url
             ? `https:${sub.fields.image.fields.file.url}`
             : undefined,
+          titleContent: sub.fields?.titleContent,
         })),
       })
     } else if (contentType === "pageLink") {
@@ -1718,6 +1723,7 @@ async function transformBlogEntry(entry: any, countryCode?: string): Promise<Blo
       name: string
       handle: string
       image?: string
+      hoverImage?: string
       description?: string
       subtitle?: string | null
       variants?: any[]
@@ -1737,6 +1743,7 @@ async function transformBlogEntry(entry: any, countryCode?: string): Promise<Blo
                 name: medusaProduct.title,
                 handle: prodRef.fields.productHandle,
                 image: medusaProduct.thumbnail || undefined,
+                hoverImage: medusaProduct.images?.[1]?.url || medusaProduct.thumbnail || undefined,
                 description: medusaProduct.description || undefined,
                 subtitle: medusaProduct.subtitle || undefined,
                 variants: medusaProduct.variants || [],
@@ -1894,5 +1901,55 @@ export async function getProductCategoryByHandle(handle: string): Promise<Produc
   } catch (error) {
     console.error(`Error fetching product category by handle "${handle}" from Contentful:`, error)
     return null
+  }
+}
+
+/**
+ * Fetch products from Contentful product categories
+ * Only fetches categories that have productHandles.length > 0
+ * Returns products sorted by the order they appear in Contentful
+ */
+export async function listProductsByContentfulCategories({
+  countryCode,
+  maxProducts = 6,
+}: {
+  countryCode: string
+  maxProducts?: number
+}): Promise<{ products: HttpTypes.StoreProduct[] }> {
+  try {
+    const client = getContentfulClient()
+
+    const response = await client.getEntries({
+      content_type: "productCategory",
+      limit: 100,
+    })
+
+    const categoriesWithProducts = response.items
+      .map((item) => item.fields as any)
+      .filter((fields) => Array.isArray(fields.productHandles) && fields.productHandles.length > 0)
+
+    const allHandles: string[] = []
+    for (const cat of categoriesWithProducts) {
+      for (const handle of cat.productHandles) {
+        if (!allHandles.includes(handle)) {
+          allHandles.push(handle)
+        }
+      }
+    }
+
+    const handlesToFetch = allHandles.slice(0, maxProducts)
+
+    const products: HttpTypes.StoreProduct[] = []
+    for (const handle of handlesToFetch) {
+      const product = await getProductByHandle({ handle, countryCode })
+      if (product) {
+        products.push(product)
+      }
+    }
+
+    return { products }
+  } catch (error) {
+    console.error("Error fetching products from Contentful categories:", error)
+    return { products: [] }
   }
 }

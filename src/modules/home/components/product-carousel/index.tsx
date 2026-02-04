@@ -29,78 +29,7 @@ interface Product {
   medusaId?: string
 }
 
-const products: Product[] = [
-  {
-    id: "1",
-    name: "Saffron Jasmine Amberwood",
-    slug: "in/products/saffron-jasmine-amberwood",
-    size: "250g",
-    description: "Hand-poured soy candle with saffron, jasmine and amberwood",
-    price: 3200,
-    image:
-      "https://images.unsplash.com/photo-1696391267294-103e9c210c6b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob21lJTIwY3JlYXRpb25zJTIwaW50ZXJpb3IlMjBib3RhbmljYWx8ZW58MXx8fHwxNzYyMDA5NDI3fDA&ixlib=rb-4.1.0&q=80&w=1920&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1576260735040-0161203bab23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzY2VudGVkJTIwY2FuZGxlJTIwdmludGFnZXxlbnwxfHx8fDE3NjIwMDk0Mjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    video:
-      "https://r2.cloudmesh.site/mixkit-a-persons-hand-accommodating-small-candles-41731-hd-ready.mp4",
-  },
-  {
-    id: "2",
-    name: "Oud Waters",
-    slug: "in/products/oud-waters",
-    size: "250g",
-    description: "Hand-poured soy candle with rare oud and aquatic notes",
-    price: 3400,
-    image:
-      "https://images.unsplash.com/photo-1580584126903-c17d41830450?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvdWQlMjBjYW5kbGV8ZW58MXx8fHwxNzYyMDIzNDY5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1621494042364-e0e6ba89c21d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYm90YW5pY2FsJTIwY2FuZGxlfGVufDF8fHx8MTc2MjAwOTQyNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    video:
-      "https://r2.cloudmesh.site/mixkit-a-persons-hand-accommodating-small-candles-41731-hd-ready.mp4",
-  },
-  {
-    id: "3",
-    name: "Cedarwood Rose",
-    slug: "/in/products/cedarwood-rose",
-    size: "300g",
-    description: "Hand-poured soy candle with cedarwood and damask rose",
-    price: 3400,
-    image:
-      "https://images.unsplash.com/photo-1621494042364-e0e6ba89c21d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYm90YW5pY2FsJTIwY2FuZGxlfGVufDF8fHx8MTc2MjAwOTQyNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1696391267294-103e9c210c6b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob21lJTIwY3JlYXRpb25zJTIwaW50ZXJpb3IlMjBib3RhbmljYWx8ZW58MXx8fHwxNzYyMDA5NDI3fDA&ixlib=rb-4.1.0&q=80&w=1920&utm_source=figma&utm_medium=referral",
-    video:
-      "https://r2.cloudmesh.site/mixkit-a-persons-hand-accommodating-small-candles-41731-hd-ready.mp4",
-  },
-  {
-    id: "4",
-    name: "Saffron Jasmine Amberwood",
-    slug: "in/products/saffron-jasmine-amberwood",
-    size: "250g",
-    description: "Hand-poured soy candle with saffron, jasmine and amberwood",
-    price: 3200,
-    image:
-      "https://images.unsplash.com/photo-1601601319316-bace8ae2b548?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBwcm9kdWN0cyUyMGxhYm9yYXRvcnklMjBncmVlbnxlbnwxfHx8fDE3NTY4OTUxMjB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1576260735040-0161203bab23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzY2VudGVkJTIwY2FuZGxlJTIwdmludGFnZXxlbnwxfHx8fDE3NjIwMDk0Mjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    video:
-      "https://r2.cloudmesh.site/mixkit-a-persons-hand-accommodating-small-candles-41731-hd-ready.mp4",
-  },
-  {
-    id: "5",
-    name: "Oud Waters",
-    slug: "in/products/oud-waters",
-    size: "250g",
-    description: "Hand-poured soy candle with rare oud and aquatic notes",
-    price: 3400,
-    image:
-      "https://images.unsplash.com/photo-1522033048162-a492b7a1bead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXZlbmRlciUyMGZpZWxkJTIwYm90YW5pY2FsfGVufDF8fHx8MTc2MTk5MTU3OXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    hoverImage:
-      "https://images.unsplash.com/photo-1621494042364-e0e6ba89c21d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYm90YW5pY2FsJTIwY2FuZGxlfGVufDF8fHx8MTc2MjAwOTQyNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    video:
-      "https://r2.cloudmesh.site/mixkit-a-persons-hand-accommodating-small-candles-41731-hd-ready.mp4",
-  },
-]
+const products: Product[] = []
 
 function ProductCard({
   product,
@@ -108,12 +37,14 @@ function ProductCard({
   onToggleLedger,
   isAddedToCart,
   isInLedger,
+  isMobile,
 }: {
   product: Product
   onAddToCart: () => void
   onToggleLedger: () => void
   isAddedToCart: boolean
   isInLedger: boolean
+  isMobile: boolean
 }) {
   const router = useRouter()
   const [isImageHovered, setIsImageHovered] = useState(false)
@@ -145,8 +76,68 @@ function ProductCard({
     }
   }
 
+  // Visibility-based auto-rotate effect for mobile
+  const cardRef = React.useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    if (!isMobile || !cardRef.current) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting)
+      },
+      { threshold: 0.5 }
+    )
+
+    observer.observe(cardRef.current)
+    return () => observer.disconnect()
+  }, [isMobile])
+
+  useEffect(() => {
+    if (!isMobile || !isVisible) {
+      // Reset to main image when not visible
+      setIsImageHovered(false)
+      if (videoRef.current) {
+        videoRef.current.pause()
+        videoRef.current.currentTime = 0
+      }
+      return
+    }
+
+    // Start with main image when becoming visible
+    setIsImageHovered(false)
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+    }
+
+    const interval = setInterval(() => {
+      setIsImageHovered((prev) => {
+        const next = !prev
+        if (videoRef.current) {
+          if (next) {
+            // Show hover media - play video
+            videoRef.current.currentTime = 0
+            videoRef.current.play().catch((e) => {
+              console.warn("Video autoplay prevented:", e)
+            })
+          } else {
+            // Show main image - pause and reset video
+            videoRef.current.pause()
+            videoRef.current.currentTime = 0
+          }
+        }
+        return next
+      })
+    }, 2500)
+
+    return () => clearInterval(interval)
+  }, [isMobile, isVisible])
+
   return (
     <div
+      ref={cardRef}
       className="group flex flex-col w-full mx-auto h-full"
       style={{
         minHeight: "480px",
@@ -205,9 +196,8 @@ function ProductCard({
         >
           <Heart
             size={18}
-            className={`transition-colors duration-300 ${
-              isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-            }`}
+            className={`transition-colors duration-300 ${isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
           />
         </button>
       </div>
@@ -237,23 +227,28 @@ function ProductCard({
           </div>
           {/* Add to Cart Button */}
           <button
-            className="group/btn-wrapper flex items-center justify-center font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 hover:bg-black transition-all duration-300 tracking-wide text-sm md:text-base cursor-pointer relative"
+            className={`group/btn-wrapper flex items-center justify-center font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 transition-all duration-300 tracking-wide text-sm md:text-base relative ${isAddedToCart ? "cursor-default opacity-60" : "cursor-pointer hover:bg-black"
+              }`}
             onClick={(e) => {
               e.stopPropagation()
               onAddToCart()
             }}
             disabled={isAddedToCart}
-            aria-label={isAddedToCart ? "Added to cart" : "Add to cart"}
+            aria-label={isAddedToCart ? "In cart" : "Add to cart"}
           >
             <div className="relative inline-flex items-center gap-2 pb-0.5 z-10 pointer-events-none">
               <span
-                className="font-din-arabic text-black group-hover/btn-wrapper:text-white text-base transition-colors duration-300"
+                className={`font-din-arabic text-base transition-colors duration-300 ${isAddedToCart ? "text-black" : "text-black group-hover/btn-wrapper:text-white"
+                  }`}
                 style={{ letterSpacing: "0.12em" }}
               >
-                {isAddedToCart ? "Added to cart" : "Add to cart"}
+                {isAddedToCart ? "In cart" : "Add to cart"}
               </span>
-              <span className="text-black group-hover/btn-wrapper:text-white text-xs transition-colors duration-300">
-                →
+              <span
+                className={`text-xs transition-colors duration-300 ${isAddedToCart ? "text-black" : "text-black group-hover/btn-wrapper:text-white"
+                  }`}
+              >
+                {isAddedToCart ? "" : "→"}
               </span>
             </div>
           </button>
@@ -283,38 +278,28 @@ export function ProductCarousel({
   const sliderRef = React.useRef<HTMLDivElement>(null)
   const [isPending, startTransition] = React.useTransition()
 
-  // Merge hardcoded aesthetic data with real Medusa product data
+  // Transform Medusa products to carousel format
   const mergedProducts: Product[] = React.useMemo(() => {
-    // Only map if we have source products
-    if (!sourceProducts?.length) return products
+    if (!sourceProducts?.length) return []
 
-    return products.map((staticProduct) => {
-      // Find matching Medusa product by handle (derived from slug)
-      // staticProduct.slug is like "in/products/saffron-jasmine-amberwood" or "/in/products/cedarwood-rose"
-      const handle = staticProduct.slug.split("/").pop()
-      const medusaProduct = sourceProducts.find((p) => p.handle === handle)
+    return sourceProducts.map((p) => {
+      const variant = p.variants?.[0]
+      const calculatedPrice = variant?.calculated_price?.calculated_amount
 
-      if (medusaProduct) {
-        // Get the first variant ID and calculated price
-        const variant = medusaProduct.variants?.[0]
-        const calculatedPrice = variant?.calculated_price?.calculated_amount
-        // Price should be divided by 100 if it's in cents (standard Medusa behavior),
-        // but checking the layout.tsx logic: "price = item.unit_price > 10000 ? item.unit_price / 100 : item.unit_price"
-        // It seems safer to use the value as is or check typical magnitude.
-        // Assuming calculated_amount is correct based on ProductHero usage.
-
-        return {
-          ...staticProduct,
-          id: staticProduct.id, // KEEP STATIC UNIQUE ID for rendering keys
-          variantId: variant?.id, // Capture real variant ID for cart
-          medusaId: medusaProduct.id, // Capture real product ID for ledger
-          price: calculatedPrice || staticProduct.price,
-          // We keep the static image/video for aesthetic consistency unless missing
-        }
+      return {
+        id: p.id,
+        name: p.title || "",
+        slug: `/${countryCode || "in"}/products/${p.handle}`,
+        size: variant?.title || "Default",
+        description: p.description || "",
+        price: calculatedPrice || 0,
+        image: p.thumbnail || "",
+        hoverImage: p.images?.[1]?.url || p.thumbnail || "",
+        variantId: variant?.id,
+        medusaId: p.id,
       }
-      return staticProduct // Fallback to static if not found
     })
-  }, [sourceProducts])
+  }, [sourceProducts, countryCode])
 
   useEffect(() => {
     const checkMobile = () => {
@@ -380,7 +365,7 @@ export function ProductCarousel({
       const totalSnaps = api.scrollSnapList().length
       const nextIndex = (currentIndex + 1) % totalSnaps
       api.scrollTo(nextIndex)
-    }, 4000) // 4 second interval
+    }, 5000) // 5 second interval
 
     return () => clearInterval(autoScrollInterval)
   }, [api, isMobile, isDragging, hasInteracted])
@@ -411,8 +396,8 @@ export function ProductCarousel({
 
     // Show appropriate message
     const message = isExisting
-      ? `Quantity increased: ${product.name}`
-      : `Added to cart: ${product.name}`
+      ? `Quantity increased — ${product.name}`
+      : `Added to cart — ${product.name}`
 
     toast.success(message, { duration: 2000 })
 
@@ -462,7 +447,7 @@ export function ProductCarousel({
     }
 
     toggleLedgerItem(ledgerItem)
-    toast.success(`${product.name} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+    toast.success(`${product.name} ${alreadyInLedger ? "removed from" : "added to"} Ledger`, {
       duration: 2000,
     })
   }
@@ -702,8 +687,13 @@ export function ProductCarousel({
                     product={product}
                     onAddToCart={() => handleAddToCart(product)}
                     onToggleLedger={() => handleToggleLedger(product)}
-                    isAddedToCart={addedToCartMessage === product.id}
+                    isAddedToCart={cartItems.some(
+                      (item) =>
+                        item.id === (product.variantId || product.id) ||
+                        (product.variantId && item.variant_id === product.variantId)
+                    )}
                     isInLedger={isInLedger(product.medusaId || product.id)}
+                    isMobile={isMobile}
                   />
                 </CarouselItem>
               ))}
@@ -714,7 +704,7 @@ export function ProductCarousel({
         {/* Slider Bar - Web and Mobile - Centered */}
         <div
           className="flex justify-center items-center w-full pt-3"
-          style={{ paddingTop: "1.5rem" }}
+          style={{ paddingTop: "3rem" }}
         >
           <div
             ref={sliderRef}

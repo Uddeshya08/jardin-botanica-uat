@@ -10,20 +10,25 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col gap-4 items-center justify-center min-h-[calc(100vh-64px)]">
-      <h1 className="text-2xl-semi font-din-arabic text-sm text-black/70 tracking-wide">
-        404
-      </h1>
-      <p className="text-small-regular font-din-arabic text-sm text-black/70 tracking-wide">
-        The specimen isn’t in this drawer. Try the menu or search.
-      </p>
-      <Link className="flex gap-x-1 items-center group" href="/">
-        <Text className="text-ui-fg-interactive">Go to frontpage</Text>
-        <ArrowUpRightMini
-          className="group-hover:rotate-45 ease-in-out duration-150"
-          color="var(--fg-interactive)"
-        />
-      </Link>
+    <div
+      className="flex flex-col gap-6 items-center justify-center min-h-screen w-full"
+      style={{ backgroundColor: "#e3e3d8" }}
+    >
+      <div className="flex flex-col items-center max-w-md text-center px-6 py-12 border border-black/5 mx-4">
+        <h1 className="text-6xl font-typewriter text-black mb-2 tracking-tighter opacity-90">
+          404
+        </h1>
+        <div className="h-px w-16 bg-black/20 my-6"></div>
+        <p className="text-base font-dinRegular text-black/80 tracking-wide uppercase mb-8">
+          The specimen isn't in this drawer.
+        </p>
+        <Link
+          href="/"
+          className="bg-black text-white px-8 py-3 text-xs tracking-[0.2em] font-dinRegular hover:bg-black/80 transition-colors uppercase no-underline"
+        >
+          Return to Frontpage
+        </Link>
+      </div>
     </div>
   )
 }

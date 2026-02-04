@@ -411,7 +411,7 @@ export function StickyCartBar({
           errorMsg.includes("required inventory") ||
           errorMsg.includes("stock")
         ) {
-          toast.error("Inventory Error", {
+          toast.error("Inventory error", {
             description:
               "This product is currently out of stock or unavailable. Please try again later.",
             duration: 5000,
@@ -555,7 +555,7 @@ export function StickyCartBar({
           errorMsg.includes("stock") ||
           errorMsg.includes("variant does not have")
         ) {
-          toast.error("Inventory Error", {
+          toast.error("Inventory error", {
             description:
               "This product is currently out of stock or unavailable. Please try again later.",
             duration: 5000,
@@ -623,7 +623,7 @@ export function StickyCartBar({
     }
 
     // Show toast with gift confirmation
-    toast.success("Gift Option Selected", {
+    toast.success("Gift option selected", {
       description: "Your item has been marked as a gift.",
       duration: 3000,
     })

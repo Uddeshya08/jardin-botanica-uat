@@ -1,5 +1,7 @@
 "use client"
 
+import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
+import { BLOCKS, INLINES } from "@contentful/rich-text-types"
 import { addToCartAction } from "@lib/data/cart-actions"
 import { emitCartUpdated } from "@lib/util/cart-client"
 import type { HttpTypes } from "@medusajs/types"
@@ -275,6 +277,52 @@ export function ProductHero({
   // Extract accordion items from productContent (Contentful)
   const accordionItems = productContent?.productAccordion || []
 
+  // Rich text render options for Contentful accordion content
+  const renderOptions = {
+    renderNode: {
+      [BLOCKS.PARAGRAPH]: (node: any, children: any) => (
+        <p className="mb-4 font-din-arabic text-black/80 leading-relaxed text-sm">{children}</p>
+      ),
+      [BLOCKS.HEADING_1]: (node: any, children: any) => (
+        <h1 className="text-xl font-american-typewriter mb-4 text-black">{children}</h1>
+      ),
+      [BLOCKS.HEADING_2]: (node: any, children: any) => (
+        <h2 className="text-lg font-american-typewriter mb-3 text-black">{children}</h2>
+      ),
+      [BLOCKS.HEADING_3]: (node: any, children: any) => (
+        <h3 className="text-base font-american-typewriter mb-2 text-black">{children}</h3>
+      ),
+      [BLOCKS.UL_LIST]: (node: any, children: any) => (
+        <ul className="list-disc pl-5 mb-4 space-y-1">{children}</ul>
+      ),
+      [BLOCKS.OL_LIST]: (node: any, children: any) => (
+        <ol className="list-decimal pl-5 mb-4 space-y-1">{children}</ol>
+      ),
+      [BLOCKS.LIST_ITEM]: (node: any, children: any) => (
+        <li className="font-din-arabic text-black/80 text-sm">{children}</li>
+      ),
+      [INLINES.HYPERLINK]: (node: any, children: any) => (
+        <a
+          href={node.data.uri}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#a28b6f] underline hover:text-black transition-colors"
+        >
+          {children}
+        </a>
+      ),
+    },
+    renderText: (text: string) => {
+      // Handle line breaks (Shift+Enter) in Contentful rich text
+      return text.split("\n").map((line, i, arr) => (
+        <React.Fragment key={i}>
+          {line}
+          {i < arr.length - 1 && <br />}
+        </React.Fragment>
+      ))
+    },
+  }
+
   // Check if we have Contentful breadcrumbs, otherwise fall back to category-based logic
   const contentfulBreadcrumbs = productContent?.breadCrumbs || []
   const useContentfulBreadcrumbs = contentfulBreadcrumbs.length > 0
@@ -365,7 +413,7 @@ export function ProductHero({
           errorMsg.includes("stock") ||
           errorMsg.includes("variant does not have")
         ) {
-          toast.error("Inventory Error", {
+          toast.error("Inventory error", {
             description:
               "This product is currently out of stock or unavailable. Please try again later.",
             duration: 5000,
@@ -431,7 +479,7 @@ export function ProductHero({
     }
 
     toggleLedgerItem(ledgerItem)
-    toast.success(`${product.title} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+    toast.success(`${product.title} ${alreadyInLedger ? "removed from" : "added to"} Ledger`, {
       duration: 2000,
     })
   }
@@ -829,10 +877,16 @@ export function ProductHero({
                       className="overflow-hidden lg:hidden"
                     >
                       <div className="pt-3 pb-2">
-                        <div
-                          className="font-din-arabic text-black/80 leading-relaxed text-sm prose prose-sm max-w-none"
-                          dangerouslySetInnerHTML={{ __html: item.contentText }}
-                        />
+                        {item.content ? (
+                          <div className="prose prose-sm max-w-none">
+                            {documentToReactComponents(item.content, renderOptions)}
+                          </div>
+                        ) : (
+                          <div
+                            className="font-din-arabic text-black/80 leading-relaxed text-sm prose prose-sm max-w-none"
+                            dangerouslySetInnerHTML={{ __html: item.contentText }}
+                          />
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -1202,10 +1256,16 @@ export function ProductHero({
           onClose={() => setOpenPanelId(null)}
           title={item.title}
         >
-          <div
-            className="font-din-arabic text-black/80 leading-relaxed prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{ __html: item.contentText }}
-          />
+          {item.content ? (
+            <div className="prose prose-sm max-w-none">
+              {documentToReactComponents(item.content, renderOptions)}
+            </div>
+          ) : (
+            <div
+              className="font-din-arabic text-black/80 leading-relaxed prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: item.contentText }}
+            />
+          )}
         </InfoPanel>
       ))}
     </div>

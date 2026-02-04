@@ -132,6 +132,7 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string) {
     size,
     availableSizes,
     description: medusaProduct.description || (metadata.description as string) || "",
+    subtitle: medusaProduct.subtitle || "",
     image,
     hoverImage,
     botanical: (metadata.botanical as string) || "Botanical Blend",

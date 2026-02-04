@@ -189,11 +189,11 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
     onToggleLedger(product)
 
     if (!isInLedger(product.id)) {
-      toast.success(`${product.name} Added To Ledger`, {
+      toast.success(`${product.name} added to Ledger`, {
         duration: 2000,
       })
     } else {
-      toast.success(`${product.name} Removed From Ledger`, {
+      toast.success(`${product.name} removed from Ledger`, {
         duration: 2000,
       })
     }
@@ -210,7 +210,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
 
     onAddToCart(cartItem)
 
-    toast.success(`${product.name} Added To Cart`, {
+    toast.success(`${product.name} added to cart`, {
       duration: 2000,
     })
   }

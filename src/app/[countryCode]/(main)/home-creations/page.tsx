@@ -112,6 +112,7 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string): Pr
     price,
     size,
     description: medusaProduct.description || "",
+    subtitle: medusaProduct.subtitle || "",
     image,
     hoverImage,
     botanical: metadata.botanical || "",

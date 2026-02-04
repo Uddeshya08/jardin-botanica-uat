@@ -28,6 +28,7 @@ export interface Product {
   size: string
   availableSizes?: string[]
   description: string
+  subtitle?: string
   image: string | null
   hoverImage?: string
   botanical: string
@@ -79,6 +80,14 @@ export function BodyHandsPage({
       : products.filter((p) => p.subCategoryName === selectedFilter)
   }, [selectedFilter, products])
 
+  const categoryProductCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: products.length }
+    filterOptions.forEach((category) => {
+      counts[category] = products.filter((p) => p.subCategoryName === category).length
+    })
+    return counts
+  }, [products, filterOptions])
+
   const handleToggleLedger = (product: Product) => {
     const alreadyInLedger = isInLedger(product.id)
     const ledgerItem: any = {
@@ -87,7 +96,7 @@ export function BodyHandsPage({
       image: product.image,
     }
     toggleLedgerItem(ledgerItem)
-    toast.success(`${product.name} ${alreadyInLedger ? "Removed From" : "Added To"} Ledger`, {
+    toast.success(`${product.name} ${alreadyInLedger ? "removed from" : "added to"} Ledger`, {
       duration: 2000,
     })
   }
@@ -107,7 +116,7 @@ export function BodyHandsPage({
 
     if (!variantId) {
       console.error("❌ No variantId found for size:", size)
-      toast.error("Could not add to cart - variant not found")
+      toast.error("Could not add to cart — variant not found")
       return
     }
 
@@ -138,7 +147,7 @@ export function BodyHandsPage({
         product_id: product.id,
         handle: product.slug,
       }
-      toast.success(`${product.name} (${size}) Added To Cart`, { duration: 2000 })
+      toast.success(`${product.name} (${size}) added to cart`, { duration: 2000 })
     }
 
     // Add to recently added products for UI state
@@ -258,29 +267,34 @@ export function BodyHandsPage({
             >
               <button
                 onClick={() => setSelectedFilter("all")}
-                className={`font-din-arabic text-sm transition-colors duration-300 ${
-                  selectedFilter === "all"
-                    ? "text-black border-b border-black"
-                    : "text-black/40 hover:text-black/70"
-                }`}
+                className={`font-din-arabic text-sm transition-colors duration-300 ${selectedFilter === "all"
+                  ? "text-black border-b border-black"
+                  : "text-black/40 hover:text-black/70"
+                  }`}
                 style={{ letterSpacing: "0.15em" }}
               >
                 All products
               </button>
-              {filterOptions.map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setSelectedFilter(filter)}
-                  className={`font-din-arabic text-sm transition-colors duration-300 ${
-                    selectedFilter === filter
-                      ? "text-black border-b border-black"
-                      : "text-black/40 hover:text-black/70"
-                  }`}
-                  style={{ letterSpacing: "0.15em" }}
-                >
-                  {filter}
-                </button>
-              ))}
+              {filterOptions.map((filter) => {
+                const productCount = categoryProductCounts[filter] || 0
+                const isDisabled = productCount === 0
+                return (
+                  <button
+                    key={filter}
+                    onClick={() => !isDisabled && setSelectedFilter(filter)}
+                    disabled={isDisabled}
+                    className={`font-din-arabic text-sm transition-colors duration-300 ${isDisabled
+                      ? "text-black/20"
+                      : selectedFilter === filter
+                        ? "text-black border-b border-black"
+                        : "text-black/40 hover:text-black/70"
+                      }`}
+                    style={{ letterSpacing: "0.15em" }}
+                  >
+                    {filter}
+                  </button>
+                )
+              })}
             </motion.div>
           </div>
         </div>
@@ -304,6 +318,7 @@ export function BodyHandsPage({
                 handleToggleLedger={handleToggleLedger}
                 handleAddToCart={handleAddToCart}
                 recentlyAddedProducts={recentlyAddedProducts}
+                cartItems={cartItems}
               />
             ))}
           </div>
@@ -420,6 +435,7 @@ function ProductCard({
   handleToggleLedger,
   handleAddToCart,
   recentlyAddedProducts,
+  cartItems,
 }: {
   product: Product
   index: number
@@ -429,6 +445,7 @@ function ProductCard({
   handleToggleLedger: (product: Product) => void
   handleAddToCart: (product: Product, size: string, price: number) => void
   recentlyAddedProducts: Set<string>
+  cartItems: any[]
 }) {
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
@@ -437,7 +454,15 @@ function ProductCard({
   )
   const isHovered = hoveredProduct === product.id
   const productSlug = getProductSlug(product.slug)
-  const itemId = `${product.id}-${selectedSize}`
+
+  // Calculate if item is in cart
+  const selectedVariant = product.variants.find((v) => v.size === selectedSize)
+  const variantId = selectedVariant?.id
+  const itemId = variantId ? `${product.id}-${variantId}` : `${product.id}-${selectedSize}`
+
+  // Check if item exists in cart
+  const isInCart = cartItems.some((item) => item.id === itemId || (variantId && item.variant_id === variantId))
+
   const isRecentlyAdded = recentlyAddedProducts.has(itemId)
 
   const getCurrentPrice = () => {
@@ -501,11 +526,10 @@ function ProductCard({
               e.stopPropagation()
               handleToggleLedger(product)
             }}
-            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
-              isInLedger(product.id)
-                ? "bg-white/20 border border-white/30"
-                : "bg-white/20 border border-white/30 hover:bg-white/30"
-            }`}
+            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${isInLedger(product.id)
+              ? "bg-white/20 border border-white/30"
+              : "bg-white/20 border border-white/30 hover:bg-white/30"
+              }`}
           >
             <Heart
               size={18}
@@ -534,12 +558,14 @@ function ProductCard({
           </div>
         </Link>
 
-        <p
-          className="font-din-arabic text-black/70 leading-relaxed mt-3 mb-4"
-          style={{ letterSpacing: "0.1em" }}
-        >
-          {product.description}
-        </p>
+        {product.subtitle && (
+          <p
+            className="font-din-arabic text-black/70 leading-relaxed mt-3 mb-4"
+            style={{ letterSpacing: "0.1em" }}
+          >
+            {product.subtitle}
+          </p>
+        )}
 
         {/* Size Selection Radio Buttons */}
         {product.availableSizes && product.availableSizes.length > 0 && (
@@ -557,11 +583,10 @@ function ProductCard({
                       className="sr-only"
                     />
                     <div
-                      className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
-                        selectedSize === size
-                          ? "border-black bg-black"
-                          : "border-black/30 group-hover:border-black/50"
-                      }`}
+                      className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${selectedSize === size
+                        ? "border-black bg-black"
+                        : "border-black/30 group-hover:border-black/50"
+                        }`}
                     >
                       {selectedSize === size && (
                         <div className="w-full h-full rounded-full bg-white scale-[0.4]"></div>
@@ -569,11 +594,10 @@ function ProductCard({
                     </div>
                   </div>
                   <span
-                    className={`font-din-arabic text-sm transition-colors ${
-                      selectedSize === size
-                        ? "text-black"
-                        : "text-black/60 group-hover:text-black/80"
-                    }`}
+                    className={`font-din-arabic text-sm transition-colors ${selectedSize === size
+                      ? "text-black"
+                      : "text-black/60 group-hover:text-black/80"
+                      }`}
                     style={{ letterSpacing: "0.1em" }}
                   >
                     {size}
@@ -592,26 +616,31 @@ function ProductCard({
           {/* Minimal Add to Cart Button - Aesop Style */}
           <div className="flex items-center justify-end">
             <button
-              onClick={() => handleAddToCart(product, selectedSize, getCurrentPrice())}
+              onClick={() => !isInCart && handleAddToCart(product, selectedSize, getCurrentPrice())}
               onMouseEnter={() => setIsButtonHovered(true)}
               onMouseLeave={() => setIsButtonHovered(false)}
-              className="group/btn relative inline-flex items-center gap-2 pb-0.5"
+              disabled={isInCart}
+              className={`group/btn relative inline-flex items-center gap-2 pb-0.5 ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
             >
               <span
                 className="font-din-arabic text-black text-base sm:text-sm"
                 style={{ letterSpacing: "0.12em" }}
               >
-                {isRecentlyAdded ? "Added to cart" : "Add to cart"}
+                {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
               </span>
-              <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
+              <span className="text-black text-base sm:text-sm">
+                {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
+              </span>
 
-              {/* Animated underline */}
-              <motion.span
-                className="absolute bottom-0 left-0 h-[1px] bg-black"
-                initial={{ width: "0%" }}
-                animate={{ width: isButtonHovered ? "100%" : "0%" }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              />
+              {/* Animated underline - only if not in cart */}
+              {!isInCart && (
+                <motion.span
+                  className="absolute bottom-0 left-0 h-[1px] bg-black"
+                  initial={{ width: "0%" }}
+                  animate={{ width: isButtonHovered ? "100%" : "0%" }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                />
+              )}
             </button>
           </div>
         </div>
@@ -639,9 +668,8 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[650px] overflow-hidden ${
-            feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
-          }`}
+          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[650px] overflow-hidden ${feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
+            }`}
         >
           <ImageWithFallback
             src={feature.image}
@@ -660,11 +688,10 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className={`flex items-center bg-white/10 p-8 sm:p-12 lg:p-20 ${
-            feature.imagePosition === "left"
-              ? "lg:col-start-2 lg:row-start-1"
-              : "lg:col-start-1 lg:row-start-1"
-          }`}
+          className={`flex items-center bg-white/10 p-8 sm:p-12 lg:p-20 ${feature.imagePosition === "left"
+            ? "lg:col-start-2 lg:row-start-1"
+            : "lg:col-start-1 lg:row-start-1"
+            }`}
         >
           <div className="max-w-md">
             <p
