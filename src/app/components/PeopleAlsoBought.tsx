@@ -186,19 +186,19 @@ export function PeopleAlsoBought({
       if (parsed && typeof parsed === "object") {
         const products: Card[] = Array.isArray(parsed.products)
           ? parsed.products.map(
-              (p: any, i: number): Card => ({
-                id: p?.id ?? i + 1,
-                name: String(p?.name ?? ""),
-                price: typeof p?.price === "number" ? p.price : undefined,
-                currency: typeof p?.currency === "string" ? p.currency : undefined,
-                image: typeof p?.image === "string" ? p.image : undefined,
-                hoverImage: typeof p?.hoverImage === "string" ? p.hoverImage : undefined,
-                description: typeof p?.description === "string" ? p.description : undefined,
-                badge: typeof p?.badge === "string" ? p.badge : undefined,
-                url: typeof p?.url === "string" ? p.url : undefined,
-                variantId: typeof p?.variantId === "string" ? p.variantId : undefined,
-              })
-            )
+            (p: any, i: number): Card => ({
+              id: p?.id ?? i + 1,
+              name: String(p?.name ?? ""),
+              price: typeof p?.price === "number" ? p.price : undefined,
+              currency: typeof p?.currency === "string" ? p.currency : undefined,
+              image: typeof p?.image === "string" ? p.image : undefined,
+              hoverImage: typeof p?.hoverImage === "string" ? p.hoverImage : undefined,
+              description: typeof p?.description === "string" ? p.description : undefined,
+              badge: typeof p?.badge === "string" ? p.badge : undefined,
+              url: typeof p?.url === "string" ? p.url : undefined,
+              variantId: typeof p?.variantId === "string" ? p.variantId : undefined,
+            })
+          )
           : defaults.products
 
         return {
@@ -723,7 +723,7 @@ export function PeopleAlsoBought({
       {/* Scroll bar */}
       <div
         className="px-4 md:px-6 lg:px-12 relative"
-        style={{ paddingTop: "24px", paddingBottom: "20px" }}
+        style={{ paddingTop: "3rem", paddingBottom: "20px" }}
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}

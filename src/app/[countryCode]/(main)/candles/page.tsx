@@ -550,7 +550,7 @@ const BannerProductCard = ({
 
   const itemId = item.url || item.label.toLowerCase().replace(/\s+/g, "-")
   const variantId = item.variantId
-  const isInCart = cartItems.some((cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId)) || (variantId && cartItem.variant_id === variantId)
+  const isInCart = cartItems.some((cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId))
 
   const handleProductClick = () => {
     if (item.url) {
@@ -1497,7 +1497,7 @@ const Candles = () => {
             {/* Progress Scroll Bar - Slider Style */}
             <div
               className="flex justify-center items-center w-full pt-3"
-              style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}
+              style={{ paddingTop: "3rem", paddingBottom: "20px" }}
             >
               <div
                 ref={sliderRef}

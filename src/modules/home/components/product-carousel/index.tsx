@@ -704,7 +704,7 @@ export function ProductCarousel({
         {/* Slider Bar - Web and Mobile - Centered */}
         <div
           className="flex justify-center items-center w-full pt-3"
-          style={{ paddingTop: "1.5rem" }}
+          style={{ paddingTop: "3rem" }}
         >
           <div
             ref={sliderRef}

@@ -402,7 +402,10 @@ export function PeopleAlsoBoughtTwo() {
         )}
 
         {/* Enhanced Custom Scroll Bar - Below Everything */}
-        <div className="px-6 lg:px-12 mt-8 relative">
+        <div
+          className="px-6 lg:px-12 relative"
+          style={{ paddingTop: "3rem", paddingBottom: "20px" }}
+        >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
