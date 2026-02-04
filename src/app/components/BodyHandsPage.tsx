@@ -153,14 +153,14 @@ export function BodyHandsPage({
     // Add to recently added products for UI state
     setRecentlyAddedProducts((prev) => new Set(prev).add(itemId))
 
-    // Reset the button state after 3 seconds
+    // Reset the button state after 2 seconds
     setTimeout(() => {
       setRecentlyAddedProducts((prev) => {
         const newSet = new Set(prev)
         newSet.delete(itemId)
         return newSet
       })
-    }, 3000)
+    }, 2000)
 
     handleCartUpdate(item)
 
@@ -267,10 +267,11 @@ export function BodyHandsPage({
             >
               <button
                 onClick={() => setSelectedFilter("all")}
-                className={`font-din-arabic text-sm transition-colors duration-300 ${selectedFilter === "all"
-                  ? "text-black border-b border-black"
-                  : "text-black/40 hover:text-black/70"
-                  }`}
+                className={`font-din-arabic text-sm transition-colors duration-300 ${
+                  selectedFilter === "all"
+                    ? "text-black border-b border-black"
+                    : "text-black/40 hover:text-black/70"
+                }`}
                 style={{ letterSpacing: "0.15em" }}
               >
                 All products
@@ -283,12 +284,13 @@ export function BodyHandsPage({
                     key={filter}
                     onClick={() => !isDisabled && setSelectedFilter(filter)}
                     disabled={isDisabled}
-                    className={`font-din-arabic text-sm transition-colors duration-300 ${isDisabled
-                      ? "text-black/20"
-                      : selectedFilter === filter
-                        ? "text-black border-b border-black"
-                        : "text-black/40 hover:text-black/70"
-                      }`}
+                    className={`font-din-arabic text-sm transition-colors duration-300 ${
+                      isDisabled
+                        ? "text-black/20"
+                        : selectedFilter === filter
+                          ? "text-black border-b border-black"
+                          : "text-black/40 hover:text-black/70"
+                    }`}
                     style={{ letterSpacing: "0.15em" }}
                   >
                     {filter}
@@ -461,7 +463,9 @@ function ProductCard({
   const itemId = variantId ? `${product.id}-${variantId}` : `${product.id}-${selectedSize}`
 
   // Check if item exists in cart
-  const isInCart = cartItems.some((item) => item.id === itemId || (variantId && item.variant_id === variantId))
+  const isInCart = cartItems.some(
+    (item) => item.id === itemId || (variantId && item.variant_id === variantId)
+  )
 
   const isRecentlyAdded = recentlyAddedProducts.has(itemId)
 
@@ -526,10 +530,11 @@ function ProductCard({
               e.stopPropagation()
               handleToggleLedger(product)
             }}
-            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${isInLedger(product.id)
-              ? "bg-white/20 border border-white/30"
-              : "bg-white/20 border border-white/30 hover:bg-white/30"
-              }`}
+            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
+              isInLedger(product.id)
+                ? "bg-white/20 border border-white/30"
+                : "bg-white/20 border border-white/30 hover:bg-white/30"
+            }`}
           >
             <Heart
               size={18}
@@ -583,10 +588,11 @@ function ProductCard({
                       className="sr-only"
                     />
                     <div
-                      className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${selectedSize === size
-                        ? "border-black bg-black"
-                        : "border-black/30 group-hover:border-black/50"
-                        }`}
+                      className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
+                        selectedSize === size
+                          ? "border-black bg-black"
+                          : "border-black/30 group-hover:border-black/50"
+                      }`}
                     >
                       {selectedSize === size && (
                         <div className="w-full h-full rounded-full bg-white scale-[0.4]"></div>
@@ -594,10 +600,11 @@ function ProductCard({
                     </div>
                   </div>
                   <span
-                    className={`font-din-arabic text-sm transition-colors ${selectedSize === size
-                      ? "text-black"
-                      : "text-black/60 group-hover:text-black/80"
-                      }`}
+                    className={`font-din-arabic text-sm transition-colors ${
+                      selectedSize === size
+                        ? "text-black"
+                        : "text-black/60 group-hover:text-black/80"
+                    }`}
                     style={{ letterSpacing: "0.1em" }}
                   >
                     {size}
@@ -616,31 +623,26 @@ function ProductCard({
           {/* Minimal Add to Cart Button - Aesop Style */}
           <div className="flex items-center justify-end">
             <button
-              onClick={() => !isInCart && handleAddToCart(product, selectedSize, getCurrentPrice())}
+              onClick={() => handleAddToCart(product, selectedSize, getCurrentPrice())}
               onMouseEnter={() => setIsButtonHovered(true)}
               onMouseLeave={() => setIsButtonHovered(false)}
-              disabled={isInCart}
-              className={`group/btn relative inline-flex items-center gap-2 pb-0.5 ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
+              className="group/btn relative inline-flex items-center gap-2 pb-0.5 cursor-pointer"
             >
               <span
                 className="font-din-arabic text-black text-base sm:text-sm"
                 style={{ letterSpacing: "0.12em" }}
               >
-                {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
+                {isRecentlyAdded ? "In cart" : "Add to cart"}
               </span>
-              <span className="text-black text-base sm:text-sm">
-                {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
-              </span>
+              <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
 
-              {/* Animated underline - only if not in cart */}
-              {!isInCart && (
-                <motion.span
-                  className="absolute bottom-0 left-0 h-[1px] bg-black"
-                  initial={{ width: "0%" }}
-                  animate={{ width: isButtonHovered ? "100%" : "0%" }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                />
-              )}
+              {/* Animated underline */}
+              <motion.span
+                className="absolute bottom-0 left-0 h-[1px] bg-black"
+                initial={{ width: "0%" }}
+                animate={{ width: isButtonHovered ? "100%" : "0%" }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              />
             </button>
           </div>
         </div>
@@ -668,8 +670,9 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[650px] overflow-hidden ${feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
-            }`}
+          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[650px] overflow-hidden ${
+            feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
+          }`}
         >
           <ImageWithFallback
             src={feature.image}
@@ -688,10 +691,11 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className={`flex items-center bg-white/10 p-8 sm:p-12 lg:p-20 ${feature.imagePosition === "left"
-            ? "lg:col-start-2 lg:row-start-1"
-            : "lg:col-start-1 lg:row-start-1"
-            }`}
+          className={`flex items-center bg-white/10 p-8 sm:p-12 lg:p-20 ${
+            feature.imagePosition === "left"
+              ? "lg:col-start-2 lg:row-start-1"
+              : "lg:col-start-1 lg:row-start-1"
+          }`}
         >
           <div className="max-w-md">
             <p

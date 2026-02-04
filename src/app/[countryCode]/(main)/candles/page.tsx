@@ -45,7 +45,9 @@ const MobileProductCard = ({
 
   const itemId = productId
   const variantId = item.variantId
-  const isInCart = cartItems.some((cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId))
+  const isInCart = cartItems.some(
+    (cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId)
+  )
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -95,10 +97,10 @@ const MobileProductCard = ({
     // Add to recently added products for UI state
     setIsRecentlyAdded(true)
 
-    // Reset the button state after 3 seconds
+    // Reset the button state after 2 seconds
     setTimeout(() => {
       setIsRecentlyAdded(false)
-    }, 3000)
+    }, 2000)
 
     handleCartUpdate(cartItem)
 
@@ -197,8 +199,9 @@ const MobileProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -223,31 +226,26 @@ const MobileProductCard = ({
         <div className="flex items-center justify-end mt-auto pt-4">
           {/* Add to Cart Button (Right) */}
           <button
-            onClick={(e) => !isInCart && handleAddToCart(e)}
+            onClick={(e) => handleAddToCart(e)}
             onMouseEnter={() => setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
-            disabled={isInCart}
-            className={`group/btn relative inline-flex items-center gap-2 pb-0.5 ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
+            className="group/btn relative inline-flex items-center gap-2 pb-0.5 cursor-pointer"
           >
             <span
               className="font-din-arabic text-black text-base sm:text-sm"
               style={{ letterSpacing: "0.12em" }}
             >
-              {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
+              {isRecentlyAdded ? "In cart" : "Add to cart"}
             </span>
-            <span className="text-black text-base sm:text-sm">
-              {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
-            </span>
+            <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
 
-            {/* Animated underline - only if not in cart */}
-            {!isInCart && (
-              <motion.span
-                className="absolute bottom-0 left-0 h-[1px] bg-black"
-                initial={{ width: "0%" }}
-                animate={{ width: isButtonHovered ? "100%" : "0%" }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              />
-            )}
+            {/* Animated underline */}
+            <motion.span
+              className="absolute bottom-0 left-0 h-[1px] bg-black"
+              initial={{ width: "0%" }}
+              animate={{ width: isButtonHovered ? "100%" : "0%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            />
           </button>
         </div>
       </div>
@@ -285,7 +283,9 @@ const ProductCard = ({
   const [isPending, startTransition] = useTransition()
 
   const itemId = productId
-  const isInCart = cartItems.some((cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId))
+  const isInCart = cartItems.some(
+    (cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId)
+  )
 
   const handleToggleLedger = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -354,10 +354,10 @@ const ProductCard = ({
     // Add to recently added products for UI state
     setIsRecentlyAdded(true)
 
-    // Reset the button state after 3 seconds
+    // Reset the button state after 2 seconds
     setTimeout(() => {
       setIsRecentlyAdded(false)
-    }, 3000)
+    }, 2000)
 
     handleCartUpdate(cartItem)
 
@@ -421,8 +421,9 @@ const ProductCard = ({
             >
               <Heart
                 size={18}
-                className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                  }`}
+                className={`transition-colors duration-300 ${
+                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
               />
             </button>
           </div>
@@ -465,8 +466,9 @@ const ProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -500,31 +502,26 @@ const ProductCard = ({
         <div className="flex items-center justify-end mt-auto pt-4">
           {/* Add to Cart Button (Right) */}
           <button
-            onClick={(e) => !isInCart && handleAddToCart(e)}
+            onClick={(e) => handleAddToCart(e)}
             onMouseEnter={() => setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
-            disabled={isInCart}
-            className={`group/btn relative inline-flex items-center gap-2 pb-0.5 ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
+            className="group/btn relative inline-flex items-center gap-2 pb-0.5 cursor-pointer"
           >
             <span
               className="font-din-arabic text-black text-base sm:text-sm"
               style={{ letterSpacing: "0.12em" }}
             >
-              {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
+              {isRecentlyAdded ? "In cart" : "Add to cart"}
             </span>
-            <span className="text-black text-base sm:text-sm">
-              {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
-            </span>
+            <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
 
-            {/* Animated underline - only if not in cart */}
-            {!isInCart && (
-              <motion.span
-                className="absolute bottom-0 left-0 h-[1px] bg-black"
-                initial={{ width: "0%" }}
-                animate={{ width: isButtonHovered ? "100%" : "0%" }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              />
-            )}
+            {/* Animated underline */}
+            <motion.span
+              className="absolute bottom-0 left-0 h-[1px] bg-black"
+              initial={{ width: "0%" }}
+              animate={{ width: isButtonHovered ? "100%" : "0%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            />
           </button>
         </div>
       </div>
@@ -550,7 +547,9 @@ const BannerProductCard = ({
 
   const itemId = item.url || item.label.toLowerCase().replace(/\s+/g, "-")
   const variantId = item.variantId
-  const isInCart = cartItems.some((cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId))
+  const isInCart = cartItems.some(
+    (cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId)
+  )
 
   const handleProductClick = () => {
     if (item.url) {
@@ -609,10 +608,10 @@ const BannerProductCard = ({
     // Add to recently added products for UI state
     setIsRecentlyAdded(true)
 
-    // Reset the button state after 3 seconds
+    // Reset the button state after 2 seconds
     setTimeout(() => {
       setIsRecentlyAdded(false)
-    }, 3000)
+    }, 2000)
 
     handleCartUpdate(cartItem)
 
@@ -715,31 +714,28 @@ const BannerProductCard = ({
         {/* Replaced Explore Button with Add to Cart Button */}
         <div className="flex justify-end mt-4">
           <button
-            onClick={(e) => !isInCart && handleAddToCart(e)}
+            onClick={(e) => handleAddToCart(e)}
             onMouseEnter={() => setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
-            disabled={isInCart}
-            className={`group/btn relative inline-flex items-center gap-2 pb-0.5 text-white ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
+            className="group/btn relative inline-flex items-center gap-2 pb-0.5 text-white cursor-pointer"
           >
             <span
               className="font-din-arabic text-white text-base sm:text-sm shadow-black drop-shadow-md"
               style={{ letterSpacing: "0.12em" }}
             >
-              {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
+              {isRecentlyAdded ? "In cart" : "Add to cart"}
             </span>
             <span className="text-white text-base sm:text-sm drop-shadow-md">
-              {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
+              {isRecentlyAdded ? "✓" : "→"}
             </span>
 
-            {/* Animated underline - only if not in cart */}
-            {!isInCart && (
-              <motion.span
-                className="absolute bottom-0 left-0 h-[1px] bg-white"
-                initial={{ width: "0%" }}
-                animate={{ width: isButtonHovered ? "100%" : "0%" }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              />
-            )}
+            {/* Animated underline */}
+            <motion.span
+              className="absolute bottom-0 left-0 h-[1px] bg-white"
+              initial={{ width: "0%" }}
+              animate={{ width: isButtonHovered ? "100%" : "0%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            />
           </button>
         </div>
       </div>
@@ -1629,36 +1625,36 @@ const Candles = () => {
                   {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
                   {isMobile
                     ? // Mobile: One product per slide
-                    candlesCollection.map((item, index) => (
-                      <CarouselItem key={index} className="banner-carousel-item">
-                        <BannerProductCard item={item} index={index} countryCode={countryCode} />
-                      </CarouselItem>
-                    ))
+                      candlesCollection.map((item, index) => (
+                        <CarouselItem key={index} className="banner-carousel-item">
+                          <BannerProductCard item={item} index={index} countryCode={countryCode} />
+                        </CarouselItem>
+                      ))
                     : // Desktop: Groups of 3 products
-                    bannerGroups.map((group, groupIndex) => (
-                      <CarouselItem key={groupIndex} className="banner-carousel-item">
-                        <div className="flex flex-row gap-0 w-full h-auto">
-                          {group.map((item, itemIndex) => {
-                            const globalIndex = groupIndex * 3 + itemIndex
-                            return (
-                              <div key={globalIndex} className="flex-1 w-1/3">
-                                <BannerProductCard
-                                  item={item}
-                                  index={globalIndex}
-                                  countryCode={countryCode}
-                                />
-                              </div>
-                            )
-                          })}
+                      bannerGroups.map((group, groupIndex) => (
+                        <CarouselItem key={groupIndex} className="banner-carousel-item">
+                          <div className="flex flex-row gap-0 w-full h-auto">
+                            {group.map((item, itemIndex) => {
+                              const globalIndex = groupIndex * 3 + itemIndex
+                              return (
+                                <div key={globalIndex} className="flex-1 w-1/3">
+                                  <BannerProductCard
+                                    item={item}
+                                    index={globalIndex}
+                                    countryCode={countryCode}
+                                  />
+                                </div>
+                              )
+                            })}
 
-                          {/* Fill remaining slots if group has less than 3 items */}
-                          {group.length < 3 &&
-                            Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
-                              <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
-                            ))}
-                        </div>
-                      </CarouselItem>
-                    ))}
+                            {/* Fill remaining slots if group has less than 3 items */}
+                            {group.length < 3 &&
+                              Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                                <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                              ))}
+                          </div>
+                        </CarouselItem>
+                      ))}
                 </CarouselContent>
               </Carousel>
               {/* Banner Carousel Slider Bar Removed */}
