@@ -1,4 +1,4 @@
-import { listProductsByContentfulCategories } from "@lib/data/contentful"
+import { getAllBlogs, listProductsByContentfulCategories } from "@lib/data/contentful"
 import Hero from "@modules/home/components/hero"
 import type { Metadata } from "next"
 
@@ -11,15 +11,16 @@ export default async function Home(props: { params: Promise<{ countryCode: strin
   const params = await props.params
   const { countryCode } = params
 
-  // Fetch products from Contentful categories (only categories with productHandles.length > 0)
   const { products } = await listProductsByContentfulCategories({
     countryCode,
     maxProducts: 6,
   })
 
+  const blogs = await getAllBlogs(3, countryCode)
+
   return (
     <>
-      <Hero products={products} countryCode={countryCode} />
+      <Hero products={products} blogs={blogs} countryCode={countryCode} />
     </>
   )
 }

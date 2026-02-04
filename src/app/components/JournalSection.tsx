@@ -1,47 +1,27 @@
 import { motion } from "motion/react"
 import Link from "next/link"
 import React, { useState } from "react"
+import type { Blog } from "types/contentful"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
-// import sensoralistImage from 'figma:asset/71a3ed929884384aa6617c6ae2f40a7724e33026.png';
+interface JournalSectionProps {
+  blogs?: Blog[]
+  countryCode?: string
+}
 
-const journalPosts = [
-  {
-    id: 1,
-    title: "Above Us, Steorra Eau de Parfum: celestial literature",
-    excerpt:
-      "Discover the ancient techniques behind our essential oil extraction process, where time and patience create liquid poetry.",
-    category: "Literature",
-    date: "January 15, 2024",
-    imageUrl:
-      "https://images.unsplash.com/photo-1610618292314-e55c7ac33485?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsaXRlcmF0dXJlJTIwc2hhZG93JTIwc2lsaG91ZXR0ZXxlbnwxfHx8fDE3NTY4OTUxMTZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-  },
-  {
-    id: 2,
-    title: "The story of Geranium Leaf Body Care",
-    excerpt:
-      "How our vintage laboratory equipment continues to shape contemporary fragrance making in an age of mass production.",
-    category: "Lessons From The Lab",
-    date: "Five-minute read",
-    imageUrl:
-      "https://images.unsplash.com/photo-1601601319316-bace8ae2b548?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBwcm9kdWN0cyUyMGxhYm9yYXRvcnklMjBncmVlbnxlbnwxfHx8fDE3NTY4OTUxMjB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-  },
-  {
-    id: 3,
-    title: "Sensorialist Literature",
-    excerpt:
-      "As nature transforms, so do our gardens. Exploring how seasonal changes influence our botanical collections and inspire new blends.",
-    category: "Culture",
-    date: "Thirty-minute read",
-    imageUrl: "/assets/sensoralistImg.png",
-  },
-]
-
-function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; index: number }) {
+function JournalPostCard({
+  blog,
+  index,
+  countryCode,
+}: {
+  blog: Blog
+  index: number
+  countryCode?: string
+}) {
   const [isPressed, setIsPressed] = useState(false)
 
   return (
-    <Link href={`/blogs/${post.id}`} className="block h-full">
+    <Link href={`/${countryCode}/blogs/${blog.slug}`} className="block h-full">
       <motion.article
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -49,7 +29,6 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
         viewport={{ once: true }}
         className="group cursor-pointer flex flex-col h-full"
       >
-        {/* Content - First on mobile, second on desktop */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -57,7 +36,6 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
           viewport={{ once: true }}
           className="space-y-4 px-6 order-2 pb-10 md:pb-0 flex-grow"
         >
-          {/* Category */}
           <motion.span
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -65,10 +43,9 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
             viewport={{ once: true }}
             className="font-din-arabic text-sm text-black/60 tracking-wide"
           >
-            {post.category}
+            {blog.categories?.[0] || "Journal"}
           </motion.span>
 
-          {/* Title */}
           <motion.h3
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -76,10 +53,9 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
             viewport={{ once: true }}
             className="font-american-typewriter text-xl leading-tight text-black group-hover:text-black/70 transition-colors duration-300"
           >
-            {post.title}
+            {blog.title}
           </motion.h3>
 
-          {/* Date/Read time */}
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -87,15 +63,20 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
             viewport={{ once: true }}
             className="font-din-arabic text-sm text-black/50"
           >
-            {post.date}
+            {blog.publishedDate
+              ? new Date(blog.publishedDate).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              : ""}
           </motion.p>
         </motion.div>
 
-        {/* Image - Second on mobile, first on desktop */}
         <motion.div className="aspect-[4/3] md:aspect-[3/4] overflow-hidden mb-6 order-1 px-6 md:px-0">
           <motion.div
-            whileHover={{ scale: 1.1 }} // desktop hover zoom
-            animate={{ scale: isPressed ? 1.1 : 1 }} // mobile press zoom
+            whileHover={{ scale: 1.1 }}
+            animate={{ scale: isPressed ? 1.1 : 1 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
             onTouchStart={() => setIsPressed(true)}
             onTouchEnd={() => setIsPressed(false)}
@@ -103,8 +84,8 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
             className="w-full h-full"
           >
             <ImageWithFallback
-              src={post.imageUrl}
-              alt={post.title}
+              src={blog.image || ""}
+              alt={blog.title}
               className="w-full h-full object-cover"
             />
           </motion.div>
@@ -114,7 +95,11 @@ function JournalPostCard({ post, index }: { post: (typeof journalPosts)[0]; inde
   )
 }
 
-export function JournalSection() {
+export function JournalSection({ blogs, countryCode }: JournalSectionProps) {
+  if (!blogs || blogs.length === 0) {
+    return null
+  }
+
   return (
     <section className="py-12 lg:py-16" style={{ backgroundColor: "#edede2" }}>
       <div className="w-full md:container md:mx-auto px-0 md:px-6 lg:px-12">
@@ -132,12 +117,16 @@ export function JournalSection() {
 
         <div className="max-w-8xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-4 md:mb-12">
-            {journalPosts.map((post, index) => {
-              return <JournalPostCard key={post.id} post={post} index={index} />
-            })}
+            {blogs.map((blog, index) => (
+              <JournalPostCard
+                key={blog.slug}
+                blog={blog}
+                index={index}
+                countryCode={countryCode}
+              />
+            ))}
           </div>
 
-          {/* View All Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -145,7 +134,7 @@ export function JournalSection() {
             viewport={{ once: true }}
             className="text-center px-6"
           >
-            <Link href="/blogs">
+            <Link href={countryCode ? `/${countryCode}/blogs` : "/blogs"}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

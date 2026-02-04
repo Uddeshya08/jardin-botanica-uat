@@ -1,4 +1,6 @@
 "use client"
+
+import type { HttpTypes } from "@medusajs/types"
 import { BespokeGifting } from "app/components/BespokeGifting"
 import { DesignPhilosophy } from "app/components/DesignPhilosophy"
 import { FeaturedRitual } from "app/components/FeaturedRitual"
@@ -9,16 +11,16 @@ import Newsletter from "app/components/Newsletter"
 import { RippleEffect } from "app/components/RippleEffect"
 import { useCartItems } from "app/context/cart-items-context"
 import React, { useEffect, useState } from "react"
+import type { Blog } from "types/contentful"
 import { ProductCarousel } from "../product-carousel"
-
-import type { HttpTypes } from "@medusajs/types"
 
 interface HeroProps {
   products?: HttpTypes.StoreProduct[]
+  blogs?: Blog[]
   countryCode?: string
 }
 
-export default function Home({ products, countryCode }: HeroProps) {
+export default function Home({ products, blogs, countryCode }: HeroProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const { cartItems, handleCartUpdate } = useCartItems()
 
@@ -35,11 +37,7 @@ export default function Home({ products, countryCode }: HeroProps) {
   return (
     <div className="min-h-screen">
       <RippleEffect />
-      <Navigation
-        isScrolled={isScrolled}
-        cartItems={cartItems}
-        onCartUpdate={handleCartUpdate}
-      />
+      <Navigation isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} />
       <HeroSection />
 
       {/* Bottom Fold Sections */}
@@ -47,7 +45,7 @@ export default function Home({ products, countryCode }: HeroProps) {
       <ProductCarousel products={products} countryCode={countryCode} />
       <FeaturedRitual />
       <BespokeGifting />
-      <JournalSection />
+      <JournalSection blogs={blogs} countryCode={countryCode} />
       <Newsletter />
     </div>
   )
