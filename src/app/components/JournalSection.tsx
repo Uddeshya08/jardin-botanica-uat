@@ -9,64 +9,19 @@ interface JournalSectionProps {
   countryCode?: string
 }
 
-const journalPosts = [
-  {
-    id: 1,
-    title: "Above Us, Steorra Eau de Parfum: celestial literature",
-    excerpt:
-      "Discover the ancient techniques behind our essential oil extraction process, where time and patience create liquid poetry.",
-    category: "Literature",
-    date: "January 15, 2024",
-    imageUrl:
-      "https://images.unsplash.com/photo-1610618292314-e55c7ac33485?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsaXRlcmF0dXJlJTIwc2hhZG93JTIwc2lsaG91ZXR0ZXxlbnwxfHx8fDE3NTY4OTUxMTZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-  },
-  {
-    id: 2,
-    title: "The story of Geranium Leaf Body Care",
-    excerpt:
-      "How our vintage laboratory equipment continues to shape contemporary fragrance making in an age of mass production.",
-    category: "Lessons From The Lab",
-    date: "Five-minute read",
-    imageUrl:
-      "https://images.unsplash.com/photo-1601601319316-bace8ae2b548?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3RhbmljYWwlMjBwcm9kdWN0cyUyMGxhYm9yYXRvcnklMjBncmVlbnxlbnwxfHx8fDE3NTY4OTUxMjB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-  },
-  {
-    id: 3,
-    title: "Sensorialist Literature",
-    excerpt:
-      "As nature transforms, so do our gardens. Exploring how seasonal changes influence our botanical collections and inspire new blends.",
-    category: "Culture",
-    date: "Thirty-minute read",
-    imageUrl: "/assets/sensoralistImg.png",
-  },
-]
-
 function JournalPostCard({
-  post,
+  blog,
   index,
   countryCode,
 }: {
-  post: (typeof journalPosts)[0] | Blog
+  blog: Blog
   index: number
   countryCode?: string
 }) {
   const [isPressed, setIsPressed] = useState(false)
 
-  const isBlog = (p: (typeof journalPosts)[0] | Blog): p is Blog => {
-    return "slug" in p && "publishedDate" in p
-  }
-
-  const blog = isBlog(post) ? post : null
-  const legacyPost = !isBlog(post) ? post : null
-
-  const title = blog?.title || legacyPost?.title || ""
-  const imageUrl = blog?.image || legacyPost?.imageUrl || ""
-  const publishedDate = blog?.publishedDate || legacyPost?.date || ""
-  const category = blog?.categories?.[0] || legacyPost?.category || "Journal"
-  const slug = blog?.slug || (legacyPost as any)?.id || ""
-
   return (
-    <Link href={slug ? `/${countryCode}/blogs/${slug}` : "#"} className="block h-full">
+    <Link href={`/${countryCode}/blogs/${blog.slug}`} className="block h-full">
       <motion.article
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -88,7 +43,7 @@ function JournalPostCard({
             viewport={{ once: true }}
             className="font-din-arabic text-sm text-black/60 tracking-wide"
           >
-            {category}
+            {blog.categories?.[0] || "Journal"}
           </motion.span>
 
           <motion.h3
@@ -98,7 +53,7 @@ function JournalPostCard({
             viewport={{ once: true }}
             className="font-american-typewriter text-xl leading-tight text-black group-hover:text-black/70 transition-colors duration-300"
           >
-            {title}
+            {blog.title}
           </motion.h3>
 
           <motion.p
@@ -108,8 +63,8 @@ function JournalPostCard({
             viewport={{ once: true }}
             className="font-din-arabic text-sm text-black/50"
           >
-            {publishedDate
-              ? new Date(publishedDate).toLocaleDateString("en-US", {
+            {blog.publishedDate
+              ? new Date(blog.publishedDate).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
                   year: "numeric",
@@ -128,7 +83,11 @@ function JournalPostCard({
             onTouchCancel={() => setIsPressed(false)}
             className="w-full h-full"
           >
-            <ImageWithFallback src={imageUrl} alt={title} className="w-full h-full object-cover" />
+            <ImageWithFallback
+              src={blog.image || ""}
+              alt={blog.title}
+              className="w-full h-full object-cover"
+            />
           </motion.div>
         </motion.div>
       </motion.article>
@@ -137,7 +96,9 @@ function JournalPostCard({
 }
 
 export function JournalSection({ blogs, countryCode }: JournalSectionProps) {
-  const displayBlogs = blogs && blogs.length > 0 ? blogs : journalPosts
+  if (!blogs || blogs.length === 0) {
+    return null
+  }
 
   return (
     <section className="py-12 lg:py-16" style={{ backgroundColor: "#edede2" }}>
@@ -156,16 +117,14 @@ export function JournalSection({ blogs, countryCode }: JournalSectionProps) {
 
         <div className="max-w-8xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-4 md:mb-12">
-            {displayBlogs.map((post, index) => {
-              return (
-                <JournalPostCard
-                  key={"slug" in post ? post.slug : post.id}
-                  post={post}
-                  index={index}
-                  countryCode={countryCode}
-                />
-              )
-            })}
+            {blogs.map((blog, index) => (
+              <JournalPostCard
+                key={blog.slug}
+                blog={blog}
+                index={index}
+                countryCode={countryCode}
+              />
+            ))}
           </div>
 
           <motion.div
