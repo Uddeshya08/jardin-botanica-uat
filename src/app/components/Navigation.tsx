@@ -1,5 +1,8 @@
 "use client"
 
+import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
+import type { Document } from "@contentful/rich-text-types"
+import { BLOCKS } from "@contentful/rich-text-types"
 import { deleteLineItem, updateLineItem } from "@lib/data/cart"
 import { getNavigation } from "@lib/data/contentful"
 import { convertToLocale } from "@lib/util/money"
@@ -7,9 +10,6 @@ import type { HttpTypes } from "@medusajs/types"
 import { useAuth } from "app/context/auth-context"
 import { type CartItem, useCartItemsSafe } from "app/context/cart-items-context"
 import { ChevronDown, Heart, Menu, Minus, Plus, Search, ShoppingBag, User, X } from "lucide-react"
-import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
-import { BLOCKS } from "@contentful/rich-text-types"
-import type { Document } from "@contentful/rich-text-types"
 import { AnimatePresence, motion } from "motion/react"
 import Image from "next/image"
 import Link from "next/link"
@@ -569,22 +569,40 @@ export function Navigation({
                     onMouseEnter={() => item.dropdown && handleMouseEnter(item.name)}
                     onMouseLeave={handleMouseLeave}
                   >
-                    <motion.a
-                      href={item.href || "#"}
-                      initial={disableAnimations ? undefined : { opacity: 0, y: -10 }}
-                      animate={disableAnimations ? undefined : { opacity: 1, y: 0 }}
-                      transition={
-                        disableAnimations ? undefined : { delay: 0.4 + index * 0.1, duration: 0.4 }
-                      }
-                      className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative group/item hover:opacity-80 whitespace-nowrap"
-                      style={{ color: navStyles.textColor }}
-                    >
-                      {item.name}
-                      <span
-                        className="absolute bottom-[-4px] left-0 w-0 h-[1px] transition-all duration-500 group-hover/item:w-full"
-                        style={{ backgroundColor: "#e58a4d" }}
-                      />
-                    </motion.a>
+                    {item.href === "#" ? (
+                      <motion.span
+                        initial={disableAnimations ? undefined : { opacity: 0, y: -10 }}
+                        animate={disableAnimations ? undefined : { opacity: 1, y: 0 }}
+                        transition={
+                          disableAnimations
+                            ? undefined
+                            : { delay: 0.4 + index * 0.1, duration: 0.4 }
+                        }
+                        className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative whitespace-nowrap cursor-default"
+                        style={{ color: navStyles.textColor }}
+                      >
+                        {item.name}
+                      </motion.span>
+                    ) : (
+                      <motion.a
+                        href={item.href}
+                        initial={disableAnimations ? undefined : { opacity: 0, y: -10 }}
+                        animate={disableAnimations ? undefined : { opacity: 1, y: 0 }}
+                        transition={
+                          disableAnimations
+                            ? undefined
+                            : { delay: 0.4 + index * 0.1, duration: 0.4 }
+                        }
+                        className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative group/item hover:opacity-80 whitespace-nowrap"
+                        style={{ color: navStyles.textColor }}
+                      >
+                        {item.name}
+                        <span
+                          className="absolute bottom-[-4px] left-0 w-0 h-[1px] transition-all duration-500 group-hover/item:w-full"
+                          style={{ backgroundColor: "#e58a4d" }}
+                        />
+                      </motion.a>
+                    )}
 
                     {/* Mega Dropdown */}
                     <AnimatePresence>
@@ -597,9 +615,9 @@ export function Navigation({
                             disableAnimations
                               ? undefined
                               : {
-                                duration: 0.2,
-                                ease: "easeOut",
-                              }
+                                  duration: 0.2,
+                                  ease: "easeOut",
+                                }
                           }
                           className="absolute top-full left-0 pt-4 z-50"
                         >
@@ -615,36 +633,68 @@ export function Navigation({
                               <div className="py-6 w-80 flex flex-col">
                                 {item.dropdown
                                   .filter((dItem) => dItem.label !== "All Products")
-                                  .map((dItem) => (
-                                    <a
-                                      key={dItem.label}
-                                      href={dItem.href}
-                                      className="group/dropdown-item block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150"
-                                      style={{
-                                        color: "#000",
-                                        fontSize: "0.95rem",
-                                      }}
-                                      onMouseEnter={() => handleDropdownItemHover(dItem.label)}
-                                    >
-                                      <span className="relative inline-block">
-                                        {dItem.titleContent ? (
-                                          documentToReactComponents(dItem.titleContent, {
-                                            renderNode: {
-                                              [BLOCKS.PARAGRAPH]: (node: any, children: any) => (
-                                                <span className="inline-block">{children}</span>
-                                              ),
-                                            },
-                                          })
-                                        ) : (
-                                          dItem.label
-                                        )}
+                                  .map((dItem) => {
+                                    if (dItem.href === "#") {
+                                      return (
                                         <span
-                                          className="absolute bottom-[-2px] left-0 w-0 h-[1px] transition-all duration-300 group-hover/dropdown-item:w-full"
-                                          style={{ backgroundColor: "#e58a4d" }}
-                                        />
-                                      </span>
-                                    </a>
-                                  ))}
+                                          key={dItem.label}
+                                          className="block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150 cursor-default"
+                                          style={{
+                                            color: "#000",
+                                            fontSize: "0.95rem",
+                                          }}
+                                        >
+                                          <span className="relative inline-block">
+                                            {dItem.titleContent
+                                              ? documentToReactComponents(dItem.titleContent, {
+                                                  renderNode: {
+                                                    [BLOCKS.PARAGRAPH]: (
+                                                      node: any,
+                                                      children: any
+                                                    ) => (
+                                                      <span className="inline-block">
+                                                        {children}
+                                                      </span>
+                                                    ),
+                                                  },
+                                                })
+                                              : dItem.label}
+                                          </span>
+                                        </span>
+                                      )
+                                    }
+                                    return (
+                                      <a
+                                        key={dItem.label}
+                                        href={dItem.href}
+                                        className="group/dropdown-item block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150"
+                                        style={{
+                                          color: "#000",
+                                          fontSize: "0.95rem",
+                                        }}
+                                        onMouseEnter={() => handleDropdownItemHover(dItem.label)}
+                                      >
+                                        <span className="relative inline-block">
+                                          {dItem.titleContent
+                                            ? documentToReactComponents(dItem.titleContent, {
+                                                renderNode: {
+                                                  [BLOCKS.PARAGRAPH]: (
+                                                    node: any,
+                                                    children: any
+                                                  ) => (
+                                                    <span className="inline-block">{children}</span>
+                                                  ),
+                                                },
+                                              })
+                                            : dItem.label}
+                                          <span
+                                            className="absolute bottom-[-2px] left-0 w-0 h-[1px] transition-all duration-300 group-hover/dropdown-item:w-full"
+                                            style={{ backgroundColor: "#e58a4d" }}
+                                          />
+                                        </span>
+                                      </a>
+                                    )
+                                  })}
                               </div>
 
                               {/* Right: Image preview */}
@@ -673,22 +723,22 @@ export function Navigation({
                                 {/* fallback/default image */}
                                 {item.dropdown.filter((dItem) => dItem.label !== "All Products")[0]
                                   ?.image && (
-                                    <img
-                                      src={
-                                        item.dropdown.filter(
-                                          (dItem) => dItem.label !== "All Products"
-                                        )[0].image
-                                      }
-                                      alt="default"
-                                      className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
-                                      style={{
-                                        opacity: !hoveredItem ? 1 : 0,
-                                        transition: "opacity 0.18s ease-out",
-                                        zIndex: 0,
-                                      }}
-                                      loading="eager"
-                                    />
-                                  )}
+                                  <img
+                                    src={
+                                      item.dropdown.filter(
+                                        (dItem) => dItem.label !== "All Products"
+                                      )[0].image
+                                    }
+                                    alt="default"
+                                    className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                                    style={{
+                                      opacity: !hoveredItem ? 1 : 0,
+                                      transition: "opacity 0.18s ease-out",
+                                      zIndex: 0,
+                                    }}
+                                    loading="eager"
+                                  />
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1107,8 +1157,6 @@ export function Navigation({
           </div>
         </motion.nav>
       </div>
-
-      {/* Mobile Menu Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -1150,10 +1198,10 @@ export function Navigation({
 
                 {/* Mobile Navigation Links */}
                 <nav className="space-y-1">
-                  {menuItems.map((item) => (
-                    <div key={item.name}>
-                      {item.dropdown ? (
-                        <div>
+                  {menuItems.map((item) => {
+                    if (item.dropdown) {
+                      return (
+                        <div key={item.name}>
                           <button
                             onClick={() =>
                               setMobileActiveDropdown(
@@ -1164,8 +1212,9 @@ export function Navigation({
                           >
                             <span>{item.name}</span>
                             <ChevronDown
-                              className={`w-4 h-4 transition-transform ${mobileActiveDropdown === item.name ? "rotate-180" : ""
-                                }`}
+                              className={`w-4 h-4 transition-transform ${
+                                mobileActiveDropdown === item.name ? "rotate-180" : ""
+                              }`}
                             />
                           </button>
                           <AnimatePresence>
@@ -1178,32 +1227,56 @@ export function Navigation({
                                 className="overflow-hidden"
                               >
                                 <div className="pl-4 py-2 space-y-1">
-                                  {item.dropdown.map((dropdownItem) => (
-                                    <a
-                                      key={dropdownItem.label}
-                                      href={dropdownItem.href}
-                                      className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
-                                      onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                      {dropdownItem.label}
-                                    </a>
-                                  ))}
+                                  {item.dropdown.map((dropdownItem) => {
+                                    if (dropdownItem.href === "#") {
+                                      return (
+                                        <span
+                                          key={dropdownItem.label}
+                                          className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors cursor-default"
+                                        >
+                                          {dropdownItem.label}
+                                        </span>
+                                      )
+                                    }
+                                    return (
+                                      <a
+                                        key={dropdownItem.label}
+                                        href={dropdownItem.href}
+                                        className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                      >
+                                        {dropdownItem.label}
+                                      </a>
+                                    )
+                                  })}
                                 </div>
                               </motion.div>
                             )}
                           </AnimatePresence>
                         </div>
-                      ) : (
-                        <a
-                          href={item.href}
-                          className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
-                          onClick={() => setIsMobileMenuOpen(false)}
+                      )
+                    }
+                    if (item.href === "#") {
+                      return (
+                        <span
+                          key={item.name}
+                          className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors cursor-default"
                         >
                           {item.name}
-                        </a>
-                      )}
-                    </div>
-                  ))}
+                        </span>
+                      )
+                    }
+                    return (
+                      <a
+                        key={item.name}
+                        href={item.href}
+                        className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {item.name}
+                      </a>
+                    )
+                  })}
 
                   {/* Mobile-only: Gift Sets */}
                   <a
@@ -1244,9 +1317,8 @@ export function Navigation({
           </>
         )}
       </AnimatePresence>
-
-      {/* Login Required Dialog */}
       <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        (
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-american-typewriter text-xl text-black">
@@ -1295,9 +1367,8 @@ export function Navigation({
             </button>
           </div>
         </DialogContent>
+        )
       </Dialog>
-
-      {/* Search Mega Menu */}
       <SearchMegaMenu
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
