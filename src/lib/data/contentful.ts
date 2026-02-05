@@ -414,21 +414,21 @@ function transformTestimonialsSectionEntry(
     // Parse testimonials array
     const items: TestimonialItem[] = Array.isArray(fields.testimonials)
       ? fields.testimonials.map((t: any, index: number) => {
-          // Handle both JSON objects and stringified JSON
-          const testimonial = typeof t === "string" ? JSON.parse(t) : t
+        // Handle both JSON objects and stringified JSON
+        const testimonial = typeof t === "string" ? JSON.parse(t) : t
 
-          return {
-            id: testimonial.id ?? index + 1,
-            name: testimonial.name || "",
-            initials: testimonial.initials || "",
-            location: testimonial.location || "",
-            rating: testimonial.rating ?? 5,
-            review: testimonial.review || "",
-            product: testimonial.product || undefined,
-            purchaseDate: testimonial.purchaseDate || undefined,
-            verified: testimonial.verified ?? true,
-          }
-        })
+        return {
+          id: testimonial.id ?? index + 1,
+          name: testimonial.name || "",
+          initials: testimonial.initials || "",
+          location: testimonial.location || "",
+          rating: testimonial.rating ?? 5,
+          review: testimonial.review || "",
+          product: testimonial.product || undefined,
+          purchaseDate: testimonial.purchaseDate || undefined,
+          verified: testimonial.verified ?? true,
+        }
+      })
       : []
 
     // Provide defaults for optional fields
@@ -844,10 +844,12 @@ function transformProductInfoPanelsEntry(
 /**
  * Fetch "From the Lab" section content from Contentful by product handle
  * @param productHandle - The product handle to filter by
+ * @param countryCode - The country code for localized pricing/inventory (optional)
  * @returns FromTheLabSection or null if not found
  */
 export async function getFromTheLabSectionByProductHandle(
-  productHandle: string
+  productHandle: string,
+  countryCode?: string
 ): Promise<FromTheLabSection | null> {
   try {
     const client = getContentfulClient()
@@ -863,12 +865,12 @@ export async function getFromTheLabSectionByProductHandle(
 
     if (response.items && response.items.length > 0) {
       const entry = response.items[0] as unknown as Entry<ContentfulFromTheLabSection>
-      return transformFromTheLabSectionEntry(entry)
+      return await transformFromTheLabSectionEntry(entry, countryCode)
     }
 
     // Fallback: Try sectionKey pattern matching
     const sectionKey = `${productHandle}-from-the-lab`
-    return await getFromTheLabSectionByKey(sectionKey)
+    return await getFromTheLabSectionByKey(sectionKey, countryCode)
   } catch (error) {
     console.error("Error fetching From the Lab section from Contentful:", error)
     return null
@@ -878,10 +880,12 @@ export async function getFromTheLabSectionByProductHandle(
 /**
  * Fetch "From the Lab" section content from Contentful by section key
  * @param sectionKey - The unique key for the section (e.g., "pdp-from-the-lab", "default-from-the-lab")
+ * @param countryCode - The country code for localized pricing/inventory (optional)
  * @returns FromTheLabSection or null if not found
  */
 export async function getFromTheLabSectionByKey(
-  sectionKey: string
+  sectionKey: string,
+  countryCode?: string
 ): Promise<FromTheLabSection | null> {
   try {
     const client = getContentfulClient()
@@ -902,7 +906,7 @@ export async function getFromTheLabSectionByKey(
     }
 
     const entry = response.items[0] as unknown as Entry<ContentfulFromTheLabSection>
-    return transformFromTheLabSectionEntry(entry)
+    return await transformFromTheLabSectionEntry(entry, countryCode)
   } catch (error) {
     console.error("Error fetching From the Lab section from Contentful:", error)
     return null
@@ -913,7 +917,7 @@ export async function getFromTheLabSectionByKey(
  * Fetch all active "From the Lab" sections from Contentful
  * @returns Array of FromTheLabSection
  */
-export async function getAllFromTheLabSections(): Promise<FromTheLabSection[]> {
+export async function getAllFromTheLabSections(countryCode?: string): Promise<FromTheLabSection[]> {
   try {
     const client = getContentfulClient()
 
@@ -929,11 +933,16 @@ export async function getAllFromTheLabSections(): Promise<FromTheLabSection[]> {
       return []
     }
 
-    return response.items
-      .map((item) =>
-        transformFromTheLabSectionEntry(item as unknown as Entry<ContentfulFromTheLabSection>)
+    const transformedItems = await Promise.all(
+      response.items.map((item) =>
+        transformFromTheLabSectionEntry(
+          item as unknown as Entry<ContentfulFromTheLabSection>,
+          countryCode
+        )
       )
-      .filter((item): item is FromTheLabSection => item !== null)
+    )
+
+    return transformedItems.filter((item): item is FromTheLabSection => item !== null)
   } catch (error) {
     console.error("Error fetching all From the Lab sections from Contentful:", error)
     return []
@@ -943,9 +952,10 @@ export async function getAllFromTheLabSections(): Promise<FromTheLabSection[]> {
 /**
  * Transform Contentful "From the Lab" section entry to simplified FromTheLabSection type
  */
-function transformFromTheLabSectionEntry(
-  entry: Entry<ContentfulFromTheLabSection>
-): FromTheLabSection | null {
+async function transformFromTheLabSectionEntry(
+  entry: Entry<ContentfulFromTheLabSection>,
+  countryCode?: string
+): Promise<FromTheLabSection | null> {
   try {
     const fields = entry.fields as any
 
@@ -1004,6 +1014,7 @@ function transformFromTheLabSectionEntry(
           description: undefined,
           badge: undefined,
           url: undefined,
+          variantId: undefined,
         }
       }
 
@@ -1024,14 +1035,50 @@ function transformFromTheLabSectionEntry(
       }
     }
 
-    // Parse products - Array of references to ProductCard entries
+    // Parse products - exclusively from featuredProductHandles (dynamic Medusa products)
     let products: FromTheLabProduct[] = []
 
-    if (Array.isArray(fields.products)) {
-      products = fields.products.map(transformProductCard)
-    } else if (fields.products && fields.products.fields) {
-      // Handle single product entry (shouldn't happen but handle it)
-      products = [transformProductCard(fields.products, 0)]
+    // Process featuredProductHandles - fetch dynamic product data from Medusa
+    if (
+      Array.isArray(fields.featuredProductHandles) &&
+      fields.featuredProductHandles.length > 0 &&
+      countryCode
+    ) {
+      try {
+        for (const handle of fields.featuredProductHandles) {
+          if (typeof handle === "string") {
+            try {
+              const medusaProduct = await getProductByHandle({
+                handle,
+                countryCode,
+              })
+
+              if (medusaProduct) {
+                // Get the first variant specific price if available, otherwise 0
+                const variant = medusaProduct.variants?.[0]
+                const calculatedPrice = variant?.calculated_price
+
+                products.push({
+                  id: medusaProduct.id,
+                  name: medusaProduct.title,
+                  // Price from Medusa
+                  price: calculatedPrice?.calculated_amount || undefined,
+                  currency: calculatedPrice?.currency_code || undefined,
+                  image: medusaProduct.thumbnail || undefined,
+                  hoverImage: medusaProduct.images?.[1]?.url || medusaProduct.thumbnail || undefined,
+                  description: medusaProduct.subtitle || undefined,
+                  url: `/${countryCode}/products/${medusaProduct.handle}`,
+                  variantId: variant?.id,
+                })
+              }
+            } catch (err) {
+              console.error(`Error fetching dynamic product for From the Lab: ${handle}`, err)
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error processing featured product handles for From the Lab:", err)
+      }
     }
 
     // Provide defaults for optional fields
@@ -1041,6 +1088,7 @@ function transformFromTheLabSectionEntry(
         extractTextFromRichText(fields.subheading) || "Formulations most often paired in practice.",
       backgroundColor: fields.backgroundColor || "#e3e3d8",
       products,
+      featuredProductHandles: fields.featuredProductHandles || [],
       isActive: fields.isActive ?? true,
     }
   } catch (error) {
@@ -1112,9 +1160,9 @@ export async function getPageBanner(pageKey: string): Promise<PageBanner | null>
       ) {
         console.error(
           `\n[SOLUTION] ❌ Content Type "pageBanner" not found in Contentful!\n` +
-            `Please create a content type with:\n` +
-            `- Content Type ID (API Identifier): "pageBanner"\n` +
-            `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey\n\n`
+          `Please create a content type with:\n` +
+          `- Content Type ID (API Identifier): "pageBanner"\n` +
+          `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey\n\n`
         )
         return null // Return null instead of throwing
       }
@@ -1127,9 +1175,9 @@ export async function getPageBanner(pageKey: string): Promise<PageBanner | null>
       ) {
         console.error(
           `\n[SOLUTION] ❌ Field "pageKey" not found in "pageBanner" content type!\n` +
-            `Please add a field with:\n` +
-            `- Field ID: "pageKey"\n` +
-            `- Field Type: Short text\n\n`
+          `Please add a field with:\n` +
+          `- Field ID: "pageKey"\n` +
+          `- Field Type: Short text\n\n`
         )
         return null
       }
@@ -1163,8 +1211,8 @@ export async function getPageBanner(pageKey: string): Promise<PageBanner | null>
 
       console.warn(
         `No active page banner found for pageKey: "${pageKey}". ` +
-          `Make sure you have an active banner entry with pageKey="${pageKey}" in Contentful. ` +
-          `Content Type ID should be "pageBanner" and field should be "pageKey" (camelCase).`
+        `Make sure you have an active banner entry with pageKey="${pageKey}" in Contentful. ` +
+        `Content Type ID should be "pageBanner" and field should be "pageKey" (camelCase).`
       )
       return null
     }
@@ -1187,9 +1235,9 @@ export async function getPageBanner(pageKey: string): Promise<PageBanner | null>
     if (error?.message?.includes("not found") || error?.sys?.id === "NotFound") {
       console.error(
         `\n[SOLUTION] Content Type "pageBanner" doesn't exist in Contentful.\n` +
-          `Please create it with:\n` +
-          `- Content Type ID: "pageBanner"\n` +
-          `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey`
+        `Please create it with:\n` +
+        `- Content Type ID: "pageBanner"\n` +
+        `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey`
       )
     }
 
@@ -1318,7 +1366,7 @@ export async function getCandlesCollection(
     }
 
     if (sectionKey) {
-      ;(sectionQuery as Record<string, unknown>)["fields.sectionKey"] = sectionKey
+      ; (sectionQuery as Record<string, unknown>)["fields.sectionKey"] = sectionKey
     }
 
     let sectionResponse

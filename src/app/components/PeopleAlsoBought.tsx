@@ -594,7 +594,7 @@ export function PeopleAlsoBought({
                   {product.hoverImage && (
                     <img
                       src={product.hoverImage}
-                      alt={`${product.name} alternative view`}
+                      alt={`${product.name}`}
                       className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
                       style={{
                         opacity: hoveredProduct === product.id ? 1 : 0,
