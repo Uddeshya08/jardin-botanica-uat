@@ -78,7 +78,10 @@ export function StickyCartBar({
 }: StickyCartBarProps) {
   // Use cart context if available, otherwise fall back to props
   const cartContext = useCartItemsSafe()
-  const cartItems = cartContext?.cartItems ?? cartItemsProp ?? []
+  // FIX: Prioritize passed props if they exist (for cases like hands/page where local state tracks the funnel),
+  // otherwise fall back to global context.
+  const cartItems =
+    cartItemsProp && cartItemsProp.length > 0 ? cartItemsProp : cartContext?.cartItems ?? []
   const onCartUpdate = cartContext?.handleCartUpdate ?? onCartUpdateProp
   const [quantity, setQuantity] = useState(1)
   const [isAddedToCart, setIsAddedToCart] = useState(false)
@@ -481,9 +484,9 @@ export function StickyCartBar({
       ritualProductId: ritualProduct.variantId,
       existingRitualProduct: existingRitualProduct
         ? {
-            id: existingRitualProduct.id,
-            quantity: existingRitualProduct.quantity,
-          }
+          id: existingRitualProduct.id,
+          quantity: existingRitualProduct.quantity,
+        }
         : null,
     })
 
@@ -703,8 +706,8 @@ export function StickyCartBar({
                           {showRitualSuggestion && !ritualCompleted
                             ? "Complete your ritual"
                             : showGoToCart
-                              ? "Order Qualifies For Complimentary Shipping"
-                              : "Order Qualifies For Complimentary Shipping"}
+                              ? "Order qualifies for complimentary shipping"
+                              : "Order qualifies for complimentary shipping"}
                         </motion.p>
                       )}
                     </div>
@@ -734,8 +737,8 @@ export function StickyCartBar({
                     </div>
                     <span className="font-din-arabic text-sm text-black/80">
                       {giftSelected
-                        ? "Gift Selected & Ready to Checkout"
-                        : "Ritual Completed & Added to Cart"}
+                        ? "Gift selected & ready to checkout"
+                        : "Ritual completed & added to cart"}
                     </span>
                   </div>
                 </div>
@@ -747,7 +750,7 @@ export function StickyCartBar({
                 {!showGoToCart && !showGiftOption && (
                   <div className="flex items-center space-x-0.5 md:space-x-2">
                     <span className="font-din-arabic text-xs text-black/60 uppercase hidden md:block">
-                      QTY
+                      Qty
                     </span>
                     <div className="flex items-center bg-black/10 backdrop-blur-sm rounded-lg">
                       <motion.button
@@ -799,11 +802,11 @@ export function StickyCartBar({
 
                 {/* Total */}
                 {!showGoToCart && !showGiftOption && (
-                  <div className="hidden lg:block text-center">
-                    <p className="font-din-arabic text-xs text-black/60 uppercase whitespace-nowrap">
-                      TOTAL
+                  <div className="text-center mr-2 md:mr-0 pl-2 border-l border-black/10 md:border-0 md:pl-0">
+                    <p className="font-din-arabic text-[10px] md:text-xs text-black/60 uppercase whitespace-nowrap">
+                      Total
                     </p>
-                    <p className="font-din-arabic-bold text-black/90 whitespace-nowrap">
+                    <p className="font-din-arabic-bold text-sm md:text-base text-black/90 whitespace-nowrap">
                       {formatMinor(currentTotalMinor, currency)}
                     </p>
                   </div>
@@ -915,7 +918,7 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <span className="hidden sm:inline">Added to Cart</span>
+                          <span className="hidden sm:inline">Added to cart</span>
                           <span className="sm:hidden">Added</span>
                         </motion.span>
                       ) : (
@@ -926,7 +929,7 @@ export function StickyCartBar({
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <span className="hidden sm:inline">Add to Cart</span>
+                          <span className="hidden sm:inline">Add to cart</span>
                           <span className="sm:hidden">Add</span>
                         </motion.span>
                       )}

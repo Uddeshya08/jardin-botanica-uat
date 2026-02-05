@@ -274,7 +274,7 @@ export function BodyHandsPage({
                 }`}
                 style={{ letterSpacing: "0.15em" }}
               >
-                All products
+                All Products
               </button>
               {filterOptions.map((filter) => {
                 const productCount = categoryProductCounts[filter] || 0

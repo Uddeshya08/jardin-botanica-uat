@@ -205,7 +205,7 @@ export function CustomerTestimonials({ testimonialsContent }: CustomerTestimonia
                   className="group flex-shrink-0 w-[90vw] md:w-auto snap-start"
                 >
                   <motion.div
-                    className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-4 md:p-6 shadow-xl shadow-black/5 relative overflow-hidden h-full min-h-[280px] md:min-h-[300px] max-h-[400px] flex flex-col"
+                    className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-4 md:p-6 shadow-xl shadow-black/5 relative overflow-hidden h-full min-h-[220px] md:min-h-[240px] max-h-[400px] flex flex-col"
                     whileHover={{
                       y: -8,
                       scale: 1.02,

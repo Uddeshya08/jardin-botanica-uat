@@ -40,7 +40,15 @@ export async function retrieveCart(cartId?: string) {
       cache: "no-store",
     })
     .then(({ cart }) => cart)
-    .catch(() => null)
+    .catch((err) => {
+      // Only return null if it's a 404 (Cart Not Found)
+      // Re-throw other errors (extensions, timeouts, 500s) to prevent the UI from interpreting them as "empty cart"
+      if (err?.status === 404 || err?.message?.includes("404") || err?.type === "not_found") {
+        return null
+      }
+      console.error("Error retrieving cart:", err)
+      throw err
+    })
 }
 
 export async function getOrSetCart(countryCode: string) {

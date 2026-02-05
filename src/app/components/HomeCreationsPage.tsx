@@ -263,7 +263,7 @@ export function HomeCreationsPage({
                 Home Creations
               </h1>
               <p
-                className="font-din-arabic text-white/95 max-w-2xl mx-auto text-base sm:text-lg lg:text-xl leading-relaxed px-4"
+                className="font-din-arabic text-white/95 max-w-2xl mx-auto text-base sm:text-base lg:text-lg leading-relaxed px-4"
                 style={{ letterSpacing: "0.1em" }}
               >
                 Hand-poured candles and artisanal diffusers to create atmosphere, warmth, and an
@@ -285,7 +285,7 @@ export function HomeCreationsPage({
               className="flex flex-wrap gap-4 sm:gap-6"
             >
               {[
-                { label: "All products", value: "all" },
+                { label: "All Products", value: "all" },
                 ...filterOptions.map((name) => ({
                   label: name.charAt(0).toUpperCase() + name.slice(1),
                   value: name,
