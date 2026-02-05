@@ -3,7 +3,7 @@
 import { addToCartAction } from "@lib/data/cart-actions"
 import { useCartItems } from "app/context/cart-items-context"
 import { useLedger } from "app/context/ledger-context"
-import { Heart, X } from "lucide-react"
+import { ChevronDown, Heart, X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
 import React, { useMemo, useState, useTransition } from "react"
@@ -67,6 +67,7 @@ export function BodyHandsPage({
   countryCode,
 }: BodyHandsPageProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>("all")
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false)
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
   const [isLedgerOpen, setIsLedgerOpen] = useState(false)
   const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
@@ -259,19 +260,86 @@ export function BodyHandsPage({
       <section className="py-6 sm:py-8 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 border-b border-black/10">
         <div className="max-w-[90rem] mx-auto">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-between">
+            {/* Mobile Filter Dropdown */}
+            <div className="sm:hidden relative w-full z-30">
+              <button
+                onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+                className="w-full flex items-center justify-between font-din-arabic text-sm text-black border-b border-black/30 pb-2"
+                style={{ letterSpacing: "0.15em" }}
+              >
+                <span>
+                  CATEGORY: {selectedFilter === "all" ? "ALL PRODUCTS" : selectedFilter.toUpperCase()}
+                </span>
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform duration-300 ${isFilterDropdownOpen ? "rotate-180" : ""
+                    }`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {isFilterDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full left-0 right-0 bg-[#e3e3d8] shadow-lg border border-black/10 mt-2 py-2 px-4 flex flex-col gap-3"
+                  >
+                    <button
+                      onClick={() => {
+                        setSelectedFilter("all")
+                        setIsFilterDropdownOpen(false)
+                      }}
+                      className={`text-left font-din-arabic text-sm transition-colors duration-200 ${selectedFilter === "all" ? "text-black font-semibold" : "text-black/60"
+                        }`}
+                      style={{ letterSpacing: "0.15em" }}
+                    >
+                      All Products
+                    </button>
+                    {filterOptions.map((filter) => {
+                      const productCount = categoryProductCounts[filter] || 0
+                      const isDisabled = productCount === 0
+                      return (
+                        <button
+                          key={filter}
+                          onClick={() => {
+                            if (!isDisabled) {
+                              setSelectedFilter(filter)
+                              setIsFilterDropdownOpen(false)
+                            }
+                          }}
+                          disabled={isDisabled}
+                          className={`text-left font-din-arabic text-sm transition-colors duration-200 ${isDisabled
+                            ? "text-black/20"
+                            : selectedFilter === filter
+                              ? "text-black font-semibold"
+                              : "text-black/60"
+                            }`}
+                          style={{ letterSpacing: "0.15em" }}
+                        >
+                          {filter}
+                        </button>
+                      )
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Desktop Filter List */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="flex flex-wrap gap-4 sm:gap-6"
+              className="hidden sm:flex flex-wrap gap-6"
             >
               <button
                 onClick={() => setSelectedFilter("all")}
-                className={`font-din-arabic text-sm transition-colors duration-300 ${
-                  selectedFilter === "all"
-                    ? "text-black border-b border-black"
-                    : "text-black/40 hover:text-black/70"
-                }`}
+                className={`font-din-arabic text-sm transition-colors duration-300 ${selectedFilter === "all"
+                  ? "text-black border-b border-black"
+                  : "text-black/40 hover:text-black/70"
+                  }`}
                 style={{ letterSpacing: "0.15em" }}
               >
                 All Products
@@ -284,13 +352,12 @@ export function BodyHandsPage({
                     key={filter}
                     onClick={() => !isDisabled && setSelectedFilter(filter)}
                     disabled={isDisabled}
-                    className={`font-din-arabic text-sm transition-colors duration-300 ${
-                      isDisabled
-                        ? "text-black/20"
-                        : selectedFilter === filter
-                          ? "text-black border-b border-black"
-                          : "text-black/40 hover:text-black/70"
-                    }`}
+                    className={`font-din-arabic text-sm transition-colors duration-300 ${isDisabled
+                      ? "text-black/20"
+                      : selectedFilter === filter
+                        ? "text-black border-b border-black"
+                        : "text-black/40 hover:text-black/70"
+                      }`}
                     style={{ letterSpacing: "0.15em" }}
                   >
                     {filter}
@@ -513,7 +580,7 @@ function ProductCard({
             style={{ opacity: isImageHovered ? 0 : 1 }}
           >
             <ImageWithFallback
-              src={product.image}
+              src={product.image || undefined}
               alt={product.name}
               className="w-full h-full object-contain"
             />
@@ -530,11 +597,10 @@ function ProductCard({
               e.stopPropagation()
               handleToggleLedger(product)
             }}
-            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
-              isInLedger(product.id)
-                ? "bg-white/20 border border-white/30"
-                : "bg-white/20 border border-white/30 hover:bg-white/30"
-            }`}
+            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${isInLedger(product.id)
+              ? "bg-white/20 border border-white/30"
+              : "bg-white/20 border border-white/30 hover:bg-white/30"
+              }`}
           >
             <Heart
               size={18}
@@ -588,11 +654,10 @@ function ProductCard({
                       className="sr-only"
                     />
                     <div
-                      className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
-                        selectedSize === size
-                          ? "border-black bg-black"
-                          : "border-black/30 group-hover:border-black/50"
-                      }`}
+                      className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${selectedSize === size
+                        ? "border-black bg-black"
+                        : "border-black/30 group-hover:border-black/50"
+                        }`}
                     >
                       {selectedSize === size && (
                         <div className="w-full h-full rounded-full bg-white scale-[0.4]"></div>
@@ -600,11 +665,10 @@ function ProductCard({
                     </div>
                   </div>
                   <span
-                    className={`font-din-arabic text-sm transition-colors ${
-                      selectedSize === size
-                        ? "text-black"
-                        : "text-black/60 group-hover:text-black/80"
-                    }`}
+                    className={`font-din-arabic text-sm transition-colors ${selectedSize === size
+                      ? "text-black"
+                      : "text-black/60 group-hover:text-black/80"
+                      }`}
                     style={{ letterSpacing: "0.1em" }}
                   >
                     {size}
@@ -670,9 +734,8 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[650px] overflow-hidden ${
-            feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
-          }`}
+          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[650px] overflow-hidden ${feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
+            }`}
         >
           <ImageWithFallback
             src={feature.image}
@@ -691,11 +754,10 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className={`flex items-center bg-white/10 p-8 sm:p-12 lg:p-20 ${
-            feature.imagePosition === "left"
-              ? "lg:col-start-2 lg:row-start-1"
-              : "lg:col-start-1 lg:row-start-1"
-          }`}
+          className={`flex items-center bg-white/10 p-8 sm:p-12 lg:p-20 ${feature.imagePosition === "left"
+            ? "lg:col-start-2 lg:row-start-1"
+            : "lg:col-start-1 lg:row-start-1"
+            }`}
         >
           <div className="max-w-md">
             <p

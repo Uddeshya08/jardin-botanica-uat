@@ -196,9 +196,8 @@ function ProductCard({
         >
           <Heart
             size={18}
-            className={`transition-colors duration-300 ${
-              isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-            }`}
+            className={`transition-colors duration-300 ${isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
           />
         </button>
       </div>
@@ -540,7 +539,7 @@ export function ProductCarousel({
 
   return (
     <section
-      className="py-12 lg:py-16"
+      className="pt-12 pb-0 lg:pt-16 lg:pb-0"
       style={{ backgroundColor: "#edede2" }}
       onMouseDownCapture={() => setHasInteracted(true)}
       onTouchStartCapture={() => setHasInteracted(true)}
@@ -580,7 +579,7 @@ export function ProductCarousel({
           }
           [data-slot="carousel-content"]:active {
             cursor: grabbing !important;
-          }
+            }
           .product-carousel-content {
             user-select: none !important;
             -webkit-user-select: none !important;
@@ -702,8 +701,7 @@ export function ProductCarousel({
 
         {/* Slider Bar - Web and Mobile - Centered */}
         <div
-          className="flex justify-center items-center w-full pt-3"
-          style={{ paddingTop: "3rem" }}
+          className="flex justify-center items-center w-full pt-12 lg:pt-16"
         >
           <div
             ref={sliderRef}

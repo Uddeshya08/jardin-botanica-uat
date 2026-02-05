@@ -199,9 +199,8 @@ const MobileProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${
-                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
             />
           </button>
         </div>
@@ -421,9 +420,8 @@ const ProductCard = ({
             >
               <Heart
                 size={18}
-                className={`transition-colors duration-300 ${
-                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+                className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                  }`}
               />
             </button>
           </div>
@@ -466,9 +464,8 @@ const ProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${
-                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
             />
           </button>
         </div>
@@ -1625,36 +1622,36 @@ const Candles = () => {
                   {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
                   {isMobile
                     ? // Mobile: One product per slide
-                      candlesCollection.map((item, index) => (
-                        <CarouselItem key={index} className="banner-carousel-item">
-                          <BannerProductCard item={item} index={index} countryCode={countryCode} />
-                        </CarouselItem>
-                      ))
+                    candlesCollection.map((item, index) => (
+                      <CarouselItem key={index} className="banner-carousel-item">
+                        <BannerProductCard item={item} index={index} countryCode={countryCode} />
+                      </CarouselItem>
+                    ))
                     : // Desktop: Groups of 3 products
-                      bannerGroups.map((group, groupIndex) => (
-                        <CarouselItem key={groupIndex} className="banner-carousel-item">
-                          <div className="flex flex-row gap-0 w-full h-auto">
-                            {group.map((item, itemIndex) => {
-                              const globalIndex = groupIndex * 3 + itemIndex
-                              return (
-                                <div key={globalIndex} className="flex-1 w-1/3">
-                                  <BannerProductCard
-                                    item={item}
-                                    index={globalIndex}
-                                    countryCode={countryCode}
-                                  />
-                                </div>
-                              )
-                            })}
+                    bannerGroups.map((group, groupIndex) => (
+                      <CarouselItem key={groupIndex} className="banner-carousel-item">
+                        <div className="flex flex-row gap-0 w-full h-auto">
+                          {group.map((item, itemIndex) => {
+                            const globalIndex = groupIndex * 3 + itemIndex
+                            return (
+                              <div key={globalIndex} className="flex-1 w-1/3">
+                                <BannerProductCard
+                                  item={item}
+                                  index={globalIndex}
+                                  countryCode={countryCode}
+                                />
+                              </div>
+                            )
+                          })}
 
-                            {/* Fill remaining slots if group has less than 3 items */}
-                            {group.length < 3 &&
-                              Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
-                                <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
-                              ))}
-                          </div>
-                        </CarouselItem>
-                      ))}
+                          {/* Fill remaining slots if group has less than 3 items */}
+                          {group.length < 3 &&
+                            Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                              <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                            ))}
+                        </div>
+                      </CarouselItem>
+                    ))}
                 </CarouselContent>
               </Carousel>
               {/* Banner Carousel Slider Bar Removed */}
@@ -1670,7 +1667,7 @@ const Candles = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: smoothEase }}
         viewport={{ once: true, amount: 0.2 }}
-        className="py-2 pb-12 md:py-6 px-4 md:px-12"
+        className="py-2 pb-6 md:py-6 px-4 md:px-12"
       >
         <div className="max-w-4xl mx-auto text-center">
           <motion.h2
@@ -1687,7 +1684,7 @@ const Candles = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
             viewport={{ once: true, amount: 0.3 }}
-            className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-4 md:px-0"
+            className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl mx-auto mb-6 md:mb-10 px-4 md:px-0"
           >
             Connect with one of our experts for personalized guidance and thoughtful product
             recommendations-crafted just for your skin, your rituals, your glow.
