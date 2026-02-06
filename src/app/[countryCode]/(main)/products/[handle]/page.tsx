@@ -57,8 +57,7 @@ export async function generateStaticParams() {
             .filter((param) => param.handle);
     } catch (error) {
         console.error(
-            `Failed to generate static paths for product pages: ${
-                error instanceof Error ? error.message : "Unknown error"
+            `Failed to generate static paths for product pages: ${error instanceof Error ? error.message : "Unknown error"
             }.`,
         );
         return [];
@@ -305,19 +304,22 @@ export default async function ProductPage(props: Props) {
     // Try product-specific "From the Lab" by productHandle first
     let fromTheLabContent = await getFromTheLabSectionByProductHandle(
         params.handle,
+        params.countryCode
     );
 
     // Fall back to section key approach if product handle search doesn't find anything
     if (!fromTheLabContent) {
         const productFromTheLabKey = `${params.handle}-from-the-lab`;
         fromTheLabContent =
-            await getFromTheLabSectionByKey(productFromTheLabKey);
+            await getFromTheLabSectionByKey(productFromTheLabKey, params.countryCode);
     }
 
     // Final fallback to generic PDP "From the Lab" if product-specific not found
     if (!fromTheLabContent) {
-        fromTheLabContent = await getFromTheLabSectionByKey("pdp-from-the-lab");
+        fromTheLabContent = await getFromTheLabSectionByKey("pdp-from-the-lab", params.countryCode);
     }
+
+    console.log("From The Lab Section Data:", fromTheLabContent);
 
     // Check for gift option in category metadata
     // Gift option takes priority over ritual product (mutual exclusivity)

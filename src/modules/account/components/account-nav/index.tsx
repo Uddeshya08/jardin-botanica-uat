@@ -41,12 +41,12 @@ const AccountNav = ({ customer }: { customer: HttpTypes.StoreCustomer | null }) 
       label: "Saved Addresses",
       icon: MapPin,
     },
-    {
-      id: "payment",
-      href: "/account/payment",
-      label: "Payment Methods",
-      icon: CreditCard,
-    },
+    // {
+    //   id: "payment",
+    //   href: "/account/payment",
+    //   label: "Payment Methods",
+    //   icon: CreditCard,
+    // },
   ]
 
   const isActive = (href: string) => {
@@ -94,9 +94,8 @@ const AccountNav = ({ customer }: { customer: HttpTypes.StoreCustomer | null }) 
                   <motion.button
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`w-full flex items-center justify-between px-4 py-4 rounded transition-all duration-300 ${
-                      active ? "bg-black text-white" : "text-black hover:bg-black/5"
-                    }`}
+                    className={`w-full flex items-center justify-between px-4 py-4 rounded transition-all duration-300 ${active ? "bg-black text-white" : "text-black hover:bg-black/5"
+                      }`}
                     data-testid={`${item.id}-link`}
                   >
                     <div className="flex items-center space-x-3">
@@ -143,11 +142,10 @@ const AccountNav = ({ customer }: { customer: HttpTypes.StoreCustomer | null }) 
             return (
               <LocalizedClientLink key={item.id} href={item.href}>
                 <button
-                  className={`flex items-center justify-center p-4 rounded-full transition-all duration-300 min-w-[48px] min-h-[48px] ${
-                    active
+                  className={`flex items-center justify-center p-4 rounded-full transition-all duration-300 min-w-[48px] min-h-[48px] ${active
                       ? "bg-black text-white shadow-lg ring-1 ring-[#D8D2C7]"
                       : "text-black hover:bg-black/10 ring-1 ring-[#D8D2C7]"
-                  }`}
+                    }`}
                   title={item.label}
                   aria-label={item.label}
                   data-testid={`${item.id}-link`}

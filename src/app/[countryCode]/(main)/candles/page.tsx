@@ -45,7 +45,9 @@ const MobileProductCard = ({
 
   const itemId = productId
   const variantId = item.variantId
-  const isInCart = cartItems.some((cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId))
+  const isInCart = cartItems.some(
+    (cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId)
+  )
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -95,10 +97,10 @@ const MobileProductCard = ({
     // Add to recently added products for UI state
     setIsRecentlyAdded(true)
 
-    // Reset the button state after 3 seconds
+    // Reset the button state after 2 seconds
     setTimeout(() => {
       setIsRecentlyAdded(false)
-    }, 3000)
+    }, 2000)
 
     handleCartUpdate(cartItem)
 
@@ -223,31 +225,26 @@ const MobileProductCard = ({
         <div className="flex items-center justify-end mt-auto pt-4">
           {/* Add to Cart Button (Right) */}
           <button
-            onClick={(e) => !isInCart && handleAddToCart(e)}
+            onClick={(e) => handleAddToCart(e)}
             onMouseEnter={() => setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
-            disabled={isInCart}
-            className={`group/btn relative inline-flex items-center gap-2 pb-0.5 ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
+            className="group/btn relative inline-flex items-center gap-2 pb-0.5 cursor-pointer"
           >
             <span
               className="font-din-arabic text-black text-base sm:text-sm"
               style={{ letterSpacing: "0.12em" }}
             >
-              {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
+              {isRecentlyAdded ? "In cart" : "Add to cart"}
             </span>
-            <span className="text-black text-base sm:text-sm">
-              {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
-            </span>
+            <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
 
-            {/* Animated underline - only if not in cart */}
-            {!isInCart && (
-              <motion.span
-                className="absolute bottom-0 left-0 h-[1px] bg-black"
-                initial={{ width: "0%" }}
-                animate={{ width: isButtonHovered ? "100%" : "0%" }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              />
-            )}
+            {/* Animated underline */}
+            <motion.span
+              className="absolute bottom-0 left-0 h-[1px] bg-black"
+              initial={{ width: "0%" }}
+              animate={{ width: isButtonHovered ? "100%" : "0%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            />
           </button>
         </div>
       </div>
@@ -285,7 +282,9 @@ const ProductCard = ({
   const [isPending, startTransition] = useTransition()
 
   const itemId = productId
-  const isInCart = cartItems.some((cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId))
+  const isInCart = cartItems.some(
+    (cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId)
+  )
 
   const handleToggleLedger = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -354,10 +353,10 @@ const ProductCard = ({
     // Add to recently added products for UI state
     setIsRecentlyAdded(true)
 
-    // Reset the button state after 3 seconds
+    // Reset the button state after 2 seconds
     setTimeout(() => {
       setIsRecentlyAdded(false)
-    }, 3000)
+    }, 2000)
 
     handleCartUpdate(cartItem)
 
@@ -500,31 +499,26 @@ const ProductCard = ({
         <div className="flex items-center justify-end mt-auto pt-4">
           {/* Add to Cart Button (Right) */}
           <button
-            onClick={(e) => !isInCart && handleAddToCart(e)}
+            onClick={(e) => handleAddToCart(e)}
             onMouseEnter={() => setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
-            disabled={isInCart}
-            className={`group/btn relative inline-flex items-center gap-2 pb-0.5 ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
+            className="group/btn relative inline-flex items-center gap-2 pb-0.5 cursor-pointer"
           >
             <span
               className="font-din-arabic text-black text-base sm:text-sm"
               style={{ letterSpacing: "0.12em" }}
             >
-              {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
+              {isRecentlyAdded ? "In cart" : "Add to cart"}
             </span>
-            <span className="text-black text-base sm:text-sm">
-              {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
-            </span>
+            <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
 
-            {/* Animated underline - only if not in cart */}
-            {!isInCart && (
-              <motion.span
-                className="absolute bottom-0 left-0 h-[1px] bg-black"
-                initial={{ width: "0%" }}
-                animate={{ width: isButtonHovered ? "100%" : "0%" }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              />
-            )}
+            {/* Animated underline */}
+            <motion.span
+              className="absolute bottom-0 left-0 h-[1px] bg-black"
+              initial={{ width: "0%" }}
+              animate={{ width: isButtonHovered ? "100%" : "0%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            />
           </button>
         </div>
       </div>
@@ -550,7 +544,9 @@ const BannerProductCard = ({
 
   const itemId = item.url || item.label.toLowerCase().replace(/\s+/g, "-")
   const variantId = item.variantId
-  const isInCart = cartItems.some((cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId))
+  const isInCart = cartItems.some(
+    (cartItem) => cartItem.id === itemId || (variantId && cartItem.variant_id === variantId)
+  )
 
   const handleProductClick = () => {
     if (item.url) {
@@ -609,10 +605,10 @@ const BannerProductCard = ({
     // Add to recently added products for UI state
     setIsRecentlyAdded(true)
 
-    // Reset the button state after 3 seconds
+    // Reset the button state after 2 seconds
     setTimeout(() => {
       setIsRecentlyAdded(false)
-    }, 3000)
+    }, 2000)
 
     handleCartUpdate(cartItem)
 
@@ -715,31 +711,28 @@ const BannerProductCard = ({
         {/* Replaced Explore Button with Add to Cart Button */}
         <div className="flex justify-end mt-4">
           <button
-            onClick={(e) => !isInCart && handleAddToCart(e)}
+            onClick={(e) => handleAddToCart(e)}
             onMouseEnter={() => setIsButtonHovered(true)}
             onMouseLeave={() => setIsButtonHovered(false)}
-            disabled={isInCart}
-            className={`group/btn relative inline-flex items-center gap-2 pb-0.5 text-white ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
+            className="group/btn relative inline-flex items-center gap-2 pb-0.5 text-white cursor-pointer"
           >
             <span
               className="font-din-arabic text-white text-base sm:text-sm shadow-black drop-shadow-md"
               style={{ letterSpacing: "0.12em" }}
             >
-              {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
+              {isRecentlyAdded ? "In cart" : "Add to cart"}
             </span>
             <span className="text-white text-base sm:text-sm drop-shadow-md">
-              {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
+              {isRecentlyAdded ? "✓" : "→"}
             </span>
 
-            {/* Animated underline - only if not in cart */}
-            {!isInCart && (
-              <motion.span
-                className="absolute bottom-0 left-0 h-[1px] bg-white"
-                initial={{ width: "0%" }}
-                animate={{ width: isButtonHovered ? "100%" : "0%" }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              />
-            )}
+            {/* Animated underline */}
+            <motion.span
+              className="absolute bottom-0 left-0 h-[1px] bg-white"
+              initial={{ width: "0%" }}
+              animate={{ width: isButtonHovered ? "100%" : "0%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            />
           </button>
         </div>
       </div>
@@ -1674,7 +1667,7 @@ const Candles = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: smoothEase }}
         viewport={{ once: true, amount: 0.2 }}
-        className="py-2 pb-12 md:py-6 px-4 md:px-12"
+        className="py-2 pb-6 md:py-6 px-4 md:px-12"
       >
         <div className="max-w-4xl mx-auto text-center">
           <motion.h2
@@ -1691,7 +1684,7 @@ const Candles = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: smoothEase }}
             viewport={{ once: true, amount: 0.3 }}
-            className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-4 md:px-0"
+            className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl mx-auto mb-6 md:mb-10 px-4 md:px-0"
           >
             Connect with one of our experts for personalized guidance and thoughtful product
             recommendations-crafted just for your skin, your rituals, your glow.

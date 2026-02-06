@@ -716,7 +716,7 @@ function LivingStudySection() {
   const { displayedText, isComplete } = useTypewriter("A Living Study", 80, undefined, isInView)
 
   return (
-    <section className="py-16 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-16 overflow-hidden">
+    <section className="pt-16 sm:pt-20 lg:pt-32 px-4 sm:px-6 lg:px-16 overflow-hidden">
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-5 gap-8 sm:gap-12 lg:gap-16 items-center">
           <motion.div
@@ -812,7 +812,7 @@ function FounderSection({
   closingRef,
   founderWorkspaceImage,
 }: {
-  closingRef: React.RefObject<HTMLElement>
+  closingRef: React.RefObject<HTMLElement | null>
   founderWorkspaceImage: string
 }) {
   const [isInView, setIsInView] = useState(false)
@@ -826,7 +826,7 @@ function FounderSection({
   return (
     <section
       ref={closingRef}
-      className="relative pt-12 pb-16 sm:pb-20 lg:pt-16 lg:pb-32 overflow-hidden"
+      className="relative py-16 sm:py-20 lg:py-32 overflow-hidden"
       style={{ backgroundColor: "#e3e3d8" }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12">
@@ -939,7 +939,7 @@ function FounderSection({
 
 export function BotanistLabPage() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const closingRef = useRef<HTMLDivElement>(null)
+  const closingRef = useRef<HTMLElement>(null)
   const bannerRef = useRef<HTMLDivElement>(null)
   const [phase, setPhase] = useState(0)
   const [isBannerInView, setIsBannerInView] = useState(false)
@@ -1196,7 +1196,7 @@ export function BotanistLabPage() {
       {/* <BotanicalCollections /> */}
       <FounderSection closingRef={closingRef} founderWorkspaceImage={FOUNDER_WORKSPACE_IMAGE} />
 
-      <section className="relative py-20 lg:py-20" style={{ backgroundColor: "#d8d2c7" }}>
+      <section className="relative py-16 sm:py-20 lg:py-32" style={{ backgroundColor: "#d8d2c7" }}>
         <div className="max-w-4xl mx-auto px-6 lg:px-20 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}

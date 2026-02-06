@@ -228,7 +228,7 @@ export default function BodyHandsRoutePage() {
         onCartUpdate={handleCartUpdate}
         forceWhiteText={false}
       />
-      <div className="h-4" />
+
       <BodyHandsPage
         products={products}
         filterOptions={filterOptions}

@@ -93,7 +93,7 @@ export default function CareersPage() {
                   className="font-din-arabic text-black/80 leading-relaxed"
                   style={{ letterSpacing: "0.1em" }}
                 >
-                  We're always looking for curious minds and restless hands. If you see the world
+                  If you see the world
                   through scent, texture, and light; if your art blurs science and story; if your
                   work begins with wonder — we'd love to hear from you.
                 </p>

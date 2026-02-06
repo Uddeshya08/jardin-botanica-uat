@@ -3,7 +3,7 @@
 import { addToCartAction } from "@lib/data/cart-actions"
 import { useCartItems } from "app/context/cart-items-context"
 import { useLedger } from "app/context/ledger-context"
-import { Heart, X } from "lucide-react"
+import { ChevronDown, Heart, X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
 import React, { useMemo, useState, useTransition } from "react"
@@ -67,6 +67,7 @@ export function BodyHandsPage({
   countryCode,
 }: BodyHandsPageProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>("all")
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false)
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
   const [isLedgerOpen, setIsLedgerOpen] = useState(false)
   const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
@@ -153,14 +154,14 @@ export function BodyHandsPage({
     // Add to recently added products for UI state
     setRecentlyAddedProducts((prev) => new Set(prev).add(itemId))
 
-    // Reset the button state after 3 seconds
+    // Reset the button state after 2 seconds
     setTimeout(() => {
       setRecentlyAddedProducts((prev) => {
         const newSet = new Set(prev)
         newSet.delete(itemId)
         return newSet
       })
-    }, 3000)
+    }, 2000)
 
     handleCartUpdate(item)
 
@@ -259,11 +260,79 @@ export function BodyHandsPage({
       <section className="py-6 sm:py-8 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 border-b border-black/10">
         <div className="max-w-[90rem] mx-auto">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-between">
+            {/* Mobile Filter Dropdown */}
+            <div className="sm:hidden relative w-full z-30">
+              <button
+                onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+                className="w-full flex items-center justify-between font-din-arabic text-sm text-black border-b border-black/30 pb-2"
+                style={{ letterSpacing: "0.15em" }}
+              >
+                <span>
+                  CATEGORY: {selectedFilter === "all" ? "ALL PRODUCTS" : selectedFilter.toUpperCase()}
+                </span>
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform duration-300 ${isFilterDropdownOpen ? "rotate-180" : ""
+                    }`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {isFilterDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full left-0 right-0 bg-[#e3e3d8] shadow-lg border border-black/10 mt-2 py-2 px-4 flex flex-col gap-3"
+                  >
+                    <button
+                      onClick={() => {
+                        setSelectedFilter("all")
+                        setIsFilterDropdownOpen(false)
+                      }}
+                      className={`text-left font-din-arabic text-sm transition-colors duration-200 ${selectedFilter === "all" ? "text-black font-semibold" : "text-black/60"
+                        }`}
+                      style={{ letterSpacing: "0.15em" }}
+                    >
+                      All Products
+                    </button>
+                    {filterOptions.map((filter) => {
+                      const productCount = categoryProductCounts[filter] || 0
+                      const isDisabled = productCount === 0
+                      return (
+                        <button
+                          key={filter}
+                          onClick={() => {
+                            if (!isDisabled) {
+                              setSelectedFilter(filter)
+                              setIsFilterDropdownOpen(false)
+                            }
+                          }}
+                          disabled={isDisabled}
+                          className={`text-left font-din-arabic text-sm transition-colors duration-200 ${isDisabled
+                            ? "text-black/20"
+                            : selectedFilter === filter
+                              ? "text-black font-semibold"
+                              : "text-black/60"
+                            }`}
+                          style={{ letterSpacing: "0.15em" }}
+                        >
+                          {filter}
+                        </button>
+                      )
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Desktop Filter List */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="flex flex-wrap gap-4 sm:gap-6"
+              className="hidden sm:flex flex-wrap gap-6"
             >
               <button
                 onClick={() => setSelectedFilter("all")}
@@ -273,7 +342,7 @@ export function BodyHandsPage({
                   }`}
                 style={{ letterSpacing: "0.15em" }}
               >
-                All products
+                All Products
               </button>
               {filterOptions.map((filter) => {
                 const productCount = categoryProductCounts[filter] || 0
@@ -461,7 +530,9 @@ function ProductCard({
   const itemId = variantId ? `${product.id}-${variantId}` : `${product.id}-${selectedSize}`
 
   // Check if item exists in cart
-  const isInCart = cartItems.some((item) => item.id === itemId || (variantId && item.variant_id === variantId))
+  const isInCart = cartItems.some(
+    (item) => item.id === itemId || (variantId && item.variant_id === variantId)
+  )
 
   const isRecentlyAdded = recentlyAddedProducts.has(itemId)
 
@@ -509,7 +580,7 @@ function ProductCard({
             style={{ opacity: isImageHovered ? 0 : 1 }}
           >
             <ImageWithFallback
-              src={product.image}
+              src={product.image || undefined}
               alt={product.name}
               className="w-full h-full object-contain"
             />
@@ -616,31 +687,26 @@ function ProductCard({
           {/* Minimal Add to Cart Button - Aesop Style */}
           <div className="flex items-center justify-end">
             <button
-              onClick={() => !isInCart && handleAddToCart(product, selectedSize, getCurrentPrice())}
+              onClick={() => handleAddToCart(product, selectedSize, getCurrentPrice())}
               onMouseEnter={() => setIsButtonHovered(true)}
               onMouseLeave={() => setIsButtonHovered(false)}
-              disabled={isInCart}
-              className={`group/btn relative inline-flex items-center gap-2 pb-0.5 ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
+              className="group/btn relative inline-flex items-center gap-2 pb-0.5 cursor-pointer"
             >
               <span
                 className="font-din-arabic text-black text-base sm:text-sm"
                 style={{ letterSpacing: "0.12em" }}
               >
-                {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
+                {isRecentlyAdded ? "In cart" : "Add to cart"}
               </span>
-              <span className="text-black text-base sm:text-sm">
-                {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
-              </span>
+              <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
 
-              {/* Animated underline - only if not in cart */}
-              {!isInCart && (
-                <motion.span
-                  className="absolute bottom-0 left-0 h-[1px] bg-black"
-                  initial={{ width: "0%" }}
-                  animate={{ width: isButtonHovered ? "100%" : "0%" }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                />
-              )}
+              {/* Animated underline */}
+              <motion.span
+                className="absolute bottom-0 left-0 h-[1px] bg-black"
+                initial={{ width: "0%" }}
+                animate={{ width: isButtonHovered ? "100%" : "0%" }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              />
             </button>
           </div>
         </div>

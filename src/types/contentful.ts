@@ -388,6 +388,7 @@ export interface FromTheLabSectionFields {
   backgroundColor?: string
   isActive: boolean
   products?: ContentfulProductCard[] // Array of references to ProductCard
+  featuredProductHandles?: string[] // List of Medusa product handles
   productHandle?: string // Optional: For product-specific filtering
   sectionKey?: string // Optional: For section-specific filtering
 }
@@ -403,6 +404,7 @@ export interface FromTheLabSection {
   subheading: string
   backgroundColor: string
   products: FromTheLabProduct[]
+  featuredProductHandles: string[]
   isActive: boolean
 }
 

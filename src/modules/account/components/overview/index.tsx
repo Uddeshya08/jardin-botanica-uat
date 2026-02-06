@@ -19,6 +19,7 @@ import {
 import { Input } from "../../../../app/components/ui/input"
 import { Label } from "../../../../app/components/ui/label"
 import { ScrollArea } from "../../../../app/components/ui/scroll-area"
+import Link from "next/link"
 
 type OverviewProps = {
   customer: HttpTypes.StoreCustomer | null
@@ -313,7 +314,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                   className="px-8 py-4 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md text-center"
                   style={{ borderColor: "#D8D2C7" }}
                 >
-                  Edit Information
+                  Edit information
                 </motion.button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md" style={{ backgroundColor: "#e3e3d8" }}>
@@ -365,7 +366,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                     className="flex-1 px-6 py-3 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 disabled:opacity-50 text-center"
                     style={{ borderColor: "#D8D2C7" }}
                   >
-                    {loading === "userInfo" ? "Saving..." : "Save Changes"}
+                    {loading === "userInfo" ? "Saving..." : "Save changes"}
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -388,7 +389,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                   className="px-8 py-4 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md text-center"
                   style={{ borderColor: "#D8D2C7" }}
                 >
-                  Change Password
+                  Change password
                 </motion.button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md" style={{ backgroundColor: "#e3e3d8" }}>
@@ -469,7 +470,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
                     className="flex-1 px-6 py-3 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 disabled:opacity-50 text-center"
                     style={{ borderColor: "#D8D2C7" }}
                   >
-                    {loading === "password" ? "Saving..." : "Save Changes"}
+                    {loading === "password" ? "Saving..." : "Save changes"}
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -529,9 +530,9 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
 
           <p className="font-din-arabic text-sm text-black/40 tracking-wide leading-relaxed mb-8">
             For details on how we handle your data, please see our{" "}
-            <button className="underline hover:text-black/60 transition-colors">
+            <Link href="/privacy-policy" className="underline hover:text-black/60 transition-colors">
               Privacy Policy
-            </button>
+            </Link>
           </p>
 
           <motion.button
@@ -542,7 +543,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
             className="px-8 py-4 border text-black font-din-arabic tracking-wide hover:bg-black hover:text-white transition-all duration-300 shadow-sm hover:shadow-md text-center w-full sm:w-auto disabled:opacity-50"
             style={{ borderColor: "#D8D2C7", marginTop: "20px" }}
           >
-            {loading === "commPrefs" ? "Saving..." : "Save Preferences"}
+            {loading === "commPrefs" ? "Saving..." : "Save preferences"}
           </motion.button>
         </motion.div>
       </div>

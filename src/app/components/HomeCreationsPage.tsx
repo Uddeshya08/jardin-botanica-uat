@@ -186,14 +186,14 @@ export function HomeCreationsPage({
     // Add to recently added products for UI state
     setRecentlyAddedProducts((prev) => new Set(prev).add(itemId))
 
-    // Reset the button state after 3 seconds
+    // Reset the button state after 2 seconds
     setTimeout(() => {
       setRecentlyAddedProducts((prev) => {
         const newSet = new Set(prev)
         newSet.delete(itemId)
         return newSet
       })
-    }, 3000)
+    }, 2000)
 
     handleCartUpdate(item)
 
@@ -263,7 +263,7 @@ export function HomeCreationsPage({
                 Home Creations
               </h1>
               <p
-                className="font-din-arabic text-white/95 max-w-2xl mx-auto text-base sm:text-lg lg:text-xl leading-relaxed px-4"
+                className="font-din-arabic text-white/95 max-w-2xl mx-auto text-base sm:text-base lg:text-lg leading-relaxed px-4"
                 style={{ letterSpacing: "0.1em" }}
               >
                 Hand-poured candles and artisanal diffusers to create atmosphere, warmth, and an
@@ -285,7 +285,7 @@ export function HomeCreationsPage({
               className="flex flex-wrap gap-4 sm:gap-6"
             >
               {[
-                { label: "All products", value: "all" },
+                { label: "All Products", value: "all" },
                 ...filterOptions.map((name) => ({
                   label: name.charAt(0).toUpperCase() + name.slice(1),
                   value: name,
@@ -299,10 +299,10 @@ export function HomeCreationsPage({
                     onClick={() => !isDisabled && setSelectedFilter(filter.value)}
                     disabled={isDisabled}
                     className={`font-din-arabic text-sm transition-colors duration-300 ${isDisabled
-                      ? "text-black/20"
-                      : selectedFilter === filter.value
-                        ? "text-black border-b border-black"
-                        : "text-black/40 hover:text-black/70"
+                        ? "text-black/20"
+                        : selectedFilter === filter.value
+                          ? "text-black border-b border-black"
+                          : "text-black/40 hover:text-black/70"
                       }`}
                     style={{ letterSpacing: "0.15em" }}
                   >
@@ -422,7 +422,9 @@ function ProductCard({
   // Check both variant ID and product ID
   const itemId = product.id
   const variantId = product.variants[0]?.id
-  const isInCart = cartItems.some((item) => item.id === itemId || (variantId && item.variant_id === variantId))
+  const isInCart = cartItems.some(
+    (item) => item.id === itemId || (variantId && item.variant_id === variantId)
+  )
 
   return (
     <motion.div
@@ -476,8 +478,8 @@ function ProductCard({
               handleToggleLedger(product)
             }}
             className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${isInLedger(product.id)
-              ? "bg-white/20 border border-white/30"
-              : "bg-white/20 border border-white/30 hover:bg-white/30"
+                ? "bg-white/20 border border-white/30"
+                : "bg-white/20 border border-white/30 hover:bg-white/30"
               }`}
             aria-label={`${isInLedger(product.id) ? "Remove from" : "Add to"} ledger`}
           >
@@ -525,31 +527,26 @@ function ProductCard({
           {/* Minimal Add to Cart Button - Aesop Style */}
           <div className="flex items-center justify-end">
             <button
-              onClick={() => !isInCart && handleAddToCart(product)}
+              onClick={() => handleAddToCart(product)}
               onMouseEnter={() => setIsButtonHovered(true)}
               onMouseLeave={() => setIsButtonHovered(false)}
-              disabled={isInCart}
-              className={`group/btn relative inline-flex items-center gap-2 pb-0.5 ${isInCart ? "cursor-default opacity-60" : "cursor-pointer"}`}
+              className="group/btn relative inline-flex items-center gap-2 pb-0.5 cursor-pointer"
             >
               <span
                 className="font-din-arabic text-black text-base sm:text-sm"
                 style={{ letterSpacing: "0.12em" }}
               >
-                {isInCart ? "In cart" : isRecentlyAdded ? "Added to cart" : "Add to cart"}
+                {isRecentlyAdded ? "In cart" : "Add to cart"}
               </span>
-              <span className="text-black text-base sm:text-sm">
-                {isInCart ? "" : isRecentlyAdded ? "✓" : "→"}
-              </span>
+              <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
 
-              {/* Animated underline - only if not in cart */}
-              {!isInCart && (
-                <motion.span
-                  className="absolute bottom-0 left-0 h-[1px] bg-black"
-                  initial={{ width: "0%" }}
-                  animate={{ width: isButtonHovered ? "100%" : "0%" }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                />
-              )}
+              {/* Animated underline */}
+              <motion.span
+                className="absolute bottom-0 left-0 h-[1px] bg-black"
+                initial={{ width: "0%" }}
+                animate={{ width: isButtonHovered ? "100%" : "0%" }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              />
             </button>
           </div>
         </div>

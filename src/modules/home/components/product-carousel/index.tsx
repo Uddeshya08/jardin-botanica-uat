@@ -227,28 +227,22 @@ function ProductCard({
           </div>
           {/* Add to Cart Button */}
           <button
-            className={`group/btn-wrapper flex items-center justify-center font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 transition-all duration-300 tracking-wide text-sm md:text-base relative ${isAddedToCart ? "cursor-default opacity-60" : "cursor-pointer hover:bg-black"
-              }`}
+            className="group/btn-wrapper flex items-center justify-center font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 transition-all duration-300 tracking-wide text-sm md:text-base relative cursor-pointer hover:bg-black"
             onClick={(e) => {
               e.stopPropagation()
               onAddToCart()
             }}
-            disabled={isAddedToCart}
-            aria-label={isAddedToCart ? "In cart" : "Add to cart"}
+            aria-label="Add to cart"
           >
             <div className="relative inline-flex items-center gap-2 pb-0.5 z-10 pointer-events-none">
               <span
-                className={`font-din-arabic text-base transition-colors duration-300 ${isAddedToCart ? "text-black" : "text-black group-hover/btn-wrapper:text-white"
-                  }`}
+                className="font-din-arabic text-base text-black group-hover/btn-wrapper:text-white transition-colors duration-300"
                 style={{ letterSpacing: "0.12em" }}
               >
                 {isAddedToCart ? "In cart" : "Add to cart"}
               </span>
-              <span
-                className={`text-xs transition-colors duration-300 ${isAddedToCart ? "text-black" : "text-black group-hover/btn-wrapper:text-white"
-                  }`}
-              >
-                {isAddedToCart ? "" : "→"}
+              <span className="text-xs text-black group-hover/btn-wrapper:text-white transition-colors duration-300">
+                {isAddedToCart ? "✓" : "→"}
               </span>
             </div>
           </button>
@@ -274,7 +268,7 @@ export function ProductCarousel({
   const [isMobile, setIsMobile] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
-  const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null)
+  const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
   const sliderRef = React.useRef<HTMLDivElement>(null)
   const [isPending, startTransition] = React.useTransition()
 
@@ -401,9 +395,17 @@ export function ProductCarousel({
 
     toast.success(message, { duration: 2000 })
 
-    // Show temporary message on the button
-    setAddedToCartMessage(product.id) // This matches the key/id used in render
-    setTimeout(() => setAddedToCartMessage(null), 2000)
+    // Add to recently added products for UI state
+    setRecentlyAddedProducts((prev) => new Set(prev).add(product.id))
+
+    // Reset the button state after 2 seconds
+    setTimeout(() => {
+      setRecentlyAddedProducts((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(product.id)
+        return newSet
+      })
+    }, 2000)
 
     // Server Action
     startTransition(async () => {
@@ -537,7 +539,7 @@ export function ProductCarousel({
 
   return (
     <section
-      className="py-12 lg:py-16"
+      className="pt-12 pb-0 lg:pt-16 lg:pb-0"
       style={{ backgroundColor: "#edede2" }}
       onMouseDownCapture={() => setHasInteracted(true)}
       onTouchStartCapture={() => setHasInteracted(true)}
@@ -577,7 +579,7 @@ export function ProductCarousel({
           }
           [data-slot="carousel-content"]:active {
             cursor: grabbing !important;
-          }
+            }
           .product-carousel-content {
             user-select: none !important;
             -webkit-user-select: none !important;
@@ -687,11 +689,7 @@ export function ProductCarousel({
                     product={product}
                     onAddToCart={() => handleAddToCart(product)}
                     onToggleLedger={() => handleToggleLedger(product)}
-                    isAddedToCart={cartItems.some(
-                      (item) =>
-                        item.id === (product.variantId || product.id) ||
-                        (product.variantId && item.variant_id === product.variantId)
-                    )}
+                    isAddedToCart={recentlyAddedProducts.has(product.id)}
                     isInLedger={isInLedger(product.medusaId || product.id)}
                     isMobile={isMobile}
                   />
@@ -703,8 +701,7 @@ export function ProductCarousel({
 
         {/* Slider Bar - Web and Mobile - Centered */}
         <div
-          className="flex justify-center items-center w-full pt-3"
-          style={{ paddingTop: "3rem" }}
+          className="flex justify-center items-center w-full pt-12 lg:pt-16"
         >
           <div
             ref={sliderRef}
