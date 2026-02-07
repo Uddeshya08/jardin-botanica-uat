@@ -12,7 +12,7 @@ export default function NotFound() {
       className="flex flex-col gap-6 items-center justify-center min-h-[calc(100vh-64px)] w-full"
       style={{ backgroundColor: "#e3e3d8" }}
     >
-      <div className="flex flex-col items-center max-w-md text-center px-6 py-12 border border-black/5 mx-4">
+      <div className="flex flex-col items-center max-w-md text-center px-6 py-12 mx-4">
         <h1 className="text-6xl font-typewriter text-black mb-2 tracking-tighter opacity-90">
           404
         </h1>

@@ -3,7 +3,6 @@
 import { ChevronsDown } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
-import { useIsMobile } from "../../../../app/components/ui/use-mobile"
 
 export default function ScrollIndicator() {
   const [showIndicator, setShowIndicator] = useState(false)
@@ -13,7 +12,6 @@ export default function ScrollIndicator() {
   const scrollStopTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const pathname = usePathname()
-  const isMobile = useIsMobile()
 
   // Define pages where scroll indicator should appear
   const isBannerPage =
@@ -24,7 +22,9 @@ export default function ScrollIndicator() {
     pathname?.endsWith("/body-hands") ||
     pathname?.includes("/in/body-hands") ||
     pathname?.endsWith("/home-creations") ||
-    pathname?.includes("/in/home-creations")
+    pathname?.includes("/in/home-creations") ||
+    pathname?.endsWith("/blogs") ||
+    pathname?.includes("/in/blogs")
 
   // Check if we're on the BotanistLabPage
   const isBotanistLabPage = pathname?.includes("/the-lab")
@@ -57,8 +57,8 @@ export default function ScrollIndicator() {
   }, [isBotanistLabPage])
 
   useEffect(() => {
-    // Don't show scroll indicator on mobile or excluded pages
-    if (isMobile || isExcludedPage || !isBannerPage) {
+    // Don't show scroll indicator on excluded pages
+    if (isExcludedPage || !isBannerPage) {
       setShowIndicator(false)
       return
     }
@@ -180,16 +180,17 @@ export default function ScrollIndicator() {
       }
       clearTimeout(initialTimeout)
     }
-  }, [isMobile, isExcludedPage, isBannerPage, isBotanistLabPage, typingComplete])
+  }, [isExcludedPage, isBannerPage, isBotanistLabPage, typingComplete])
 
   return (
     <div
-      className={`fixed bottom-4 right-6 z-50 pointer-events-none ${showIndicator ? "opacity-100" : "opacity-0"
-        }`}
+      className={`fixed bottom-4 right-4 md:right-6 z-50 pointer-events-none ${
+        showIndicator ? "opacity-100" : "opacity-0"
+      }`}
     >
       <div className="flex flex-col items-center animate-[bounce_2s_ease-in-out_infinite]">
-        <div className="flex items-center justify-center backdrop-blur-md bg-white/10 dark:bg-black/20 rounded-full w-14 h-14">
-          <ChevronsDown className="w-8 h-8 text-gray-400 dark:text-gray-100" />
+        <div className="flex items-center justify-center backdrop-blur-md bg-white/10 dark:bg-black/20 rounded-full w-10 h-10 md:w-14 md:h-14">
+          <ChevronsDown className="w-6 h-6 md:w-8 md:h-8 text-gray-400 dark:text-gray-100" />
         </div>
       </div>
     </div>

@@ -1246,7 +1246,7 @@ export function BotanistLabPage() {
               className="px-8 py-4 bg-black text-white font-din-arabic transition-all duration-300"
               style={{ letterSpacing: "0.1em" }}
             >
-              Explore the journal
+              Explore the Journal
             </motion.button>
             <motion.button
               whileHover={{

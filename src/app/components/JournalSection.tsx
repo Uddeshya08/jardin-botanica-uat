@@ -101,7 +101,7 @@ export function JournalSection({ blogs, countryCode }: JournalSectionProps) {
   }
 
   return (
-    <section className="py-12 lg:py-16" style={{ backgroundColor: "#edede2" }}>
+    <section className="pt-6 lg:pt-8 pb-12 lg:pb-16" style={{ backgroundColor: "#edede2" }}>
       <div className="w-full md:container md:mx-auto px-0 md:px-6 lg:px-12">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
