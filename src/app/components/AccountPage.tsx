@@ -1,62 +1,59 @@
-import { Eye, EyeOff, Phone, Smartphone } from "lucide-react"
+"use client"
+
+import { login, signup } from "@lib/data/customer"
+import { Eye, EyeOff, Smartphone } from "lucide-react"
 import { motion } from "motion/react"
+import { useParams, useRouter } from "next/navigation"
 import type React from "react"
-import { useState } from "react"
+import { useActionState, useEffect, useState } from "react"
 
 export function AccountPage() {
+  const router = useRouter()
+  const routeParams = useParams()
+  const countryCode = (routeParams?.countryCode as string) || "us"
+
+  const [signinMessage, signinAction, isSigninPending] = useActionState(login, null)
+  const [signupMessage, signupAction, isSignupPending] = useActionState(signup, null)
+
   const [showSignInPassword, setShowSignInPassword] = useState(false)
   const [showCreatePassword, setShowCreatePassword] = useState(false)
   const [passwordError, setPasswordError] = useState<string | null>(null)
-
-  const [signInData, setSignInData] = useState({
-    email: "",
-    password: "",
-  })
-
-  const [createAccountData, setCreateAccountData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    dateOfBirth: "",
-    phoneNumber: "",
-  })
-
-  const handleSignInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setSignInData({
-      ...signInData,
-      [name]: value,
-    })
-  }
+  const [createPassword, setCreatePassword] = useState("")
 
   const handleCreateAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setCreateAccountData({
-      ...createAccountData,
-      [name]: value,
-    })
     if (name === "password") {
+      setCreatePassword(value)
       if (passwordError && value.length >= 15) {
         setPasswordError(null)
       }
     }
   }
 
-  const handleSignInSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Sign in submitted:", signInData)
-  }
-
   const handleCreateAccountSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (createAccountData.password.length < 15) {
+    if (createPassword.length < 15) {
+      e.preventDefault()
       setPasswordError("Password must be at least 15 characters long")
       return
     }
     setPasswordError(null)
-    console.log("Create account submitted:", createAccountData)
   }
+
+  useEffect(() => {
+    if (signinMessage === null) return
+    if (signinMessage === "" || signinMessage === undefined) {
+      router.replace(`/${countryCode}/account`)
+      router.refresh()
+    }
+  }, [countryCode, router, signinMessage])
+
+  useEffect(() => {
+    if (signupMessage === null) return
+    if (typeof signupMessage !== "string") {
+      router.replace(`/${countryCode}/account`)
+      router.refresh()
+    }
+  }, [countryCode, router, signupMessage])
 
   return (
     <div className="min-h-screen pt-32 pb-12" style={{ backgroundColor: "#e3e3d8" }}>
@@ -73,7 +70,7 @@ export function AccountPage() {
               Sign in
             </h2>
 
-            <form onSubmit={handleSignInSubmit} className="space-y-5">
+            <form action={signinAction} className="space-y-5">
               {/* Email Address */}
               <div>
                 <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
@@ -82,8 +79,7 @@ export function AccountPage() {
                 <input
                   type="email"
                   name="email"
-                  value={signInData.email}
-                  onChange={handleSignInChange}
+                  autoComplete="email"
                   className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                   style={{ borderColor: "#D8D2C7" }}
                   placeholder="Enter your email address"
@@ -100,8 +96,7 @@ export function AccountPage() {
                   <input
                     type={showSignInPassword ? "text" : "password"}
                     name="password"
-                    value={signInData.password}
-                    onChange={handleSignInChange}
+                    autoComplete="current-password"
                     className="font-din-arabic w-full px-4 py-3.5 pr-12 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                     style={{ borderColor: "#D8D2C7" }}
                     placeholder="Enter your password"
@@ -119,6 +114,9 @@ export function AccountPage() {
                     )}
                   </button>
                 </div>
+                {typeof signinMessage === "string" && (
+                  <p className="mt-2 text-sm text-rose-600 font-din-arabic">{signinMessage}</p>
+                )}
               </div>
 
               {/* Forgot password */}
@@ -133,12 +131,39 @@ export function AccountPage() {
 
               {/* Sign In Button */}
               <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
+                whileHover={{ scale: isSigninPending ? 1 : 1.01 }}
+                whileTap={{ scale: isSigninPending ? 1 : 0.99 }}
                 type="submit"
-                className="font-din-arabic w-full py-4 bg-black text-white hover:bg-black/90 transition-all duration-300 text-center"
+                disabled={isSigninPending}
+                className="font-din-arabic w-full py-4 bg-black text-white hover:bg-black/90 transition-all duration-300 text-center flex items-center justify-center gap-2"
               >
-                Sign in
+                {isSigninPending ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign in"
+                )}
               </motion.button>
 
               {/* Divider */}
@@ -210,7 +235,7 @@ export function AccountPage() {
                   className="font-din-arabic w-full flex items-center px-4 py-3.5 border bg-transparent text-black hover:bg-black/5 transition-all duration-300"
                   style={{ borderColor: "#D8D2C7" }}
                 >
-                  {/* <Smartphone className="w-5 h-5 mr-3 flex-shrink-0" /> */}
+                  <Smartphone className="w-5 h-5 mr-3 flex-shrink-0" />
                   <span className="text-left">Continue with Phone</span>
                 </motion.button>
               </div>
@@ -228,7 +253,7 @@ export function AccountPage() {
               Create account
             </h2>
 
-            <form onSubmit={handleCreateAccountSubmit} className="space-y-5">
+            <form action={signupAction} onSubmit={handleCreateAccountSubmit} className="space-y-5">
               {/* First Name and Last Name */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -237,9 +262,8 @@ export function AccountPage() {
                   </label>
                   <input
                     type="text"
-                    name="firstName"
-                    value={createAccountData.firstName}
-                    onChange={handleCreateAccountChange}
+                    name="first_name"
+                    autoComplete="given-name"
                     className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                     style={{ borderColor: "#D8D2C7" }}
                     placeholder="First name"
@@ -252,9 +276,8 @@ export function AccountPage() {
                   </label>
                   <input
                     type="text"
-                    name="lastName"
-                    value={createAccountData.lastName}
-                    onChange={handleCreateAccountChange}
+                    name="last_name"
+                    autoComplete="family-name"
                     className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                     style={{ borderColor: "#D8D2C7" }}
                     placeholder="Last name"
@@ -274,8 +297,7 @@ export function AccountPage() {
                 <input
                   type="date"
                   name="dateOfBirth"
-                  value={createAccountData.dateOfBirth}
-                  onChange={handleCreateAccountChange}
+                  autoComplete="bday"
                   className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black focus:outline-none focus:border-black transition-all duration-300"
                   style={{ borderColor: "#D8D2C7" }}
                 />
@@ -289,8 +311,7 @@ export function AccountPage() {
                 <input
                   type="email"
                   name="email"
-                  value={createAccountData.email}
-                  onChange={handleCreateAccountChange}
+                  autoComplete="email"
                   className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                   style={{ borderColor: "#D8D2C7" }}
                   placeholder="Enter your email address"
@@ -307,16 +328,14 @@ export function AccountPage() {
                   <input
                     type={showCreatePassword ? "text" : "password"}
                     name="password"
-                    value={createAccountData.password}
+                    value={createPassword}
                     onChange={handleCreateAccountChange}
                     onBlur={() => {
-                      if (
-                        createAccountData.password.length > 0 &&
-                        createAccountData.password.length < 15
-                      ) {
+                      if (createPassword.length > 0 && createPassword.length < 15) {
                         setPasswordError("Password must be at least 15 characters long")
                       }
                     }}
+                    autoComplete="new-password"
                     className="font-din-arabic w-full px-4 py-3.5 pr-12 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                     style={{
                       borderColor: passwordError ? "#ef4444" : "#D8D2C7",
@@ -334,16 +353,16 @@ export function AccountPage() {
                       <Eye className="w-5 h-5" />
                     )}
                   </button>
-                  {createAccountData.password.length > 0 && (
-                    <span className="absolute right-3 top-1/2 transform translate-y-2 font-din-arabic text-xs text-black/60">
-                      {createAccountData.password.length >= 15 ? (
-                        <span className="text-green-600">15+ ✓</span>
-                      ) : (
-                        `${createAccountData.password.length}/15`
-                      )}
-                    </span>
-                  )}
                 </div>
+                {createPassword.length > 0 && (
+                  <p className="mt-1 text-xs font-din-arabic text-black/60 text-right">
+                    {createPassword.length >= 15 ? (
+                      <span className="text-green-600">15+ ✓</span>
+                    ) : (
+                      `${createPassword.length}/15`
+                    )}
+                  </p>
+                )}
                 {passwordError && (
                   <p className="mt-2 text-sm text-rose-600 font-din-arabic">{passwordError}</p>
                 )}
@@ -356,8 +375,8 @@ export function AccountPage() {
                 </label>
                 <input
                   type="tel"
-                  name="phoneNumber"
-                  value={createAccountData.phoneNumber}
+                  name="phone"
+                  autoComplete="tel"
                   onChange={handleCreateAccountChange}
                   className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                   style={{ borderColor: "#D8D2C7" }}
@@ -365,16 +384,47 @@ export function AccountPage() {
                 />
               </div>
 
+              {typeof signupMessage === "string" && (
+                <p className="text-sm text-rose-600 font-din-arabic">{signupMessage}</p>
+              )}
+
               {/* Spacer to align with SSO buttons from left column */}
               <div className="pt-6">
                 {/* Create Account Button */}
                 <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
+                  whileHover={{ scale: isSignupPending ? 1 : 1.01 }}
+                  whileTap={{ scale: isSignupPending ? 1 : 0.99 }}
                   type="submit"
-                  className="font-din-arabic w-full py-4 bg-black text-white hover:bg-black/90 transition-all duration-300 text-center"
+                  disabled={isSignupPending}
+                  className="font-din-arabic w-full py-4 bg-black text-white hover:bg-black/90 transition-all duration-300 text-center flex items-center justify-center gap-2"
                 >
-                  Create account
+                  {isSignupPending ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Creating account...
+                    </>
+                  ) : (
+                    "Create account"
+                  )}
                 </motion.button>
               </div>
             </form>
