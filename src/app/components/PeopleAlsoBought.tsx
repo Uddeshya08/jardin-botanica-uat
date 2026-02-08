@@ -576,7 +576,7 @@ export function PeopleAlsoBought({
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover transition-opacity duration-300"
+                      className="w-full h-full object-contain transition-opacity duration-300"
                       style={{
                         opacity: hoveredProduct === product.id ? 0 : 1,
                         userSelect: "none", // Prevent text selection
@@ -595,7 +595,7 @@ export function PeopleAlsoBought({
                     <img
                       src={product.hoverImage}
                       alt={`${product.name}`}
-                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                      className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300"
                       style={{
                         opacity: hoveredProduct === product.id ? 1 : 0,
                         userSelect: "none",
