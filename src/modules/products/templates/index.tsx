@@ -12,7 +12,7 @@ import { StickyCartBar } from "app/components/StickyCartBar"
 import { type CartItem, useCartItems } from "app/context/cart-items-context"
 import { notFound } from "next/navigation"
 import type React from "react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import type {
   AfterlifeSection,
   FeaturedRitualTwoSection,
@@ -76,6 +76,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   const [heroCartItem, setHeroCartItem] = useState<CartItem | null>(null)
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
 
+  // Ref for the featured ritual section to determine when to hide the sticky cart
+  const featuredRitualRef = useRef<HTMLDivElement>(null)
+
   // Wrapper function to update both heroCartItem and context
   const handleCartUpdateWrapper = (item: CartItem | null) => {
     setHeroCartItem(item)
@@ -97,9 +100,20 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
       const scrollY = window.scrollY
       setIsScrolled(scrollY > 50)
 
+      // Check if we've reached the featured ritual section
+      let isBeforeRitual = true
+      if (featuredRitualRef.current) {
+        const rect = featuredRitualRef.current.getBoundingClientRect()
+        // If the top of the ritual section is visible in the viewport or above it
+        // The sticky cart should hide when the ritual section starts entering the viewport
+        isBeforeRitual = rect.top > window.innerHeight
+      }
+
       // Show sticky cart after scrolling past the ProductHero section (approximately 450px for compact height)
       // Show by default, hide only when heroCartItem exists and quantity is explicitly 0
-      const shouldShowCart = scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0)
+      // Also hide if we've reached the ritual section
+      const shouldShowCart =
+        scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0) && isBeforeRitual
 
       // Hide sticky cart when footer copyright is visible
       const footerElement = document.querySelector("footer")
@@ -116,6 +130,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     }
 
     window.addEventListener("scroll", handleScroll)
+    // Initial check
+    handleScroll()
+
     return () => window.removeEventListener("scroll", handleScroll)
   }, [heroCartItem])
 
@@ -153,18 +170,18 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
         <Afterlife afterlifeContent={afterlifeContent} />
         <PeopleAlsoBought product={product as any} fromTheLabContent={fromTheLabContent} />
-        <FeaturedRitualTwo
-          key={`featured-ritual-two-${
-            featuredRitualTwoContent?.productHandle ||
-            featuredRitualTwoContent?.sectionKey ||
-            "default"
-          }`}
-          featuredRitualTwoContent={featuredRitualTwoContent}
-        />
+        <div ref={featuredRitualRef}>
+          <FeaturedRitualTwo
+            key={`featured-ritual-two-${featuredRitualTwoContent?.productHandle ||
+              featuredRitualTwoContent?.sectionKey ||
+              "default"
+              }`}
+            featuredRitualTwoContent={featuredRitualTwoContent}
+          />
+        </div>
         <CustomerTestimonials
-          key={`customer-testimonials-${
-            testimonialsContent?.productHandle || testimonialsContent?.sectionKey || "default"
-          }`}
+          key={`customer-testimonials-${testimonialsContent?.productHandle || testimonialsContent?.sectionKey || "default"
+            }`}
           testimonialsContent={testimonialsContent}
         />
         <Featured featuredContent={featuredContent} />
