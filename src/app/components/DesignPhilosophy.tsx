@@ -119,7 +119,7 @@ export function DesignPhilosophy() {
               viewport={{ once: true }}
               className="space-y-4"
             >
-              <p className="font-din-arabic text-lg text-black/75 leading-relaxed max-w-lg">
+              <p className="font-american-typewriter text-lg text-black/75 leading-relaxed max-w-lg">
                 We study living collections and translate them into disciplined blends measured
                 actives, climate-smart bases. Design carries it home the weight in your palm, the
                 arc of a pump, the soft dry-down turning daily gestures into deliberate pleasure.

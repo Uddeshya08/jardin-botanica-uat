@@ -86,7 +86,7 @@ const Newsletter = () => {
             viewport={{ once: true }}
             className="font-american-typewriter text-3xl lg:text-4xl tracking-tight mb-6 text-black"
           >
-            Join the circle
+            Join the Circle
           </motion.h3>
           <motion.p
             initial={{ opacity: 0, y: 20 }}

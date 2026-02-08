@@ -51,7 +51,7 @@ const heroPanels: HeroPanel[] = [
     description:
       "An invitation to the inner world.\nEarly access. Limited blends. Private gatherings.",
     imageUrl: "https://images.unsplash.com/photo-1740513348123-72148a7dbf5b",
-    cta: "Join the circle",
+    cta: "Join the Circle",
   },
 ]
 

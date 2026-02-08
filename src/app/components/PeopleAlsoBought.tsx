@@ -186,19 +186,19 @@ export function PeopleAlsoBought({
       if (parsed && typeof parsed === "object") {
         const products: Card[] = Array.isArray(parsed.products)
           ? parsed.products.map(
-            (p: any, i: number): Card => ({
-              id: p?.id ?? i + 1,
-              name: String(p?.name ?? ""),
-              price: typeof p?.price === "number" ? p.price : undefined,
-              currency: typeof p?.currency === "string" ? p.currency : undefined,
-              image: typeof p?.image === "string" ? p.image : undefined,
-              hoverImage: typeof p?.hoverImage === "string" ? p.hoverImage : undefined,
-              description: typeof p?.description === "string" ? p.description : undefined,
-              badge: typeof p?.badge === "string" ? p.badge : undefined,
-              url: typeof p?.url === "string" ? p.url : undefined,
-              variantId: typeof p?.variantId === "string" ? p.variantId : undefined,
-            })
-          )
+              (p: any, i: number): Card => ({
+                id: p?.id ?? i + 1,
+                name: String(p?.name ?? ""),
+                price: typeof p?.price === "number" ? p.price : undefined,
+                currency: typeof p?.currency === "string" ? p.currency : undefined,
+                image: typeof p?.image === "string" ? p.image : undefined,
+                hoverImage: typeof p?.hoverImage === "string" ? p.hoverImage : undefined,
+                description: typeof p?.description === "string" ? p.description : undefined,
+                badge: typeof p?.badge === "string" ? p.badge : undefined,
+                url: typeof p?.url === "string" ? p.url : undefined,
+                variantId: typeof p?.variantId === "string" ? p.variantId : undefined,
+              })
+            )
           : defaults.products
 
         return {
@@ -506,7 +506,7 @@ export function PeopleAlsoBought({
 
       <div
         ref={scrollContainerRef}
-        className="flex overflow-x-auto scrollbar-hide py-8 relative"
+        className="flex overflow-x-auto scrollbar-hide pt-8 pb-4 relative"
         style={{
           scrollSnapType: "x mandatory",
           WebkitOverflowScrolling: "touch",
@@ -576,7 +576,7 @@ export function PeopleAlsoBought({
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover transition-opacity duration-300"
+                      className="w-full h-full object-contain transition-opacity duration-300"
                       style={{
                         opacity: hoveredProduct === product.id ? 0 : 1,
                         userSelect: "none", // Prevent text selection
@@ -595,7 +595,7 @@ export function PeopleAlsoBought({
                     <img
                       src={product.hoverImage}
                       alt={`${product.name}`}
-                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                      className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300"
                       style={{
                         opacity: hoveredProduct === product.id ? 1 : 0,
                         userSelect: "none",
@@ -660,7 +660,7 @@ export function PeopleAlsoBought({
                     e.stopPropagation()
                     handleAddToCart(product)
                   }}
-                  className="w-full mt-3 md:mt-4 px-3 md:px-4 py-2 bg-transparent border border-black/20 text-black hover:bg-black hover:text-white transition-all duration-300 font-din-arabic text-xs md:text-sm tracking-wide opacity-0 md:group-hover:opacity-100 text-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full mt-3 md:mt-4 px-3 md:px-4 py-2 bg-transparent border border-black/20 text-black hover:bg-black hover:text-white transition-all duration-300 font-din-arabic text-xs md:text-sm tracking-wide text-center disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={(adding === product.id || isPending) && !product.variantId}
                 >
                   {adding === product.id || (isPending && addedToCart === product.id)
@@ -723,7 +723,7 @@ export function PeopleAlsoBought({
       {/* Scroll bar */}
       <div
         className="px-4 md:px-6 lg:px-12 relative"
-        style={{ paddingTop: "3rem", paddingBottom: "20px" }}
+        style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}

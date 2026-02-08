@@ -196,8 +196,9 @@ function ProductCard({
         >
           <Heart
             size={18}
-            className={`transition-colors duration-300 ${isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+            className={`transition-colors duration-300 ${
+              isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+            }`}
           />
         </button>
       </div>
@@ -357,7 +358,14 @@ export function ProductCarousel({
     const autoScrollInterval = setInterval(() => {
       const currentIndex = api.selectedScrollSnap()
       const totalSnaps = api.scrollSnapList().length
-      const nextIndex = (currentIndex + 1) % totalSnaps
+
+      // Stop auto-scroll when reaching the last item
+      if (currentIndex >= totalSnaps - 1) {
+        clearInterval(autoScrollInterval)
+        return
+      }
+
+      const nextIndex = currentIndex + 1
       api.scrollTo(nextIndex)
     }, 5000) // 5 second interval
 
@@ -673,7 +681,7 @@ export function ProductCarousel({
             setApi={setApi}
             opts={{
               align: "start",
-              loop: true,
+              loop: false,
               dragFree: true,
               containScroll: "trimSnaps",
               watchDrag: true,
@@ -700,9 +708,7 @@ export function ProductCarousel({
         </div>
 
         {/* Slider Bar - Web and Mobile - Centered */}
-        <div
-          className="flex justify-center items-center w-full pt-12 lg:pt-16"
-        >
+        <div className="flex justify-center items-center w-full pt-12 lg:pt-16">
           <div
             ref={sliderRef}
             className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"

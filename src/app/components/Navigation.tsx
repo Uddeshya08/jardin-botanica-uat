@@ -644,7 +644,7 @@ export function Navigation({
                                             fontSize: "0.95rem",
                                           }}
                                         >
-                                          <span className="relative inline-block">
+                                          <span className="relative inline-block whitespace-pre">
                                             {dItem.titleContent
                                               ? documentToReactComponents(dItem.titleContent, {
                                                   renderNode: {
@@ -652,7 +652,7 @@ export function Navigation({
                                                       node: any,
                                                       children: any
                                                     ) => (
-                                                      <span className="inline-block">
+                                                      <span className="inline-block whitespace-pre">
                                                         {children}
                                                       </span>
                                                     ),
@@ -674,7 +674,7 @@ export function Navigation({
                                         }}
                                         onMouseEnter={() => handleDropdownItemHover(dItem.label)}
                                       >
-                                        <span className="relative inline-block">
+                                        <span className="relative inline-block whitespace-pre">
                                           {dItem.titleContent
                                             ? documentToReactComponents(dItem.titleContent, {
                                                 renderNode: {
@@ -682,7 +682,9 @@ export function Navigation({
                                                     node: any,
                                                     children: any
                                                   ) => (
-                                                    <span className="inline-block">{children}</span>
+                                                    <span className="inline-block whitespace-pre">
+                                                      {children}
+                                                    </span>
                                                   ),
                                                 },
                                               })
@@ -1346,7 +1348,7 @@ export function Navigation({
               className="w-full font-din-arabic py-2 border text-black hover:bg-black/5 transition-colors tracking-wide"
               style={{ borderColor: "rgba(0, 0, 0, 0.2)" }}
             >
-              Keep Browsing
+              Keep browsing
             </button>
           </div>
           <div className="pt-4 text-center">
