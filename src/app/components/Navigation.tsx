@@ -338,6 +338,14 @@ export function Navigation({
     return countryMatch ? countryMatch[1] : "in"
   }
 
+  const prefixCountryCode = (href: string | undefined): string => {
+    if (!href || href === "#") return "#"
+    if (href.startsWith("http")) return href
+    const countryCode = getCountryCode()
+    if (href.startsWith(`/${countryCode}/`)) return href
+    return href.startsWith("/") ? `/${countryCode}${href}` : `/${countryCode}/${href}`
+  }
+
   const handleHeartClick = () => {
     if (userIsLoggedIn) {
       // User is logged in, redirect to ledger
@@ -585,7 +593,7 @@ export function Navigation({
                       </motion.span>
                     ) : (
                       <motion.a
-                        href={item.href}
+                        href={prefixCountryCode(item.href)}
                         initial={disableAnimations ? undefined : { opacity: 0, y: -10 }}
                         animate={disableAnimations ? undefined : { opacity: 1, y: 0 }}
                         transition={
@@ -666,7 +674,7 @@ export function Navigation({
                                     return (
                                       <a
                                         key={dItem.label}
-                                        href={dItem.href}
+                                        href={prefixCountryCode(dItem.href)}
                                         className="group/dropdown-item block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150"
                                         style={{
                                           color: "#000",
@@ -1243,7 +1251,7 @@ export function Navigation({
                                     return (
                                       <a
                                         key={dropdownItem.label}
-                                        href={dropdownItem.href}
+                                        href={prefixCountryCode(dropdownItem.href)}
                                         className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                       >
@@ -1271,7 +1279,7 @@ export function Navigation({
                     return (
                       <a
                         key={item.name}
-                        href={item.href}
+                        href={prefixCountryCode(item.href)}
                         className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
@@ -1279,15 +1287,6 @@ export function Navigation({
                       </a>
                     )
                   })}
-
-                  {/* Mobile-only: Gift Sets */}
-                  <a
-                    href="/in/gift-sets"
-                    className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    GIFT SETS
-                  </a>
                 </nav>
 
                 {/* Mobile Quick Actions */}
