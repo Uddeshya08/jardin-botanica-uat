@@ -81,7 +81,7 @@ export function StickyCartBar({
   // FIX: Prioritize passed props if they exist (for cases like hands/page where local state tracks the funnel),
   // otherwise fall back to global context.
   const cartItems =
-    cartItemsProp && cartItemsProp.length > 0 ? cartItemsProp : cartContext?.cartItems ?? []
+    cartItemsProp && cartItemsProp.length > 0 ? cartItemsProp : (cartContext?.cartItems ?? [])
   const onCartUpdate = cartContext?.handleCartUpdate ?? onCartUpdateProp
   const [quantity, setQuantity] = useState(1)
   const [isAddedToCart, setIsAddedToCart] = useState(false)
@@ -484,9 +484,9 @@ export function StickyCartBar({
       ritualProductId: ritualProduct.variantId,
       existingRitualProduct: existingRitualProduct
         ? {
-          id: existingRitualProduct.id,
-          quantity: existingRitualProduct.quantity,
-        }
+            id: existingRitualProduct.id,
+            quantity: existingRitualProduct.quantity,
+          }
         : null,
     })
 
@@ -703,11 +703,9 @@ export function StickyCartBar({
                             color: showGoToCart ? "#f97316" : "#545d4a",
                           }}
                         >
-                          {showRitualSuggestion && !ritualCompleted
-                            ? "Complete your ritual"
-                            : showGoToCart
-                              ? "Order qualifies for complimentary shipping"
-                              : "Order qualifies for complimentary shipping"}
+                          {showGoToCart
+                            ? "Order qualifies for complimentary shipping"
+                            : "Order qualifies for complimentary shipping"}
                         </motion.p>
                       )}
                     </div>

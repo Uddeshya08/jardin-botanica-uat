@@ -587,7 +587,7 @@ export function Navigation({
                             : { delay: 0.4 + index * 0.1, duration: 0.4 }
                         }
                         className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative whitespace-nowrap cursor-default"
-                        style={{ color: navStyles.textColor }}
+                        style={{ color: "#9ca3af" }}
                       >
                         {item.name}
                       </motion.span>
@@ -648,7 +648,7 @@ export function Navigation({
                                           key={dItem.label}
                                           className="block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150 cursor-default"
                                           style={{
-                                            color: "#000",
+                                            color: "#9ca3af",
                                             fontSize: "0.95rem",
                                           }}
                                         >

@@ -123,6 +123,7 @@ export function PeopleAlsoBought({
   const [scrollProgress, setScrollProgress] = useState(0)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
+  const [needsScroll, setNeedsScroll] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   // Use a ref for hasInteracted to access instantaneous value in interval closure if needed,
@@ -239,6 +240,7 @@ export function PeopleAlsoBought({
       setScrollProgress(progress)
       setCanScrollLeft(scrollLeft > 10)
       setCanScrollRight(scrollLeft < maxScroll - 10)
+      setNeedsScroll(scrollWidth > clientWidth)
     }
   }
   const scroll = (dir: "left" | "right") => {
@@ -720,41 +722,43 @@ export function PeopleAlsoBought({
         </div>
       )}
 
-      {/* Scroll bar */}
-      <div
-        className="px-4 md:px-6 lg:px-12 relative"
-        style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true }}
-          className="w-full space-y-3"
+      {/* Scroll bar - only show when there are enough items to scroll */}
+      {needsScroll && (
+        <div
+          className="px-4 md:px-6 lg:px-12 relative"
+          style={{ paddingTop: "1.5rem", paddingBottom: "20px" }}
         >
-          <div
-            ref={scrollBarRef}
-            className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full overflow-hidden cursor-pointer group select-none mx-auto"
-            onClick={handleScrollBarClick}
-            onMouseMove={handleScrollBarDrag}
-            onMouseDown={(e) => e.preventDefault()}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="w-full space-y-3"
           >
-            <motion.div
-              className="h-full rounded-full cursor-grab active:cursor-grabbing transition-all duration-200 group-hover:h-1 select-none absolute"
-              style={{
-                background: "#a28b6f",
-                width: "20%",
-                left: `${scrollProgress * 0.8}%`,
-              }}
-              onMouseDown={(e) => {
-                e.preventDefault()
-                setIsDragging(true)
-              }}
-              transition={{ duration: 0.1, ease: "easeOut" }}
-            />
-          </div>
-        </motion.div>
-      </div>
+            <div
+              ref={scrollBarRef}
+              className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full overflow-hidden cursor-pointer group select-none mx-auto"
+              onClick={handleScrollBarClick}
+              onMouseMove={handleScrollBarDrag}
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              <motion.div
+                className="h-full rounded-full cursor-grab active:cursor-grabbing transition-all duration-200 group-hover:h-1 select-none absolute"
+                style={{
+                  background: "#a28b6f",
+                  width: "20%",
+                  left: `${scrollProgress * 0.8}%`,
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  setIsDragging(true)
+                }}
+                transition={{ duration: 0.1, ease: "easeOut" }}
+              />
+            </div>
+          </motion.div>
+        </div>
+      )}
     </section>
   )
 }
