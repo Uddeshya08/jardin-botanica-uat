@@ -1210,7 +1210,7 @@ const Candles = () => {
       />
       <PageBanner
         pageKey="candles"
-        containerClassName="absolute top-[37%] md:top-1/2 ps-6 md:left-[70px] md:-translate-y-1/2 max-w-xs md:max-w-md"
+        containerClassName="absolute top-[37%] md:top-1/2 ps-6 md:ps-0 md:left-9 lg:left-[4.5rem] md:-translate-y-1/2 max-w-xs md:max-w-md"
       />
       {/* Mobile Product Carousel Section - Mobile Only */}
       {!isLoadingCollection && candlesCollection.length > 0 && (

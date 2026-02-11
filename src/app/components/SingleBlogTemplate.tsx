@@ -40,7 +40,7 @@ const FeaturedBlogProduct = ({
   variants?: any[]
   isMobile?: boolean
 }) => {
-  const [isAdding, setIsAdding] = useState(false)
+  const [isInCart, setIsInCart] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const cardRef = React.useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
@@ -88,7 +88,6 @@ const FeaturedBlogProduct = ({
       return
     }
 
-    setIsAdding(true)
     try {
       await addToCart({
         variantId: selectedVariant.id,
@@ -96,11 +95,11 @@ const FeaturedBlogProduct = ({
         countryCode,
       })
       toast.success(`${name} added to cart`, { duration: 2000 })
+      setIsInCart(true)
+      setTimeout(() => setIsInCart(false), 2000)
     } catch (error) {
       console.error("Error adding to cart:", error)
       toast.error((error as Error)?.message || "Failed to add to cart")
-    } finally {
-      setIsAdding(false)
     }
   }
 
@@ -174,13 +173,13 @@ const FeaturedBlogProduct = ({
           fontFamily: '"DIN Arabic Regular"',
         }}
         onClick={handleAddToCart}
-        disabled={!selectedVariant || isAdding}
+        disabled={!selectedVariant}
       >
         <span className="text-inherit group-hover/btn-wrapper:text-white transition-colors duration-300">
-          {isAdding ? "Adding..." : "Add to cart"}
+          {isInCart ? "In cart" : "Add to cart"}
         </span>
         <span className="ml-2 text-inherit group-hover/btn-wrapper:text-white text-xs transition-colors duration-300">
-          →
+          {isInCart ? "✓" : "→"}
         </span>
       </button>
     </div>
