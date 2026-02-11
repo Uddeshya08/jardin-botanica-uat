@@ -279,30 +279,78 @@ export function StickyCartBar({
     currentTotalMinor = mainProductTotal
   }
 
+  // Calculate existing cart total (excluding current product to avoid double counting)
+  const existingCartTotal = useMemo(() => {
+    if (!cartItems || cartItems.length === 0) return 0
+
+    const productId = product?.id ?? variant?.id
+
+    return cartItems.reduce((total, item) => {
+      // Skip the current product to avoid double counting
+      const itemVariantId = (item as any).variant_id
+      const isCurrentProduct =
+        item.id === productId ||
+        item.product_id === productId ||
+        itemVariantId === variant?.id ||
+        item.id === variant?.id ||
+        item.id.startsWith(`${productId}-`) ||
+        item.id.includes(`-${variant?.id}`)
+
+      if (isCurrentProduct) return total
+
+      // Skip ritual product if it matches
+      if (ritualProduct) {
+        const isRitualProduct =
+          item.id === ritualProduct.variantId || itemVariantId === ritualProduct.variantId
+        if (isRitualProduct) return total
+      }
+
+      // Add item total (unit price * quantity)
+      const itemPrice = (item as any).unit_price || item.price || 0
+      const itemQuantity = item.quantity || 1
+      return total + itemPrice * itemQuantity
+    }, 0)
+  }, [cartItems, product, variant, ritualProduct])
+
+  // Check if ritual product is actually in cart (for qualification purposes)
+  const ritualProductInCart = useMemo(() => {
+    if (!ritualProduct || !cartItems || cartItems.length === 0) return null
+    return cartItems.find((item) => {
+      const itemVariantId = (item as any).variant_id || item.id
+      return itemVariantId === ritualProduct.variantId || item.id === ritualProduct.variantId
+    })
+  }, [cartItems, ritualProduct])
+
   // Shipping qualification logic:
-  // - If showing ritual suggestion: check if ritual product alone qualifies
-  // - If ritual completed: check if combined total qualifies
-  // - Otherwise: check if main product alone qualifies
-  const qualifiesShipping = currentTotalMinor >= shippingThresholdMinor
+  // 1. All cart items sum >= 2500 (already qualifies)
+  // 2. Current item + cart items >= 2500 (will qualify after adding current item)
+  // 3. Include ritual product if it's in cart, completed, OR being suggested
+  const projectedTotalWithCurrent = existingCartTotal + mainProductTotal
+  const effectiveRitualTotal =
+    ritualProduct && (ritualProductInCart || ritualCompleted || showRitualSuggestion)
+      ? ritualProductTotal
+      : 0
+  const projectedTotalWithRitual = existingCartTotal + mainProductTotal + effectiveRitualTotal
+
+  const qualifiesShipping =
+    existingCartTotal >= shippingThresholdMinor || // Already qualifies from cart
+    projectedTotalWithCurrent >= shippingThresholdMinor || // Will qualify with current item
+    projectedTotalWithRitual >= shippingThresholdMinor // Will qualify (with ritual if available/suggested)
 
   const handleQuantityChange = (delta: number) => {
     const next = Math.min(10, Math.max(1, quantity + delta))
     setQuantity(next)
     onUpdateHeroQuantity?.(next)
 
-    // Check if this change unlocks shipping (including ritual product)
+    // Check if this change unlocks shipping (including existing cart + ritual product if available)
     const nextMainTotal = minor * next
-    const nextRitualTotal = ritualProduct ? ritualProduct.price * ritualQuantity : 0
+    const nextRitualTotal =
+      ritualProduct && (ritualProductInCart || ritualCompleted || showRitualSuggestion)
+        ? ritualProduct.price * ritualQuantity
+        : 0
+    const nextProjectedTotal = existingCartTotal + nextMainTotal + nextRitualTotal
 
-    let nextTotal: number
-    if (showRitualSuggestion && !ritualCompleted) {
-      nextTotal = nextRitualTotal
-    } else if (ritualCompleted) {
-      nextTotal = nextMainTotal + nextRitualTotal
-    } else {
-      nextTotal = nextMainTotal
-    }
-    const willQualify = nextTotal >= shippingThresholdMinor
+    const willQualify = nextProjectedTotal >= shippingThresholdMinor
 
     if (!previouslyQualified && willQualify) {
       setJustUnlocked(true)
@@ -316,19 +364,15 @@ export function StickyCartBar({
     const next = Math.min(10, Math.max(1, ritualQuantity + delta))
     setRitualQuantity(next)
 
-    // Check if this change unlocks shipping (including ritual product)
+    // Check if this change unlocks shipping (including existing cart + main product + ritual if available)
     const nextMainTotal = minor * quantity
-    const nextRitualTotal = ritualProduct ? ritualProduct.price * next : 0
+    const nextRitualTotal =
+      ritualProduct && (ritualProductInCart || ritualCompleted || showRitualSuggestion)
+        ? ritualProduct.price * next
+        : 0
+    const nextProjectedTotal = existingCartTotal + nextMainTotal + nextRitualTotal
 
-    let nextTotal: number
-    if (showRitualSuggestion && !ritualCompleted) {
-      nextTotal = nextRitualTotal
-    } else if (ritualCompleted) {
-      nextTotal = nextMainTotal + nextRitualTotal
-    } else {
-      nextTotal = nextMainTotal
-    }
-    const willQualify = nextTotal >= shippingThresholdMinor
+    const willQualify = nextProjectedTotal >= shippingThresholdMinor
 
     if (!previouslyQualified && willQualify) {
       setJustUnlocked(true)
@@ -698,13 +742,13 @@ export function StickyCartBar({
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="font-din-arabic text-[10px] md:text-xs truncate"
+                          className="font-din-aric text-[10px] md:text-xs truncate"
                           style={{
                             color: showGoToCart ? "#f97316" : "#545d4a",
                           }}
                         >
-                          {showGoToCart
-                            ? "Order qualifies for complimentary shipping"
+                          {existingCartTotal >= shippingThresholdMinor
+                            ? "Cart qualifies for complimentary shipping"
                             : "Order qualifies for complimentary shipping"}
                         </motion.p>
                       )}

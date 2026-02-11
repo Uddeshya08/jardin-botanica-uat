@@ -505,3 +505,63 @@ export const verifyEmailAndSetPassword = async (data: {
     }
   }
 }
+
+/**
+ * Update customer password - requires current password for security
+ */
+export const updateCustomerPassword = async (data: {
+  current_password: string
+  new_password: string
+}): Promise<{ success: boolean; message: string; error?: string }> => {
+  try {
+    const authHeaders = await getAuthHeaders()
+
+    if (!authHeaders || !("authorization" in authHeaders)) {
+      return {
+        success: false,
+        message: "Not authenticated",
+        error: "NOT_AUTHENTICATED",
+      }
+    }
+
+    const headers = {
+      "Content-Type": "application/json",
+      "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+      ...authHeaders,
+    }
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/store/custom/password/change`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          current_password: data.current_password,
+          new_password: data.new_password,
+        }),
+      }
+    )
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result.message || "Failed to update password",
+        error: result.type || "REQUEST_FAILED",
+      }
+    }
+
+    return {
+      success: true,
+      message: result.message || "Password updated successfully",
+    }
+  } catch (error: any) {
+    console.error("Password update error:", error)
+    return {
+      success: false,
+      message: error.message || "An error occurred",
+      error: "UNKNOWN_ERROR",
+    }
+  }
+}

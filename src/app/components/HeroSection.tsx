@@ -280,14 +280,10 @@ export function HeroSection() {
                 <motion.h1
                   key={`title-${activePanel}`}
                   className="font-american-typewriter text-5xl md:text-6xl lg:text-7xl mb-6 tracking-tight"
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{
-                    ...springTransition,
-                    stiffness: 250,
-                    damping: 25,
-                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                   {currentPanel.subtitle}
                 </motion.h1>
@@ -300,15 +296,10 @@ export function HeroSection() {
                     <motion.div
                       key={`description-${activePanel}`}
                       className="font-din-arabic text-xl md:text-2xl text-white/90 leading-relaxed"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -15 }}
-                      transition={{
-                        ...springTransition,
-                        stiffness: 250,
-                        damping: 25,
-                        delay: 0.08,
-                      }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
                     >
                       {currentPanel.description.split("\n").map((line, i) => (
                         <span key={i}>
@@ -371,10 +362,10 @@ export function HeroSection() {
                         ? "bg-white text-black"
                         : "text-white border border-white/30"
                     }`}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -15 }}
-                    transition={{ ...springTransition, delay: 0.15 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.4, ease: "easeOut", delay: 0.15 }}
                     onClick={() => handleCTAClick(activePanel)}
                     style={{
                       WebkitTapHighlightColor: "transparent",

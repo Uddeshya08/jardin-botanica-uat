@@ -298,12 +298,13 @@ export function HomeCreationsPage({
                     key={filter.value}
                     onClick={() => !isDisabled && setSelectedFilter(filter.value)}
                     disabled={isDisabled}
-                    className={`font-din-arabic text-sm transition-colors duration-300 ${isDisabled
+                    className={`font-din-arabic text-sm transition-colors duration-300 ${
+                      isDisabled
                         ? "text-black/20"
                         : selectedFilter === filter.value
                           ? "text-black border-b border-black"
                           : "text-black/40 hover:text-black/70"
-                      }`}
+                    }`}
                     style={{ letterSpacing: "0.15em" }}
                   >
                     {filter.label}
@@ -477,10 +478,11 @@ function ProductCard({
               e.stopPropagation()
               handleToggleLedger(product)
             }}
-            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${isInLedger(product.id)
+            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
+              isInLedger(product.id)
                 ? "bg-white/20 border border-white/30"
                 : "bg-white/20 border border-white/30 hover:bg-white/30"
-              }`}
+            }`}
             aria-label={`${isInLedger(product.id) ? "Remove from" : "Add to"} ledger`}
           >
             <Heart
@@ -510,14 +512,21 @@ function ProductCard({
           </div>
         </Link>
 
-        {product.subtitle && (
+        {product.description ? (
+          <p
+            className="font-din-arabic text-black/70 leading-relaxed mt-3"
+            style={{ letterSpacing: "0.1em" }}
+          >
+            {product.description.split(".")[0]}
+          </p>
+        ) : product.subtitle ? (
           <p
             className="font-din-arabic text-black/70 leading-relaxed mt-3"
             style={{ letterSpacing: "0.1em" }}
           >
             {product.subtitle}
           </p>
-        )}
+        ) : null}
 
         <div className="mt-auto pt-4">
           <p className="font-din-arabic text-black text-sm mb-4" style={{ letterSpacing: "0.1em" }}>
@@ -685,8 +694,9 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[500px] overflow-hidden ${feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
-            }`}
+          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[500px] overflow-hidden ${
+            feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
+          }`}
         >
           <ImageWithFallback
             src={feature.image}
