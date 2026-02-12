@@ -1,9 +1,10 @@
 "use client"
 
-import { requestEmailUpdate, updateCustomer } from "@lib/data/customer"
+import { requestEmailUpdate, updateCustomer, updateCustomerPassword } from "@lib/data/customer"
 import type { HttpTypes } from "@medusajs/types"
 import { Pencil } from "lucide-react"
 import { motion } from "motion/react"
+import Link from "next/link"
 import type React from "react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -19,7 +20,6 @@ import {
 import { Input } from "../../../../app/components/ui/input"
 import { Label } from "../../../../app/components/ui/label"
 import { ScrollArea } from "../../../../app/components/ui/scroll-area"
-import Link from "next/link"
 
 type OverviewProps = {
   customer: HttpTypes.StoreCustomer | null
@@ -87,17 +87,38 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
       toast.error("Passwords do not match")
       return
     }
+    if (!passwordData.currentPassword) {
+      toast.error("Please enter your current password")
+      return
+    }
+    if (passwordData.newPassword.length < 8) {
+      toast.error("New password must be at least 8 characters long")
+      return
+    }
     setLoading("password")
-    // Note: Password update would need to be implemented via Medusa API
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setLoading(null)
-    setChangePasswordOpen(false)
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    })
-    toast.success("Password updated successfully")
+    try {
+      const result = await updateCustomerPassword({
+        current_password: passwordData.currentPassword,
+        new_password: passwordData.newPassword,
+      })
+
+      setLoading(null)
+
+      if (result.success) {
+        setChangePasswordOpen(false)
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        })
+        toast.success("Password updated successfully")
+      } else {
+        toast.error(result.message || "Failed to update password")
+      }
+    } catch (error: any) {
+      setLoading(null)
+      toast.error(error?.message || "An error occurred. Please try again.")
+    }
   }
 
   const handleRequestEmailUpdate = async () => {
@@ -530,7 +551,10 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
 
           <p className="font-din-arabic text-sm text-black/40 tracking-wide leading-relaxed mb-8">
             For details on how we handle your data, please see our{" "}
-            <Link href="/privacy-policy" className="underline hover:text-black/60 transition-colors">
+            <Link
+              href="/privacy-policy"
+              className="underline hover:text-black/60 transition-colors"
+            >
               Privacy Policy
             </Link>
           </p>
