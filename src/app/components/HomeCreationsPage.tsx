@@ -517,7 +517,7 @@ function ProductCard({
             className="font-din-arabic text-black/70 leading-relaxed mt-3"
             style={{ letterSpacing: "0.1em" }}
           >
-            {product.description.split(".")[0]}
+            {product.description.split(".")[0]}.
           </p>
         ) : product.subtitle ? (
           <p
