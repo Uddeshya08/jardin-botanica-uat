@@ -1,11 +1,12 @@
 "use client"
 
-import { getAllGiftSets } from "@lib/data/contentful"
+import { addBundleToCart, getAllBundlesWithVariants } from "@lib/data/bundles"
+import { emitCartUpdated } from "@lib/util/cart-client"
+import { useCartItems } from "app/context/cart-items-context"
 import { ChevronDown, ChevronRight, Star } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import React, { useEffect, useState } from "react"
 import { toast } from "sonner"
-import type { GiftSet } from "../../types/contentful"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 // Placeholder images - replace with actual images when available
@@ -53,11 +54,8 @@ interface Product {
 
 interface GiftSetsPageProps {
   onClose: () => void
-
   onToggleLedger: (item: any) => void
-
   ledger: any[]
-
   onAddToCart: (item: any) => void
 }
 
@@ -82,10 +80,13 @@ interface Product {
   layout?: "large" | "standard"
   hasCandles?: boolean
   // Dynamic candle options from Contentful
-  candleOptions?: { name: string; size: string }[]
+  candleOptions?: { name: string; size: string; variantId: string }[]
+  // Store slot info for proper selection mapping
+  choiceSlots?: { id: string; slotName: string }[]
 }
 
 export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: GiftSetsPageProps) {
+  const { handleCartUpdate: updateCartContext } = useCartItems()
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
 
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
@@ -106,45 +107,90 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
     [key: string]: number
   }>({})
 
-  // Dynamic state for products from Contentful
+  // Dynamic state for products from Medusa bundles
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // Fetch gift sets from Contentful
+  // Fetch bundles from Medusa
   useEffect(() => {
-    const fetchGiftSets = async () => {
+    const fetchBundles = async () => {
       setIsLoading(true)
       try {
-        const giftSets = await getAllGiftSets()
-        const mapped: Product[] = giftSets.map((gs) => ({
-          id: gs.handle,
-          name: gs.title,
-          description: gs.description,
-          category: gs.category,
-          price: gs.price,
-          image: gs.coverImage,
-          images: gs.images.length > 0 ? gs.images : undefined,
-          hoverImage: gs.hoverImage || undefined,
-          featured: gs.featured,
-          items: gs.productSetsIncluded,
-          // Derived fields
-          hasCandles: gs.questions.length > 0,
-          layout: gs.featured ? ("large" as const) : ("standard" as const),
-          // Dynamic candle options from questions
-          candleOptions: gs.questions[0]?.options || [],
-          // Default empty values for fields not in Contentful
-          size: "",
-          botanical: "",
-          property: "",
-        }))
+        const bundles = await getAllBundlesWithVariants()
+        const mapped: Product[] = bundles.map((bundle: any) => {
+          // Get category from metadata or default to 'discovery'
+          const category = (bundle.metadata?.category as string) || "discovery"
+
+          const variantDetails = bundle.variantDetails || new Map()
+
+          // Transform choice_slots to candleOptions format - only include options with valid variant details
+          const candleOptions = (bundle.choice_slots || []).flatMap((slot: any) =>
+            (slot.options || [])
+              .map((opt: any) => {
+                const variantDetail = variantDetails.get(opt.medusa_variant_id)
+                // Skip if no variant detail found
+                if (!variantDetail) return null
+                // Build display name from product name + variant title
+                let displayName = variantDetail.productName
+                if (variantDetail.title && variantDetail.title !== "Default") {
+                  displayName += ` - ${variantDetail.title}`
+                }
+                return {
+                  name: displayName,
+                  size: variantDetail?.options?.[0]?.value || "Standard",
+                  variantId: opt.medusa_variant_id,
+                }
+              })
+              .filter(Boolean)
+          )
+
+          // Transform items to display names - only include items with valid variant details
+          const itemsList = (bundle.items || [])
+            .map((item: any) => {
+              const variantDetail = variantDetails.get(item.medusa_variant_id)
+              if (!variantDetail) return null
+              let itemName = variantDetail.productName
+              if (variantDetail.title && variantDetail.title !== "Default") {
+                itemName += ` - ${variantDetail.title}`
+              }
+              return itemName
+            })
+            .filter(Boolean)
+
+          return {
+            id: bundle.id,
+            name: bundle.title,
+            description: bundle.description || "",
+            category,
+            price: bundle.bundle_price,
+            image: bundle.productImages?.[0] || bundle.bundle_image || giftSetHeroImage,
+            images:
+              bundle.productImages && bundle.productImages.length > 1
+                ? bundle.productImages
+                : undefined,
+            hoverImage: bundle.productImages?.[1] || undefined,
+            featured: bundle.is_featured,
+            items: itemsList,
+            hasCandles: (bundle.choice_slots || []).length > 0,
+            layout: bundle.is_featured ? ("large" as const) : ("standard" as const),
+            candleOptions,
+            choiceSlots: (bundle.choice_slots || []).map((slot: any) => ({
+              id: slot.id,
+              slotName: slot.slot_name,
+            })),
+            size: "",
+            botanical: "",
+            property: "",
+          }
+        })
         setProducts(mapped)
       } catch (error) {
-        console.error("Error fetching gift sets:", error)
+        console.error("Error fetching bundles:", error)
       } finally {
         setIsLoading(false)
       }
     }
-    fetchGiftSets()
+    fetchBundles()
   }, [])
 
   // Auto-scroll images on mobile every 2 seconds
@@ -199,20 +245,59 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
     }
   }
 
-  const handleAddToCart = (product: Product) => {
-    const cartItem = {
-      ...product,
+  const handleAddToCart = async (product: Product) => {
+    // Build selections object for choice slots - keyed by slot ID
+    const selections: Record<string, string[]> = {}
 
-      selectedCandle: selectedCandles[product.id],
+    // Get the slot IDs for this product
+    const slotIds = product.choiceSlots?.map((s) => s.id) || []
 
-      personalMessage: personalMessages[product.id],
+    // Get the variant ID selected for this product (keyed by product.id)
+    const selectedVariantId = selectedCandles[product.id]
+
+    if (selectedVariantId) {
+      // Use the first slot ID (assuming one candle slot per bundle)
+      if (slotIds.length > 0) {
+        selections[slotIds[0]] = [selectedVariantId]
+      }
     }
 
-    onAddToCart(cartItem)
+    // Use the Medusa bundle add-to-cart (server action handles cart internally)
+    try {
+      await addBundleToCart(product.id, {
+        quantity: 1,
+        selections,
+        metadata: {
+          personalMessage: personalMessages[product.id] || "",
+        },
+      })
 
-    toast.success(`${product.name} added to cart`, {
-      duration: 2000,
-    })
+      // Update cart context directly for instant UI feedback
+      if (updateCartContext) {
+        updateCartContext({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+          image: product.image,
+          metadata: {
+            personalMessage: personalMessages[product.id] || "",
+            selections,
+          },
+        })
+      }
+
+      emitCartUpdated({ quantityDelta: 1 })
+
+      toast.success(`${product.name} added to cart`, {
+        duration: 2000,
+      })
+    } catch (error) {
+      console.error("Error adding bundle to cart:", error)
+      toast.error("Failed to add to cart", {
+        duration: 2000,
+      })
+    }
   }
 
   const toggleItemsExpanded = (productId: string) => {
@@ -666,7 +751,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                                 <label
                                   key={`${product.id}-candle-${idx}`}
                                   className={`flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded cursor-pointer transition-all duration-200 ${
-                                    selectedCandles[product.id] === candle.name
+                                    selectedCandles[product.id] === candle.variantId
                                       ? "border border-[#e58a4d]"
                                       : "border border-transparent"
                                   }`}
@@ -674,9 +759,11 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                                   <input
                                     type="radio"
                                     name={`candle-${product.id}`}
-                                    value={candle.name}
-                                    checked={selectedCandles[product.id] === candle.name}
-                                    onChange={() => handleCandleSelect(product.id, candle.name)}
+                                    value={candle.variantId}
+                                    checked={selectedCandles[product.id] === candle.variantId}
+                                    onChange={() =>
+                                      handleCandleSelect(product.id, candle.variantId)
+                                    }
                                     className="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-[#e58a4d]"
                                   />
 
