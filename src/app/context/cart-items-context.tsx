@@ -70,12 +70,16 @@ export function CartItemsProvider({
         })
 
         if (existingIndex >= 0) {
-          // Update existing item
+          // Update existing item - increment quantity instead of replacing
           const updatedItems = [...prevItems]
-          updatedItems[existingIndex] = item
-          console.log("✅ Updated existing cart item:", {
-            old: prevItems[existingIndex],
-            new: item,
+          const existingItem = updatedItems[existingIndex]
+          updatedItems[existingIndex] = {
+            ...existingItem,
+            quantity: existingItem.quantity + item.quantity,
+          }
+          console.log("✅ Updated existing cart item quantity:", {
+            old: existingItem,
+            new: updatedItems[existingIndex],
             index: existingIndex,
           })
           return updatedItems
