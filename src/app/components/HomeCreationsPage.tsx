@@ -445,7 +445,7 @@ function ProductCard({
           onMouseLeave={() => setIsImageHovered(false)}
         >
           {/* Hover Image - Behind */}
-          {product.hoverImage && (
+          {product.hoverImage && isImageHovered && (
             <div className="absolute inset-0">
               <ImageWithFallback
                 src={product.hoverImage || ""}
@@ -458,7 +458,7 @@ function ProductCard({
           {/* Main Image - On Top */}
           <div
             className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-            style={{ opacity: isImageHovered ? 0 : 1 }}
+            style={{ opacity: isImageHovered && product.hoverImage ? 0 : 1 }}
           >
             <ImageWithFallback
               src={product.image || ""}

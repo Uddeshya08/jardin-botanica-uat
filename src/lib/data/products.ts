@@ -36,10 +36,6 @@ export const getProductByHandle = async ({
     ...(await getAuthHeaders()),
   }
 
-  const next = {
-    ...(await getCacheOptions("products")),
-  }
-
   return sdk.client
     .fetch<{ products: HttpTypes.StoreProduct[] }>(`/store/products`, {
       method: "GET",
@@ -50,8 +46,7 @@ export const getProductByHandle = async ({
           "*variants.calculated_price,+variants.inventory_quantity,*metadata,+tags,*categories,*images",
       },
       headers,
-      next,
-      cache: "force-cache",
+      next: { revalidate: 30 },
     })
     .then(({ products }) => {
       return products.length > 0 ? products[0] : null
@@ -100,10 +95,6 @@ export const listProducts = async ({
     ...(await getAuthHeaders()),
   }
 
-  const next = {
-    ...(await getCacheOptions("products")),
-  }
-
   return sdk.client
     .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(`/store/products`, {
       method: "GET",
@@ -116,8 +107,7 @@ export const listProducts = async ({
         ...queryParams,
       },
       headers,
-      next,
-      cache: "force-cache",
+      next: { revalidate: 30 },
     })
     .then(({ products, count }) => {
       const nextPage = count > offset + limit ? pageParam + 1 : null

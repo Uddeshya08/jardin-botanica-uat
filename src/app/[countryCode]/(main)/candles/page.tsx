@@ -166,7 +166,7 @@ const MobileProductCard = ({
           onMouseLeave={() => setIsImageHovered(false)}
         >
           {/* Hover Image - Behind */}
-          {item.hoverSrc && (
+          {item.hoverSrc && isImageHovered && (
             <div className="absolute inset-0">
               <ImageWithFallback
                 src={item.hoverSrc}
@@ -199,8 +199,9 @@ const MobileProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -390,7 +391,7 @@ const ProductCard = ({
             onMouseLeave={() => setIsImageHovered(false)}
           >
             {/* Hover Image - Behind */}
-            {hoverSrc && (
+            {hoverSrc && isImageHovered && (
               <div className="absolute inset-0">
                 <ImageWithFallback
                   src={hoverSrc}
@@ -403,7 +404,7 @@ const ProductCard = ({
             {/* Main Image - On Top */}
             <div
               className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-              style={{ opacity: isImageHovered ? 0 : 1 }}
+              style={{ opacity: isImageHovered && hoverSrc ? 0 : 1 }}
             >
               <ImageWithFallback
                 src={src}
@@ -420,8 +421,9 @@ const ProductCard = ({
             >
               <Heart
                 size={18}
-                className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                  }`}
+                className={`transition-colors duration-300 ${
+                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
               />
             </button>
           </div>
@@ -434,7 +436,7 @@ const ProductCard = ({
           onMouseLeave={() => setIsImageHovered(false)}
         >
           {/* Hover Image - Behind */}
-          {hoverSrc && (
+          {hoverSrc && isImageHovered && (
             <div className="absolute inset-0">
               <ImageWithFallback
                 src={hoverSrc}
@@ -447,7 +449,7 @@ const ProductCard = ({
           {/* Main Image - On Top */}
           <div
             className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-            style={{ opacity: isImageHovered ? 0 : 1 }}
+            style={{ opacity: isImageHovered && hoverSrc ? 0 : 1 }}
           >
             <ImageWithFallback
               src={src}
@@ -464,8 +466,9 @@ const ProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+              className={`transition-colors duration-300 ${
+                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
             />
           </button>
         </div>
@@ -981,8 +984,8 @@ const Candles = () => {
 
             return {
               label: product.title,
-              src: product.thumbnail || "",
-              hoverSrc: product.images?.[1]?.url || product.thumbnail || undefined,
+              src: product.images?.[0]?.url || product.thumbnail || "",
+              hoverSrc: product.images?.[1]?.url || undefined,
               url: `/products/${product.handle}`,
               order: index,
               isActive: true,
@@ -1622,36 +1625,36 @@ const Candles = () => {
                   {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
                   {isMobile
                     ? // Mobile: One product per slide
-                    candlesCollection.map((item, index) => (
-                      <CarouselItem key={index} className="banner-carousel-item">
-                        <BannerProductCard item={item} index={index} countryCode={countryCode} />
-                      </CarouselItem>
-                    ))
+                      candlesCollection.map((item, index) => (
+                        <CarouselItem key={index} className="banner-carousel-item">
+                          <BannerProductCard item={item} index={index} countryCode={countryCode} />
+                        </CarouselItem>
+                      ))
                     : // Desktop: Groups of 3 products
-                    bannerGroups.map((group, groupIndex) => (
-                      <CarouselItem key={groupIndex} className="banner-carousel-item">
-                        <div className="flex flex-row gap-0 w-full h-auto">
-                          {group.map((item, itemIndex) => {
-                            const globalIndex = groupIndex * 3 + itemIndex
-                            return (
-                              <div key={globalIndex} className="flex-1 w-1/3">
-                                <BannerProductCard
-                                  item={item}
-                                  index={globalIndex}
-                                  countryCode={countryCode}
-                                />
-                              </div>
-                            )
-                          })}
+                      bannerGroups.map((group, groupIndex) => (
+                        <CarouselItem key={groupIndex} className="banner-carousel-item">
+                          <div className="flex flex-row gap-0 w-full h-auto">
+                            {group.map((item, itemIndex) => {
+                              const globalIndex = groupIndex * 3 + itemIndex
+                              return (
+                                <div key={globalIndex} className="flex-1 w-1/3">
+                                  <BannerProductCard
+                                    item={item}
+                                    index={globalIndex}
+                                    countryCode={countryCode}
+                                  />
+                                </div>
+                              )
+                            })}
 
-                          {/* Fill remaining slots if group has less than 3 items */}
-                          {group.length < 3 &&
-                            Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
-                              <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
-                            ))}
-                        </div>
-                      </CarouselItem>
-                    ))}
+                            {/* Fill remaining slots if group has less than 3 items */}
+                            {group.length < 3 &&
+                              Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                                <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                              ))}
+                          </div>
+                        </CarouselItem>
+                      ))}
                 </CarouselContent>
               </Carousel>
               {/* Banner Carousel Slider Bar Removed */}
