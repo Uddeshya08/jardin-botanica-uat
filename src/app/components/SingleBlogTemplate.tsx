@@ -569,23 +569,23 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
                 </motion.div>
 
                 {/* Tags */}
-                <motion.div
-                  className="mb-12 pt-8"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 1.8, duration: 0.6 }}
-                >
-                  <p
-                    style={{
-                      fontFamily: "Georgia, serif",
-                      fontSize: "14px",
-                      color: "#999",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {blog?.tags?.join(", ") || blog?.categories?.join(", ")}
-                  </p>
-                </motion.div>
+                {/* <motion.div */}
+                {/*   className="mb-12 pt-8" */}
+                {/*   initial={{ y: 20, opacity: 0 }} */}
+                {/*   animate={{ y: 0, opacity: 1 }} */}
+                {/*   transition={{ delay: 1.8, duration: 0.6 }} */}
+                {/* > */}
+                {/*   <p */}
+                {/*     style={{ */}
+                {/*       fontFamily: "Georgia, serif", */}
+                {/*       fontSize: "14px", */}
+                {/*       color: "#999", */}
+                {/*       fontStyle: "italic", */}
+                {/*     }} */}
+                {/*   > */}
+                {/*     {blog?.tags?.join(", ") || blog?.categories?.join(", ")} */}
+                {/*   </p> */}
+                {/* </motion.div> */}
               </motion.div>
             </motion.div>
 

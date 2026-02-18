@@ -1736,7 +1736,7 @@ export async function getNavigation(): Promise<NavigationItem[]> {
 // ============================================================
 
 import type { Document } from "@contentful/rich-text-types"
-import type { Author, Blog } from "../../types/contentful"
+import type { Author, Blog, JournalTag } from "../../types/contentful"
 
 /**
  * Transform a Contentful blog entry to simplified Blog type
@@ -1804,6 +1804,19 @@ async function transformBlogEntry(entry: any, countryCode?: string): Promise<Blo
       }
     }
 
+    // Transform journal tags
+    const journalTags: JournalTag[] = []
+    if (Array.isArray(fields.journalTag)) {
+      fields.journalTag.forEach((tag: any) => {
+        if (tag.fields?.name) {
+          journalTags.push({
+            id: tag.sys?.id || "",
+            name: tag.fields.name,
+          })
+        }
+      })
+    }
+
     return {
       title: fields.title || "",
       slug: fields.slug || "",
@@ -1816,6 +1829,8 @@ async function transformBlogEntry(entry: any, countryCode?: string): Promise<Blo
       author,
       featuredProducts,
       tags: fields.tags || [],
+      journalTags,
+      isFeaturedBlog: fields.isFeaturedBlog || false,
     }
   } catch (error) {
     console.error("Error transforming blog entry:", error)
@@ -1826,7 +1841,7 @@ async function transformBlogEntry(entry: any, countryCode?: string): Promise<Blo
 /**
  * Fetch all blogs from Contentful
  */
-export async function getAllBlogs(limit: number = 4, countryCode?: string): Promise<Blog[]> {
+export async function getAllBlogs(limit: number = 10, countryCode?: string): Promise<Blog[]> {
   try {
     const client = getContentfulClient()
     const response = await client.getEntries({
@@ -1838,6 +1853,8 @@ export async function getAllBlogs(limit: number = 4, countryCode?: string): Prom
         "fields.publishedDate",
         "fields.image",
         "fields.imagealt",
+        "fields.journalTag",
+        "fields.isFeaturedBlog",
       ],
       order: ["-fields.publishedDate"],
       limit,
@@ -1871,6 +1888,43 @@ export async function getBlogBySlug(slug: string, countryCode?: string): Promise
   } catch (error) {
     console.error("Error fetching blog by slug:", error)
     return null
+  }
+}
+
+/**
+ * Fetch all journal tags from Contentful
+ */
+export async function getAllJournalTags(): Promise<JournalTag[]> {
+  try {
+    const client = getContentfulClient()
+    const response = await client.getEntries({
+      content_type: "journalTag",
+      limit: 100,
+      order: ["fields.name"],
+    })
+
+    const tags = response.items
+      .map((item: any) => ({
+        id: item.sys.id,
+        name: item.fields.name,
+      }))
+      .filter((tag) => tag.name) // Filter out any tags without names
+
+    // Deduplicate tags by name (just in case)
+    const uniqueTags: JournalTag[] = []
+    const seenNames = new Set<string>()
+
+    for (const tag of tags) {
+      if (!seenNames.has(tag.name)) {
+        seenNames.add(tag.name)
+        uniqueTags.push(tag)
+      }
+    }
+
+    return uniqueTags
+  } catch (error) {
+    console.error("Error fetching journal tags:", error)
+    return []
   }
 }
 
