@@ -619,6 +619,21 @@ export interface Author {
   socialLinks: string[]
 }
 
+// Journal Tag Content Types
+export interface JournalTagFields {
+  name: string
+}
+
+export interface ContentfulJournalTag extends EntrySkeletonType {
+  contentTypeId: "journalTag"
+  fields: JournalTagFields
+}
+
+export interface JournalTag {
+  id: string
+  name: string
+}
+
 // Blog Content Types
 export interface BlogFields {
   title: string
@@ -632,9 +647,36 @@ export interface BlogFields {
   author?: ContentfulAuthor
   featuredProducts?: any[] // References
   tags?: string[]
+  journalTag?: ContentfulJournalTag[] // References, many
+  isFeaturedBlog?: boolean
 }
 
 export interface ContentfulBlog extends EntrySkeletonType {
   contentTypeId: "blog"
   fields: BlogFields
+}
+
+export interface Blog {
+  title: string
+  slug: string
+  description: string
+  content: Document // Rich text document
+  publishedDate: string
+  image?: string
+  imagealt?: string
+  categories: string[]
+  author?: Author
+  featuredProducts: {
+    id: string
+    name: string
+    handle: string
+    image?: string
+    hoverImage?: string
+    description?: string
+    subtitle?: string | null
+    variants?: import("@medusajs/types").HttpTypes.StoreProductVariant[]
+  }[]
+  tags: string[]
+  journalTags: JournalTag[]
+  isFeaturedBlog?: boolean
 }
