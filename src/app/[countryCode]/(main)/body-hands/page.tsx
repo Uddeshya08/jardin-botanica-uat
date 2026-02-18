@@ -86,7 +86,7 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string) {
     .trim()
 
   // Get images
-  const image = medusaProduct.thumbnail || null
+  const image = medusaProduct.images?.[0]?.url || medusaProduct.thumbnail || null
   const hoverImage =
     medusaProduct.images && medusaProduct.images.length > 1
       ? medusaProduct.images[1].url
