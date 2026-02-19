@@ -1831,6 +1831,7 @@ async function transformBlogEntry(entry: any, countryCode?: string): Promise<Blo
       tags: fields.tags || [],
       journalTags,
       isFeaturedBlog: fields.isFeaturedBlog || false,
+      isHeroBlog: fields.isHeroBlog || false,
     }
   } catch (error) {
     console.error("Error transforming blog entry:", error)
@@ -1855,6 +1856,7 @@ export async function getAllBlogs(limit: number = 10, countryCode?: string): Pro
         "fields.imagealt",
         "fields.journalTag",
         "fields.isFeaturedBlog",
+        "fields.isHeroBlog",
       ],
       order: ["-fields.publishedDate"],
       limit,

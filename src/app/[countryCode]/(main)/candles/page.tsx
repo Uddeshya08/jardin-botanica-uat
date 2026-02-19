@@ -13,6 +13,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "app/components/ui/carousel"
+import { CarouselSlider } from "app/components/ui/carousel-slider"
 import { useCartItems } from "app/context/cart-items-context"
 import { type LedgerItem, useLedger } from "app/context/ledger-context"
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
@@ -266,7 +267,7 @@ const ProductCard = ({
 }: {
   src: string
   label: string
-  hoverSrc: string
+  hoverSrc?: string
   url?: string
   index: number
   productId: string
@@ -431,20 +432,23 @@ const ProductCard = ({
       ) : (
         <div
           className="relative w-full overflow-hidden cursor-pointer"
-          style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
+          style={{ aspectRatio: "3/4", marginBottom: "1.5rem" }}
           onMouseEnter={() => setIsImageHovered(true)}
           onMouseLeave={() => setIsImageHovered(false)}
         >
           {/* Hover Image - Behind */}
-          {hoverSrc && isImageHovered && (
-            <div className="absolute inset-0">
+          <div
+            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+            style={{ opacity: isImageHovered ? 1 : 0 }}
+          >
+            {hoverSrc && (
               <ImageWithFallback
                 src={hoverSrc}
                 alt={`${label} alternate view`}
                 className="w-full h-full object-cover"
               />
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Main Image - On Top */}
           <div
@@ -758,24 +762,16 @@ const Candles = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isScrolled, setIsScrolled] = useState(false)
   const [hoveredProductIndex, setHoveredProductIndex] = useState<number | null>(null)
-  const [productScrollPosition, setProductScrollPosition] = useState(0)
-  const [maxProductScroll, setMaxProductScroll] = useState(0)
   const [candlesCollection, setCandlesCollection] = useState<CandlesCollectionItem[]>([])
   const [isLoadingCollection, setIsLoadingCollection] = useState(true)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [isMobile, setIsMobile] = useState(false)
-  const [current, setCurrent] = useState(0)
-  const [scrollProgress, setScrollProgress] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const sliderRef = useRef<HTMLDivElement>(null)
-  const mobileSliderRef = useRef<HTMLDivElement>(null)
+
   const containerRef = useRef<HTMLDivElement>(null)
   const { toggleLedgerItem, isInLedger } = useLedger()
   const { cartItems, handleCartUpdate } = useCartItems()
   const [mobileCarouselApi, setMobileCarouselApi] = useState<CarouselApi>()
-  const [mobileCurrent, setMobileCurrent] = useState(0)
-  const [mobileScrollProgress, setMobileScrollProgress] = useState(0)
-  const [isMobileDragging, setIsMobileDragging] = useState(false)
+
   const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null)
   const [bannerCarouselApi, setBannerCarouselApi] = useState<CarouselApi>()
   const [bannerCurrent, setBannerCurrent] = useState(0)
@@ -814,124 +810,6 @@ const Candles = () => {
 
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
-
-  useEffect(() => {
-    if (!carouselApi) return
-
-    setCurrent(carouselApi.selectedScrollSnap())
-    setScrollProgress(carouselApi.scrollProgress())
-
-    carouselApi.on("select", () => {
-      setCurrent(carouselApi.selectedScrollSnap())
-    })
-
-    carouselApi.on("scroll", () => {
-      setScrollProgress(carouselApi.scrollProgress())
-      setCurrent(carouselApi.selectedScrollSnap())
-    })
-  }, [carouselApi])
-
-  useEffect(() => {
-    if (!mobileCarouselApi) return
-
-    setMobileCurrent(mobileCarouselApi.selectedScrollSnap())
-    setMobileScrollProgress(mobileCarouselApi.scrollProgress())
-
-    mobileCarouselApi.on("select", () => {
-      setMobileCurrent(mobileCarouselApi.selectedScrollSnap())
-    })
-
-    mobileCarouselApi.on("scroll", () => {
-      setMobileScrollProgress(mobileCarouselApi.scrollProgress())
-      setMobileCurrent(mobileCarouselApi.selectedScrollSnap())
-    })
-
-    // Ensure carousel starts at the beginning on mount for mobile
-    const scrollToStart = () => {
-      mobileCarouselApi.scrollTo(0, true)
-      const content = document.querySelector(
-        '.mobile-candles-carousel-wrapper [data-slot="carousel-content"]'
-      ) as HTMLElement
-      if (content) {
-        content.scrollLeft = 0
-      }
-    }
-    setTimeout(scrollToStart, 100)
-    setTimeout(scrollToStart, 300)
-  }, [mobileCarouselApi])
-
-  const handleSliderClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isDragging) return
-    e.stopPropagation()
-    const rect = e.currentTarget.getBoundingClientRect()
-    const clickX = e.clientX - rect.left
-    const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
-
-    if (carouselApi) {
-      const scrollSnaps = carouselApi.scrollSnapList()
-      if (scrollSnaps.length > 0) {
-        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
-        carouselApi.scrollTo(targetIndex)
-      }
-    }
-  }
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(true)
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!sliderRef.current || !carouselApi) return
-      const rect = sliderRef.current.getBoundingClientRect()
-      const clickX = e.clientX - rect.left
-      const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
-
-      const scrollSnaps = carouselApi.scrollSnapList()
-      if (scrollSnaps.length > 0) {
-        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
-        carouselApi.scrollTo(targetIndex)
-      }
-    }
-
-    const handleMouseUp = () => {
-      setIsDragging(false)
-      document.removeEventListener("mousemove", handleMouseMove)
-      document.removeEventListener("mouseup", handleMouseUp)
-    }
-
-    document.addEventListener("mousemove", handleMouseMove)
-    document.addEventListener("mouseup", handleMouseUp)
-  }
-
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(true)
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!sliderRef.current || !carouselApi) return
-      const rect = sliderRef.current.getBoundingClientRect()
-      const touch = e.touches[0]
-      const clickX = touch.clientX - rect.left
-      const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
-
-      const scrollSnaps = carouselApi.scrollSnapList()
-      if (scrollSnaps.length > 0) {
-        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
-        carouselApi.scrollTo(targetIndex)
-      }
-    }
-
-    const handleTouchEnd = () => {
-      setIsDragging(false)
-      document.removeEventListener("touchmove", handleTouchMove)
-      document.removeEventListener("touchend", handleTouchEnd)
-    }
-
-    document.addEventListener("touchmove", handleTouchMove)
-    document.addEventListener("touchend", handleTouchEnd)
-  }
 
   const nextImages = () => {
     setCurrentImageIndex((prevIndex) =>
@@ -1008,14 +886,11 @@ const Candles = () => {
   const products = candlesCollection.map((item) => ({
     src: item.src,
     label: item.label,
-    hoverSrc: item.hoverSrc || item.src, // Fallback to main image if no hover image
+    hoverSrc: item.hoverSrc,
     url: item.url,
     price: item.price,
     variantId: item.variantId,
   }))
-
-  // Calculate slider position based on scroll progress
-  const sliderPercentage = scrollProgress * 100
 
   // Helper function to convert product name to URL slug
   function getProductSlug(productName: string): string {
@@ -1040,132 +915,6 @@ const Candles = () => {
       }
     }
   }
-
-  const scrollProducts = (direction: "left" | "right") => {
-    const scrollContainer = document.getElementById("product-slider")
-    if (scrollContainer) {
-      // Calculate scroll amount: 2 items + gap
-      // Item width: (100vw - 2rem) / 2 - 0.5rem
-      // Gap: 1rem = 16px
-      const containerWidth = scrollContainer.clientWidth
-      const itemWidth = (containerWidth - 32 - 16) / 2 // Account for px-4 (32px) and gap
-      const scrollAmount = itemWidth * 2 + 16 // Two images + gap
-
-      const currentScroll = scrollContainer.scrollLeft
-      const newPosition =
-        direction === "right"
-          ? currentScroll + scrollAmount
-          : Math.max(0, currentScroll - scrollAmount)
-
-      scrollContainer.scrollTo({
-        left: newPosition,
-        behavior: "smooth",
-      })
-      setProductScrollPosition(newPosition)
-    }
-  }
-
-  useEffect(() => {
-    const scrollContainer = document.getElementById("product-slider")
-    if (!scrollContainer) return
-
-    const updateScrollInfo = () => {
-      setProductScrollPosition(scrollContainer.scrollLeft)
-      setMaxProductScroll(scrollContainer.scrollWidth - scrollContainer.clientWidth)
-    }
-
-    updateScrollInfo()
-    scrollContainer.addEventListener("scroll", updateScrollInfo)
-
-    // Recalculate on resize
-    window.addEventListener("resize", updateScrollInfo)
-
-    return () => {
-      scrollContainer.removeEventListener("scroll", updateScrollInfo)
-      window.removeEventListener("resize", updateScrollInfo)
-    }
-  }, [])
-
-  const canScrollLeft = productScrollPosition > 0
-  const canScrollRight = productScrollPosition < maxProductScroll - 10 // Small buffer for smooth scrolling
-
-  // Mobile slider handlers
-  const handleMobileSliderClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isMobileDragging) return
-    e.stopPropagation()
-    const rect = e.currentTarget.getBoundingClientRect()
-    const clickX = e.clientX - rect.left
-    const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
-
-    if (mobileCarouselApi) {
-      const scrollSnaps = mobileCarouselApi.scrollSnapList()
-      if (scrollSnaps.length > 0) {
-        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
-        mobileCarouselApi.scrollTo(targetIndex)
-      }
-    }
-  }
-
-  const handleMobileMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsMobileDragging(true)
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!mobileSliderRef.current || !mobileCarouselApi) return
-      const rect = mobileSliderRef.current.getBoundingClientRect()
-      const clickX = e.clientX - rect.left
-      const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
-
-      const scrollSnaps = mobileCarouselApi.scrollSnapList()
-      if (scrollSnaps.length > 0) {
-        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
-        mobileCarouselApi.scrollTo(targetIndex)
-      }
-    }
-
-    const handleMouseUp = () => {
-      setIsMobileDragging(false)
-      document.removeEventListener("mousemove", handleMouseMove)
-      document.removeEventListener("mouseup", handleMouseUp)
-    }
-
-    document.addEventListener("mousemove", handleMouseMove)
-    document.addEventListener("mouseup", handleMouseUp)
-  }
-
-  const handleMobileTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsMobileDragging(true)
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!mobileSliderRef.current || !mobileCarouselApi) return
-      const rect = mobileSliderRef.current.getBoundingClientRect()
-      const touch = e.touches[0]
-      const clickX = touch.clientX - rect.left
-      const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
-
-      const scrollSnaps = mobileCarouselApi.scrollSnapList()
-      if (scrollSnaps.length > 0) {
-        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
-        mobileCarouselApi.scrollTo(targetIndex)
-      }
-    }
-
-    const handleTouchEnd = () => {
-      setIsMobileDragging(false)
-      document.removeEventListener("touchmove", handleTouchMove)
-      document.removeEventListener("touchend", handleTouchEnd)
-    }
-
-    document.addEventListener("touchmove", handleTouchMove)
-    document.addEventListener("touchend", handleTouchEnd)
-  }
-
-  // Calculate mobile slider position
-  const mobileSliderPercentage =
-    candlesCollection.length > 0 ? (mobileCurrent / (candlesCollection.length - 1)) * 100 : 0
 
   // Banner carousel handlers
   useEffect(() => {
@@ -1290,7 +1039,7 @@ const Candles = () => {
                 margin-left: 0 !important;
                 gap: 0 !important;
               }
-              .mobile-candles-carousel-wrapper [data-slot="carousel-content"] {
+              [data-slot="carousel-content"] {
                 cursor: grab !important;
                 -webkit-overflow-scrolling: touch !important;
                 scroll-behavior: smooth !important;
@@ -1300,10 +1049,10 @@ const Candles = () => {
                 overflow-x: auto !important;
                 scroll-padding-left: 0 !important;
               }
-              .mobile-candles-carousel-wrapper [data-slot="carousel-content"]::-webkit-scrollbar {
+              [data-slot="carousel-content"]::-webkit-scrollbar {
                 display: none !important;
               }
-              .mobile-candles-carousel-wrapper [data-slot="carousel-content"]:active {
+              [data-slot="carousel-content"]:active {
                 cursor: grabbing !important;
               }
             `,
@@ -1341,7 +1090,9 @@ const Candles = () => {
                 </Carousel>
               </div>
 
-              {/* Mobile Slider Bar Removed */}
+              <div className="px-6 mt-6">
+                <CarouselSlider api={mobileCarouselApi} />
+              </div>
             </div>
           </div>
         </motion.div>
@@ -1430,24 +1181,14 @@ const Candles = () => {
                 padding-right: 2rem !important;
               }
             }
-            .candles-carousel-wrapper [data-slot="carousel-content"] {
+            [data-slot="carousel-content"] {
               cursor: grab !important;
               -webkit-overflow-scrolling: touch !important;
               scroll-behavior: smooth !important;
-              scrollbar-width: none !important;
-              -ms-overflow-style: none !important;
-              overflow-x: auto !important;
+              scroll-snap-type: x mandatory !important;
             }
-            .candles-carousel-wrapper [data-slot="carousel-content"]::-webkit-scrollbar {
-              display: none !important;
-            }
-            .candles-carousel-wrapper [data-slot="carousel-content"]:active {
+            [data-slot="carousel-content"]:active {
               cursor: grabbing !important;
-            }
-            .candles-carousel-wrapper [data-slot="carousel-content"] * {
-              -webkit-transform: translateZ(0) !important;
-              transform: translateZ(0) !important;
-              will-change: transform !important;
             }
           `,
             }}
@@ -1489,36 +1230,8 @@ const Candles = () => {
                 </CarouselContent>
               </Carousel>
             </div>
-
-            {/* Progress Scroll Bar - Slider Style */}
-            <div
-              className="flex justify-center items-center w-full pt-3"
-              style={{ paddingTop: "3rem", paddingBottom: "20px" }}
-            >
-              <div
-                ref={sliderRef}
-                className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
-                onClick={handleSliderClick}
-              >
-                {/* Slider Thumb - Moves left/right based on scroll */}
-                <div
-                  className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
-                  style={{
-                    left: `calc(${Math.max(0, Math.min(100, sliderPercentage))}% - 16px)`,
-                    transform: "translateY(-50%)",
-                  }}
-                  onMouseDown={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    handleMouseDown(e)
-                  }}
-                  onTouchStart={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    handleTouchStart(e)
-                  }}
-                />
-              </div>
+            <div className="pl-[5rem] pr-[4rem] mt-6">
+              <CarouselSlider api={carouselApi} />
             </div>
           </div>
         </motion.div>
@@ -1573,7 +1286,7 @@ const Candles = () => {
                 padding-left: 0 !important;
                 padding-right: 0 !important;
               }
-              .banner-carousel-wrapper [data-slot="carousel-content"] {
+              [data-slot="carousel-content"] {
                 cursor: grab !important;
                 scroll-behavior: smooth !important;
                 scrollbar-width: none !important;
@@ -1581,10 +1294,10 @@ const Candles = () => {
                 overflow-x: auto !important;
                 scroll-snap-type: x mandatory !important;
               }
-              .banner-carousel-wrapper [data-slot="carousel-content"]::-webkit-scrollbar {
+              [data-slot="carousel-content"]::-webkit-scrollbar {
                 display: none !important;
               }
-              .banner-carousel-wrapper [data-slot="carousel-content"]:active {
+              [data-slot="carousel-content"]:active {
                 cursor: grabbing !important;
               }
               @media (max-width: 767px) {
@@ -1657,7 +1370,9 @@ const Candles = () => {
                       ))}
                 </CarouselContent>
               </Carousel>
-              {/* Banner Carousel Slider Bar Removed */}
+              <div className="px-6 mt-6">
+                <CarouselSlider api={bannerCarouselApi} />
+              </div>
             </div>
 
             {/* Navigation Arrows Removed for Mobile - Gesture Only */}
