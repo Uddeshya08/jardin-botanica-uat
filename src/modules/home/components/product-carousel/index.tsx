@@ -58,7 +58,9 @@ function ProductCard({
   }
 
   const handleMouseEnter = () => {
-    setIsImageHovered(true)
+    if (product.hoverImage || product.video) {
+      setIsImageHovered(true)
+    }
     if (videoRef.current) {
       videoRef.current.currentTime = 0
       videoRef.current.play().catch((e) => {
@@ -114,6 +116,9 @@ function ProductCard({
 
     const interval = setInterval(() => {
       setIsImageHovered((prev) => {
+        // Only toggle if we have a hover image or video to show
+        if (!product.hoverImage && !product.video) return false
+
         const next = !prev
         if (videoRef.current) {
           if (next) {
@@ -154,7 +159,10 @@ function ProductCard({
         onClick={handleProductClick}
       >
         {/* Hover Media - Video or Image - Behind */}
-        <div className="absolute inset-0">
+        <div
+          className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+          style={{ opacity: isImageHovered ? 1 : 0 }}
+        >
           {product.video ? (
             <video
               ref={videoRef}
@@ -176,7 +184,9 @@ function ProductCard({
         {/* Main Image - On Top */}
         <div
           className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-          style={{ opacity: isImageHovered ? 0 : 1 }}
+          style={{
+            opacity: (isImageHovered && (product.hoverImage || product.video)) ? 0 : 1
+          }}
         >
           <ImageWithFallback
             src={product.image}
@@ -196,9 +206,8 @@ function ProductCard({
         >
           <Heart
             size={18}
-            className={`transition-colors duration-300 ${
-              isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-            }`}
+            className={`transition-colors duration-300 ${isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
           />
         </button>
       </div>
@@ -288,8 +297,8 @@ export function ProductCarousel({
         size: variant?.title || "Default",
         description: p.description || "",
         price: calculatedPrice || 0,
-        image: p.thumbnail || "",
-        hoverImage: p.images?.[1]?.url || p.thumbnail || "",
+        image: p.images?.[0]?.url || p.thumbnail || "",
+        hoverImage: p.images?.[1]?.url || "",
         variantId: variant?.id,
         medusaId: p.id,
       }
@@ -573,8 +582,8 @@ export function ProductCarousel({
             box-sizing: border-box !important;
             padding-left: 0 !important;
             padding-right: 0 !important;
-            margin-left: 1rem !important;
-            margin-right: 1rem !important;
+            margin-left: 2rem !important;
+            margin-right: 2rem !important;
           }
           .product-carousel-item:first-child {
             margin-left: 0 !important;
@@ -604,8 +613,8 @@ export function ProductCarousel({
               flex-basis: calc(100vw - 3rem) !important;
               padding-left: 0 !important;
               padding-right: 0 !important;
-              margin-left: 1.5rem !important;
-              margin-right: 1.5rem !important;
+              margin-left: 2rem !important;
+              margin-right: 2rem !important;
             }
             .product-carousel-content {
               padding-left: 0 !important;
@@ -628,8 +637,8 @@ export function ProductCarousel({
             .product-carousel-item {
               width: calc((100vw - 100px) * 1 / 2.5) !important;
               flex-basis: calc((100vw - 100px) * 1 / 2.5) !important;
-              margin-left: 1rem !important;
-              margin-right: 1rem !important;
+              margin-left: 2rem !important;
+              margin-right: 2rem !important;
             }
             .product-carousel-content {
               padding-left: 2rem !important;
@@ -640,8 +649,8 @@ export function ProductCarousel({
             .product-carousel-item {
               width: calc((100vw - 124px) * 1 / 3) !important;
               flex-basis: calc((100vw - 124px) * 1 / 3) !important;
-              margin-left: 1rem !important;
-              margin-right: 1rem !important;
+              margin-left: 2rem !important;
+              margin-right: 2rem !important;
             }
             .product-carousel-content {
               padding-left: 2rem !important;
@@ -652,8 +661,8 @@ export function ProductCarousel({
             .product-carousel-item {
               width: calc((100vw - 148px) * 1 / 4) !important;
               flex-basis: calc((100vw - 148px) * 1 / 4) !important;
-              margin-left: 1rem !important;
-              margin-right: 1rem !important;
+              margin-left: 2rem !important;
+              margin-right: 2rem !important;
             }
             .product-carousel-content {
               padding-left: 2rem !important;
@@ -664,8 +673,8 @@ export function ProductCarousel({
             .product-carousel-item {
               width: calc((100vw - 180px) * 1 / 5) !important;
               flex-basis: calc((100vw - 180px) * 1 / 5) !important;
-              margin-left: 1rem !important;
-              margin-right: 1rem !important;
+              margin-left: 2rem !important;
+              margin-right: 2rem !important;
             }
             .product-carousel-content {
               padding-left: 2rem !important;

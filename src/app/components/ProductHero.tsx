@@ -1063,9 +1063,21 @@ export function ProductHero({
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full lg:w-[60%] relative flex items-center justify-center py-6 overflow-hidden"
+        className="w-full lg:w-[60%] relative overflow-hidden h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[calc(100vh-80px)] lg:min-h-[600px]"
         style={{ backgroundColor: "#d6d6c6" }}
       >
+        {/* Product Image - Full Section Coverage without cropping */}
+        <div className="absolute inset-0 w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8">
+          <img
+            src={productImages[currentImageIndex]}
+            alt="Jardin Botanica Tea Exfoliant Rinse"
+            className="w-full h-full object-contain object-center"
+            style={{
+              filter: "drop-shadow(0 20px 45px rgba(0, 0, 0, 0.15))",
+            }}
+          />
+        </div>
+
         {/* Botanical Blend Badge - Top Left */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -1075,8 +1087,11 @@ export function ProductHero({
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
             <Star className="w-3 h-3" style={{ color: "#a28b6f" }} />
-            <span className="font-din-arabic text-xs tracking-wide" style={{ color: "#a28b6f" }}>
-              BOTANICAL BLEND
+            <span
+              className="font-din-arabic uppercase text-xs tracking-wide"
+              style={{ color: "#a28b6f" }}
+            >
+              {(product.metadata?.botanical as string | undefined) || "BOTANICAL BLEND"}
             </span>
           </div>
         </motion.div>
@@ -1138,34 +1153,11 @@ export function ProductHero({
           }}
           whileTap={{ scale: 0.9 }}
           onClick={handlePrevImage}
-          className="absolute left-8 top-1/2 transform -translate-y-1/2 z-10 p-4 rounded-full text-black/60 hover:text-black transition-all backdrop-blur-sm"
+          className="absolute left-4 sm:left-8 top-1/2 transform -translate-y-1/2 z-10 p-3 sm:p-4 rounded-full text-black/60 hover:text-black transition-all backdrop-blur-sm"
           aria-label="Previous image"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
         </motion.button>
-
-        {/* Product Image - Static & Bigger */}
-        <div className="relative max-w-4xl mx-auto py-4 md:py-4">
-          <img
-            src={productImages[currentImageIndex]}
-            alt="Jardin Botanica Tea Exfoliant Rinse"
-            className="w-full h-auto object-contain mx-auto relative z-10"
-            style={{
-              maxHeight: "500px", // Reduced for more compact hero section
-              filter: "drop-shadow(0 20px 45px rgba(0, 0, 0, 0.15))",
-            }}
-          />
-
-          {/* Enhanced shadow for bigger image */}
-          <div
-            className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-8 w-3/4 h-10 rounded-full blur-2xl"
-            style={{
-              backgroundColor: "rgba(0, 0, 0, 0.18)",
-              background:
-                "radial-gradient(ellipse, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.12) 50%, transparent 100%)",
-            }}
-          />
-        </div>
 
         {/* Enhanced Next Arrow */}
         <motion.button
@@ -1175,14 +1167,14 @@ export function ProductHero({
           }}
           whileTap={{ scale: 0.9 }}
           onClick={handleNextImage}
-          className="absolute right-8 top-1/2 transform -translate-y-1/2 z-10 p-4 rounded-full text-black/60 hover:text-black transition-all backdrop-blur-sm"
+          className="absolute right-4 sm:right-8 top-1/2 transform -translate-y-1/2 z-10 p-3 sm:p-4 rounded-full text-black/60 hover:text-black transition-all backdrop-blur-sm"
           aria-label="Next image"
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
         </motion.button>
 
         {/* Enhanced Image Indicators */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3">
+        <div className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3 z-10">
           {productImages.map((_, index) => (
             <motion.button
               key={index}

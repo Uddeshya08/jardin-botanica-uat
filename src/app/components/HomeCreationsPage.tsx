@@ -298,13 +298,12 @@ export function HomeCreationsPage({
                     key={filter.value}
                     onClick={() => !isDisabled && setSelectedFilter(filter.value)}
                     disabled={isDisabled}
-                    className={`font-din-arabic text-sm transition-colors duration-300 ${
-                      isDisabled
+                    className={`font-din-arabic text-sm transition-colors duration-300 ${isDisabled
                         ? "text-black/20"
                         : selectedFilter === filter.value
                           ? "text-black border-b border-black"
                           : "text-black/40 hover:text-black/70"
-                    }`}
+                      }`}
                     style={{ letterSpacing: "0.15em" }}
                   >
                     {filter.label}
@@ -440,20 +439,23 @@ function ProductCard({
       <Link href={`/products/${productSlug}`}>
         <div
           className="relative w-full overflow-hidden cursor-pointer"
-          style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
+          style={{ aspectRatio: "3/4", marginBottom: "1.5rem" }}
           onMouseEnter={() => setIsImageHovered(true)}
           onMouseLeave={() => setIsImageHovered(false)}
         >
           {/* Hover Image - Behind */}
-          {product.hoverImage && isImageHovered && (
-            <div className="absolute inset-0">
+          <div
+            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+            style={{ opacity: isImageHovered ? 1 : 0 }}
+          >
+            {product.hoverImage && (
               <ImageWithFallback
-                src={product.hoverImage || ""}
+                src={product.hoverImage}
                 alt={`${product.name} alternate view`}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
               />
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Main Image - On Top */}
           <div
@@ -463,7 +465,7 @@ function ProductCard({
             <ImageWithFallback
               src={product.image || ""}
               alt={product.name}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
             />
           </div>
 
@@ -478,11 +480,10 @@ function ProductCard({
               e.stopPropagation()
               handleToggleLedger(product)
             }}
-            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
-              isInLedger(product.id)
+            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${isInLedger(product.id)
                 ? "bg-white/20 border border-white/30"
                 : "bg-white/20 border border-white/30 hover:bg-white/30"
-            }`}
+              }`}
             aria-label={`${isInLedger(product.id) ? "Remove from" : "Add to"} ledger`}
           >
             <Heart
@@ -694,9 +695,8 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[500px] overflow-hidden ${
-            feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
-          }`}
+          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[500px] overflow-hidden ${feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
+            }`}
         >
           <ImageWithFallback
             src={feature.image}

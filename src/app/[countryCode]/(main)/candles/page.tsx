@@ -199,9 +199,8 @@ const MobileProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${
-                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
             />
           </button>
         </div>
@@ -266,7 +265,7 @@ const ProductCard = ({
 }: {
   src: string
   label: string
-  hoverSrc: string
+  hoverSrc?: string
   url?: string
   index: number
   productId: string
@@ -421,9 +420,8 @@ const ProductCard = ({
             >
               <Heart
                 size={18}
-                className={`transition-colors duration-300 ${
-                  isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-                }`}
+                className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                  }`}
               />
             </button>
           </div>
@@ -431,20 +429,23 @@ const ProductCard = ({
       ) : (
         <div
           className="relative w-full overflow-hidden cursor-pointer"
-          style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
+          style={{ aspectRatio: "3/4", marginBottom: "1.5rem" }}
           onMouseEnter={() => setIsImageHovered(true)}
           onMouseLeave={() => setIsImageHovered(false)}
         >
           {/* Hover Image - Behind */}
-          {hoverSrc && isImageHovered && (
-            <div className="absolute inset-0">
+          <div
+            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+            style={{ opacity: isImageHovered ? 1 : 0 }}
+          >
+            {hoverSrc && (
               <ImageWithFallback
                 src={hoverSrc}
                 alt={`${label} alternate view`}
                 className="w-full h-full object-cover"
               />
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Main Image - On Top */}
           <div
@@ -466,9 +467,8 @@ const ProductCard = ({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${
-                isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+              className={`transition-colors duration-300 ${isItemInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+                }`}
             />
           </button>
         </div>
@@ -1008,7 +1008,7 @@ const Candles = () => {
   const products = candlesCollection.map((item) => ({
     src: item.src,
     label: item.label,
-    hoverSrc: item.hoverSrc || item.src, // Fallback to main image if no hover image
+    hoverSrc: item.hoverSrc,
     url: item.url,
     price: item.price,
     variantId: item.variantId,
@@ -1625,36 +1625,36 @@ const Candles = () => {
                   {/* Mobile: Show individual products, Desktop: Show groups of 3 */}
                   {isMobile
                     ? // Mobile: One product per slide
-                      candlesCollection.map((item, index) => (
-                        <CarouselItem key={index} className="banner-carousel-item">
-                          <BannerProductCard item={item} index={index} countryCode={countryCode} />
-                        </CarouselItem>
-                      ))
+                    candlesCollection.map((item, index) => (
+                      <CarouselItem key={index} className="banner-carousel-item">
+                        <BannerProductCard item={item} index={index} countryCode={countryCode} />
+                      </CarouselItem>
+                    ))
                     : // Desktop: Groups of 3 products
-                      bannerGroups.map((group, groupIndex) => (
-                        <CarouselItem key={groupIndex} className="banner-carousel-item">
-                          <div className="flex flex-row gap-0 w-full h-auto">
-                            {group.map((item, itemIndex) => {
-                              const globalIndex = groupIndex * 3 + itemIndex
-                              return (
-                                <div key={globalIndex} className="flex-1 w-1/3">
-                                  <BannerProductCard
-                                    item={item}
-                                    index={globalIndex}
-                                    countryCode={countryCode}
-                                  />
-                                </div>
-                              )
-                            })}
+                    bannerGroups.map((group, groupIndex) => (
+                      <CarouselItem key={groupIndex} className="banner-carousel-item">
+                        <div className="flex flex-row gap-0 w-full h-auto">
+                          {group.map((item, itemIndex) => {
+                            const globalIndex = groupIndex * 3 + itemIndex
+                            return (
+                              <div key={globalIndex} className="flex-1 w-1/3">
+                                <BannerProductCard
+                                  item={item}
+                                  index={globalIndex}
+                                  countryCode={countryCode}
+                                />
+                              </div>
+                            )
+                          })}
 
-                            {/* Fill remaining slots if group has less than 3 items */}
-                            {group.length < 3 &&
-                              Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
-                                <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
-                              ))}
-                          </div>
-                        </CarouselItem>
-                      ))}
+                          {/* Fill remaining slots if group has less than 3 items */}
+                          {group.length < 3 &&
+                            Array.from({ length: 3 - group.length }).map((_, fillIndex) => (
+                              <div key={`fill-${fillIndex}`} className="flex-1 w-1/3" />
+                            ))}
+                        </div>
+                      </CarouselItem>
+                    ))}
                 </CarouselContent>
               </Carousel>
               {/* Banner Carousel Slider Bar Removed */}
