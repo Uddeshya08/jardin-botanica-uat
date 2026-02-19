@@ -7,6 +7,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "app/components/ui/carousel"
+import { CarouselSlider } from "app/components/ui/carousel-slider"
 import { useCartItems } from "app/context/cart-items-context"
 import { type LedgerItem, useLedger } from "app/context/ledger-context"
 import { motion } from "framer-motion"
@@ -185,7 +186,7 @@ function ProductCard({
         <div
           className="absolute inset-0 transition-opacity duration-700 ease-in-out"
           style={{
-            opacity: (isImageHovered && (product.hoverImage || product.video)) ? 0 : 1
+            opacity: isImageHovered && (product.hoverImage || product.video) ? 0 : 1,
           }}
         >
           <ImageWithFallback
@@ -206,8 +207,9 @@ function ProductCard({
         >
           <Heart
             size={18}
-            className={`transition-colors duration-300 ${isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+            className={`transition-colors duration-300 ${
+              isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+            }`}
           />
         </button>
       </div>
@@ -273,13 +275,9 @@ export function ProductCarousel({
   const { cartItems, handleCartUpdate } = useCartItems()
   const { toggleLedgerItem, isInLedger } = useLedger()
   const [api, setApi] = useState<CarouselApi>()
-  const [current, setCurrent] = useState(0)
-  const [scrollProgress, setScrollProgress] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
-  const [isDragging, setIsDragging] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
-  const sliderRef = React.useRef<HTMLDivElement>(null)
   const [isPending, startTransition] = React.useTransition()
 
   // Transform Medusa products to carousel format
@@ -319,17 +317,6 @@ export function ProductCarousel({
   useEffect(() => {
     if (!api) return
 
-    setCurrent(api.selectedScrollSnap())
-    setScrollProgress(api.scrollProgress())
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap())
-    })
-
-    api.on("scroll", () => {
-      setScrollProgress(api.scrollProgress())
-    })
-
     // Ensure carousel starts at the beginning on mount (especially for mobile)
     const isMobileCheck = typeof window !== "undefined" && window.innerWidth < 750
     if (isMobileCheck) {
@@ -361,9 +348,6 @@ export function ProductCarousel({
   useEffect(() => {
     if (!api || !isMobile || hasInteracted) return
 
-    // Don't auto-scroll while user is dragging
-    if (isDragging) return
-
     const autoScrollInterval = setInterval(() => {
       const currentIndex = api.selectedScrollSnap()
       const totalSnaps = api.scrollSnapList().length
@@ -379,7 +363,7 @@ export function ProductCarousel({
     }, 5000) // 5 second interval
 
     return () => clearInterval(autoScrollInterval)
-  }, [api, isMobile, isDragging, hasInteracted])
+  }, [api, isMobile, hasInteracted])
 
   const scrollTo = (index: number) => {
     api?.scrollTo(index)
@@ -469,89 +453,6 @@ export function ProductCarousel({
     toast.success(`${product.name} ${alreadyInLedger ? "removed from" : "added to"} Ledger`, {
       duration: 2000,
     })
-  }
-
-  // Calculate slider position based on current slide position
-  const totalSlides = mergedProducts.length
-
-  console.log(products, "products----")
-  console.log(totalSlides, "totalSlides----")
-
-  const normalizedIndex =
-    totalSlides > 0 ? ((current % totalSlides) + totalSlides) % totalSlides : 0
-  const sliderPercentage = totalSlides > 0 ? (normalizedIndex / (totalSlides - 1)) * 100 : 0
-
-  const handleSliderClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isDragging) return
-    e.stopPropagation()
-    const rect = e.currentTarget.getBoundingClientRect()
-    const clickX = e.clientX - rect.left
-    const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
-
-    if (api) {
-      const scrollSnaps = api.scrollSnapList()
-      if (scrollSnaps.length > 0) {
-        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
-        api.scrollTo(targetIndex)
-      }
-    }
-  }
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(true)
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!sliderRef.current || !api) return
-      const rect = sliderRef.current.getBoundingClientRect()
-      const clickX = e.clientX - rect.left
-      const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
-
-      const scrollSnaps = api.scrollSnapList()
-      if (scrollSnaps.length > 0) {
-        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
-        api.scrollTo(targetIndex)
-      }
-    }
-
-    const handleMouseUp = () => {
-      setIsDragging(false)
-      document.removeEventListener("mousemove", handleMouseMove)
-      document.removeEventListener("mouseup", handleMouseUp)
-    }
-
-    document.addEventListener("mousemove", handleMouseMove)
-    document.addEventListener("mouseup", handleMouseUp)
-  }
-
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(true)
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!sliderRef.current || !api) return
-      const rect = sliderRef.current.getBoundingClientRect()
-      const touch = e.touches[0]
-      const clickX = touch.clientX - rect.left
-      const percentage = Math.min(Math.max(clickX / rect.width, 0), 1)
-
-      const scrollSnaps = api.scrollSnapList()
-      if (scrollSnaps.length > 0) {
-        const targetIndex = Math.round(percentage * (scrollSnaps.length - 1))
-        api.scrollTo(targetIndex)
-      }
-    }
-
-    const handleTouchEnd = () => {
-      setIsDragging(false)
-      document.removeEventListener("touchmove", handleTouchMove)
-      document.removeEventListener("touchend", handleTouchEnd)
-    }
-
-    document.addEventListener("touchmove", handleTouchMove)
-    document.addEventListener("touchend", handleTouchEnd)
   }
 
   return (
@@ -714,33 +615,8 @@ export function ProductCarousel({
               ))}
             </CarouselContent>
           </Carousel>
-        </div>
-
-        {/* Slider Bar - Web and Mobile - Centered */}
-        <div className="flex justify-center items-center w-full pt-12 lg:pt-16">
-          <div
-            ref={sliderRef}
-            className="relative w-1/2 md:w-2/5 lg:w-1/3 h-0.5 bg-black/10 rounded-full cursor-pointer select-none group"
-            onClick={handleSliderClick}
-          >
-            {/* Slider Thumb */}
-            <div
-              className="absolute top-1/2 h-0.5 w-8 rounded-full bg-black/30 transition-all duration-200 group-hover:w-10 group-hover:bg-black/40 cursor-grab active:cursor-grabbing"
-              style={{
-                left: `calc(${sliderPercentage}% - 16px)`,
-                transform: "translateY(-50%)",
-              }}
-              onMouseDown={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                handleMouseDown(e)
-              }}
-              onTouchStart={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                handleTouchStart(e)
-              }}
-            />
+          <div className="px-4 sm:px-6 lg:px-12 xl:px-10 2xl:px-15 mt-6">
+            <CarouselSlider api={api} />
           </div>
         </div>
       </div>
