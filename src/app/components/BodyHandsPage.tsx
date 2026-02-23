@@ -273,9 +273,8 @@ export function BodyHandsPage({
                 </span>
                 <ChevronDown
                   size={16}
-                  className={`transition-transform duration-300 ${
-                    isFilterDropdownOpen ? "rotate-180" : ""
-                  }`}
+                  className={`transition-transform duration-300 ${isFilterDropdownOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
@@ -293,9 +292,8 @@ export function BodyHandsPage({
                         setSelectedFilter("all")
                         setIsFilterDropdownOpen(false)
                       }}
-                      className={`text-left font-din-arabic text-sm transition-colors duration-200 ${
-                        selectedFilter === "all" ? "text-black font-semibold" : "text-black/60"
-                      }`}
+                      className={`text-left font-din-arabic text-sm transition-colors duration-200 ${selectedFilter === "all" ? "text-black font-semibold" : "text-black/60"
+                        }`}
                       style={{ letterSpacing: "0.15em" }}
                     >
                       All Products
@@ -313,13 +311,12 @@ export function BodyHandsPage({
                             }
                           }}
                           disabled={isDisabled}
-                          className={`text-left font-din-arabic text-sm transition-colors duration-200 ${
-                            isDisabled
+                          className={`text-left font-din-arabic text-sm transition-colors duration-200 ${isDisabled
                               ? "text-black/20"
                               : selectedFilter === filter
                                 ? "text-black font-semibold"
                                 : "text-black/60"
-                          }`}
+                            }`}
                           style={{ letterSpacing: "0.15em" }}
                         >
                           {filter}
@@ -340,11 +337,10 @@ export function BodyHandsPage({
             >
               <button
                 onClick={() => setSelectedFilter("all")}
-                className={`font-din-arabic text-sm transition-colors duration-300 ${
-                  selectedFilter === "all"
+                className={`font-din-arabic text-sm transition-colors duration-300 ${selectedFilter === "all"
                     ? "text-black border-b border-black"
                     : "text-black/40 hover:text-black/70"
-                }`}
+                  }`}
                 style={{ letterSpacing: "0.15em" }}
               >
                 All Products
@@ -357,13 +353,12 @@ export function BodyHandsPage({
                     key={filter}
                     onClick={() => !isDisabled && setSelectedFilter(filter)}
                     disabled={isDisabled}
-                    className={`font-din-arabic text-sm transition-colors duration-300 ${
-                      isDisabled
+                    className={`font-din-arabic text-sm transition-colors duration-300 ${isDisabled
                         ? "text-black/20"
                         : selectedFilter === filter
                           ? "text-black border-b border-black"
                           : "text-black/40 hover:text-black/70"
-                    }`}
+                      }`}
                     style={{ letterSpacing: "0.15em" }}
                   >
                     {filter}
@@ -562,23 +557,23 @@ function ProductCard({
       <Link href={`/products/${productSlug}`}>
         <div
           className="relative w-full overflow-hidden cursor-pointer"
-          style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
+          style={{ aspectRatio: "3/4", marginBottom: "1.5rem" }}
           onMouseEnter={() => setIsImageHovered(true)}
           onMouseLeave={() => setIsImageHovered(false)}
         >
           {/* Hover Image - Behind */}
-          {product.hoverImage && isImageHovered && (
-            <div
-              className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-              style={{ opacity: 1 }}
-            >
+          <div
+            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+            style={{ opacity: isImageHovered ? 1 : 0 }}
+          >
+            {product.hoverImage && (
               <ImageWithFallback
                 src={product.hoverImage}
                 alt={`${product.name} alternate view`}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
               />
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Main Image - On Top */}
           <div
@@ -588,7 +583,7 @@ function ProductCard({
             <ImageWithFallback
               src={product.image || undefined}
               alt={product.name}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
             />
           </div>
 
@@ -603,11 +598,10 @@ function ProductCard({
               e.stopPropagation()
               handleToggleLedger(product)
             }}
-            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
-              isInLedger(product.id)
+            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${isInLedger(product.id)
                 ? "bg-white/20 border border-white/30"
                 : "bg-white/20 border border-white/30 hover:bg-white/30"
-            }`}
+              }`}
           >
             <Heart
               size={18}
@@ -661,11 +655,10 @@ function ProductCard({
                       className="sr-only"
                     />
                     <div
-                      className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
-                        selectedSize === size
+                      className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${selectedSize === size
                           ? "border-black bg-black"
                           : "border-black/30 group-hover:border-black/50"
-                      }`}
+                        }`}
                     >
                       {selectedSize === size && (
                         <div className="w-full h-full rounded-full bg-white scale-[0.4]"></div>
@@ -673,11 +666,10 @@ function ProductCard({
                     </div>
                   </div>
                   <span
-                    className={`font-din-arabic text-sm transition-colors ${
-                      selectedSize === size
+                    className={`font-din-arabic text-sm transition-colors ${selectedSize === size
                         ? "text-black"
                         : "text-black/60 group-hover:text-black/80"
-                    }`}
+                      }`}
                     style={{ letterSpacing: "0.1em" }}
                   >
                     {size}
@@ -743,9 +735,8 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[650px] overflow-hidden ${
-            feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
-          }`}
+          className={`relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-auto lg:min-h-[650px] overflow-hidden ${feature.imagePosition === "left" ? "lg:col-start-1" : "lg:col-start-2"
+            }`}
         >
           <ImageWithFallback
             src={feature.image}
@@ -764,11 +755,10 @@ function FullWidthFeatureSection({ feature }: { feature: FullWidthFeature }) {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className={`flex items-center bg-white/10 p-8 sm:p-12 lg:p-20 ${
-            feature.imagePosition === "left"
+          className={`flex items-center bg-white/10 p-8 sm:p-12 lg:p-20 ${feature.imagePosition === "left"
               ? "lg:col-start-2 lg:row-start-1"
               : "lg:col-start-1 lg:row-start-1"
-          }`}
+            }`}
         >
           <div className="max-w-md">
             <p

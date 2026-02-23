@@ -26,6 +26,9 @@ const Home = () => {
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([])
   const featuredBlogs = blogs.filter((blog) => blog.isFeaturedBlog)
 
+  const heroBlog = blogs.find((blog) => blog.isHeroBlog) || blogs[0]
+  const dailyFeedBlogs = blogs.filter((blog) => blog.slug !== heroBlog?.slug)
+
   // Fetch blogs and tags from Contentful
   useEffect(() => {
     const fetchData = async () => {
@@ -440,14 +443,14 @@ const Home = () => {
                     <div className="max-w-7xl mx-auto my-8 md:my-12 lg:my-20 px-4 lg:px-0">
                       <div className="flex flex-col lg:flex-row justify-between gap-6 lg:gap-8">
                         {/* Hero Article */}
-                        {blogs.length > 0 && (
+                        {heroBlog && (
                           <motion.div
                             className="w-full lg:w-[70%] flex-shrink-0"
                             initial={{ x: -50, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ delay: 0.6, duration: 0.8 }}
                           >
-                            <Link href={`/${countryCode}/blogs/${blogs[0].slug}`}>
+                            <Link href={`/${countryCode}/blogs/${heroBlog.slug}`}>
                               <div className="relative cursor-pointer">
                                 <div
                                   className="relative group w-full overflow-hidden"
@@ -455,11 +458,11 @@ const Home = () => {
                                 >
                                   <motion.img
                                     src={
-                                      blogs[0].image ||
+                                      heroBlog.image ||
                                       "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=858&h=971&fit=crop"
                                     }
                                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                                    alt={blogs[0].imagealt || blogs[0].title}
+                                    alt={heroBlog.imagealt || heroBlog.title}
                                     initial={{ scale: 1.1, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     transition={{ delay: 0.8, duration: 1.0 }}
@@ -482,8 +485,8 @@ const Home = () => {
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 1.2, duration: 0.6 }}
                                   >
-                                    {blogs[0].publishedDate
-                                      ? new Date(blogs[0].publishedDate)
+                                    {heroBlog.publishedDate
+                                      ? new Date(heroBlog.publishedDate)
                                         .toLocaleDateString("en-US", {
                                           month: "long",
                                           day: "numeric",
@@ -499,7 +502,7 @@ const Home = () => {
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 1.3, duration: 0.6 }}
                                   >
-                                    {blogs[0].title}
+                                    {heroBlog.title}
                                   </motion.h2>
                                   <motion.p
                                     className="mb-4 lg:mb-6 text-sm lg:text-[16px] font-din-arabic tracking-[1px] text-[#626262]"
@@ -507,7 +510,7 @@ const Home = () => {
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 1.4, duration: 0.6 }}
                                   >
-                                    {blogs[0].description}
+                                    {heroBlog.description}
                                   </motion.p>
                                   <motion.span
                                     className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline"
@@ -554,10 +557,10 @@ const Home = () => {
                                   "inset 0px 2px 0px 0px #d3d2ca, inset 0px 3px 0px 0px #fefdf3, inset 0px 4px 0px 0px #d3d2ca",
                               }}
                             >
-                              {blogs.slice(1).map((blog, index) => (
+                              {dailyFeedBlogs.map((blog, index) => (
                                 <motion.article
                                   key={blog.slug}
-                                  className={`${index < blogs.slice(1).length - 1
+                                  className={`${index < dailyFeedBlogs.length - 1
                                     ? "border-b border-gray-200 pb-3 lg:pb-4"
                                     : "pb-3 lg:pb-4"
                                     }`}
@@ -671,73 +674,46 @@ const Home = () => {
                           </motion.h2>
                         </motion.div>
 
-                        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-                          {/* Left Side - Large Featured Article */}
-                          <div className="flex-1 w-full lg:w-[70%]">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12 lg:gap-y-16">
+                          {featuredBlogs.map((blog, index) => (
                             <motion.div
-                              className="pb-8 lg:pb-12"
-                              style={{ paddingBottom: "40px" }}
+                              key={blog.slug}
                               initial={{ y: 40, opacity: 0 }}
                               animate={{ y: 0, opacity: 1 }}
-                              transition={{ delay: 0.9, duration: 0.8 }}
+                              transition={{ delay: 0.9 + index * 0.1, duration: 0.8 }}
                             >
-                              <Link href={`/${countryCode}/blogs/${featuredBlogs[0].slug}`}>
-                                <div className="flex flex-col md:flex-row gap-4 lg:gap-6 group cursor-pointer">
-                                  <div className="w-full md:w-1/2 overflow-hidden">
-                                    <img
-                                      src={
-                                        featuredBlogs[0].image ||
-                                        "https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?w=800&h=600&fit=crop"
-                                      }
-                                      className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                                      alt={featuredBlogs[0].imagealt || featuredBlogs[0].title}
-                                    />
+                              <Link href={`/${countryCode}/blogs/${blog.slug}`}>
+                                <div className="group cursor-pointer h-full flex flex-col">
+                                  <div className="relative w-full overflow-hidden mb-4 lg:mb-6">
+                                    <div style={{ aspectRatio: "16/9" }}>
+                                      <img
+                                        src={
+                                          blog.image ||
+                                          "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&h=600&fit=crop"
+                                        }
+                                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                                        alt={blog.imagealt || blog.title}
+                                      />
+                                    </div>
                                   </div>
-                                  <div className="w-full md:w-1/2">
-                                    <h3 className="font-american-typewriter text-lg lg:text-xl mb-2 group-hover:underline">
-                                      {featuredBlogs[0].title}
-                                    </h3>
-                                    {featuredBlogs[0].author && (
-                                      <p className="text-sm font-din-arabic text-[#626262]">
-                                        by {featuredBlogs[0].author.name}
-                                      </p>
-                                    )}
-                                    <p className="text-sm font-din-arabic text-[#626262] mt-2 line-clamp-3">
-                                      {featuredBlogs[0].description}
+                                  <h3 className="text-lg lg:text-xl font-american-typewriter mb-2 group-hover:underline leading-tight">
+                                    {blog.title}
+                                  </h3>
+                                  {blog.author && (
+                                    <p className="text-sm font-din-arabic text-[#626262] mb-3">
+                                      by {blog.author.name}
                                     </p>
-                                  </div>
+                                  )}
+                                  <p className="text-sm font-din-arabic text-[#626262] line-clamp-3 mb-4 leading-relaxed flex-grow">
+                                    {blog.description}
+                                  </p>
+                                  <span className="text-sm font-american-typewriter uppercase tracking-wide font-bold text-[#626262] group-hover:underline mt-auto">
+                                    READ MORE...
+                                  </span>
                                 </div>
                               </Link>
                             </motion.div>
-                          </div>
-
-                          {/* Right Side - Second Featured Article (if exists) */}
-                          {featuredBlogs.length > 1 && (
-                            <div className="w-full lg:w-[30%]">
-                              <Link href={`/${countryCode}/blogs/${featuredBlogs[1].slug}`}>
-                                <div className="group cursor-pointer">
-                                  <div className="relative w-full h-64 md:h-80 lg:h-96 mb-4 lg:mb-6 overflow-hidden">
-                                    <img
-                                      src={
-                                        featuredBlogs[1].image ||
-                                        "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&h=600&fit=crop"
-                                      }
-                                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                                      alt={featuredBlogs[1].imagealt || featuredBlogs[1].title}
-                                    />
-                                  </div>
-                                  <h3 className="text-xl lg:text-2xl font-american-typewriter mb-2 group-hover:underline">
-                                    {featuredBlogs[1].title}
-                                  </h3>
-                                  {featuredBlogs[1].author && (
-                                    <p className="text-xs lg:text-sm italic text-gray-600 mb-3">
-                                      by {featuredBlogs[1].author.name}
-                                    </p>
-                                  )}
-                                </div>
-                              </Link>
-                            </div>
-                          )}
+                          ))}
                         </div>
                       </div>
                     )}

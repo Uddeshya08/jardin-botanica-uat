@@ -649,6 +649,7 @@ export interface BlogFields {
   tags?: string[]
   journalTag?: ContentfulJournalTag[] // References, many
   isFeaturedBlog?: boolean
+  isHeroBlog?: boolean
 }
 
 export interface ContentfulBlog extends EntrySkeletonType {
@@ -679,4 +680,5 @@ export interface Blog {
   tags: string[]
   journalTags: JournalTag[]
   isFeaturedBlog?: boolean
+  isHeroBlog?: boolean
 }
