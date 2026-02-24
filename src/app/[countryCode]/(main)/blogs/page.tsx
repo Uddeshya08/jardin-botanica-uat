@@ -26,6 +26,15 @@ const Home = () => {
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([])
   const featuredBlogs = blogs.filter((blog) => blog.isFeaturedBlog)
 
+  const chunkedFeaturedBlogs: Blog[][] = featuredBlogs.reduce((acc: Blog[][], curr, i) => {
+    if (i % 3 === 0) {
+      acc.push([curr])
+    } else {
+      acc[acc.length - 1].push(curr)
+    }
+    return acc
+  }, [])
+
   const heroBlog = blogs.find((blog) => blog.isHeroBlog) || blogs[0]
   const dailyFeedBlogs = blogs.filter((blog) => blog.slug !== heroBlog?.slug)
 
@@ -674,45 +683,330 @@ const Home = () => {
                           </motion.h2>
                         </motion.div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12 lg:gap-y-16">
-                          {featuredBlogs.map((blog, index) => (
-                            <motion.div
-                              key={blog.slug}
-                              initial={{ y: 40, opacity: 0 }}
-                              animate={{ y: 0, opacity: 1 }}
-                              transition={{ delay: 0.9 + index * 0.1, duration: 0.8 }}
-                            >
-                              <Link href={`/${countryCode}/blogs/${blog.slug}`}>
-                                <div className="group cursor-pointer h-full flex flex-col">
-                                  <div className="relative w-full overflow-hidden mb-4 lg:mb-6">
-                                    <div style={{ aspectRatio: "16/9" }}>
-                                      <img
-                                        src={
-                                          blog.image ||
-                                          "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&h=600&fit=crop"
-                                        }
-                                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                                        alt={blog.imagealt || blog.title}
-                                      />
-                                    </div>
-                                  </div>
-                                  <h3 className="text-lg lg:text-xl font-american-typewriter mb-2 group-hover:underline leading-tight">
-                                    {blog.title}
-                                  </h3>
-                                  {blog.author && (
-                                    <p className="text-sm font-din-arabic text-[#626262] mb-3">
-                                      by {blog.author.name}
-                                    </p>
+                        <div className="flex flex-col gap-12 lg:gap-16">
+                          {chunkedFeaturedBlogs.map((chunk, chunkIndex) => (
+                            <div key={`featured-chunk-${chunkIndex}`}>
+                              {chunkIndex > 0 && (
+                                <motion.div
+                                  className="w-full mb-12 lg:mb-16"
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ duration: 0.8 }}
+                                >
+                                  <h2
+                                    className="font-american-typewriter tracking-tight uppercase"
+                                    style={{
+                                      borderBottom: "1px solid #d3d2ca",
+                                      height: "1px"
+                                    }}
+                                  ></h2>
+                                </motion.div>
+                              )}
+                              <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                                {/* Left Side - Up to 2 Blogs (70%) */}
+                                <div className="flex-1 w-full lg:w-[70%]">
+                                  {chunk[0] && (
+                                    <motion.div
+                                      className="pb-8 lg:pb-12"
+                                      style={{ paddingBottom: "40px" }}
+                                      initial={{ y: 40, opacity: 0 }}
+                                      animate={{ y: 0, opacity: 1 }}
+                                      transition={{ delay: 0.9, duration: 0.8 }}
+                                    >
+                                      <div className="flex flex-col md:flex-row gap-4 lg:gap-6">
+                                        {/* Image = 65 */}
+                                        <motion.div
+                                          className="w-full md:w-1/2 flex flex-col cursor-pointer group"
+                                          initial={{ x: -30, opacity: 0 }}
+                                          animate={{ x: 0, opacity: 1 }}
+                                          transition={{ delay: 1.1, duration: 0.8 }}
+                                        >
+                                          <Link href={`/${countryCode}/blogs/${chunk[0].slug}`} className="relative w-full h-auto overflow-hidden block">
+                                            {/* Grayscale Base Image */}
+                                            <motion.img
+                                              src={
+                                                chunk[0].image ||
+                                                "https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?w=800&h=600&fit=crop"
+                                              }
+                                              alt={chunk[0].imagealt || chunk[0].title}
+                                              className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                                              initial={{ scale: 1.1, opacity: 0 }}
+                                              animate={{ scale: 1, opacity: 1 }}
+                                              transition={{ delay: 1.3, duration: 0.8 }}
+                                            />
+
+                                            {/* Black Overlay - Removed on hover */}
+                                            <motion.div
+                                              className="absolute inset-0 bg-black group-hover:opacity-0 transition-opacity duration-500"
+                                              initial={{ opacity: 0 }}
+                                            />
+                                          </Link>
+                                        </motion.div>
+
+                                        {/* Text = 35 */}
+                                        <motion.div
+                                          className="w-full md:w-1/2 flex flex-col group"
+                                          style={{ paddingBottom: "5px", position: "relative" }}
+                                          initial={{ x: 30, opacity: 0 }}
+                                          animate={{ x: 0, opacity: 1 }}
+                                          transition={{ delay: 1.2, duration: 0.8 }}
+                                        >
+                                          <div>
+                                            <Link href={`/${countryCode}/blogs/${chunk[0].slug}`} className="block">
+                                              <motion.h3
+                                                className="font-american-typewriter text-lg lg:text-xl mb-2 lg:mb-3 group-hover:underline"
+                                                initial={{ y: 15, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                transition={{ delay: 1.4, duration: 0.6 }}
+                                              >
+                                                {chunk[0].title}
+                                              </motion.h3>
+                                            </Link>
+                                            {chunk[0].author && (
+                                              <motion.p
+                                                className="text-sm lg:text-base font-din-arabic text-[#535c4a] mb-3 lg:mb-4 text-[16px]"
+                                                initial={{ y: 15, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                transition={{ delay: 1.5, duration: 0.6 }}
+                                              >
+                                                by {chunk[0].author.name}
+                                              </motion.p>
+                                            )}
+                                            <motion.p
+                                              className="leading-relaxed text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px] line-clamp-3"
+                                              initial={{ y: 15, opacity: 0 }}
+                                              animate={{ y: 0, opacity: 1 }}
+                                              transition={{ delay: 1.6, duration: 0.6 }}
+                                            >
+                                              {chunk[0].description}
+                                            </motion.p>
+                                          </div>
+                                          <motion.div
+                                            className="mt-4 lg:hidden"
+                                            initial={{ y: 10, opacity: 0 }}
+                                            animate={{ y: 0, opacity: 1 }}
+                                            transition={{ delay: 1.7, duration: 0.6 }}
+                                          >
+                                            <Link
+                                              href={`/${countryCode}/blogs/${chunk[0].slug}`}
+                                              className="text-sm font-american-typewriter font-medium text-gray-600 hover:underline inline-block uppercase tracking-wide"
+                                            >
+                                              Read more...
+                                            </Link>
+                                          </motion.div>
+                                          <motion.div
+                                            className="mt-4 hidden lg:block"
+                                            style={{ position: "absolute", bottom: "0" }}
+                                            initial={{ y: 10, opacity: 0 }}
+                                            animate={{ y: 0, opacity: 1 }}
+                                            transition={{ delay: 1.7, duration: 0.6 }}
+                                          >
+                                            <Link
+                                              href={`/${countryCode}/blogs/${chunk[0].slug}`}
+                                              className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline inline-block uppercase tracking-wide"
+                                            >
+                                              Read more...
+                                            </Link>
+                                          </motion.div>
+                                        </motion.div>
+                                      </div>
+                                    </motion.div>
                                   )}
-                                  <p className="text-sm font-din-arabic text-[#626262] line-clamp-3 mb-4 leading-relaxed flex-grow">
-                                    {blog.description}
-                                  </p>
-                                  <span className="text-sm font-american-typewriter uppercase tracking-wide font-bold text-[#626262] group-hover:underline mt-auto">
-                                    READ MORE...
-                                  </span>
+
+                                  {/* Second Blog */}
+                                  {chunk[1] && (
+                                    <motion.div
+                                      className=""
+                                      initial={{ y: 40, opacity: 0 }}
+                                      animate={{ y: 0, opacity: 1 }}
+                                      transition={{ delay: 1.3, duration: 0.8 }}
+                                    >
+                                      <div className="flex flex-col md:flex-row gap-4 md:gap-6 group">
+                                        {/* Left: Title + Author + Image */}
+                                        <motion.div
+                                          className="w-full md:w-1/2 flex flex-col"
+                                          style={{ borderTop: "1px solid #D3D2CA" }}
+                                          initial={{ x: -30, opacity: 0 }}
+                                          animate={{ x: 0, opacity: 1 }}
+                                          transition={{ delay: 1.5, duration: 0.8 }}
+                                        >
+                                          {/* Title + Author */}
+                                          <Link href={`/${countryCode}/blogs/${chunk[1].slug}`} className="mb-3 lg:mb-4 block">
+                                            <motion.h3
+                                              className="font-american-typewriter text-lg lg:text-xl mb-2 leading-tight pt-4 lg:pt-6 group-hover:underline"
+                                              initial={{ y: 15, opacity: 0 }}
+                                              animate={{ y: 0, opacity: 1 }}
+                                              transition={{ delay: 1.7, duration: 0.6 }}
+                                            >
+                                              {chunk[1].title}
+                                            </motion.h3>
+                                            {chunk[1].author && (
+                                              <motion.p
+                                                className="text-xs lg:text-sm italic text-gray-600"
+                                                initial={{ y: 10, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                transition={{ delay: 1.8, duration: 0.6 }}
+                                              >
+                                                by {chunk[1].author.name}
+                                              </motion.p>
+                                            )}
+                                          </Link>
+                                          {/* Image */}
+                                          <motion.div
+                                            className="flex-1"
+                                            initial={{ y: 20, opacity: 0 }}
+                                            animate={{ y: 0, opacity: 1 }}
+                                            transition={{ delay: 1.9, duration: 0.8 }}
+                                          >
+                                            <Link href={`/${countryCode}/blogs/${chunk[1].slug}`} className="relative group/img w-full h-48 lg:h-64 overflow-hidden block">
+                                              {/* Grayscale Base Image */}
+                                              <motion.img
+                                                src={
+                                                  chunk[1].image ||
+                                                  "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&h=600&fit=crop"
+                                                }
+                                                alt={chunk[1].imagealt || chunk[1].title}
+                                                className="w-full h-full object-cover grayscale group-hover/img:grayscale-0 transition-all duration-500"
+                                                initial={{ scale: 1.1, opacity: 0 }}
+                                                animate={{ scale: 1, opacity: 1 }}
+                                                transition={{ delay: 2.1, duration: 0.8 }}
+                                              />
+
+                                              {/* Black Overlay - Removed on hover */}
+                                              <motion.div
+                                                className="absolute inset-0 bg-black group-hover/img:opacity-0 transition-opacity duration-500"
+                                                initial={{ opacity: 0 }}
+                                              />
+                                            </Link>
+                                          </motion.div>
+                                        </motion.div>
+
+                                        {/* Right: Description + Read More */}
+                                        <motion.div
+                                          className="w-full md:w-1/2 flex flex-col justify-between pb-6 lg:pb-10"
+                                          style={{
+                                            borderTop: "1px solid #D3D2CA",
+                                            paddingBottom: "5px",
+                                          }}
+                                          initial={{ x: 30, opacity: 0 }}
+                                          animate={{ x: 0, opacity: 1 }}
+                                          transition={{ delay: 1.6, duration: 0.8 }}
+                                        >
+                                          <div>
+                                            <motion.p
+                                              className="leading-relaxed mb-3 lg:mb-4 pt-4 lg:pt-6 text-sm lg:text-base font-din-arabic tracking-[1px] text-[#626262] text-[16px] line-clamp-6"
+                                              initial={{ y: 15, opacity: 0 }}
+                                              animate={{ y: 0, opacity: 1 }}
+                                              transition={{ delay: 1.8, duration: 0.6 }}
+                                            >
+                                              {chunk[1].description}
+                                            </motion.p>
+                                          </div>
+                                          <motion.div
+                                            initial={{ y: 10, opacity: 0 }}
+                                            animate={{ y: 0, opacity: 1 }}
+                                            transition={{ delay: 2.1, duration: 0.6 }}
+                                          >
+                                            <Link
+                                              href={`/${countryCode}/blogs/${chunk[1].slug}`}
+                                              className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline inline-block mt-4 uppercase tracking-wide"
+                                            >
+                                              Read more...
+                                            </Link>
+                                          </motion.div>
+                                        </motion.div>
+                                      </div>
+                                    </motion.div>
+                                  )}
                                 </div>
-                              </Link>
-                            </motion.div>
+
+                                {/* Right Side - 1 Blog (30%) */}
+                                {chunk[2] && (
+                                  <motion.div
+                                    className="w-full lg:w-[30%]"
+                                    initial={{ x: 40, opacity: 0 }}
+                                    animate={{ x: 0, opacity: 1 }}
+                                    transition={{ delay: 1.1, duration: 0.8 }}
+                                  >
+                                    <div className="group">
+                                      <Link href={`/${countryCode}/blogs/${chunk[2].slug}`} className="relative w-full h-64 md:h-80 lg:h-96 mb-4 lg:mb-6 overflow-hidden block">
+                                        {/* Grayscale Base Image */}
+                                        <motion.img
+                                          src={
+                                            chunk[2].image ||
+                                            "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&h=600&fit=crop"
+                                          }
+                                          alt={chunk[2].imagealt || chunk[2].title}
+                                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                                          initial={{ scale: 1.1, opacity: 0 }}
+                                          animate={{ scale: 1, opacity: 1 }}
+                                          transition={{ delay: 1.3, duration: 0.8 }}
+                                        />
+
+                                        {/* Black Overlay - Removed on hover */}
+                                        <motion.div
+                                          className="absolute inset-0 bg-black group-hover:opacity-0 transition-opacity duration-500"
+                                          initial={{ opacity: 0 }}
+                                        />
+                                      </Link>
+
+                                      <motion.div
+                                        className="px-2 cursor-pointer"
+                                        initial={{ y: 20, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 1.5, duration: 0.8 }}
+                                      >
+                                        <Link href={`/${countryCode}/blogs/${chunk[2].slug}`} className="block">
+                                          <motion.h3
+                                            className="text-xl lg:text-2xl font-american-typewriter mb-2 lg:mb-3 leading-tight group-hover:underline"
+                                            initial={{ y: 15, opacity: 0 }}
+                                            animate={{ y: 0, opacity: 1 }}
+                                            transition={{ delay: 1.7, duration: 0.6 }}
+                                          >
+                                            {chunk[2].title}
+                                          </motion.h3>
+                                        </Link>
+                                        {chunk[2].author && (
+                                          <motion.p
+                                            className="text-xs lg:text-sm italic text-gray-600 mb-3 lg:mb-4"
+                                            initial={{ y: 10, opacity: 0 }}
+                                            animate={{ y: 0, opacity: 1 }}
+                                            transition={{ delay: 1.8, duration: 0.6 }}
+                                          >
+                                            by {chunk[2].author.name}
+                                          </motion.p>
+                                        )}
+                                        <motion.p
+                                          className="leading-relaxed mb-3 lg:mb-4 text-sm lg:text-base font-din-arabic line-clamp-4"
+                                          style={{
+                                            letterSpacing: "1px",
+                                            color: "#626262",
+                                            fontSize: "16px",
+                                          }}
+                                          initial={{ y: 15, opacity: 0 }}
+                                          animate={{ y: 0, opacity: 1 }}
+                                          transition={{ delay: 1.9, duration: 0.6 }}
+                                        >
+                                          {chunk[2].description}
+                                        </motion.p>
+                                        <motion.div
+                                          initial={{ y: 10, opacity: 0 }}
+                                          animate={{ y: 0, opacity: 1 }}
+                                          transition={{ delay: 2.0, duration: 0.6 }}
+                                        >
+                                          <Link
+                                            href={`/${countryCode}/blogs/${chunk[2].slug}`}
+                                            className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline inline-block mt-2 uppercase tracking-wide"
+                                          >
+                                            READ MORE...
+                                          </Link>
+                                        </motion.div>
+                                      </motion.div>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </div>
@@ -786,10 +1080,10 @@ const Home = () => {
             )}
           </AnimatePresence>
         </motion.div>
-      </div>
+      </div >
 
       {/* Newsletter Subscription Section */}
-      <div className="w-full bg-[#FEFDF3] py-8 lg:py-10">
+      < div className="w-full bg-[#FEFDF3] py-8 lg:py-10" >
         <div className="max-w-4xl mx-auto px-4 lg:px-6">
           <motion.div
             className="text-center"
@@ -852,7 +1146,7 @@ const Home = () => {
             </motion.form>
           </motion.div>
         </div>
-      </div>
+      </div >
 
       <motion.div
         className="w-full h-1 bg-black"
@@ -860,7 +1154,7 @@ const Home = () => {
         animate={{ width: "100%" }}
         transition={{ delay: 0.8, duration: 1.0 }}
       />
-    </div>
+    </div >
   )
 }
 

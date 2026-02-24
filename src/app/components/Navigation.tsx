@@ -623,9 +623,9 @@ export function Navigation({
                             disableAnimations
                               ? undefined
                               : {
-                                  duration: 0.2,
-                                  ease: "easeOut",
-                                }
+                                duration: 0.2,
+                                ease: "easeOut",
+                              }
                           }
                           className="absolute top-full left-0 pt-4 z-50"
                         >
@@ -655,17 +655,17 @@ export function Navigation({
                                           <span className="relative inline-block whitespace-pre">
                                             {dItem.titleContent
                                               ? documentToReactComponents(dItem.titleContent, {
-                                                  renderNode: {
-                                                    [BLOCKS.PARAGRAPH]: (
-                                                      node: any,
-                                                      children: any
-                                                    ) => (
-                                                      <span className="inline-block whitespace-pre">
-                                                        {children}
-                                                      </span>
-                                                    ),
-                                                  },
-                                                })
+                                                renderNode: {
+                                                  [BLOCKS.PARAGRAPH]: (
+                                                    node: any,
+                                                    children: any
+                                                  ) => (
+                                                    <span className="inline-block whitespace-pre">
+                                                      {children}
+                                                    </span>
+                                                  ),
+                                                },
+                                              })
                                               : dItem.label}
                                           </span>
                                         </span>
@@ -685,17 +685,17 @@ export function Navigation({
                                         <span className="relative inline-block whitespace-pre">
                                           {dItem.titleContent
                                             ? documentToReactComponents(dItem.titleContent, {
-                                                renderNode: {
-                                                  [BLOCKS.PARAGRAPH]: (
-                                                    node: any,
-                                                    children: any
-                                                  ) => (
-                                                    <span className="inline-block whitespace-pre">
-                                                      {children}
-                                                    </span>
-                                                  ),
-                                                },
-                                              })
+                                              renderNode: {
+                                                [BLOCKS.PARAGRAPH]: (
+                                                  node: any,
+                                                  children: any
+                                                ) => (
+                                                  <span className="inline-block whitespace-pre">
+                                                    {children}
+                                                  </span>
+                                                ),
+                                              },
+                                            })
                                             : dItem.label}
                                           <span
                                             className="absolute bottom-[-2px] left-0 w-0 h-[1px] transition-all duration-300 group-hover/dropdown-item:w-full"
@@ -733,22 +733,22 @@ export function Navigation({
                                 {/* fallback/default image */}
                                 {item.dropdown.filter((dItem) => dItem.label !== "All Products")[0]
                                   ?.image && (
-                                  <img
-                                    src={
-                                      item.dropdown.filter(
-                                        (dItem) => dItem.label !== "All Products"
-                                      )[0].image
-                                    }
-                                    alt="default"
-                                    className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
-                                    style={{
-                                      opacity: !hoveredItem ? 1 : 0,
-                                      transition: "opacity 0.18s ease-out",
-                                      zIndex: 0,
-                                    }}
-                                    loading="eager"
-                                  />
-                                )}
+                                    <img
+                                      src={
+                                        item.dropdown.filter(
+                                          (dItem) => dItem.label !== "All Products"
+                                        )[0].image
+                                      }
+                                      alt="default"
+                                      className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                                      style={{
+                                        opacity: !hoveredItem ? 1 : 0,
+                                        transition: "opacity 0.18s ease-out",
+                                        zIndex: 0,
+                                      }}
+                                      loading="eager"
+                                    />
+                                  )}
                               </div>
                             </div>
                           </div>
@@ -1222,9 +1222,8 @@ export function Navigation({
                           >
                             <span>{item.name}</span>
                             <ChevronDown
-                              className={`w-4 h-4 transition-transform ${
-                                mobileActiveDropdown === item.name ? "rotate-180" : ""
-                              }`}
+                              className={`w-4 h-4 transition-transform ${mobileActiveDropdown === item.name ? "rotate-180" : ""
+                                }`}
                             />
                           </button>
                           <AnimatePresence>
@@ -1319,7 +1318,6 @@ export function Navigation({
         )}
       </AnimatePresence>
       <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
-        (
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-american-typewriter text-xl text-black">
@@ -1368,7 +1366,6 @@ export function Navigation({
             </button>
           </div>
         </DialogContent>
-        )
       </Dialog>
       <SearchMegaMenu
         isOpen={isSearchOpen}
