@@ -95,9 +95,9 @@ const buildSizeOptions = (product: ProductHeroProps["product"], sizeOptionId?: s
 
       return label
         ? {
-            id: variant.id,
-            label,
-          }
+          id: variant.id,
+          label,
+        }
         : null
     })
     .filter((option): option is { id: string; label: string } => Boolean(option))
@@ -531,9 +531,8 @@ export function ProductHero({
                           ) : (
                             <BreadcrumbLink
                               href={crumb.url}
-                              className={`font-din-arabic text-xs tracking-wide flex items-center ${
-                                isHome ? "" : "text-black/80 hover:underline"
-                              }`}
+                              className={`font-din-arabic text-xs tracking-wide flex items-center ${isHome ? "" : "text-black/80 hover:underline"
+                                }`}
                               style={isHome ? { color: "#a28b6f" } : {}}
                             >
                               {isHome && <Home className="w-3 h-3 mr-1" />}
@@ -1063,20 +1062,19 @@ export function ProductHero({
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full lg:w-[60%] relative overflow-hidden h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[calc(100vh-80px)] lg:min-h-[600px]"
+        className="w-full lg:w-[60%] relative overflow-hidden h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-auto lg:min-h-[calc(100vh-80px)] flex"
         style={{ backgroundColor: "#d6d6c6" }}
       >
-        {/* Product Image - Full Section Coverage without cropping */}
-        <div className="absolute inset-0 w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8">
-          <img
-            src={productImages[currentImageIndex]}
-            alt="Jardin Botanica Tea Exfoliant Rinse"
-            className="w-full h-full object-contain object-center"
-            style={{
-              filter: "drop-shadow(0 20px 45px rgba(0, 0, 0, 0.15))",
-            }}
-          />
-        </div>
+        {/* Product Image - Full Section Coverage */}
+        <img
+          src={productImages[currentImageIndex]}
+          alt="Jardin Botanica Tea Exfoliant Rinse"
+          className="absolute inset-0 w-full h-full object-contain object-center"
+          style={{
+            filter: "drop-shadow(0 20px 45px rgba(0, 0, 0, 0.15))",
+          }}
+        />
+        {/* </div> */}
 
         {/* Botanical Blend Badge - Top Left */}
         <motion.div
@@ -1108,15 +1106,13 @@ export function ProductHero({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleToggleLedger}
-            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${
-              isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"
-            }`}
+            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"
+              }`}
             aria-label={isProductInLedger ? "Remove from ledger" : "Add to ledger"}
           >
             <Heart
-              className={`w-5 h-5 transition-colors ${
-                isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"
-              }`}
+              className={`w-5 h-5 transition-colors ${isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"
+                }`}
             />
           </motion.button>
 
@@ -1181,9 +1177,8 @@ export function ProductHero({
               onClick={() => setCurrentImageIndex(index)}
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                currentImageIndex === index ? "w-8" : ""
-              }`}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${currentImageIndex === index ? "w-8" : ""
+                }`}
               style={{
                 backgroundColor: currentImageIndex === index ? "#a28b6f" : "rgba(0, 0, 0, 0.3)",
               }}
