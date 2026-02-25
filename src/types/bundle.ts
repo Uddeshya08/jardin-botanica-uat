@@ -1,3 +1,10 @@
+export interface BundleText {
+  id: string
+  bundle_id: string
+  text: string
+  sort_order: number
+}
+
 export interface BundleItem {
   id: string
   bundle_id: string
@@ -38,6 +45,7 @@ export interface Bundle {
   is_featured: boolean
   metadata: Record<string, unknown> | null
   items?: BundleItem[]
+  bundle_texts?: BundleText[]
   choice_slots?: ChoiceSlot[]
 }
 
@@ -50,6 +58,7 @@ export interface AddBundleToCartPayload {
   cart_id: string
   quantity?: number
   selections?: Record<string, string[]>
+  personalized_note?: string
   metadata?: Record<string, unknown>
 }
 
