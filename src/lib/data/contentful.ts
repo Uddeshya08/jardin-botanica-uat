@@ -414,21 +414,21 @@ function transformTestimonialsSectionEntry(
     // Parse testimonials array
     const items: TestimonialItem[] = Array.isArray(fields.testimonials)
       ? fields.testimonials.map((t: any, index: number) => {
-        // Handle both JSON objects and stringified JSON
-        const testimonial = typeof t === "string" ? JSON.parse(t) : t
+          // Handle both JSON objects and stringified JSON
+          const testimonial = typeof t === "string" ? JSON.parse(t) : t
 
-        return {
-          id: testimonial.id ?? index + 1,
-          name: testimonial.name || "",
-          initials: testimonial.initials || "",
-          location: testimonial.location || "",
-          rating: testimonial.rating ?? 5,
-          review: testimonial.review || "",
-          product: testimonial.product || undefined,
-          purchaseDate: testimonial.purchaseDate || undefined,
-          verified: testimonial.verified ?? true,
-        }
-      })
+          return {
+            id: testimonial.id ?? index + 1,
+            name: testimonial.name || "",
+            initials: testimonial.initials || "",
+            location: testimonial.location || "",
+            rating: testimonial.rating ?? 5,
+            review: testimonial.review || "",
+            product: testimonial.product || undefined,
+            purchaseDate: testimonial.purchaseDate || undefined,
+            verified: testimonial.verified ?? true,
+          }
+        })
       : []
 
     // Provide defaults for optional fields
@@ -1036,7 +1036,7 @@ async function transformFromTheLabSectionEntry(
     }
 
     // Parse products - exclusively from featuredProductHandles (dynamic Medusa products)
-    let products: FromTheLabProduct[] = []
+    const products: FromTheLabProduct[] = []
 
     // Process featuredProductHandles - fetch dynamic product data from Medusa
     if (
@@ -1065,7 +1065,8 @@ async function transformFromTheLabSectionEntry(
                   price: calculatedPrice?.calculated_amount || undefined,
                   currency: calculatedPrice?.currency_code || undefined,
                   image: medusaProduct.thumbnail || undefined,
-                  hoverImage: medusaProduct.images?.[1]?.url || medusaProduct.thumbnail || undefined,
+                  hoverImage:
+                    medusaProduct.images?.[1]?.url || medusaProduct.thumbnail || undefined,
                   description: medusaProduct.subtitle || undefined,
                   url: `/${countryCode}/products/${medusaProduct.handle}`,
                   variantId: variant?.id,
@@ -1160,9 +1161,9 @@ export async function getPageBanner(pageKey: string): Promise<PageBanner | null>
       ) {
         console.error(
           `\n[SOLUTION] ❌ Content Type "pageBanner" not found in Contentful!\n` +
-          `Please create a content type with:\n` +
-          `- Content Type ID (API Identifier): "pageBanner"\n` +
-          `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey\n\n`
+            `Please create a content type with:\n` +
+            `- Content Type ID (API Identifier): "pageBanner"\n` +
+            `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey\n\n`
         )
         return null // Return null instead of throwing
       }
@@ -1175,9 +1176,9 @@ export async function getPageBanner(pageKey: string): Promise<PageBanner | null>
       ) {
         console.error(
           `\n[SOLUTION] ❌ Field "pageKey" not found in "pageBanner" content type!\n` +
-          `Please add a field with:\n` +
-          `- Field ID: "pageKey"\n` +
-          `- Field Type: Short text\n\n`
+            `Please add a field with:\n` +
+            `- Field ID: "pageKey"\n` +
+            `- Field Type: Short text\n\n`
         )
         return null
       }
@@ -1211,8 +1212,8 @@ export async function getPageBanner(pageKey: string): Promise<PageBanner | null>
 
       console.warn(
         `No active page banner found for pageKey: "${pageKey}". ` +
-        `Make sure you have an active banner entry with pageKey="${pageKey}" in Contentful. ` +
-        `Content Type ID should be "pageBanner" and field should be "pageKey" (camelCase).`
+          `Make sure you have an active banner entry with pageKey="${pageKey}" in Contentful. ` +
+          `Content Type ID should be "pageBanner" and field should be "pageKey" (camelCase).`
       )
       return null
     }
@@ -1235,9 +1236,9 @@ export async function getPageBanner(pageKey: string): Promise<PageBanner | null>
     if (error?.message?.includes("not found") || error?.sys?.id === "NotFound") {
       console.error(
         `\n[SOLUTION] Content Type "pageBanner" doesn't exist in Contentful.\n` +
-        `Please create it with:\n` +
-        `- Content Type ID: "pageBanner"\n` +
-        `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey`
+          `Please create it with:\n` +
+          `- Content Type ID: "pageBanner"\n` +
+          `- Fields: title, description, mediaType, video, image, fallbackImage, isActive, pageKey`
       )
     }
 
@@ -1366,7 +1367,7 @@ export async function getCandlesCollection(
     }
 
     if (sectionKey) {
-      ; (sectionQuery as Record<string, unknown>)["fields.sectionKey"] = sectionKey
+      ;(sectionQuery as Record<string, unknown>)["fields.sectionKey"] = sectionKey
     }
 
     let sectionResponse
@@ -1854,6 +1855,7 @@ export async function getAllBlogs(limit: number = 10, countryCode?: string): Pro
         "fields.publishedDate",
         "fields.image",
         "fields.imagealt",
+        "fields.author",
         "fields.journalTag",
         "fields.isFeaturedBlog",
         "fields.isHeroBlog",
@@ -1873,7 +1875,168 @@ export async function getAllBlogs(limit: number = 10, countryCode?: string): Pro
 }
 
 /**
- * Fetch a single blog by slug from Contentful
+ * Fetch hero blog and other blogs from Contentful
+ * Returns hero blog + paginated other blogs (all blogs, not excluding featured)
+ */
+export async function getHeroAndOtherBlogs(
+  limit: number = 3,
+  skip: number = 0,
+  countryCode?: string
+): Promise<{ blogs: Blog[]; total: number }> {
+  try {
+    const client = getContentfulClient()
+
+    // Get hero blog
+    const heroResponse = await client.getEntries({
+      content_type: "blog",
+      "fields.isHeroBlog": true,
+      select: [
+        "fields.title",
+        "fields.slug",
+        "fields.description",
+        "fields.publishedDate",
+        "fields.image",
+        "fields.imagealt",
+        "fields.author",
+        "fields.journalTag",
+        "fields.isFeaturedBlog",
+        "fields.isHeroBlog",
+      ],
+      order: ["-fields.publishedDate"],
+      limit: 1,
+    })
+
+    // Get other blogs (all blogs excluding hero)
+    const othersResponse = await client.getEntries({
+      content_type: "blog",
+      select: [
+        "fields.title",
+        "fields.slug",
+        "fields.description",
+        "fields.publishedDate",
+        "fields.image",
+        "fields.imagealt",
+        "fields.author",
+        "fields.journalTag",
+        "fields.isFeaturedBlog",
+        "fields.isHeroBlog",
+      ],
+      order: ["-fields.publishedDate"],
+      skip,
+      limit,
+    })
+
+    const [heroBlogs, otherBlogs] = await Promise.all([
+      Promise.all(heroResponse.items.map((item) => transformBlogEntry(item, countryCode))),
+      Promise.all(othersResponse.items.map((item) => transformBlogEntry(item, countryCode))),
+    ])
+
+    const hero = heroBlogs.filter((b): b is Blog => b !== null)
+    const others = otherBlogs.filter((b): b is Blog => b !== null)
+
+    // Filter out hero from others if it appears there
+    const filteredOthers = others.filter((b) => !b.isHeroBlog)
+
+    return {
+      blogs: [...hero, ...filteredOthers],
+      total: othersResponse.total,
+    }
+  } catch (error) {
+    console.error("Error fetching hero and other blogs:", error)
+    return { blogs: [], total: 0 }
+  }
+}
+
+/**
+ * Fetch paginated blogs excluding hero entries.
+ */
+export async function getNonHeroBlogs(
+  limit: number = 3,
+  skip: number = 0,
+  countryCode?: string
+): Promise<{ blogs: Blog[]; total: number }> {
+  try {
+    const client = getContentfulClient()
+    const response = await client.getEntries({
+      content_type: "blog",
+      "fields.isHeroBlog[ne]": true,
+      select: [
+        "fields.title",
+        "fields.slug",
+        "fields.description",
+        "fields.publishedDate",
+        "fields.image",
+        "fields.imagealt",
+        "fields.author",
+        "fields.journalTag",
+        "fields.isFeaturedBlog",
+        "fields.isHeroBlog",
+      ],
+      order: ["-fields.publishedDate"],
+      skip,
+      limit,
+    })
+
+    const blogs = await Promise.all(
+      response.items.map((item) => transformBlogEntry(item, countryCode))
+    )
+
+    return {
+      blogs: blogs.filter((b): b is Blog => b !== null),
+      total: response.total,
+    }
+  } catch (error) {
+    console.error("Error fetching non-hero blogs:", error)
+    return { blogs: [], total: 0 }
+  }
+}
+
+/**
+ * Fetch only featured blogs from Contentful
+ */
+export async function getFeaturedBlogs(
+  limit: number = 10,
+  skip: number = 0,
+  countryCode?: string
+): Promise<{ blogs: Blog[]; total: number }> {
+  try {
+    const client = getContentfulClient()
+    const response = await client.getEntries({
+      content_type: "blog",
+      "fields.isFeaturedBlog": true,
+      select: [
+        "fields.title",
+        "fields.slug",
+        "fields.description",
+        "fields.publishedDate",
+        "fields.image",
+        "fields.imagealt",
+        "fields.author",
+        "fields.journalTag",
+        "fields.isFeaturedBlog",
+        "fields.isHeroBlog",
+      ],
+      order: ["-fields.publishedDate"],
+      skip,
+      limit,
+    })
+
+    const blogs = await Promise.all(
+      response.items.map((item) => transformBlogEntry(item, countryCode))
+    )
+
+    return {
+      blogs: blogs.filter((b): b is Blog => b !== null),
+      total: response.total,
+    }
+  } catch (error) {
+    console.error("Error fetching featured blogs:", error)
+    return { blogs: [], total: 0 }
+  }
+}
+
+/**
+ * Fetch only featured blogs from Contentful
  */
 export async function getBlogBySlug(slug: string, countryCode?: string): Promise<Blog | null> {
   try {

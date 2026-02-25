@@ -477,8 +477,8 @@ export function Navigation({
           backdropFilter: "none",
           WebkitBackdropFilter: "none",
           borderBottom: "none",
-          textColor: "#1a1a1a",
-          logoSrc: "/assets/Jardinlogoblack.svg",
+          textColor: "white",
+          logoSrc: "/assets/Jardinlogo.svg",
         }
       }
     }
@@ -1319,7 +1319,6 @@ export function Navigation({
         )}
       </AnimatePresence>
       <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
-        (
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-american-typewriter text-xl text-black">
@@ -1368,7 +1367,6 @@ export function Navigation({
             </button>
           </div>
         </DialogContent>
-        )
       </Dialog>
       <SearchMegaMenu
         isOpen={isSearchOpen}

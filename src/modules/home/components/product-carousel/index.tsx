@@ -207,9 +207,8 @@ function ProductCard({
         >
           <Heart
             size={18}
-            className={`transition-colors duration-300 ${
-              isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-            }`}
+            className={`transition-colors duration-300 ${isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+              }`}
           />
         </button>
       </div>
@@ -615,7 +614,7 @@ export function ProductCarousel({
               ))}
             </CarouselContent>
           </Carousel>
-          <div className="px-4 sm:px-6 lg:px-12 xl:px-10 2xl:px-15 mt-6">
+          <div className="px-4 sm:px-6 lg:px-12 xl:px-10 2xl:px-15 mt-10">
             <CarouselSlider api={api} />
           </div>
         </div>
