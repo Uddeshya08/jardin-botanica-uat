@@ -320,7 +320,7 @@ export function PeopleAlsoBoughtTwo() {
                   }}
                   className="w-full mt-4 px-4 py-2 bg-transparent border border-black/20 text-black hover:bg-black hover:text-white transition-all duration-300 font-din-arabic text-sm tracking-wide opacity-0 group-hover:opacity-100 text-center"
                 >
-                  {addedToCart === product.id ? "✓ Added" : "Quick Add"}
+                  {addedToCart === product.id ? "✓ Added" : "Quick add"}
                 </motion.button>
               </div>
             </motion.div>

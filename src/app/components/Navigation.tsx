@@ -41,6 +41,7 @@ interface NavigationProps {
   disableSticky?: boolean
   disableAnimations?: boolean
   isLoggedIn?: boolean
+  forceBlackText?: boolean
 }
 
 export function Navigation({
@@ -52,6 +53,7 @@ export function Navigation({
   disableAnimations = false,
   forceWhiteText = false,
   isLoggedIn = false,
+  forceBlackText = false,
 }: NavigationProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -439,6 +441,16 @@ export function Navigation({
           textColor: "white",
           logoSrc: "/assets/Jardinlogo.svg",
         }
+      } else if (forceBlackText) {
+        // Force black text mode: transparent background with black text
+        return {
+          backgroundColor: "transparent",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          borderBottom: "none",
+          textColor: "black",
+          logoSrc: "/assets/Jardinlogoblack.svg",
+        }
       }
       return {
         backgroundColor: "transparent",
@@ -469,6 +481,16 @@ export function Navigation({
           borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
           textColor: "white",
           logoSrc: "/assets/Jardinlogo.svg",
+        }
+      } else if (forceBlackText) {
+        // Force black text mode: transparent background with black text
+        return {
+          backgroundColor: "transparent",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          borderBottom: "none",
+          textColor: "black",
+          logoSrc: "/assets/Jardinlogoblack.svg",
         }
       } else {
         // Default: transparent with black text

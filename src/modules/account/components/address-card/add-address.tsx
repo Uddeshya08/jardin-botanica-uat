@@ -174,6 +174,18 @@ const AddAddress = ({
                 autoComplete="country"
                 data-testid="country-select"
               />
+              <div className="flex flex-col gap-y-2">
+                <label className="text-sm font-medium text-gray-700">Address Type</label>
+                <select
+                  name="address_type"
+                  defaultValue="Home"
+                  className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="Home">Home</option>
+                  <option value="Work">Work</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
               <Input label="Phone" name="phone" autoComplete="phone" data-testid="phone-input" />
             </div>
             {formState.error && (
