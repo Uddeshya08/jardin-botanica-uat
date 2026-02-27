@@ -1090,23 +1090,25 @@ export function ProductHero({
         />
         {/* </div> */}
 
-        {/* Botanical Blend Badge - Top Left */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="absolute top-8 left-8 z-20"
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
-            <Star className="w-3 h-3" style={{ color: "#a28b6f" }} />
-            <span
-              className="font-din-arabic uppercase text-xs tracking-wide"
-              style={{ color: "#a28b6f" }}
-            >
-              {(product.metadata?.botanical as string | undefined) || "BOTANICAL BLEND"}
-            </span>
-          </div>
-        </motion.div>
+        {/* Product Tag Badge - Top Left */}
+        {product.metadata?.show_product_tag && product.metadata?.product_tag && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="absolute top-8 left-8 z-20"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
+              <Star className="w-3 h-3" style={{ color: "#a28b6f" }} />
+              <span
+                className="font-din-arabic uppercase text-xs tracking-wide"
+                style={{ color: "#a28b6f" }}
+              >
+                {product.metadata.product_tag as string}
+              </span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Action Icons - Positioned at top-right above product image */}
         <motion.div
