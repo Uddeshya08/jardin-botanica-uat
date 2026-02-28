@@ -73,6 +73,7 @@ interface Product {
   botanical: string
   property: string
   items?: string[]
+  bundleTexts?: string[]
   savings?: number
   featured?: boolean
   priceRange?: string
@@ -133,7 +134,8 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                 // Build display name from product name + variant title
                 let displayName = variantDetail.productName
                 if (variantDetail.title && variantDetail.title !== "Default") {
-                  displayName += ` - ${variantDetail.title}`
+                  console.log("VARIANT DETAILS:", variantDetail)
+                  displayName += ` (${variantDetail.title})`
                 }
                 return {
                   name: displayName,
@@ -170,7 +172,12 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                 : undefined,
             hoverImage: bundle.productImages?.[1] || undefined,
             featured: bundle.is_featured,
-            items: itemsList,
+            items: [
+              ...itemsList,
+              ...(bundle.bundle_texts || [])
+                .sort((a: any, b: any) => a.sort_order - b.sort_order)
+                .map((bt: any) => bt.text),
+            ],
             hasCandles: (bundle.choice_slots || []).length > 0,
             layout: bundle.is_featured ? ("large" as const) : ("standard" as const),
             candleOptions,
@@ -267,9 +274,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
       await addBundleToCart(product.id, {
         quantity: 1,
         selections,
-        metadata: {
-          personalMessage: personalMessages[product.id] || "",
-        },
+        personalized_note: personalMessages[product.id] || "",
       })
 
       // Update cart context directly for instant UI feedback
@@ -771,7 +776,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                                     className="font-din-arabic text-black/80 text-xs sm:text-sm"
                                     style={{ letterSpacing: "0.1em" }}
                                   >
-                                    {candle.name} ({candle.size})
+                                    {candle.name}
                                   </span>
                                 </label>
                               ))}

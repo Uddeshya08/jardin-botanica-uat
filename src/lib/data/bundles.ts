@@ -109,16 +109,21 @@ export async function getAllBundlesWithVariants(): Promise<BundleWithVariants[]>
 
     const bundles = response.bundles || []
 
+    console.log("🔍 [getAllBundlesWithVariants] Bundles fetched:", bundles.length)
+    console.log(
+      "🔍 [getAllBundlesWithVariants] Sample bundle:",
+      JSON.stringify(bundles[0], null, 2)
+    )
+
     if (bundles.length === 0) return []
 
-    // Collect all variant IDs and product IDs from bundles
+    // Collect all variant IDs from bundles (main variant + items + choice slot options)
     const variantIds = new Set<string>()
-    const productIds = new Set<string>()
 
     for (const bundle of bundles) {
-      // Collect product ID if available
-      if (bundle.medusa_product_id) {
-        productIds.add(bundle.medusa_product_id)
+      // Add bundle's main variant ID
+      if (bundle.medusa_variant_id) {
+        variantIds.add(bundle.medusa_variant_id)
       }
       // Items
       for (const item of bundle.items || []) {
@@ -135,24 +140,28 @@ export async function getAllBundlesWithVariants(): Promise<BundleWithVariants[]>
     // Fetch variant details
     const variantMap = await getVariantsByIds(Array.from(variantIds))
 
-    // Fetch product details for images if we have product IDs
-    const productImagesMap = new Map<string, string[]>()
-    if (productIds.size > 0) {
+    // Fetch products for images using variant IDs
+    const variantImagesMap = new Map<string, string[]>()
+    if (variantIds.size > 0) {
       try {
-        // Fetch products with images
+        // Query products by variant IDs
         const productsResponse = await sdk.client.fetch<{ products: any[] }>("/store/products", {
           method: "GET",
           query: {
-            id: Array.from(productIds),
-            limit: productIds.size,
-            fields: "*images",
+            "variants.id": Array.from(variantIds),
+            limit: 100,
+            fields: "*images,*variants",
           },
           headers,
         })
 
+        // Map images to variant IDs
         for (const product of productsResponse.products || []) {
           const images = (product.images || []).map((img: any) => img.url)
-          productImagesMap.set(product.id, images)
+          // Associate images with each variant of this product
+          for (const variant of product.variants || []) {
+            variantImagesMap.set(variant.id, images)
+          }
         }
       } catch (error) {
         console.error("Error fetching product images:", error)
@@ -161,12 +170,13 @@ export async function getAllBundlesWithVariants(): Promise<BundleWithVariants[]>
 
     // Attach variant details and product images to bundles
     return bundles.map((bundle) => {
-      // Get images from product or fallback to bundle_image
+      // Get images from bundle's main variant
       let images: string[] = []
-      if (bundle.medusa_product_id && productImagesMap.has(bundle.medusa_product_id)) {
-        images = productImagesMap.get(bundle.medusa_product_id) || []
+
+      if (bundle.medusa_variant_id && variantImagesMap.has(bundle.medusa_variant_id)) {
+        images = variantImagesMap.get(bundle.medusa_variant_id) || []
       }
-      // If no product images, use bundle_image as fallback
+      // Fallback to bundle_image if no images found
       if (images.length === 0 && bundle.bundle_image) {
         images = [bundle.bundle_image]
       }
