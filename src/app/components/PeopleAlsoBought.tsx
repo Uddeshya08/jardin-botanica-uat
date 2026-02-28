@@ -630,7 +630,7 @@ export function PeopleAlsoBought({
                 {/* Product Name and Price */}
                 <div className="flex items-start justify-between gap-2">
                   <h3
-                    className="font-american-typewriter text-black group-hover:text-black/80 transition-colors duration-200 flex-1 text-base md:text-lg"
+                    className="font-american-typewriter text-black group-hover:text-black/80 transition-colors duration-200 flex-1 text-base md:text-lg line-clamp-1"
                     style={{ lineHeight: "1.3", letterSpacing: "0.05em" }}
                   >
                     {product.name}
@@ -669,7 +669,7 @@ export function PeopleAlsoBought({
                     ? "Adding..."
                     : addedToCart === product.id
                       ? "✓ Added"
-                      : "Quick Add"}
+                      : "Quick add"}
                 </motion.button>
               </div>
             </div>

@@ -1,8 +1,8 @@
 "use client"
 
-import { clsx } from "clsx"
 import { login, signup } from "@lib/data/customer"
 import { DatePicker } from "app/components/ui/date-picker"
+import { clsx } from "clsx"
 import { Eye, EyeOff, Smartphone } from "lucide-react"
 import { motion } from "motion/react"
 import { useParams, useRouter } from "next/navigation"
@@ -23,6 +23,7 @@ export function AccountPage() {
   const [createPassword, setCreatePassword] = useState("")
   const [currentView, setCurrentView] = useState<"sign-in" | "register">("sign-in")
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>()
+  const [phoneError, setPhoneError] = useState<string | null>(null)
 
   const handleCreateAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -31,6 +32,14 @@ export function AccountPage() {
       if (passwordError && value.length >= 15) {
         setPasswordError(null)
       }
+    }
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "")
+    e.target.value = value
+    if (phoneError) {
+      setPhoneError(null)
     }
   }
 
@@ -229,9 +238,13 @@ export function AccountPage() {
                   whileTap={{ scale: 0.99 }}
                   type="button"
                   className="font-din-arabic w-full flex items-center px-4 py-3.5 border bg-transparent text-black hover:bg-black/5 transition-all duration-300"
-                  style={{ borderColor: '#D8D2C7' }}
+                  style={{ borderColor: "#D8D2C7" }}
                 >
-                  <svg className="w-5 h-5 mr-3 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <svg
+                    className="w-5 h-5 mr-3 flex-shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
                     <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
                   </svg>
                   <span className="text-left">Continue with Apple</span>
@@ -297,7 +310,11 @@ export function AccountPage() {
               Create account
             </h2>
 
-            <form action={signupAction} onSubmit={handleCreateAccountSubmit} className="space-y-5 w-full">
+            <form
+              action={signupAction}
+              onSubmit={handleCreateAccountSubmit}
+              className="space-y-5 w-full"
+            >
               {/* First Name and Last Name */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -349,9 +366,10 @@ export function AccountPage() {
                   name="dateOfBirth"
                   value={
                     dateOfBirth
-                      ? `${dateOfBirth.getFullYear()}-${String(
-                        dateOfBirth.getMonth() + 1
-                      ).padStart(2, "0")}-${String(dateOfBirth.getDate()).padStart(2, "0")}`
+                      ? `${dateOfBirth.getFullYear()}-${String(dateOfBirth.getMonth() + 1).padStart(
+                          2,
+                          "0"
+                        )}-${String(dateOfBirth.getDate()).padStart(2, "0")}`
                       : ""
                   }
                 />
@@ -431,11 +449,21 @@ export function AccountPage() {
                   type="tel"
                   name="phone"
                   autoComplete="tel"
-                  onChange={handleCreateAccountChange}
+                  maxLength={10}
+                  onChange={handlePhoneChange}
+                  onBlur={(e) => {
+                    const value = e.target.value
+                    if (value.length > 0 && value.length !== 10) {
+                      setPhoneError("Please enter a valid 10-digit phone number")
+                    }
+                  }}
                   className="font-din-arabic w-full px-4 py-3.5 border border-[#D8D2C7] bg-[#EBEBE8] text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
-                  style={{ borderColor: "#D8D2C7" }}
+                  style={{ borderColor: phoneError ? "#ef4444" : "#D8D2C7" }}
                   placeholder="Enter your phone number"
                 />
+                {phoneError && (
+                  <p className="mt-2 text-sm text-rose-600 font-din-arabic">{phoneError}</p>
+                )}
               </div>
 
               {typeof signupMessage === "string" && (

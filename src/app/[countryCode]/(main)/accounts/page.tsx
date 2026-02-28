@@ -50,7 +50,12 @@ export default function App() {
   return (
     <div className="min-h-screen">
       <RippleEffect />
-      <Navigation isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} />
+      <Navigation
+        isScrolled={isScrolled}
+        cartItems={cartItems}
+        onCartUpdate={handleCartUpdate}
+        forceBlackText={true}
+      />
       <AccountPage />
     </div>
   )

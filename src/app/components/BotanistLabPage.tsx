@@ -42,7 +42,7 @@ export const useTypewriter = (text: string, baseSpeed = 90, pauseAt?: number, is
         setIndex((prev) => prev + 1)
 
         if (pauseAt && index === pauseAt) {
-          setTimeout(() => { }, 1200)
+          setTimeout(() => {}, 1200)
         }
       }, delay)
 
@@ -435,8 +435,9 @@ function InteractiveLabImage() {
                       stiffness: 100,
                       damping: 28,
                     }}
-                    className={`absolute ${hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-4" : "top-full mt-4"
-                      } w-72 sm:w-80 max-w-[calc(100vw-2rem)] pointer-events-none`}
+                    className={`absolute ${
+                      hotspot.id === 3 || hotspot.id === 4 ? "bottom-full mb-4" : "top-full mt-4"
+                    } w-72 sm:w-80 max-w-[calc(100vw-2rem)] pointer-events-none`}
                     style={{
                       left: hotspot.position.left ? "0" : "auto",
                       right: hotspot.position.right ? "0" : "auto",
@@ -451,8 +452,9 @@ function InteractiveLabImage() {
                     {/* Popup content with pointer-events-auto to receive hover */}
                     <div className="bg-white/95 backdrop-blur-md rounded-sm shadow-2xl p-5 sm:p-6 pointer-events-auto">
                       <div
-                        className={`absolute ${hotspot.id === 3 || hotspot.id === 4 ? "-bottom-2" : "-top-2"
-                          } w-4 h-4 bg-white shadow-xl`}
+                        className={`absolute ${
+                          hotspot.id === 3 || hotspot.id === 4 ? "-bottom-2" : "-top-2"
+                        } w-4 h-4 bg-white shadow-xl`}
                         style={{
                           left: hotspot.id === 3 ? "24px" : hotspot.position.left ? "24px" : "auto",
                           right:
@@ -468,13 +470,15 @@ function InteractiveLabImage() {
                         animate={{ opacity: 1, scaleY: 1 }}
                         exit={{ opacity: 0, scaleY: 0 }}
                         transition={{ duration: 0.3, delay: 0.1 }}
-                        className={`absolute ${hotspot.id === 3 || hotspot.id === 4
-                          ? "bottom-full mb-0"
-                          : "top-full mt-0"
-                          } left-1/2 -translate-x-1/2 w-0.5 bg-gradient-to-b ${hotspot.id === 3 || hotspot.id === 4
+                        className={`absolute ${
+                          hotspot.id === 3 || hotspot.id === 4
+                            ? "bottom-full mb-0"
+                            : "top-full mt-0"
+                        } left-1/2 -translate-x-1/2 w-0.5 bg-gradient-to-b ${
+                          hotspot.id === 3 || hotspot.id === 4
                             ? "from-white/95 to-[#a28b6f]/40"
                             : "from-[#a28b6f]/40 to-white/95"
-                          }`}
+                        }`}
                         style={{
                           height: hotspot.id === 3 || hotspot.id === 4 ? "16px" : "16px",
                         }}
@@ -1196,7 +1200,7 @@ export function BotanistLabPage() {
       {/* <BotanicalCollections /> */}
       <FounderSection closingRef={closingRef} founderWorkspaceImage={FOUNDER_WORKSPACE_IMAGE} />
 
-      <section className="relative py-16 sm:py-20 lg:py-32" style={{ backgroundColor: "#d8d2c7" }}>
+      <section className="relative py-6 sm:py-8 lg:py-10" style={{ backgroundColor: "#d8d2c7" }}>
         <div className="max-w-4xl mx-auto px-6 lg:px-20 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -1218,7 +1222,7 @@ export function BotanistLabPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="mb-16"
+            className="mb-10"
           >
             <p
               className="font-din-arabic text-black/70 leading-relaxed max-w-2xl mx-auto"

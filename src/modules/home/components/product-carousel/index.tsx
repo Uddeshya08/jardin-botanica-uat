@@ -351,9 +351,9 @@ export function ProductCarousel({
       const currentIndex = api.selectedScrollSnap()
       const totalSnaps = api.scrollSnapList().length
 
-      // Stop auto-scroll when reaching the last item
+      // Loop back to first item when reaching the last item
       if (currentIndex >= totalSnaps - 1) {
-        clearInterval(autoScrollInterval)
+        api.scrollTo(0)
         return
       }
 
@@ -490,9 +490,6 @@ export function ProductCarousel({
           }
           [data-slot="carousel-content"] {
             cursor: grab !important;
-            -webkit-overflow-scrolling: touch !important;
-            scroll-behavior: smooth !important;
-            scroll-snap-type: x mandatory !important;
           }
           [data-slot="carousel-content"]:active {
             cursor: grabbing !important;
@@ -591,10 +588,11 @@ export function ProductCarousel({
             opts={{
               align: "start",
               loop: false,
-              dragFree: true,
+              dragFree: false,
+              skipSnaps: false,
               containScroll: "trimSnaps",
               watchDrag: true,
-              duration: 40, // Slow down scroll speed (milliseconds)
+              duration: 60, // Slow down scroll speed
               startIndex: 0,
             }}
             className="w-full"

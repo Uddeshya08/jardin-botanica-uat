@@ -417,7 +417,12 @@ export default function AuthPage() {
   return (
     <div>
       <RippleEffect />
-      <Navigation isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} />
+      <Navigation
+        isScrolled={isScrolled}
+        cartItems={cartItems}
+        onCartUpdate={handleCartUpdate}
+        forceHoverState={true}
+      />
 
       <div className="min-h-screen pt-44 pb-12" style={{ backgroundColor: "#e3e3d8" }}>
         <div className="container mx-auto px-2 lg:px-12">

@@ -211,28 +211,66 @@ const ShippingAddress = ({
       }))
   }
 
-  // Load saved addresses from localStorage
+  // Load saved addresses from localStorage and customer addresses from Medusa
   useEffect(() => {
+    const allAddresses: SavedAddress[] = []
+
+    // First, load customer addresses from Medusa (if logged in)
+    if (customer?.addresses && customer.addresses.length > 0) {
+      const customerAddresses: SavedAddress[] = customer.addresses
+        .filter((addr) => addr.country_code === "in") // Only Indian addresses for now
+        .map((addr) => ({
+          id: addr.id || `cust-${Math.random().toString(36).substr(2, 9)}`,
+          name: `${addr.first_name || ""} ${addr.last_name || ""}`.trim() || "Saved Address",
+          addressLine1: addr.address_1 || "",
+          addressLine2: addr.address_2 || undefined,
+          city: addr.city || "",
+          state: addr.province || "",
+          pincode: addr.postal_code || "",
+          phone: addr.phone || "",
+          label:
+            (addr.metadata?.address_type as "Home" | "Work" | "Other") ||
+            ((addr.company ? "Work" : "Home") as "Home" | "Work" | "Other"),
+          isDefault: false,
+        }))
+      allAddresses.push(...customerAddresses)
+    }
+
+    // Then, load addresses from localStorage
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("jardinBotanica_savedAddresses")
       if (saved) {
         try {
           const parsed = JSON.parse(saved)
-          setSavedAddresses(parsed)
-          // Auto-select default address if available
-          const defaultAddr = parsed.find((addr: SavedAddress) => addr.isDefault)
-          if (defaultAddr && !cart?.shipping_address) {
-            populateAddressFields(defaultAddr)
-            setSelectedAddressId(defaultAddr.id)
-          } else {
-            setSelectedAddressId(parsed[0].id)
-          }
+          // Filter out localStorage addresses that already exist in customer addresses
+          const localAddresses = parsed.filter(
+            (localAddr: SavedAddress) =>
+              !allAddresses.some(
+                (custAddr) =>
+                  custAddr.addressLine1.toLowerCase() === localAddr.addressLine1.toLowerCase() &&
+                  custAddr.pincode === localAddr.pincode
+              )
+          )
+          allAddresses.push(...localAddresses)
         } catch (e) {
           console.error("Error loading saved addresses:", e)
         }
       }
     }
-  }, [])
+
+    if (allAddresses.length > 0) {
+      setSavedAddresses(allAddresses)
+      // Auto-select default address if available
+      const defaultAddr = allAddresses.find((addr: SavedAddress) => addr.isDefault)
+      if (defaultAddr && !cart?.shipping_address) {
+        populateAddressFields(defaultAddr)
+        setSelectedAddressId(defaultAddr.id)
+      } else if (!cart?.shipping_address) {
+        setSelectedAddressId(allAddresses[0].id)
+        populateAddressFields(allAddresses[0])
+      }
+    }
+  }, [customer])
 
   useEffect(() => {
     // Ensure cart is not null and has a shipping_address before setting form data

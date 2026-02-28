@@ -484,7 +484,7 @@ const ProductCard = ({
           <Link href={url.startsWith("/") ? url : `/${url}`}>
             <div className="text-center">
               <h3
-                className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer text-center"
+                className="font-american-typewriter text-lg mb-1 hover:opacity-70 transition-opacity cursor-pointer text-center"
                 style={{ letterSpacing: "0.05em" }}
               >
                 {label && label.trim() ? label : "Product Name"}
@@ -494,7 +494,7 @@ const ProductCard = ({
         ) : (
           <div className="text-center">
             <h3
-              className="font-american-typewriter text-xl mb-1 text-center"
+              className="font-american-typewriter text-lg mb-1 text-center"
               style={{ letterSpacing: "0.05em" }}
             >
               {label && label.trim() ? label : "Product Name"}
@@ -1043,7 +1043,6 @@ const Candles = () => {
                 cursor: grab !important;
                 -webkit-overflow-scrolling: touch !important;
                 scroll-behavior: smooth !important;
-                scroll-snap-type: x mandatory !important;
                 scrollbar-width: none !important;
                 -ms-overflow-style: none !important;
                 overflow-x: auto !important;
@@ -1065,11 +1064,11 @@ const Candles = () => {
                   opts={{
                     align: "center",
                     loop: false,
-                    dragFree: true,
+                    dragFree: false,
+                    skipSnaps: false,
                     containScroll: "trimSnaps",
                     watchDrag: true,
-                    duration: 15,
-                    dragThreshold: 5,
+                    duration: 60,
                   }}
                   className="w-full"
                 >
@@ -1090,7 +1089,7 @@ const Candles = () => {
                 </Carousel>
               </div>
 
-              <div className="px-6 mt-6">
+              <div className="px-6 mt-12">
                 <CarouselSlider api={mobileCarouselApi} />
               </div>
             </div>
@@ -1185,7 +1184,6 @@ const Candles = () => {
               cursor: grab !important;
               -webkit-overflow-scrolling: touch !important;
               scroll-behavior: smooth !important;
-              scroll-snap-type: x mandatory !important;
             }
             [data-slot="carousel-content"]:active {
               cursor: grabbing !important;
@@ -1200,11 +1198,11 @@ const Candles = () => {
                 opts={{
                   align: "start",
                   loop: false,
-                  dragFree: true,
+                  dragFree: false,
+                  skipSnaps: false,
                   containScroll: "trimSnaps",
                   watchDrag: true,
-                  duration: 50,
-                  slidesToScroll: 1,
+                  duration: 60,
                 }}
                 className="w-full"
               >
@@ -1230,7 +1228,7 @@ const Candles = () => {
                 </CarouselContent>
               </Carousel>
             </div>
-            <div className="pl-[5rem] pr-[4rem] mt-6">
+            <div className="pl-[5rem] pr-[4rem] mt-12">
               <CarouselSlider api={carouselApi} />
             </div>
           </div>
@@ -1292,7 +1290,6 @@ const Candles = () => {
                 scrollbar-width: none !important;
                 -ms-overflow-style: none !important;
                 overflow-x: auto !important;
-                scroll-snap-type: x mandatory !important;
               }
               [data-slot="carousel-content"]::-webkit-scrollbar {
                 display: none !important;
@@ -1326,11 +1323,11 @@ const Candles = () => {
                 opts={{
                   align: "start",
                   loop: false,
-                  dragFree: true,
+                  dragFree: false,
+                  skipSnaps: false,
                   containScroll: "trimSnaps",
                   watchDrag: true,
-                  duration: 50,
-                  slidesToScroll: 1,
+                  duration: 60,
                 }}
                 className="w-full"
               >
@@ -1701,7 +1698,7 @@ const Candles = () => {
               viewport={{ once: true, amount: 0.3 }}
               className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 text-black"
             >
-              Join the circle
+              Join the Circle
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}

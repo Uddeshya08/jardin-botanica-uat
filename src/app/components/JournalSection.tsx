@@ -36,7 +36,7 @@ function JournalPostCard({
           viewport={{ once: true }}
           className="space-y-4 px-6 order-2 pb-10 md:pb-0 flex-grow"
         >
-          <motion.span
+          {/* <motion.span
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: index * 0.2 + 0.4 }}
@@ -44,7 +44,7 @@ function JournalPostCard({
             className="font-din-arabic text-sm text-black/60 tracking-wide"
           >
             {blog.categories?.[0] || "Journal"}
-          </motion.span>
+          </motion.span> */}
 
           <motion.h3
             initial={{ opacity: 0, y: 10 }}
@@ -65,10 +65,10 @@ function JournalPostCard({
           >
             {blog.publishedDate
               ? new Date(blog.publishedDate).toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })
               : ""}
           </motion.p>
         </motion.div>

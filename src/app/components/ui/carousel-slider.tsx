@@ -160,7 +160,7 @@ export function CarouselSlider({
         className={cn(
           "absolute top-1/2 -translate-y-1/2 w-8 h-1 rounded-full bg-black/30 cursor-grab transition-all",
           "hover:bg-black/40 hover:scale-110",
-          isDragging && "cursor-grabbing bg-black/80 scale-110",
+          isDragging ? "cursor-grabbing bg-black/80 scale-110 duration-75" : "duration-500 ease-out",
           thumbClassName
         )}
         style={thumbStyle}

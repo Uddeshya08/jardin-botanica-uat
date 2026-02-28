@@ -58,6 +58,16 @@ interface ProductHeroProps {
   onCartUpdate?: (item: CartItem | null) => void
   productInfoPanels?: ProductInfoPanels | null
   productContent?: ProductContent | null
+  selectedVariantId?: string | null
+  onVariantChange?: (variantId: string | null) => void
+  onUpdateHeroQuantity?: (quantity: number) => void
+  ritualProduct?: {
+    variantId: string
+    name: string
+    price: number
+    currency: string
+    image?: string
+  } | null
 }
 
 const extractNumericSize = (label: string) => {
@@ -95,9 +105,9 @@ const buildSizeOptions = (product: ProductHeroProps["product"], sizeOptionId?: s
 
       return label
         ? {
-          id: variant.id,
-          label,
-        }
+            id: variant.id,
+            label,
+          }
         : null
     })
     .filter((option): option is { id: string; label: string } => Boolean(option))
@@ -114,9 +124,8 @@ export function ProductHero({
   onVariantChange,
   productInfoPanels,
   productContent,
-}: ProductHeroProps & {
-  onVariantChange?: (variantId: string | null) => void
-}) {
+  selectedVariantId: selectedVariantIdProp,
+}: ProductHeroProps) {
   const [isRitualPanelOpen, setIsRitualPanelOpen] = useState(false)
   const [isActivesPanelOpen, setIsActivesPanelOpen] = useState(false)
   const [isFragranceNotesOpen, setIsFragranceNotesOpen] = useState(false)
@@ -183,14 +192,18 @@ export function ProductHero({
 
     return preferredOption?.id ?? product.variants[0]?.id ?? null
   }, [product, visibleSizeOptions])
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(defaultVariantId)
+
+  const initialVariantId = selectedVariantIdProp ?? defaultVariantId
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(initialVariantId)
+
   useEffect(() => {
-    setSelectedVariantId(defaultVariantId)
-    // Only call onVariantChange if it's actually different and not undefined
-    if (defaultVariantId !== null && defaultVariantId !== undefined) {
+    if (selectedVariantIdProp !== undefined && selectedVariantIdProp !== null) {
+      setSelectedVariantId(selectedVariantIdProp)
+    } else if (defaultVariantId !== selectedVariantId) {
+      setSelectedVariantId(defaultVariantId)
       onVariantChange?.(defaultVariantId)
     }
-  }, [defaultVariantId])
+  }, [defaultVariantId, selectedVariantIdProp, onVariantChange, selectedVariantId])
   const selectedVariant =
     product.variants?.find((v) => v.id === selectedVariantId) ?? product.variants?.[0]
 
@@ -531,8 +544,9 @@ export function ProductHero({
                           ) : (
                             <BreadcrumbLink
                               href={crumb.url}
-                              className={`font-din-arabic text-xs tracking-wide flex items-center ${isHome ? "" : "text-black/80 hover:underline"
-                                }`}
+                              className={`font-din-arabic text-xs tracking-wide flex items-center ${
+                                isHome ? "" : "text-black/80 hover:underline"
+                              }`}
                               style={isHome ? { color: "#a28b6f" } : {}}
                             >
                               {isHome && <Home className="w-3 h-3 mr-1" />}
@@ -736,7 +750,7 @@ export function ProductHero({
                   disabled
                   className="font-din-arabic px-6 md:px-8 py-3 bg-[#a28b6f]/30 text-black/50 border border-[#a28b6f]/40 cursor-not-allowed tracking-wide w-full sm:w-auto transition-all duration-300"
                 >
-                  Out of Stock
+                  Out of stock
                 </button>
               ) : (
                 <motion.button
@@ -1076,23 +1090,25 @@ export function ProductHero({
         />
         {/* </div> */}
 
-        {/* Botanical Blend Badge - Top Left */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="absolute top-8 left-8 z-20"
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
-            <Star className="w-3 h-3" style={{ color: "#a28b6f" }} />
-            <span
-              className="font-din-arabic uppercase text-xs tracking-wide"
-              style={{ color: "#a28b6f" }}
-            >
-              {(product.metadata?.botanical as string | undefined) || "BOTANICAL BLEND"}
-            </span>
-          </div>
-        </motion.div>
+        {/* Product Tag Badge - Top Left */}
+        {product.metadata?.show_product_tag && product.metadata?.product_tag && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="absolute top-8 left-8 z-20"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
+              <Star className="w-3 h-3" style={{ color: "#a28b6f" }} />
+              <span
+                className="font-din-arabic uppercase text-xs tracking-wide"
+                style={{ color: "#a28b6f" }}
+              >
+                {product.metadata.product_tag as string}
+              </span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Action Icons - Positioned at top-right above product image */}
         <motion.div
@@ -1106,13 +1122,15 @@ export function ProductHero({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleToggleLedger}
-            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"
-              }`}
+            className={`p-2 transition-all bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 ${
+              isProductInLedger ? "text-[#e58a4d]" : "text-black/60 hover:text-black"
+            }`}
             aria-label={isProductInLedger ? "Remove from ledger" : "Add to ledger"}
           >
             <Heart
-              className={`w-5 h-5 transition-colors ${isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"
-                }`}
+              className={`w-5 h-5 transition-colors ${
+                isProductInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-current"
+              }`}
             />
           </motion.button>
 
@@ -1177,8 +1195,9 @@ export function ProductHero({
               onClick={() => setCurrentImageIndex(index)}
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${currentImageIndex === index ? "w-8" : ""
-                }`}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                currentImageIndex === index ? "w-8" : ""
+              }`}
               style={{
                 backgroundColor: currentImageIndex === index ? "#a28b6f" : "rgba(0, 0, 0, 0.3)",
               }}

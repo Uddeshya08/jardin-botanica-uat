@@ -145,13 +145,14 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           isScrolled={isScrolled}
           cartItems={cartItems}
           onCartUpdate={handleCartUpdateWrapper}
-          forceWhiteText={false}
+          forceBlackText={true}
         />
         <div className="h-4"></div>
         <ProductHero
           product={product}
           countryCode={countryCode}
           selectedVariantId={selectedVariantId}
+          onVariantChange={setSelectedVariantId}
           onUpdateHeroQuantity={handleHeroQuantityUpdate}
           onCartUpdate={handleCartUpdateWrapper}
           ritualProduct={ritualProductProp}
@@ -172,16 +173,18 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         <PeopleAlsoBought product={product as any} fromTheLabContent={fromTheLabContent} />
         <div ref={featuredRitualRef}>
           <FeaturedRitualTwo
-            key={`featured-ritual-two-${featuredRitualTwoContent?.productHandle ||
+            key={`featured-ritual-two-${
+              featuredRitualTwoContent?.productHandle ||
               featuredRitualTwoContent?.sectionKey ||
               "default"
-              }`}
+            }`}
             featuredRitualTwoContent={featuredRitualTwoContent}
           />
         </div>
         <CustomerTestimonials
-          key={`customer-testimonials-${testimonialsContent?.productHandle || testimonialsContent?.sectionKey || "default"
-            }`}
+          key={`customer-testimonials-${
+            testimonialsContent?.productHandle || testimonialsContent?.sectionKey || "default"
+          }`}
           testimonialsContent={testimonialsContent}
         />
         <Featured featuredContent={featuredContent} />
