@@ -32,6 +32,7 @@ const EditAddress: React.FC<EditAddressProps> = ({ region, address, isActive = f
   const [postalCode, setPostalCode] = useState(address.postal_code || "")
   const [city, setCity] = useState(address.city || "")
   const [province, setProvince] = useState(address.province || "")
+  const [isDefaultShipping, setIsDefaultShipping] = useState(address.is_default_shipping || false)
   const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
 
   const [formState, formAction] = useActionState(updateCustomerAddress, {
@@ -42,7 +43,7 @@ const EditAddress: React.FC<EditAddressProps> = ({ region, address, isActive = f
 
   const close = () => {
     setSuccessState(false)
-    // Reset to original values when closing
+    setIsDefaultShipping(address.is_default_shipping || false)
     setPostalCode(address.postal_code || "")
     setCity(address.city || "")
     setProvince(address.province || "")
@@ -95,6 +96,7 @@ const EditAddress: React.FC<EditAddressProps> = ({ region, address, isActive = f
     setPostalCode(address.postal_code || "")
     setCity(address.city || "")
     setProvince(address.province || "")
+    setIsDefaultShipping(address.is_default_shipping || false)
   }, [address])
 
   const removeAddress = async () => {
@@ -272,6 +274,22 @@ const EditAddress: React.FC<EditAddressProps> = ({ region, address, isActive = f
                 defaultValue={address.phone || undefined}
                 data-testid="phone-input"
               />
+              <div className="flex items-center gap-x-2 mt-4">
+                <input
+                  type="checkbox"
+                  id={`is_default_shipping-${address.id}`}
+                  name="is_default_shipping"
+                  checked={isDefaultShipping}
+                  onChange={(e) => setIsDefaultShipping(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black accent-black"
+                />
+                <label
+                  htmlFor={`is_default_shipping-${address.id}`}
+                  className="text-sm font-medium mt-4 text-gray-700 cursor-pointer"
+                >
+                  Set as default shipping address
+                </label>
+              </div>
             </div>
             {formState.error && (
               <div className="text-rose-500 text-small-regular py-2">{formState.error}</div>

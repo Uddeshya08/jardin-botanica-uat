@@ -40,7 +40,7 @@ export default function TermsAndConditionsPage() {
 
   return (
     <>
-      <Navigation isScrolled={isScrolled} />
+      <Navigation isScrolled={isScrolled} forceBlackText={true} />
       <main>
         <TermsAndConditions />
       </main>

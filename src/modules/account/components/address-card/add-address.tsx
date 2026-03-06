@@ -187,6 +187,18 @@ const AddAddress = ({
                 </select>
               </div>
               <Input label="Phone" name="phone" autoComplete="phone" data-testid="phone-input" />
+              <div className="flex items-center gap-x-2 mt-4 mb-2">
+                <input
+                  type="checkbox"
+                  id="is_default_shipping"
+                  name="is_default_shipping"
+                  defaultChecked={addresses.length === 0}
+                  className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black accent-black"
+                />
+                <label htmlFor="is_default_shipping" className="text-sm font-medium text-gray-700 cursor-pointer">
+                  Set as default shipping address
+                </label>
+              </div>
             </div>
             {formState.error && (
               <div className="text-rose-500 text-small-regular py-2" data-testid="address-error">
