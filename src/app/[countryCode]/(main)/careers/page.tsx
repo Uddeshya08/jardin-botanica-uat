@@ -55,7 +55,7 @@ export default function CareersPage() {
 
   return (
     <>
-      <Navigation isScrolled={isScrolled} />
+      <Navigation isScrolled={isScrolled} forceBlackText={true} />
       <main>
         <div
           className="min-h-screen px-6 lg:px-16 pt-32 lg:pt-40 pb-24 lg:pb-32"

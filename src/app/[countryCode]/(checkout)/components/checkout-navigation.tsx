@@ -27,6 +27,7 @@ export default function CheckoutNavigation() {
       onCartUpdate={handleCartUpdate}
       isLoggedIn={isLoggedIn}
       disableSticky={false}
+      forceBlackText={true}
     />
   )
 }

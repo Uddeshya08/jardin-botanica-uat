@@ -40,7 +40,7 @@ export default function ReturnsAndExchangesPage() {
 
   return (
     <>
-      <Navigation isScrolled={isScrolled} />
+      <Navigation isScrolled={isScrolled} forceBlackText={true} />
       <main>
         <ReturnsAndExchanges />
       </main>

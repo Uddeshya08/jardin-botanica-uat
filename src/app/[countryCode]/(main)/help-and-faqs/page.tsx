@@ -40,7 +40,7 @@ export default function HelpFAQPage() {
 
   return (
     <>
-      <Navigation isScrolled={isScrolled} />
+      <Navigation isScrolled={isScrolled} forceBlackText={true} />
       <main>
         <HelpFAQ />
       </main>
