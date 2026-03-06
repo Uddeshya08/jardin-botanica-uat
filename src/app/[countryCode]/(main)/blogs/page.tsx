@@ -627,7 +627,7 @@ const Home = () => {
                                   transition={{ delay: 1.3 + index * 0.2, duration: 0.6 }}
                                 >
                                   <motion.div
-                                    className={`text-xs lg:text-sm text-gray-600 mb-2 font-din-arabic tracking-[0.1em] text-[14px] ${index == 0 ? "pt-4 lg:pt-6" : "pt-0"
+                                    className={`text-xs lg:text-sm text-gray-600 mb-2 font-din-arabic tracking-[0.1em] text-[14px] ${index === 0 ? "pt-4 lg:pt-6" : "pt-0"
                                       }`}
                                     initial={{ x: -10, opacity: 0 }}
                                     animate={{ x: 0, opacity: 1 }}

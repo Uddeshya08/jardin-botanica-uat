@@ -295,8 +295,7 @@ export const addCustomerAddress = async (
   currentState: Record<string, unknown>,
   formData: FormData
 ): Promise<any> => {
-  const isDefaultBilling = (currentState.isDefaultBilling as boolean) || false
-  const isDefaultShipping = (currentState.isDefaultShipping as boolean) || false
+  const isDefaultShipping = formData.get("is_default_shipping") === "on"
 
   const address = {
     first_name: formData.get("first_name") as string,
@@ -309,7 +308,7 @@ export const addCustomerAddress = async (
     province: formData.get("province") as string,
     country_code: formData.get("country_code") as string,
     phone: formData.get("phone") as string,
-    is_default_billing: isDefaultBilling,
+    is_default_billing: false,
     is_default_shipping: isDefaultShipping,
     metadata: {
       address_type: (formData.get("address_type") as string) || "Home",
@@ -359,7 +358,7 @@ export const updateCustomerAddress = async (
     return { success: false, error: "Address ID is required" }
   }
 
-  const isDefaultShipping = formData.get("is_default_shipping") === "on";
+  const isDefaultShipping = formData.get("is_default_shipping") === "on"
 
   const address = {
     first_name: formData.get("first_name") as string,
@@ -577,7 +576,7 @@ export const updateCustomerPassword = async (data: {
 
 export const getCustomerPreferences = async (): Promise<any> => {
   const authHeaders = await getAuthHeaders()
-  if (!authHeaders) return null
+  if (!authHeaders || !("authorization" in authHeaders)) return null
 
   const next = await getCacheOptions("customers")
 
@@ -592,22 +591,34 @@ export const getCustomerPreferences = async (): Promise<any> => {
     .catch(() => null)
 }
 
-export const updateCustomerPreferences = async (data: { email_updates: boolean; newsletter: boolean }) => {
+export const updateCustomerPreferences = async (data: {
+  email_updates: boolean
+  newsletter: boolean
+}) => {
   const authHeaders = await getAuthHeaders()
-  if (!authHeaders) return { success: false, message: "Not authenticated" }
+  if (!authHeaders || !("authorization" in authHeaders))
+    return { success: false, message: "Not authenticated" }
 
-  return sdk.client
-    .fetch<{ preference: any }>(`/store/customers/me/preferences`, {
-      method: "POST",
-      headers: authHeaders,
-      body: data
-    })
-    .then(({ preference }) => {
-      getCacheTag("customers").then((tag) => revalidateTag(tag))
-      return { success: true, message: "Preferences updated successfully", preference }
-    })
-    .catch((error) => {
-      console.error("Failed to update preferences:", error)
-      return { success: false, message: "Failed to update preferences" }
-    })
+  try {
+    const { preference } = await sdk.client.fetch<{ preference: any }>(
+      `/store/customers/me/preferences`,
+      {
+        method: "POST",
+        headers: authHeaders,
+        body: data,
+      }
+    )
+
+    const tag = await getCacheTag("customers")
+    revalidateTag(tag)
+
+    return {
+      success: true,
+      message: "Preferences updated successfully",
+      preference,
+    }
+  } catch (error) {
+    console.error("Failed to update preferences:", error)
+    return { success: false, message: "Failed to update preferences" }
+  }
 }
