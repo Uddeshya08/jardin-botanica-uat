@@ -24,14 +24,15 @@ import { ScrollArea } from "../../../../app/components/ui/scroll-area"
 type OverviewProps = {
   customer: HttpTypes.StoreCustomer | null
   orders: HttpTypes.StoreOrder[] | null
+  preferences?: any
 }
 
-const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
+const Overview: React.FC<OverviewProps> = ({ customer, orders, preferences }) => {
   const [editInfoOpen, setEditInfoOpen] = useState(false)
   const [changePasswordOpen, setChangePasswordOpen] = useState(false)
   const [updateEmailOpen, setUpdateEmailOpen] = useState(false)
-  const [emailComms, setEmailComms] = useState(false)
-  const [newsletter, setNewsletter] = useState(false)
+  const [emailComms, setEmailComms] = useState(preferences?.email_updates ?? false)
+  const [newsletter, setNewsletter] = useState(preferences?.newsletter ?? false)
   const [loading, setLoading] = useState<string | null>(null)
 
   // Utility function to convert text to title case
@@ -169,10 +170,23 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders }) => {
 
   const handleSaveCommunicationPrefs = async () => {
     setLoading("commPrefs")
-    // Note: Communication preferences would need to be stored via Medusa API
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    setLoading(null)
-    toast.success("Communication preferences updated successfully")
+    try {
+      const { updateCustomerPreferences } = await import("@lib/data/customer")
+      const result = await updateCustomerPreferences({
+        email_updates: emailComms,
+        newsletter: newsletter,
+      })
+
+      setLoading(null)
+      if (result.success) {
+        toast.success(result.message || "Communication preferences updated successfully")
+      } else {
+        toast.error(result.message || "Failed to update preferences")
+      }
+    } catch (error) {
+      setLoading(null)
+      toast.error("An error occurred while updating preferences")
+    }
   }
 
   const sectionVariants = {

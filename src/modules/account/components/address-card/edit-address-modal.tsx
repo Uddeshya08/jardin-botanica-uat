@@ -272,6 +272,18 @@ const EditAddress: React.FC<EditAddressProps> = ({ region, address, isActive = f
                 defaultValue={address.phone || undefined}
                 data-testid="phone-input"
               />
+              <div className="flex items-center gap-x-2 mt-4">
+                <input
+                  type="checkbox"
+                  id="is_default_shipping"
+                  name="is_default_shipping"
+                  defaultChecked={address.is_default_shipping}
+                  className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black accent-black"
+                />
+                <label htmlFor="is_default_shipping" className="text-sm font-medium mt-4 text-gray-700 cursor-pointer">
+                  Set as default shipping address
+                </label>
+              </div>
             </div>
             {formState.error && (
               <div className="text-rose-500 text-small-regular py-2">{formState.error}</div>

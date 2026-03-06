@@ -359,6 +359,8 @@ export const updateCustomerAddress = async (
     return { success: false, error: "Address ID is required" }
   }
 
+  const isDefaultShipping = formData.get("is_default_shipping") === "on";
+
   const address = {
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
@@ -369,6 +371,7 @@ export const updateCustomerAddress = async (
     postal_code: formData.get("postal_code") as string,
     province: formData.get("province") as string,
     country_code: formData.get("country_code") as string,
+    is_default_shipping: isDefaultShipping,
     metadata: {
       address_type: (formData.get("address_type") as string) || "Home",
     },
@@ -570,4 +573,41 @@ export const updateCustomerPassword = async (data: {
       error: "UNKNOWN_ERROR",
     }
   }
+}
+
+export const getCustomerPreferences = async (): Promise<any> => {
+  const authHeaders = await getAuthHeaders()
+  if (!authHeaders) return null
+
+  const next = await getCacheOptions("customers")
+
+  return await sdk.client
+    .fetch<{ preference: any }>(`/store/customers/me/preferences`, {
+      method: "GET",
+      headers: authHeaders,
+      next,
+      cache: "force-cache",
+    })
+    .then(({ preference }) => preference)
+    .catch(() => null)
+}
+
+export const updateCustomerPreferences = async (data: { email_updates: boolean; newsletter: boolean }) => {
+  const authHeaders = await getAuthHeaders()
+  if (!authHeaders) return { success: false, message: "Not authenticated" }
+
+  return sdk.client
+    .fetch<{ preference: any }>(`/store/customers/me/preferences`, {
+      method: "POST",
+      headers: authHeaders,
+      body: data
+    })
+    .then(({ preference }) => {
+      getCacheTag("customers").then((tag) => revalidateTag(tag))
+      return { success: true, message: "Preferences updated successfully", preference }
+    })
+    .catch((error) => {
+      console.error("Failed to update preferences:", error)
+      return { success: false, message: "Failed to update preferences" }
+    })
 }
