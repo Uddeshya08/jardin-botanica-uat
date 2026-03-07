@@ -223,8 +223,9 @@ const Home = () => {
                 <button
                   type="button"
                   onClick={() => setActiveTab("HOME")}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "HOME" ? "text-[#4f5864]" : "text-[#4f5864] hover:text-[#626262]"
-                    }`}
+                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                    activeTab === "HOME" ? "text-[#4f5864]" : "text-[#4f5864] hover:text-[#626262]"
+                  }`}
                 >
                   HOME
                 </button>
@@ -233,8 +234,9 @@ const Home = () => {
                     key={tag.id}
                     type="button"
                     onClick={() => setActiveTab(tag.name)}
-                    className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === tag.name ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                      }`}
+                    className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                      activeTab === tag.name ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                    }`}
                   >
                     {tag.name}
                   </button>
@@ -292,7 +294,11 @@ const Home = () => {
         <div className="w-full bg-[#FEFDF3] pt-3 md:pt-4 pb-3 md:pb-4">
           <div className="w-full flex justify-end px-4 lg:pr-40">
             <p className="text-xs lg:text-sm font-american-typewriter text-black font-semibold tracking-[1px]">
-              {new Date().toLocaleDateString("en-US", { month: "long", day: "2-digit", year: "numeric" })}
+              {new Date().toLocaleDateString("en-US", {
+                month: "long",
+                day: "2-digit",
+                year: "numeric",
+              })}
             </p>
           </div>
           <div className="w-full h-[1px] bg-[#d3d2ca] mt-3 md:mt-4"></div>
@@ -325,8 +331,9 @@ const Home = () => {
             <button
               type="button"
               onClick={() => setActiveTab("HOME")}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === "HOME" ? "text-[#4f5864]" : "text-[#4f5864] hover:text-[#626262]"
-                }`}
+              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                activeTab === "HOME" ? "text-[#4f5864]" : "text-[#4f5864] hover:text-[#626262]"
+              }`}
             >
               HOME
             </button>
@@ -335,8 +342,9 @@ const Home = () => {
                 key={tag.id}
                 type="button"
                 onClick={() => setActiveTab(tag.name)}
-                className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${activeTab === tag.name ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                  }`}
+                className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+                  activeTab === tag.name ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+                }`}
               >
                 {tag.name}
               </button>
@@ -399,7 +407,11 @@ const Home = () => {
             transition={{ delay: 0.6, duration: 0.6 }}
           >
             <p className="text-xs md:text-sm font-american-typewriter text-black font-semibold tracking-[1px]">
-              {new Date().toLocaleDateString("en-US", { month: "long", day: "2-digit", year: "numeric" })}
+              {new Date().toLocaleDateString("en-US", {
+                month: "long",
+                day: "2-digit",
+                year: "numeric",
+              })}
             </p>
           </motion.div>
 
@@ -472,12 +484,12 @@ const Home = () => {
                                 <div className="text-xs text-[#626262] mb-2 font-din-arabic tracking-[0.1em]">
                                   {blog.publishedDate
                                     ? new Date(blog.publishedDate)
-                                      .toLocaleDateString("en-US", {
-                                        month: "long",
-                                        day: "numeric",
-                                        year: "numeric",
-                                      })
-                                      .toUpperCase()
+                                        .toLocaleDateString("en-US", {
+                                          month: "long",
+                                          day: "numeric",
+                                          year: "numeric",
+                                        })
+                                        .toUpperCase()
                                     : ""}
                                 </div>
                                 <h3 className="font-american-typewriter text-lg mb-2 group-hover:underline">
@@ -495,7 +507,7 @@ const Home = () => {
                   </div>
                 )}
 
-                {/* Default content (Hero + Daily Feed) */}
+                {/* Default content (Hero + Recent Entries) */}
                 {(!isSearchOpen || searchQuery.trim() === "") && (
                   <>
                     <div className="max-w-7xl mx-auto my-8 md:my-12 lg:my-20 px-4 lg:px-0">
@@ -545,12 +557,12 @@ const Home = () => {
                                   >
                                     {heroBlog.publishedDate
                                       ? new Date(heroBlog.publishedDate)
-                                        .toLocaleDateString("en-US", {
-                                          month: "long",
-                                          day: "numeric",
-                                          year: "numeric",
-                                        })
-                                        .toUpperCase()
+                                          .toLocaleDateString("en-US", {
+                                            month: "long",
+                                            day: "numeric",
+                                            year: "numeric",
+                                          })
+                                          .toUpperCase()
                                       : ""}
                                   </motion.div>
                                   <motion.h2
@@ -585,7 +597,7 @@ const Home = () => {
                           </motion.div>
                         )}
 
-                        {/* Daily Feed Sidebar */}
+                        {/* Recent Entries Sidebar */}
                         <motion.div
                           className="w-full lg:w-[30%]"
                           initial={{ x: 50, opacity: 0 }}
@@ -599,7 +611,7 @@ const Home = () => {
                               animate={{ y: 0, opacity: 1 }}
                               transition={{ delay: 1.0, duration: 0.6 }}
                             >
-                              Daily Feed
+                              Recent Entries
                             </motion.h3>
 
                             <motion.p
@@ -618,17 +630,19 @@ const Home = () => {
                               {dailyFeedBlogs.map((blog, index) => (
                                 <motion.article
                                   key={blog.slug}
-                                  className={`${index < dailyFeedBlogs.length - 1
-                                    ? "border-b border-gray-200 pb-3 lg:pb-4"
-                                    : "pb-3 lg:pb-4"
-                                    }`}
+                                  className={`${
+                                    index < dailyFeedBlogs.length - 1
+                                      ? "border-b border-gray-200 pb-3 lg:pb-4"
+                                      : "pb-3 lg:pb-4"
+                                  }`}
                                   initial={{ y: 20, opacity: 0 }}
                                   animate={{ y: 0, opacity: 1 }}
                                   transition={{ delay: 1.3 + index * 0.2, duration: 0.6 }}
                                 >
                                   <motion.div
-                                    className={`text-xs lg:text-sm text-gray-600 mb-2 font-din-arabic tracking-[0.1em] text-[14px] ${index === 0 ? "pt-4 lg:pt-6" : "pt-0"
-                                      }`}
+                                    className={`text-xs lg:text-sm text-gray-600 mb-2 font-din-arabic tracking-[0.1em] text-[14px] ${
+                                      index === 0 ? "pt-4 lg:pt-6" : "pt-0"
+                                    }`}
                                     initial={{ x: -10, opacity: 0 }}
                                     animate={{ x: 0, opacity: 1 }}
                                     transition={{
@@ -638,12 +652,12 @@ const Home = () => {
                                   >
                                     {blog.publishedDate
                                       ? new Date(blog.publishedDate)
-                                        .toLocaleDateString("en-US", {
-                                          month: "long",
-                                          day: "numeric",
-                                          year: "numeric",
-                                        })
-                                        .toUpperCase()
+                                          .toLocaleDateString("en-US", {
+                                            month: "long",
+                                            day: "numeric",
+                                            year: "numeric",
+                                          })
+                                          .toUpperCase()
                                       : ""}
                                   </motion.div>
                                   <motion.h4
@@ -717,7 +731,7 @@ const Home = () => {
                       </div>
                     </div>
 
-                    {/* Featured News Section */}
+                    {/* From the Botanist's Desk Section */}
                     {featuredBlogs.length > 0 && (
                       <div className="max-w-7xl mx-auto my-8 md:my-12 lg:my-20 px-4 lg:px-0">
                         <motion.div
@@ -733,7 +747,7 @@ const Home = () => {
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ delay: 0.5, duration: 0.8 }}
                           >
-                            Featured News
+                            From the Botanist's Desk
                           </motion.h2>
                           <motion.h2
                             className="font-american-typewriter pt-2 text-3xl tracking-tight uppercase"
@@ -1153,12 +1167,12 @@ const Home = () => {
                           <div className="text-xs text-[#626262] mb-2 font-din-arabic tracking-[0.1em]">
                             {blog.publishedDate
                               ? new Date(blog.publishedDate)
-                                .toLocaleDateString("en-US", {
-                                  month: "long",
-                                  day: "numeric",
-                                  year: "numeric",
-                                })
-                                .toUpperCase()
+                                  .toLocaleDateString("en-US", {
+                                    month: "long",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })
+                                  .toUpperCase()
                               : ""}
                           </div>
                           <h3 className="font-american-typewriter text-lg mb-2 group-hover:underline">
@@ -1238,10 +1252,11 @@ const Home = () => {
               </div>
               {message && (
                 <div
-                  className={`text-sm px-4 py-2 rounded text-center ${isSuccess
-                    ? "bg-green-100 text-green-800 border border-green-300"
-                    : "bg-red-100 text-red-800 border border-red-300"
-                    }`}
+                  className={`text-sm px-4 py-2 rounded text-center ${
+                    isSuccess
+                      ? "bg-green-100 text-green-800 border border-green-300"
+                      : "bg-red-100 text-red-800 border border-red-300"
+                  }`}
                 >
                   {message}
                 </div>

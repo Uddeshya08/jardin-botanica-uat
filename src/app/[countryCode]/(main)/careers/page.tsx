@@ -70,7 +70,7 @@ export default function CareersPage() {
               className="mb-16 text-center"
             >
               <h1
-                className="font-american-typewriter mb-4 text-3xl text-center"
+                className="font-american-typewriter mb-4 text-3xl text-center pt-4 lg:pt-0"
                 style={{ letterSpacing: "0.05em" }}
               >
                 Work With the Botanist's Lab
@@ -93,9 +93,8 @@ export default function CareersPage() {
                   className="font-din-arabic text-black/80 leading-relaxed"
                   style={{ letterSpacing: "0.1em" }}
                 >
-                  If you see the world
-                  through scent, texture, and light; if your art blurs science and story; if your
-                  work begins with wonder — we'd love to hear from you.
+                  If you see the world through scent, texture, and light; if your art blurs science
+                  and story; if your work begins with wonder — we'd love to hear from you.
                 </p>
               </div>
 

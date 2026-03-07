@@ -256,7 +256,7 @@ const EditAddress: React.FC<EditAddressProps> = ({ region, address, isActive = f
                 data-testid="country-select"
               />
               <div className="flex flex-col gap-y-2">
-                <label className="text-sm font-medium text-gray-700">Address Type</label>
+                <label className="text-sm font-medium text-gray-700">Address type</label>
                 <select
                   name="address_type"
                   defaultValue={(address.metadata as any)?.address_type || "Home"}
