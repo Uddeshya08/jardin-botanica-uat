@@ -175,7 +175,7 @@ const AddAddress = ({
                 data-testid="country-select"
               />
               <div className="flex flex-col gap-y-2">
-                <label className="text-sm font-medium text-gray-700">Address Type</label>
+                <label className="text-sm font-medium text-gray-700">Address type</label>
                 <select
                   name="address_type"
                   defaultValue="Home"
@@ -195,7 +195,10 @@ const AddAddress = ({
                   defaultChecked={addresses.length === 0}
                   className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black accent-black"
                 />
-                <label htmlFor="is_default_shipping" className="text-sm font-medium text-gray-700 cursor-pointer">
+                <label
+                  htmlFor="is_default_shipping"
+                  className="text-sm font-medium text-gray-700 cursor-pointer"
+                >
                   Set as default shipping address
                 </label>
               </div>

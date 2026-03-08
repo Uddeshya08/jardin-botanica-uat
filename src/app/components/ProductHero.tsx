@@ -5,6 +5,7 @@ import { BLOCKS, INLINES } from "@contentful/rich-text-types"
 import { addToCartAction } from "@lib/data/cart-actions"
 import { emitCartUpdated } from "@lib/util/cart-client"
 import type { HttpTypes } from "@medusajs/types"
+import { useAuth } from "app/context/auth-context"
 import { type LedgerItem, useLedger } from "app/context/ledger-context"
 import {
   ChevronRight as BreadcrumbChevron,
@@ -39,6 +40,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "./ui/breadcrumb"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Label } from "./ui/label"
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
 
@@ -150,6 +152,8 @@ export function ProductHero({
   }, [])
 
   const router = useRouter()
+  const { isLoggedIn } = useAuth()
+  const [showLoginDialog, setShowLoginDialog] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isAddedToCart, setIsAddedToCart] = useState(false)
@@ -477,6 +481,11 @@ export function ProductHero({
   }
 
   const handleToggleLedger = () => {
+    if (!isLoggedIn) {
+      setShowLoginDialog(true)
+      return
+    }
+
     const alreadyInLedger = isInLedger(product.id)
     const ledgerItem: LedgerItem = {
       id: product.id,
@@ -1274,6 +1283,51 @@ export function ProductHero({
           )}
         </InfoPanel>
       ))}
+
+      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-american-typewriter text-xl text-black">
+              Open Your Ledger
+            </DialogTitle>
+            <DialogDescription className="font-din-arabic text-black/70 pt-2">
+              Sign in to add favourites to your Ledger.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 pt-4">
+            <button
+              onClick={() => {
+                setShowLoginDialog(false)
+                router.push(`/${countryCode}/account?tab=signin`)
+              }}
+              className="w-full font-din-arabic py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
+            >
+              Sign in
+            </button>
+            <button
+              onClick={() => setShowLoginDialog(false)}
+              className="w-full font-din-arabic py-2 border text-black hover:bg-black/5 transition-colors tracking-wide"
+              style={{ borderColor: "rgba(0, 0, 0, 0.2)" }}
+            >
+              Keep browsing
+            </button>
+          </div>
+          <div className="pt-4 text-center">
+            <button
+              onClick={() => {
+                setShowLoginDialog(false)
+                router.push(`/${countryCode}/account?tab=signup`)
+              }}
+              className="font-din-arabic text-sm text-black/70 hover:text-black transition-colors"
+            >
+              New here?{" "}
+              <span className="underline decoration-black/20 hover:decoration-black/60">
+                Create an account
+              </span>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
