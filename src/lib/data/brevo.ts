@@ -20,8 +20,29 @@ export async function subscribeToNewsletter(
     }
 
     const BREVO_API_KEY = process.env.BREVO_API_KEY
-
     const BREVO_LIST_ID = process.env.BREVO_LIST_ID
+
+    if (!BREVO_API_KEY) {
+      return {
+        success: false,
+        message: "Newsletter service is not configured.",
+      }
+    }
+
+    if (!BREVO_LIST_ID) {
+      return {
+        success: false,
+        message: "Newsletter list is not configured.",
+      }
+    }
+
+    const listId = parseInt(BREVO_LIST_ID)
+    if (Number.isNaN(listId)) {
+      return {
+        success: false,
+        message: "Invalid newsletter list configuration.",
+      }
+    }
 
     const response = await fetch("https://api.brevo.com/v3/contacts", {
       method: "POST",
@@ -33,18 +54,32 @@ export async function subscribeToNewsletter(
       body: JSON.stringify({
         email: email.toLowerCase().trim(),
         attributes: firstName ? { FIRSTNAME: firstName } : undefined,
-        listIds: [parseInt(BREVO_LIST_ID)],
+        listIds: [listId],
         updateEnabled: true,
       }),
     })
 
-    const data = await response.json()
-
-    // Handle success
-    if (response.ok || response.status === 204 || response.status === 201) {
+    // Handle success (204 No Content has no body)
+    if (response.status === 204 || response.status === 201 || response.ok) {
       return {
         success: true,
         message: "Successfully subscribed! Welcome to the circle.",
+      }
+    }
+
+    // Parse response body if it has content
+    const contentType = response.headers.get("content-type")
+    const hasJsonBody = contentType && contentType.includes("application/json")
+    let data: { code?: string; message?: string } = {}
+
+    if (hasJsonBody && response.status !== 204) {
+      try {
+        const text = await response.text()
+        if (text) {
+          data = JSON.parse(text)
+        }
+      } catch {
+        // Failed to parse JSON, continue with empty data
       }
     }
 
