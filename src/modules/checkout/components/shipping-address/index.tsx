@@ -10,6 +10,8 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { Checkbox as ShadcnCheckbox } from "../../../../app/components/ui/checkbox"
 import { Label } from "../../../../app/components/ui/label"
+import { addCustomerAddress, updateCustomerAddress } from "@lib/data/customer"
+import { useRouter } from "next/navigation"
 import {
   Select,
   SelectContent,
@@ -139,8 +141,9 @@ const ShippingAddress = ({
   cart: HttpTypes.StoreCart | null
   checked: boolean
   onChange: () => void
-  onEmailValidationChange?: (isValid: boolean) => void
+    onEmailValidationChange?: (isValid: boolean) => void
 }) => {
+  const router = useRouter()
   const [formData, setFormData] = useState<Record<string, any>>({
     "shipping_address.first_name": cart?.shipping_address?.first_name || "",
     "shipping_address.last_name": cart?.shipping_address?.last_name || "",
@@ -236,13 +239,13 @@ const ShippingAddress = ({
       allAddresses.push(...customerAddresses)
     }
 
-    // Then, load addresses from localStorage
+    // Then, load addresses from sessionStorage
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("jardinBotanica_savedAddresses")
+      const saved = sessionStorage.getItem("jardinBotanica_savedAddresses")
       if (saved) {
         try {
           const parsed = JSON.parse(saved)
-          // Filter out localStorage addresses that already exist in customer addresses
+          // Filter out sessionStorage addresses that already exist in customer addresses
           const localAddresses = parsed.filter(
             (localAddr: SavedAddress) =>
               !allAddresses.some(
@@ -268,6 +271,8 @@ const ShippingAddress = ({
       } else if (!cart?.shipping_address) {
         setSelectedAddressId(allAddresses[0].id)
         populateAddressFields(allAddresses[0])
+      } else {
+        setSelectedAddressId(allAddresses[0].id)
       }
     }
   }, [customer])
@@ -535,11 +540,10 @@ const ShippingAddress = ({
                   setSelectedAddressId(address.id)
                   populateAddressFields(address)
                 }}
-                className={`cursor-pointer rounded-2xl p-5 transition-all duration-300 relative ${
-                  selectedAddressId === address.id
-                    ? "bg-white/60 border-2 border-black/20 shadow-lg shadow-black/10"
-                    : "bg-white/40 border border-white/60 hover:bg-white/60 shadow-md"
-                }`}
+                className={`cursor-pointer rounded-2xl p-5 transition-all duration-300 relative ${selectedAddressId === address.id
+                  ? "bg-white/60 border-2 border-black/20 shadow-lg shadow-black/10"
+                  : "bg-white/40 border border-white/60 hover:bg-white/60 shadow-md"
+                  }`}
               >
                 {/* Edit Icon */}
                 <motion.button
@@ -850,7 +854,7 @@ const ShippingAddress = ({
                 type="button"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => {
+                onClick={async () => {
                   // Validate required fields
                   if (
                     !newAddressData.name ||
@@ -870,38 +874,79 @@ const ShippingAddress = ({
                     return
                   }
 
-                  if (isEditingAddress) {
-                    // Update existing address
-                    const updated = savedAddresses.map((addr) =>
-                      addr.id === editingAddressId ? { ...addr, ...newAddressData } : addr
-                    )
-                    setSavedAddresses(updated)
-                    localStorage.setItem("jardinBotanica_savedAddresses", JSON.stringify(updated))
+                  if (customer?.id) {
+                    const [firstName, ...lastNameParts] = newAddressData.name.split(" ")
+                    const lastName = lastNameParts.join(" ") || ""
 
-                    // Update form fields if this address is selected
-                    if (selectedAddressId === editingAddressId) {
-                      populateAddressFields({
-                        id: editingAddressId,
-                        ...newAddressData,
-                      } as SavedAddress)
+                    const formDataToSubmit = new FormData()
+                    formDataToSubmit.append("first_name", firstName)
+                    formDataToSubmit.append("last_name", lastName)
+                    formDataToSubmit.append("address_1", newAddressData.addressLine1)
+                    formDataToSubmit.append("address_2", newAddressData.addressLine2 || "")
+                    formDataToSubmit.append("city", newAddressData.city)
+                    formDataToSubmit.append("province", newAddressData.state)
+                    formDataToSubmit.append("postal_code", newAddressData.pincode)
+                    formDataToSubmit.append("phone", newAddressData.phone)
+                    formDataToSubmit.append("country_code", "in")
+                    if (newAddressData.isDefault) {
+                      formDataToSubmit.append("is_default_shipping", "on")
                     }
+                    formDataToSubmit.append("address_type", newAddressData.label)
 
-                    toast.success("Address updated successfully")
+                    if (isEditingAddress && !editingAddressId.startsWith("address-")) {
+                      const res = await updateCustomerAddress(
+                        { addressId: editingAddressId },
+                        formDataToSubmit
+                      )
+                      if (!res.success) {
+                        toast.error(res.error || "Failed to update address")
+                        return
+                      }
+                      toast.success("Address updated successfully")
+                      router.refresh()
+                    } else {
+                        const res = await addCustomerAddress({}, formDataToSubmit)
+                        if (!res.success) {
+                          toast.error(res.error || "Failed to save address")
+                          return
+                        }
+                        toast.success("Address saved successfully")
+                        router.refresh()
+                    }
                   } else {
-                    // Save new address
-                    const newAddr: SavedAddress = {
-                      id: `address-${Date.now()}`,
-                      ...newAddressData,
+                    if (isEditingAddress) {
+                      // Update existing address
+                      const updated = savedAddresses.map((addr) =>
+                        addr.id === editingAddressId ? { ...addr, ...newAddressData } : addr
+                      )
+                      setSavedAddresses(updated)
+                      sessionStorage.setItem("jardinBotanica_savedAddresses", JSON.stringify(updated))
+
+                      // Update form fields if this address is selected
+                      if (selectedAddressId === editingAddressId) {
+                        populateAddressFields({
+                          id: editingAddressId,
+                          ...newAddressData,
+                        } as SavedAddress)
+                      }
+                      
+                      toast.success("Address updated successfully")
+                    } else {
+                      // Save new address
+                      const newAddr: SavedAddress = {
+                        id: `address-${Date.now()}`,
+                        ...newAddressData,
+                      }
+                      const updated = [...savedAddresses, newAddr]
+                      setSavedAddresses(updated)
+                      sessionStorage.setItem("jardinBotanica_savedAddresses", JSON.stringify(updated))
+
+                      // Select it and populate form
+                      setSelectedAddressId(newAddr.id)
+                      populateAddressFields(newAddr)
+                      
+                      toast.success("Address saved successfully")
                     }
-                    const updated = [...savedAddresses, newAddr]
-                    setSavedAddresses(updated)
-                    localStorage.setItem("jardinBotanica_savedAddresses", JSON.stringify(updated))
-
-                    // Select it and populate form
-                    setSelectedAddressId(newAddr.id)
-                    populateAddressFields(newAddr)
-
-                    toast.success("Address saved successfully")
                   }
 
                   // Reset and hide form
@@ -980,11 +1025,10 @@ const ShippingAddress = ({
               value={formData.email}
               onChange={handleChange}
               onBlur={handleEmailBlur}
-              className={`file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30 ${
-                emailError
-                  ? "border-red-500 focus:border-red-500"
-                  : "border-black/10 focus:border-black/30"
-              }`}
+              className={`file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30 ${emailError
+                ? "border-red-500 focus:border-red-500"
+                : "border-black/10 focus:border-black/30"
+                }`}
               aria-invalid={emailError ? "true" : "false"}
               data-testid="shipping-email-input"
             />

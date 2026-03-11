@@ -581,7 +581,7 @@ function OurWorkSection() {
   return (
     <motion.section
       ref={sectionRef}
-      className="relative overflow-hidden"
+      className="relative"
       style={{ backgroundColor: "#d8d2c7", opacity }}
     >
       <InteractiveLabImage />

@@ -730,7 +730,7 @@ export function StickyCartBar({
                         ? ritualProduct.name
                         : `${name}${variant?.title ? ` • ${variant.title}` : ""}`}
                     </h3>
-                    <div className="flex items-center space-x-1 overflow-hidden">
+                    <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-1 overflow-visible mt-0.5 md:mt-0">
                       <p className="font-din-arabic-bold text-xs md:text-sm text-black/70 whitespace-nowrap">
                         {ritualProduct && showRitualSuggestion && !showGoToCart
                           ? formatMinor(ritualProduct.price, ritualProduct.currency)
@@ -742,7 +742,7 @@ export function StickyCartBar({
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="font-din-aric text-[10px] md:text-xs truncate"
+                          className="font-din-aric text-[10px] md:text-xs leading-tight"
                           style={{
                             color: showGoToCart ? "#f97316" : "#545d4a",
                           }}
