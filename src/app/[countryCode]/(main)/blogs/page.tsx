@@ -850,7 +850,7 @@ const Home = () => {
                                             </Link>
                                             {chunk[0].author && (
                                               <motion.p
-                                                className="text-sm lg:text-base font-din-arabic text-[#535c4a] mb-3 lg:mb-4 text-[16px]"
+                                                className="text-xs lg:text-sm italic text-gray-600 mb-3 lg:mb-4"
                                                 initial={{ y: 15, opacity: 0 }}
                                                 animate={{ y: 0, opacity: 1 }}
                                                 transition={{ delay: 1.5, duration: 0.6 }}
@@ -965,7 +965,7 @@ const Home = () => {
                                             </Link>
                                             {chunk[1].author && (
                                               <motion.p
-                                                className="text-sm lg:text-base font-din-arabic text-[#535c4a] mb-3 lg:mb-4 text-[16px]"
+                                                className="text-xs lg:text-sm italic text-gray-600 mb-3 lg:mb-4"
                                                 initial={{ y: 15, opacity: 0 }}
                                                 animate={{ y: 0, opacity: 1 }}
                                                 transition={{ delay: 1.9, duration: 0.6 }}

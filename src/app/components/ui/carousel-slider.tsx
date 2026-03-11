@@ -135,11 +135,6 @@ export function CarouselSlider({
     }
   }, [isDragging, api])
 
-  const thumbStyle = {
-    left: `${progress}%`,
-    transform: "translateX(-50%)",
-  }
-
   return (
     <div
       className={cn("relative h-1 w-full max-w-[40%] mx-auto select-none", className)}
@@ -158,15 +153,22 @@ export function CarouselSlider({
       />
       <div
         className={cn(
-          "absolute top-1/2 -translate-y-1/2 w-8 h-1 rounded-full bg-black/30 cursor-grab transition-all",
-          "hover:bg-black/40 hover:scale-110",
-          isDragging ? "cursor-grabbing bg-black/80 scale-110 duration-75" : "duration-500 ease-out",
-          thumbClassName
+          "absolute top-0 h-full transition-all",
+          isDragging ? "duration-75" : "duration-500 ease-out"
         )}
-        style={thumbStyle}
-        onMouseDown={handleThumbMouseDown}
-        aria-hidden="true"
-      />
+        style={{ left: `${progress}%`, transform: `translateX(-${progress}%)` }}
+      >
+        <div
+          className={cn(
+            "h-full w-8 rounded-full bg-black/30 cursor-grab transition-all origin-center",
+            "hover:bg-black/40 hover:scale-[1.3]",
+            isDragging ? "cursor-grabbing bg-black/80 scale-[1.3] duration-75" : "duration-500 ease-out",
+            thumbClassName
+          )}
+          onMouseDown={handleThumbMouseDown}
+          aria-hidden="true"
+        />
+      </div>
     </div>
   )
 }
