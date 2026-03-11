@@ -528,9 +528,9 @@ export function StickyCartBar({
       ritualProductId: ritualProduct.variantId,
       existingRitualProduct: existingRitualProduct
         ? {
-            id: existingRitualProduct.id,
-            quantity: existingRitualProduct.quantity,
-          }
+          id: existingRitualProduct.id,
+          quantity: existingRitualProduct.quantity,
+        }
         : null,
     })
 
@@ -742,7 +742,7 @@ export function StickyCartBar({
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="font-din-aric text-[10px] md:text-xs leading-tight"
+                          className="font-din-arabic text-[10px] md:text-xs leading-tight"
                           style={{
                             color: showGoToCart ? "#f97316" : "#545d4a",
                           }}
