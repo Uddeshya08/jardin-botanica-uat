@@ -197,7 +197,7 @@ const AddAddress = ({
                 />
                 <label
                   htmlFor="is_default_shipping"
-                  className="text-sm font-medium text-gray-700 cursor-pointer"
+                  className="text-sm font-medium mt-4 text-gray-700 cursor-pointer"
                 >
                   Set as default shipping address
                 </label>
