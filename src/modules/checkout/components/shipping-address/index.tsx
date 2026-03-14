@@ -1,5 +1,6 @@
 import type { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
+import compareAddresses from "@lib/util/compare-addresses"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import { mapKeys } from "lodash"
@@ -130,6 +131,22 @@ interface SavedAddress {
   isDefault: boolean
 }
 
+const toComparableAddress = (address: SavedAddress): HttpTypes.StoreCartAddress => {
+  const [firstName, ...lastNameParts] = address.name.split(" ")
+
+  return {
+    first_name: firstName || "",
+    last_name: lastNameParts.join(" ") || "",
+    address_1: address.addressLine1,
+    company: address.addressLine2 || "",
+    postal_code: address.pincode,
+    city: address.city,
+    country_code: "in",
+    province: address.state,
+    phone: address.phone,
+  } as HttpTypes.StoreCartAddress
+}
+
 const ShippingAddress = ({
   customer,
   cart,
@@ -214,6 +231,16 @@ const ShippingAddress = ({
       }))
   }
 
+  const populateAddressFields = (address: SavedAddress) => {
+    const comparableAddress = toComparableAddress(address)
+    setFormAddress(comparableAddress)
+  }
+
+  const selectSavedAddress = (address: SavedAddress) => {
+    setSelectedAddressId(address.id)
+    populateAddressFields(address)
+  }
+
   // Load saved addresses from localStorage and customer addresses from Medusa
   useEffect(() => {
     const allAddresses: SavedAddress[] = []
@@ -263,19 +290,25 @@ const ShippingAddress = ({
 
     if (allAddresses.length > 0) {
       setSavedAddresses(allAddresses)
+      const matchingCartAddress = cart?.shipping_address
+        ? allAddresses.find((address) =>
+            compareAddresses(toComparableAddress(address), cart.shipping_address)
+          )
+        : undefined
+
       // Auto-select default address if available
       const defaultAddr = allAddresses.find((addr: SavedAddress) => addr.isDefault)
-      if (defaultAddr && !cart?.shipping_address) {
-        populateAddressFields(defaultAddr)
-        setSelectedAddressId(defaultAddr.id)
+      if (matchingCartAddress) {
+        setSelectedAddressId(matchingCartAddress.id)
+      } else if (defaultAddr && !cart?.shipping_address) {
+        selectSavedAddress(defaultAddr)
       } else if (!cart?.shipping_address) {
-        setSelectedAddressId(allAddresses[0].id)
-        populateAddressFields(allAddresses[0])
+        selectSavedAddress(allAddresses[0])
       } else {
-        setSelectedAddressId(allAddresses[0].id)
+        setSelectedAddressId("")
       }
     }
-  }, [customer])
+  }, [cart?.shipping_address, customer])
 
   useEffect(() => {
     // Ensure cart is not null and has a shipping_address before setting form data
@@ -367,23 +400,6 @@ const ShippingAddress = ({
       onEmailValidationChange(isValid)
     }
   }, [emailError, formData.email, onEmailValidationChange])
-
-  const populateAddressFields = (address: SavedAddress) => {
-    const [firstName, ...lastNameParts] = address.name.split(" ")
-    const lastName = lastNameParts.join(" ") || ""
-    setFormData((prev) => ({
-      ...prev,
-      "shipping_address.first_name": firstName,
-      "shipping_address.last_name": lastName,
-      "shipping_address.address_1": address.addressLine1,
-      "shipping_address.company": address.addressLine2 || "",
-      "shipping_address.city": address.city,
-      "shipping_address.province": address.state,
-      "shipping_address.postal_code": address.pincode,
-      "shipping_address.phone": address.phone,
-      "shipping_address.country_code": "in",
-    }))
-  }
 
   const handleEditAddress = (address: SavedAddress) => {
     setNewAddressData({
@@ -537,8 +553,7 @@ const ShippingAddress = ({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
-                  setSelectedAddressId(address.id)
-                  populateAddressFields(address)
+                  selectSavedAddress(address)
                 }}
                 className={`cursor-pointer rounded-2xl p-5 transition-all duration-300 relative ${selectedAddressId === address.id
                   ? "bg-white/60 border-2 border-black/20 shadow-lg shadow-black/10"
@@ -942,8 +957,7 @@ const ShippingAddress = ({
                       sessionStorage.setItem("jardinBotanica_savedAddresses", JSON.stringify(updated))
 
                       // Select it and populate form
-                      setSelectedAddressId(newAddr.id)
-                      populateAddressFields(newAddr)
+                      selectSavedAddress(newAddr)
                       
                       toast.success("Address saved successfully")
                     }

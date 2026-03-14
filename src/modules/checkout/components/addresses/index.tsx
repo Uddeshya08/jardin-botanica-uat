@@ -4,13 +4,13 @@ import { listCartOptions, setShippingMethod, updateCart } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
 import { CheckCircleSolid } from "@medusajs/icons"
 import type { HttpTypes } from "@medusajs/types"
-import { Button, Heading, Text, useToggleState } from "@medusajs/ui"
+import { Heading, Text, useToggleState } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
 import { ChevronLeft } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
@@ -39,7 +39,7 @@ const Addresses = ({
   )
 
   const handleEdit = () => {
-    router.push(pathname + "?step=address")
+    router.push(`${pathname}?step=address`)
   }
 
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -87,6 +87,8 @@ const Addresses = ({
         email: trimmedEmail,
       } as any
 
+      addressData.shipping_address.postal_code = addressData.shipping_address.postal_code.trim()
+
       const sameAsBilling = formData.get("same_as_billing")
       if (sameAsBilling === "on") {
         addressData.billing_address = addressData.shipping_address
@@ -108,7 +110,7 @@ const Addresses = ({
       await updateCart(addressData)
 
       // Step 2: Check serviceability
-      const pincode = formData.get("shipping_address.postal_code") as string
+      const pincode = addressData.shipping_address.postal_code
 
       if (!pincode) {
         setSubmitError("Postal code is required")
@@ -136,7 +138,7 @@ const Addresses = ({
         })
 
         // Step 4: Redirect to payment step
-        router.push(pathname + "?step=payment")
+        router.push(`${pathname}?step=payment`)
         setIsSubmitting(false)
       }
     } catch (error: any) {
@@ -147,8 +149,6 @@ const Addresses = ({
       setIsSubmitting(false)
     }
   }
-
-  useEffect(() => {}, [cart?.shipping_address?.postal_code])
 
   return (
     <div>
@@ -169,6 +169,7 @@ const Addresses = ({
               {!isOpen && cart?.shipping_address && (
                 <Text>
                   <button
+                    type="button"
                     onClick={handleEdit}
                     className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
                     data-testid="edit-address-button"
@@ -205,7 +206,10 @@ const Addresses = ({
             ) : (
               <div className="ml-auto">
                 <Link href="/">
-                  <button className="px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2">
+                  <button
+                    type="button"
+                    className="px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
+                  >
                     Continue shopping
                   </button>
                 </Link>
@@ -216,7 +220,7 @@ const Addresses = ({
       ) : (
         <div>
           <div className="text-small-regular">
-            {cart && cart.shipping_address ? (
+            {cart?.shipping_address ? (
               <div className="flex items-start gap-x-8">
                 <div className="flex items-start gap-x-1 w-full">
                   <div className="flex flex-col w-1/3" data-testid="shipping-address-summary">
