@@ -174,7 +174,14 @@ const Payment = ({
   const setPaymentMethod = async (method: string) => {
     setError(null)
     setSelectedPaymentMethod(method)
-    if (isStripeFunc(method)) {
+
+    // Check if a session already exists for this provider
+    const existingSession = cart.payment_collection?.payment_sessions?.find(
+      (session: any) => session.provider_id === method && session.status === "pending"
+    )
+
+    // Only create a new session if one doesn't already exist for this provider
+    if (!existingSession) {
       await initiatePaymentSession(cart, {
         provider_id: method,
       })
@@ -258,11 +265,11 @@ const Payment = ({
       if (!shouldInputCard) {
         return router.push(
           pathname +
-          "?" +
-          updateQueryParams({
-            step: "review",
-            paymenttype: selectedPaymentType,
-          }),
+            "?" +
+            updateQueryParams({
+              step: "review",
+              paymenttype: selectedPaymentType,
+            }),
           {
             scroll: false,
           }
@@ -287,9 +294,14 @@ const Payment = ({
     }
   }, [searchParams])
 
-  // Auto-set payment provider on mount
+  // Auto-set payment provider on mount only if no active session exists
   useEffect(() => {
-    setPaymentMethod(PAYMENT_PROVIDER_ID)
+    const hasActiveSession = cart.payment_collection?.payment_sessions?.some(
+      (session: any) => session.status === "pending"
+    )
+    if (!hasActiveSession) {
+      setPaymentMethod(PAYMENT_PROVIDER_ID)
+    }
   }, [])
 
   return (
@@ -358,12 +370,14 @@ const Payment = ({
                         data-testid={`payment-type-${type.id}`}
                       >
                         <div
-                          className={`w-12 h-12 ${selectedPaymentType === type.id ? "bg-green-100" : "bg-white"
-                            } rounded-lg flex items-center justify-center flex-shrink-0`}
+                          className={`w-12 h-12 ${
+                            selectedPaymentType === type.id ? "bg-green-100" : "bg-white"
+                          } rounded-lg flex items-center justify-center flex-shrink-0`}
                         >
                           <Icon
-                            className={`w-6 h-6 ${selectedPaymentType === type.id ? "text-green-700" : "text-black"
-                              }`}
+                            className={`w-6 h-6 ${
+                              selectedPaymentType === type.id ? "text-green-700" : "text-black"
+                            }`}
                           />
                         </div>
 
