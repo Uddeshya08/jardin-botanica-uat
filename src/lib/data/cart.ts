@@ -16,6 +16,17 @@ import {
 } from "./cookies"
 import { getRegion } from "./regions"
 
+async function revalidateCartShippingState() {
+  const cartCacheTag = await getCacheTag("carts")
+  revalidateTag(cartCacheTag)
+
+  const fulfillmentCacheTag = await getCacheTag("fulfillment")
+  revalidateTag(fulfillmentCacheTag)
+
+  const shippingOptionsCacheTag = await getCacheTag("shippingOptions")
+  revalidateTag(shippingOptionsCacheTag)
+}
+
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
  * @param cartId - optional - The ID of the cart to retrieve.
@@ -97,11 +108,7 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
   return sdk.store.cart
     .update(cartId, data, {}, headers)
     .then(async ({ cart }) => {
-      const cartCacheTag = await getCacheTag("carts")
-      revalidateTag(cartCacheTag)
-
-      const fulfillmentCacheTag = await getCacheTag("fulfillment")
-      revalidateTag(fulfillmentCacheTag)
+      await revalidateCartShippingState()
 
       return cart
     })
@@ -142,11 +149,7 @@ export async function addToCart({
       headers
     )
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts")
-      revalidateTag(cartCacheTag)
-
-      const fulfillmentCacheTag = await getCacheTag("fulfillment")
-      revalidateTag(fulfillmentCacheTag)
+      await revalidateCartShippingState()
     })
     .catch(medusaError)
 }
@@ -196,11 +199,7 @@ export async function addOrUpdateLineItem({
     await sdk.store.cart
       .updateLineItem(cart.id, existingLineItem.id, { quantity: newQuantity }, {}, headers)
       .then(async () => {
-        const cartCacheTag = await getCacheTag("carts")
-        revalidateTag(cartCacheTag)
-
-        const fulfillmentCacheTag = await getCacheTag("fulfillment")
-        revalidateTag(fulfillmentCacheTag)
+        await revalidateCartShippingState()
       })
       .catch(medusaError)
   } else {
@@ -220,11 +219,7 @@ export async function addOrUpdateLineItem({
     await sdk.store.cart
       .createLineItem(cart.id, lineItemData, {}, headers)
       .then(async () => {
-        const cartCacheTag = await getCacheTag("carts")
-        revalidateTag(cartCacheTag)
-
-        const fulfillmentCacheTag = await getCacheTag("fulfillment")
-        revalidateTag(fulfillmentCacheTag)
+        await revalidateCartShippingState()
       })
       .catch(medusaError)
 
@@ -255,11 +250,7 @@ export async function updateLineItem({ lineId, quantity }: { lineId: string; qua
   await sdk.store.cart
     .updateLineItem(cartId, lineId, { quantity }, {}, headers)
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts")
-      revalidateTag(cartCacheTag)
-
-      const fulfillmentCacheTag = await getCacheTag("fulfillment")
-      revalidateTag(fulfillmentCacheTag)
+      await revalidateCartShippingState()
     })
     .catch(medusaError)
 }
@@ -335,11 +326,7 @@ export async function deleteLineItem(lineId: string) {
       headers,
     })
 
-    const cartCacheTag = await getCacheTag("carts")
-    revalidateTag(cartCacheTag)
-
-    const fulfillmentCacheTag = await getCacheTag("fulfillment")
-    revalidateTag(fulfillmentCacheTag)
+    await revalidateCartShippingState()
   } catch (error) {
     medusaError(error)
   }
@@ -418,11 +405,7 @@ export async function applyPromotions(codes: string[]) {
   return sdk.store.cart
     .update(cartId, { promo_codes: codes }, {}, headers)
     .then(async () => {
-      const cartCacheTag = await getCacheTag("carts")
-      revalidateTag(cartCacheTag)
-
-      const fulfillmentCacheTag = await getCacheTag("fulfillment")
-      revalidateTag(fulfillmentCacheTag)
+      await revalidateCartShippingState()
     })
     .catch(medusaError)
 }

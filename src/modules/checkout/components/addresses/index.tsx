@@ -1,6 +1,7 @@
 "use client"
 
-import { listCartOptions, setShippingMethod, updateCart } from "@lib/data/cart"
+import { setShippingMethod, updateCart } from "@lib/data/cart"
+import { listCartShippingMethods } from "@lib/data/fulfillment"
 import compareAddresses from "@lib/util/compare-addresses"
 import { CheckCircleSolid } from "@medusajs/icons"
 import type { HttpTypes } from "@medusajs/types"
@@ -120,21 +121,25 @@ const Addresses = ({
 
       // Step 3: Set shipping method
       if (cart?.id) {
-        const response = await listCartOptions()
+        const shippingOptions = (await listCartShippingMethods(cart.id)) ?? []
 
-        const surfaceShipping = response.shipping_options.find(
-          (option) => option.data?.shipping_mode === "Surface"
+        const deliveryOptions = shippingOptions.filter(
+          (option) => option.service_zone?.fulfillment_set?.type !== "pickup"
         )
+        const preferredShippingOption =
+          deliveryOptions.find((option) => option.data?.shipping_mode === "Surface") ||
+          deliveryOptions[0] ||
+          shippingOptions[0]
 
-        if (!surfaceShipping) {
-          setSubmitError("No surface shipping option found")
+        if (!preferredShippingOption) {
+          setSubmitError("No shipping option found for this address")
           setIsSubmitting(false)
           return
         }
 
         await setShippingMethod({
           cartId: cart.id,
-          shippingMethodId: surfaceShipping?.id,
+          shippingMethodId: preferredShippingOption.id,
         })
 
         // Step 4: Redirect to payment step
