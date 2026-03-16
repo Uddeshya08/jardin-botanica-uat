@@ -141,6 +141,11 @@ const PAYMENT_PROVIDER_ID = "pp_razorpay_razorpay"
 
 const COD_PROVIDER_ID = "pp_system_default"
 
+const getPendingSessionForProvider = (cart: any, providerId: string) =>
+  cart?.payment_collection?.payment_sessions?.find(
+    (session: any) => session.provider_id === providerId && session.status === "pending"
+  )
+
 const Payment = ({
   cart,
   availablePaymentMethods,
@@ -175,12 +180,8 @@ const Payment = ({
     setError(null)
     setSelectedPaymentMethod(method)
 
-    // Check if a session already exists for this provider
-    const existingSession = cart.payment_collection?.payment_sessions?.find(
-      (session: any) => session.provider_id === method && session.status === "pending"
-    )
+    const existingSession = getPendingSessionForProvider(cart, method)
 
-    // Only create a new session if one doesn't already exist for this provider
     if (!existingSession) {
       await initiatePaymentSession(cart, {
         provider_id: method,
@@ -236,31 +237,32 @@ const Payment = ({
   const handleSubmit = async () => {
     setIsLoading(true)
     try {
+      const targetProviderId =
+        selectedPaymentType === "cod" ? COD_PROVIDER_ID : PAYMENT_PROVIDER_ID
+
+      const updatedCart = await setShippingMethod({
+        cartId: cart.id,
+        shippingMethodId: cart.shipping_methods[0].shipping_option_id,
+        paymentMethod: selectedPaymentType === "cod" ? "COD" : "PREPAID",
+        totalAmount: cart.total,
+      })
+
+      const nextCart = updatedCart || cart
+      const pendingSessionForProvider = getPendingSessionForProvider(nextCart, targetProviderId)
+
       if (selectedPaymentType === "cod") {
-        await setShippingMethod({
-          cartId: cart.id,
-          shippingMethodId: cart.shipping_methods[0].shipping_option_id,
-          paymentMethod: "COD",
-          totalAmount: cart.total,
-        })
-      } else {
-        await setShippingMethod({
-          cartId: cart.id,
-          shippingMethodId: cart.shipping_methods[0].shipping_option_id,
-          paymentMethod: "PREPAID",
-          totalAmount: cart.total,
+        if (!pendingSessionForProvider) {
+          await initiatePaymentSession(nextCart, {
+            provider_id: targetProviderId,
+          })
+        }
+      } else if (!pendingSessionForProvider) {
+        await initiatePaymentSession(nextCart, {
+          provider_id: targetProviderId,
         })
       }
 
-      const shouldInputCard = isStripeFunc(selectedPaymentMethod) && !activeSession
-
-      const checkActiveSession = activeSession?.provider_id === selectedPaymentMethod
-
-      if (!checkActiveSession) {
-        await initiatePaymentSession(cart, {
-          provider_id: selectedPaymentMethod,
-        })
-      }
+      const shouldInputCard = isStripeFunc(targetProviderId) && !pendingSessionForProvider
 
       if (!shouldInputCard) {
         return router.push(
@@ -296,13 +298,13 @@ const Payment = ({
 
   // Auto-set payment provider on mount only if no active session exists
   useEffect(() => {
-    const hasActiveSession = cart.payment_collection?.payment_sessions?.some(
-      (session: any) => session.status === "pending"
-    )
+    const defaultProviderId = selectedPaymentType === "cod" ? COD_PROVIDER_ID : PAYMENT_PROVIDER_ID
+    const hasActiveSession = getPendingSessionForProvider(cart, defaultProviderId)
+
     if (!hasActiveSession) {
-      setPaymentMethod(PAYMENT_PROVIDER_ID)
+      setPaymentMethod(defaultProviderId)
     }
-  }, [])
+  }, [cart, selectedPaymentType])
 
   return (
     <div>

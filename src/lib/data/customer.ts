@@ -42,7 +42,7 @@ const mapErrorMessage = (error: any): string => {
 export const retrieveCustomer = async (): Promise<HttpTypes.StoreCustomer | null> => {
   const authHeaders = await getAuthHeaders()
 
-  if (!authHeaders) return null
+  if (!("authorization" in authHeaders)) return null
 
   const headers = {
     ...authHeaders,
@@ -52,8 +52,10 @@ export const retrieveCustomer = async (): Promise<HttpTypes.StoreCustomer | null
     ...(await getCacheOptions("customers")),
   }
 
-  return await sdk.client
-    .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
+  try {
+    const { customer } = await sdk.client.fetch<{ customer: HttpTypes.StoreCustomer }>(
+      `/store/customers/me`,
+      {
       method: "GET",
       query: {
         fields: "*orders",
@@ -61,9 +63,13 @@ export const retrieveCustomer = async (): Promise<HttpTypes.StoreCustomer | null
       headers,
       next,
       cache: "force-cache",
-    })
-    .then(({ customer }) => customer)
-    .catch(() => null)
+      }
+    )
+
+    return customer
+  } catch {
+    return null
+  }
 }
 
 export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {

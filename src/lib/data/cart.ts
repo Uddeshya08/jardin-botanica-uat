@@ -351,8 +351,8 @@ export async function setShippingMethod({
     ...(await getAuthHeaders()),
   }
 
-  return sdk.store.cart
-    .addShippingMethod(
+  try {
+    const { cart } = await sdk.store.cart.addShippingMethod(
       cartId,
       {
         option_id: shippingMethodId,
@@ -366,11 +366,14 @@ export async function setShippingMethod({
       {},
       headers
     )
-    .then(async () => {
-      const cartCacheTag = await getCacheTag("carts")
-      revalidateTag(cartCacheTag)
-    })
-    .catch(medusaError)
+
+    const cartCacheTag = await getCacheTag("carts")
+    revalidateTag(cartCacheTag)
+
+    return cart
+  } catch (error) {
+    return medusaError(error)
+  }
 }
 
 export async function initiatePaymentSession(
@@ -381,14 +384,14 @@ export async function initiatePaymentSession(
     ...(await getAuthHeaders()),
   }
 
-  return sdk.store.payment
-    .initiatePaymentSession(cart, data, {}, headers)
-    .then(async (resp) => {
-      const cartCacheTag = await getCacheTag("carts")
-      revalidateTag(cartCacheTag)
-      return resp
-    })
-    .catch(medusaError)
+  try {
+    const resp = await sdk.store.payment.initiatePaymentSession(cart, data, {}, headers)
+    const cartCacheTag = await getCacheTag("carts")
+    revalidateTag(cartCacheTag)
+    return resp
+  } catch (error) {
+    return medusaError(error)
+  }
 }
 
 export async function applyPromotions(codes: string[]) {

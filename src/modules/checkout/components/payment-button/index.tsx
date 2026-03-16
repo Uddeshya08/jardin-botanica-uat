@@ -25,7 +25,9 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ cart, "data-testid": data
     !cart.email ||
     (cart.shipping_methods?.length ?? 0) < 1
 
-  const paymentSession = cart.payment_collection?.payment_sessions?.[0]
+  const paymentSession = cart.payment_collection?.payment_sessions?.find(
+    (session) => session.status === "pending"
+  )
 
   switch (true) {
     case isStripe(paymentSession?.provider_id):
@@ -78,13 +80,13 @@ const StripePaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onPaymentCompleted = async () => {
-    await placeOrder()
-      .catch((err) => {
-        setErrorMessage(err.message)
-      })
-      .finally(() => {
-        setSubmitting(false)
-      })
+    try {
+      await placeOrder()
+    } catch (err: any) {
+      setErrorMessage(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const stripe = useStripe()
@@ -93,7 +95,7 @@ const StripePaymentButton = ({
 
   const session = cart.payment_collection?.payment_sessions?.find((s) => s.status === "pending")
 
-  const disabled = !stripe || !elements ? true : false
+  const disabled = !stripe || !elements
 
   const giftContext = useGiftContextSafe()
 
@@ -118,12 +120,13 @@ const StripePaymentButton = ({
       return
     }
 
-    await stripe
-      .confirmCardPayment(session?.data.client_secret as string, {
+    const { error, paymentIntent } = await stripe.confirmCardPayment(
+      session?.data.client_secret as string,
+      {
         payment_method: {
           card: card,
           billing_details: {
-            name: cart.billing_address?.first_name + " " + cart.billing_address?.last_name,
+            name: `${cart.billing_address?.first_name} ${cart.billing_address?.last_name}`,
             address: {
               city: cart.billing_address?.city ?? undefined,
               country: cart.billing_address?.country_code ?? undefined,
@@ -136,28 +139,31 @@ const StripePaymentButton = ({
             phone: cart.billing_address?.phone ?? undefined,
           },
         },
-      })
-      .then(({ error, paymentIntent }) => {
-        if (error) {
-          const pi = error.payment_intent
+      }
+    )
 
-          if ((pi && pi.status === "requires_capture") || (pi && pi.status === "succeeded")) {
-            onPaymentCompleted()
-          }
+    if (error) {
+      const pi = error.payment_intent
 
-          setErrorMessage(error.message || null)
-          return
-        }
-
-        if (
-          (paymentIntent && paymentIntent.status === "requires_capture") ||
-          paymentIntent.status === "succeeded"
-        ) {
-          return onPaymentCompleted()
-        }
-
+      if ((pi && pi.status === "requires_capture") || (pi && pi.status === "succeeded")) {
+        await onPaymentCompleted()
         return
-      })
+      }
+
+      setErrorMessage(error.message || null)
+      setSubmitting(false)
+      return
+    }
+
+    if (
+      (paymentIntent && paymentIntent.status === "requires_capture") ||
+      paymentIntent?.status === "succeeded"
+    ) {
+      await onPaymentCompleted()
+      return
+    }
+
+    setSubmitting(false)
   }
 
   return (
@@ -190,13 +196,13 @@ const ManualTestPaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onPaymentCompleted = async () => {
-    await placeOrder()
-      .catch((err) => {
-        setErrorMessage(err.message)
-      })
-      .finally(() => {
-        setSubmitting(false)
-      })
+    try {
+      await placeOrder()
+    } catch (err: any) {
+      setErrorMessage(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const giftContext = useGiftContextSafe()
@@ -216,7 +222,7 @@ const ManualTestPaymentButton = ({
       }
     }
 
-    onPaymentCompleted()
+    await onPaymentCompleted()
   }
 
   return (
