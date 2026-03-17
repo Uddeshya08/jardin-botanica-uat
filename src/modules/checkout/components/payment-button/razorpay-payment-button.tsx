@@ -142,12 +142,7 @@ export const RazorpayPaymentButton = ({
 
     razorpay.on("payment.failed", (response: any) => {
       setErrorMessage(JSON.stringify(response.error))
-    })
-
-    razorpay.on("payment.authorized" as any, () => {
-      placeOrder().then((authorizedCart) => {
-        console.log("authorized:", authorizedCart)
-      })
+      setSubmitting(false)
     })
   }, [
     Razorpay,
