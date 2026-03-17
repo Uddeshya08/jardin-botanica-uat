@@ -38,6 +38,15 @@ export async function handleGoogleCallback(queryParams: Record<string, string>) 
     return { success: true }
   } catch (error: any) {
     console.error("Google callback error:", error)
+
+    if (error.message == "Email is required to create a customer") {
+      return {
+        success: false,
+        error:
+          "No account found for the email please Sign up or create account first.",
+      }
+    }
+
     return {
       success: false,
       error: error.message || error.toString(),

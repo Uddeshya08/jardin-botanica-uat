@@ -1,119 +1,121 @@
 // src/app/[countryCode]/account/auth/page.tsx
-"use client"
+"use client";
 
-import { sdk } from "@lib/config"
-import { login, signup } from "@lib/data/customer"
-import { Navigation } from "app/components/Navigation"
-import { RippleEffect } from "app/components/RippleEffect"
-import { DatePicker } from "app/components/ui/date-picker"
-import { Eye, EyeOff, Smartphone } from "lucide-react"
-import { motion } from "motion/react"
-import { useParams, useRouter, useSearchParams } from "next/navigation"
-import React, { useActionState, useEffect, useState } from "react"
+import { sdk } from "@lib/config";
+import { login, signup } from "@lib/data/customer";
+import { Navigation } from "app/components/Navigation";
+import { RippleEffect } from "app/components/RippleEffect";
+import { DatePicker } from "app/components/ui/date-picker";
+import { Eye, EyeOff, Smartphone } from "lucide-react";
+import { motion } from "motion/react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import React, { useActionState, useEffect, useState } from "react";
+import PhoneAuthModal from "app/components/PhoneAuthModal";
 
 // Google reCAPTCHA v2 types
 declare global {
   interface Window {
     grecaptcha?: {
-      ready: (callback: () => void) => void
+      ready: (callback: () => void) => void;
       render: (
         container: HTMLElement,
         options: {
-          sitekey: string
-          callback: (token: string) => void
-          "expired-callback": () => void
-          "error-callback": () => void
-          size?: string
-          theme?: string
-        }
-      ) => number
-      reset: (widgetId?: number) => void
-      getResponse: (widgetId?: number) => string
-    }
+          sitekey: string;
+          callback: (token: string) => void;
+          "expired-callback": () => void;
+          "error-callback": () => void;
+          size?: string;
+          theme?: string;
+        },
+      ) => number;
+      reset: (widgetId?: number) => void;
+      getResponse: (widgetId?: number) => string;
+    };
   }
 }
 
 interface CartItem {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  image?: string
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string;
 }
 
 // Simple error renderer (or reuse @modules/checkout/components/error-message)
 function ErrorText({ error }: { error: string | null }) {
-  if (!error) return null
+  if (!error) return null;
 
   // "Error:" prefix remove
-  const cleanError = error.replace(/^Error:\s*/i, "").replace(/^Invalid request:\s*/i, "")
+  const cleanError = error.replace(/^Error:\s*/i, "").replace(/^Invalid request:\s*/i, "");
 
-  return <p className="mt-2 text-sm text-rose-600">{cleanError}</p>
+  return <p className="mt-2 text-sm text-rose-600">{cleanError}</p>;
 }
 
 export default function AuthPage() {
-  const router = useRouter()
-  const params = useSearchParams()
-  const routeParams = useParams()
-  const countryCode = (routeParams?.countryCode as string) || "us"
-  const redirectTo = params.get("redirect") || "/account"
+  const router = useRouter();
+  const params = useSearchParams();
+  const routeParams = useParams();
+  const countryCode = (routeParams?.countryCode as string) || "us";
+  const redirectTo = params.get("redirect") || "/account";
 
   // Check for stored order email and redirect path
-  const [orderEmail, setOrderEmail] = useState("")
-  const [actualRedirectPath, setActualRedirectPath] = useState(redirectTo)
+  const [orderEmail, setOrderEmail] = useState("");
+  const [actualRedirectPath, setActualRedirectPath] = useState(redirectTo);
 
   useEffect(() => {
     // Check if there's a stored email and redirect path from order confirmation
-    const storedEmail = sessionStorage.getItem("jardinBotanica_orderEmail")
-    const storedRedirect = sessionStorage.getItem("jardinBotanica_redirectAfterLogin")
+    const storedEmail = sessionStorage.getItem("jardinBotanica_orderEmail");
+    const storedRedirect = sessionStorage.getItem("jardinBotanica_redirectAfterLogin");
 
     if (storedEmail) {
-      setOrderEmail(storedEmail)
+      setOrderEmail(storedEmail);
     }
 
     if (storedRedirect) {
-      setActualRedirectPath(storedRedirect)
+      setActualRedirectPath(storedRedirect);
     }
-  }, [])
+  }, []);
 
   // ----- SIGN IN -----
-  const [signinMessage, signinAction] = useActionState(login, null)
-  const [showSignInPassword, setShowSignInPassword] = useState(false)
-  const [failedAttempts, setFailedAttempts] = useState(0)
-  const [isLockedOut, setIsLockedOut] = useState(false)
-  const [delaySeconds, setDelaySeconds] = useState(0)
-  const [isDelaying, setIsDelaying] = useState(false)
-  const [showCaptcha, setShowCaptcha] = useState(false)
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
-  const recaptchaRef = React.useRef<HTMLDivElement>(null)
-  const recaptchaWidgetId = React.useRef<number | null>(null)
+  const [signinMessage, signinAction] = useActionState(login, null);
+  const [showSignInPassword, setShowSignInPassword] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [isLockedOut, setIsLockedOut] = useState(false);
+  const [delaySeconds, setDelaySeconds] = useState(0);
+  const [isDelaying, setIsDelaying] = useState(false);
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = React.useRef<HTMLDivElement>(null);
+  const recaptchaWidgetId = React.useRef<number | null>(null);
+  const [showPhoneModal, setShowPhoneModal] = useState(true);
 
   // Load Google reCAPTCHA v2 script
   useEffect(() => {
     // Check if script already exists
-    const existingScript = document.querySelector('script[src*="google.com/recaptcha"]')
+    const existingScript = document.querySelector('script[src*="google.com/recaptcha"]');
     if (existingScript) {
-      return // Script already loaded
+      return; // Script already loaded
     }
 
-    const script = document.createElement("script")
-    script.src = "https://www.google.com/recaptcha/api.js?render=explicit"
-    script.async = true
-    script.defer = true
+    const script = document.createElement("script");
+    script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+    script.async = true;
+    script.defer = true;
     script.onerror = () => {
-      console.error("Failed to load reCAPTCHA script")
-    }
+      console.error("Failed to load reCAPTCHA script");
+    };
 
-    document.body.appendChild(script)
+    document.body.appendChild(script);
 
     return () => {
       // Cleanup: remove script when component unmounts
-      const scriptToRemove = document.querySelector('script[src*="google.com/recaptcha"]')
+      const scriptToRemove = document.querySelector('script[src*="google.com/recaptcha"]');
       if (scriptToRemove && scriptToRemove.parentNode) {
-        scriptToRemove.parentNode.removeChild(scriptToRemove)
+        scriptToRemove.parentNode.removeChild(scriptToRemove);
       }
-    }
-  }, [])
+    };
+  }, []);
 
   // Render Google reCAPTCHA v2 widget when showCaptcha is true
   useEffect(() => {
@@ -122,67 +124,67 @@ export default function AuthPage() {
       if (recaptchaWidgetId.current !== null && window.grecaptcha) {
         try {
           if (recaptchaRef.current) {
-            recaptchaRef.current.innerHTML = ""
+            recaptchaRef.current.innerHTML = "";
           }
-          recaptchaWidgetId.current = null
+          recaptchaWidgetId.current = null;
         } catch (e) {
           // Ignore errors
         }
       }
-      setCaptchaToken(null)
-      return
+      setCaptchaToken(null);
+      return;
     }
 
     // Wait for DOM to be ready and reCAPTCHA script to load
     const renderWidget = () => {
-      if (!recaptchaRef.current) return
+      if (!recaptchaRef.current) return;
 
       // Clear container first
-      recaptchaRef.current.innerHTML = ""
+      recaptchaRef.current.innerHTML = "";
 
       if (window.grecaptcha && window.grecaptcha.render) {
-        const grecaptcha = window.grecaptcha
+        const grecaptcha = window.grecaptcha;
 
         // Render new widget
         const siteKey =
-          process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LdcOz4sAAAAALhObDF_LXr0dea8zYCfFOoi3qX8"
+          process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LdcOz4sAAAAALhObDF_LXr0dea8zYCfFOoi3qX8";
         if (siteKey) {
           try {
             recaptchaWidgetId.current = grecaptcha.render(recaptchaRef.current, {
               sitekey: siteKey,
               callback: (token: string) => {
-                console.log("reCAPTCHA token received")
-                setCaptchaToken(token)
+                console.log("reCAPTCHA token received");
+                setCaptchaToken(token);
               },
               "expired-callback": () => {
-                console.log("reCAPTCHA token expired")
-                setCaptchaToken(null)
+                console.log("reCAPTCHA token expired");
+                setCaptchaToken(null);
                 // Reset widget when expired
                 if (recaptchaWidgetId.current !== null && window.grecaptcha) {
-                  window.grecaptcha.reset(recaptchaWidgetId.current)
+                  window.grecaptcha.reset(recaptchaWidgetId.current);
                 }
               },
               "error-callback": () => {
-                console.error("reCAPTCHA error occurred")
-                setCaptchaToken(null)
+                console.error("reCAPTCHA error occurred");
+                setCaptchaToken(null);
               },
               size: "normal",
               theme: "light",
-            })
-            console.log("reCAPTCHA widget rendered successfully")
+            });
+            console.log("reCAPTCHA widget rendered successfully");
           } catch (error) {
-            console.error("Failed to render reCAPTCHA widget:", error)
+            console.error("Failed to render reCAPTCHA widget:", error);
             // Show user-friendly error
             if (recaptchaRef.current) {
               recaptchaRef.current.innerHTML =
-                '<p class="text-red-600 text-sm font-din-arabic">reCAPTCHA failed to load. Please refresh the page.</p>'
+                '<p class="text-red-600 text-sm font-din-arabic">reCAPTCHA failed to load. Please refresh the page.</p>';
             }
           }
         } else {
-          console.warn("NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not set")
+          console.warn("NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not set");
         }
       }
-    }
+    };
 
     // Wait for grecaptcha to be ready
     const checkAndRender = () => {
@@ -190,229 +192,252 @@ export default function AuthPage() {
         // Use ready callback if available
         if (window.grecaptcha.ready) {
           window.grecaptcha.ready(() => {
-            setTimeout(renderWidget, 200)
-          })
+            setTimeout(renderWidget, 200);
+          });
         } else {
-          setTimeout(renderWidget, 200)
+          setTimeout(renderWidget, 200);
         }
       } else {
         // Retry after 200ms
-        setTimeout(checkAndRender, 200)
+        setTimeout(checkAndRender, 200);
       }
-    }
+    };
 
     const timer = setTimeout(() => {
-      checkAndRender()
-    }, 1000)
+      checkAndRender();
+    }, 1000);
 
     return () => {
-      clearTimeout(timer)
+      clearTimeout(timer);
       // Cleanup widget on unmount
       if (recaptchaWidgetId.current !== null && window.grecaptcha) {
         try {
           if (recaptchaRef.current) {
-            recaptchaRef.current.innerHTML = ""
+            recaptchaRef.current.innerHTML = "";
           }
-          recaptchaWidgetId.current = null
+          recaptchaWidgetId.current = null;
         } catch (e) {
           // Ignore errors
         }
       }
-    }
-  }, [showCaptcha])
+    };
+  }, [showCaptcha]);
 
   // Load failed attempts from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem("jardinBotanica_failedLoginAttempts")
-    const attempts = stored ? parseInt(stored, 10) : 0
-    setFailedAttempts(attempts)
-    setIsLockedOut(attempts >= 10)
-    setShowCaptcha(attempts >= 3)
-  }, [])
+    const stored = localStorage.getItem("jardinBotanica_failedLoginAttempts");
+    const attempts = stored ? parseInt(stored, 10) : 0;
+    setFailedAttempts(attempts);
+    setIsLockedOut(attempts >= 10);
+    setShowCaptcha(attempts >= 3);
+  }, []);
 
   // Handle delay countdown
   useEffect(() => {
     if (delaySeconds > 0) {
       const timer = setTimeout(() => {
-        setDelaySeconds(delaySeconds - 1)
-      }, 1000)
-      return () => clearTimeout(timer)
+        setDelaySeconds(delaySeconds - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
     } else if (isDelaying && delaySeconds === 0) {
-      setIsDelaying(false)
+      setIsDelaying(false);
     }
-  }, [delaySeconds, isDelaying])
+  }, [delaySeconds, isDelaying]);
 
   useEffect(() => {
     // In the starter, a *truthy* message is usually an error string.
     // If your login action returns structured state, adjust accordingly.
-    if (signinMessage === null) return
+    if (signinMessage === null) return;
 
     if (signinMessage === "") {
       // Success - reset failed attempts
-      localStorage.removeItem("jardinBotanica_failedLoginAttempts")
-      setFailedAttempts(0)
-      setIsLockedOut(false)
-      setIsDelaying(false)
-      setDelaySeconds(0)
-      setShowCaptcha(false)
-      setCaptchaToken(null)
+      localStorage.removeItem("jardinBotanica_failedLoginAttempts");
+      setFailedAttempts(0);
+      setIsLockedOut(false);
+      setIsDelaying(false);
+      setDelaySeconds(0);
+      setShowCaptcha(false);
+      setCaptchaToken(null);
 
       // Cleanup reCAPTCHA widget
       if (recaptchaWidgetId.current !== null && window.grecaptcha) {
         try {
-          window.grecaptcha.reset(recaptchaWidgetId.current)
-          recaptchaWidgetId.current = null
+          window.grecaptcha.reset(recaptchaWidgetId.current);
+          recaptchaWidgetId.current = null;
         } catch (e) {
           // Ignore errors
         }
       }
 
       // Clear session storage after successful login
-      sessionStorage.removeItem("jardinBotanica_orderEmail")
-      sessionStorage.removeItem("jardinBotanica_redirectAfterLogin")
+      sessionStorage.removeItem("jardinBotanica_orderEmail");
+      sessionStorage.removeItem("jardinBotanica_redirectAfterLogin");
 
-      router.replace(actualRedirectPath)
-      router.refresh()
+      router.replace(actualRedirectPath);
+      router.refresh();
     } else {
       // Failed login - increment attempts immediately
-      const stored = localStorage.getItem("jardinBotanica_failedLoginAttempts")
-      const currentAttempts = stored ? parseInt(stored, 10) : 0
-      const newAttempts = currentAttempts + 1
+      const stored = localStorage.getItem("jardinBotanica_failedLoginAttempts");
+      const currentAttempts = stored ? parseInt(stored, 10) : 0;
+      const newAttempts = currentAttempts + 1;
 
       // Update localStorage immediately
-      localStorage.setItem("jardinBotanica_failedLoginAttempts", newAttempts.toString())
+      localStorage.setItem("jardinBotanica_failedLoginAttempts", newAttempts.toString());
 
       // Update state immediately
-      setFailedAttempts(newAttempts)
+      setFailedAttempts(newAttempts);
 
       if (newAttempts >= 10) {
-        setIsLockedOut(true)
-        setShowCaptcha(false)
-        setCaptchaToken(null)
+        setIsLockedOut(true);
+        setShowCaptcha(false);
+        setCaptchaToken(null);
       } else if (newAttempts >= 3) {
         // Show captcha after 3 failed attempts
-        setShowCaptcha(true)
-        setCaptchaToken(null) // Reset captcha token
+        setShowCaptcha(true);
+        setCaptchaToken(null); // Reset captcha token
 
         // Start 5-second delay
-        const delay = 5
-        setDelaySeconds(delay)
-        setIsDelaying(true)
+        const delay = 5;
+        setDelaySeconds(delay);
+        setIsDelaying(true);
       }
     }
-  }, [signinMessage, actualRedirectPath, router])
+  }, [signinMessage, actualRedirectPath, router]);
 
   // ----- SIGN UP -----
-  const [signupMessage, signupAction] = useActionState(signup, null)
-  const [showCreatePassword, setShowCreatePassword] = useState(false)
-  const [createPassword, setCreatePassword] = useState("")
-  const [passwordError, setPasswordError] = useState<string | null>(null)
-  const [dateValue, setDateValue] = useState<Date | undefined>(undefined)
+  const [signupMessage, signupAction] = useActionState(signup, null);
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
+  const [createPassword, setCreatePassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [dateValue, setDateValue] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
-    if (signupMessage === null) return
+    if (signupMessage === null) return;
     if (signupMessage === "") {
       // Clear session storage after successful signup
-      sessionStorage.removeItem("jardinBotanica_orderEmail")
-      sessionStorage.removeItem("jardinBotanica_redirectAfterLogin")
+      sessionStorage.removeItem("jardinBotanica_orderEmail");
+      sessionStorage.removeItem("jardinBotanica_redirectAfterLogin");
 
-      router.replace(actualRedirectPath)
-      router.refresh()
+      router.replace(actualRedirectPath);
+      router.refresh();
     }
-  }, [signupMessage, actualRedirectPath, router])
+  }, [signupMessage, actualRedirectPath, router]);
 
   // ----- TAB STATE FOR MOBILE -----
-  const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin")
+  const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
 
   // Set initial tab based on URL parameter
   useEffect(() => {
-    const tabParam = params.get("tab")
+    const tabParam = params.get("tab");
     if (tabParam === "signup") {
-      setActiveTab("signup")
+      setActiveTab("signup");
     } else if (tabParam === "signin") {
-      setActiveTab("signin")
+      setActiveTab("signin");
     }
-  }, [params])
+  }, [params]);
 
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [showStickyCart, setShowStickyCart] = useState(false)
-  const [heroCartItem, setHeroCartItem] = useState<CartItem | null>(null)
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [showStickyCart, setShowStickyCart] = useState(false);
+  const [heroCartItem, setHeroCartItem] = useState<CartItem | null>(null);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   const handleCartUpdate = (item: CartItem | null) => {
-    setHeroCartItem(item)
+    setHeroCartItem(item);
 
     // Update cartItems array for navigation
     if (item && item.quantity > 0) {
       setCartItems((prevItems) => {
-        const existingIndex = prevItems.findIndex((cartItem) => cartItem.id === item.id)
+        const existingIndex = prevItems.findIndex((cartItem) => cartItem.id === item.id);
         if (existingIndex >= 0) {
           // Update existing item
-          const updatedItems = [...prevItems]
-          updatedItems[existingIndex] = item
-          return updatedItems
+          const updatedItems = [...prevItems];
+          updatedItems[existingIndex] = item;
+          return updatedItems;
         } else {
           // Add new item
-          return [...prevItems, item]
+          return [...prevItems, item];
         }
-      })
+      });
     } else if (item && item.quantity === 0) {
       // Remove item if quantity is 0
-      setCartItems((prevItems) => prevItems.filter((cartItem) => cartItem.id !== item.id))
+      setCartItems((prevItems) => prevItems.filter((cartItem) => cartItem.id !== item.id));
     }
-  }
+  };
 
   const handleHeroQuantityUpdate = (quantity: number) => {
     if (heroCartItem) {
       setHeroCartItem({
         ...heroCartItem,
         quantity: quantity,
-      })
+      });
     }
-  }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollY = window.scrollY
-      setIsScrolled(scrollY > 50)
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 50);
 
       // Show sticky cart after scrolling past the ProductHero section (approximately 450px for compact height)
       // Show by default, hide only when heroCartItem exists and quantity is explicitly 0
-      const shouldShowCart = scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0)
+      const shouldShowCart = scrollY > 450 && (heroCartItem === null || heroCartItem.quantity > 0);
 
       // Hide sticky cart when footer copyright is visible
-      const footerElement = document.querySelector("footer")
-      const copyrightElement = footerElement?.querySelector("p")
+      const footerElement = document.querySelector("footer");
+      const copyrightElement = footerElement?.querySelector("p");
 
       if (copyrightElement && copyrightElement.textContent?.includes("© 2025 Jardin Botanica")) {
-        const copyrightRect = copyrightElement.getBoundingClientRect()
-        const isFooterVisible = copyrightRect.top < window.innerHeight && copyrightRect.bottom > 0
+        const copyrightRect = copyrightElement.getBoundingClientRect();
+        const isFooterVisible = copyrightRect.top < window.innerHeight && copyrightRect.bottom > 0;
 
-        setShowStickyCart(shouldShowCart && !isFooterVisible)
+        setShowStickyCart(shouldShowCart && !isFooterVisible);
       } else {
-        setShowStickyCart(shouldShowCart)
+        setShowStickyCart(shouldShowCart);
       }
-    }
+    };
 
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const loginWithGoogle = async () => {
-    const result = await sdk.auth.login("customer", "google", {})
+    const result = await sdk.auth.login("customer", "google", {});
     if (typeof result === "object" && result.location) {
-      window.location.href = result.location
-      return
+      window.location.href = result.location;
+      return;
     }
 
     if (typeof result !== "string") {
-      alert("Authentication failed")
-      return
+      alert("Authentication failed");
+      return;
     }
 
-    const { customer } = await sdk.store.customer.retrieve()
-    console.log(customer)
-  }
+    const { customer } = await sdk.store.customer.retrieve();
+    console.log(customer);
+  };
+
+  const handlePhoneAuthSuccess = async (token: string) => {
+    try {
+      // Get customer data with the token
+      const { customer } = await sdk.store.customer.retrieve({
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Phone auth successful:", customer);
+
+      // Clear session storage
+      sessionStorage.removeItem("jardinBotanica_orderEmail");
+      sessionStorage.removeItem("jardinBotanica_redirectAfterLogin");
+
+      // Redirect to account page
+      router.replace(actualRedirectPath);
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to fetch customer:", error);
+    }
+  };
 
   return (
     <div>
@@ -496,8 +521,8 @@ export default function AuthPage() {
                   className="space-y-5"
                   onSubmit={(e) => {
                     if (isDelaying || delaySeconds > 0 || (showCaptcha && !captchaToken)) {
-                      e.preventDefault()
-                      return false
+                      e.preventDefault();
+                      return false;
                     }
                   }}
                 >
@@ -686,8 +711,12 @@ export default function AuthPage() {
                       type="button"
                       className="font-din-arabic w-full flex items-center px-4 py-3.5 border bg-transparent text-black hover:bg-black/5 transition-all duration-300"
                       style={{ borderColor: "#D8D2C7" }}
+                      onClick={() => {
+                        console.log("Phone auth clicked");
+                        setShowPhoneModal(true);
+                      }}
                     >
-                      <Smartphone className="w-5 h-5 mr-3" />
+                      {/*<Smartphone className="w-5 h-5 mr-3" />*/}
                       <span className="text-left">Continue with Phone</span>
                     </button>
                   </div>
@@ -711,10 +740,10 @@ export default function AuthPage() {
                 className="space-y-5"
                 onSubmit={(e) => {
                   if (createPassword.length < 15) {
-                    e.preventDefault()
-                    setPasswordError("Password must be at least 15 characters long")
+                    e.preventDefault();
+                    setPasswordError("Password must be at least 15 characters long");
                   } else {
-                    setPasswordError(null)
+                    setPasswordError(null);
                   }
                 }}
               >
@@ -768,7 +797,7 @@ export default function AuthPage() {
                 </div>
                 <div>
                   <label className="font-din-arabic block text-sm text-black mb-2 tracking-wide">
-                    Phone
+                    Phone Number*
                   </label>
                   <input
                     type="tel"
@@ -777,6 +806,7 @@ export default function AuthPage() {
                     className="font-din-arabic w-full px-4 py-3.5 border bg-transparent text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
                     style={{ borderColor: "#D8D2C7" }}
                     placeholder="Enter your phone number"
+                    required
                   />
                 </div>
 
@@ -812,14 +842,14 @@ export default function AuthPage() {
                       name="password"
                       value={createPassword}
                       onChange={(e) => {
-                        setCreatePassword(e.target.value)
+                        setCreatePassword(e.target.value);
                         if (passwordError && e.target.value.length >= 15) {
-                          setPasswordError(null)
+                          setPasswordError(null);
                         }
                       }}
                       onBlur={() => {
                         if (createPassword.length > 0 && createPassword.length < 15) {
-                          setPasswordError("Password must be at least 15 characters long")
+                          setPasswordError("Password must be at least 15 characters long");
                         }
                       }}
                       autoComplete="new-password"
@@ -871,6 +901,13 @@ export default function AuthPage() {
           </div>
         </div>
       </div>
+
+      <PhoneAuthModal
+        isOpen={showPhoneModal}
+        onClose={() => setShowPhoneModal(false)}
+        onSuccess={handlePhoneAuthSuccess}
+        apiUrl={process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"}
+      />
     </div>
-  )
+  );
 }

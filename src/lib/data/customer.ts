@@ -1,10 +1,10 @@
-"use server"
+"use server";
 
-import { sdk } from "@lib/config"
-import medusaError from "@lib/util/medusa-error"
-import type { HttpTypes } from "@medusajs/types"
-import { revalidateTag } from "next/cache"
-import { redirect } from "next/navigation"
+import { sdk } from "@lib/config";
+import medusaError from "@lib/util/medusa-error";
+import type { HttpTypes } from "@medusajs/types";
+import { revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
 import {
   getAuthHeaders,
   getCacheOptions,
@@ -13,44 +13,44 @@ import {
   removeAuthToken,
   removeCartId,
   setAuthToken,
-} from "./cookies"
+} from "./cookies";
 
 const mapErrorMessage = (error: any): string => {
-  const msg = error?.toString() || ""
+  const msg = error?.toString() || "";
   if (
     msg.includes("Invalid email or password") ||
     msg.includes("401") ||
     msg.includes("Unauthorized") ||
     msg.includes("Wrong password")
   ) {
-    return "Couldn’t sign you in. Please check your email and password."
+    return "Couldn’t sign you in. Please check your email and password.";
   }
   if (
     msg.includes("already exists") ||
     msg.includes("Identity with email") ||
     msg.includes("Duplicate entry")
   ) {
-    return "You’re already on file. Use “Sign in” or reset your password."
+    return "You’re already on file. Use “Sign in” or reset your password.";
   }
   if (msg.includes("400") || msg.includes("Invalid request")) {
     // Basic form validation catch-all
-    return "Almost there. Some fields need a quick check."
+    return "Almost there. Some fields need a quick check.";
   }
-  return msg
-}
+  return msg;
+};
 
 export const retrieveCustomer = async (): Promise<HttpTypes.StoreCustomer | null> => {
-  const authHeaders = await getAuthHeaders()
+  const authHeaders = await getAuthHeaders();
 
-  if (!authHeaders) return null
+  if (!authHeaders) return null;
 
   const headers = {
     ...authHeaders,
-  }
+  };
 
   const next = {
     ...(await getCacheOptions("customers")),
-  }
+  };
 
   return await sdk.client
     .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
@@ -63,63 +63,67 @@ export const retrieveCustomer = async (): Promise<HttpTypes.StoreCustomer | null
       cache: "force-cache",
     })
     .then(({ customer }) => customer)
-    .catch(() => null)
-}
+    .catch(() => null);
+};
 
 export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
   const headers = {
     ...(await getAuthHeaders()),
-  }
+  };
 
   const updateRes = await sdk.store.customer
     .update(body, {}, headers)
     .then(({ customer }) => customer)
-    .catch(medusaError)
+    .catch(medusaError);
 
-  const cacheTag = await getCacheTag("customers")
-  revalidateTag(cacheTag)
+  const cacheTag = await getCacheTag("customers");
+  revalidateTag(cacheTag);
 
-  return updateRes
-}
+  return updateRes;
+};
 
 export async function signup(_currentState: unknown, formData: FormData) {
-  const password = formData.get("password") as string
+  const password = formData.get("password") as string;
   const customerForm = {
     email: formData.get("email") as string,
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
     phone: formData.get("phone") as string,
-  }
+  };
 
   try {
     const token = await sdk.auth.register("customer", "emailpass", {
       email: customerForm.email,
       password: password,
-    })
+    });
 
-    await setAuthToken(token as string)
+    await setAuthToken(token as string);
 
     const headers = {
       ...(await getAuthHeaders()),
-    }
+    };
 
-    const { customer: createdCustomer } = await sdk.store.customer.create(customerForm, {}, headers)
+    const { customer: createdCustomer } = await sdk.store.customer.create(
+      customerForm,
+      {},
+      headers,
+    );
 
     const loginToken = await sdk.auth.login("customer", "emailpass", {
       email: customerForm.email,
       password,
-    })
+    });
 
-    await setAuthToken(loginToken as string)
+    await setAuthToken(loginToken as string);
 
-    const customerCacheTag = await getCacheTag("customers")
-    revalidateTag(customerCacheTag)
+    const customerCacheTag = await getCacheTag("customers");
+    revalidateTag(customerCacheTag);
 
-    await transferCart()
+    await transferCart();
 
-    return createdCustomer
+    return createdCustomer;
   } catch (error: any) {
-    return mapErrorMessage(error)
+    return mapErrorMessage(error);
   }
 }
 
@@ -127,11 +131,11 @@ export async function signup(_currentState: unknown, formData: FormData) {
  * Verify Google reCAPTCHA v3 token (works for v2 as well)
  */
 async function verifyRecaptchaToken(token: string): Promise<boolean> {
-  const secretKey = process.env.RECAPTCHA_SECRET_KEY || ""
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY || "";
 
   if (!secretKey) {
-    console.warn("RECAPTCHA_SECRET_KEY not set, skipping verification")
-    return true // Allow login if secret key is not configured
+    console.warn("RECAPTCHA_SECRET_KEY not set, skipping verification");
+    return true; // Allow login if secret key is not configured
   }
 
   try {
@@ -144,67 +148,67 @@ async function verifyRecaptchaToken(token: string): Promise<boolean> {
         secret: secretKey,
         response: token,
       }),
-    })
+    });
 
-    const data = await response.json()
-    return data.success === true
+    const data = await response.json();
+    return data.success === true;
   } catch (error) {
-    console.error("reCAPTCHA verification error:", error)
-    return false
+    console.error("reCAPTCHA verification error:", error);
+    return false;
   }
 }
 
 export async function login(_currentState: unknown, formData: FormData) {
-  const email = formData.get("email") as string
-  const password = formData.get("password") as string
-  const recaptchaToken = formData.get("g-recaptcha-response") as string | null
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const recaptchaToken = formData.get("g-recaptcha-response") as string | null;
 
   // If reCAPTCHA token is provided, verify it
   if (recaptchaToken && recaptchaToken.trim() !== "") {
-    const isValid = await verifyRecaptchaToken(recaptchaToken)
+    const isValid = await verifyRecaptchaToken(recaptchaToken);
     if (!isValid) {
-      return "Verification failed. Please complete the security check and try again."
+      return "Verification failed. Please complete the security check and try again.";
     }
   }
 
   try {
     await sdk.auth.login("customer", "emailpass", { email, password }).then(async (token) => {
-      await setAuthToken(token as string)
-      const customerCacheTag = await getCacheTag("customers")
-      revalidateTag(customerCacheTag)
-    })
+      await setAuthToken(token as string);
+      const customerCacheTag = await getCacheTag("customers");
+      revalidateTag(customerCacheTag);
+    });
   } catch (error: any) {
-    return mapErrorMessage(error)
+    return mapErrorMessage(error);
   }
 
   try {
-    await transferCart()
+    await transferCart();
   } catch (error: any) {
-    return mapErrorMessage(error)
+    return mapErrorMessage(error);
   }
 }
 
 export async function signout(countryCode: string) {
-  await sdk.auth.logout()
+  await sdk.auth.logout();
 
-  await removeAuthToken()
+  await removeAuthToken();
 
-  const customerCacheTag = await getCacheTag("customers")
-  revalidateTag(customerCacheTag)
+  const customerCacheTag = await getCacheTag("customers");
+  revalidateTag(customerCacheTag);
 
-  await removeCartId()
+  await removeCartId();
 
-  const cartCacheTag = await getCacheTag("carts")
-  revalidateTag(cartCacheTag)
+  const cartCacheTag = await getCacheTag("carts");
+  revalidateTag(cartCacheTag);
 
-  redirect(`/${countryCode}/account`)
+  redirect(`/${countryCode}/account`);
 }
 
 export async function requestPasswordReset(_currentState: unknown, formData: FormData) {
-  const email = formData.get("email") as string
+  const email = formData.get("email") as string;
 
   if (!email) {
-    return { success: false, error: "Email is required" }
+    return { success: false, error: "Email is required" };
   }
 
   try {
@@ -212,27 +216,27 @@ export async function requestPasswordReset(_currentState: unknown, formData: For
     // This will trigger the auth.password_reset event that our subscriber handles
     await sdk.auth.resetPassword("customer", "emailpass", {
       identifier: email,
-    })
+    });
 
     // The API returns a successful response always, even if the customer's email doesn't exist
     // This ensures that customer emails that don't exist are not exposed
-    return { success: true, error: null }
+    return { success: true, error: null };
   } catch (error: any) {
-    console.error("Password reset request error:", error)
-    return { success: false, error: mapErrorMessage(error) }
+    console.error("Password reset request error:", error);
+    return { success: false, error: mapErrorMessage(error) };
   }
 }
 
 export async function resetPassword(_currentState: unknown, formData: FormData) {
-  const email = formData.get("email") as string
-  const password = formData.get("password") as string
-  const token = formData.get("token") as string
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const token = formData.get("token") as string;
 
   if (!email || !password || !token) {
     return {
       success: false,
       message: "Email, password, and token are required",
-    }
+    };
   }
 
   try {
@@ -245,57 +249,57 @@ export async function resetPassword(_currentState: unknown, formData: FormData) 
         email,
         password,
       },
-      token
-    )
+      token,
+    );
 
     // Automatically login after successful password reset
     const loginToken = await sdk.auth.login("customer", "emailpass", {
       email,
       password,
-    })
+    });
 
     // Set the auth token in cookies
-    await setAuthToken(loginToken as string)
+    await setAuthToken(loginToken as string);
 
     // Revalidate customer cache
-    const customerCacheTag = await getCacheTag("customers")
-    revalidateTag(customerCacheTag)
+    const customerCacheTag = await getCacheTag("customers");
+    revalidateTag(customerCacheTag);
 
     // Transfer cart if exists
     try {
-      await transferCart()
+      await transferCart();
     } catch (cartError) {
-      console.error("Cart transfer error:", cartError)
+      console.error("Cart transfer error:", cartError);
       // Don't fail password reset if cart transfer fails
     }
 
-    return { success: true, message: "" }
+    return { success: true, message: "" };
   } catch (error: any) {
-    console.error("Password reset error:", error)
-    return { success: false, message: mapErrorMessage(error) }
+    console.error("Password reset error:", error);
+    return { success: false, message: mapErrorMessage(error) };
   }
 }
 
 export async function transferCart() {
-  const cartId = await getCartId()
+  const cartId = await getCartId();
 
   if (!cartId) {
-    return
+    return;
   }
 
-  const headers = await getAuthHeaders()
+  const headers = await getAuthHeaders();
 
-  await sdk.store.cart.transferCart(cartId, {}, headers)
+  await sdk.store.cart.transferCart(cartId, {}, headers);
 
-  const cartCacheTag = await getCacheTag("carts")
-  revalidateTag(cartCacheTag)
+  const cartCacheTag = await getCacheTag("carts");
+  revalidateTag(cartCacheTag);
 }
 
 export const addCustomerAddress = async (
   currentState: Record<string, unknown>,
-  formData: FormData
+  formData: FormData,
 ): Promise<any> => {
-  const isDefaultShipping = formData.get("is_default_shipping") === "on"
+  const isDefaultShipping = formData.get("is_default_shipping") === "on";
 
   const address = {
     first_name: formData.get("first_name") as string,
@@ -313,52 +317,52 @@ export const addCustomerAddress = async (
     metadata: {
       address_type: (formData.get("address_type") as string) || "Home",
     },
-  }
+  };
 
   const headers = {
     ...(await getAuthHeaders()),
-  }
+  };
 
   return sdk.store.customer
     .createAddress(address, {}, headers)
     .then(async ({ customer }) => {
-      const customerCacheTag = await getCacheTag("customers")
-      revalidateTag(customerCacheTag)
-      return { success: true, error: null }
+      const customerCacheTag = await getCacheTag("customers");
+      revalidateTag(customerCacheTag);
+      return { success: true, error: null };
     })
     .catch((err) => {
-      return { success: false, error: mapErrorMessage(err) }
-    })
-}
+      return { success: false, error: mapErrorMessage(err) };
+    });
+};
 
 export const deleteCustomerAddress = async (addressId: string): Promise<void> => {
   const headers = {
     ...(await getAuthHeaders()),
-  }
+  };
 
   await sdk.store.customer
     .deleteAddress(addressId, headers)
     .then(async () => {
-      const customerCacheTag = await getCacheTag("customers")
-      revalidateTag(customerCacheTag)
-      return { success: true, error: null }
+      const customerCacheTag = await getCacheTag("customers");
+      revalidateTag(customerCacheTag);
+      return { success: true, error: null };
     })
     .catch((err) => {
-      return { success: false, error: mapErrorMessage(err) }
-    })
-}
+      return { success: false, error: mapErrorMessage(err) };
+    });
+};
 
 export const updateCustomerAddress = async (
   currentState: Record<string, unknown>,
-  formData: FormData
+  formData: FormData,
 ): Promise<any> => {
-  const addressId = (currentState.addressId as string) || (formData.get("addressId") as string)
+  const addressId = (currentState.addressId as string) || (formData.get("addressId") as string);
 
   if (!addressId) {
-    return { success: false, error: "Address ID is required" }
+    return { success: false, error: "Address ID is required" };
   }
 
-  const isDefaultShipping = formData.get("is_default_shipping") === "on"
+  const isDefaultShipping = formData.get("is_default_shipping") === "on";
 
   const address = {
     first_name: formData.get("first_name") as string,
@@ -374,53 +378,53 @@ export const updateCustomerAddress = async (
     metadata: {
       address_type: (formData.get("address_type") as string) || "Home",
     },
-  } as HttpTypes.StoreUpdateCustomerAddress
+  } as HttpTypes.StoreUpdateCustomerAddress;
 
-  const phone = formData.get("phone") as string
+  const phone = formData.get("phone") as string;
 
   if (phone) {
-    address.phone = phone
+    address.phone = phone;
   }
 
   const headers = {
     ...(await getAuthHeaders()),
-  }
+  };
 
   return sdk.store.customer
     .updateAddress(addressId, address, {}, headers)
     .then(async () => {
-      const customerCacheTag = await getCacheTag("customers")
-      revalidateTag(customerCacheTag)
-      return { success: true, error: null }
+      const customerCacheTag = await getCacheTag("customers");
+      revalidateTag(customerCacheTag);
+      return { success: true, error: null };
     })
     .catch((err) => {
-      return { success: false, error: mapErrorMessage(err) }
-    })
-}
+      return { success: false, error: mapErrorMessage(err) };
+    });
+};
 
 /**
  * Request email update - sends verification email with password reset link
  */
 export const requestEmailUpdate = async (data: {
-  current_password: string
-  new_email: string
+  current_password: string;
+  new_email: string;
 }): Promise<{ success: boolean; message: string; error?: string }> => {
   try {
-    const authHeaders = await getAuthHeaders()
+    const authHeaders = await getAuthHeaders();
 
     if (!authHeaders || !("authorization" in authHeaders)) {
       return {
         success: false,
         message: "Not authenticated",
         error: "NOT_AUTHENTICATED",
-      }
+      };
     }
 
     const headers = {
       "Content-Type": "application/json",
       "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
       ...authHeaders,
-    }
+    };
 
     // Call Medusa backend to request email update
     const response = await fetch(
@@ -432,50 +436,50 @@ export const requestEmailUpdate = async (data: {
           current_password: data.current_password,
           new_email: data.new_email,
         }),
-      }
-    )
+      },
+    );
 
-    const result = await response.json()
+    const result = await response.json();
 
     if (!response.ok) {
       return {
         success: false,
         message: result.message || "Failed to send verification email",
         error: result.type || "REQUEST_FAILED",
-      }
+      };
     }
 
     return {
       success: true,
       message: result.message || "Verification email sent successfully",
-    }
+    };
   } catch (error: any) {
-    console.error("Email update request error:", error)
+    console.error("Email update request error:", error);
     return {
       success: false,
       message: error.message || "An error occurred",
       error: "UNKNOWN_ERROR",
-    }
+    };
   }
-}
+};
 
 /**
  * Verify email and set new password
  */
 export const verifyEmailAndSetPassword = async (data: {
-  token: string
-  new_password: string
-  new_email?: string
+  token: string;
+  new_password: string;
+  new_email?: string;
 }): Promise<{
-  success: boolean
-  message: string
-  new_email?: string
+  success: boolean;
+  message: string;
+  new_email?: string;
 }> => {
   try {
     const headers = {
       "Content-Type": "application/json",
       "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
-    }
+    };
 
     // Call Medusa backend to verify and update
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/store/custom/email/verify`, {
@@ -485,58 +489,58 @@ export const verifyEmailAndSetPassword = async (data: {
         token: data.token,
         new_password: data.new_password,
       }),
-    })
+    });
 
-    const result = await response.json()
+    const result = await response.json();
 
     if (!response.ok) {
       return {
         success: false,
         message: result.message || "Verification failed",
-      }
+      };
     }
 
     // Revalidate customer cache
-    const customerCacheTag = await getCacheTag("customers")
-    revalidateTag(customerCacheTag)
+    const customerCacheTag = await getCacheTag("customers");
+    revalidateTag(customerCacheTag);
 
     return {
       success: true,
       message: result.message || "Email and password updated successfully",
       new_email: result.new_email,
-    }
+    };
   } catch (error: any) {
-    console.error("Email verification error:", error)
+    console.error("Email verification error:", error);
     return {
       success: false,
       message: error.message || "Verification failed",
-    }
+    };
   }
-}
+};
 
 /**
  * Update customer password - requires current password for security
  */
 export const updateCustomerPassword = async (data: {
-  current_password: string
-  new_password: string
+  current_password: string;
+  new_password: string;
 }): Promise<{ success: boolean; message: string; error?: string }> => {
   try {
-    const authHeaders = await getAuthHeaders()
+    const authHeaders = await getAuthHeaders();
 
     if (!authHeaders || !("authorization" in authHeaders)) {
       return {
         success: false,
         message: "Not authenticated",
         error: "NOT_AUTHENTICATED",
-      }
+      };
     }
 
     const headers = {
       "Content-Type": "application/json",
       "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
       ...authHeaders,
-    }
+    };
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/store/custom/password/change`,
@@ -547,38 +551,38 @@ export const updateCustomerPassword = async (data: {
           current_password: data.current_password,
           new_password: data.new_password,
         }),
-      }
-    )
+      },
+    );
 
-    const result = await response.json()
+    const result = await response.json();
 
     if (!response.ok) {
       return {
         success: false,
         message: result.message || "Failed to update password",
         error: result.type || "REQUEST_FAILED",
-      }
+      };
     }
 
     return {
       success: true,
       message: result.message || "Password updated successfully",
-    }
+    };
   } catch (error: any) {
-    console.error("Password update error:", error)
+    console.error("Password update error:", error);
     return {
       success: false,
       message: error.message || "An error occurred",
       error: "UNKNOWN_ERROR",
-    }
+    };
   }
-}
+};
 
 export const getCustomerPreferences = async (): Promise<any> => {
-  const authHeaders = await getAuthHeaders()
-  if (!authHeaders || !("authorization" in authHeaders)) return null
+  const authHeaders = await getAuthHeaders();
+  if (!authHeaders || !("authorization" in authHeaders)) return null;
 
-  const next = await getCacheOptions("customers")
+  const next = await getCacheOptions("customers");
 
   return await sdk.client
     .fetch<{ preference: any }>(`/store/customers/me/preferences`, {
@@ -588,16 +592,16 @@ export const getCustomerPreferences = async (): Promise<any> => {
       cache: "force-cache",
     })
     .then(({ preference }) => preference)
-    .catch(() => null)
-}
+    .catch(() => null);
+};
 
 export const updateCustomerPreferences = async (data: {
-  email_updates: boolean
-  newsletter: boolean
+  email_updates: boolean;
+  newsletter: boolean;
 }) => {
-  const authHeaders = await getAuthHeaders()
+  const authHeaders = await getAuthHeaders();
   if (!authHeaders || !("authorization" in authHeaders))
-    return { success: false, message: "Not authenticated" }
+    return { success: false, message: "Not authenticated" };
 
   try {
     const { preference } = await sdk.client.fetch<{ preference: any }>(
@@ -606,19 +610,47 @@ export const updateCustomerPreferences = async (data: {
         method: "POST",
         headers: authHeaders,
         body: data,
-      }
-    )
+      },
+    );
 
-    const tag = await getCacheTag("customers")
-    revalidateTag(tag)
+    const tag = await getCacheTag("customers");
+    revalidateTag(tag);
 
     return {
       success: true,
       message: "Preferences updated successfully",
       preference,
-    }
+    };
   } catch (error) {
-    console.error("Failed to update preferences:", error)
-    return { success: false, message: "Failed to update preferences" }
+    console.error("Failed to update preferences:", error);
+    return { success: false, message: "Failed to update preferences" };
+  }
+};
+
+export async function requestPhoneOTP(phone: string) {
+  try {
+    const token = await sdk.auth.login("customer", "phone-auth", {
+      phone,
+      step: "request",
+    });
+    return { success: true, token };
+  } catch (error: any) {
+    return { success: false, error: mapErrorMessage(error) };
+  }
+}
+
+export async function verifyPhoneOTP(phone: string, otp: string) {
+  try {
+    const token = await sdk.auth.login("customer", "phone-auth", {
+      phone,
+      otp,
+    });
+    await setAuthToken(token as string);
+    const customerCacheTag = await getCacheTag("customers");
+    revalidateTag(customerCacheTag);
+    await transferCart();
+    return { success: true, token };
+  } catch (error: any) {
+    return { success: false, error: mapErrorMessage(error) };
   }
 }

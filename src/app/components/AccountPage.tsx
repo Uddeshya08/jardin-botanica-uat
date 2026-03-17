@@ -1,96 +1,121 @@
-"use client"
+"use client";
 
-import { sdk } from "@lib/config"
-import { login, signup } from "@lib/data/customer"
-import { DatePicker } from "app/components/ui/date-picker"
-import { clsx } from "clsx"
-import { Eye, EyeOff, Smartphone } from "lucide-react"
-import { motion } from "motion/react"
-import { useParams, useRouter } from "next/navigation"
-import type React from "react"
-import { useActionState, useEffect, useState } from "react"
+import { sdk } from "@lib/config";
+import { login, signup } from "@lib/data/customer";
+import { DatePicker } from "app/components/ui/date-picker";
+import { clsx } from "clsx";
+import { Eye, EyeOff, Smartphone } from "lucide-react";
+import { motion } from "motion/react";
+import { useParams, useRouter } from "next/navigation";
+import type React from "react";
+import { useActionState, useEffect, useState } from "react";
+import PhoneAuthModal from "./PhoneAuthModal";
 
 export function AccountPage() {
-  const router = useRouter()
-  const routeParams = useParams()
-  const countryCode = (routeParams?.countryCode as string) || "us"
+  const router = useRouter();
+  const routeParams = useParams();
+  const countryCode = (routeParams?.countryCode as string) || "us";
 
-  const [signinMessage, signinAction, isSigninPending] = useActionState(login, null)
-  const [signupMessage, signupAction, isSignupPending] = useActionState(signup, null)
+  const [signinMessage, signinAction, isSigninPending] = useActionState(login, null);
+  const [signupMessage, signupAction, isSignupPending] = useActionState(signup, null);
 
-  const [showSignInPassword, setShowSignInPassword] = useState(false)
-  const [showCreatePassword, setShowCreatePassword] = useState(false)
-  const [passwordError, setPasswordError] = useState<string | null>(null)
-  const [createPassword, setCreatePassword] = useState("")
-  const [currentView, setCurrentView] = useState<"sign-in" | "register">("sign-in")
-  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>()
-  const [phoneError, setPhoneError] = useState<string | null>(null)
+  const [showSignInPassword, setShowSignInPassword] = useState(false);
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [createPassword, setCreatePassword] = useState("");
+  const [currentView, setCurrentView] = useState<"sign-in" | "register">("sign-in");
+  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+
+  const handlePhoneAuthSuccess = async (token: string) => {
+    try {
+      // Get customer data with the token
+      const { customer } = await sdk.store.customer.retrieve({
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Phone auth successful:", customer);
+
+      // Clear session storage
+      sessionStorage.removeItem("jardinBotanica_orderEmail");
+      sessionStorage.removeItem("jardinBotanica_redirectAfterLogin");
+
+      // Redirect to account page
+      router.replace(actualRedirectPath);
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to fetch customer:", error);
+    }
+  };
 
   const handleCreateAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     if (name === "password") {
-      setCreatePassword(value)
+      setCreatePassword(value);
       if (passwordError && value.length >= 15) {
-        setPasswordError(null)
+        setPasswordError(null);
       }
     }
-  }
+  };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, "")
-    e.target.value = value
+    const value = e.target.value.replace(/\D/g, "");
+    e.target.value = value;
     if (phoneError) {
-      setPhoneError(null)
+      setPhoneError(null);
     }
-  }
+  };
 
   const handleCreateAccountSubmit = (e: React.FormEvent) => {
     if (createPassword.length < 15) {
-      e.preventDefault()
-      setPasswordError("Password must be at least 15 characters long")
-      return
+      e.preventDefault();
+      setPasswordError("Password must be at least 15 characters long");
+      return;
     }
-    setPasswordError(null)
-  }
+    setPasswordError(null);
+  };
 
   const loginWithGoogle = async () => {
     try {
-      const result = await sdk.auth.login("customer", "google", {})
+      const result = await sdk.auth.login("customer", "google", {});
       if (typeof result === "object" && result.location) {
-        window.location.href = result.location
-        return
+        window.location.href = result.location;
+        return;
       }
 
       if (typeof result !== "string") {
-        alert("Authentication failed")
-        return
+        alert("Authentication failed");
+        return;
       }
 
-      const { customer } = await sdk.store.customer.retrieve()
-      console.log(customer)
-      router.replace(`/${countryCode}/account`)
-      router.refresh()
+      const { customer } = await sdk.store.customer.retrieve();
+      console.log(customer);
+      router.replace(`/${countryCode}/account`);
+      router.refresh();
     } catch (error) {
-      console.error("Google login error:", error)
-      alert("Authentication failed")
+      console.error("Google login error:", error);
+      alert("Authentication failed");
     }
-  }
+  };
 
   useEffect(() => {
-    if (signinMessage === null) return
+    if (signinMessage === null) return;
     if (signinMessage === "" || signinMessage === undefined) {
-      router.replace(`/${countryCode}/account`)
-      router.refresh()
+      router.replace(`/${countryCode}/account`);
+      router.refresh();
     }
-  }, [countryCode, router, signinMessage])
+  }, [countryCode, router, signinMessage]);
 
   useEffect(() => {
-    if (signupMessage === null) return
+    if (signupMessage === null) return;
     if (typeof signupMessage !== "string") {
-      router.replace(`/${countryCode}/account`)
-      router.refresh()
+      router.replace(`/${countryCode}/account`);
+      router.refresh();
     }
-  }, [countryCode, router, signupMessage])
+  }, [countryCode, router, signupMessage]);
 
   return (
     <div className="min-h-screen pt-32 pb-12" style={{ backgroundColor: "#e3e3d8" }}>
@@ -102,7 +127,7 @@ export function AccountPage() {
               onClick={() => setCurrentView("sign-in")}
               className={clsx(
                 "flex-1 pb-4 text-center font-din-arabic text-base tracking-widest transition-colors relative whitespace-nowrap",
-                currentView === "sign-in" ? "text-black" : "text-black/40"
+                currentView === "sign-in" ? "text-black" : "text-black/40",
               )}
             >
               Sign In
@@ -117,7 +142,7 @@ export function AccountPage() {
               onClick={() => setCurrentView("register")}
               className={clsx(
                 "flex-1 pb-4 text-center font-din-arabic text-base tracking-widest transition-colors relative whitespace-nowrap",
-                currentView === "register" ? "text-black" : "text-black/40"
+                currentView === "register" ? "text-black" : "text-black/40",
               )}
             >
               Create Account
@@ -137,7 +162,7 @@ export function AccountPage() {
             transition={{ duration: 0.6 }}
             className={clsx(
               "p-0 lg:p-10 w-full",
-              currentView === "register" ? "hidden lg:block" : "block"
+              currentView === "register" ? "hidden lg:block" : "block",
             )}
           >
             <h2 className="font-american-typewriter text-2xl mb-8 text-black text-center">
@@ -313,6 +338,7 @@ export function AccountPage() {
                   type="button"
                   className="font-din-arabic w-full flex items-center px-4 py-3.5 border bg-transparent text-black hover:bg-black/5 transition-all duration-300"
                   style={{ borderColor: "#D8D2C7" }}
+                  onClick={() => setShowPhoneModal(true)}
                 >
                   <Smartphone className="w-5 h-5 mr-3 flex-shrink-0" />
                   <span className="text-left">Continue with Phone</span>
@@ -328,7 +354,7 @@ export function AccountPage() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className={clsx(
               "p-0 lg:p-10 w-full",
-              currentView === "sign-in" ? "hidden lg:block" : "block"
+              currentView === "sign-in" ? "hidden lg:block" : "block",
             )}
           >
             <h2 className="font-american-typewriter text-2xl mb-8 text-black text-center">
@@ -393,7 +419,7 @@ export function AccountPage() {
                     dateOfBirth
                       ? `${dateOfBirth.getFullYear()}-${String(dateOfBirth.getMonth() + 1).padStart(
                           2,
-                          "0"
+                          "0",
                         )}-${String(dateOfBirth.getDate()).padStart(2, "0")}`
                       : ""
                   }
@@ -429,7 +455,7 @@ export function AccountPage() {
                     onChange={handleCreateAccountChange}
                     onBlur={() => {
                       if (createPassword.length > 0 && createPassword.length < 15) {
-                        setPasswordError("Password must be at least 15 characters long")
+                        setPasswordError("Password must be at least 15 characters long");
                       }
                     }}
                     autoComplete="new-password"
@@ -477,9 +503,9 @@ export function AccountPage() {
                   maxLength={10}
                   onChange={handlePhoneChange}
                   onBlur={(e) => {
-                    const value = e.target.value
+                    const value = e.target.value;
                     if (value.length > 0 && value.length !== 10) {
-                      setPhoneError("Please enter a valid 10-digit phone number")
+                      setPhoneError("Please enter a valid 10-digit phone number");
                     }
                   }}
                   className="font-din-arabic w-full px-4 py-3.5 border border-[#D8D2C7] bg-[#EBEBE8] text-black placeholder-black/50 focus:outline-none focus:border-black transition-all duration-300"
@@ -536,8 +562,15 @@ export function AccountPage() {
               </div>
             </form>
           </motion.div>
+
+          <PhoneAuthModal
+            isOpen={showPhoneModal}
+            onClose={() => setShowPhoneModal(false)}
+            onSuccess={handlePhoneAuthSuccess}
+            apiUrl={process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"}
+          />
         </div>
       </div>
     </div>
-  )
+  );
 }
