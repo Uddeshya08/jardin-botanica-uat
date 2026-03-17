@@ -12,11 +12,24 @@ type ItemProps = {
 }
 
 const Item = ({ item, currencyCode }: ItemProps) => {
+  // Check if this is a bundle item using metadata
+  const metadata = item?.metadata as Record<string, unknown> | null
+  const isBundle = !!metadata?.["_bundle_id"]
+
+  // For bundle items, use bundle title and image from metadata
+  const displayName =
+    isBundle && metadata?.["_bundle_title"]
+      ? (metadata["_bundle_title"] as string)
+      : item.product_title
+
+  const displayThumbnail =
+    isBundle && metadata?.["_bundle_image"] ? (metadata["_bundle_image"] as string) : item.thumbnail
+
   return (
     <Table.Row className="w-full !bg-[#e3e3d8]" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24 !bg-[#e3e3d8]">
         <div className="flex w-16">
-          <Thumbnail thumbnail={item.thumbnail} size="square" />
+          <Thumbnail thumbnail={displayThumbnail} size="square" />
         </div>
       </Table.Cell>
 
@@ -25,7 +38,7 @@ const Item = ({ item, currencyCode }: ItemProps) => {
           className="txt-medium-plus font-din-arabic text-sm text-black/70 tracking-wide"
           data-testid="product-name"
         >
-          {item.product_title}
+          {displayName}
         </Text>
         <LineItemOptions variant={item.variant} data-testid="product-variant" />
       </Table.Cell>

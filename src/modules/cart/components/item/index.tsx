@@ -23,8 +23,18 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
   const [isDeleting, setIsDeleting] = useState(false)
   const [giftUpdating, setGiftUpdating] = useState(false)
 
-  // Read gift data from line item metadata (persisted in database)
+  // Check if this is a bundle item using metadata
   const itemMetadata = (item as any).metadata || {}
+  const isBundle = !!itemMetadata["_bundle_id"]
+
+  // For bundle items, use bundle title and image from metadata
+  const displayTitle =
+    isBundle && itemMetadata["_bundle_title"] ? itemMetadata["_bundle_title"] : item.product_title
+
+  const displayThumbnail =
+    isBundle && itemMetadata["_bundle_image"] ? itemMetadata["_bundle_image"] : item.thumbnail
+
+  // Read gift data from line item metadata (persisted in database)
   const isGift = itemMetadata.is_gift === true || itemMetadata.is_gift === "true"
 
   // Check gift eligibility: first from line item metadata, then from product categories
@@ -129,10 +139,10 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
           transition={{ duration: 0.2 }}
           className="relative w-full h-full overflow-hidden rounded-lg"
         >
-          {item.thumbnail || item.variant?.product?.images?.[0]?.url ? (
+          {displayThumbnail || item.variant?.product?.images?.[0]?.url ? (
             <img
-              src={item.thumbnail || item.variant?.product?.images?.[0]?.url}
-              alt={item.product_title || "Product"}
+              src={displayThumbnail || item.variant?.product?.images?.[0]?.url}
+              alt={displayTitle || "Product"}
               className="w-full h-full object-contain object-center"
             />
           ) : (
@@ -145,9 +155,9 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
       </LocalizedClientLink>
 
       <div className="flex-1 min-w-0">
-        <ProductTitleTooltip title={item.product_title || ""}>
+        <ProductTitleTooltip title={displayTitle || ""}>
           <span className="font-din-arabic-bold block" data-testid="product-title">
-            {item.product_title}
+            {displayTitle}
           </span>
         </ProductTitleTooltip>
 

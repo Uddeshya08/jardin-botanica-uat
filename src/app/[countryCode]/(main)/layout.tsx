@@ -40,16 +40,31 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       // Otherwise, it's already in major units (rupees)
       const price = item.unit_price > 10000 ? item.unit_price / 100 : item.unit_price
 
+      // Check if this is a bundle item using metadata
+      const metadata = item?.metadata as Record<string, unknown> | null
+      const isBundle = !!metadata?.["_bundle_id"]
+
       // Get variant title if available and construct name with variant info
       const variantTitle = (item as any).variant?.title
-      const displayName = variantTitle ? `${item.title} (${variantTitle})` : item.title
+
+      // For bundle items, use bundle title from metadata, otherwise use product title
+      let displayName: string
+      let displayImage: string | null | undefined
+
+      if (isBundle && metadata?.["_bundle_title"]) {
+        displayName = metadata["_bundle_title"] as string
+        displayImage = metadata["_bundle_image"] as string | undefined
+      } else {
+        displayName = variantTitle ? `${item.title} (${variantTitle})` : item.title
+        displayImage = item.thumbnail
+      }
 
       return {
         id: item.id,
         name: displayName,
         price: price,
         quantity: item.quantity,
-        image: item.thumbnail,
+        image: displayImage,
         product_id: item?.product_id,
         variant_id: item?.variant_id,
         handle: (item as any).product?.handle,
