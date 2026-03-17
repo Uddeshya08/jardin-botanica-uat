@@ -1,8 +1,6 @@
 "use client"
 
-import { addBundleToCart, getAllBundlesWithVariants } from "@lib/data/bundles"
-import { emitCartUpdated } from "@lib/util/cart-client"
-import { useCartItems } from "app/context/cart-items-context"
+import { getAllBundlesWithVariants } from "@lib/data/bundles"
 import { ChevronDown, ChevronRight, Star } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import React, { useEffect, useState } from "react"
@@ -13,44 +11,6 @@ import { ImageWithFallback } from "./figma/ImageWithFallback"
 const giftSetHeroImage = "/assets/19c9ec6b99a1b843de4b2694678c1ef92c6d81ad.png"
 
 const videoPlaceholderImage = "/assets/0b086e0ac201459f6375d219ed3caa1e230994d6.png"
-
-interface Product {
-  id: string
-
-  name: string
-
-  category: string
-
-  price: number
-
-  size: string
-
-  description: string
-
-  image: string
-
-  images?: string[] // For multi-image slider
-
-  hoverImage?: string
-
-  botanical: string
-
-  property: string
-
-  items?: string[]
-
-  savings?: number
-
-  featured?: boolean
-
-  priceRange?: string
-
-  bestFor?: string
-
-  layout?: "large" | "standard"
-
-  hasCandles?: boolean
-}
 
 interface GiftSetsPageProps {
   onClose: () => void
@@ -87,7 +47,6 @@ interface Product {
 }
 
 export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: GiftSetsPageProps) {
-  const { handleCartUpdate: updateCartContext } = useCartItems()
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
 
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
@@ -188,6 +147,7 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
             size: "",
             botanical: "",
             property: "",
+            medusaVariantId: bundle.medusa_variant_id || "",
           }
         })
         setProducts(mapped)
@@ -247,59 +207,6 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
       })
     } else {
       toast.success(`${product.name} removed from Ledger`, {
-        duration: 2000,
-      })
-    }
-  }
-
-  const handleAddToCart = async (product: Product) => {
-    // Build selections object for choice slots - keyed by slot ID
-    const selections: Record<string, string[]> = {}
-
-    // Get the slot IDs for this product
-    const slotIds = product.choiceSlots?.map((s) => s.id) || []
-
-    // Get the variant ID selected for this product (keyed by product.id)
-    const selectedVariantId = selectedCandles[product.id]
-
-    if (selectedVariantId) {
-      // Use the first slot ID (assuming one candle slot per bundle)
-      if (slotIds.length > 0) {
-        selections[slotIds[0]] = [selectedVariantId]
-      }
-    }
-
-    // Use the Medusa bundle add-to-cart (server action handles cart internally)
-    try {
-      await addBundleToCart(product.id, {
-        quantity: 1,
-        selections,
-        personalized_note: personalMessages[product.id] || "",
-      })
-
-      // Update cart context directly for instant UI feedback
-      if (updateCartContext) {
-        updateCartContext({
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          quantity: 1,
-          image: product.image,
-          metadata: {
-            personalMessage: personalMessages[product.id] || "",
-            selections,
-          },
-        })
-      }
-
-      emitCartUpdated({ quantityDelta: 1 })
-
-      toast.success(`${product.name} added to cart`, {
-        duration: 2000,
-      })
-    } catch (error) {
-      console.error("Error adding bundle to cart:", error)
-      toast.error("Failed to add to cart", {
         duration: 2000,
       })
     }
@@ -822,7 +729,11 @@ export function GiftSetsPage({ onClose, onToggleLedger, ledger, onAddToCart }: G
                         onClick={(e) => {
                           e.stopPropagation()
 
-                          handleAddToCart(product)
+                          onAddToCart({
+                            ...product,
+                            selectedCandleVariantId: selectedCandles[product.id],
+                            personalMessage: personalMessages[product.id] || "",
+                          })
                         }}
                         whileHover={{ x: 5 }}
                         whileTap={{ scale: 0.98 }}

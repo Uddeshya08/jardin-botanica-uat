@@ -16,12 +16,26 @@ export default async function CheckoutLayout({ children }: { children: React.Rea
       // If unit_price > 10000, likely in minor units (paise), divide by 100
       // Otherwise, it's already in major units (rupees)
       const price = item.unit_price > 10000 ? item.unit_price / 100 : item.unit_price
+
+      // Check if this is a bundle item using metadata
+      const metadata = item?.metadata as Record<string, unknown> | null
+      const isBundle = !!metadata?.["_bundle_id"]
+
+      // For bundle items, use bundle title and image from metadata
+      const displayName =
+        isBundle && metadata?.["_bundle_title"] ? (metadata["_bundle_title"] as string) : item.title
+
+      const displayImage =
+        isBundle && metadata?.["_bundle_image"]
+          ? (metadata["_bundle_image"] as string)
+          : item.thumbnail
+
       return {
         id: item.id,
-        name: item.title,
+        name: displayName,
         price: price,
         quantity: item.quantity,
-        image: item.thumbnail,
+        image: displayImage,
         product_id: item?.product_id,
         variant_id: item?.variant_id,
         handle: (item as any).product?.handle,

@@ -167,11 +167,13 @@ export async function addOrUpdateLineItem({
   quantity,
   countryCode,
   canBeGifted,
+  metadata,
 }: {
   variantId: string
   quantity: number
   countryCode: string
   canBeGifted?: boolean
+  metadata?: Record<string, unknown>
 }): Promise<{ lineItemId: string; cartId: string }> {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
@@ -209,11 +211,22 @@ export async function addOrUpdateLineItem({
       quantity,
     }
 
+    // Build metadata object
+    const metadataObj: Record<string, unknown> = {}
+
     // Store canBeGifted flag in metadata if provided
     if (canBeGifted !== undefined) {
-      lineItemData.metadata = {
-        can_be_gifted: canBeGifted,
-      }
+      metadataObj.can_be_gifted = canBeGifted
+    }
+
+    // Merge additional metadata
+    if (metadata) {
+      Object.assign(metadataObj, metadata)
+    }
+
+    // Attach metadata if any exists
+    if (Object.keys(metadataObj).length > 0) {
+      lineItemData.metadata = metadataObj
     }
 
     await sdk.store.cart
