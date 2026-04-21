@@ -61,28 +61,22 @@ export function HeroSection() {
   const [videoError, setVideoError] = useState<Record<number, boolean>>({})
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)
-  const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({})
+  const videoRef = useRef<HTMLVideoElement | null>(null)
   const [swipeOffset, setSwipeOffset] = useState(0)
   const [isSwiping, setIsSwiping] = useState(false)
   const [showEmailForm, setShowEmailForm] = useState(false)
   const [email, setEmail] = useState("")
 
-  useEffect(() => {
-    setActivePanel(1)
-  }, [])
-
   const currentPanel = heroPanels.find((p) => p.id === activePanel) || heroPanels[0]
 
-  // Play video when panel becomes active
+  // Keep video playback on a single path to avoid Safari repaint flashes.
   useEffect(() => {
-    const panel = heroPanels.find((p) => p.id === activePanel)
-    if (videoRefs.current[activePanel] && panel?.videoUrl) {
-      videoRefs.current[activePanel]!.currentTime = 0
-      videoRefs.current[activePanel]!.play().catch(() => {
+    if (videoRef.current && currentPanel.videoUrl) {
+      videoRef.current.play().catch(() => {
         setVideoError((prev) => ({ ...prev, [activePanel]: true }))
       })
     }
-  }, [activePanel])
+  }, [activePanel, currentPanel.videoUrl])
 
   // Function to transition to next panel
   const goToNextPanel = () => {
@@ -92,9 +86,9 @@ export function HeroSection() {
   }
 
   // Handle video end - pause on last frame
-  const handleVideoEnd = (panelId: number) => () => {
-    if (videoRefs.current[panelId]) {
-      videoRefs.current[panelId]!.pause()
+  const handleVideoEnd = () => {
+    if (videoRef.current) {
+      videoRef.current.pause()
     }
   }
 
@@ -191,77 +185,58 @@ export function HeroSection() {
 
   return (
     <div
-      className="relative w-full h-screen bg-black overflow-hidden"
-      style={{ paddingTop: "40px" }}
+      className="relative w-full bg-black overflow-hidden"
+      style={{ paddingTop: "40px", minHeight: "100svh", height: "100dvh" }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Disable hover effects on touch devices */}
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-          @media (hover: none) and (pointer: coarse) {
-            .hero-cta-button:hover,
-            .hero-nav-dot:hover {
-              background-color: inherit !important;
-              color: inherit !important;
-            }
-          }
-        `,
-        }}
-      />
-
-      {/* ✅ Preloaded Background Layers - All panels rendered, opacity controls visibility */}
+      {/* Keep a single active background layer mounted to reduce Safari compositing flicker. */}
       <div className="absolute inset-0 z-0">
-        {heroPanels.map((panel) => (
+        <AnimatePresence mode="wait">
           <motion.div
-            key={panel.id}
-            initial={false}
-            animate={{
-              opacity: activePanel === panel.id ? 1 : 0,
-              scale: activePanel === panel.id ? 1 : 1.05,
-            }}
-            transition={{
-              opacity: { duration: 0.5, ease: "easeInOut" },
-              scale: { duration: 0.6, ease: "easeOut" },
-            }}
+            key={currentPanel.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
             className="absolute inset-0"
-            style={{ pointerEvents: activePanel === panel.id ? "auto" : "none" }}
+            style={{
+              backfaceVisibility: "hidden",
+              transform: "translateZ(0)",
+              WebkitBackfaceVisibility: "hidden",
+            }}
           >
             <div className="w-full h-full relative overflow-hidden">
-              {!videoError[panel.id] && panel.videoUrl ? (
+              {!videoError[currentPanel.id] && currentPanel.videoUrl ? (
                 <video
-                  ref={(el) => {
-                    videoRefs.current[panel.id] = el
-                  }}
-                  src={panel.videoUrl}
+                  ref={videoRef}
+                  src={currentPanel.videoUrl}
                   muted
                   playsInline
                   preload="auto"
-                  onEnded={handleVideoEnd(panel.id)}
-                  onError={() => setVideoError((prev) => ({ ...prev, [panel.id]: true }))}
-                  onLoadedData={() => {
-                    if (activePanel === panel.id && videoRefs.current[panel.id]) {
-                      videoRefs.current[panel.id]!.currentTime = 0
-                      videoRefs.current[panel.id]!.play()
-                    }
-                  }}
+                  autoPlay
+                  onEnded={handleVideoEnd}
+                  onError={() => setVideoError((prev) => ({ ...prev, [currentPanel.id]: true }))}
                   className="w-full h-full object-cover"
-                  style={{ minHeight: "100vh" }}
+                  style={{ minHeight: "100svh", backfaceVisibility: "hidden" }}
                 />
               ) : (
                 <ImageWithFallback
-                  src={panel.imageUrl}
-                  alt={panel.title}
+                  src={currentPanel.imageUrl}
+                  alt={currentPanel.title}
                   className="w-full h-full object-cover"
-                  style={{ minHeight: "100vh" }}
+                  style={{
+                    minHeight: "100svh",
+                    backfaceVisibility: "hidden",
+                    transform: "translateZ(0)",
+                  }}
                 />
               )}
             </div>
             <div className="absolute inset-0 bg-black/50" />
           </motion.div>
-        ))}
+        </AnimatePresence>
       </div>
 
       {/* ✅ Content Overlay with Spring Physics */}
@@ -274,6 +249,11 @@ export function HeroSection() {
               opacity: isSwiping ? 1 - Math.abs(swipeOffset) / 500 : 1,
             }}
             transition={springTransition}
+            style={{
+              backfaceVisibility: "hidden",
+              transform: "translateZ(0)",
+              WebkitBackfaceVisibility: "hidden",
+            }}
           >
             <div className="min-h-[200px] md:min-h-[250px] lg:min-h-[300px]">
               <AnimatePresence mode="wait">
@@ -315,69 +295,63 @@ export function HeroSection() {
 
             {/* CTA Button with Email Form */}
             <div className="mt-4">
-              <AnimatePresence mode="wait">
-                {activePanel === 4 && showEmailForm ? (
-                  /* Email Form - Shows after clicking Join the Circle */
-                  <motion.div
-                    key="email-form"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={springTransition}
-                    className="flex items-center gap-4"
-                  >
-                    <motion.input
-                      initial={{ x: -30, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ ...springTransition, delay: 0.1 }}
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
-                      className="font-din-arabic px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white focus:bg-white/20 transition-all duration-300 rounded-none"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && email.trim()) {
-                          handleEmailSubscription()
-                        }
-                      }}
-                      autoFocus
-                    />
-                    <motion.button
-                      initial={{ x: 30, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ ...springTransition, delay: 0.15 }}
-                      className="font-din-arabic inline-flex items-center px-8 py-3 bg-white text-black hover:bg-white/90 transition-all duration-300 tracking-wide"
-                      onClick={handleEmailSubscription}
-                      disabled={!email.trim()}
-                    >
-                      Subscribe
-                    </motion.button>
-                  </motion.div>
-                ) : (
-                  /* Regular CTA Button */
-                  <motion.button
-                    key={`cta-${activePanel}`}
-                    className={`font-din-arabic inline-flex items-center px-8 py-3 transition-all duration-300 tracking-wide touch-manipulation ${
-                      currentPanel.isSpecial
-                        ? "bg-white text-black"
-                        : "text-white border border-white/30"
-                    }`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4, ease: "easeOut", delay: 0.15 }}
-                    onClick={() => handleCTAClick(activePanel)}
-                    style={{
-                      WebkitTapHighlightColor: "transparent",
-                      WebkitTouchCallout: "none",
-                      WebkitUserSelect: "none",
-                      userSelect: "none",
+              {activePanel === 4 && showEmailForm ? (
+                <motion.div
+                  key="email-form"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={springTransition}
+                  className="flex items-center gap-4"
+                >
+                  <motion.input
+                    initial={{ x: -30, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ ...springTransition, delay: 0.1 }}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="font-din-arabic px-4 py-3 bg-white/10 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white focus:bg-white/20 transition-all duration-300 rounded-none"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && email.trim()) {
+                        handleEmailSubscription()
+                      }
                     }}
+                    autoFocus
+                  />
+                  <motion.button
+                    initial={{ x: 30, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ ...springTransition, delay: 0.15 }}
+                    className="font-din-arabic inline-flex items-center px-8 py-3 bg-white text-black hover:bg-white/90 transition-all duration-300 tracking-wide"
+                    onClick={handleEmailSubscription}
+                    disabled={!email.trim()}
                   >
-                    {currentPanel.cta}
+                    Subscribe
                   </motion.button>
-                )}
-              </AnimatePresence>
+                </motion.div>
+              ) : (
+                <button
+                  className={`font-din-arabic inline-flex items-center px-8 py-3 transition-all duration-300 tracking-wide touch-manipulation ${
+                    currentPanel.isSpecial
+                      ? "bg-white text-black"
+                      : "text-white border border-white/30"
+                  }`}
+                  onClick={() => handleCTAClick(activePanel)}
+                  type="button"
+                  style={{
+                    WebkitTapHighlightColor: "transparent",
+                    WebkitTouchCallout: "none",
+                    WebkitUserSelect: "none",
+                    backfaceVisibility: "hidden",
+                    transform: "translateZ(0)",
+                    userSelect: "none",
+                  }}
+                >
+                  {currentPanel.cta}
+                </button>
+              )}
             </div>
           </motion.div>
         </div>
@@ -387,7 +361,7 @@ export function HeroSection() {
       <div className="absolute bottom-[6rem] sm:bottom-6 left-0 right-0 z-30">
         <div className="container mx-auto px-2 sm:px-4 md:px-6 lg:px-12">
           <div className="flex justify-center">
-            <div className="flex bg-black/20 backdrop-blur-md rounded-full px-1 sm:px-1.5 md:px-2 py-1 sm:py-1.5 md:py-2 gap-0.5 sm:gap-1">
+            <div className="flex rounded-full px-1 sm:px-1.5 md:px-2 py-1 sm:py-1.5 md:py-2 gap-0.5 sm:gap-1 bg-black/55 border border-white/10">
               {heroPanels.map((panel) => (
                 <button
                   key={panel.id}
