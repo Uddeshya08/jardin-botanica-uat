@@ -790,7 +790,7 @@ function HomeFragranceRitualSection() {
       step: "03",
       title: "Care with Intention",
       description:
-        "Trim candle wicks before each use and rotate diffuser rocks every few days to ensure an even, lasting fragrance experience.",
+        "Trim candle wicks before each use to ensure an even and lasting fragrance experience.",
       fragrance: "Lasting performance",
     },
   ]
