@@ -51,7 +51,7 @@ const TERMS_SECTIONS: TermsSection[] = [
     number: "7",
     title: "Intellectual Property",
     content:
-      "All content on this website—including text, images, design, and branding—belongs to Jardin Botanica. No part of this site may be copied, reproduced, or used without prior written consent.",
+      "All content on this website — including text, images, videos, design, and branding — belongs to Jardin Botanica. No part of this site may be copied, reproduced, or used without prior written consent."
   },
   {
     number: "8",
@@ -94,7 +94,7 @@ export function TermsAndConditions() {
           <h1 className="font-american-typewriter text-3xl mb-6 text-black">Terms & Conditions</h1>
           <div className="h-px w-20 bg-black/15 mb-6"></div>
           <p className="font-din-arabic text-black/50 tracking-wide">
-            Last updated: October 5, 2025
+            Last updated: July 1, 2026
           </p>
         </motion.div>
 

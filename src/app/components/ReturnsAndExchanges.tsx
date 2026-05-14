@@ -56,7 +56,7 @@ export function ReturnsAndExchanges() {
                   <span className="font-din-arabic text-black/60 text-xs">1</span>
                 </div>
                 <p className="font-din-arabic text-black/70 leading-relaxed">
-                  Contact us within <span className="text-black font-din-arabic-bold">7 days</span>{" "}
+                  Contact us within <span className="text-black font-din-arabic-bold">48 hours</span>{" "}
                   of delivery
                 </p>
               </div>

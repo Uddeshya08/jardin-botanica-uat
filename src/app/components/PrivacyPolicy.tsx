@@ -78,21 +78,21 @@ const PRIVACY_SECTIONS: PrivacySection[] = [
   },
   {
     number: "9",
-    title: "Website Hosting (Amazon Web Services – AWS)",
+    title: "Website Hosting (Hostinger)",
     content:
-      'Our Site is hosted on Amazon Web Services ("AWS"), a cloud infrastructure provider. Personal data you submit through the Site (such as order details and contact information) may be processed and stored on AWS-hosted systems that we manage or that our service providers manage on our behalf. AWS operates and secures the underlying cloud infrastructure, while we remain responsible for how our application is configured and how personal data is handled within our systems (including access controls and encryption where applicable). Depending on how our services are configured and where our service providers operate, your personal data may be processed in locations outside India. We take reasonable steps to ensure appropriate safeguards are in place consistent with applicable law and vendor commitments. AWS Privacy Notice: https://aws.amazon.com/privacy/ | AWS Shared Responsibility Model: https://aws.amazon.com/compliance/shared-responsibility-model/',
+      'Our Site is hosted by Hostinger, a web hosting provider. Personal data you submit through the Site (such as order details and contact information) may be processed and stored on servers managed by Hostinger or its infrastructure partners on our behalf.Hostinger is responsible for securing the underlying hosting environment, while we remain responsible for how our website and systems are configured and how personal data is handled within them (including access controls and encryption where applicable).Depending on how our services are configured and where our service providers operate, your personal data may be processed in locations outside India. We take reasonable steps to ensure appropriate safeguards are in place, consistent with applicable law and our vendor commitments. | Hostinger Privacy Policy: https://www.hostinger.com/privacy-policy',
   },
   {
     number: "10",
     title: "Who We Share Personal Data With",
     content:
-      "We share personal data only as needed to run our business, including with: Website and hosting provider: AWS | Payment processor: Razorpay | Email/SMS service provider: Brevo | Shipping and logistics partners: Delhivery | Professional advisors and authorities where required by law (accountants, lawyers, regulators). We do not sell your personal data.",
+      "We share personal data only as needed to run our business, including with: Website and hosting provider: Hostinger | Payment processor: Razorpay | Email/SMS service provider: Brevo | Shipping and logistics partners: Delhivery | Professional advisors and authorities where required by law (accountants, lawyers, regulators). We do not sell your personal data.",
   },
   {
     number: "11",
     title: "International Data Transfers",
     content:
-      "Some of our service providers (including AWS and Brevo) may process data outside India. When this happens, we take reasonable steps to ensure appropriate safeguards are in place consistent with applicable law and vendor commitments.",
+      "Some of our service providers may process data outside India. When this happens, we take reasonable steps to ensure appropriate safeguards are in place consistent with applicable law and vendor commitments.",
   },
   {
     number: "12",
@@ -147,7 +147,7 @@ export function PrivacyPolicy() {
           <h1 className="font-american-typewriter text-3xl mb-6 text-black">Privacy Policy</h1>
           <div className="h-px w-20 bg-black/15 mb-6"></div>
           <p className="font-din-arabic text-black/50 tracking-wide">
-            Effective date: February 01, 2026
+            Effective date: July 01, 2026
           </p>
         </motion.div>
 
