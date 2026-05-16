@@ -1,4 +1,5 @@
 "use client"
+import { useNewsletterSubscription } from "@lib/hooks/use-newsletter-subscription"
 import { Afterlife } from "app/components/Afterlife"
 import { CustomerTestimonials } from "app/components/CustomerTestimonials"
 import { FeaturedRitual } from "app/components/FeaturedRitual"
@@ -11,7 +12,7 @@ import { ProductHeroHands } from "app/components/ProductHeroHands"
 import { RippleEffect } from "app/components/RippleEffect"
 import { StickyCartBar } from "app/components/StickyCartBar"
 import { motion } from "motion/react"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 interface CartItem {
   id: string
@@ -86,35 +87,8 @@ export default function App() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const [email, setEmail] = useState("")
-  const [message, setMessage] = useState("")
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [isPending, startTransition] = React.useTransition()
-
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!email || !email.includes("@")) {
-      setIsSuccess(false)
-      setMessage("Please enter a valid email address")
-      return
-    }
-
-    startTransition(async () => {
-      const { subscribeToNewsletter } = await import("@lib/data/brevo")
-      const result = await subscribeToNewsletter(email)
-
-      setIsSuccess(result.success)
-      setMessage(result.message)
-
-      if (result.success) {
-        setEmail("")
-        setTimeout(() => {
-          setMessage("")
-        }, 5000)
-      }
-    })
-  }
+  const { email, setEmail, message, isSuccess, isPending, handleSubmit } =
+    useNewsletterSubscription()
 
   return (
     <div className="min-h-screen">
@@ -191,7 +165,7 @@ export default function App() {
               latest concoctions.
             </motion.p>
             <motion.form
-              onSubmit={handleSubscribe}
+              onSubmit={handleSubmit}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}

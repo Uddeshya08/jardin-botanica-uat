@@ -1,6 +1,6 @@
 "use client"
+import { useNewsletterSubscription } from "@lib/hooks/use-newsletter-subscription"
 import { ChevronLeft, ChevronRight, Star, ThumbsUp } from "lucide-react"
-import type React from "react"
 import { useState } from "react"
 
 const Product = () => {
@@ -9,38 +9,8 @@ const Product = () => {
   const [aromaSlide, setAromaSlide] = useState(0)
 
   // Newsletter state
-  const [email, setEmail] = useState("")
-  const [message, setMessage] = useState("")
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
-
-    if (!email.includes("@")) {
-      setMessage("Please enter a valid email address")
-      setIsSuccess(false)
-      return
-    }
-
-    setIsSubmitting(true)
-
-    // Dynamic import to avoid server action issues if any
-    const { subscribeToNewsletter } = await import("@lib/data/brevo")
-    const result = await subscribeToNewsletter(email)
-
-    setIsSubmitting(false)
-    setIsSuccess(result.success)
-    setMessage(result.message)
-
-    if (result.success) {
-      setEmail("")
-      setTimeout(() => {
-        setMessage("")
-      }, 5000)
-    }
-  }
+  const { email, setEmail, message, isSuccess, isPending, handleSubmit } =
+    useNewsletterSubscription()
 
   // Product images array for the main product
   const productImages = ["/Images/GPT.png", "/Images/product1.png", "/Images/product2.png"]
@@ -629,7 +599,7 @@ const Product = () => {
           </p>
 
           <form
-            onSubmit={handleNewsletterSubmit}
+            onSubmit={handleSubmit}
             className="flex flex-col md:flex-row max-w-lg mx-auto gap-4 md:gap-0 relative"
           >
             <input
@@ -637,15 +607,15 @@ const Product = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email address"
-              disabled={isSubmitting}
+              disabled={isPending}
               className="flex-1 px-4 md:px-6 py-3 md:py-1 focus:outline-none focus:border-gray-500 text-gray-700 font-din"
             />
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isPending}
               className="bg-[#535c4a] text-white px-8 md:px-10 py-2 md:py-1 text-sm md:text-md font-medium rounded-none font-din"
             >
-              {isSubmitting ? "Subscribing..." : "Subscribe"}
+              {isPending ? "Subscribing..." : "Subscribe"}
             </button>
           </form>
           {message && (

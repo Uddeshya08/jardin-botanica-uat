@@ -1,51 +1,17 @@
 "use client"
 
-import { subscribeToNewsletter } from "@lib/data/brevo"
+import { useNewsletterSubscription } from "@lib/hooks/use-newsletter-subscription"
 import { motion } from "motion/react"
-import type React from "react"
-import { useState, useTransition } from "react"
 
 const Newsletter = () => {
-  const [email, setEmail] = useState("")
-  const [message, setMessage] = useState("")
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [isPending, startTransition] = useTransition()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!email || !email.includes("@")) {
-      setIsSuccess(false)
-      setMessage("Please enter a valid email address")
-      return
-    }
-
-    startTransition(async () => {
-      const result = await subscribeToNewsletter(email)
-
-      setIsSuccess(result.success)
-      setMessage(
-        result.success
-          ? result.message
-          : "Couldn't sign you up right now — please try again in a moment"
-      )
-
-      if (result.success) {
-        setEmail("")
-
-        setTimeout(() => {
-          setMessage("")
-        }, 5000)
-      }
-    })
-  }
+  const { email, setEmail, message, isSuccess, isPending, handleSubmit } =
+    useNewsletterSubscription()
 
   return (
     <section
       className="py-12 lg:py-16 relative overflow-hidden"
       style={{ backgroundColor: "#e3e3d8" }}
     >
-      {/* Smooth Animated Gradient Background */}
       <motion.div
         className="absolute inset-0 opacity-15"
         style={{
@@ -61,7 +27,6 @@ const Newsletter = () => {
           repeat: Infinity,
         }}
       />
-      {/* Secondary Smooth Layer */}
       <motion.div
         className="absolute inset-0 opacity-10"
         style={{
@@ -146,4 +111,5 @@ const Newsletter = () => {
     </section>
   )
 }
+
 export default Newsletter
