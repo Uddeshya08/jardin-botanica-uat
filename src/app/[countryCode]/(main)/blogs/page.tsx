@@ -5,6 +5,7 @@ import {
   getHeroAndOtherBlogs,
   getNonHeroBlogs,
 } from "@lib/data/contentful"
+import { useNewsletterSubscription } from "@lib/hooks/use-newsletter-subscription"
 import { Navigation } from "app/components/Navigation"
 import { RippleEffect } from "app/components/RippleEffect"
 import type { CartItem } from "app/context/cart-items-context"
@@ -20,7 +21,8 @@ import type { Blog, JournalTag } from "types/contentful"
 const Home = () => {
   const params = useParams()
   const countryCode = (params?.countryCode as string) || "in"
-  const [email, setEmail] = useState("")
+  const { email, setEmail, message, isSuccess, isPending, handleSubmit } =
+    useNewsletterSubscription()
   const [activeTab, setActiveTab] = useState("HOME")
   const [heroBlog, setHeroBlog] = useState<Blog | null>(null)
   const [dailyFeedBlogs, setDailyFeedBlogs] = useState<Blog[]>([])
@@ -105,37 +107,6 @@ const Home = () => {
 
     setFilteredBlogs(filtered)
   }, [searchQuery, heroBlog, dailyFeedBlogs, activeTab])
-
-  const [message, setMessage] = useState("")
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
-
-    if (!email.includes("@")) {
-      setMessage("Please enter a valid email address")
-      setIsSuccess(false)
-      return
-    }
-
-    setIsSubmitting(true)
-
-    const { subscribeToNewsletter } = await import("@lib/data/brevo")
-    const result = await subscribeToNewsletter(email)
-
-    setIsSubmitting(false)
-    setIsSuccess(result.success)
-    setMessage(result.message)
-
-    if (result.success) {
-      setEmail("")
-      setTimeout(() => {
-        setMessage("")
-      }, 5000)
-    }
-  }
 
   const handleDailyFeedPrev = () => {
     if (dailyFeedPage > 0) {
@@ -1226,7 +1197,7 @@ const Home = () => {
             </motion.p>
 
             <motion.form
-              onSubmit={handleNewsletterSubmit}
+              onSubmit={handleSubmit}
               className="flex flex-col gap-4 max-w-md mx-auto"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -1239,15 +1210,15 @@ const Home = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email address *"
                   required
-                  disabled={isSubmitting}
+                  disabled={isPending}
                   className="flex-1 w-full px-4 py-3 border border-gray-300 bg-white text-black placeholder-gray-500 italic focus:outline-none focus:border-black transition-colors font-din-arabic"
                 />
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isPending}
                   className="w-full sm:w-auto px-8 py-3 bg-black text-white font-american-typewriter font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors"
                 >
-                  {isSubmitting ? "Joined" : "Join the circle"}
+                  {isPending ? "Joining..." : "Join the circle"}
                 </button>
               </div>
               {message && (

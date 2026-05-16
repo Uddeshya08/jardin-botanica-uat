@@ -1,8 +1,9 @@
 "use client"
+import { useNewsletterSubscription } from "@lib/hooks/use-newsletter-subscription"
 import { AnimatePresence, motion } from "motion/react"
 import { useRouter } from "next/navigation"
 import type React from "react"
-import { useEffect, useRef, useState, useTransition } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
@@ -65,7 +66,7 @@ export function HeroSection() {
   const [swipeOffset, setSwipeOffset] = useState(0)
   const [isSwiping, setIsSwiping] = useState(false)
   const [showEmailForm, setShowEmailForm] = useState(false)
-  const [email, setEmail] = useState("")
+  const { email, setEmail, message, isSuccess, isPending, subscribe } = useNewsletterSubscription()
 
   const currentPanel = heroPanels.find((p) => p.id === activePanel) || heroPanels[0]
 
@@ -113,27 +114,29 @@ export function HeroSection() {
     }
   }
 
-  // Handle email subscription
-  const [, startTransition] = useTransition()
   const handleEmailSubscription = () => {
     if (!email || !email.includes("@")) {
       toast.error("Please enter a valid email address")
       return
     }
 
-    startTransition(async () => {
-      const { subscribeToNewsletter } = await import("@lib/data/brevo")
-      const result = await subscribeToNewsletter(email)
-
-      if (result.success) {
-        toast.success(result.message)
-        setEmail("")
-        setShowEmailForm(false)
-      } else {
-        toast.error(result.message)
-      }
-    })
+    subscribe()
   }
+
+  useEffect(() => {
+    if (!message || isPending) {
+      return
+    }
+
+    if (isSuccess) {
+      toast.success(message)
+      if (showEmailForm) {
+        setShowEmailForm(false)
+      }
+    } else {
+      toast.error(message)
+    }
+  }, [isPending, isSuccess, message])
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchEndX.current = null
@@ -326,9 +329,9 @@ export function HeroSection() {
                     transition={{ ...springTransition, delay: 0.15 }}
                     className="font-din-arabic inline-flex items-center px-8 py-3 bg-white text-black hover:bg-white/90 transition-all duration-300 tracking-wide"
                     onClick={handleEmailSubscription}
-                    disabled={!email.trim()}
+                    disabled={!email.trim() || isPending}
                   >
-                    Subscribe
+                    {isPending ? "Subscribing..." : "Subscribe"}
                   </motion.button>
                 </motion.div>
               ) : (

@@ -2,6 +2,7 @@
 "use client"
 import { addToCartAction } from "@lib/data/cart-actions"
 import { getProductCategoryByHandle } from "@lib/data/contentful"
+import { useNewsletterSubscription } from "@lib/hooks/use-newsletter-subscription"
 import { getProductByHandle } from "@lib/data/products"
 import { ImageWithFallback } from "app/components/figma/ImageWithFallback"
 import { Navigation } from "app/components/Navigation"
@@ -775,6 +776,8 @@ const Candles = () => {
   const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null)
   const [bannerCarouselApi, setBannerCarouselApi] = useState<CarouselApi>()
   const [bannerCurrent, setBannerCurrent] = useState(0)
+  const { email, setEmail, message, isSuccess, isPending, handleSubmit } =
+    useNewsletterSubscription()
 
   // Smooth scroll animations
   const { scrollYProgress } = useScroll({
@@ -1436,7 +1439,7 @@ const Candles = () => {
           >
             <video autoPlay loop muted playsInline className="w-full h-full object-cover">
               <source
-                src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+                src="https://assets.mixkit.co/videos/5224/5224-720.mp4"
                 type="video/mp4"
               />
               Your browser does not support the video tag.
@@ -1710,7 +1713,8 @@ const Candles = () => {
               Be the first to discover new blends, exclusive rituals, and stories from our botanical
               laboratory.
             </motion.p>
-            <motion.div
+            <motion.form
+              onSubmit={handleSubmit}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4, ease: smoothEase }}
@@ -1722,17 +1726,36 @@ const Candles = () => {
                 transition={{ duration: 0.3, ease: smoothEase }}
                 type="email"
                 placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isPending}
                 className="font-din-arabic flex-1 px-4 py-3 bg-transparent border border-black/30 text-black placeholder-black/60 focus:outline-none focus:border-black transition-all duration-300"
               />
               <motion.button
+                type="submit"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.3, ease: smoothEase }}
+                disabled={isPending}
                 className="font-din-arabic px-8 py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
               >
-                Subscribe
+                {isPending ? "Subscribing..." : "Subscribe"}
               </motion.button>
-            </motion.div>
+            </motion.form>
+            {message && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`font-din-arabic text-sm px-4 py-2 rounded mt-4 ${
+                  isSuccess
+                    ? "bg-green-100 text-green-800 border border-green-300"
+                    : "bg-red-100 text-red-800 border border-red-300"
+                }`}
+              >
+                {message}
+              </motion.div>
+            )}
           </div>
         </div>
       </section>
