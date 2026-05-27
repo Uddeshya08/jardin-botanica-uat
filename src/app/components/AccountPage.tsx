@@ -14,9 +14,11 @@ export function AccountPage() {
   const router = useRouter()
   const routeParams = useParams()
   const countryCode = (routeParams?.countryCode as string) || "us"
+  const defaultRedirectPath = `/${countryCode}/account`
 
   const [signinMessage, signinAction, isSigninPending] = useActionState(login, null)
   const [signupMessage, signupAction, isSignupPending] = useActionState(signup, null)
+  const [redirectPath, setRedirectPath] = useState(defaultRedirectPath)
 
   const [showSignInPassword, setShowSignInPassword] = useState(false)
   const [showCreatePassword, setShowCreatePassword] = useState(false)
@@ -25,6 +27,14 @@ export function AccountPage() {
   const [currentView, setCurrentView] = useState<"sign-in" | "register">("sign-in")
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>()
   const [phoneError, setPhoneError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const redirectParam = new URLSearchParams(window.location.search).get("redirect")
+
+    setRedirectPath(
+      redirectParam?.startsWith(`/${countryCode}/account`) ? redirectParam : defaultRedirectPath
+    )
+  }, [countryCode, defaultRedirectPath])
 
   const handleCreateAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -68,7 +78,7 @@ export function AccountPage() {
 
       const { customer } = await sdk.store.customer.retrieve()
       console.log(customer)
-      router.replace(`/${countryCode}/account`)
+      router.replace(redirectPath)
       router.refresh()
     } catch (error) {
       console.error("Google login error:", error)
@@ -79,18 +89,18 @@ export function AccountPage() {
   useEffect(() => {
     if (signinMessage === null) return
     if (signinMessage === "" || signinMessage === undefined) {
-      router.replace(`/${countryCode}/account`)
+      router.replace(redirectPath)
       router.refresh()
     }
-  }, [countryCode, router, signinMessage])
+  }, [redirectPath, router, signinMessage])
 
   useEffect(() => {
     if (signupMessage === null) return
     if (typeof signupMessage !== "string") {
-      router.replace(`/${countryCode}/account`)
+      router.replace(redirectPath)
       router.refresh()
     }
-  }, [countryCode, router, signupMessage])
+  }, [redirectPath, router, signupMessage])
 
   return (
     <div className="min-h-screen pt-32 pb-12" style={{ backgroundColor: "#e3e3d8" }}>
