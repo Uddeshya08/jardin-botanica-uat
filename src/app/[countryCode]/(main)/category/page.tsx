@@ -546,7 +546,7 @@ const Category = () => {
             viewport={{ once: true }}
             className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-2 md:mb-4 tracking-tight font-american-typewriter"
           >
-            Need a Hand Choosing?
+            Gifting, Hosting, and Spaces Worth Remembering
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -555,8 +555,7 @@ const Category = () => {
             viewport={{ once: true }}
             className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-4 md:px-0"
           >
-            Connect with one of our experts for personalized guidance and thoughtful product
-            recommendations-crafted just for your skin, your rituals, your glow.
+           Private orders, boutique placements, hospitality projects, and considered gifting — let us help compose something suited to the occasion.
           </motion.p>
           <motion.button
             initial={{ opacity: 0, y: 0 }}

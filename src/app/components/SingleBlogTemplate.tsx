@@ -528,7 +528,7 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 1.1, duration: 0.4 }}
                   >
-                    Twitter
+                    X
                   </motion.p>
                   <motion.p
                     style={{
@@ -541,7 +541,7 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 1.2, duration: 0.4 }}
                   >
-                    Pinterest
+                    Instagram
                   </motion.p>
                 </div>
               </div>

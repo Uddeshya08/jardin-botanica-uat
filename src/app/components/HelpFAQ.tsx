@@ -116,7 +116,7 @@ export function HelpFAQ() {
                   >
                     hello@jardinbotanica.com
                   </a>{" "}
-                  with the subject "Order Change – #[Order No.]".
+                  with the subject "Order Change – #[Order Number.]".
                 </p>
                 <p className="font-din-arabic text-black/80">
                   If your confirmation email has gone wandering, check

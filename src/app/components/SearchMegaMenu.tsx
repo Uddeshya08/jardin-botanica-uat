@@ -384,7 +384,7 @@ export function SearchMegaMenu({ isOpen, onClose, countryCode, region }: SearchM
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 max-w-6xl">
                     {[
                       {
-                        label: "Hand & Hands",
+                        label: "Body & Hands",
                         link: `/${countryCode}/body-hands`,
                       },
                       { label: "Candles", link: `/${countryCode}/candles` },
