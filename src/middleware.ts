@@ -100,6 +100,11 @@ export async function middleware(request: NextRequest) {
   let redirectUrl = request.nextUrl.href
 
   let response = NextResponse.redirect(redirectUrl, 307)
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set(
+    "x-current-path",
+    `${request.nextUrl.pathname}${request.nextUrl.search}`
+  )
 
   const cacheIdCookie = request.cookies.get("_medusa_cache_id")
 
@@ -114,7 +119,11 @@ export async function middleware(request: NextRequest) {
 
   // if one of the country codes is in the url and the cache id is set, return next
   if (urlHasCountryCode && cacheIdCookie) {
-    return NextResponse.next()
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
   }
 
   // if one of the country codes is in the url and the cache id is not set, set the cache id and redirect
@@ -128,7 +137,11 @@ export async function middleware(request: NextRequest) {
 
   // check if the url is a static asset
   if (request.nextUrl.pathname.includes(".")) {
-    return NextResponse.next()
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
   }
 
   const redirectPath = request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname

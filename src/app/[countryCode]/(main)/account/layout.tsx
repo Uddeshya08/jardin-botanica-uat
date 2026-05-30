@@ -1,5 +1,6 @@
 import { retrieveCustomer } from "@lib/data/customer"
 import { Toaster } from "@medusajs/ui"
+import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import ClientAccountShell from "./_client-account-shell" // <-- new client wrapper
 
@@ -17,7 +18,14 @@ export default async function AccountPageLayout({
   const customer = await retrieveCustomer().catch(() => null)
 
   if (!customer) {
-    redirect(`/${countryCode}/accounts`)
+    const requestHeaders = await headers()
+    const currentPath = requestHeaders.get("x-current-path")
+    const redirectPath =
+      currentPath?.startsWith(`/${countryCode}/account`)
+        ? currentPath
+        : `/${countryCode}/account`
+
+    redirect(`/${countryCode}/accounts?redirect=${encodeURIComponent(redirectPath)}`)
   }
 
   return (
