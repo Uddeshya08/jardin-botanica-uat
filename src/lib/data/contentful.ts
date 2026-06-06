@@ -1813,6 +1813,7 @@ async function transformBlogEntry(entry: any, countryCode?: string): Promise<Blo
           journalTags.push({
             id: tag.sys?.id || "",
             name: tag.fields.name,
+            order: typeof tag.fields.order === "number" ? tag.fields.order : undefined,
           })
         }
       })
@@ -1870,6 +1871,30 @@ export async function getAllBlogs(limit: number = 10, countryCode?: string): Pro
     return blogs.filter((b): b is Blog => b !== null)
   } catch (error) {
     console.error("Error fetching all blogs:", error)
+    return []
+  }
+}
+
+export async function getLatestBlogLinks(
+  limit: number = 8
+): Promise<{ title: string; slug: string }[]> {
+  try {
+    const client = getContentfulClient()
+    const response = await client.getEntries({
+      content_type: "blog",
+      select: ["fields.title", "fields.slug", "fields.publishedDate"],
+      order: ["-fields.publishedDate"],
+      limit,
+    })
+
+    return response.items
+      .map((item: any) => ({
+        title: item.fields.title,
+        slug: item.fields.slug,
+      }))
+      .filter((blog) => blog.title && blog.slug)
+  } catch (error) {
+    console.error("Error fetching latest blog links:", error)
     return []
   }
 }
@@ -2065,15 +2090,25 @@ export async function getAllJournalTags(): Promise<JournalTag[]> {
     const response = await client.getEntries({
       content_type: "journalTag",
       limit: 100,
-      order: ["fields.name"],
     })
 
     const tags = response.items
       .map((item: any) => ({
         id: item.sys.id,
         name: item.fields.name,
+        order: typeof item.fields.order === "number" ? item.fields.order : undefined,
       }))
       .filter((tag) => tag.name) // Filter out any tags without names
+      .sort((a, b) => {
+        const aOrder = a.order ?? Number.MAX_SAFE_INTEGER
+        const bOrder = b.order ?? Number.MAX_SAFE_INTEGER
+
+        if (aOrder !== bOrder) {
+          return aOrder - bOrder
+        }
+
+        return a.name.localeCompare(b.name)
+      })
 
     // Deduplicate tags by name (just in case)
     const uniqueTags: JournalTag[] = []

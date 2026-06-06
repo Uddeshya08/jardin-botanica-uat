@@ -23,7 +23,7 @@ const Home = () => {
   const countryCode = (params?.countryCode as string) || "in"
   const { email, setEmail, message, isSuccess, isPending, handleSubmit } =
     useNewsletterSubscription()
-  const [activeTab, setActiveTab] = useState("HOME")
+  const [activeTab, setActiveTab] = useState("")
   const [heroBlog, setHeroBlog] = useState<Blog | null>(null)
   const [dailyFeedBlogs, setDailyFeedBlogs] = useState<Blog[]>([])
   const [featuredBlogs, setFeaturedBlogs] = useState<Blog[]>([])
@@ -38,6 +38,7 @@ const Home = () => {
   const [dailyFeedTotal, setDailyFeedTotal] = useState(0)
   const [featuredPage, setFeaturedPage] = useState(0)
   const [featuredTotal, setFeaturedTotal] = useState(0)
+  const journalTabs = tags
 
   const featuredBlogList = featuredBlogs
   const hasMoreFeatured = featuredBlogs.length < featuredTotal
@@ -79,6 +80,13 @@ const Home = () => {
       }
       setFeaturedTotal(featuredResult.total)
       setTags(allTags)
+      setActiveTab((currentTab) => {
+        if (currentTab && allTags.some((tag) => tag.name === currentTab)) {
+          return currentTab
+        }
+
+        return ""
+      })
     }
     fetchData()
   }, [countryCode, dailyFeedPage, featuredPage])
@@ -88,7 +96,7 @@ const Home = () => {
     let filtered = [...(heroBlog ? [heroBlog] : []), ...dailyFeedBlogs]
 
     // Filter by active tab (tag)
-    if (activeTab !== "HOME") {
+    if (activeTab) {
       filtered = filtered.filter((blog: Blog) =>
         blog.journalTags?.some((tag: JournalTag) => tag.name === activeTab)
       )
@@ -131,6 +139,24 @@ const Home = () => {
   const [showStickyCart, setShowStickyCart] = useState(false)
   const [heroCartItem, setHeroCartItem] = useState<CartItem | null>(null)
   const [cartItems, setCartItems] = useState<CartItem[]>([])
+
+  const renderJournalTabs = () =>
+    journalTabs.map((tab) => {
+      const isActive = activeTab === tab.name
+
+      return (
+        <button
+          key={tab.id}
+          type="button"
+          onClick={() => setActiveTab(tab.name)}
+          className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
+            isActive ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+          }`}
+        >
+          {tab.name}
+        </button>
+      )
+    })
 
   const handleCartUpdate = (item: CartItem | null) => {
     setHeroCartItem(item)
@@ -191,27 +217,7 @@ const Home = () => {
               }}
             >
               <div className="flex justify-start lg:justify-center items-center space-x-4 md:space-x-6 lg:space-x-8 mb-3 lg:mb-4 mt-2 lg:mt-4 overflow-x-auto lg:overflow-x-visible scrollbar-hide">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("HOME")}
-                  className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
-                    activeTab === "HOME" ? "text-[#4f5864]" : "text-[#4f5864] hover:text-[#626262]"
-                  }`}
-                >
-                  HOME
-                </button>
-                {tags.map((tag) => (
-                  <button
-                    key={tag.id}
-                    type="button"
-                    onClick={() => setActiveTab(tag.name)}
-                    className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
-                      activeTab === tag.name ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                    }`}
-                  >
-                    {tag.name}
-                  </button>
-                ))}
+                {renderJournalTabs()}
                 <button
                   type="button"
                   onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -299,27 +305,7 @@ const Home = () => {
           transition={{ delay: 0.3, duration: 0.6 }}
         >
           <div className="flex justify-start lg:justify-center items-center space-x-4 md:space-x-6 lg:space-x-8 mb-4 pt-4 lg:pt-6 overflow-x-auto lg:overflow-x-visible scrollbar-hide px-4 lg:px-0">
-            <button
-              type="button"
-              onClick={() => setActiveTab("HOME")}
-              className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
-                activeTab === "HOME" ? "text-[#4f5864]" : "text-[#4f5864] hover:text-[#626262]"
-              }`}
-            >
-              HOME
-            </button>
-            {tags.map((tag) => (
-              <button
-                key={tag.id}
-                type="button"
-                onClick={() => setActiveTab(tag.name)}
-                className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
-                  activeTab === tag.name ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
-                }`}
-              >
-                {tag.name}
-              </button>
-            ))}
+            {renderJournalTabs()}
             <button
               type="button"
               onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -402,7 +388,7 @@ const Home = () => {
           transition={{ delay: 0.7, duration: 0.6 }}
         >
           <AnimatePresence mode="wait">
-            {activeTab === "HOME" ? (
+            {!activeTab || activeTab === "HOME" ? (
               <motion.div
                 key="home"
                 initial={{ opacity: 0, y: 10 }}

@@ -233,11 +233,11 @@ export interface FeaturedRitualTwoSection {
 // Afterlife Section Content Types
 export interface AfterlifeItem {
   icon?:
-  | string
-  | {
-    src: string
-    alt: string
-  }
+    | string
+    | {
+        src: string
+        alt: string
+      }
   title?: string
   text: string
 }
@@ -622,6 +622,7 @@ export interface Author {
 // Journal Tag Content Types
 export interface JournalTagFields {
   name: string
+  order?: number
 }
 
 export interface ContentfulJournalTag extends EntrySkeletonType {
@@ -632,6 +633,7 @@ export interface ContentfulJournalTag extends EntrySkeletonType {
 export interface JournalTag {
   id: string
   name: string
+  order?: number
 }
 
 // Blog Content Types
