@@ -477,70 +477,15 @@ export const SingleBlogTemplate = ({
               />
             </motion.div>
 
-            {/* Share Section */}
+            {/* Article Content */}
             <motion.div
-              className="mb-8 flex flex-col md:flex-row"
+              className="mb-8 space-y-6"
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.6 }}
             >
-              <div className="w-full md:w-32 mb-8 md:mb-0 md:mr-[5px]">
-                <p
-                  style={{
-                    fontFamily: '"American Typewriter "',
-                    fontSize: "14px",
-                    color: "#999",
-                    marginBottom: "12px",
-                  }}
-                >
-                  SHARE THIS POST?
-                </p>
-                <div className="flex flex-row md:flex-col gap-6 md:gap-0 md:space-y-1">
-                  <motion.p
-                    style={{
-                      fontFamily: '"American Typewriter"',
-                      fontSize: "14px",
-                      color: "#999",
-                      fontStyle: "italic",
-                    }}
-                    initial={{ x: -10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 1.0, duration: 0.4 }}
-                  >
-                    Facebook
-                  </motion.p>
-                  <motion.p
-                    style={{
-                      fontFamily: '"American Typewriter"',
-                      fontSize: "14px",
-                      color: "#999",
-                      fontStyle: "italic",
-                    }}
-                    initial={{ x: -10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 1.1, duration: 0.4 }}
-                  >
-                    X
-                  </motion.p>
-                  <motion.p
-                    style={{
-                      fontFamily: '"American Typewriter"',
-                      fontSize: "14px",
-                      color: "#999",
-                      fontStyle: "italic",
-                    }}
-                    initial={{ x: -10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 1.2, duration: 0.4 }}
-                  >
-                    Instagram
-                  </motion.p>
-                </div>
-              </div>
-
-              {/* Article Content */}
               <motion.div
-                className="flex-1 md:ml-12 md:pl-8 space-y-6 border-l-0 md:border-l-2 md:border-[#D3D2CA]"
+                className="space-y-6"
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 1.0, duration: 0.8 }}
