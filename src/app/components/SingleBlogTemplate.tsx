@@ -189,9 +189,14 @@ const FeaturedBlogProduct = ({
 interface SingleBlogTemplateProps {
   blog: Blog | null
   countryCode: string
+  latestArticles: { title: string; slug: string }[]
 }
 
-export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProps) => {
+export const SingleBlogTemplate = ({
+  blog,
+  countryCode,
+  latestArticles,
+}: SingleBlogTemplateProps) => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
@@ -282,19 +287,6 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
       letterSpacing: "0.15em",
     },
   }
-
-  const latestArticles = [
-    "The Longform Guide to Surfing: Great Stories About Big Waves",
-    "The Ultimate Guide to New York's Favorite Food",
-    "Salty Peanut-Pretzel Ice Cream Cake",
-    "A Cool Solution for Hot Summer Nights",
-    "Full Irish Breakfast In Manhattan",
-    "Overcoming Your Fear Of The Kitchen",
-    "Want to Make Creamed Corn Into a Meal? Add Shrimp",
-    "Why Healthy Eating Doesn't Mean Dieting",
-    "A Quick, Satisfying Fix for Weeknight Chicken",
-    "Fresh Food on TV: Weekend Edition",
-  ]
 
   const containerVariants = {
     hidden: { opacity: 0, x: 20 },
@@ -761,36 +753,6 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
                 </div>
               </div>
             )}
-
-            {/* About Author */}
-            <div
-              className=""
-              style={{
-                borderBottom: "2px solid #000",
-                paddingBottom: "15px",
-              }}
-            >
-              <div>
-                <h2 style={styles.subsequentHeading} className=" pt-6 mb-6">
-                  About author
-                </h2>
-              </div>
-              <div className="flex items-center gap-4">
-                {/* Profile Pic */}
-                <img
-                  src={
-                    blog?.author?.profilePic ||
-                    "https://secure.gravatar.com/avatar/36e2a7ea656db63c186eb0a02e7fe5c656ed25665db2154081aff88f2f5671c4?s=180&d=mm&r=g"
-                  }
-                  alt={blog?.author?.name || "author"}
-                  className="rounded-full w-20 h-20 object-cover"
-                />
-                {/* Name */}
-                <h2 className="uppercase" style={styles.subsequentHeading}>
-                  {blog?.author?.name || "cmsmasters"}
-                </h2>
-              </div>
-            </div>
           </div>
 
           <motion.div className="" variants={containerVariants} initial="hidden" animate="visible">
@@ -801,18 +763,17 @@ export const SingleBlogTemplate = ({ blog, countryCode }: SingleBlogTemplateProp
                   LATEST ARTICLES
                 </h2>
                 <motion.ul className="space-y-3">
-                  {latestArticles.map((article, index) => (
-                    <motion.li key={index} variants={itemVariants} whileHover="hover">
+                  {latestArticles.map((article) => (
+                    <motion.li key={article.slug} variants={itemVariants} whileHover="hover">
                       <motion.div className="flex items-start" variants={textHoverVariants}>
                         <span className=" mr-2 mt-1">•</span>
-                        <motion.a
-                          href={`/${countryCode}/blogs`}
+                        <Link
+                          href={`/${countryCode}/blogs/${article.slug}`}
                           className="leading-relaxed"
-                          whileHover={{ color: "#111827" }}
                           style={styles.subCopy}
                         >
-                          {article}
-                        </motion.a>
+                          {article.title}
+                        </Link>
                       </motion.div>
                     </motion.li>
                   ))}

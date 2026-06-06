@@ -85,7 +85,7 @@ const Home = () => {
           return currentTab
         }
 
-        return allTags[0]?.name || ""
+        return ""
       })
     }
     fetchData()

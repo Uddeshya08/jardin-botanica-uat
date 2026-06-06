@@ -1875,6 +1875,30 @@ export async function getAllBlogs(limit: number = 10, countryCode?: string): Pro
   }
 }
 
+export async function getLatestBlogLinks(
+  limit: number = 8
+): Promise<{ title: string; slug: string }[]> {
+  try {
+    const client = getContentfulClient()
+    const response = await client.getEntries({
+      content_type: "blog",
+      select: ["fields.title", "fields.slug", "fields.publishedDate"],
+      order: ["-fields.publishedDate"],
+      limit,
+    })
+
+    return response.items
+      .map((item: any) => ({
+        title: item.fields.title,
+        slug: item.fields.slug,
+      }))
+      .filter((blog) => blog.title && blog.slug)
+  } catch (error) {
+    console.error("Error fetching latest blog links:", error)
+    return []
+  }
+}
+
 /**
  * Fetch hero blog and other blogs from Contentful
  * Returns hero blog + paginated other blogs (all blogs, not excluding featured)
