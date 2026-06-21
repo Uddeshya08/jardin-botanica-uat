@@ -10,7 +10,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "app/components/ui/carousel"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Share2 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
 import React, { useEffect, useState } from "react"
@@ -190,12 +190,17 @@ interface SingleBlogTemplateProps {
   blog: Blog | null
   countryCode: string
   latestArticles: { title: string; slug: string }[]
+  navigationPosts: {
+    previous: { title: string; slug: string } | null
+    next: { title: string; slug: string } | null
+  }
 }
 
 export const SingleBlogTemplate = ({
   blog,
   countryCode,
   latestArticles,
+  navigationPosts,
 }: SingleBlogTemplateProps) => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -449,6 +454,30 @@ export const SingleBlogTemplate = ({
               >
                 BY {blog?.author?.name?.toUpperCase() || "JARDIN BOTANICA"}
               </span>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  if (!blog) return
+
+                  if (navigator.share) {
+                    navigator.share({
+                      title: blog.title,
+                      text: blog.description || blog.title,
+                      url: window.location.href,
+                    })
+                  } else {
+                    navigator.clipboard.writeText(window.location.href)
+                    toast.success("Link copied to clipboard", {
+                      duration: 2000,
+                    })
+                  }
+                }}
+                className="ml-auto p-2 text-black/60 hover:text-black transition-colors bg-black/5 rounded-full hover:bg-black/10"
+                aria-label="Share blog"
+              >
+                <Share2 className="w-4 h-4" />
+              </motion.button>
               {/* <div className="ml-auto flex items-center gap-2">
                                 <span
                                     style={{
@@ -555,16 +584,23 @@ export const SingleBlogTemplate = ({
                   >
                     PREVIOUS POST
                   </p>
-                  <h4
-                    style={{
-                      fontFamily: '"American Typewriter"',
-                      fontSize: "18px",
-                      color: "#333",
-                      lineHeight: "1.3",
-                    }}
-                  >
-                    Get the Best Catering for Your Summer Wedding in Philly
-                  </h4>
+                  {navigationPosts.previous ? (
+                    <Link
+                      href={`/${countryCode}/blogs/${navigationPosts.previous.slug}`}
+                      className="block hover:opacity-70 transition-opacity duration-200"
+                    >
+                      <h4
+                        style={{
+                          fontFamily: '"American Typewriter"',
+                          fontSize: "18px",
+                          color: "#333",
+                          lineHeight: "1.3",
+                        }}
+                      >
+                        {navigationPosts.previous.title}
+                      </h4>
+                    </Link>
+                  ) : null}
                 </motion.div>
                 <motion.div
                   className="w-1/2 pl-8 text-right"
@@ -582,16 +618,23 @@ export const SingleBlogTemplate = ({
                   >
                     NEXT POST
                   </p>
-                  <h4
-                    style={{
-                      fontFamily: '"American Typewriter"',
-                      fontSize: "18px",
-                      color: "#333",
-                      lineHeight: "1.3",
-                    }}
-                  >
-                    Why Some Say the Eclipse Is Best Experienced in a Crowd
-                  </h4>
+                  {navigationPosts.next ? (
+                    <Link
+                      href={`/${countryCode}/blogs/${navigationPosts.next.slug}`}
+                      className="block hover:opacity-70 transition-opacity duration-200"
+                    >
+                      <h4
+                        style={{
+                          fontFamily: '"American Typewriter"',
+                          fontSize: "18px",
+                          color: "#333",
+                          lineHeight: "1.3",
+                        }}
+                      >
+                        {navigationPosts.next.title}
+                      </h4>
+                    </Link>
+                  ) : null}
                 </motion.div>
               </div>
             </motion.div>

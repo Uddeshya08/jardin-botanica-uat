@@ -1899,6 +1899,31 @@ export async function getLatestBlogLinks(
   }
 }
 
+export async function getAllBlogLinks(): Promise<
+  { title: string; slug: string; publishedDate: string }[]
+> {
+  try {
+    const client = getContentfulClient()
+    const response = await client.getEntries({
+      content_type: "blog",
+      select: ["fields.title", "fields.slug", "fields.publishedDate"],
+      order: ["fields.publishedDate"],
+      limit: 1000,
+    })
+
+    return response.items
+      .map((item: any) => ({
+        title: item.fields.title,
+        slug: item.fields.slug,
+        publishedDate: item.fields.publishedDate || "",
+      }))
+      .filter((blog) => blog.title && blog.slug)
+  } catch (error) {
+    console.error("Error fetching all blog links:", error)
+    return []
+  }
+}
+
 /**
  * Fetch hero blog and other blogs from Contentful
  * Returns hero blog + paginated other blogs (all blogs, not excluding featured)
