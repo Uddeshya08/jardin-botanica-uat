@@ -10,7 +10,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "app/components/ui/carousel"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Share2 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
 import React, { useEffect, useState } from "react"
@@ -190,12 +190,17 @@ interface SingleBlogTemplateProps {
   blog: Blog | null
   countryCode: string
   latestArticles: { title: string; slug: string }[]
+  navigationPosts: {
+    previous: { title: string; slug: string } | null
+    next: { title: string; slug: string } | null
+  }
 }
 
 export const SingleBlogTemplate = ({
   blog,
   countryCode,
   latestArticles,
+  navigationPosts,
 }: SingleBlogTemplateProps) => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -449,6 +454,30 @@ export const SingleBlogTemplate = ({
               >
                 BY {blog?.author?.name?.toUpperCase() || "JARDIN BOTANICA"}
               </span>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  if (!blog) return
+
+                  if (navigator.share) {
+                    navigator.share({
+                      title: blog.title,
+                      text: blog.description || blog.title,
+                      url: window.location.href,
+                    })
+                  } else {
+                    navigator.clipboard.writeText(window.location.href)
+                    toast.success("Link copied to clipboard", {
+                      duration: 2000,
+                    })
+                  }
+                }}
+                className="ml-auto p-2 text-black/60 hover:text-black transition-colors bg-black/5 rounded-full hover:bg-black/10"
+                aria-label="Share blog"
+              >
+                <Share2 className="w-4 h-4" />
+              </motion.button>
               {/* <div className="ml-auto flex items-center gap-2">
                                 <span
                                     style={{
@@ -477,70 +506,15 @@ export const SingleBlogTemplate = ({
               />
             </motion.div>
 
-            {/* Share Section */}
+            {/* Article Content */}
             <motion.div
-              className="mb-8 flex flex-col md:flex-row"
+              className="mb-8 space-y-6"
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.6 }}
             >
-              <div className="w-full md:w-32 mb-8 md:mb-0 md:mr-[5px]">
-                <p
-                  style={{
-                    fontFamily: '"American Typewriter "',
-                    fontSize: "14px",
-                    color: "#999",
-                    marginBottom: "12px",
-                  }}
-                >
-                  SHARE THIS POST?
-                </p>
-                <div className="flex flex-row md:flex-col gap-6 md:gap-0 md:space-y-1">
-                  <motion.p
-                    style={{
-                      fontFamily: '"American Typewriter"',
-                      fontSize: "14px",
-                      color: "#999",
-                      fontStyle: "italic",
-                    }}
-                    initial={{ x: -10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 1.0, duration: 0.4 }}
-                  >
-                    Facebook
-                  </motion.p>
-                  <motion.p
-                    style={{
-                      fontFamily: '"American Typewriter"',
-                      fontSize: "14px",
-                      color: "#999",
-                      fontStyle: "italic",
-                    }}
-                    initial={{ x: -10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 1.1, duration: 0.4 }}
-                  >
-                    X
-                  </motion.p>
-                  <motion.p
-                    style={{
-                      fontFamily: '"American Typewriter"',
-                      fontSize: "14px",
-                      color: "#999",
-                      fontStyle: "italic",
-                    }}
-                    initial={{ x: -10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 1.2, duration: 0.4 }}
-                  >
-                    Instagram
-                  </motion.p>
-                </div>
-              </div>
-
-              {/* Article Content */}
               <motion.div
-                className="flex-1 md:ml-12 md:pl-8 space-y-6 border-l-0 md:border-l-2 md:border-[#D3D2CA]"
+                className="space-y-6"
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 1.0, duration: 0.8 }}
@@ -610,16 +584,23 @@ export const SingleBlogTemplate = ({
                   >
                     PREVIOUS POST
                   </p>
-                  <h4
-                    style={{
-                      fontFamily: '"American Typewriter"',
-                      fontSize: "18px",
-                      color: "#333",
-                      lineHeight: "1.3",
-                    }}
-                  >
-                    Get the Best Catering for Your Summer Wedding in Philly
-                  </h4>
+                  {navigationPosts.previous ? (
+                    <Link
+                      href={`/${countryCode}/blogs/${navigationPosts.previous.slug}`}
+                      className="block hover:opacity-70 transition-opacity duration-200"
+                    >
+                      <h4
+                        style={{
+                          fontFamily: '"American Typewriter"',
+                          fontSize: "18px",
+                          color: "#333",
+                          lineHeight: "1.3",
+                        }}
+                      >
+                        {navigationPosts.previous.title}
+                      </h4>
+                    </Link>
+                  ) : null}
                 </motion.div>
                 <motion.div
                   className="w-1/2 pl-8 text-right"
@@ -637,16 +618,23 @@ export const SingleBlogTemplate = ({
                   >
                     NEXT POST
                   </p>
-                  <h4
-                    style={{
-                      fontFamily: '"American Typewriter"',
-                      fontSize: "18px",
-                      color: "#333",
-                      lineHeight: "1.3",
-                    }}
-                  >
-                    Why Some Say the Eclipse Is Best Experienced in a Crowd
-                  </h4>
+                  {navigationPosts.next ? (
+                    <Link
+                      href={`/${countryCode}/blogs/${navigationPosts.next.slug}`}
+                      className="block hover:opacity-70 transition-opacity duration-200"
+                    >
+                      <h4
+                        style={{
+                          fontFamily: '"American Typewriter"',
+                          fontSize: "18px",
+                          color: "#333",
+                          lineHeight: "1.3",
+                        }}
+                      >
+                        {navigationPosts.next.title}
+                      </h4>
+                    </Link>
+                  ) : null}
                 </motion.div>
               </div>
             </motion.div>

@@ -63,7 +63,7 @@ export async function subscribeToNewsletter(
     if (response.status === 204 || response.status === 201 || response.ok) {
       return {
         success: true,
-        message: "Successfully subscribed! Welcome to the circle.",
+        message: "Successfully subscribed! Welcome to the Circle.",
       }
     }
 

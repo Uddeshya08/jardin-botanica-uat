@@ -4,6 +4,7 @@ import { emitCartUpdated } from "@lib/util/cart-client"
 import { useCartItemsSafe } from "app/context/cart-items-context"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { motion } from "motion/react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useMemo, useRef, useState, useTransition } from "react"
@@ -231,6 +232,23 @@ export function PeopleAlsoBought({
 
   const { heading, subheading, bg, products: cards } = meta
 
+  const getProductPath = (productCard: Card) => {
+    if (!productCard.url || productCard.url.trim() === "" || productCard.url === "/") {
+      return null
+    }
+
+    try {
+      return productCard.url.startsWith("/")
+        ? productCard.url
+        : productCard.url.startsWith("http://") || productCard.url.startsWith("https://")
+          ? new URL(productCard.url).pathname
+          : `/${productCard.url}`
+    } catch (urlError) {
+      console.error("Invalid URL:", productCard.url, urlError)
+      return null
+    }
+  }
+
   // ------- SCROLL / DRAG logic (unchanged) -------
   const updateScrollProgress = () => {
     if (scrollContainerRef.current) {
@@ -441,11 +459,7 @@ export function PeopleAlsoBought({
       }
 
       try {
-        const urlPath = productCard.url.startsWith("/")
-          ? productCard.url
-          : productCard.url.startsWith("http://") || productCard.url.startsWith("https://")
-            ? new URL(productCard.url).pathname
-            : `/${productCard.url}` // If it's just a path without leading slash
+        const urlPath = getProductPath(productCard)
 
         // Only redirect if path is not empty or "/"
         if (urlPath && urlPath.trim() !== "" && urlPath !== "/") {
@@ -548,7 +562,10 @@ export function PeopleAlsoBought({
           )}
         </motion.div>
 
-        {cards.map((product, index) => (
+        {cards.map((product, index) => {
+          const productPath = getProductPath(product)
+
+          return (
           <motion.div
             key={`product-${product.id ?? index}-${index}`}
             initial={{ opacity: 0, y: 30 }}
@@ -564,77 +581,152 @@ export function PeopleAlsoBought({
           >
             <div className="max-w-[340px] mx-auto md:max-w-none md:w-full">
               {/* Product Image */}
-              <div
-                className="relative mb-4 md:mb-6 overflow-hidden bg-white/20 rounded-sm"
-                style={{ paddingBottom: "125%" }}
-              >
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="absolute inset-0"
+              {productPath ? (
+                <Link
+                  href={productPath}
+                  className="block relative mb-4 md:mb-6 overflow-hidden bg-white/20 rounded-sm"
+                  style={{ paddingBottom: "125%" }}
                 >
-                  {/* Base Image */}
-                  {product.image ? (
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-contain transition-opacity duration-300"
-                      style={{
-                        opacity: hoveredProduct === product.id ? 0 : 1,
-                        userSelect: "none", // Prevent text selection
-                        WebkitUserSelect: "none",
-                      }}
-                      draggable={false} // Prevent image dragging
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-400 text-sm">No image</span>
-                    </div>
-                  )}
-
-                  {/* Hover Image */}
-                  {product.hoverImage && (
-                    <img
-                      src={product.hoverImage}
-                      alt={`${product.name}`}
-                      className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300"
-                      style={{
-                        opacity: hoveredProduct === product.id ? 1 : 0,
-                        userSelect: "none",
-                        WebkitUserSelect: "none",
-                      }}
-                      draggable={false} // Prevent image dragging
-                    />
-                  )}
-
-                  {/* Badge */}
-                  {product.badge && (
-                    <div className="absolute top-3 md:top-4 left-3 md:left-4">
-                      <span
-                        className="px-2 md:px-3 py-1 text-xs font-din-arabic tracking-wide font-medium"
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    className="absolute inset-0"
+                  >
+                    {/* Base Image */}
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-contain transition-opacity duration-300"
                         style={{
-                          backgroundColor: "rgba(255, 255, 255, 0.9)",
-                          color: "#000",
-                          borderRadius: "12px",
+                          opacity: hoveredProduct === product.id ? 0 : 1,
+                          userSelect: "none",
+                          WebkitUserSelect: "none",
                         }}
-                      >
-                        {product.badge}
-                      </span>
-                    </div>
-                  )}
-                </motion.div>
-              </div>
+                        draggable={false}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400 text-sm">No image</span>
+                      </div>
+                    )}
+
+                    {/* Hover Image */}
+                    {product.hoverImage && (
+                      <img
+                        src={product.hoverImage}
+                        alt={`${product.name}`}
+                        className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300"
+                        style={{
+                          opacity: hoveredProduct === product.id ? 1 : 0,
+                          userSelect: "none",
+                          WebkitUserSelect: "none",
+                        }}
+                        draggable={false}
+                      />
+                    )}
+
+                    {/* Badge */}
+                    {product.badge && (
+                      <div className="absolute top-3 md:top-4 left-3 md:left-4">
+                        <span
+                          className="px-2 md:px-3 py-1 text-xs font-din-arabic tracking-wide font-medium"
+                          style={{
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                            color: "#000",
+                            borderRadius: "12px",
+                          }}
+                        >
+                          {product.badge}
+                        </span>
+                      </div>
+                    )}
+                  </motion.div>
+                </Link>
+              ) : (
+                <div
+                  className="relative mb-4 md:mb-6 overflow-hidden bg-white/20 rounded-sm"
+                  style={{ paddingBottom: "125%" }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    className="absolute inset-0"
+                  >
+                    {/* Base Image */}
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-contain transition-opacity duration-300"
+                        style={{
+                          opacity: hoveredProduct === product.id ? 0 : 1,
+                          userSelect: "none",
+                          WebkitUserSelect: "none",
+                        }}
+                        draggable={false}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400 text-sm">No image</span>
+                      </div>
+                    )}
+
+                    {/* Hover Image */}
+                    {product.hoverImage && (
+                      <img
+                        src={product.hoverImage}
+                        alt={`${product.name}`}
+                        className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300"
+                        style={{
+                          opacity: hoveredProduct === product.id ? 1 : 0,
+                          userSelect: "none",
+                          WebkitUserSelect: "none",
+                        }}
+                        draggable={false}
+                      />
+                    )}
+
+                    {/* Badge */}
+                    {product.badge && (
+                      <div className="absolute top-3 md:top-4 left-3 md:left-4">
+                        <span
+                          className="px-2 md:px-3 py-1 text-xs font-din-arabic tracking-wide font-medium"
+                          style={{
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                            color: "#000",
+                            borderRadius: "12px",
+                          }}
+                        >
+                          {product.badge}
+                        </span>
+                      </div>
+                    )}
+                  </motion.div>
+                </div>
+              )}
 
               {/* Product Details */}
               <div className="space-y-3">
                 {/* Product Name and Price */}
                 <div className="flex items-start justify-between gap-2">
-                  <h3
-                    className="font-american-typewriter text-black group-hover:text-black/80 transition-colors duration-200 flex-1 text-base md:text-lg line-clamp-1"
-                    style={{ lineHeight: "1.3", letterSpacing: "0.05em" }}
-                  >
-                    {product.name}
-                  </h3>
+                  {productPath ? (
+                    <Link href={productPath} className="flex-1 min-w-0">
+                      <h3
+                        className="font-american-typewriter text-black group-hover:text-black/80 transition-colors duration-200 text-base md:text-lg line-clamp-1"
+                        style={{ lineHeight: "1.3", letterSpacing: "0.05em" }}
+                      >
+                        {product.name}
+                      </h3>
+                    </Link>
+                  ) : (
+                    <h3
+                      className="font-american-typewriter text-black group-hover:text-black/80 transition-colors duration-200 flex-1 text-base md:text-lg line-clamp-1"
+                      style={{ lineHeight: "1.3", letterSpacing: "0.05em" }}
+                    >
+                      {product.name}
+                    </h3>
+                  )}
 
                   {product.price && (
                     <span
@@ -674,7 +766,8 @@ export function PeopleAlsoBought({
               </div>
             </div>
           </motion.div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Arrows - Always Visible on Mobile, Conditional on Desktop */}
