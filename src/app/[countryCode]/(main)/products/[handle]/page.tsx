@@ -1,3 +1,5 @@
+import { buildMetadata } from "@lib/seo"
+import { getPageSEO } from "@lib/strapi"
 import {
     getAfterlifeSectionByKey,
     getAfterlifeSectionByProductHandle,
@@ -82,15 +84,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         notFound();
     }
 
-    return {
-        title: `${product.title} | Medusa Store`,
-        description: `${product.title}`,
-        openGraph: {
-            title: `${product.title} | Medusa Store`,
-            description: `${product.title}`,
-            images: product.thumbnail ? [product.thumbnail] : [],
-        },
-    };
+    const seo = await getPageSEO(`product-${handle}`)
+    return buildMetadata(seo, {
+        title: `${product.title} | Jardin Botanica`,
+        description: product.description || product.title,
+        image: product.thumbnail || undefined,
+    })
 }
 
 export default async function ProductPage(props: Props) {
