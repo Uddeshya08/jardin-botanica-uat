@@ -1,10 +1,15 @@
 import { getAllBlogs, listProductsByContentfulCategories } from "@lib/data/contentful"
+import { buildMetadata } from "@lib/seo"
+import { getPageSEO } from "@lib/strapi"
 import Hero from "@modules/home/components/hero"
 import type { Metadata } from "next"
 
-export const metadata: Metadata = {
-  title: "Medusa Next.js Starter Template",
-  description: "A performant frontend ecommerce starter template with Next.js 15 and Medusa.",
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSEO("home")
+  return buildMetadata(seo, {
+    title: "Jardin Botanica",
+    description: "Discover botanical skincare crafted with nature's finest ingredients.",
+  })
 }
 
 export default async function Home(props: { params: Promise<{ countryCode: string }> }) {

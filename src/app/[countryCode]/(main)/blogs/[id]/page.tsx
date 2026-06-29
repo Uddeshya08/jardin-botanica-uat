@@ -1,5 +1,7 @@
 import { getAllBlogLinks, getBlogBySlug, getLatestBlogLinks } from "@lib/data/contentful"
-import { SingleBlogTemplate } from "app/components/SingleBlogTemplate" // Assuming absolute imports are set up as per previous file
+import { buildMetadata } from "@lib/seo"
+import { getPageSEO } from "@lib/strapi"
+import { SingleBlogTemplate } from "app/components/SingleBlogTemplate"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
@@ -15,15 +17,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
-  return {
+  const seo = await getPageSEO(`blog-${params.id}`)
+  return buildMetadata(seo, {
     title: `${blog.title} | Jardin Botanica`,
     description: blog.title,
-    openGraph: {
-      title: `${blog.title} | Jardin Botanica`,
-      description: blog.title,
-      images: blog.image ? [blog.image] : [],
-    },
-  }
+    image: blog.image || undefined,
+  })
 }
 
 export default async function SingleBlogPage(props: Props) {

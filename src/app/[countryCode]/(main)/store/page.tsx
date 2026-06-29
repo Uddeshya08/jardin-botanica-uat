@@ -1,10 +1,15 @@
+import { buildMetadata } from "@lib/seo"
+import { getPageSEO } from "@lib/strapi"
 import type { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import StoreTemplate from "@modules/store/templates"
 import type { Metadata } from "next"
 
-export const metadata: Metadata = {
-  title: "Store",
-  description: "Explore all of our products.",
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSEO("store")
+  return buildMetadata(seo, {
+    title: "Store | Jardin Botanica",
+    description: "Explore all of our products.",
+  })
 }
 
 type Params = {
