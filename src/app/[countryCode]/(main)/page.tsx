@@ -1,11 +1,11 @@
 import { getAllBlogs, listProductsByContentfulCategories } from "@lib/data/contentful"
+import { getPageSEOSanity } from "@lib/sanity"
 import { buildMetadata } from "@lib/seo"
-import { getPageSEO } from "@lib/strapi"
 import Hero from "@modules/home/components/hero"
 import type { Metadata } from "next"
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getPageSEO("home")
+  const seo = await getPageSEOSanity("home")
   return buildMetadata(seo, {
     title: "Jardin Botanica",
     description: "Discover botanical skincare crafted with nature's finest ingredients.",

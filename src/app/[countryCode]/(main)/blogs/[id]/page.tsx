@@ -1,6 +1,6 @@
 import { getAllBlogLinks, getBlogBySlug, getLatestBlogLinks } from "@lib/data/contentful"
+import { getPageSEOSanity } from "@lib/sanity"
 import { buildMetadata } from "@lib/seo"
-import { getPageSEO } from "@lib/strapi"
 import { SingleBlogTemplate } from "app/components/SingleBlogTemplate"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
@@ -17,7 +17,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
-  const seo = await getPageSEO(`blog-${params.id}`)
+  const seo = await getPageSEOSanity(`blog-${params.id}`)
   return buildMetadata(seo, {
     title: `${blog.title} | Jardin Botanica`,
     description: blog.title,
