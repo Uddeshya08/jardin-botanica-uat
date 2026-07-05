@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import type { StrapiSEO } from "./strapi"
+import type { SanitySEO } from "types/sanity-blog"
 
 interface FallbackSEO {
   title?: string
@@ -7,15 +7,15 @@ interface FallbackSEO {
   image?: string
 }
 
-export function buildMetadata(strapi: StrapiSEO | null, fallback: FallbackSEO = {}): Metadata {
-  const title = strapi?.metaTitle || fallback.title || "Jardin Botanica"
-  const description = strapi?.metaDescription || fallback.description || ""
-  const image = strapi?.shareImage?.url || fallback.image
+export function buildMetadata(seo: SanitySEO | null, fallback: FallbackSEO = {}): Metadata {
+  const title = seo?.metaTitle || fallback.title || "Jardin Botanica"
+  const description = seo?.metaDescription || fallback.description || ""
+  const image = seo?.shareImage?.url || fallback.image
 
   return {
     title,
     description,
-    keywords: strapi?.keywords,
+    keywords: seo?.keywords,
     openGraph: {
       title,
       description,

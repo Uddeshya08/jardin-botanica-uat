@@ -61,6 +61,11 @@ const nextConfig = {
         hostname: "*.jardinbotanica.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+        pathname: "/**",
+      },
     ],
   },
 }

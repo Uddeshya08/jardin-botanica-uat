@@ -1,11 +1,11 @@
+import { getPageSEOSanity } from "@lib/sanity"
 import { buildMetadata } from "@lib/seo"
-import { getPageSEO } from "@lib/strapi"
 import type { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import StoreTemplate from "@modules/store/templates"
 import type { Metadata } from "next"
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getPageSEO("store")
+  const seo = await getPageSEOSanity("store")
   return buildMetadata(seo, {
     title: "Store | Jardin Botanica",
     description: "Explore all of our products.",

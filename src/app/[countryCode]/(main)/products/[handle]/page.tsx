@@ -1,5 +1,5 @@
+import { getPageSEOSanity } from "@lib/sanity"
 import { buildMetadata } from "@lib/seo"
-import { getPageSEO } from "@lib/strapi"
 import {
     getAfterlifeSectionByKey,
     getAfterlifeSectionByProductHandle,
@@ -84,7 +84,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         notFound();
     }
 
-    const seo = await getPageSEO(`product-${handle}`)
+    const seo = await getPageSEOSanity(`product-${handle}`)
     return buildMetadata(seo, {
         title: `${product.title} | Jardin Botanica`,
         description: product.description || product.title,
