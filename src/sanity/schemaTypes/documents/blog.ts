@@ -99,6 +99,14 @@ export const blog = defineType({
         defineArrayMember({ type: "statementBlock" }),
       ],
     }),
+    defineField({
+      name: "featuredProducts",
+      title: "Featured products",
+      type: "array",
+      description: "Shown as up to 3 tiles at the end of the article. Enter the product handle only (e.g. soft-orris), not the full URL.",
+      of: [defineArrayMember({ type: "string" })],
+      validation: (Rule) => Rule.max(3),
+    }),
   ],
   preview: {
     select: { title: "title", media: "coverImage", subtitle: "publishedDate" },

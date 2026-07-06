@@ -1,10 +1,11 @@
 import { getProductByHandle } from "@lib/data/products"
+import { getProductPrice } from "@lib/util/get-product-price"
 import { getBlogBySlugSanity, getLatestBlogCardsSanity, getPageSEOSanity } from "@lib/sanity"
 import { buildMetadata } from "@lib/seo"
 import { SingleBlogTemplate2 } from "app/components/SingleBlogTemplate2"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import type { SanityBlog } from "types/sanity-blog"
+import type { SanityBlog, SanityFeaturedProduct } from "types/sanity-blog"
 
 async function withCtaProductImages(blog: SanityBlog, countryCode: string): Promise<SanityBlog> {
   const content = await Promise.all(
@@ -17,6 +18,27 @@ async function withCtaProductImages(blog: SanityBlog, countryCode: string): Prom
     })
   )
   return { ...blog, content }
+}
+
+async function resolveFeaturedProducts(
+  handles: string[] | undefined,
+  countryCode: string
+): Promise<SanityFeaturedProduct[]> {
+  if (!handles?.length) return []
+  const products = await Promise.all(
+    handles.slice(0, 3).map(async (handle) => {
+      const product = await getProductByHandle({ handle, countryCode }).catch(() => null)
+      if (!product) return null
+      const { cheapestPrice } = getProductPrice({ product })
+      return {
+        handle,
+        title: product.title ?? handle,
+        image: product.thumbnail ?? null,
+        price: cheapestPrice?.calculated_price ?? null,
+      }
+    })
+  )
+  return products.filter((p): p is SanityFeaturedProduct => p !== null)
 }
 
 type Props = {
@@ -50,9 +72,17 @@ export default async function SingleBlogTemplate2Page(props: Props) {
     notFound()
   }
 
-  const enrichedBlog = await withCtaProductImages(blog, params.countryCode)
+  const [enrichedBlog, featuredProducts] = await Promise.all([
+    withCtaProductImages(blog, params.countryCode),
+    resolveFeaturedProducts(blog.featuredProducts, params.countryCode),
+  ])
 
   return (
-    <SingleBlogTemplate2 blog={enrichedBlog} countryCode={params.countryCode} alsoArticles={alsoArticles} />
+    <SingleBlogTemplate2
+      blog={enrichedBlog}
+      countryCode={params.countryCode}
+      alsoArticles={alsoArticles}
+      featuredProducts={featuredProducts}
+    />
   )
 }
