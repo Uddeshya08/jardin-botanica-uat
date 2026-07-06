@@ -1,9 +1,9 @@
 import { defineField, defineType } from "sanity"
 
 /**
- * Full-width feature section: small top-left image, centered bold statement,
- * small bottom-right image. Breaks out of the article's left/right zigzag
- * for its row — this block always spans the full width.
+ * Full-width feature section: a single centered, bold statement. Breaks out of
+ * the article's left/right zigzag for its row — this block always spans the
+ * full width of the page.
  */
 export const statementBlock = defineType({
   name: "statementBlock",
@@ -11,28 +11,14 @@ export const statementBlock = defineType({
   type: "object",
   fields: [
     defineField({
-      name: "topImage",
-      title: "Top image (left-aligned)",
-      type: "image",
-      options: { hotspot: true },
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
       name: "statement",
       title: "Statement",
       type: "text",
       rows: 2,
       validation: (Rule) => Rule.required(),
     }),
-    defineField({
-      name: "bottomImage",
-      title: "Bottom image (right-aligned)",
-      type: "image",
-      options: { hotspot: true },
-      validation: (Rule) => Rule.required(),
-    }),
   ],
   preview: {
-    select: { title: "statement", media: "topImage" },
+    select: { title: "statement" },
   },
 })

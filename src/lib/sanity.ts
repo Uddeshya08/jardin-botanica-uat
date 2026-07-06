@@ -1,6 +1,13 @@
 import { client } from "../sanity/lib/client"
 import type { SanityBlog, SanitySEO } from "types/sanity-blog"
 
+// In dev, bypass Next's fetch cache entirely so Studio edits appear on refresh.
+// In prod, cache with a short revalidate window for performance.
+const cacheOpts = (revalidate: number) =>
+  process.env.NODE_ENV === "production"
+    ? ({ next: { revalidate } } as const)
+    : ({ cache: "no-store" } as const)
+
 const BLOG_PROJECTION = `{
   title,
   "slug": slug.current,
@@ -10,6 +17,7 @@ const BLOG_PROJECTION = `{
   categories,
   tags,
   author{name, "avatar": avatar{"url": asset->url}},
+  featuredProducts,
   content[]{
     ...,
     _type == "imageBlock" => {
@@ -17,10 +25,6 @@ const BLOG_PROJECTION = `{
     },
     _type == "imageGalleryBlock" => {
       "images": images[]{"url": asset->url},
-    },
-    _type == "statementBlock" => {
-      "topImage": {"url": topImage.asset->url},
-      "bottomImage": {"url": bottomImage.asset->url},
     },
   }
 }`
@@ -34,7 +38,7 @@ export async function getBlogBySlugSanity(slug: string): Promise<SanityBlog | nu
     const blog = await client.fetch<SanityBlog | null>(
       `*[_type == "blog" && slug.current == $slug][0]${BLOG_PROJECTION}`,
       { slug },
-      { next: { revalidate: 60 } }
+      cacheOpts(60)
     )
     return blog
   } catch (error) {
@@ -58,7 +62,7 @@ export async function getLatestBlogCardsSanity(
         "image": coverImage.asset->url
       }`,
       { excludeSlug: excludeSlug ?? "", limit },
-      { next: { revalidate: 60 } }
+      cacheOpts(60)
     )
     return cards
   } catch (error) {
@@ -81,7 +85,7 @@ export async function getPageSEOSanity(pageSlug: string): Promise<SanitySEO | nu
         "shareImage": shareImage{"url": asset->url}
       }`,
       { pageSlug },
-      { next: { revalidate: 3600 } }
+      cacheOpts(3600)
     )
     return seo
   } catch (error) {

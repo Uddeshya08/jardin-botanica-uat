@@ -24,6 +24,7 @@ export interface SanityImageBlock {
   alt?: string
   caption?: string
   fullBleed?: boolean
+  alignment?: "left" | "center" | "right"
 }
 
 export interface SanityImageGalleryBlock {
@@ -52,9 +53,7 @@ export interface SanityQuoteBlock {
 export interface SanityStatementBlock {
   _type: "statementBlock"
   _key: string
-  topImage: SanityImageRef
   statement: string
-  bottomImage: SanityImageRef
 }
 
 export type SanityContentBlock =
@@ -70,6 +69,13 @@ export interface SanityBlogAuthor {
   avatar?: SanityImageRef | null
 }
 
+export interface SanityFeaturedProduct {
+  handle: string
+  title: string
+  image: string | null
+  price: string | null
+}
+
 export interface SanityBlog {
   title: string
   slug: string
@@ -80,6 +86,8 @@ export interface SanityBlog {
   tags?: string[]
   author?: SanityBlogAuthor | null
   content: SanityContentBlock[]
+  // Raw product handles from Sanity — resolved server-side into SanityFeaturedProduct[]
+  featuredProducts?: string[]
 }
 
 export interface SanitySEO {
