@@ -56,6 +56,13 @@ export interface SanityStatementBlock {
   statement: string
 }
 
+export interface SanityAccordionBlock {
+  _type: "accordionBlock"
+  _key: string
+  label: string
+  content: SanityPortableTextBlock[]
+}
+
 export type SanityContentBlock =
   | SanityPortableTextBlock
   | SanityImageBlock
@@ -63,6 +70,7 @@ export type SanityContentBlock =
   | SanityCtaBlock
   | SanityQuoteBlock
   | SanityStatementBlock
+  | SanityAccordionBlock
 
 export interface SanityBlogAuthor {
   name: string

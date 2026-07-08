@@ -97,6 +97,7 @@ export const blog = defineType({
         defineArrayMember({ type: "ctaBlock" }),
         defineArrayMember({ type: "quoteBlock" }),
         defineArrayMember({ type: "statementBlock" }),
+        defineArrayMember({ type: "accordionBlock" }),
       ],
     }),
     defineField({
