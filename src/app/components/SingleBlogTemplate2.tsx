@@ -4,7 +4,7 @@ import { Navigation } from "app/components/Navigation"
 import { motion } from "motion/react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import type { SanityBlog } from "types/sanity-blog"
+import type { SanityAccordionBlock, SanityBlog } from "types/sanity-blog"
 
 /**
  * Template 2 — editorial single-article layout inspired by framacph.com/blogs/stories.
@@ -17,6 +17,92 @@ interface FeaturedProduct {
   title: string
   image: string | null
   price: string | null
+}
+
+// Rich text renderer for accordion bodies — kept minimal (paragraph, h3, link).
+const accordionInnerComponents: PortableTextComponents = {
+  block: {
+    normal: ({ children }) => <p className="mb-4 last:mb-0">{children}</p>,
+    h3: ({ children }) => (
+      <h3
+        className="mb-2 mt-4"
+        style={{ fontFamily: '"American Typewriter"', fontSize: "18px", color: "#333" }}
+      >
+        {children}
+      </h3>
+    ),
+  },
+  marks: {
+    link: ({ children, value }) => {
+      const href = value?.href || "#"
+      const isExternal = href.startsWith("http")
+      return (
+        <a
+          href={href}
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener noreferrer" : undefined}
+          className="text-[#4f5864] underline hover:text-black transition-colors duration-200"
+        >
+          {children}
+        </a>
+      )
+    },
+  },
+}
+
+// Collapsible section: click the label to reveal the rich text body.
+const AccordionItem = ({
+  label,
+  content,
+}: {
+  label: string
+  content: SanityAccordionBlock["content"]
+}) => {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="border-t border-black/15 w-full max-w-3xl mx-auto">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between py-5 text-left"
+        aria-expanded={open}
+      >
+        <span
+          className="uppercase"
+          style={{
+            fontFamily: '"American Typewriter"',
+            fontSize: "15px",
+            letterSpacing: "2px",
+            color: "#333",
+          }}
+        >
+          {label}
+        </span>
+        <span
+          className="ml-4 shrink-0 transition-transform duration-300"
+          style={{
+            fontSize: "22px",
+            lineHeight: 1,
+            color: "#333",
+            transform: open ? "rotate(45deg)" : "rotate(0deg)",
+          }}
+        >
+          +
+        </span>
+      </button>
+      <div
+        className="overflow-hidden transition-all duration-300"
+        style={{ maxHeight: open ? "1000px" : "0px", opacity: open ? 1 : 0 }}
+      >
+        <div
+          className="pb-6"
+          style={{ fontFamily: "Georgia, serif", fontSize: "16px", lineHeight: "1.8", color: "#333" }}
+        >
+          <PortableText value={content} components={accordionInnerComponents} />
+        </div>
+      </div>
+    </div>
+  )
 }
 
 interface SingleBlogTemplate2Props {
@@ -232,6 +318,9 @@ export const SingleBlogTemplate2 = ({
           )}
         </blockquote>
       ),
+      accordionBlock: ({ value }) => (
+        <AccordionItem label={value.label} content={value.content} />
+      ),
       statementBlock: ({ value }) => (
         <p
           className="text-center w-full py-12 md:py-16 px-6"
@@ -266,20 +355,20 @@ export const SingleBlogTemplate2 = ({
   const bylineDate = formatByline(blog.publishedDate)
   const bylineAuthor = blog.author?.name
 
-  // statementBlock and center-aligned images break out to a full-width row of
-  // their own. Everything else pairs up in plain document order — first block
-  // in a pair lands col 1, second lands col 2 — so a text block followed by an
-  // image reads text-left/image-right, and an image followed by text reads
-  // image-left/text-right, matching the zigzag straight from array order.
-  // Left/right on an imageBlock only styles how the image sits *inside*
-  // whichever column it lands in (see the imageBlock renderer) — it never
-  // moves the column itself, or pairing with neighbors breaks.
+  // statementBlock, accordionBlock, and center-aligned images break out to a
+  // full-width row of their own. Everything else pairs up in plain document
+  // order — first block in a pair lands col 1, second lands col 2 — so a text
+  // block followed by an image reads text-left/image-right, and an image
+  // followed by text reads image-left/text-right, matching the zigzag straight
+  // from array order. Left/right on an imageBlock only styles how the image
+  // sits *inside* whichever column it lands in (see the imageBlock renderer) —
+  // it never moves the column itself, or pairing with neighbors breaks.
   let contentRow = 1
   let pendingCol = 0
   const contentLayout = blog.content.map((block) => {
     const isCenterImage = block._type === "imageBlock" && (block.alignment || "center") === "center"
 
-    if (block._type === "statementBlock" || isCenterImage) {
+    if (block._type === "statementBlock" || block._type === "accordionBlock" || isCenterImage) {
       if (pendingCol === 1) {
         contentRow += 1
         pendingCol = 0
@@ -300,7 +389,7 @@ export const SingleBlogTemplate2 = ({
 
   return (
     <div className="bg-[#FEFDF3] min-h-screen overflow-x-hidden">
-      <Navigation isScrolled={isScrolled} disableSticky={true} />
+      <Navigation isScrolled={isScrolled} disableSticky={true} forceBlackText={true} />
 
       {/* Hero — centered title/subtitle, no image, matches reference "Sink Theory" hero */}
       <motion.div
