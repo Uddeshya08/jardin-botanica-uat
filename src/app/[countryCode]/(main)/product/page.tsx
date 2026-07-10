@@ -483,7 +483,7 @@ const Product = () => {
                     transform: "translateX(10ch)",
                   }}
                 >
-                  Because one scent is never enough
+                 For every room, hour, and mood.
                 </p>
               </div>
             </div>

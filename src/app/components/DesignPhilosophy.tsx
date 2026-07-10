@@ -120,9 +120,9 @@ export function DesignPhilosophy() {
               className="space-y-4"
             >
               <p className="font-american-typewriter text-lg text-black/75 leading-relaxed max-w-lg">
-                We study living collections and translate them into disciplined blends measured
-                actives, climate-smart bases. Design carries it home the weight in your palm, the
-                arc of a pump, the soft dry-down turning daily gestures into deliberate pleasure.
+               We study living collections and translate them into disciplined blends built on measured actives
+               and climate-smart bases. Design carries it home through the weight of the vessel, the rhythm of use,
+               and the soft afterfeel, turning daily gestures into deliberate pleasure.
               </p>
             </motion.div>
 

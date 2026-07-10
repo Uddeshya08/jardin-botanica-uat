@@ -440,7 +440,7 @@ const Product = () => {
                 }}
                 className="text-right"
               >
-                Because one scent is never enough
+                For every room, hour, and mood.
               </p>
             </div>
 
