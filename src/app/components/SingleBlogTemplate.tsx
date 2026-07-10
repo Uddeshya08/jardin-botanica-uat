@@ -381,24 +381,7 @@ export const SingleBlogTemplate = ({
             className="flex-1 max-w-4xl px-4 md:px-12"
             style={{ borderRight: "0 md:2px solid #000" }}
           >
-            {/* Sports Category */}
-            <motion.div
-              initial={{ y: -10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.6 }}
-            >
-              <p
-                className="text-sm mb-6 uppercase"
-                style={{
-                  ...styles.trackingNewspaper,
-                  fontSize: "12px",
-                  color: "#999",
-                  letterSpacing: "2px",
-                }}
-              >
-                {blog?.categories?.[0] || "BLOG"}
-              </p>
-            </motion.div>
+  
 
             {/* Main Title */}
             <motion.h1
