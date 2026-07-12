@@ -1,8 +1,6 @@
 "use client"
-import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
-import { BLOCKS, INLINES } from "@contentful/rich-text-types"
+import { PortableText, type PortableTextComponents } from "@portabletext/react"
 import { addToCart } from "@lib/data/cart"
-import type { HttpTypes } from "@medusajs/types"
 import { Navigation } from "app/components/Navigation"
 import {
   Carousel,
@@ -10,12 +8,12 @@ import {
   CarouselContent,
   CarouselItem,
 } from "app/components/ui/carousel"
-import { ChevronLeft, ChevronRight, Share2 } from "lucide-react"
-import { AnimatePresence, motion } from "motion/react"
+import { ChevronLeft, Share2 } from "lucide-react"
+import { motion } from "motion/react"
 import Link from "next/link"
 import React, { useEffect, useState } from "react"
 import { toast } from "sonner"
-import type { Blog } from "types/contentful"
+import type { SanityBlogTemplate1 } from "types/sanity-blog"
 
 const FeaturedBlogProduct = ({
   id,
@@ -187,7 +185,7 @@ const FeaturedBlogProduct = ({
 }
 
 interface SingleBlogTemplateProps {
-  blog: Blog | null
+  blog: SanityBlogTemplate1 | null
   countryCode: string
   latestArticles: { title: string; slug: string }[]
   navigationPosts: {
@@ -321,28 +319,58 @@ export const SingleBlogTemplate = ({
     },
   }
 
-  const renderOptions = {
-    renderNode: {
-      [BLOCKS.EMBEDDED_ASSET]: (node: any) => {
-        const { file, title } = node.data.target.fields
-        const imageUrl = `https:${file.url}`
-        const alt = title || "Blog Image"
-        return (
-          <div className="my-8">
-            <img src={imageUrl} alt={alt} className="w-full h-auto object-cover rounded-sm" />
-          </div>
-        )
-      },
-      [BLOCKS.PARAGRAPH]: (node: any, children: any) => <p className="mb-6">{children}</p>,
-      [INLINES.HYPERLINK]: (node: any, children: any) => (
-        <a
-          href={node.data.uri}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[#4f5864] underline hover:text-black transition-colors duration-200"
+  const portableTextComponents: PortableTextComponents = {
+    block: {
+      normal: ({ children }) => <p className="mb-6">{children}</p>,
+      h2: ({ children }) => (
+        <h2 className="mb-6 mt-4" style={{ ...styles.subsequentHeading, color: "#333" }}>
+          {children}
+        </h2>
+      ),
+      h3: ({ children }) => (
+        <h3 className="mb-4 mt-2" style={{ ...styles.subsequentHeading3, color: "#333" }}>
+          {children}
+        </h3>
+      ),
+      blockquote: ({ children }) => (
+        <blockquote
+          className="my-8 pl-6 italic"
+          style={{ borderLeft: "3px solid #4f5864", color: "#4f5864" }}
         >
           {children}
-        </a>
+        </blockquote>
+      ),
+    },
+    marks: {
+      link: ({ children, value }) => {
+        const href = value?.href || "#"
+        const isExternal = href.startsWith("http")
+        return (
+          <a
+            href={href}
+            target={isExternal ? "_blank" : undefined}
+            rel={isExternal ? "noopener noreferrer" : undefined}
+            className="text-[#4f5864] underline hover:text-black transition-colors duration-200"
+          >
+            {children}
+          </a>
+        )
+      },
+    },
+    types: {
+      imageBlock: ({ value }) => (
+        <div className="my-8">
+          <img
+            src={value.image.url}
+            alt={value.alt || blog?.title || "Blog Image"}
+            className="w-full h-auto object-cover rounded-sm"
+          />
+          {value.caption && (
+            <p className="text-center mt-3 text-sm" style={{ color: "#999" }}>
+              {value.caption}
+            </p>
+          )}
+        </div>
       ),
     },
   }
@@ -351,9 +379,11 @@ export const SingleBlogTemplate = ({
     return null
   }
 
+  const featuredProducts = blog.resolvedFeaturedProducts ?? []
+
   return (
     <div className="bg-[#FEFDF3] min-h-screen">
-      <Navigation isScrolled={isScrolled} disableSticky={true} />
+      <Navigation isScrolled={isScrolled} disableSticky={true} forceBlackText={true} />
       <div className="max-w-7xl mx-auto py-12 px-4 md:px-6">
         {/* Back Button */}
         <motion.div
@@ -482,10 +512,9 @@ export const SingleBlogTemplate = ({
               transition={{ delay: 0.6, duration: 0.8 }}
             >
               <img
-                src={blog?.image || "/assets/football.jpg"}
-                alt={blog?.imagealt || blog?.title}
+                src={blog?.coverImage?.url || "/assets/football.jpg"}
+                alt={blog?.imageAlt || blog?.title}
                 className="w-full h-auto object-cover"
-                style={{ filter: "grayscale(100%)" }}
               />
             </motion.div>
 
@@ -514,7 +543,9 @@ export const SingleBlogTemplate = ({
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 1.2, duration: 0.6 }}
                 >
-                  {documentToReactComponents(blog?.content, renderOptions)}
+                  {blog?.content && (
+                    <PortableText value={blog.content} components={portableTextComponents} />
+                  )}
                 </motion.div>
 
                 {/* Tags */}
@@ -623,7 +654,7 @@ export const SingleBlogTemplate = ({
             </motion.div>
 
             {/* From the Botanist's Shelf */}
-            {blog?.featuredProducts && blog.featuredProducts.length > 0 && (
+            {featuredProducts.length > 0 && (
               <div className="mb-20 pt-16 border-t-[2px] border-[#000]">
                 <h2 style={styles.subsequentHeading} className="mb-10 text-center">
                   From the Botanist's Shelf
@@ -631,7 +662,7 @@ export const SingleBlogTemplate = ({
 
                 {/* Desktop Grid */}
                 <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-                  {blog.featuredProducts.map((product) => (
+                  {featuredProducts.map((product) => (
                     <FeaturedBlogProduct
                       key={product.id}
                       id={product.id}
@@ -702,7 +733,7 @@ export const SingleBlogTemplate = ({
                       className="w-full"
                     >
                       <CarouselContent className="blog-carousel-content">
-                        {blog.featuredProducts.map((product) => (
+                        {featuredProducts.map((product) => (
                           <CarouselItem key={product.id} className="blog-carousel-item">
                             <FeaturedBlogProduct
                               id={product.id}
