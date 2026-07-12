@@ -1,8 +1,14 @@
 import { defineArrayMember, defineField, defineType } from "sanity"
 
-export const blog = defineType({
-  name: "blog",
-  title: "Blog Template 2",
+/**
+ * Blog Template 1 — the classic single-column journal article (migrated off
+ * Contentful). Rich text with inline images, a cover image, author byline, and
+ * a "From the Botanist's Shelf" featured-products row resolved from Medusa.
+ * Rendered by SingleBlogTemplate at /[countryCode]/blogs/[id].
+ */
+export const blogTemplate1 = defineType({
+  name: "blogTemplate1",
+  title: "Blog Template 1",
   type: "document",
   fields: [
     defineField({
@@ -23,7 +29,7 @@ export const blog = defineType({
       title: "Description",
       type: "text",
       rows: 3,
-      description: "Shown as the hero subtitle and used as a fallback SEO description",
+      description: "Short summary — used for share text and SEO fallback",
     }),
     defineField({
       name: "publishedDate",
@@ -37,18 +43,9 @@ export const blog = defineType({
       options: { hotspot: true },
     }),
     defineField({
-      name: "categories",
-      title: "Categories",
-      type: "array",
-      of: [defineArrayMember({ type: "string" })],
-      options: { layout: "tags" },
-    }),
-    defineField({
-      name: "tags",
-      title: "Tags",
-      type: "array",
-      of: [defineArrayMember({ type: "string" })],
-      options: { layout: "tags" },
+      name: "imageAlt",
+      title: "Cover image alt text",
+      type: "string",
     }),
     defineField({
       name: "author",
@@ -56,10 +53,17 @@ export const blog = defineType({
       type: "author",
     }),
     defineField({
+      name: "categories",
+      title: "Categories",
+      type: "array",
+      of: [defineArrayMember({ type: "string" })],
+      options: { layout: "tags" },
+    }),
+    defineField({
       name: "content",
       title: "Content",
       type: "array",
-      description: "Stack text and image blocks in any order — this is what Contentful couldn't do",
+      description: "Article body — text paragraphs interleaved with inline images",
       of: [
         defineArrayMember({
           type: "block",
@@ -93,20 +97,15 @@ export const blog = defineType({
           },
         }),
         defineArrayMember({ type: "imageBlock" }),
-        defineArrayMember({ type: "imageGalleryBlock" }),
-        defineArrayMember({ type: "ctaBlock" }),
-        defineArrayMember({ type: "quoteBlock" }),
-        defineArrayMember({ type: "statementBlock" }),
-        defineArrayMember({ type: "accordionBlock" }),
       ],
     }),
     defineField({
       name: "featuredProducts",
       title: "Featured products",
       type: "array",
-      description: "Shown as up to 3 tiles at the end of the article. Enter the product handle only (e.g. soft-orris), not the full URL.",
+      description:
+        'Shown as "From the Botanist\'s Shelf". Enter product handles only (e.g. soft-orris), not full URLs.',
       of: [defineArrayMember({ type: "string" })],
-      validation: (Rule) => Rule.max(3),
     }),
   ],
   preview: {

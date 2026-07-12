@@ -1,5 +1,5 @@
 import { client } from "../sanity/lib/client"
-import type { SanityBlog, SanitySEO } from "types/sanity-blog"
+import type { SanityBlog, SanityBlogTemplate1, SanitySEO } from "types/sanity-blog"
 
 // In dev, bypass Next's fetch cache entirely so Studio edits appear on refresh.
 // In prod, cache with a short revalidate window for performance.
@@ -71,6 +71,87 @@ export async function getLatestBlogCardsSanity(
   }
 }
 
+
+const BLOG_TEMPLATE1_PROJECTION = `{
+  title,
+  "slug": slug.current,
+  description,
+  publishedDate,
+  "coverImage": coverImage{"url": asset->url},
+  imageAlt,
+  categories,
+  author{name, "avatar": avatar{"url": asset->url}},
+  featuredProducts,
+  content[]{
+    ...,
+    _type == "imageBlock" => {
+      "image": {"url": image.asset->url},
+    },
+  }
+}`
+
+/**
+ * Fetch a single Blog Template 1 article by slug (the classic single-column
+ * journal layout migrated off Contentful). featuredProducts are raw handles —
+ * the route resolves them into Medusa products.
+ */
+export async function getBlogTemplate1BySlugSanity(
+  slug: string
+): Promise<SanityBlogTemplate1 | null> {
+  try {
+    return await client.fetch<SanityBlogTemplate1 | null>(
+      `*[_type == "blogTemplate1" && slug.current == $slug][0]${BLOG_TEMPLATE1_PROJECTION}`,
+      { slug },
+      cacheOpts(60)
+    )
+  } catch (error) {
+    console.error("Error fetching Sanity blogTemplate1 by slug:", error)
+    return null
+  }
+}
+
+/**
+ * Title/slug links for the "Latest Articles" sidebar of Blog Template 1.
+ */
+export async function getLatestBlogTemplate1LinksSanity(
+  limit: number = 8
+): Promise<{ title: string; slug: string }[]> {
+  try {
+    return await client.fetch<{ title: string; slug: string }[]>(
+      `*[_type == "blogTemplate1"] | order(publishedDate desc) [0...$limit]{
+        title,
+        "slug": slug.current
+      }`,
+      { limit },
+      cacheOpts(60)
+    )
+  } catch (error) {
+    console.error("Error fetching Sanity blogTemplate1 latest links:", error)
+    return []
+  }
+}
+
+/**
+ * All Blog Template 1 title/slug links, published-date order — used to build
+ * previous/next post navigation.
+ */
+export async function getAllBlogTemplate1LinksSanity(): Promise<
+  { title: string; slug: string }[]
+> {
+  try {
+    return await client.fetch<{ title: string; slug: string }[]>(
+      `*[_type == "blogTemplate1"] | order(publishedDate desc){
+        title,
+        "slug": slug.current
+      }`,
+      {},
+      cacheOpts(60)
+    )
+  } catch (error) {
+    console.error("Error fetching Sanity blogTemplate1 all links:", error)
+    return []
+  }
+}
 
 /**
  * SEO metadata for a page, replacing Strapi's page-seos content type.

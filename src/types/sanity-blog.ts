@@ -104,3 +104,34 @@ export interface SanitySEO {
   keywords?: string
   shareImage?: { url: string }
 }
+
+// Featured product for Blog Template 1, resolved server-side from Medusa —
+// carries variants so the article's "From the Botanist's Shelf" cards can
+// add to cart directly.
+export interface ResolvedFeaturedProduct {
+  id: string
+  name: string
+  handle: string
+  image?: string
+  hoverImage?: string
+  description?: string
+  subtitle?: string | null
+  variants?: any[]
+}
+
+// Blog Template 1 (migrated off Contentful). `content` is Portable Text;
+// `featuredProducts` holds raw Medusa handles until the route resolves them
+// into ResolvedFeaturedProduct[].
+export interface SanityBlogTemplate1 {
+  title: string
+  slug: string
+  description?: string
+  publishedDate?: string
+  coverImage?: SanityImageRef | null
+  imageAlt?: string
+  author?: SanityBlogAuthor | null
+  categories?: string[]
+  content: SanityContentBlock[]
+  featuredProducts?: string[]
+  resolvedFeaturedProducts?: ResolvedFeaturedProduct[]
+}
