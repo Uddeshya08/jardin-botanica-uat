@@ -19,13 +19,26 @@ export async function handleGoogleCallback(queryParams: Record<string, string>) 
 
     const shouldCreateCustomer = !tokenPayload.actor_id || tokenPayload.actor_id === ""
 
-    console.log("Token payload:", tokenPayload)
-
     if (shouldCreateCustomer) {
-      const email = tokenPayload.user_metadata?.email as string
-
       const headers = {
         authorization: `Bearer ${token}`,
+      }
+
+      // The callback JWT only carries actor_id/auth_identity_id — Google's
+      // profile lives on the provider identity record, fetched separately.
+      const identityRes = await fetch(
+        `${process.env.MEDUSA_BACKEND_URL}/store/custom/auth/google-identity`,
+        {
+          headers: {
+            ...headers,
+            "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+          },
+        }
+      )
+      const { email } = (await identityRes.json()) as { email: string | null }
+
+      if (!email) {
+        throw new Error("Could not retrieve email from Google account")
       }
 
       await sdk.store.customer.create({ email }, {}, headers)
