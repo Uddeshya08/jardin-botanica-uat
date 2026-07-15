@@ -71,7 +71,7 @@ export const blogTemplate1 = defineType({
             { title: "Normal", value: "normal" },
             { title: "H2", value: "h2" },
             { title: "H3", value: "h3" },
-            { title: "Quote", value: "blockquote" },
+            { title: "Quote", value: "quote" },
           ],
           marks: {
             decorators: [
