@@ -332,7 +332,7 @@ export const SingleBlogTemplate = ({
           {children}
         </h3>
       ),
-      blockquote: ({ children }) => (
+      quote: ({ children }) => (
         <blockquote
           className="my-8 pl-6 italic"
           style={{ borderLeft: "3px solid #4f5864", color: "#4f5864" }}

@@ -175,7 +175,7 @@ export const SingleBlogTemplate2 = ({
           {children}
         </h3>
       ),
-      blockquote: ({ children }) => (
+      quote: ({ children }) => (
         <blockquote className="text-center my-12 max-w-xl mx-auto">
           <p
             style={{
