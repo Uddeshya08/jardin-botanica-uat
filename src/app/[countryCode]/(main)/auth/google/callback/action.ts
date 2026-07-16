@@ -2,6 +2,7 @@
 
 import { sdk } from "@lib/config"
 import { getCacheTag, setAuthToken } from "@lib/data/cookies"
+import { transferCart } from "@lib/data/customer"
 import { revalidateTag } from "next/cache"
 
 export async function handleGoogleCallback(queryParams: Record<string, string>) {
@@ -70,6 +71,15 @@ export async function handleGoogleCallback(queryParams: Record<string, string>) 
     // Revalidate customer cache
     const customerCacheTag = await getCacheTag("customers")
     revalidateTag(customerCacheTag)
+
+    // Link the guest cart to the now-authenticated customer, matching the
+    // email/password login flows. A transfer failure shouldn't fail sign-in —
+    // the cart-mismatch banner offers a manual retry.
+    try {
+      await transferCart()
+    } catch (transferError) {
+      console.error("Cart transfer after Google sign-in failed:", transferError)
+    }
 
     return { success: true }
   } catch (error: any) {
