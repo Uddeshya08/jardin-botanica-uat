@@ -207,6 +207,7 @@ export function AccountPage() {
               <div className="text-right">
                 <button
                   type="button"
+                  onClick={() => router.push(`/${countryCode}/forgot-password`)}
                   className="font-din-arabic text-sm text-black/70 hover:text-black transition-colors"
                 >
                   Forgot your Password?
