@@ -8,7 +8,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Spinner from "@modules/common/icons/spinner"
 import { motion } from "framer-motion"
 import { Gift, X } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ProductTitleTooltip } from "./product-title-tooltip"
 
 type ItemProps = {
@@ -94,17 +94,40 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
     }
   }
 
-  const changeQuantity = async (quantity: number) => {
-    if (quantity < 1) return
+  // Source of truth for stepper clicks while a write is in flight — reading
+  // item.quantity directly here raced against revalidateTag's async refetch:
+  // the button re-enabled before the new prop landed, so a burst of clicks
+  // all computed off the same stale base and requests stacked/doubled.
+  const [displayQty, setDisplayQty] = useState(item.quantity)
+  const pendingQtyRef = useRef(item.quantity)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    setUpdating(true)
+  useEffect(() => {
+    if (!debounceRef.current) {
+      setDisplayQty(item.quantity)
+      pendingQtyRef.current = item.quantity
+    }
+  }, [item.quantity])
 
-    await updateLineItem({
-      lineId: item.id,
-      quantity,
-    }).finally(() => {
-      setUpdating(false)
-    })
+  const changeQuantity = (nextQuantity: number) => {
+    if (nextQuantity < 1) return
+
+    pendingQtyRef.current = nextQuantity
+    setDisplayQty(nextQuantity)
+
+    // Debounce the actual write — a burst of clicks accumulates on
+    // pendingQtyRef and only the final value is sent, so rapid clicking
+    // can't fire overlapping requests.
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(async () => {
+      setUpdating(true)
+      try {
+        await updateLineItem({ lineId: item.id, quantity: pendingQtyRef.current })
+      } finally {
+        setUpdating(false)
+        debounceRef.current = null
+      }
+    }, 350)
   }
 
   const handleDelete = async () => {
@@ -117,7 +140,7 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
   // TODO: Update this to grab the actual max inventory
   const maxQtyFromInventory = 10
   const maxQuantity = item.variant?.manage_inventory ? 10 : maxQtyFromInventory
-  const canIncrease = item.quantity < maxQuantity
+  const canIncrease = displayQty < maxQuantity
 
   return (
     <motion.div
@@ -180,8 +203,8 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => changeQuantity(item.quantity - 1)}
-                disabled={updating || item.quantity <= 1}
+                onClick={() => changeQuantity(pendingQtyRef.current - 1)}
+                disabled={updating || displayQty <= 1}
                 style={{ cursor: "pointer" }}
                 className="w-7 h-7 rounded-lg bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors disabled:opacity-50"
                 data-testid="product-decrease-button"
@@ -192,13 +215,13 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
               {updating ? (
                 <Spinner className="w-4 h-4" />
               ) : (
-                <span className="font-din-arabic text-sm w-8 text-center">{item.quantity}</span>
+                <span className="font-din-arabic text-sm w-8 text-center">{displayQty}</span>
               )}
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => changeQuantity(item.quantity + 1)}
+                onClick={() => changeQuantity(pendingQtyRef.current + 1)}
                 disabled={updating || !canIncrease}
                 style={{ cursor: "pointer" }}
                 className="w-7 h-7 rounded-lg bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors disabled:opacity-50"
@@ -282,8 +305,8 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => changeQuantity(item.quantity - 1)}
-                disabled={updating || item.quantity <= 1}
+                onClick={() => changeQuantity(pendingQtyRef.current - 1)}
+                disabled={updating || displayQty <= 1}
                 className="w-7 h-7 rounded-lg bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 data-testid="product-decrease-button"
               >
@@ -293,13 +316,13 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
               {updating ? (
                 <Spinner className="w-4 h-4" />
               ) : (
-                <span className="font-din-arabic text-sm w-10 text-center">{item.quantity}</span>
+                <span className="font-din-arabic text-sm w-10 text-center">{displayQty}</span>
               )}
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => changeQuantity(item.quantity + 1)}
+                onClick={() => changeQuantity(pendingQtyRef.current + 1)}
                 disabled={updating || !canIncrease}
                 className="w-7 h-7 rounded-lg bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 data-testid="product-increase-button"
