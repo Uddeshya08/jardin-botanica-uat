@@ -117,6 +117,7 @@ export function PeopleAlsoBought({
   const [isPending, startTransition] = useTransition()
   const cartContext = useCartItemsSafe()
   const handleCartUpdate = cartContext?.handleCartUpdate
+  const cartItems = cartContext?.cartItems ?? []
   const [hoveredId, setHoveredId] = useState<string | number | null>(null)
   const [hoveredProduct, setHoveredProduct] = useState<string | number | null>(null)
   const [addedToCart, setAddedToCart] = useState<string | number | null>(null)
@@ -378,11 +379,15 @@ export function PeopleAlsoBought({
 
       // Optimistic UI update - update cart context immediately (like ProductHero)
       if (handleCartUpdate) {
+        const existingItem = cartItems.find(
+          (ci) => ci.id === String(variantId) || ci.variant_id === String(variantId)
+        )
+        const newQuantity = (existingItem?.quantity ?? 0) + 1
         handleCartUpdate({
           id: String(variantId),
           name: productCard.name,
           price: priceInPaise,
-          quantity: 1,
+          quantity: newQuantity,
           image: productCard.image,
           variant_id: String(variantId),
         } as any)

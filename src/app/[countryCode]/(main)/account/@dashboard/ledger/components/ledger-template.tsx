@@ -12,7 +12,7 @@ import { toast } from "sonner"
 
 export default function LedgerTemplate() {
   const { ledger, toggleLedgerItem } = useLedger()
-  const { handleCartUpdate } = useCartItems()
+  const { handleCartUpdate, cartItems } = useCartItems()
   const { countryCode } = useParams() as { countryCode: string }
   const [isPending, startTransition] = useTransition()
   const [addingItems, setAddingItems] = useState<Set<string>>(new Set())
@@ -283,11 +283,15 @@ export default function LedgerTemplate() {
     }
 
     // Optimistically update cart context for immediate UI feedback
+    const existingCartItem = cartItems.find(
+      (ci) => ci.id === (variantId as string) || ci.variant_id === (variantId as string)
+    )
+    const newQuantity = (existingCartItem?.quantity ?? 0) + 1
     handleCartUpdate({
       id: variantId as string,
       name: item.name,
       price: item.price,
-      quantity: 1,
+      quantity: newQuantity,
       image: item.image,
       variant_id: variantId as string,
     } as any)
