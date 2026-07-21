@@ -70,7 +70,7 @@ export function BespokeGifting() {
             viewport={{ once: true }}
             className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-white md:text-black leading-tight"
           >
-            Bespoke Experiences
+            Bespoke Botanical Set
           </motion.h2>
 
           {/* Main Description */}
@@ -81,8 +81,8 @@ export function BespokeGifting() {
             viewport={{ once: true }}
             className="font-din-arabic text-base md:text-lg text-white/90 md:text-black/70 leading-relaxed mb-6 md:mb-8"
           >
-            Every detail leaves an impression. We help you create tailored offerings with curated
-            selections and artisan finishing.
+          For rooms, tables, welcome moments, and gestures that call for something more considered, we compose tailored selections from the Jardin Botanica world.
+From hand care and candles to home fragrance objects and finishing details, each set is arranged with use, atmosphere, and presentation in mind.
           </motion.p>
 
           {/* Personal Consultation Text */}

@@ -70,12 +70,14 @@ export function CartItemsProvider({
         })
 
         if (existingIndex >= 0) {
-          // Update existing item - increment quantity instead of replacing
+          // Callers compute the new total (existing + delta) themselves and
+          // pass it in as item.quantity — replace, don't re-add, or a +1 click
+          // on qty=1 flashes 3 before the server refetch corrects it to 2.
           const updatedItems = [...prevItems]
           const existingItem = updatedItems[existingIndex]
           updatedItems[existingIndex] = {
             ...existingItem,
-            quantity: existingItem.quantity + item.quantity,
+            quantity: item.quantity,
           }
           console.log("✅ Updated existing cart item quantity:", {
             old: existingItem,
