@@ -17,10 +17,11 @@ import {
 import { CarouselSlider } from "app/components/ui/carousel-slider"
 import { useCartItems } from "app/context/cart-items-context"
 import { type LedgerItem, useLedger } from "app/context/ledger-context"
-import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
+import { Heart } from "lucide-react"
 import { motion, useScroll, useSpring } from "motion/react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
+import Script from "next/script"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { toast } from "sonner"
 import type { CandlesCollectionItem } from "../../../../types/contentful"
@@ -1548,113 +1549,35 @@ const Candles = () => {
               viewport={{ once: true, amount: 0.2 }}
               className="w-full md:w-[60%] relative mt-8 md:mt-0"
             >
-              {isMobile ? (
-                // Mobile View - Carousel
-                <>
-                  <style
-                    dangerouslySetInnerHTML={{
-                      __html: `
-                        .stay-in-touch-carousel-item {
-                          flex-basis: 40% !important;
-                          padding-left: 0 !important;
-                          margin-right: 0.5rem !important;
-                        }
-                        .stay-in-touch-carousel-content {
-                          margin-left: 0 !important;
-                          gap: 0 !important;
-                        }
-                      `,
-                    }}
-                  />
-                  <Carousel
-                    opts={{
-                      align: "start",
-                      loop: false,
-                      dragFree: true,
-                      containScroll: "trimSnaps",
-                    }}
-                    className="w-full"
-                  >
-                    <CarouselContent className="stay-in-touch-carousel-content">
-                      {carouselImages.map((imageSrc, index) => (
-                        <CarouselItem key={index} className="stay-in-touch-carousel-item pl-0">
-                          <div className="w-full h-auto aspect-square overflow-hidden rounded-lg relative">
-                            <img
-                              src={imageSrc}
-                              alt={`Instagram post ${index + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                  </Carousel>
-                </>
-              ) : (
-                // Desktop View - Existing Slider
-                <div className="flex gap-2 md:gap-4 overflow-hidden relative px-2 md:px-12">
-                  {/* Left Navigation Button */}
-                  <div className="hidden md:block absolute left-0 md:left-4 top-1/2 -translate-y-1/2 mt-8 z-20">
-                    <motion.button
-                      whileHover={{ scale: 1.05, x: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={prevImages}
-                      className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl overflow-hidden"
-                      aria-label="Scroll left"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-white transition-all duration-300" />
-                      </div>
-                      <div className="absolute inset-0 rounded-full ring-1 ring-white/30 group-hover:ring-white/50 transition-all duration-300" />
-                    </motion.button>
-                  </div>
-                  <div className="flex gap-2 md:gap-4 w-full transition-all duration-300 ease-in-out">
-                    {getVisibleImages().map((imageSrc, index) => (
-                      <motion.div
-                        key={`${currentImageIndex}-${index}`}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        transition={{
-                          duration: 0.6,
-                          delay: index * 0.1,
-                          ease: smoothEase,
-                        }}
-                        viewport={{ once: true, amount: 0.2 }}
-                        className="w-full h-auto aspect-square overflow-hidden rounded-lg relative"
-                      >
-                        <motion.img
-                          whileHover={{ scale: 1.05 }}
-                          transition={{ duration: 0.4, ease: smoothEase }}
-                          src={imageSrc}
-                          alt={`Instagram post ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        {/* Vertical Divider - only between 2nd and 3rd images */}
-                        {index === 1 && (
-                          <div className="absolute right-0 top-0 bottom-0 w-px bg-gray-300 z-10"></div>
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
-                  {/* Right Navigation Button */}
-                  <div className="hidden md:block absolute right-0 md:right-4 top-1/2 -translate-y-1/2 mt-8 z-20">
-                    <motion.button
-                      whileHover={{ scale: 1.05, x: 2 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={nextImages}
-                      className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-md transition-all duration-500 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl overflow-hidden"
-                      aria-label="Scroll right"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-white transition-all duration-300" />
-                      </div>
-                      <div className="absolute inset-0 rounded-full ring-1 ring-white/30 group-hover:ring-white/50 transition-all duration-300" />
-                    </motion.button>
-                  </div>
-                </div>
-              )}
+              <div
+                className="tagembed-widget"
+                style={{ width: "100%", height: "100%", overflow: "auto" }}
+                data-widget-id="330514"
+                data-website="1"
+              />
+              <Script
+                src="https://widget.tagembed.com/embed.min.js"
+                strategy="afterInteractive"
+                onLoad={() => {
+                  const stripBadge = () => {
+                    document
+                      .querySelectorAll('.tagembed-widget a[href*="tagembed.com"]')
+                      .forEach((a) => {
+                        const wrapper = a.parentElement
+                        if (wrapper) wrapper.remove()
+                        else a.remove()
+                      })
+                  }
+                  stripBadge()
+                  const widget = document.querySelector(".tagembed-widget")
+                  if (widget) {
+                    new MutationObserver(stripBadge).observe(widget, {
+                      childList: true,
+                      subtree: true,
+                    })
+                  }
+                }}
+              />
             </motion.div>
           </div>
         </div>
