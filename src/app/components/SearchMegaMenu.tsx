@@ -286,57 +286,9 @@ export function SearchMegaMenu({ isOpen, onClose, countryCode, region }: SearchM
                     )}
                   </div>
 
-                  {/* Sidebar - Suggested & Categories */}
+                  {/* Sidebar - Popular */}
                   <div className="lg:col-span-1">
                     <div className="space-y-8">
-                      {/* Suggested Keywords */}
-                      {searchResults.suggestedTerms.length > 0 && (
-                        <div>
-                          <h3 className="font-american-typewriter text-black text-base mb-4 pb-3 border-b border-black/10">
-                            Suggested
-                          </h3>
-                          <div className="space-y-2">
-                            {searchResults.suggestedTerms.map((term, index) => (
-                              <button
-                                key={index}
-                                onClick={() => setSearchQuery(term)}
-                                className="block w-full text-left font-din-arabic text-black/60 hover:text-black text-sm py-1 transition-colors"
-                              >
-                                {term}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Categories */}
-                      {searchResults.categories.length > 0 && (
-                        <div>
-                          <h3 className="font-american-typewriter text-black text-base mb-4 pb-3 border-b border-black/10">
-                            Categories
-                          </h3>
-                          <div className="space-y-2">
-                            <Link
-                              href={`/${countryCode}/store`}
-                              onClick={handleClose}
-                              className="block font-din-arabic text-black/60 hover:text-black text-sm py-1 transition-colors"
-                            >
-                              See all Hair
-                            </Link>
-                            {searchResults.categories.map((category, index) => (
-                              <Link
-                                key={index}
-                                href={`/${countryCode}/store?category=${encodeURIComponent(category)}`}
-                                onClick={handleClose}
-                                className="block font-din-arabic text-black/60 hover:text-black text-sm py-1 transition-colors"
-                              >
-                                {category}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
                       {/* Popular Searches */}
                       <div>
                         <h3 className="font-american-typewriter text-black text-base mb-4 pb-3 border-b border-black/10">
@@ -345,8 +297,8 @@ export function SearchMegaMenu({ isOpen, onClose, countryCode, region }: SearchM
                         <div className="space-y-2">
                           {[
                             {
-                              label: "hand balm",
-                              link: `/${countryCode}/body-hands`,
+                              label: "cedarwood",
+                              link: `/${countryCode}/candles`,
                             },
                             {
                               label: "hand soap",
