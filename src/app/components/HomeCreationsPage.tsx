@@ -265,8 +265,7 @@ export function HomeCreationsPage({
                 className="font-din-arabic text-white/95 max-w-2xl mx-auto text-base sm:text-base lg:text-lg leading-relaxed px-4"
                 style={{ letterSpacing: "0.1em" }}
               >
-                Hand-poured candles and artisanal diffusers to create atmosphere, warmth, and an
-                enduring sense of ease.
+                Hand-poured candles that bring atmosphere, warmth, and an enduring sense of ease.
               </p>
             </motion.div>
           </div>
@@ -349,7 +348,7 @@ export function HomeCreationsPage({
       </section>
 
       {/* Editorial Blog Section - Full Width */}
-      {filteredProducts.length > 3 && <EditorialBlogSection />}
+      {/* {filteredProducts.length > 3 && <EditorialBlogSection />} */}
 
       {/* Products Grid - Second Set */}
       {filteredProducts.length > 3 && (

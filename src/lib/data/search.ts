@@ -53,26 +53,72 @@ export const searchProducts = async ({
   }
 
   try {
-    // Search products by title
-    const response = await sdk.client.fetch<{
-      products: HttpTypes.StoreProduct[]
-      count: number
-    }>(`/store/products`, {
-      method: "GET",
-      query: {
-        q: query,
-        limit,
-        region_id: region.id,
-        fields:
-          "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,+categories",
-      },
-      headers,
-      next,
-      cache: "no-store",
-    })
+    const productFields =
+      "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,+categories"
 
-    const products = response.products || []
-    const count = response.count || 0
+    // Parallel: text search on products AND category name lookup
+    const [textResponse, categoryResponse] = await Promise.all([
+      sdk.client.fetch<{
+        products: HttpTypes.StoreProduct[]
+        count: number
+      }>(`/store/products`, {
+        method: "GET",
+        query: {
+          q: query,
+          limit,
+          region_id: region.id,
+          fields: productFields,
+        },
+        headers,
+        next,
+        cache: "no-store",
+      }),
+      sdk.client.fetch<{
+        product_categories: Array<{ id: string; name: string; handle: string }>
+      }>(`/store/product-categories`, {
+        method: "GET",
+        query: {
+          q: query,
+          limit: 5,
+          fields: "id,name,handle",
+        },
+        headers,
+        next,
+        cache: "no-store",
+      }).catch(() => ({ product_categories: [] })),
+    ])
+
+    // If category-name matched, fetch products in those categories and merge
+    const categoryIds = (categoryResponse.product_categories || []).map((c) => c.id)
+    let categoryProducts: HttpTypes.StoreProduct[] = []
+    if (categoryIds.length > 0) {
+      const catResp = await sdk.client
+        .fetch<{
+          products: HttpTypes.StoreProduct[]
+          count: number
+        }>(`/store/products`, {
+          method: "GET",
+          query: {
+            category_id: categoryIds,
+            limit,
+            region_id: region.id,
+            fields: productFields,
+          },
+          headers,
+          next,
+          cache: "no-store",
+        })
+        .catch(() => ({ products: [], count: 0 }))
+      categoryProducts = catResp.products || []
+    }
+
+    // Merge + dedupe by id, text matches first
+    const byId = new Map<string, HttpTypes.StoreProduct>()
+    ;[...(textResponse.products || []), ...categoryProducts].forEach((p) => {
+      if (p?.id && !byId.has(p.id)) byId.set(p.id, p)
+    })
+    const products = Array.from(byId.values()).slice(0, limit)
+    const count = products.length || textResponse.count || 0
 
     // Extract categories from products
     const categoriesSet = new Set<string>()

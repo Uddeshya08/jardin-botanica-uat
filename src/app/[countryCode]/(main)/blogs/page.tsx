@@ -495,19 +495,23 @@ const Home = () => {
                                     transition={{ delay: 0.8, duration: 1.0 }}
                                   />
                                   <motion.div
-                                    className="absolute inset-0 bg-[#FEFDF3] transition-opacity duration-500"
-                                    initial={{ opacity: 0.5 }}
-                                    animate={{ opacity: 0.5 }}
+                                    className="absolute inset-0 transition-opacity duration-500"
+                                    style={{
+                                      background:
+                                        "linear-gradient(90deg, rgba(254,253,243,0.88) 0%, rgba(254,253,243,0.72) 35%, rgba(254,253,243,0.35) 65%, rgba(254,253,243,0.15) 100%)",
+                                    }}
+                                    initial={{ opacity: 1 }}
+                                    animate={{ opacity: 1 }}
                                   />
                                 </div>
                                 <motion.div
-                                  className="absolute top-1/2 left-4 md:left-8 lg:left-12 transform -translate-y-1/2 max-w-xs md:max-w-md lg:max-w-lg px-4 md:px-6 lg:px-8"
+                                  className="absolute top-1/2 left-4 md:left-8 lg:left-12 transform -translate-y-1/2 max-w-sm md:max-w-xl lg:max-w-2xl px-4 md:px-6 lg:px-8"
                                   initial={{ x: -30, opacity: 0 }}
                                   animate={{ x: 0, opacity: 1 }}
                                   transition={{ delay: 1.0, duration: 0.8 }}
                                 >
                                   <motion.div
-                                    className="text-xs lg:text-sm text-gray-600 mb-2 lg:mb-3 text-[#626262] p-0 text-[14px]"
+                                    className="text-xs lg:text-sm mb-2 lg:mb-3 text-[#3a3a3a] p-0 text-[14px] tracking-wider"
                                     initial={{ y: 10, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 1.2, duration: 0.6 }}
@@ -523,8 +527,12 @@ const Home = () => {
                                       : ""}
                                   </motion.div>
                                   <motion.h2
-                                    className="text-xl md:text-2xl lg:text-[48px] text-gray-900 mb-3 lg:mb-4 font-american-typewriter leading-tight"
-                                    style={{ letterSpacing: "2px", fontWeight: "600" }}
+                                    className="text-2xl md:text-3xl lg:text-[44px] text-[#1a1a1a] mb-4 lg:mb-5 font-american-typewriter"
+                                    style={{
+                                      letterSpacing: "1px",
+                                      fontWeight: "600",
+                                      lineHeight: "1.15",
+                                    }}
                                     initial={{ y: 15, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 1.3, duration: 0.6 }}
@@ -532,7 +540,7 @@ const Home = () => {
                                     {heroBlog.title}
                                   </motion.h2>
                                   <motion.p
-                                    className="mb-4 lg:mb-6 text-sm lg:text-[16px] font-din-arabic tracking-[1px] text-[#626262]"
+                                    className="mb-5 lg:mb-6 text-sm lg:text-[16px] font-din-arabic tracking-[0.5px] text-[#2d2d2d] leading-relaxed"
                                     initial={{ y: 15, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 1.4, duration: 0.6 }}
@@ -540,7 +548,7 @@ const Home = () => {
                                     {heroBlog.description}
                                   </motion.p>
                                   <motion.span
-                                    className="text-sm lg:text-base font-american-typewriter font-medium text-gray-600 hover:underline"
+                                    className="text-sm lg:text-base font-american-typewriter font-medium text-[#1a1a1a] hover:underline"
                                     style={{ fontWeight: "600" }}
                                     initial={{ y: 10, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
