@@ -397,7 +397,7 @@ export function BodyHandsPage({
       </section>
 
       {/* Editorial Blog Section - Understanding your skin - Full Width */}
-      <EditorialBlogSection />
+      {/* <EditorialBlogSection /> */}
 
       {/* Hand Care Ritual Section */}
       <section className="py-0">

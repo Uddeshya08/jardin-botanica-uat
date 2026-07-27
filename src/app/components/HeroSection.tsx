@@ -23,7 +23,7 @@ const heroPanels: HeroPanel[] = [
     id: 1,
     title: "Rituals",
     subtitle: "Little acts of care that change the day.",
-    description: "",
+    description: "Made to turn the everyday into something worth noticing.",
     imageUrl: "https://images.unsplash.com/photo-1674620305515-1394fe40c634",
     videoUrl: "/assets/video-banner.mp4",
     cta: "Build your set",
@@ -41,7 +41,7 @@ const heroPanels: HeroPanel[] = [
     title: "The Lab",
     subtitle: "The garden is our brief; the lab is our proof.",
     description:
-      "Formulas with measured actives and climate-smart bases—finished with design you can feel.",
+      "Formulas with measured actives and climate-smart bases — finished with design you can feel.",
     imageUrl: "https://images.unsplash.com/photo-1720275273886-89966091ce4d",
     cta: "Enter the lab",
   },

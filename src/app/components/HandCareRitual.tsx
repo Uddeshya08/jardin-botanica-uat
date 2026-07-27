@@ -10,7 +10,7 @@ export function HandCareRitualSection() {
       step: "01",
       title: "Cleanse",
       description:
-        "Begin with the Tea Exfoliant Rinse, a botanical hand wash infused with fine exfoliating grains and the scent of black tea. Work into a light lather, allowing the texture to polish and refresh the skin.",
+        "Begin with the Tea Exfoliant Rinse, a botanical hand wash with an oat micro-polish and the scent of green tea. Work into a light lather, allowing the texture to gently smooth and refresh the skin.",
       botanical: "",
     },
     {
@@ -24,7 +24,7 @@ export function HandCareRitualSection() {
       step: "03",
       title: "Nourish",
       description:
-        "Follow with the Soft Orris Hand Veil. Massage from fingertips to wrists, focusing on knuckles and dry areas. The orris root and mango butter infusion in our blend promises lasting softness — no matter how dry the hands.",
+        "Follow with the Soft Orris Hand Veil. Massage from fingertips to wrists, focusing on knuckles and dry areas. The aloe and mango seed butter infusion in our blend promises lasting softness — no matter how dry the hands.",
       botanical: "",
     },
     {

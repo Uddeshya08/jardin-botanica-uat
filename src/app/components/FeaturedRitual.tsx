@@ -45,9 +45,9 @@ export function FeaturedRitual() {
             className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8 md:mb-12"
           >
             Clean that isn't squeaky; softness that isn't sticky.
+
             <br />
-            Our signature hand care ritual combines purifying botanicals with protective
-            nourishment.
+            Our signature hand care ritual combines botanical cleansing with protective nourishment.
           </motion.p>
 
           {/* Dual CTAs */}
