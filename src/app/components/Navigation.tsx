@@ -19,6 +19,12 @@ import { useEffect, useRef, useState } from "react"
 import { SearchMegaMenu } from "./SearchMegaMenu"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 
+// Module-scoped flag so the nav intro animation plays at most once per
+// tab lifetime. Prevents replays from StrictMode's simulated remount,
+// hydration remounts (Hero's client boundary on the homepage), and route
+// re-entry.
+let hasPlayedNavIntro = false
+
 interface DropdownItem {
   label: string
   href: string
@@ -58,6 +64,20 @@ export function Navigation({
   const router = useRouter()
   const pathname = usePathname()
   const { isLoggedIn: authIsLoggedIn } = useAuth()
+
+  // Gate intro animation to first mount per tab session. Prevents replays
+  // from StrictMode's simulated remount and Hero-boundary hydration
+  // remounts (both destroy component state, so useState initializer runs
+  // fresh and reads the module flag set by the previous mount's effect).
+  const [skipIntro] = useState(() => hasPlayedNavIntro)
+  useEffect(() => {
+    hasPlayedNavIntro = true
+  }, [])
+  // introInitial: pass this instead of a raw `initial` for any motion
+  // element that plays an entrance animation. Returns `false` on repeat
+  // mounts so framer snaps to the animate target with no intro.
+  const introInitial = <T,>(from: T): T | false | undefined =>
+    disableAnimations ? undefined : skipIntro ? false : from
 
   // Use context if available, otherwise fall back to props
   const cartContext = useCartItemsSafe()
@@ -513,7 +533,7 @@ export function Navigation({
       <div className={disableSticky ? "relative z-50" : "fixed top-0 left-0 right-0 z-50"}>
         {/* Top Shipping Bar */}
         <motion.div
-          initial={disableAnimations ? undefined : { y: -50, opacity: 0 }}
+          initial={introInitial({ y: -50, opacity: 0 })}
           animate={disableAnimations ? undefined : { y: 0, opacity: 1 }}
           transition={disableAnimations ? undefined : { duration: 0.6, ease: "easeOut" }}
           className="text-white py-2"
@@ -530,7 +550,7 @@ export function Navigation({
 
         {/* Main Navigation */}
         <motion.nav
-          initial={disableAnimations ? undefined : { y: -100 }}
+          initial={introInitial({ y: -100 })}
           animate={disableAnimations ? undefined : { y: 0 }}
           transition={
             disableAnimations ? undefined : { duration: 0.8, ease: "easeOut", delay: 0.3 }
@@ -568,7 +588,7 @@ export function Navigation({
             <div className="flex items-center justify-between py-4 px-0 md:px-4 relative">
               {/* Logo */}
               <motion.div
-                initial={disableAnimations ? undefined : { opacity: 0 }}
+                initial={introInitial({ opacity: 0 })}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
                 transition={disableAnimations ? undefined : { delay: 0.3, duration: 0.6 }}
                 className="flex w-full"
@@ -586,14 +606,14 @@ export function Navigation({
 
               {/* --- Centered Desktop Navigation with Mega Menu --- */}
               <motion.div
-                initial={disableAnimations ? undefined : { opacity: 0 }}
+                initial={introInitial({ opacity: 0 })}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
                 transition={disableAnimations ? undefined : { delay: 0.4, duration: 0.6 }}
                 className="hidden lg:flex space-x-8 absolute left-1/2 transform -translate-x-1/2"
               >
                 {menuItems.map((item, index) => (
                   <div
-                    key={item.name}
+                    key={`${item.name || "menu"}-${index}`}
                     className="relative"
                     style={item.name === "HOME CREATIONS" ? { marginLeft: "0.5rem" } : undefined}
                     onMouseEnter={() => item.dropdown && handleMouseEnter(item.name)}
@@ -601,7 +621,7 @@ export function Navigation({
                   >
                     {item.href === "#" ? (
                       <motion.span
-                        initial={disableAnimations ? undefined : { opacity: 0, y: -10 }}
+                        initial={introInitial({ opacity: 0, y: -10 })}
                         animate={disableAnimations ? undefined : { opacity: 1, y: 0 }}
                         transition={
                           disableAnimations
@@ -616,7 +636,7 @@ export function Navigation({
                     ) : (
                       <motion.a
                         href={prefixCountryCode(item.href)}
-                        initial={disableAnimations ? undefined : { opacity: 0, y: -10 }}
+                        initial={introInitial({ opacity: 0, y: -10 })}
                         animate={disableAnimations ? undefined : { opacity: 1, y: 0 }}
                         transition={
                           disableAnimations
@@ -663,11 +683,11 @@ export function Navigation({
                               <div className="py-6 w-80 flex flex-col">
                                 {item.dropdown
                                   .filter((dItem) => dItem.label !== "All Products")
-                                  .map((dItem) => {
+                                  .map((dItem, dIdx) => {
                                     if (dItem.href === "#") {
                                       return (
                                         <span
-                                          key={dItem.label}
+                                          key={`${dItem.label || "item"}-${dIdx}`}
                                           className="block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150 cursor-default"
                                           style={{
                                             color: "#9ca3af",
@@ -695,7 +715,7 @@ export function Navigation({
                                     }
                                     return (
                                       <a
-                                        key={dItem.label}
+                                        key={`${dItem.label || "item"}-${dIdx}`}
                                         href={prefixCountryCode(dItem.href)}
                                         className="group/dropdown-item block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150"
                                         style={{
@@ -736,10 +756,10 @@ export function Navigation({
                               >
                                 {item.dropdown
                                   .filter((dItem) => dItem.label !== "All Products")
-                                  .map((dItem) =>
+                                  .map((dItem, dIdx) =>
                                     dItem.image ? (
                                       <img
-                                        key={dItem.label}
+                                        key={`${dItem.label || "img"}-${dIdx}`}
                                         src={dItem.image}
                                         alt={dItem.label}
                                         className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
@@ -783,7 +803,7 @@ export function Navigation({
 
               {/* Mobile Menu Toggle - Cart and Hamburger */}
               <motion.div
-                initial={disableAnimations ? undefined : { opacity: 0 }}
+                initial={introInitial({ opacity: 0 })}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
                 transition={disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }}
                 className="lg:hidden flex items-center space-x-1 z-10"
@@ -972,7 +992,7 @@ export function Navigation({
 
               {/* Desktop Actions */}
               <motion.div
-                initial={disableAnimations ? undefined : { opacity: 0 }}
+                initial={introInitial({ opacity: 0 })}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
                 transition={disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }}
                 className="hidden lg:flex items-center gap-6"
@@ -1230,10 +1250,10 @@ export function Navigation({
 
                 {/* Mobile Navigation Links */}
                 <nav className="space-y-1">
-                  {menuItems.map((item) => {
+                  {menuItems.map((item, index) => {
                     if (item.dropdown) {
                       return (
-                        <div key={item.name}>
+                        <div key={`${item.name || "menu"}-${index}`}>
                           <button
                             onClick={() =>
                               setMobileActiveDropdown(
@@ -1259,11 +1279,11 @@ export function Navigation({
                                 className="overflow-hidden"
                               >
                                 <div className="pl-4 py-2 space-y-1">
-                                  {item.dropdown.map((dropdownItem) => {
+                                  {item.dropdown.map((dropdownItem, dIdx) => {
                                     if (dropdownItem.href === "#") {
                                       return (
                                         <span
-                                          key={dropdownItem.label}
+                                          key={`${dropdownItem.label || "item"}-${dIdx}`}
                                           className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors cursor-default"
                                         >
                                           {dropdownItem.label}
@@ -1272,7 +1292,7 @@ export function Navigation({
                                     }
                                     return (
                                       <a
-                                        key={dropdownItem.label}
+                                        key={`${dropdownItem.label || "item"}-${dIdx}`}
                                         href={prefixCountryCode(dropdownItem.href)}
                                         className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
                                         onClick={() => setIsMobileMenuOpen(false)}
@@ -1291,7 +1311,7 @@ export function Navigation({
                     if (item.href === "#") {
                       return (
                         <span
-                          key={item.name}
+                          key={`${item.name || "menu"}-${index}`}
                           className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors cursor-default"
                         >
                           {item.name}
@@ -1300,7 +1320,7 @@ export function Navigation({
                     }
                     return (
                       <a
-                        key={item.name}
+                        key={`${item.name || "menu"}-${index}`}
                         href={prefixCountryCode(item.href)}
                         className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
                         onClick={() => setIsMobileMenuOpen(false)}

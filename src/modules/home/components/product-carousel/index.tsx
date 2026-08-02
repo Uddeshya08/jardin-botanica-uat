@@ -286,12 +286,22 @@ export function ProductCarousel({
     return sourceProducts.map((p) => {
       const variant = p.variants?.[0]
       const calculatedPrice = variant?.calculated_price?.calculated_amount
+      // Prefer the "size" option value (what PDP shows). Falls back to
+      // variant title, then any first option value.
+      const sizeOptionId = (p as any).options?.find(
+        (o: any) => (o?.title || "").toLowerCase() === "size"
+      )?.id
+      const sizeOptionValue = sizeOptionId
+        ? (variant as any)?.options?.find((o: any) => o.option_id === sizeOptionId)?.value
+        : undefined
+      const sizeLabel =
+        sizeOptionValue || variant?.title || (variant as any)?.options?.[0]?.value || "Default"
 
       return {
         id: p.id,
         name: p.title || "",
         slug: `/${countryCode || "in"}/products/${p.handle}`,
-        size: variant?.title || "Default",
+        size: sizeLabel,
         description: p.description || "",
         price: calculatedPrice || 0,
         image: p.images?.[0]?.url || p.thumbnail || "",

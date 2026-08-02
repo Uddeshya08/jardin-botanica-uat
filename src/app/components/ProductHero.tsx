@@ -96,19 +96,27 @@ const extractNumericSize = (label: string) => {
   return value
 }
 
+// Trim any product-type prefix off a size label so the radio button reads
+// just the quantity, e.g. "Hand wash 500 ml" -> "500 ml", "Candle 200 g"
+// -> "200 g". Falls back to the original string if no quantity is found.
+const stripToQuantity = (raw: string): string => {
+  const match = raw.match(/\d+(?:\.\d+)?\s*(?:ml|l|g|gm|kg|oz|lb)\b/i)
+  return match ? match[0].replace(/\s+/g, " ").trim() : raw
+}
+
 const buildSizeOptions = (product: ProductHeroProps["product"], sizeOptionId?: string) => {
   return (product.variants || [])
     .map((variant) => {
-      const label = sizeOptionId
+      const raw = sizeOptionId
         ? (variant?.options?.find((opt) => opt.option_id === sizeOptionId)?.value ??
           variant?.title ??
           "")
         : (variant?.title ?? variant?.options?.[0]?.value ?? "")
 
-      return label
+      return raw
         ? {
             id: variant.id,
-            label,
+            label: stripToQuantity(raw),
           }
         : null
     })
