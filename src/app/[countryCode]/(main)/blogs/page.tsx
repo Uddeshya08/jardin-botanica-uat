@@ -1,10 +1,5 @@
 "use client"
-import {
-  getAllJournalTags,
-  getFeaturedBlogs,
-  getHeroAndOtherBlogs,
-  getNonHeroBlogs,
-} from "@lib/data/contentful"
+import { getJournalBlogsCountSanity, getJournalBlogsSanity } from "@lib/sanity"
 import { useNewsletterSubscription } from "@lib/hooks/use-newsletter-subscription"
 import { Navigation } from "app/components/Navigation"
 import { RippleEffect } from "app/components/RippleEffect"
@@ -14,7 +9,12 @@ import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
-import type { Blog, JournalTag } from "types/contentful"
+import {
+  JOURNAL_CATEGORIES,
+  type SanityJournalListItem,
+} from "types/sanity-blog"
+
+type Blog = SanityJournalListItem
 
 // Removed unused local interfaces
 
@@ -27,7 +27,6 @@ const Home = () => {
   const [heroBlog, setHeroBlog] = useState<Blog | null>(null)
   const [dailyFeedBlogs, setDailyFeedBlogs] = useState<Blog[]>([])
   const [featuredBlogs, setFeaturedBlogs] = useState<Blog[]>([])
-  const [tags, setTags] = useState<JournalTag[]>([])
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([])
@@ -38,7 +37,6 @@ const Home = () => {
   const [dailyFeedTotal, setDailyFeedTotal] = useState(0)
   const [featuredPage, setFeaturedPage] = useState(0)
   const [featuredTotal, setFeaturedTotal] = useState(0)
-  const journalTabs = tags
 
   const featuredBlogList = featuredBlogs
   const hasMoreFeatured = featuredBlogs.length < featuredTotal
@@ -52,69 +50,78 @@ const Home = () => {
     return acc
   }, [])
 
-  // Fetch hero, daily feed, and featured blogs from Contentful
+  // Reset pagination whenever the active category changes so we don't try to
+  // page past the end of a smaller filtered set.
+  useEffect(() => {
+    setFeaturedPage(0)
+    setDailyFeedPage(0)
+  }, [activeTab])
+
+  // Fetch hero, daily feed, and featured blogs from Sanity — merged across
+  // `blog` + `blogTemplate1`, honoring the active category filter.
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch hero separately
-      const [heroResult, dailyFeedResult, featuredResult, allTags] = await Promise.all([
-        getHeroAndOtherBlogs(1, 0, countryCode),
-        getNonHeroBlogs(DAILY_FEED_LIMIT, dailyFeedPage * DAILY_FEED_LIMIT, countryCode),
-        getFeaturedBlogs(FEATURED_LIMIT, featuredPage * FEATURED_LIMIT, countryCode),
-        getAllJournalTags(),
+      const categoryArg = activeTab || undefined
+      const [featuredResult, dailyFeedResult, dailyTotal, featuredTotalCount] = await Promise.all([
+        getJournalBlogsSanity({
+          featured: true,
+          category: categoryArg,
+          limit: FEATURED_LIMIT,
+          offset: featuredPage * FEATURED_LIMIT + (featuredPage === 0 ? 1 : 0),
+        }),
+        getJournalBlogsSanity({
+          featured: false,
+          category: categoryArg,
+          limit: DAILY_FEED_LIMIT,
+          offset: dailyFeedPage * DAILY_FEED_LIMIT,
+        }),
+        getJournalBlogsCountSanity({ featured: false, category: categoryArg }),
+        getJournalBlogsCountSanity({ featured: true, category: categoryArg }),
       ])
 
-      // Set hero (first blog from hero result)
-      if (heroResult.blogs.length > 0) {
-        setHeroBlog(heroResult.blogs[0])
-      }
-
-      // Set daily feed (replace on pagination)
-      setDailyFeedBlogs(dailyFeedResult.blogs)
-      setDailyFeedTotal(dailyFeedResult.total)
-
-      // Append featured blogs (accumulate on pagination)
       if (featuredPage === 0) {
-        setFeaturedBlogs(featuredResult.blogs)
+        const hero = await getJournalBlogsSanity({
+          featured: true,
+          category: categoryArg,
+          limit: 1,
+          offset: 0,
+        })
+        setHeroBlog(hero[0] ?? null)
+        setFeaturedBlogs(featuredResult)
       } else {
-        setFeaturedBlogs((prev) => [...prev, ...featuredResult.blogs])
+        setFeaturedBlogs((prev) => [...prev, ...featuredResult])
       }
-      setFeaturedTotal(featuredResult.total)
-      setTags(allTags)
-      setActiveTab((currentTab) => {
-        if (currentTab && allTags.some((tag) => tag.name === currentTab)) {
-          return currentTab
-        }
 
-        return ""
-      })
+      setDailyFeedBlogs(dailyFeedResult)
+      setDailyFeedTotal(dailyTotal)
+      setFeaturedTotal(Math.max(0, featuredTotalCount - 1))
     }
     fetchData()
-  }, [countryCode, dailyFeedPage, featuredPage])
+  }, [countryCode, dailyFeedPage, featuredPage, activeTab])
 
-  // Filter blogs based on search query and active tab
+  // Search across hero + daily feed + featured strip. Tag filtering dropped —
+  // tag tabs no longer shown per current journal design.
   useEffect(() => {
-    let filtered = [...(heroBlog ? [heroBlog] : []), ...dailyFeedBlogs]
+    const pool = [
+      ...(heroBlog ? [heroBlog] : []),
+      ...dailyFeedBlogs,
+      ...featuredBlogs,
+    ]
 
-    // Filter by active tab (tag)
-    if (activeTab) {
-      filtered = filtered.filter((blog: Blog) =>
-        blog.journalTags?.some((tag: JournalTag) => tag.name === activeTab)
-      )
+    if (searchQuery.trim() === "") {
+      setFilteredBlogs(pool)
+      return
     }
 
-    // Filter by search query
-    if (searchQuery.trim() !== "") {
-      const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(
-        (blog: Blog) =>
+    const query = searchQuery.toLowerCase()
+    setFilteredBlogs(
+      pool.filter(
+        (blog) =>
           blog.title.toLowerCase().includes(query) ||
-          (blog.description && blog.description.toLowerCase().includes(query)) ||
-          (blog.author && blog.author.name && blog.author.name.toLowerCase().includes(query))
+          (blog.description && blog.description.toLowerCase().includes(query))
       )
-    }
-
-    setFilteredBlogs(filtered)
-  }, [searchQuery, heroBlog, dailyFeedBlogs, activeTab])
+    )
+  }, [searchQuery, heroBlog, dailyFeedBlogs, featuredBlogs])
 
   const handleDailyFeedPrev = () => {
     if (dailyFeedPage > 0) {
@@ -140,20 +147,24 @@ const Home = () => {
   const [heroCartItem, setHeroCartItem] = useState<CartItem | null>(null)
   const [cartItems, setCartItems] = useState<CartItem[]>([])
 
+  // Category filter tabs — rendered in the same row as the search icon,
+  // both in the sticky header and under the masthead. Clicking a tab
+  // filters all sections; clicking the active tab clears the filter.
   const renderJournalTabs = () =>
-    journalTabs.map((tab) => {
-      const isActive = activeTab === tab.name
-
+    JOURNAL_CATEGORIES.map((cat) => {
+      const isActive = activeTab === cat
       return (
         <button
-          key={tab.id}
+          key={cat}
           type="button"
-          onClick={() => setActiveTab(tab.name)}
-          className={`font-bold uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm lg:text-base whitespace-nowrap ${
-            isActive ? "text-[#000]" : "text-[#000] hover:text-[#626262]"
+          onClick={() => setActiveTab(isActive ? "" : cat)}
+          className={`font-din-arabic uppercase tracking-wide transition-colors duration-200 text-xs md:text-sm whitespace-nowrap ${
+            isActive
+              ? "text-black font-bold"
+              : "text-[#4f5864] hover:text-black"
           }`}
         >
-          {tab.name}
+          {cat}
         </button>
       )
     })
@@ -283,15 +294,31 @@ const Home = () => {
       )}
 
       {/* Main Journal Section */}
-      <div className="w-full bg-[#FEFDF3] relative pt-12 md:pt-24">
+      <div className="w-full bg-[#FEFDF3] relative pt-4 md:pt-8">
+        <motion.p
+          className="font-din-arabic text-center text-xs md:text-sm tracking-[0.35em] uppercase text-black/50 mb-3 md:mb-4 px-4 lg:px-0"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.15, duration: 0.5 }}
+        >
+          Journal
+        </motion.p>
         <motion.h1
-          className="font-american-typewriter text-center text-3xl md:text-5xl lg:text-7xl tracking-tight uppercase px-4 lg:px-0"
+          className="font-american-typewriter text-center text-3xl md:text-5xl lg:text-7xl tracking-tight px-4 lg:px-0"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
         >
-          Journal
+          Le Botaniste
         </motion.h1>
+        <motion.p
+          className="font-din-arabic text-center text-sm md:text-base lg:text-lg text-black/70 mt-4 md:mt-5 max-w-xl mx-auto px-4 lg:px-0 italic"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+        >
+          Observations on plants, scent, objects and ritual.
+        </motion.p>
 
         {/* Tabs */}
         <motion.div
@@ -388,7 +415,9 @@ const Home = () => {
           transition={{ delay: 0.7, duration: 0.6 }}
         >
           <AnimatePresence mode="wait">
-            {!activeTab || activeTab === "HOME" ? (
+            {/* Data is category-filtered server-side; keep the home layout
+                regardless of active tab. */}
+            {true ? (
               <motion.div
                 key="home"
                 initial={{ opacity: 0, y: 10 }}
@@ -424,7 +453,7 @@ const Home = () => {
                               transition={{ delay: index * 0.1, duration: 0.5 }}
                               className="group"
                             >
-                              <Link href={`/${countryCode}/blogs/${blog.slug}`}>
+                              <Link href={`/${countryCode}${blog.href}`}>
                                 <div
                                   className="relative overflow-hidden mb-4"
                                   style={{ aspectRatio: "16/10" }}
@@ -434,7 +463,7 @@ const Home = () => {
                                       blog.image ||
                                       "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=800&h=500&fit=crop"
                                     }
-                                    alt={blog.imagealt || blog.title}
+                                    alt={blog.imageAlt || blog.title}
                                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                                   />
                                 </div>
@@ -477,7 +506,7 @@ const Home = () => {
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ delay: 0.6, duration: 0.8 }}
                           >
-                            <Link href={`/${countryCode}/blogs/${heroBlog.slug}`}>
+                            <Link href={`/${countryCode}${heroBlog.href}`}>
                               <div className="relative cursor-pointer">
                                 <div
                                   className="relative group w-full overflow-hidden"
@@ -489,7 +518,7 @@ const Home = () => {
                                       "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=858&h=971&fit=crop"
                                     }
                                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                                    alt={heroBlog.imagealt || heroBlog.title}
+                                    alt={heroBlog.imageAlt || heroBlog.title}
                                     initial={{ scale: 1.1, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     transition={{ delay: 0.8, duration: 1.0 }}
@@ -635,7 +664,7 @@ const Home = () => {
                                     }}
                                   >
                                     <Link
-                                      href={`/${countryCode}/blogs/${blog.slug}`}
+                                      href={`/${countryCode}${blog.href}`}
                                       className="hover:underline font-american-typewriter text-lg lg:text-xl"
                                     >
                                       {blog.title}
@@ -1115,7 +1144,7 @@ const Home = () => {
                         transition={{ delay: index * 0.1, duration: 0.5 }}
                         className="group text-left"
                       >
-                        <Link href={`/${countryCode}/blogs/${blog.slug}`}>
+                        <Link href={`/${countryCode}${blog.href}`}>
                           <div
                             className="relative overflow-hidden mb-4"
                             style={{ aspectRatio: "16/10" }}
@@ -1125,7 +1154,7 @@ const Home = () => {
                                 blog.image ||
                                 "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=800&h=500&fit=crop"
                               }
-                              alt={blog.imagealt || blog.title}
+                              alt={blog.imageAlt || blog.title}
                               className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                             />
                           </div>

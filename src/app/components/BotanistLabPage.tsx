@@ -930,7 +930,7 @@ function FounderSection({
                   className="font-din-arabic text-[#a28b6f]/60 text-xs uppercase"
                   style={{ letterSpacing: "0.15em" }}
                 >
-                  Founder &amp; Chief Botanist
+                  Founder
                 </p>
               </div>
             </div>

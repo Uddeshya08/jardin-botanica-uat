@@ -37,6 +37,13 @@ export const blogTemplate1 = defineType({
       type: "datetime",
     }),
     defineField({
+      name: "isFeatured",
+      title: "Featured on journal page",
+      type: "boolean",
+      description: "Toggle on to include this article in the Featured section on /blogs. Off = shows only in Recent Entries.",
+      initialValue: false,
+    }),
+    defineField({
       name: "coverImage",
       title: "Cover image",
       type: "image",
@@ -53,11 +60,21 @@ export const blogTemplate1 = defineType({
       type: "author",
     }),
     defineField({
-      name: "categories",
-      title: "Categories",
-      type: "array",
-      of: [defineArrayMember({ type: "string" })],
-      options: { layout: "tags" },
+      name: "category",
+      title: "Category",
+      type: "string",
+      description: "Section the article belongs to on /blogs. Drives the tab filter under the journal header.",
+      options: {
+        list: [
+          { title: "Rituals", value: "Rituals" },
+          { title: "Dispatches", value: "Dispatches" },
+          { title: "Field Notes", value: "Field Notes" },
+          { title: "Archive", value: "Archive" },
+          { title: "Spaces", value: "Spaces" },
+        ],
+        layout: "dropdown",
+      },
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "content",

@@ -1,5 +1,10 @@
 import { client } from "../sanity/lib/client"
-import type { SanityBlog, SanityBlogTemplate1, SanitySEO } from "types/sanity-blog"
+import type {
+  SanityBlog,
+  SanityBlogTemplate1,
+  SanityJournalListItem,
+  SanitySEO,
+} from "types/sanity-blog"
 
 // In dev, bypass Next's fetch cache entirely so Studio edits appear on refresh.
 // In prod, cache with a short revalidate window for performance.
@@ -150,6 +155,92 @@ export async function getAllBlogTemplate1LinksSanity(): Promise<
   } catch (error) {
     console.error("Error fetching Sanity blogTemplate1 all links:", error)
     return []
+  }
+}
+
+// GROQ projection for the merged journal listing. Uses `select()` to derive
+// per-type href so page components don't need to know which schema an item
+// came from.
+const JOURNAL_LIST_PROJECTION = `{
+  _type,
+  title,
+  "slug": slug.current,
+  description,
+  publishedDate,
+  isFeatured,
+  category,
+  "image": coalesce(coverImage.asset->url, ""),
+  "imageAlt": coalesce(imageAlt, ""),
+  "href": select(
+    _type == "blog" => "/blogs/template-2/" + slug.current,
+    _type == "blogTemplate1" => "/blogs/" + slug.current,
+    "/blogs/" + slug.current
+  )
+}`
+
+/**
+ * Fetch merged journal blog entries across `blog` + `blogTemplate1`, ordered
+ * by publishedDate desc, paginated. Pass `featured: true` for the Featured
+ * strip; `featured: false` for the Recent Entries sidebar.
+ */
+const buildJournalFilters = (featured?: boolean, category?: string) => {
+  // isFeatured may be absent on older docs; treat missing as false so the
+  // "not featured" filter still returns them.
+  const featuredFilter =
+    featured === undefined
+      ? ""
+      : featured
+        ? "&& isFeatured == true"
+        : "&& (isFeatured != true || !defined(isFeatured))"
+  const categoryFilter = category ? "&& category == $category" : ""
+  return { featuredFilter, categoryFilter }
+}
+
+export async function getJournalBlogsSanity({
+  featured,
+  category,
+  limit = 10,
+  offset = 0,
+}: {
+  featured?: boolean
+  category?: string
+  limit?: number
+  offset?: number
+}): Promise<SanityJournalListItem[]> {
+  try {
+    const { featuredFilter, categoryFilter } = buildJournalFilters(featured, category)
+    return await client.fetch<SanityJournalListItem[]>(
+      `*[_type in ["blog", "blogTemplate1"] ${featuredFilter} ${categoryFilter}] | order(publishedDate desc) [$offset...$end]${JOURNAL_LIST_PROJECTION}`,
+      { offset, end: offset + limit, category: category ?? "" },
+      cacheOpts(60)
+    )
+  } catch (error) {
+    console.error("Error fetching Sanity journal blogs:", error)
+    return []
+  }
+}
+
+/**
+ * Total count for merged journal listing — used to gate "View more" on the
+ * Featured pagination.
+ */
+export async function getJournalBlogsCountSanity({
+  featured,
+  category,
+}: {
+  featured?: boolean
+  category?: string
+}): Promise<number> {
+  try {
+    const { featuredFilter, categoryFilter } = buildJournalFilters(featured, category)
+    return await client.fetch<number>(
+      `count(*[_type in ["blog", "blogTemplate1"] ${featuredFilter} ${categoryFilter}])`,
+      { category: category ?? "" },
+      cacheOpts(60)
+    )
+  } catch (error) {
+    console.error("Error fetching Sanity journal blogs count:", error)
+    return 0
   }
 }
 
