@@ -89,6 +89,7 @@ export interface SanityBlog {
   slug: string
   description?: string
   publishedDate?: string
+  isFeatured?: boolean
   coverImage?: SanityImageRef | null
   categories?: string[]
   tags?: string[]
@@ -127,6 +128,7 @@ export interface SanityBlogTemplate1 {
   slug: string
   description?: string
   publishedDate?: string
+  isFeatured?: boolean
   coverImage?: SanityImageRef | null
   imageAlt?: string
   author?: SanityBlogAuthor | null
@@ -134,4 +136,34 @@ export interface SanityBlogTemplate1 {
   content: SanityContentBlock[]
   featuredProducts?: string[]
   resolvedFeaturedProducts?: ResolvedFeaturedProduct[]
+}
+
+export type JournalCategory =
+  | "Rituals"
+  | "Dispatches"
+  | "Field Notes"
+  | "Archive"
+  | "Spaces"
+
+export const JOURNAL_CATEGORIES: JournalCategory[] = [
+  "Rituals",
+  "Dispatches",
+  "Field Notes",
+  "Archive",
+  "Spaces",
+]
+
+// Merged journal-listing item (across `blog` + `blogTemplate1` types).
+// `href` is derived from `_type` server-side; consumers link to it directly.
+export interface SanityJournalListItem {
+  _type: "blog" | "blogTemplate1"
+  title: string
+  slug: string
+  description?: string
+  publishedDate?: string
+  isFeatured?: boolean
+  category?: JournalCategory
+  image?: string
+  imageAlt?: string
+  href: string
 }

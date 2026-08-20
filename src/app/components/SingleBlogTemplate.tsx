@@ -1,6 +1,7 @@
 "use client"
 import { PortableText, type PortableTextComponents } from "@portabletext/react"
 import { addToCart } from "@lib/data/cart"
+import { convertToLocale } from "@lib/util/money"
 import { Navigation } from "app/components/Navigation"
 import {
   Carousel,
@@ -46,8 +47,38 @@ const FeaturedBlogProduct = ({
   // Get the first available variant for simplicity
   const selectedVariant = variants?.[0]
 
-  // Use subtitle if available, otherwise fall back to description
-  const displayText = subtitle || description
+  // Derive price + quantity from the variant. Price uses the calculated price
+  // (already region-adjusted); quantity prefers the "size" option value
+  // (matches PDP radios) and falls back to variant.title.
+  const priceAmount = selectedVariant?.calculated_price?.calculated_amount
+  const priceCurrency =
+    selectedVariant?.calculated_price?.currency_code ||
+    selectedVariant?.calculated_price?.original_currency_code ||
+    ""
+  const formattedPrice =
+    typeof priceAmount === "number"
+      ? convertToLocale({
+          amount: priceAmount,
+          currency_code: priceCurrency,
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        })
+      : null
+  // Look for the first candidate (title, then any option value) that contains
+  // a quantity token like "200 g" / "500 ml". Candle option values are just
+  // the number ("200") without a unit, so the title is often the only source.
+  const sizeCandidates = [
+    (selectedVariant as any)?.title,
+    ...((selectedVariant as any)?.options?.map((o: any) => o?.value) ?? []),
+  ].filter(Boolean) as string[]
+  const sizeMatch = sizeCandidates
+    .map((s) => String(s).match(/\d+(?:\.\d+)?\s*(?:ml|l|g|gm|kg|oz|lb)\b/i))
+    .find((m) => m !== null)
+  const quantityLabel = sizeMatch ? sizeMatch[0].replace(/\s+/g, " ").trim() : ""
+  // `description` and `subtitle` intentionally unused now — kept in props for
+  // backward compatibility with existing call sites.
+  void description
+  void subtitle
 
   // Mobile auto-rotate effect
   useEffect(() => {
@@ -150,16 +181,20 @@ const FeaturedBlogProduct = ({
           >
             {name}
           </h3>
-          {displayText && (
+          {(formattedPrice || quantityLabel) && (
             <p
-              className="text-sm md:text-base mb-4 line-clamp-2"
+              className="text-sm md:text-base mb-4 flex items-center justify-center gap-2"
               style={{
                 fontFamily: '"DIN Arabic Regular"',
-                color: "#626262",
+                color: "#333",
                 lineHeight: "1.5",
               }}
             >
-              {displayText}
+              {formattedPrice && <span className="font-medium">{formattedPrice}</span>}
+              {formattedPrice && quantityLabel && (
+                <span className="text-black/30">·</span>
+              )}
+              {quantityLabel && <span className="text-black/60">{quantityLabel}</span>}
             </p>
           )}
         </div>
