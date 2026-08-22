@@ -52,6 +52,14 @@ interface FullWidthFeature {
   imagePosition: "left" | "right"
 }
 
+// Trim any product-type prefix off a size label so the radio button reads
+// just the quantity, e.g. "hand wash 500 ml" -> "500 ml". Same helper as
+// ProductHero. Falls back to the raw string if no quantity token is found.
+function stripToQuantity(raw: string): string {
+  const match = String(raw).match(/\d+(?:\.\d+)?\s*(?:ml|l|g|gm|kg|oz|lb)\b/i)
+  return match ? match[0].replace(/\s+/g, " ").trim() : raw
+}
+
 // Helper function to convert product name to URL slug
 function getProductSlug(productName: string): string {
   return productName
@@ -672,7 +680,7 @@ function ProductCard({
                       }`}
                     style={{ letterSpacing: "0.1em" }}
                   >
-                    {size}
+                    {stripToQuantity(size)}
                   </span>
                 </label>
               ))}
@@ -681,6 +689,20 @@ function ProductCard({
         )}
 
         <div className="mt-auto pt-4">
+          {product.subCategoryName && (
+            <p
+              className="font-din-arabic text-black/60 text-xs mb-1"
+              style={{ letterSpacing: "0.1em" }}
+            >
+              {product.subCategoryName}
+              {selectedSize && (
+                <>
+                  <span className="mx-2 text-black/30">·</span>
+                  {stripToQuantity(selectedSize)}
+                </>
+              )}
+            </p>
+          )}
           <p className="font-din-arabic text-black text-sm mb-4" style={{ letterSpacing: "0.1em" }}>
             ₹{getCurrentPrice().toLocaleString()}
           </p>

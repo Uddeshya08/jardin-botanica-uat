@@ -1,8 +1,10 @@
 import { motion } from "motion/react"
 import Link from "next/link"
 import React, { useState } from "react"
-import type { Blog } from "types/contentful"
+import type { SanityJournalListItem } from "types/sanity-blog"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
+
+type Blog = SanityJournalListItem
 
 interface JournalSectionProps {
   blogs?: Blog[]
@@ -21,7 +23,7 @@ function JournalPostCard({
   const [isPressed, setIsPressed] = useState(false)
 
   return (
-    <Link href={`/${countryCode}/blogs/${blog.slug}`} className="block h-full">
+    <Link href={`/${countryCode}${blog.href}`} className="block h-full">
       <motion.article
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
