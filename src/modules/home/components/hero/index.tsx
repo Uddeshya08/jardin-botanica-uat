@@ -11,7 +11,7 @@ import Newsletter from "app/components/Newsletter"
 import { RippleEffect } from "app/components/RippleEffect"
 import { useCartItems } from "app/context/cart-items-context"
 import React, { useEffect, useState } from "react"
-import type { Blog } from "types/contentful"
+import type { SanityJournalListItem as Blog } from "types/sanity-blog"
 import { ProductCarousel } from "../product-carousel"
 
 interface HeroProps {

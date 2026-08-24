@@ -286,16 +286,35 @@ export function ProductCarousel({
     return sourceProducts.map((p) => {
       const variant = p.variants?.[0]
       const calculatedPrice = variant?.calculated_price?.calculated_amount
-      // Prefer the "size" option value (what PDP shows). Falls back to
-      // variant title, then any first option value.
-      const sizeOptionId = (p as any).options?.find(
-        (o: any) => (o?.title || "").toLowerCase() === "size"
-      )?.id
-      const sizeOptionValue = sizeOptionId
-        ? (variant as any)?.options?.find((o: any) => o.option_id === sizeOptionId)?.value
-        : undefined
-      const sizeLabel =
-        sizeOptionValue || variant?.title || (variant as any)?.options?.[0]?.value || "Default"
+
+      // Extract the quantity token ("500 ml", "200 g", …) from wherever it
+      // lives — variant title, size option value, or any variant option
+      // value. Falls back to the raw variant title if no unit-bearing token
+      // is present, so nothing regresses when the schema changes.
+      const quantityCandidates: string[] = [
+        (variant as any)?.title ?? "",
+        ...((variant as any)?.options?.map((o: any) => o?.value ?? "") ?? []),
+      ].filter(Boolean)
+      const qMatch = quantityCandidates
+        .map((s) => s.match(/\d+(?:\.\d+)?\s*(?:ml|l|g|gm|kg|oz|lb)\b/i))
+        .find((m) => m !== null)
+      const quantityLabel = qMatch
+        ? qMatch[0].replace(/\s+/g, " ").trim()
+        : (variant?.title || "")
+
+      // Category prefix — use the innermost Medusa category name (last in the
+      // list is usually the leaf, e.g. "Hand Wash" over the parent "Body &
+      // Hands"). Any product with a category renders "<Category> · <qty>"
+      // automatically, no code change per new SKU.
+      const categories = ((p as any).categories || []) as { name?: string }[]
+      const categoryName =
+        categories[categories.length - 1]?.name || categories[0]?.name || ""
+
+      const sizeLabel = categoryName
+        ? quantityLabel
+          ? `${categoryName} · ${quantityLabel}`
+          : categoryName
+        : quantityLabel || "Default"
 
       return {
         id: p.id,

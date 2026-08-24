@@ -245,6 +245,27 @@ export async function getJournalBlogsCountSanity({
 }
 
 /**
+ * Latest N journal entries (merged across both blog types) that actually
+ * have a cover image set — used by the home page Journal section where the
+ * cover is mandatory. Entries without a cover are skipped, so if the newest
+ * post has no image the next-newest with one takes its place.
+ */
+export async function getLatestJournalWithCoverSanity(
+  limit: number = 3
+): Promise<SanityJournalListItem[]> {
+  try {
+    return await client.fetch<SanityJournalListItem[]>(
+      `*[_type in ["blog", "blogTemplate1"] && defined(coverImage.asset)] | order(publishedDate desc) [0...$limit]${JOURNAL_LIST_PROJECTION}`,
+      { limit },
+      cacheOpts(60)
+    )
+  } catch (error) {
+    console.error("Error fetching latest Sanity journal with cover:", error)
+    return []
+  }
+}
+
+/**
  * SEO metadata for a page, replacing Strapi's page-seos content type.
  */
 export async function getPageSEOSanity(pageSlug: string): Promise<SanitySEO | null> {
