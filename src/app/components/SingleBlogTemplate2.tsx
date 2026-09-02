@@ -1,6 +1,7 @@
 "use client"
 import { PortableText, type PortableTextComponents } from "@portabletext/react"
 import { Navigation } from "app/components/Navigation"
+import { ChevronLeft } from "lucide-react"
 import { motion } from "motion/react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -465,6 +466,25 @@ export const SingleBlogTemplate2 = ({
 
       {/* Narrative body — zigzag two-column: each block alternates left/right down the page */}
       <div className="max-w-5xl mx-auto px-6 md:px-4">
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1, duration: 0.6 }}
+        >
+          <Link
+            href={`/${countryCode}/blogs`}
+            className="inline-flex items-center text-xs md:text-sm text-[#999] hover:text-[#626262] transition-colors duration-200"
+            style={{
+              fontFamily: '"American Typewriter"',
+              letterSpacing: "1px",
+            }}
+          >
+            <ChevronLeft size={16} className="mr-1" />
+            Back to Journal
+          </Link>
+        </motion.div>
+
         <div
           className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 items-start"
           style={{

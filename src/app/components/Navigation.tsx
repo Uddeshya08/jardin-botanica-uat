@@ -118,12 +118,17 @@ export function Navigation({
           navItems.map((item) => ({
             name: item.name,
             href: item.href,
-            dropdown: item.dropdown?.map((d) => ({
-              label: d.label,
-              href: d.href,
-              image: d.image,
-              titleContent: d.titleContent,
-            })),
+            dropdown: item.dropdown
+              ?.filter(
+                (d) =>
+                  !(item.name === "HOME CREATIONS" && d.label?.toLowerCase() === "diffuser")
+              )
+              .map((d) => ({
+                label: d.label,
+                href: d.href,
+                image: d.image,
+                titleContent: d.titleContent,
+              })),
           }))
         )
       }
