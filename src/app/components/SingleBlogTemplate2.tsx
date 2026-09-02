@@ -1,6 +1,8 @@
 "use client"
 import { PortableText, type PortableTextComponents } from "@portabletext/react"
 import { Navigation } from "app/components/Navigation"
+import { Carousel, CarouselContent, CarouselItem } from "app/components/ui/carousel"
+import { ChevronLeft } from "lucide-react"
 import { motion } from "motion/react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -465,6 +467,25 @@ export const SingleBlogTemplate2 = ({
 
       {/* Narrative body — zigzag two-column: each block alternates left/right down the page */}
       <div className="max-w-5xl mx-auto px-6 md:px-4">
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1, duration: 0.6 }}
+        >
+          <Link
+            href={`/${countryCode}/blogs`}
+            className="inline-flex items-center text-xs md:text-sm text-[#999] hover:text-[#626262] transition-colors duration-200"
+            style={{
+              fontFamily: '"American Typewriter"',
+              letterSpacing: "1px",
+            }}
+          >
+            <ChevronLeft size={16} className="mr-1" />
+            Back to Journal
+          </Link>
+        </motion.div>
+
         <div
           className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 items-start"
           style={{
@@ -503,7 +524,7 @@ export const SingleBlogTemplate2 = ({
             Shop the Story
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-12">
+          <div className="hidden md:grid grid-cols-3 gap-x-8 gap-y-12">
             {featuredProducts.map((product) => (
               <Link
                 key={product.handle}
@@ -533,6 +554,77 @@ export const SingleBlogTemplate2 = ({
                 )}
               </Link>
             ))}
+          </div>
+
+          <div className="md:hidden">
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `
+                  .shop-story-carousel-item {
+                    width: calc(85vw) !important;
+                    flex-basis: calc(85vw) !important;
+                    flex-shrink: 0 !important;
+                    margin-left: 0.75rem !important;
+                    margin-right: 0.75rem !important;
+                  }
+                  .shop-story-carousel-content {
+                    user-select: none !important;
+                    -webkit-user-select: none !important;
+                    padding-left: 0 !important;
+                    padding-right: 1.5rem !important;
+                  }
+                  .shop-story-carousel-content > div {
+                    margin-left: 0 !important;
+                    gap: 0 !important;
+                  }
+                `,
+              }}
+            />
+            <Carousel
+              opts={{
+                align: "center",
+                loop: featuredProducts.length > 1,
+                dragFree: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="shop-story-carousel-content">
+                {featuredProducts.map((product) => (
+                  <CarouselItem key={product.handle} className="shop-story-carousel-item">
+                    <Link
+                      href={`/${countryCode}/products/${product.handle}`}
+                      className="group block text-center"
+                    >
+                      <div className="relative overflow-hidden mb-4" style={{ aspectRatio: "4/5" }}>
+                        <img
+                          src={product.image || "/assets/placeholder-product.jpg"}
+                          alt={product.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3
+                        className="group-hover:underline"
+                        style={{
+                          fontFamily: '"American Typewriter"',
+                          fontSize: "16px",
+                          color: "#333",
+                        }}
+                      >
+                        {product.title}
+                      </h3>
+                      {product.price && (
+                        <p
+                          className="mt-1"
+                          style={{ fontFamily: "Georgia, serif", fontSize: "14px", color: "#666" }}
+                        >
+                          {product.price}
+                        </p>
+                      )}
+                    </Link>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
           </div>
         </div>
       )}
