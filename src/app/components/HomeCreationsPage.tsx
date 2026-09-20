@@ -9,7 +9,6 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import React, { useEffect, useMemo, useState, useTransition } from "react"
 import { toast } from "sonner"
-import type { Blog } from "types/contentful"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 export interface Product {
@@ -36,7 +35,6 @@ interface HomeCreationsPageProps {
   filterOptions: string[] // Dynamic filter names from Contentful (e.g., ["Candles", "Diffusers"])
   isLoading?: boolean
   countryCode?: string
-  journalBlogs?: Blog[]
 }
 
 interface FullWidthFeature {
@@ -92,7 +90,6 @@ export function HomeCreationsPage({
   filterOptions,
   isLoading = false,
   countryCode,
-  journalBlogs = [],
 }: HomeCreationsPageProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>("all")
   const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
@@ -350,10 +347,8 @@ export function HomeCreationsPage({
         </div>
       </section>
 
-      <HomeCreationsJournalGrid blogs={journalBlogs} countryCode={countryCode} />
-
       {/* Editorial Blog Section - Full Width */}
-      {filteredProducts.length > 3 && <EditorialBlogSection />}
+      {filteredProducts.length > 3 && <EditorialBlogSection countryCode={countryCode} />}
 
       {/* Products Grid - Second Set */}
       {filteredProducts.length > 3 && (
@@ -395,89 +390,6 @@ export function HomeCreationsPage({
         </section>
       )}
     </div>
-  )
-}
-
-function HomeCreationsJournalGrid({ blogs, countryCode }: { blogs: Blog[]; countryCode?: string }) {
-  if (blogs.length === 0) return null
-
-  return (
-    <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pb-16 sm:pb-24 lg:pb-32">
-      <div className="max-w-[90rem] mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="flex items-end justify-between gap-6 mb-8 sm:mb-10"
-        >
-          <div>
-            <p
-              className="font-din-arabic text-black/50 text-xs mb-3"
-              style={{ letterSpacing: "0.2em" }}
-            >
-              STORIES, RITUALS & BOTANICAL NOTES
-            </p>
-            <h2 className="font-american-typewriter text-3xl sm:text-4xl lg:text-5xl">
-              From the Journal
-            </h2>
-          </div>
-          <Link
-            href={`/${countryCode || "in"}/blogs`}
-            className="hidden sm:inline-block font-din-arabic text-sm border-b border-black/40 pb-1 hover:border-black"
-            style={{ letterSpacing: "0.12em" }}
-          >
-            View all stories
-          </Link>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {blogs.slice(0, 4).map((blog, index) => (
-            <motion.article
-              key={blog.slug}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.65, delay: (index % 2) * 0.1 }}
-              className="group relative aspect-[4/3] sm:aspect-[16/11] overflow-hidden bg-black"
-            >
-              <ImageWithFallback
-                src={blog.image || ""}
-                alt={blog.imagealt || blog.title}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/5" />
-              <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8 lg:p-10 text-white">
-                <p
-                  className="font-din-arabic text-white/70 text-xs mb-3"
-                  style={{ letterSpacing: "0.18em" }}
-                >
-                  {(blog.journalTags?.[0]?.name || blog.categories?.[0] || "Journal").toUpperCase()}
-                </p>
-                <h3 className="font-american-typewriter text-2xl sm:text-3xl leading-tight max-w-xl mb-5">
-                  {blog.title}
-                </h3>
-                <Link
-                  href={`/${countryCode || "in"}/blogs/${blog.slug}`}
-                  className="w-fit font-din-arabic text-xs sm:text-sm border border-white/60 px-5 py-2.5 hover:bg-white hover:text-black transition-colors duration-300"
-                  style={{ letterSpacing: "0.14em" }}
-                >
-                  Read story
-                </Link>
-              </div>
-            </motion.article>
-          ))}
-        </div>
-
-        <Link
-          href={`/${countryCode || "in"}/blogs`}
-          className="sm:hidden block w-fit mx-auto mt-8 font-din-arabic text-sm border-b border-black/40 pb-1"
-          style={{ letterSpacing: "0.12em" }}
-        >
-          View all stories
-        </Link>
-      </div>
-    </section>
   )
 }
 
@@ -647,7 +559,7 @@ function ProductCard({
   )
 }
 
-function EditorialBlogSection() {
+function EditorialBlogSection({ countryCode }: { countryCode?: string }) {
   return (
     <motion.section
       initial={{ opacity: 0 }}
@@ -709,7 +621,7 @@ function EditorialBlogSection() {
               className="font-american-typewriter text-white text-2xl sm:text-3xl lg:text-4xl mb-5 sm:mb-7"
               style={{ letterSpacing: "0.05em" }}
             >
-              Creating atmosphere through fragrance
+              On Wax, Rooms, and Scent
             </motion.h2>
 
             <motion.p
@@ -725,33 +637,35 @@ function EditorialBlogSection() {
               familiar rooms into spaces that feel entirely your own.
             </motion.p>
 
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.7 }}
-              whileHover={{ x: 5 }}
-              whileTap={{ scale: 0.98 }}
-              className="group inline-flex items-center gap-3 border border-white/40 hover:border-white hover:bg-white/5 px-10 py-3.5 transition-all duration-300"
-            >
-              <span
-                className="font-din-arabic text-white text-sm"
-                style={{ letterSpacing: "0.15em" }}
+            <Link href={`/${countryCode || "in"}/blogs/template-2/on-wax-rooms-and-scent`}>
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.7 }}
+                whileHover={{ x: 5 }}
+                whileTap={{ scale: 0.98 }}
+                className="group inline-flex items-center gap-3 border border-white/40 hover:border-white hover:bg-white/5 px-10 py-3.5 transition-all duration-300"
               >
-                Read the guide
-              </span>
-              <motion.span
-                className="text-white"
-                animate={{ x: [0, 5, 0] }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                →
-              </motion.span>
-            </motion.button>
+                <span
+                  className="font-din-arabic text-white text-sm"
+                  style={{ letterSpacing: "0.15em" }}
+                >
+                  Read the guide
+                </span>
+                <motion.span
+                  className="text-white"
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  →
+                </motion.span>
+              </motion.button>
+            </Link>
           </div>
         </motion.div>
       </div>

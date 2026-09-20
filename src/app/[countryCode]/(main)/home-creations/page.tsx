@@ -1,6 +1,6 @@
 "use client"
 
-import { getAllBlogs, getProductCategoryByHandle } from "@lib/data/contentful"
+import { getProductCategoryByHandle } from "@lib/data/contentful"
 import { getProductByHandle } from "@lib/data/products"
 import { HomeCreationsPage, type Product } from "app/components/HomeCreationsPage"
 import { Navigation } from "app/components/Navigation"
@@ -8,7 +8,7 @@ import { RippleEffect } from "app/components/RippleEffect"
 import { useCartItems } from "app/context/cart-items-context"
 import { useParams } from "next/navigation"
 import React, { useEffect, useState } from "react"
-import type { Blog, ProductCategory } from "../../../../types/contentful"
+import type { ProductCategory } from "../../../../types/contentful"
 
 function getCategoryProducts(category: ProductCategory, linkedCategories: ProductCategory[]) {
   const categorySources = [category, ...linkedCategories]
@@ -117,18 +117,11 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string): Pr
 export default function HomeCreationsRoutePage() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
-  const [journalBlogs, setJournalBlogs] = useState<Blog[]>([])
   const [filterOptions, setFilterOptions] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const { cartItems, handleCartUpdate } = useCartItems()
   const params = useParams()
   const countryCode = params?.countryCode as string
-
-  useEffect(() => {
-    getAllBlogs(4, countryCode)
-      .then(setJournalBlogs)
-      .catch((error) => console.error("Error fetching Home Creations journals:", error))
-  }, [countryCode])
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 50)
@@ -214,7 +207,6 @@ export default function HomeCreationsRoutePage() {
         filterOptions={filterOptions}
         isLoading={isLoading}
         countryCode={countryCode}
-        journalBlogs={journalBlogs}
       />
     </div>
   )
