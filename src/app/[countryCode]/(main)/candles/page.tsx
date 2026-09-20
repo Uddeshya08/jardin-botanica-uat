@@ -225,8 +225,14 @@ const MobileProductCard = ({
           </div>
         </div>
 
+        <div className="mt-auto pt-4">
+          <p className="font-din-arabic text-black text-sm" style={{ letterSpacing: "0.1em" }}>
+            ₹{(item.price || 0).toLocaleString()}
+          </p>
+        </div>
+
         {/* Actions Row */}
-        <div className="flex items-center justify-end mt-auto pt-4">
+        <div className="flex items-center justify-end pt-4">
           {/* Add to Cart Button (Right) */}
           <button
             onClick={(e) => handleAddToCart(e)}
@@ -504,8 +510,14 @@ const ProductCard = ({
           </div>
         )}
 
+        <div className="mt-auto pt-4 text-left">
+          <p className="font-din-arabic text-black text-sm" style={{ letterSpacing: "0.1em" }}>
+            ₹{price.toLocaleString()}
+          </p>
+        </div>
+
         {/* Actions Row */}
-        <div className="flex items-center justify-end mt-auto pt-4">
+        <div className="flex items-center justify-end pt-4">
           {/* Add to Cart Button (Right) */}
           <button
             onClick={(e) => handleAddToCart(e)}
@@ -1405,7 +1417,8 @@ const Candles = () => {
             viewport={{ once: true, amount: 0.3 }}
             className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed max-w-2xl mx-auto mb-6 md:mb-10 px-4 md:px-0"
           >
-           Private orders, boutique placements, hospitality projects, and considered gifting — let us help compose something suited to the occasion.
+            Private orders, boutique placements, hospitality projects, and considered gifting — let
+            us help compose something suited to the occasion.
           </motion.p>
           <motion.a
             href="mailto:hello@jardinbotanica.com"
@@ -1438,10 +1451,7 @@ const Candles = () => {
             className="w-full md:w-[55%] h-[300px] md:h-[500px] overflow-hidden"
           >
             <video autoPlay loop muted playsInline className="w-full h-full object-cover">
-              <source
-                src="https://assets.mixkit.co/videos/5224/5224-720.mp4"
-                type="video/mp4"
-              />
+              <source src="https://assets.mixkit.co/videos/5224/5224-720.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </motion.div>

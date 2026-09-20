@@ -2172,6 +2172,7 @@ function transformProductCategoryEntry(
 
     // Transform subCategory - filter only ProductCategory references
     const subCategories: ProductCategory[] = []
+    const pageLinks: { title: string; url: string }[] = []
     if (Array.isArray(fields.subCategory)) {
       fields.subCategory.forEach((item: any) => {
         // Check if this is a ProductCategory reference (not PageLink)
@@ -2184,6 +2185,11 @@ function transformProductCategoryEntry(
           if (nestedCategory) {
             subCategories.push(nestedCategory)
           }
+        } else if (contentTypeId === "pageLink" && item.fields?.url) {
+          pageLinks.push({
+            title: item.fields.title || "",
+            url: item.fields.url,
+          })
         }
       })
     }
@@ -2194,6 +2200,7 @@ function transformProductCategoryEntry(
       url: fields.url || undefined,
       productHandles: Array.isArray(fields.productHandles) ? fields.productHandles : [],
       subCategories,
+      pageLinks,
     }
   } catch (error) {
     console.error("Error transforming ProductCategory entry:", error)
