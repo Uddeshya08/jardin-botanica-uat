@@ -144,7 +144,7 @@ function ProductCard({
   return (
     <div
       ref={cardRef}
-      className="group flex flex-col w-full max-w-[480px] min-h-[390px] md:min-h-[480px] mx-auto h-full px-0 md:pl-6"
+      className="group flex flex-col w-full max-w-[480px] min-h-0 md:min-h-[480px] mx-auto h-auto md:h-full px-1 md:pl-6"
     >
       {/* Product Image */}
       <div
@@ -209,11 +209,11 @@ function ProductCard({
       </div>
 
       {/* Product Info */}
-      <div className="flex flex-col flex-grow min-h-0 md:justify-between">
+      <div className="flex flex-col min-h-0 md:flex-grow md:justify-between">
         <div>
-          <div className="flex justify-start items-center py-1 md:py-2">
+          <div className="flex justify-start items-start pt-1 pb-0 md:py-2 min-h-[2.5rem] md:min-h-0 overflow-hidden">
             <h3
-              className="font-american-typewriter text-sm leading-snug md:text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity"
+              className="font-american-typewriter w-full min-w-0 text-xs leading-snug md:text-xl mb-0 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity line-clamp-2 break-words"
               style={{ letterSpacing: "0.05em" }}
               onClick={handleProductClick}
             >
@@ -222,7 +222,7 @@ function ProductCard({
           </div>
         </div>
         {/* Price, Size and Add to Cart Button - Combined for better mobile spacing */}
-        <div className="flex flex-col gap-2 md:gap-4 flex-grow justify-end">
+        <div className="flex flex-col gap-2 mt-1 md:mt-0 md:gap-4 md:flex-grow md:justify-end">
           <div className="flex justify-between items-center gap-1">
             <p
               className="font-din-arabic text-black text-xs md:text-sm"
@@ -541,8 +541,10 @@ export function ProductCarousel({
               margin-right: 0.75rem !important;
             }
             .product-carousel-content {
+              margin-left: 0 !important;
               padding-left: 0.25rem !important;
               padding-right: 0.25rem !important;
+              box-sizing: border-box !important;
             }
             [data-slot="carousel-content"] {
               scroll-padding-left: 0 !important;
