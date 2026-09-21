@@ -348,7 +348,7 @@ export function HomeCreationsPage({
       </section>
 
       {/* Editorial Blog Section - Full Width */}
-      {/* {filteredProducts.length > 3 && <EditorialBlogSection />} */}
+      {filteredProducts.length > 3 && <EditorialBlogSection countryCode={countryCode} />}
 
       {/* Products Grid - Second Set */}
       {filteredProducts.length > 3 && (
@@ -504,12 +504,6 @@ function ProductCard({
             >
               {product.name}
             </h3>
-            <p
-              className="font-din-arabic text-black/60 text-sm mb-2"
-              style={{ letterSpacing: "0.1em" }}
-            >
-              {product.size}
-            </p>
           </div>
         </Link>
 
@@ -565,7 +559,7 @@ function ProductCard({
   )
 }
 
-function EditorialBlogSection() {
+function EditorialBlogSection({ countryCode }: { countryCode?: string }) {
   return (
     <motion.section
       initial={{ opacity: 0 }}
@@ -627,7 +621,7 @@ function EditorialBlogSection() {
               className="font-american-typewriter text-white text-2xl sm:text-3xl lg:text-4xl mb-5 sm:mb-7"
               style={{ letterSpacing: "0.05em" }}
             >
-              Creating atmosphere through fragrance
+              On Wax, Rooms, and Scent
             </motion.h2>
 
             <motion.p
@@ -643,33 +637,35 @@ function EditorialBlogSection() {
               familiar rooms into spaces that feel entirely your own.
             </motion.p>
 
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.7 }}
-              whileHover={{ x: 5 }}
-              whileTap={{ scale: 0.98 }}
-              className="group inline-flex items-center gap-3 border border-white/40 hover:border-white hover:bg-white/5 px-10 py-3.5 transition-all duration-300"
-            >
-              <span
-                className="font-din-arabic text-white text-sm"
-                style={{ letterSpacing: "0.15em" }}
+            <Link href={`/${countryCode || "in"}/blogs/template-2/on-wax-rooms-and-scent`}>
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.7 }}
+                whileHover={{ x: 5 }}
+                whileTap={{ scale: 0.98 }}
+                className="group inline-flex items-center gap-3 border border-white/40 hover:border-white hover:bg-white/5 px-10 py-3.5 transition-all duration-300"
               >
-                Read the guide
-              </span>
-              <motion.span
-                className="text-white"
-                animate={{ x: [0, 5, 0] }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                →
-              </motion.span>
-            </motion.button>
+                <span
+                  className="font-din-arabic text-white text-sm"
+                  style={{ letterSpacing: "0.15em" }}
+                >
+                  Read the guide
+                </span>
+                <motion.span
+                  className="text-white"
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  →
+                </motion.span>
+              </motion.button>
+            </Link>
           </div>
         </motion.div>
       </div>

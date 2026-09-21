@@ -144,17 +144,11 @@ function ProductCard({
   return (
     <div
       ref={cardRef}
-      className="group flex flex-col w-full mx-auto h-full"
-      style={{
-        minHeight: "480px",
-        maxWidth: "480px",
-        paddingLeft: "1.5rem",
-      }}
+      className="group flex flex-col w-full max-w-[480px] min-h-[390px] md:min-h-[480px] mx-auto h-full px-0 md:pl-6"
     >
       {/* Product Image */}
       <div
-        className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] sm:aspect-[3/4]"
-        style={{ marginBottom: "2.5rem" }}
+        className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] mb-4 md:mb-10"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleProductClick}
@@ -198,7 +192,7 @@ function ProductCard({
 
         {/* Ledger Icon */}
         <button
-          className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 bg-white/20 border border-white/30 hover:bg-white/30"
+          className="absolute top-2 right-2 md:top-4 md:right-4 p-1.5 md:p-2.5 rounded-full backdrop-blur-md transition-all duration-300 bg-white/20 border border-white/30 hover:bg-white/30"
           aria-label={`${isInLedger ? "Remove from" : "Add to"} ledger`}
           onClick={(e) => {
             e.stopPropagation()
@@ -207,8 +201,9 @@ function ProductCard({
         >
           <Heart
             size={18}
-            className={`transition-colors duration-300 ${isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
-              }`}
+            className={`transition-colors duration-300 ${
+              isInLedger ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"
+            }`}
           />
         </button>
       </div>
@@ -218,7 +213,7 @@ function ProductCard({
         <div>
           <div className="flex justify-start items-center py-1 md:py-2">
             <h3
-              className="font-american-typewriter text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity"
+              className="font-american-typewriter text-sm leading-snug md:text-xl mb-0.5 md:mb-1 cursor-pointer hover:opacity-70 transition-opacity"
               style={{ letterSpacing: "0.05em" }}
               onClick={handleProductClick}
             >
@@ -228,17 +223,23 @@ function ProductCard({
         </div>
         {/* Price, Size and Add to Cart Button - Combined for better mobile spacing */}
         <div className="flex flex-col gap-2 md:gap-4 flex-grow justify-end">
-          <div className="flex justify-between items-center">
-            <p className="font-din-arabic text-black text-sm" style={{ letterSpacing: "0.1em" }}>
+          <div className="flex justify-between items-center gap-1">
+            <p
+              className="font-din-arabic text-black text-xs md:text-sm"
+              style={{ letterSpacing: "0.06em" }}
+            >
               ₹{product.price.toLocaleString()}
             </p>
-            <p className="font-din-arabic text-black/60 text-sm" style={{ letterSpacing: "0.1em" }}>
+            <p
+              className="font-din-arabic text-black/60 text-xs md:text-sm"
+              style={{ letterSpacing: "0.06em" }}
+            >
               {product.size}
             </p>
           </div>
           {/* Add to Cart Button */}
           <button
-            className="group/btn-wrapper flex items-center justify-center font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 transition-all duration-300 tracking-wide text-sm md:text-base relative cursor-pointer hover:bg-black"
+            className="group/btn-wrapper flex items-center justify-center font-din-arabic px-2 py-2.5 md:px-8 md:py-3 bg-transparent border border-black/30 transition-all duration-300 tracking-wide text-xs md:text-base relative cursor-pointer hover:bg-black"
             onClick={(e) => {
               e.stopPropagation()
               onAddToCart()
@@ -247,8 +248,8 @@ function ProductCard({
           >
             <div className="relative inline-flex items-center gap-2 pb-0.5 z-10 pointer-events-none">
               <span
-                className="font-din-arabic text-base text-black group-hover/btn-wrapper:text-white transition-colors duration-300"
-                style={{ letterSpacing: "0.12em" }}
+                className="font-din-arabic text-xs md:text-base text-black group-hover/btn-wrapper:text-white transition-colors duration-300"
+                style={{ letterSpacing: "0.08em" }}
               >
                 {isAddedToCart ? "In cart" : "Add to cart"}
               </span>
@@ -298,17 +299,14 @@ export function ProductCarousel({
       const qMatch = quantityCandidates
         .map((s) => s.match(/\d+(?:\.\d+)?\s*(?:ml|l|g|gm|kg|oz|lb)\b/i))
         .find((m) => m !== null)
-      const quantityLabel = qMatch
-        ? qMatch[0].replace(/\s+/g, " ").trim()
-        : (variant?.title || "")
+      const quantityLabel = qMatch ? qMatch[0].replace(/\s+/g, " ").trim() : variant?.title || ""
 
       // Category prefix — use the innermost Medusa category name (last in the
       // list is usually the leaf, e.g. "Hand Wash" over the parent "Body &
       // Hands"). Any product with a category renders "<Category> · <qty>"
       // automatically, no code change per new SKU.
       const categories = ((p as any).categories || []) as { name?: string }[]
-      const categoryName =
-        categories[categories.length - 1]?.name || categories[0]?.name || ""
+      const categoryName = categories[categories.length - 1]?.name || categories[0]?.name || ""
 
       const sizeLabel = categoryName
         ? quantityLabel
@@ -535,16 +533,16 @@ export function ProductCarousel({
           }
           @media (max-width: 749px) {
             .product-carousel-item {
-              width: calc(100vw - 3rem) !important;
-              flex-basis: calc(100vw - 3rem) !important;
+              width: calc(50% - 0.375rem) !important;
+              flex-basis: calc(50% - 0.375rem) !important;
               padding-left: 0 !important;
               padding-right: 0 !important;
-              margin-left: 2rem !important;
-              margin-right: 2rem !important;
+              margin-left: 0 !important;
+              margin-right: 0.75rem !important;
             }
             .product-carousel-content {
-              padding-left: 0 !important;
-              padding-right: 1.5rem !important;
+              padding-left: 0.25rem !important;
+              padding-right: 0.25rem !important;
             }
             [data-slot="carousel-content"] {
               scroll-padding-left: 0 !important;
@@ -553,7 +551,7 @@ export function ProductCarousel({
               margin-left: 0 !important;
             }
             .product-carousel-item:first-child {
-              margin-left: 1.5rem !important;
+              margin-left: 0 !important;
             }
           }
           .product-carousel-item:first-child {

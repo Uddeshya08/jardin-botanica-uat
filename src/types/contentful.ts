@@ -582,6 +582,7 @@ export interface ProductCategory {
   url?: string
   productHandles: string[] // Medusa product handles to fetch
   subCategories: ProductCategory[] // Only nested ProductCategory items (filtered from subCategory)
+  pageLinks?: PageLink[]
 }
 
 // Navigation Content Types

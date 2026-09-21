@@ -98,7 +98,12 @@ const AccordionItem = ({
       >
         <div
           className="pb-6"
-          style={{ fontFamily: "Georgia, serif", fontSize: "16px", lineHeight: "1.8", color: "#333" }}
+          style={{
+            fontFamily: "Georgia, serif",
+            fontSize: "16px",
+            lineHeight: "1.8",
+            color: "#333",
+          }}
         >
           <PortableText value={content} components={accordionInnerComponents} />
         </div>
@@ -112,16 +117,87 @@ interface SingleBlogTemplate2Props {
   countryCode: string
   alsoArticles: { title: string; slug: string; image?: string; imagealt?: string }[]
   featuredProducts?: FeaturedProduct[]
+  atmosphereProducts?: FeaturedProduct[]
 }
+
+const atmosphereTitles: Record<string, string> = {
+  "oud-waters": "For quiet arrivals",
+  "cedarwood-rose": "For rooms at dusk",
+  "saffron-amberwood": "For the table after dinner",
+  "santal-pepper": "For the last lamp on",
+}
+
+const ATMOSPHERE_PLACEHOLDER_IMAGE = "/assets/atmosphere-product-placeholder.jpg"
+
+const AtmosphereProductGrid = ({
+  products,
+  countryCode,
+}: {
+  products: FeaturedProduct[]
+  countryCode: string
+}) => (
+  <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pb-20 sm:pb-24 lg:pb-32 pt-12">
+    <div className="max-w-[90rem] mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+        className="flex items-end justify-between gap-6 mb-8 sm:mb-10"
+      >
+        <div>
+          <h2 className="font-american-typewriter text-3xl sm:text-4xl lg:text-5xl text-black">
+            By atmosphere
+          </h2>
+        </div>
+      </motion.div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        {products.map((product, index) => (
+          <motion.article
+            key={product.handle}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.65, delay: (index % 2) * 0.1 }}
+            className="group relative aspect-[4/3] sm:aspect-[16/11] overflow-hidden bg-black"
+          >
+            <Link href={`/${countryCode}/products/${product.handle}`} className="absolute inset-0">
+              <img
+                src={ATMOSPHERE_PLACEHOLDER_IMAGE}
+                alt={product.title}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 via-45% to-transparent" />
+              <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8 lg:p-10 text-white">
+                <div className="w-fit max-w-full">
+                  <p className="font-din-arabic text-white/85 text-xs mb-2 tracking-[0.18em] drop-shadow-md">
+                    {product.title.toUpperCase()}
+                  </p>
+                  <h3 className="font-american-typewriter text-2xl sm:text-3xl leading-tight max-w-xl drop-shadow-lg group-hover:underline">
+                    {atmosphereTitles[product.handle]}
+                  </h3>
+                </div>
+              </div>
+            </Link>
+          </motion.article>
+        ))}
+      </div>
+    </div>
+  </section>
+)
 
 export const SingleBlogTemplate2 = ({
   blog,
   countryCode,
   alsoArticles,
   featuredProducts = [],
+  atmosphereProducts = [],
 }: SingleBlogTemplate2Props) => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const showJournalStoryGrid = blog?.slug === "on-wax-rooms-and-scent"
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50)
@@ -320,9 +396,7 @@ export const SingleBlogTemplate2 = ({
           )}
         </blockquote>
       ),
-      accordionBlock: ({ value }) => (
-        <AccordionItem label={value.label} content={value.content} />
-      ),
+      accordionBlock: ({ value }) => <AccordionItem label={value.label} content={value.content} />,
       statementBlock: ({ value }) => (
         <p
           className="text-center w-full py-12 md:py-16 px-6"
@@ -410,6 +484,27 @@ export const SingleBlogTemplate2 = ({
         )}
         <div className="absolute inset-0 bg-black/35" />
 
+        {showJournalStoryGrid && (
+          <motion.div
+            className="absolute top-6 md:top-8 left-6 md:left-10 z-20"
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1, duration: 0.6 }}
+          >
+            <Link
+              href={`/${countryCode}/blogs`}
+              className="inline-flex items-center text-base md:text-lg text-white hover:text-white/75 transition-colors duration-200 drop-shadow-md"
+              style={{
+                fontFamily: '"American Typewriter"',
+                letterSpacing: "1px",
+              }}
+            >
+              <ChevronLeft size={22} className="mr-1" />
+              Back to Journal
+            </Link>
+          </motion.div>
+        )}
+
         <div className="relative z-10 max-w-2xl mx-auto px-6 md:px-4 pb-12 md:pb-16 text-center">
           <motion.h1
             style={{
@@ -466,28 +561,36 @@ export const SingleBlogTemplate2 = ({
       </motion.div>
 
       {/* Narrative body — zigzag two-column: each block alternates left/right down the page */}
-      <div className="max-w-5xl mx-auto px-6 md:px-4">
-        <motion.div
-          className="mb-8"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1, duration: 0.6 }}
-        >
-          <Link
-            href={`/${countryCode}/blogs`}
-            className="inline-flex items-center text-xs md:text-sm text-[#999] hover:text-[#626262] transition-colors duration-200"
-            style={{
-              fontFamily: '"American Typewriter"',
-              letterSpacing: "1px",
-            }}
+      <div
+        className={`${showJournalStoryGrid ? "w-full max-w-none px-6 md:px-12 lg:px-20" : "max-w-5xl px-6 md:px-4"} mx-auto`}
+      >
+        {!showJournalStoryGrid && (
+          <motion.div
+            className="mb-8"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1, duration: 0.6 }}
           >
-            <ChevronLeft size={16} className="mr-1" />
-            Back to Journal
-          </Link>
-        </motion.div>
+            <Link
+              href={`/${countryCode}/blogs`}
+              className="inline-flex items-center text-xs md:text-sm text-[#999] hover:text-[#626262] transition-colors duration-200"
+              style={{
+                fontFamily: '"American Typewriter"',
+                letterSpacing: "1px",
+              }}
+            >
+              <ChevronLeft size={16} className="mr-1" />
+              Back to Journal
+            </Link>
+          </motion.div>
+        )}
 
         <div
-          className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 items-start"
+          className={
+            showJournalStoryGrid
+              ? "flex flex-col gap-y-4"
+              : "grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 items-start"
+          }
           style={{
             fontFamily: "Georgia, serif",
             fontSize: "16px",
@@ -498,7 +601,7 @@ export const SingleBlogTemplate2 = ({
           {blog.content.map((block, i) => (
             <motion.div
               key={block._key}
-              style={isMobile ? undefined : contentLayout[i]}
+              style={isMobile || showJournalStoryGrid ? undefined : contentLayout[i]}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1 * i, duration: 0.6 }}
@@ -630,7 +733,11 @@ export const SingleBlogTemplate2 = ({
       )}
 
       {/* "Also" — related stories grid, mirrors the reference site's related-content section */}
-      {alsoArticles.length > 0 && (
+      {showJournalStoryGrid && atmosphereProducts.length > 0 && (
+        <AtmosphereProductGrid products={atmosphereProducts} countryCode={countryCode} />
+      )}
+
+      {!showJournalStoryGrid && alsoArticles.length > 0 && (
         <div className="max-w-6xl mx-auto px-6 md:px-4 pb-24 pt-4">
           <h2
             className="text-center mb-10 uppercase"

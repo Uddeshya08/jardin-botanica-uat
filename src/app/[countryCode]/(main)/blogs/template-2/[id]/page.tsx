@@ -22,11 +22,12 @@ async function withCtaProductImages(blog: SanityBlog, countryCode: string): Prom
 
 async function resolveFeaturedProducts(
   handles: string[] | undefined,
-  countryCode: string
+  countryCode: string,
+  limit = 3
 ): Promise<SanityFeaturedProduct[]> {
   if (!handles?.length) return []
   const products = await Promise.all(
-    handles.slice(0, 3).map(async (handle) => {
+    handles.slice(0, limit).map(async (handle) => {
       const product = await getProductByHandle({ handle, countryCode }).catch(() => null)
       if (!product) return null
       const { cheapestPrice } = getProductPrice({ product })
@@ -72,9 +73,13 @@ export default async function SingleBlogTemplate2Page(props: Props) {
     notFound()
   }
 
-  const [enrichedBlog, featuredProducts] = await Promise.all([
+  const atmosphereHandles = ["oud-waters", "cedarwood-rose", "saffron-amberwood", "santal-pepper"]
+  const [enrichedBlog, featuredProducts, atmosphereProducts] = await Promise.all([
     withCtaProductImages(blog, params.countryCode),
     resolveFeaturedProducts(blog.featuredProducts, params.countryCode),
+    params.id === "on-wax-rooms-and-scent"
+      ? resolveFeaturedProducts(atmosphereHandles, params.countryCode, 4)
+      : Promise.resolve([]),
   ])
 
   return (
@@ -83,6 +88,7 @@ export default async function SingleBlogTemplate2Page(props: Props) {
       countryCode={params.countryCode}
       alsoArticles={alsoArticles}
       featuredProducts={featuredProducts}
+      atmosphereProducts={atmosphereProducts}
     />
   )
 }

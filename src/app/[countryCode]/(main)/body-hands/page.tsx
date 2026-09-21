@@ -72,6 +72,11 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string) {
       size = sizeOption.values[0].value || ""
     }
   }
+  const sizeOptionId = medusaProduct.options?.find(
+    (option: any) =>
+      option.title?.toLowerCase().includes("size") ||
+      option.title?.toLowerCase().includes("quantity")
+  )?.id
   if (!size && metadata.size) {
     size = metadata.size
   }
@@ -94,7 +99,10 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string) {
 
   // Process variants for sizes and prices
   const variants = (medusaProduct.variants || []).map((v: any) => {
-    const variantSize = (v.title || "")
+    const optionSize =
+      v.options?.find((option: any) => option.option_id === sizeOptionId)?.value ||
+      v.options?.[0]?.value
+    const variantSize = (optionSize || v.title || "")
       .toLowerCase()
       .replace(/size:\s*/i, "")
       .trim()
