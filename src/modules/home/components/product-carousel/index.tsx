@@ -225,13 +225,13 @@ function ProductCard({
         <div className="flex flex-col gap-2 mt-1 md:mt-0 md:gap-4 md:flex-grow md:justify-end">
           <div className="flex justify-between items-center gap-1">
             <p
-              className="font-din-arabic text-black text-xs md:text-sm"
+              className="font-din-arabic text-black text-xs md:text-sm shrink-0 whitespace-nowrap"
               style={{ letterSpacing: "0.06em" }}
             >
               ₹{product.price.toLocaleString()}
             </p>
             <p
-              className="font-din-arabic text-black/60 text-xs md:text-sm"
+              className="font-din-arabic text-black/60 text-xs md:text-sm min-w-0 truncate text-right"
               style={{ letterSpacing: "0.06em" }}
             >
               {product.size}
@@ -533,17 +533,18 @@ export function ProductCarousel({
           }
           @media (max-width: 749px) {
             .product-carousel-item {
-              width: calc(50% - 0.375rem) !important;
-              flex-basis: calc(50% - 0.375rem) !important;
+              width: calc((100% - 0.5rem) / 2) !important;
+              flex-basis: calc((100% - 0.5rem) / 2) !important;
               padding-left: 0 !important;
               padding-right: 0 !important;
               margin-left: 0 !important;
-              margin-right: 0.75rem !important;
+              margin-right: 0 !important;
             }
             .product-carousel-content {
               margin-left: 0 !important;
-              padding-left: 0.25rem !important;
-              padding-right: 0.25rem !important;
+              gap: 0.5rem !important;
+              padding-left: 0.5rem !important;
+              padding-right: 0.5rem !important;
               box-sizing: border-box !important;
             }
             [data-slot="carousel-content"] {
@@ -551,6 +552,7 @@ export function ProductCarousel({
             }
             .product-carousel-content > div {
               margin-left: 0 !important;
+              margin-right: 0 !important;
             }
             .product-carousel-item:first-child {
               margin-left: 0 !important;
