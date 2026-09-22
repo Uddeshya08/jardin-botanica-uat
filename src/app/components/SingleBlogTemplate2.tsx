@@ -129,6 +129,30 @@ const atmosphereTitles: Record<string, string> = {
 
 const ATMOSPHERE_PLACEHOLDER_IMAGE = "/assets/atmosphere-product-placeholder.jpg"
 
+const AtmosphereProductCard = ({
+  product,
+  countryCode,
+}: {
+  product: FeaturedProduct
+  countryCode: string
+}) => (
+  <Link href={`/${countryCode}/products/${product.handle}`} className="group block min-w-0">
+    <div className="relative aspect-[4/3] overflow-hidden bg-[#e7e5da] mb-4">
+      <img
+        src={ATMOSPHERE_PLACEHOLDER_IMAGE}
+        alt={product.title}
+        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+      />
+    </div>
+    <p className="font-din-arabic text-[11px] text-black/55 uppercase tracking-[0.14em] mb-1.5">
+      {product.title}
+    </p>
+    <h3 className="font-american-typewriter text-lg lg:text-xl leading-snug text-black group-hover:underline">
+      {atmosphereTitles[product.handle]}
+    </h3>
+  </Link>
+)
+
 const AtmosphereProductGrid = ({
   products,
   countryCode,
@@ -136,54 +160,65 @@ const AtmosphereProductGrid = ({
   products: FeaturedProduct[]
   countryCode: string
 }) => (
-  <section className="px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pb-20 sm:pb-24 lg:pb-32 pt-12">
-    <div className="max-w-[90rem] mx-auto">
+  <section className="pb-20 sm:pb-24 lg:pb-28 pt-12 md:pt-16">
+    <div className="max-w-[88rem] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
-        className="flex items-end justify-between gap-6 mb-8 sm:mb-10"
+        className="mb-8 md:mb-10"
       >
-        <div>
-          <h2 className="font-american-typewriter text-3xl sm:text-4xl lg:text-5xl text-black">
-            By atmosphere
-          </h2>
-        </div>
+        <h2 className="font-american-typewriter text-3xl md:text-4xl text-black">By atmosphere</h2>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+      <div className="hidden md:grid grid-cols-4 gap-4 lg:gap-5">
         {products.map((product, index) => (
           <motion.article
             key={product.handle}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.65, delay: (index % 2) * 0.1 }}
-            className="group relative aspect-[4/3] sm:aspect-[16/11] overflow-hidden bg-black"
+            transition={{ duration: 0.65, delay: index * 0.08 }}
+            className="min-w-0"
           >
-            <Link href={`/${countryCode}/products/${product.handle}`} className="absolute inset-0">
-              <img
-                src={ATMOSPHERE_PLACEHOLDER_IMAGE}
-                alt={product.title}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 via-45% to-transparent" />
-              <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8 lg:p-10 text-white">
-                <div className="w-fit max-w-full">
-                  <p className="font-din-arabic text-white/85 text-xs mb-2 tracking-[0.18em] drop-shadow-md">
-                    {product.title.toUpperCase()}
-                  </p>
-                  <h3 className="font-american-typewriter text-2xl sm:text-3xl leading-tight max-w-xl drop-shadow-lg group-hover:underline">
-                    {atmosphereTitles[product.handle]}
-                  </h3>
-                </div>
-              </div>
-            </Link>
+            <AtmosphereProductCard product={product} countryCode={countryCode} />
           </motion.article>
         ))}
       </div>
+    </div>
+
+    <div className="md:hidden overflow-hidden">
+      <style>{`
+        .atmosphere-carousel-content {
+          margin-left: 0 !important;
+          padding-left: 1.25rem;
+          padding-right: 1.25rem;
+        }
+        .atmosphere-carousel-item {
+          flex: 0 0 78vw !important;
+          width: 78vw !important;
+          padding-left: 0 !important;
+          margin-right: 1rem;
+        }
+      `}</style>
+      <Carousel
+        opts={{
+          align: "start",
+          loop: false,
+          dragFree: true,
+          containScroll: "trimSnaps",
+        }}
+        className="w-full"
+      >
+        <CarouselContent className="atmosphere-carousel-content">
+          {products.map((product) => (
+            <CarouselItem key={product.handle} className="atmosphere-carousel-item">
+              <AtmosphereProductCard product={product} countryCode={countryCode} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
     </div>
   </section>
 )
