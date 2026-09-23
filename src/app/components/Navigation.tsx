@@ -115,21 +115,39 @@ export function Navigation({
       const navItems = await getNavigation()
       if (navItems.length > 0) {
         setMenuItems(
-          navItems.map((item) => ({
-            name: item.name,
-            href: item.href,
-            dropdown: item.dropdown
+          navItems.map((item) => {
+            const isBotanistsLab = item.name.toLowerCase().includes("botanist")
+            const contentfulDropdown = item.dropdown
               ?.filter(
-                (d) =>
-                  !(item.name === "HOME CREATIONS" && d.label?.toLowerCase() === "diffuser")
+                (d) => !(item.name === "HOME CREATIONS" && d.label?.toLowerCase() === "diffuser")
               )
               .map((d) => ({
                 label: d.label,
                 href: d.href,
                 image: d.image,
                 titleContent: d.titleContent,
-              })),
-          }))
+              }))
+            const dropdown = isBotanistsLab ? (contentfulDropdown ?? []) : contentfulDropdown
+
+            if (
+              isBotanistsLab &&
+              dropdown &&
+              !dropdown.some((dropdownItem) => dropdownItem.href.includes("material-archive"))
+            ) {
+              dropdown.push({
+                label: "Material Archive",
+                href: "/material-archive",
+                image: undefined,
+                titleContent: undefined,
+              })
+            }
+
+            return {
+              name: item.name,
+              href: item.href,
+              dropdown,
+            }
+          })
         )
       }
     }
