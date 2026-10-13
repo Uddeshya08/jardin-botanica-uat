@@ -126,7 +126,7 @@ export default function ResetPasswordPage() {
                     Reset Your Password
                   </h1>
                   <p className="font-din-arabic text-sm text-black/70 leading-relaxed">
-                    Enter your new password below. Make sure it's strong and secure.
+                    Choose one that’s difficult to guess.
                   </p>
                 </div>
 
@@ -202,8 +202,8 @@ export default function ResetPasswordPage() {
                       Password requirements:
                     </p>
                     <ul className="font-din-arabic text-xs text-black/60 mt-2 space-y-1 list-disc list-inside">
-                      <li>At least 8 characters long</li>
-                      <li>Mix of letters and numbers recommended</li>
+                      <li>Use at least 8 characters</li>
+                      <li>Avoid common or easily guessed passwords</li>
                     </ul>
                   </div>
 

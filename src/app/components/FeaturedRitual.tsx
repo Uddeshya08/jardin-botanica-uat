@@ -47,7 +47,7 @@ export function FeaturedRitual() {
             Clean that isn't squeaky; softness that isn't sticky.
 
             <br />
-            Our signature hand care ritual combines botanical cleansing with protective nourishment.
+            A considered approach to hand care that brings together gentle exfoliation and lightweight nourishment in one everyday ritual.
           </motion.p>
 
           {/* Dual CTAs */}
@@ -64,16 +64,9 @@ export function FeaturedRitual() {
               onClick={handleBuildRitual}
               className="font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide text-sm md:text-base"
             >
-              Build your ritual
+              Get Early Access
             </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleShopSet}
-              className="font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide text-sm md:text-base"
-            >
-              Shop the set
-            </motion.button>
+           
           </motion.div>
         </motion.div>
 

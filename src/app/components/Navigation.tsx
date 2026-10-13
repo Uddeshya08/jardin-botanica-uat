@@ -30,6 +30,7 @@ interface DropdownItem {
   href: string
   image?: string
   titleContent?: Document
+  comingSoon?: boolean
 }
 
 interface MenuItem {
@@ -117,16 +118,27 @@ export function Navigation({
         setMenuItems(
           navItems.map((item) => {
             const isBotanistsLab = item.name.toLowerCase().includes("botanist")
+            const isBodyHands =
+              item.name.toLowerCase().includes("body") && item.name.toLowerCase().includes("hand")
             const contentfulDropdown = item.dropdown
               ?.filter(
                 (d) => !(item.name === "HOME CREATIONS" && d.label?.toLowerCase() === "diffuser")
               )
-              .map((d) => ({
-                label: d.label,
-                href: d.href,
-                image: d.image,
-                titleContent: d.titleContent,
-              }))
+              .map((d) => {
+                const label = d.label.toLowerCase()
+                const comingSoon =
+                  isBodyHands &&
+                  ((label.includes("cleanser") && label.includes("exfoliant")) ||
+                    (label.includes("lotion") && label.includes("moistur")))
+
+                return {
+                  label: d.label,
+                  href: comingSoon ? "#" : d.href,
+                  image: d.image,
+                  titleContent: d.titleContent,
+                  comingSoon,
+                }
+              })
             const dropdown = isBotanistsLab ? (contentfulDropdown ?? []) : contentfulDropdown
 
             if (
@@ -144,7 +156,7 @@ export function Navigation({
 
             return {
               name: item.name,
-              href: item.href,
+              href: isBodyHands ? "#" : item.href,
               dropdown,
             }
           })
@@ -717,7 +729,7 @@ export function Navigation({
                                             fontSize: "0.95rem",
                                           }}
                                         >
-                                          <span className="relative inline-block whitespace-pre">
+                                          <span className="relative inline-flex items-baseline gap-2 whitespace-pre">
                                             {dItem.titleContent
                                               ? documentToReactComponents(dItem.titleContent, {
                                                   renderNode: {
@@ -732,6 +744,11 @@ export function Navigation({
                                                   },
                                                 })
                                               : dItem.label}
+                                            {dItem.comingSoon && (
+                                              <span className="font-din-arabic text-[9px] uppercase tracking-[0.14em] text-black/35">
+                                                Coming Soon
+                                              </span>
+                                            )}
                                           </span>
                                         </span>
                                       )
@@ -1309,7 +1326,12 @@ export function Navigation({
                                           key={`${dropdownItem.label || "item"}-${dIdx}`}
                                           className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors cursor-default"
                                         >
-                                          {dropdownItem.label}
+                                          <span>{dropdownItem.label}</span>
+                                          {dropdownItem.comingSoon && (
+                                            <span className="ml-2 inline-block text-[9px] uppercase tracking-[0.14em] text-black/35">
+                                              Coming Soon
+                                            </span>
+                                          )}
                                         </span>
                                       )
                                     }
