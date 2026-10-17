@@ -1562,7 +1562,7 @@ const Candles = () => {
               <div
                 className="tagembed-widget"
                 style={{ width: "100%", height: "100%", overflow: "auto" }}
-                data-widget-id="330514"
+                data-widget-id="337738"
                 data-website="1"
               />
               <Script
