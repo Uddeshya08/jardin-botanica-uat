@@ -101,16 +101,47 @@ export async function middleware(request: NextRequest) {
 
   let response = NextResponse.redirect(redirectUrl, 307)
   const requestHeaders = new Headers(request.headers)
-  requestHeaders.set(
-    "x-current-path",
-    `${request.nextUrl.pathname}${request.nextUrl.search}`
-  )
+  requestHeaders.set("x-current-path", `${request.nextUrl.pathname}${request.nextUrl.search}`)
 
   const cacheIdCookie = request.cookies.get("_medusa_cache_id")
 
   const cacheId = cacheIdCookie?.value || crypto.randomUUID()
 
-  const regionMap = await getRegionMap(cacheId)
+  let regionMap: Map<string, HttpTypes.StoreRegion>
+
+  try {
+    regionMap = await getRegionMap(cacheId)
+  } catch (error) {
+    if (process.env.NODE_ENV !== "development") {
+      throw error
+    }
+
+    console.warn("Middleware.ts: Medusa regions unavailable; using URL country in development.")
+
+    const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
+    if (/^[a-z]{2}$/.test(urlCountryCode || "")) {
+      const fallbackResponse = NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      })
+
+      if (!cacheIdCookie) {
+        fallbackResponse.cookies.set("_medusa_cache_id", cacheId, {
+          maxAge: 60 * 60 * 24,
+        })
+      }
+
+      return fallbackResponse
+    }
+
+    const redirectPath = request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
+    const queryString = request.nextUrl.search || ""
+    return NextResponse.redirect(
+      `${request.nextUrl.origin}/${DEFAULT_REGION}${redirectPath}${queryString}`,
+      307
+    )
+  }
 
   const countryCode = regionMap && (await getCountryCode(request, regionMap))
 

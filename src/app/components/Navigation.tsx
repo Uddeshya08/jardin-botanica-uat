@@ -30,6 +30,7 @@ interface DropdownItem {
   href: string
   image?: string
   titleContent?: Document
+  comingSoon?: boolean
 }
 
 interface MenuItem {
@@ -115,39 +116,52 @@ export function Navigation({
       const navItems = await getNavigation()
       if (navItems.length > 0) {
         setMenuItems(
-          navItems.map((item) => {
-            const isBotanistsLab = item.name.toLowerCase().includes("botanist")
-            const contentfulDropdown = item.dropdown
-              ?.filter(
-                (d) => !(item.name === "HOME CREATIONS" && d.label?.toLowerCase() === "diffuser")
-              )
-              .map((d) => ({
-                label: d.label,
-                href: d.href,
-                image: d.image,
-                titleContent: d.titleContent,
-              }))
-            const dropdown = isBotanistsLab ? (contentfulDropdown ?? []) : contentfulDropdown
+          navItems
+            .filter((item) => !item.name.toLowerCase().includes("gift"))
+            .map((item) => {
+              const isBotanistsLab = item.name.toLowerCase().includes("botanist")
+              const isBodyHands =
+                item.name.toLowerCase().includes("body") && item.name.toLowerCase().includes("hand")
+              const contentfulDropdown = item.dropdown
+                ?.filter(
+                  (d) => !(item.name === "HOME CREATIONS" && d.label?.toLowerCase() === "diffuser")
+                )
+                .map((d) => {
+                  const label = d.label.toLowerCase()
+                  const comingSoon =
+                    isBodyHands &&
+                    ((label.includes("cleanser") && label.includes("exfoliant")) ||
+                      (label.includes("lotion") && label.includes("moistur")))
 
-            if (
-              isBotanistsLab &&
-              dropdown &&
-              !dropdown.some((dropdownItem) => dropdownItem.href.includes("material-archive"))
-            ) {
-              dropdown.push({
-                label: "Material Archive",
-                href: "/material-archive",
-                image: undefined,
-                titleContent: undefined,
-              })
-            }
+                  return {
+                    label: d.label,
+                    href: comingSoon ? "#" : d.href,
+                    image: d.image,
+                    titleContent: d.titleContent,
+                    comingSoon,
+                  }
+                })
+              const dropdown = isBotanistsLab ? (contentfulDropdown ?? []) : contentfulDropdown
 
-            return {
-              name: item.name,
-              href: item.href,
-              dropdown,
-            }
-          })
+              if (
+                isBotanistsLab &&
+                dropdown &&
+                !dropdown.some((dropdownItem) => dropdownItem.href.includes("material-archive"))
+              ) {
+                dropdown.push({
+                  label: "Material Archive",
+                  href: "/material-archive",
+                  image: undefined,
+                  titleContent: undefined,
+                })
+              }
+
+              return {
+                name: item.name,
+                href: isBodyHands ? "#" : item.href,
+                dropdown,
+              }
+            })
         )
       }
     }
@@ -634,88 +648,131 @@ export function Navigation({
                 transition={disableAnimations ? undefined : { delay: 0.4, duration: 0.6 }}
                 className="hidden lg:flex space-x-8 absolute left-1/2 transform -translate-x-1/2"
               >
-                {menuItems.map((item, index) => (
-                  <div
-                    key={`${item.name || "menu"}-${index}`}
-                    className="relative"
-                    style={item.name === "HOME CREATIONS" ? { marginLeft: "0.5rem" } : undefined}
-                    onMouseEnter={() => item.dropdown && handleMouseEnter(item.name)}
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    {item.href === "#" ? (
-                      <motion.span
-                        initial={introInitial({ opacity: 0, y: -10 })}
-                        animate={disableAnimations ? undefined : { opacity: 1, y: 0 }}
-                        transition={
-                          disableAnimations
-                            ? undefined
-                            : { delay: 0.4 + index * 0.1, duration: 0.4 }
-                        }
-                        className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative whitespace-nowrap cursor-default"
-                        style={{ color: "#9ca3af" }}
-                      >
-                        {item.name}
-                      </motion.span>
-                    ) : (
-                      <motion.a
-                        href={prefixCountryCode(item.href)}
-                        initial={introInitial({ opacity: 0, y: -10 })}
-                        animate={disableAnimations ? undefined : { opacity: 1, y: 0 }}
-                        transition={
-                          disableAnimations
-                            ? undefined
-                            : { delay: 0.4 + index * 0.1, duration: 0.4 }
-                        }
-                        className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative group/item hover:opacity-80 whitespace-nowrap"
-                        style={{ color: navStyles.textColor }}
-                      >
-                        {item.name}
-                        <span
-                          className="absolute bottom-[-4px] left-0 w-0 h-[1px] transition-all duration-500 group-hover/item:w-full"
-                          style={{ backgroundColor: "#e58a4d" }}
-                        />
-                      </motion.a>
-                    )}
-
-                    {/* Mega Dropdown */}
-                    <AnimatePresence>
-                      {item.dropdown && activeDropdown === item.name && (
-                        <motion.div
-                          initial={disableAnimations ? undefined : { opacity: 0 }}
-                          animate={disableAnimations ? undefined : { opacity: 1 }}
-                          exit={disableAnimations ? undefined : { opacity: 0 }}
+                {menuItems
+                  .filter((item) => !item.name.toLowerCase().includes("gift"))
+                  .map((item, index) => (
+                    <div
+                      key={`${item.name || "menu"}-${index}`}
+                      className="relative"
+                      style={item.name === "HOME CREATIONS" ? { marginLeft: "0.5rem" } : undefined}
+                      onMouseEnter={() => item.dropdown && handleMouseEnter(item.name)}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                      {item.href === "#" ? (
+                        <motion.span
+                          initial={introInitial({ opacity: 0, y: -10 })}
+                          animate={disableAnimations ? undefined : { opacity: 1, y: 0 }}
                           transition={
                             disableAnimations
                               ? undefined
-                              : {
-                                  duration: 0.2,
-                                  ease: "easeOut",
-                                }
+                              : { delay: 0.4 + index * 0.1, duration: 0.4 }
                           }
-                          className="absolute top-full left-0 pt-4 z-50"
+                          className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative whitespace-nowrap cursor-default"
+                          style={{
+                            color:
+                              item.name.toLowerCase().includes("body") &&
+                              item.name.toLowerCase().includes("hand")
+                                ? "#fff"
+                                : "#9ca3af",
+                          }}
                         >
-                          <div
-                            className="border shadow-2xl overflow-hidden"
-                            style={{
-                              backgroundColor: "#e3e3d8",
-                              borderColor: "rgba(0,0,0,0.08)",
-                            }}
+                          {item.name}
+                        </motion.span>
+                      ) : (
+                        <motion.a
+                          href={prefixCountryCode(item.href)}
+                          initial={introInitial({ opacity: 0, y: -10 })}
+                          animate={disableAnimations ? undefined : { opacity: 1, y: 0 }}
+                          transition={
+                            disableAnimations
+                              ? undefined
+                              : { delay: 0.4 + index * 0.1, duration: 0.4 }
+                          }
+                          className="font-din-arabic text-sm tracking-wider transition-all duration-300 relative group/item hover:opacity-80 whitespace-nowrap"
+                          style={{ color: navStyles.textColor }}
+                        >
+                          {item.name}
+                          <span
+                            className="absolute bottom-[-4px] left-0 w-0 h-[1px] transition-all duration-500 group-hover/item:w-full"
+                            style={{ backgroundColor: "#e58a4d" }}
+                          />
+                        </motion.a>
+                      )}
+
+                      {/* Mega Dropdown */}
+                      <AnimatePresence>
+                        {item.dropdown && activeDropdown === item.name && (
+                          <motion.div
+                            initial={disableAnimations ? undefined : { opacity: 0 }}
+                            animate={disableAnimations ? undefined : { opacity: 1 }}
+                            exit={disableAnimations ? undefined : { opacity: 0 }}
+                            transition={
+                              disableAnimations
+                                ? undefined
+                                : {
+                                    duration: 0.2,
+                                    ease: "easeOut",
+                                  }
+                            }
+                            className="absolute top-full left-0 pt-4 z-50"
                           >
-                            <div className="flex h-72">
-                              {/* Left: Links */}
-                              <div className="py-6 w-80 flex flex-col">
-                                {item.dropdown
-                                  .filter((dItem) => dItem.label !== "All Products")
-                                  .map((dItem, dIdx) => {
-                                    if (dItem.href === "#") {
+                            <div
+                              className="border shadow-2xl overflow-hidden"
+                              style={{
+                                backgroundColor: "#e3e3d8",
+                                borderColor: "rgba(0,0,0,0.08)",
+                              }}
+                            >
+                              <div className="flex h-72">
+                                {/* Left: Links */}
+                                <div className="py-6 w-80 flex flex-col">
+                                  {item.dropdown
+                                    .filter((dItem) => dItem.label !== "All Products")
+                                    .map((dItem, dIdx) => {
+                                      if (dItem.href === "#") {
+                                        return (
+                                          <span
+                                            key={`${dItem.label || "item"}-${dIdx}`}
+                                            className="block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150 cursor-default"
+                                            style={{
+                                              color: dItem.comingSoon ? "#565b55" : "#9ca3af",
+                                              fontSize: "0.95rem",
+                                            }}
+                                          >
+                                            <span className="relative inline-flex items-baseline whitespace-pre">
+                                              {dItem.titleContent
+                                                ? documentToReactComponents(dItem.titleContent, {
+                                                    renderNode: {
+                                                      [BLOCKS.PARAGRAPH]: (
+                                                        node: any,
+                                                        children: any
+                                                      ) => (
+                                                        <span className="inline-block whitespace-pre">
+                                                          {children}
+                                                        </span>
+                                                      ),
+                                                    },
+                                                  })
+                                                : dItem.label}
+                                              {dItem.comingSoon && (
+                                                <span className="pl-3 font-din-arabic text-[9px] italic tracking-[0.08em] text-black/35">
+                                                  Coming soon
+                                                </span>
+                                              )}
+                                            </span>
+                                          </span>
+                                        )
+                                      }
                                       return (
-                                        <span
+                                        <a
                                           key={`${dItem.label || "item"}-${dIdx}`}
-                                          className="block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150 cursor-default"
+                                          href={prefixCountryCode(dItem.href)}
+                                          className="group/dropdown-item block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150"
                                           style={{
-                                            color: "#9ca3af",
+                                            color: "#000",
                                             fontSize: "0.95rem",
                                           }}
+                                          onMouseEnter={() => handleDropdownItemHover(dItem.label)}
                                         >
                                           <span className="relative inline-block whitespace-pre">
                                             {dItem.titleContent
@@ -732,96 +789,67 @@ export function Navigation({
                                                   },
                                                 })
                                               : dItem.label}
+                                            <span
+                                              className="absolute bottom-[-2px] left-0 w-0 h-[1px] transition-all duration-300 group-hover/dropdown-item:w-full"
+                                              style={{ backgroundColor: "#e58a4d" }}
+                                            />
                                           </span>
-                                        </span>
+                                        </a>
                                       )
-                                    }
-                                    return (
-                                      <a
-                                        key={`${dItem.label || "item"}-${dIdx}`}
-                                        href={prefixCountryCode(dItem.href)}
-                                        className="group/dropdown-item block px-8 py-4 font-american-typewriter tracking-wide transition-all duration-150"
-                                        style={{
-                                          color: "#000",
-                                          fontSize: "0.95rem",
-                                        }}
-                                        onMouseEnter={() => handleDropdownItemHover(dItem.label)}
-                                      >
-                                        <span className="relative inline-block whitespace-pre">
-                                          {dItem.titleContent
-                                            ? documentToReactComponents(dItem.titleContent, {
-                                                renderNode: {
-                                                  [BLOCKS.PARAGRAPH]: (
-                                                    node: any,
-                                                    children: any
-                                                  ) => (
-                                                    <span className="inline-block whitespace-pre">
-                                                      {children}
-                                                    </span>
-                                                  ),
-                                                },
-                                              })
-                                            : dItem.label}
-                                          <span
-                                            className="absolute bottom-[-2px] left-0 w-0 h-[1px] transition-all duration-300 group-hover/dropdown-item:w-full"
-                                            style={{ backgroundColor: "#e58a4d" }}
-                                          />
-                                        </span>
-                                      </a>
-                                    )
-                                  })}
-                              </div>
+                                    })}
+                                </div>
 
-                              {/* Right: Image preview */}
-                              <div
-                                className="w-96 h-full overflow-hidden relative p-4"
-                                style={{ backgroundColor: "#e3e3d8" }}
-                              >
-                                {item.dropdown
-                                  .filter((dItem) => dItem.label !== "All Products")
-                                  .map((dItem, dIdx) =>
-                                    dItem.image ? (
-                                      <img
-                                        key={`${dItem.label || "img"}-${dIdx}`}
-                                        src={dItem.image}
-                                        alt={dItem.label}
-                                        className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
-                                        style={{
-                                          opacity: hoveredItem === dItem.label ? 1 : 0,
-                                          transition: "opacity 0.18s ease-out",
-                                          zIndex: hoveredItem === dItem.label ? 2 : 1,
-                                        }}
-                                        loading="eager"
-                                      />
-                                    ) : null
+                                {/* Right: Image preview */}
+                                <div
+                                  className="w-96 h-full overflow-hidden relative p-4"
+                                  style={{ backgroundColor: "#e3e3d8" }}
+                                >
+                                  {item.dropdown
+                                    .filter((dItem) => dItem.label !== "All Products")
+                                    .map((dItem, dIdx) =>
+                                      dItem.image ? (
+                                        <img
+                                          key={`${dItem.label || "img"}-${dIdx}`}
+                                          src={dItem.image}
+                                          alt={dItem.label}
+                                          className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                                          style={{
+                                            opacity: hoveredItem === dItem.label ? 1 : 0,
+                                            transition: "opacity 0.18s ease-out",
+                                            zIndex: hoveredItem === dItem.label ? 2 : 1,
+                                          }}
+                                          loading="eager"
+                                        />
+                                      ) : null
+                                    )}
+                                  {/* fallback/default image */}
+                                  {item.dropdown.filter(
+                                    (dItem) => dItem.label !== "All Products"
+                                  )[0]?.image && (
+                                    <img
+                                      src={
+                                        item.dropdown.filter(
+                                          (dItem) => dItem.label !== "All Products"
+                                        )[0].image
+                                      }
+                                      alt="default"
+                                      className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
+                                      style={{
+                                        opacity: !hoveredItem ? 1 : 0,
+                                        transition: "opacity 0.18s ease-out",
+                                        zIndex: 0,
+                                      }}
+                                      loading="eager"
+                                    />
                                   )}
-                                {/* fallback/default image */}
-                                {item.dropdown.filter((dItem) => dItem.label !== "All Products")[0]
-                                  ?.image && (
-                                  <img
-                                    src={
-                                      item.dropdown.filter(
-                                        (dItem) => dItem.label !== "All Products"
-                                      )[0].image
-                                    }
-                                    alt="default"
-                                    className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)] object-cover pointer-events-none rounded"
-                                    style={{
-                                      opacity: !hoveredItem ? 1 : 0,
-                                      transition: "opacity 0.18s ease-out",
-                                      zIndex: 0,
-                                    }}
-                                    loading="eager"
-                                  />
-                                )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
               </motion.div>
 
               {/* Mobile Menu Toggle - Cart and Hamburger */}
@@ -1273,85 +1301,96 @@ export function Navigation({
 
                 {/* Mobile Navigation Links */}
                 <nav className="space-y-1">
-                  {menuItems.map((item, index) => {
-                    if (item.dropdown) {
-                      return (
-                        <div key={`${item.name || "menu"}-${index}`}>
-                          <button
-                            onClick={() =>
-                              setMobileActiveDropdown(
-                                mobileActiveDropdown === item.name ? null : item.name
-                              )
-                            }
-                            className="w-full flex items-center justify-between px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
-                          >
-                            <span>{item.name}</span>
-                            <ChevronDown
-                              className={`w-4 h-4 transition-transform ${
-                                mobileActiveDropdown === item.name ? "rotate-180" : ""
-                              }`}
-                            />
-                          </button>
-                          <AnimatePresence>
-                            {mobileActiveDropdown === item.name && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="overflow-hidden"
-                              >
-                                <div className="pl-4 py-2 space-y-1">
-                                  {item.dropdown.map((dropdownItem, dIdx) => {
-                                    if (dropdownItem.href === "#") {
+                  {menuItems
+                    .filter((item) => !item.name.toLowerCase().includes("gift"))
+                    .map((item, index) => {
+                      if (item.dropdown) {
+                        return (
+                          <div key={`${item.name || "menu"}-${index}`}>
+                            <button
+                              onClick={() =>
+                                setMobileActiveDropdown(
+                                  mobileActiveDropdown === item.name ? null : item.name
+                                )
+                              }
+                              className="w-full flex items-center justify-between px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
+                            >
+                              <span>{item.name}</span>
+                              <ChevronDown
+                                className={`w-4 h-4 transition-transform ${
+                                  mobileActiveDropdown === item.name ? "rotate-180" : ""
+                                }`}
+                              />
+                            </button>
+                            <AnimatePresence>
+                              {mobileActiveDropdown === item.name && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="pl-4 py-2 space-y-1">
+                                    {item.dropdown.map((dropdownItem, dIdx) => {
+                                      if (dropdownItem.href === "#") {
+                                        return (
+                                          <span
+                                            key={`${dropdownItem.label || "item"}-${dIdx}`}
+                                            className={`block px-4 py-3 font-din-arabic tracking-wide hover:bg-black/5 transition-colors cursor-default ${
+                                              dropdownItem.comingSoon
+                                                ? "text-black/80"
+                                                : "text-black/70"
+                                            }`}
+                                          >
+                                            <span>{dropdownItem.label}</span>
+                                            {dropdownItem.comingSoon && (
+                                              <span className="ml-2 inline-block text-[9px] italic tracking-[0.08em] text-black/35">
+                                                Coming soon
+                                              </span>
+                                            )}
+                                          </span>
+                                        )
+                                      }
                                       return (
-                                        <span
+                                        <a
                                           key={`${dropdownItem.label || "item"}-${dIdx}`}
-                                          className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors cursor-default"
+                                          href={prefixCountryCode(dropdownItem.href)}
+                                          className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
+                                          onClick={() => setIsMobileMenuOpen(false)}
                                         >
                                           {dropdownItem.label}
-                                        </span>
+                                        </a>
                                       )
-                                    }
-                                    return (
-                                      <a
-                                        key={`${dropdownItem.label || "item"}-${dIdx}`}
-                                        href={prefixCountryCode(dropdownItem.href)}
-                                        className="block px-4 py-3 text-black/70 font-din-arabic tracking-wide hover:bg-black/5 transition-colors"
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                      >
-                                        {dropdownItem.label}
-                                      </a>
-                                    )
-                                  })}
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      )
-                    }
-                    if (item.href === "#") {
+                                    })}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        )
+                      }
+                      if (item.href === "#") {
+                        return (
+                          <span
+                            key={`${item.name || "menu"}-${index}`}
+                            className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors cursor-default"
+                          >
+                            {item.name}
+                          </span>
+                        )
+                      }
                       return (
-                        <span
+                        <a
                           key={`${item.name || "menu"}-${index}`}
-                          className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors cursor-default"
+                          href={prefixCountryCode(item.href)}
+                          className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
+                          onClick={() => setIsMobileMenuOpen(false)}
                         >
                           {item.name}
-                        </span>
+                        </a>
                       )
-                    }
-                    return (
-                      <a
-                        key={`${item.name || "menu"}-${index}`}
-                        href={prefixCountryCode(item.href)}
-                        className="block px-4 py-4 text-black font-din-arabic tracking-wider hover:bg-black/5 transition-colors"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        {item.name}
-                      </a>
-                    )
-                  })}
+                    })}
                 </nav>
 
                 {/* Mobile Quick Actions */}

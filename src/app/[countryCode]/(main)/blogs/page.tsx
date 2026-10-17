@@ -217,7 +217,7 @@ const Home = () => {
         <div className="fixed top-0 left-0 right-0 z-50 bg-[#FEFDF3]">
           <div className="w-full px-4 lg:px-0">
             <h1 className="font-american-typewriter text-center text-2xl md:text-4xl lg:text-7xl tracking-tight py-2 lg:py-0">
-              Journal
+              Le Botaniste
             </h1>
 
             <div

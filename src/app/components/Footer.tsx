@@ -33,8 +33,6 @@ export function Footer() {
       links: [
         { name: "Body & Hands", href: `/${countryCode}/body-hands` },
         { name: "Home Creations", href: `/${countryCode}/home-creations` },
-
-        { name: "Gift Sets", href: `/${countryCode}/gift-sets` },
       ],
     },
     {
