@@ -2,6 +2,7 @@
 
 import { sdk } from "@lib/config"
 import { login, signup } from "@lib/data/customer"
+import { PhoneOtpLogin } from "app/components/PhoneOtpLogin"
 import { DatePicker } from "app/components/ui/date-picker"
 import { clsx } from "clsx"
 import { Eye, EyeOff, Smartphone } from "lucide-react"
@@ -21,6 +22,7 @@ export function AccountPage() {
   const [redirectPath, setRedirectPath] = useState(defaultRedirectPath)
 
   const [showSignInPassword, setShowSignInPassword] = useState(false)
+  const [showPhoneLogin, setShowPhoneLogin] = useState(false)
   const [showCreatePassword, setShowCreatePassword] = useState(false)
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [createPassword, setCreatePassword] = useState("")
@@ -65,8 +67,12 @@ export function AccountPage() {
 
   const loginWithGoogle = async () => {
     try {
-      const result = await sdk.auth.login("customer", "google", {})
+      const callbackUrl = `${window.location.origin}/${countryCode}/auth/google/callback`
+      const result = await sdk.auth.login("customer", "google", {
+        callback_url: callbackUrl,
+      })
       if (typeof result === "object" && result.location) {
+        sessionStorage.setItem("jardinBotanica_googleRedirectPath", redirectPath)
         window.location.href = result.location
         return
       }
@@ -154,6 +160,15 @@ export function AccountPage() {
               Sign in
             </h2>
 
+            {showPhoneLogin ? (
+              <PhoneOtpLogin
+                onBack={() => setShowPhoneLogin(false)}
+                onSuccess={() => {
+                  router.replace(redirectPath)
+                  router.refresh()
+                }}
+              />
+            ) : (
             <form action={signinAction} className="space-y-5 w-full">
               {/* Email Address */}
               <div>
@@ -322,6 +337,7 @@ export function AccountPage() {
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                   type="button"
+                  onClick={() => setShowPhoneLogin(true)}
                   className="font-din-arabic w-full flex items-center px-4 py-3.5 border bg-transparent text-black hover:bg-black/5 transition-all duration-300"
                   style={{ borderColor: "#D8D2C7" }}
                 >
@@ -330,6 +346,7 @@ export function AccountPage() {
                 </motion.button>
               </div>
             </form>
+            )}
           </motion.div>
 
           {/* Create Account Section */}

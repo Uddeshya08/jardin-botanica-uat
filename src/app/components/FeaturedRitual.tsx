@@ -1,18 +1,12 @@
-import { motion } from "motion/react"
-import { useRouter } from "next/navigation"
-import React, { useState } from "react"
+import { useNewsletterSubscription } from "@lib/hooks/use-newsletter-subscription"
+import { AnimatePresence, motion } from "motion/react"
+import { useState } from "react"
 
 export function FeaturedRitual() {
-  const router = useRouter()
   const [isPressed, setIsPressed] = useState(false)
-
-  const handleBuildRitual = () => {
-    router.push("/in/body-hands")
-  }
-
-  const handleShopSet = () => {
-    router.push("in/gift-sets")
-  }
+  const [isEmailFormOpen, setIsEmailFormOpen] = useState(false)
+  const { email, setEmail, message, isSuccess, isPending, handleSubmit } =
+    useNewsletterSubscription()
 
   return (
     <section className="py-12 lg:py-16" style={{ backgroundColor: "#edede2" }}>
@@ -45,28 +39,82 @@ export function FeaturedRitual() {
             className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8 md:mb-12"
           >
             Clean that isn't squeaky; softness that isn't sticky.
-
-            <br />
-            A considered approach to hand care that brings together gentle exfoliation and lightweight nourishment in one everyday ritual.
+            <br />A considered approach to hand care that brings together gentle exfoliation and
+            lightweight nourishment in one everyday ritual.
           </motion.p>
 
-          {/* Dual CTAs */}
+          {/* Early access signup */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="flex flex-col sm:flex-row gap-3 md:gap-4"
+            className="w-full max-w-md"
           >
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleBuildRitual}
-              className="font-din-arabic px-6 py-3 md:px-8 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide text-sm md:text-base"
-            >
-              Get Early Access
-            </motion.button>
-           
+            <AnimatePresence mode="wait" initial={false}>
+              {!isEmailFormOpen ? (
+                <motion.button
+                  key="early-access-button"
+                  type="button"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setIsEmailFormOpen(true)}
+                  className="border border-black/30 bg-transparent px-6 py-3 font-din-arabic text-sm tracking-wide text-black transition-colors duration-300 hover:bg-black hover:text-white md:px-8 md:text-base"
+                >
+                  Get Early Access
+                </motion.button>
+              ) : (
+                <motion.form
+                  key="early-access-form"
+                  initial={{ opacity: 0, width: "11rem" }}
+                  animate={{ opacity: 1, width: "100%" }}
+                  exit={{ opacity: 0, width: "11rem" }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
+                  onSubmit={handleSubmit}
+                  className="origin-left overflow-hidden"
+                >
+                  <div className="flex w-full min-w-[18rem] border border-black/30 bg-transparent focus-within:border-black">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder="Enter your email"
+                      autoComplete="email"
+                      required
+                      disabled={isPending}
+                      aria-label="Email address for early access"
+                      className="min-w-0 flex-1 bg-transparent px-4 py-3 font-din-arabic text-sm text-black outline-none placeholder:text-black/45 disabled:opacity-60 md:px-5 md:text-base"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isPending}
+                      className="shrink-0 border-l border-black/30 bg-black px-4 py-3 font-din-arabic text-sm tracking-wide text-white transition-colors hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-60 md:px-6"
+                    >
+                      {isPending ? "Submitting..." : "Submit"}
+                    </button>
+                  </div>
+
+                  <AnimatePresence>
+                    {message && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        role="status"
+                        className={`mt-3 font-din-arabic text-sm ${
+                          isSuccess ? "text-[#52644a]" : "text-red-700"
+                        }`}
+                      >
+                        {message}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </motion.form>
+              )}
+            </AnimatePresence>
           </motion.div>
         </motion.div>
 

@@ -4,6 +4,7 @@
 import { sdk } from "@lib/config"
 import { login, signup } from "@lib/data/customer"
 import { Navigation } from "app/components/Navigation"
+import { PhoneOtpLogin } from "app/components/PhoneOtpLogin"
 import { RippleEffect } from "app/components/RippleEffect"
 import { DatePicker } from "app/components/ui/date-picker"
 import { Eye, EyeOff, Smartphone } from "lucide-react"
@@ -85,6 +86,7 @@ export default function AuthPage() {
   const [isDelaying, setIsDelaying] = useState(false)
   const [showCaptcha, setShowCaptcha] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [showPhoneLogin, setShowPhoneLogin] = useState(false)
   const recaptchaRef = React.useRef<HTMLDivElement>(null)
   const recaptchaWidgetId = React.useRef<number | null>(null)
 
@@ -399,8 +401,15 @@ export default function AuthPage() {
   }, [])
 
   const loginWithGoogle = async () => {
-    const result = await sdk.auth.login("customer", "google", {})
+    const callbackUrl = `${window.location.origin}/${countryCode}/auth/google/callback`
+    const result = await sdk.auth.login("customer", "google", {
+      callback_url: callbackUrl,
+    })
     if (typeof result === "object" && result.location) {
+      const redirectPath = actualRedirectPath.startsWith(`/${countryCode}/`)
+        ? actualRedirectPath
+        : `/${countryCode}/account`
+      sessionStorage.setItem("jardinBotanica_googleRedirectPath", redirectPath)
       window.location.href = result.location
       return
     }
@@ -490,6 +499,16 @@ export default function AuthPage() {
                     </motion.button>
                   </a>
                 </div>
+              ) : showPhoneLogin ? (
+                <PhoneOtpLogin
+                  onBack={() => setShowPhoneLogin(false)}
+                  onSuccess={() => {
+                    sessionStorage.removeItem("jardinBotanica_orderEmail")
+                    sessionStorage.removeItem("jardinBotanica_redirectAfterLogin")
+                    router.replace(actualRedirectPath)
+                    router.refresh()
+                  }}
+                />
               ) : (
                 <form
                   action={signinAction}
@@ -684,6 +703,7 @@ export default function AuthPage() {
                     </button>
                     <button
                       type="button"
+                      onClick={() => setShowPhoneLogin(true)}
                       className="font-din-arabic w-full flex items-center px-4 py-3.5 border bg-transparent text-black hover:bg-black/5 transition-all duration-300"
                       style={{ borderColor: "#D8D2C7" }}
                     >
