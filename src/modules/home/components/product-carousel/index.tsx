@@ -584,6 +584,19 @@ export function ProductCarousel({
               padding-left: 2rem !important;
               padding-right: 0 !important;
             }
+            .product-carousel-content.product-carousel-content--centered {
+              justify-content: center !important;
+              gap: 2rem !important;
+              padding-left: 2rem !important;
+              padding-right: 2rem !important;
+            }
+            .product-carousel-content.product-carousel-content--centered > .product-carousel-item {
+              width: calc((100% - 6rem) / 4) !important;
+              max-width: 320px !important;
+              flex-basis: calc((100% - 6rem) / 4) !important;
+              margin-left: 0 !important;
+              margin-right: 0 !important;
+            }
           }
           @media (min-width: 1200px) {
             .product-carousel-item {
@@ -628,7 +641,11 @@ export function ProductCarousel({
             }}
             className="w-full"
           >
-            <CarouselContent className="product-carousel-content">
+            <CarouselContent
+              className={`product-carousel-content ${
+                mergedProducts.length <= 4 ? "product-carousel-content--centered" : ""
+              }`}
+            >
               {mergedProducts.map((product) => (
                 <CarouselItem key={product.id} className="product-carousel-item">
                   <ProductCard

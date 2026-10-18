@@ -3,8 +3,9 @@
 import { requestEmailUpdate, updateCustomer, updateCustomerPassword } from "@lib/data/customer"
 import type { HttpTypes } from "@medusajs/types"
 import { Pencil } from "lucide-react"
-import { motion } from "motion/react"
+import { motion, type Variants } from "motion/react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import type React from "react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -28,6 +29,7 @@ type OverviewProps = {
 }
 
 const Overview: React.FC<OverviewProps> = ({ customer, orders, preferences }) => {
+  const router = useRouter()
   const [editInfoOpen, setEditInfoOpen] = useState(false)
   const [changePasswordOpen, setChangePasswordOpen] = useState(false)
   const [updateEmailOpen, setUpdateEmailOpen] = useState(false)
@@ -46,15 +48,13 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders, preferences }) =>
       .join(" ")
   }
 
-  if (!customer) {
-    return null
-  }
-
   const [userInfo, setUserInfo] = useState({
-    firstName: customer.first_name || "",
-    lastName: customer.last_name || "",
-    email: customer.email || "",
+    firstName: customer?.first_name || "",
+    lastName: customer?.last_name || "",
+    email: customer?.email || "",
+    phone: customer?.phone || "",
   })
+  const [savedInfo, setSavedInfo] = useState(userInfo)
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -67,15 +67,45 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders, preferences }) =>
     newEmail: "",
   })
 
+  if (!customer) {
+    return null
+  }
+
   const handleSaveUserInfo = async () => {
+    const phoneInput = userInfo.phone.trim()
+    const phoneChanged = phoneInput !== savedInfo.phone
+    let phone = phoneInput
+
+    if (phoneChanged && phoneInput) {
+      if (!/^\+?[\d\s()-]+$/.test(phoneInput)) {
+        toast.error("Enter a valid mobile number")
+        return
+      }
+
+      const digits = phoneInput.replace(/\D/g, "")
+      const nationalNumber =
+        digits.length === 12 && digits.startsWith("91") ? digits.slice(2) : digits
+
+      if (nationalNumber.length !== 10) {
+        toast.error("Enter a 10-digit Indian mobile number")
+        return
+      }
+
+      phone = `+91${nationalNumber}`
+    }
+
     setLoading("userInfo")
     try {
       await updateCustomer({
         first_name: userInfo.firstName,
         last_name: userInfo.lastName,
+        phone,
       })
+      setSavedInfo({ ...userInfo, phone })
+      setUserInfo({ ...userInfo, phone })
       setLoading(null)
       setEditInfoOpen(false)
+      router.refresh()
       toast.success("Personal information updated successfully")
     } catch (error) {
       setLoading(null)
@@ -189,7 +219,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders, preferences }) =>
     }
   }
 
-  const sectionVariants = {
+  const sectionVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -230,7 +260,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders, preferences }) =>
                 Name
               </label>
               <p className="font-din-arabic text-base text-black tracking-wide">
-                {toTitleCase(customer.first_name || "")} {toTitleCase(customer.last_name || "")}
+                {toTitleCase(savedInfo.firstName)} {toTitleCase(savedInfo.lastName)}
               </p>
             </div>
 
@@ -338,10 +368,29 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders, preferences }) =>
                 </Dialog>
               </div>
             </div>
+            <div>
+              <p className="font-din-arabic mb-3 text-xs uppercase tracking-wider text-black/40">
+                Mobile number
+              </p>
+              <p className="font-din-arabic text-base tracking-wide text-black">
+                {savedInfo.phone || "Not added"}
+              </p>
+              {!savedInfo.phone && (
+                <p className="font-din-arabic mt-2 text-sm text-black/60">
+                  Add a mobile number to sign in with a code.
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Dialog open={editInfoOpen} onOpenChange={setEditInfoOpen}>
+            <Dialog
+              open={editInfoOpen}
+              onOpenChange={(open) => {
+                setEditInfoOpen(open)
+                if (!open) setUserInfo(savedInfo)
+              }}
+            >
               <DialogTrigger asChild>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -386,6 +435,25 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders, preferences }) =>
                       <Input
                         value={userInfo.lastName}
                         onChange={(e) => setUserInfo({ ...userInfo, lastName: e.target.value })}
+                        className="mt-2 bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10"
+                        style={{ borderColor: "#D8D2C7" }}
+                      />
+                    </div>
+                    <div>
+                      <Label
+                        htmlFor="account-mobile-number"
+                        className="font-din-arabic text-sm text-black/60 tracking-wide"
+                      >
+                        Mobile number
+                      </Label>
+                      <Input
+                        id="account-mobile-number"
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        value={userInfo.phone}
+                        onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
+                        placeholder="+91 98765 43210"
                         className="mt-2 bg-transparent border font-din-arabic tracking-wide transition-all duration-200 focus:ring-2 focus:ring-black/10"
                         style={{ borderColor: "#D8D2C7" }}
                       />

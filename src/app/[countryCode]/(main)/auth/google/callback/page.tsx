@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { handleGoogleCallback } from "./action"
 
@@ -9,6 +9,8 @@ export default function GoogleCallbackPage() {
   const [error, setError] = useState<string>("")
   const router = useRouter()
   const searchParams = useSearchParams()
+  const params = useParams()
+  const countryCode = (params?.countryCode as string) || "in"
 
   useEffect(() => {
     const processCallback = async () => {
@@ -23,9 +25,14 @@ export default function GoogleCallbackPage() {
 
       if (result.success) {
         setStatus("success")
+        const storedRedirect = sessionStorage.getItem("jardinBotanica_googleRedirectPath")
+        const redirectPath = storedRedirect?.startsWith(`/${countryCode}/`)
+          ? storedRedirect
+          : `/${countryCode}/account`
+        sessionStorage.removeItem("jardinBotanica_googleRedirectPath")
         // Redirect to account page after 1 second
         setTimeout(() => {
-          router.push("/account")
+          router.replace(redirectPath)
         }, 1000)
       } else {
         setStatus("error")
@@ -34,7 +41,7 @@ export default function GoogleCallbackPage() {
     }
 
     processCallback()
-  }, [searchParams, router])
+  }, [searchParams, router, countryCode])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -89,7 +96,7 @@ export default function GoogleCallbackPage() {
             <h2 className="text-xl font-semibold text-gray-700">Authentication Failed</h2>
             <p className="text-red-600 mt-2">{error}</p>
             <button
-              onClick={() => router.push("/login")}
+              onClick={() => router.push(`/${countryCode}/accounts`)}
               className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Back to login

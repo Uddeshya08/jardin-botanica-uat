@@ -317,7 +317,7 @@ export function HomeCreationsPage({
       {/* Products Grid - First Set */}
       <section className="py-10 sm:py-14 lg:py-20">
         <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 sm:gap-y-16 lg:gap-y-20  justify-items-center">
+          <div className="scrollbar-hide flex snap-x snap-mandatory gap-x-2 overflow-x-auto md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-16 md:overflow-visible lg:grid-cols-3 lg:gap-y-20">
             {filteredProducts.slice(0, 3).map((product, index) => (
               <ProductCard
                 key={product.id}
@@ -363,7 +363,7 @@ export function HomeCreationsPage({
 
             {/* Remaining Products */}
             {filteredProducts.length > 6 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 sm:gap-y-16 lg:gap-y-20 mb-16 sm:mb-24 lg:mb-32 justify-items-center">
+              <div className="scrollbar-hide mb-16 flex snap-x snap-mandatory gap-x-2 overflow-x-auto md:mb-24 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-16 md:overflow-visible lg:mb-32 lg:grid-cols-3 lg:gap-y-20">
                 {filteredProducts.slice(6).map((product, index) => (
                   <ProductCard
                     key={product.id}
@@ -431,14 +431,12 @@ function ProductCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group flex flex-col w-full mx-auto"
-      style={{ minHeight: "600px", maxWidth: "420px" }}
+      className="group mx-0 flex w-[calc((100%_-_0.5rem)/2)] min-w-[calc((100%_-_0.5rem)/2)] flex-none snap-start flex-col md:mx-auto md:min-h-[600px] md:w-full md:min-w-0 md:max-w-[420px] md:snap-none"
     >
       {/* Product Image */}
       <Link href={`/products/${productSlug}`}>
         <div
-          className="relative w-full overflow-hidden cursor-pointer"
-          style={{ aspectRatio: "3/4", marginBottom: "1.5rem" }}
+          className="relative mb-3 aspect-[3/4] w-full cursor-pointer overflow-hidden md:mb-6"
           onMouseEnter={() => setIsImageHovered(true)}
           onMouseLeave={() => setIsImageHovered(false)}
         >
@@ -479,7 +477,7 @@ function ProductCard({
               e.stopPropagation()
               handleToggleLedger(product)
             }}
-            className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
+            className={`absolute top-2 right-2 z-10 rounded-full p-1.5 backdrop-blur-md transition-all duration-300 md:top-4 md:right-4 md:p-2.5 ${
               isInLedger(product.id)
                 ? "bg-white/20 border border-white/30"
                 : "bg-white/20 border border-white/30 hover:bg-white/30"
@@ -488,7 +486,7 @@ function ProductCard({
           >
             <Heart
               size={18}
-              className={`transition-colors duration-300 ${isInLedger(product.id) ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"}`}
+              className={`h-4 w-4 transition-colors duration-300 md:h-[18px] md:w-[18px] ${isInLedger(product.id) ? "fill-[#e58a4d] stroke-[#e58a4d]" : "stroke-white fill-none"}`}
             />
           </motion.button>
         </div>
@@ -499,7 +497,7 @@ function ProductCard({
         <Link href={`/products/${productSlug}`}>
           <div>
             <h3
-              className="font-american-typewriter text-xl mb-1 hover:opacity-70 transition-opacity cursor-pointer"
+              className="mb-1 line-clamp-2 min-h-[2.5rem] cursor-pointer break-words font-american-typewriter text-xs leading-snug transition-opacity hover:opacity-70 md:min-h-0 md:text-xl"
               style={{ letterSpacing: "0.05em" }}
             >
               {product.name}
@@ -509,24 +507,34 @@ function ProductCard({
 
         {product.description ? (
           <p
-            className="font-din-arabic text-black/70 leading-relaxed mt-3"
+            className="mt-3 hidden font-din-arabic leading-relaxed text-black/70 md:block"
             style={{ letterSpacing: "0.1em" }}
           >
             {product.description.split(".")[0]}.
           </p>
         ) : product.subtitle ? (
           <p
-            className="font-din-arabic text-black/70 leading-relaxed mt-3"
+            className="mt-3 hidden font-din-arabic leading-relaxed text-black/70 md:block"
             style={{ letterSpacing: "0.1em" }}
           >
             {product.subtitle}
           </p>
         ) : null}
 
-        <div className="mt-auto pt-4">
-          <p className="font-din-arabic text-black text-sm mb-4" style={{ letterSpacing: "0.1em" }}>
-            ₹{product.price.toLocaleString()}
-          </p>
+        <div className="mt-auto pt-2 md:pt-4">
+          <div className="mb-2 flex items-center justify-between gap-1 md:mb-4">
+            <p
+              className="shrink-0 whitespace-nowrap font-din-arabic text-xs text-black md:text-sm"
+              style={{ letterSpacing: "0.06em" }}
+            >
+              ₹{product.price.toLocaleString()}
+            </p>
+            {product.size && (
+              <p className="min-w-0 truncate text-right font-din-arabic text-[10px] text-black/60 md:text-sm">
+                {product.size}
+              </p>
+            )}
+          </div>
 
           {/* Minimal Add to Cart Button - Aesop Style */}
           <div className="flex items-center justify-end">
@@ -534,15 +542,17 @@ function ProductCard({
               onClick={() => handleAddToCart(product)}
               onMouseEnter={() => setIsButtonHovered(true)}
               onMouseLeave={() => setIsButtonHovered(false)}
-              className="group/btn relative inline-flex items-center gap-2 pb-0.5 cursor-pointer"
+              className="group/btn relative inline-flex w-full cursor-pointer items-center justify-center gap-1 border border-black/30 px-1 py-2 pb-2 md:w-auto md:justify-start md:gap-2 md:border-0 md:px-0 md:py-0 md:pb-0.5"
             >
               <span
-                className="font-din-arabic text-black text-base sm:text-sm"
+                className="font-din-arabic text-[10px] text-black md:text-sm"
                 style={{ letterSpacing: "0.12em" }}
               >
                 {isRecentlyAdded ? "In cart" : "Add to cart"}
               </span>
-              <span className="text-black text-base sm:text-sm">{isRecentlyAdded ? "✓" : "→"}</span>
+              <span className="text-[10px] text-black md:text-sm">
+                {isRecentlyAdded ? "✓" : "→"}
+              </span>
 
               {/* Animated underline */}
               <motion.span
