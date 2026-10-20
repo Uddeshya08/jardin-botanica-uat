@@ -1,13 +1,14 @@
 "use client"
 import { motion } from "motion/react"
 import React, { useState } from "react"
+import type { HomeEditorialSection } from "types/sanity-home"
 
-export function BespokeGifting() {
+export function BespokeGifting({ content }: { content?: HomeEditorialSection }) {
   const [isPressed, setIsPressed] = useState(false)
 
   const handleBeginConsultation = () => {
-    const email = "hello@jardinbotanica.com"
-    const subject = "Business Enquiry"
+    const email = content?.contactEmail || "hello@jardinbotanica.com"
+    const subject = content?.emailSubject || "Business Enquiry"
     window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}`
   }
 
@@ -26,8 +27,8 @@ export function BespokeGifting() {
           <div className="relative h-full w-full md:hidden">
             <div className="absolute inset-0 bg-black/60 z-10" />
             <img
-              src="/assets/first.png"
-              alt="Hands holding botanical book with oranges and plants"
+              src={content?.image?.url || "/assets/first.png"}
+              alt={content?.image?.alt || "Hands holding botanical book with oranges and plants"}
               className="w-full h-full object-cover"
               style={{ objectPosition: "center" }}
             />
@@ -46,8 +47,8 @@ export function BespokeGifting() {
               onTouchCancel={() => setIsPressed(false)}
             >
               <img
-                src="/assets/first.png"
-                alt="Hands holding botanical book with oranges and plants"
+                src={content?.image?.url || "/assets/first.png"}
+                alt={content?.image?.alt || "Hands holding botanical book with oranges and plants"}
                 className="w-full h-full object-contain"
               />
             </motion.div>
@@ -70,7 +71,7 @@ export function BespokeGifting() {
             viewport={{ once: true }}
             className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-white md:text-black leading-tight"
           >
-            Bespoke Botanical Set
+            {content?.heading || "Bespoke Botanical Set"}
           </motion.h2>
 
           {/* Main Description */}
@@ -81,8 +82,7 @@ export function BespokeGifting() {
             viewport={{ once: true }}
             className="font-din-arabic text-base md:text-lg text-white/90 md:text-black/70 leading-relaxed mb-6 md:mb-8"
           >
-          For rooms, tables, welcome moments, and gestures that call for something more considered, we compose tailored selections from the Jardin Botanica world.
-From hand care and candles to home fragrance objects and finishing details, each set is arranged with use, atmosphere, and presentation in mind.
+            {content?.description || "For rooms, tables, welcome moments, and gestures that call for something more considered, we compose tailored selections from the Jardin Botanica world. From hand care and candles to home fragrance objects and finishing details, each set is arranged with use, atmosphere, and presentation in mind."}
           </motion.p>
 
           {/* Personal Consultation Text */}
@@ -93,8 +93,7 @@ From hand care and candles to home fragrance objects and finishing details, each
             viewport={{ once: true }}
             className="font-din-arabic text-base md:text-lg text-white/90 md:text-black/70 leading-relaxed mb-8 md:mb-12"
           >
-            Our specialists design solutions aligned with your brand, your ideas, and the moments
-            you want to elevate.
+            {content?.secondaryText || "Our specialists design solutions aligned with your brand, your ideas, and the moments you want to elevate."}
           </motion.p>
 
           {/* Bottom Link */}
@@ -110,7 +109,7 @@ From hand care and candles to home fragrance objects and finishing details, each
               onClick={handleBeginConsultation}
               className="font-din-arabic w-full md:w-auto px-6 py-4 md:py-3 md:px-8 bg-transparent border border-white/60 md:border-black/30 text-white md:text-black hover:bg-white hover:text-black md:hover:bg-black md:hover:text-white transition-all duration-300 tracking-wide text-sm md:text-base backdrop-blur-sm md:backdrop-blur-none"
             >
-              Begin consultation
+              {content?.ctaLabel || "Begin consultation"}
             </motion.button>
           </motion.div>
         </motion.div>

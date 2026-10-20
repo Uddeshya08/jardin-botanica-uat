@@ -1,6 +1,7 @@
 import type { SchemaTypeDefinition } from "sanity"
 import { blog } from "./documents/blog"
 import { blogTemplate1 } from "./documents/blogTemplate1"
+import { homePage } from "./documents/homePage"
 import { pageSeo } from "./documents/pageSeo"
 import { accordionBlock } from "./objects/accordionBlock"
 import { author } from "./objects/author"
@@ -13,6 +14,7 @@ import { statementBlock } from "./objects/statementBlock"
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     blogTemplate1,
+    homePage,
     pageSeo,
     blog,
     author,

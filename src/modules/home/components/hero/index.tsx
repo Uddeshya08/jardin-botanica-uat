@@ -12,15 +12,17 @@ import { RippleEffect } from "app/components/RippleEffect"
 import { useCartItems } from "app/context/cart-items-context"
 import React, { useEffect, useState } from "react"
 import type { SanityJournalListItem as Blog } from "types/sanity-blog"
+import type { SanityHomePage } from "types/sanity-home"
 import { ProductCarousel } from "../product-carousel"
 
 interface HeroProps {
   products?: HttpTypes.StoreProduct[]
   blogs?: Blog[]
   countryCode?: string
+  content?: SanityHomePage | null
 }
 
-export default function Home({ products, blogs, countryCode }: HeroProps) {
+export default function Home({ products, blogs, countryCode, content }: HeroProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const { cartItems, handleCartUpdate } = useCartItems()
 
@@ -38,15 +40,15 @@ export default function Home({ products, blogs, countryCode }: HeroProps) {
     <div className="min-h-screen">
       <RippleEffect />
       <Navigation isScrolled={isScrolled} cartItems={cartItems} onCartUpdate={handleCartUpdate} />
-      <HeroSection />
+      <HeroSection slides={content?.heroSlides} />
 
       {/* Bottom Fold Sections */}
-      <DesignPhilosophy />
-      <ProductCarousel products={products} countryCode={countryCode} />
-      <FeaturedRitual />
-      <BespokeGifting />
-      <JournalSection blogs={blogs} countryCode={countryCode} />
-      <Newsletter />
+      <DesignPhilosophy content={content?.philosophy} />
+      <ProductCarousel products={products} countryCode={countryCode} heading={content?.products?.heading} />
+      <FeaturedRitual content={content?.ritual} />
+      <BespokeGifting content={content?.gifting} />
+      <JournalSection blogs={blogs} countryCode={countryCode} content={content?.journal} />
+      <Newsletter content={content?.newsletter} />
     </div>
   )
 }

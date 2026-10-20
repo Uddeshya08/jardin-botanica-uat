@@ -267,9 +267,11 @@ function ProductCard({
 export function ProductCarousel({
   products: sourceProducts,
   countryCode,
+  heading,
 }: {
   products?: any[]
   countryCode?: string
+  heading?: string
 }) {
   const router = useRouter()
   const { cartItems, handleCartUpdate } = useCartItems()
@@ -495,7 +497,13 @@ export function ProductCarousel({
         viewport={{ once: true }}
       >
         <h2 className="text-center font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-black leading-tight">
-          From the Botanist’s Lab<span className="font-normal text-2xl align-super">™</span>
+          {heading ? (
+            heading.endsWith("™") ? (
+              <>{heading.slice(0, -1)}<span className="font-normal text-2xl align-super">™</span></>
+            ) : heading
+          ) : (
+            <>From the Botanist’s Lab<span className="font-normal text-2xl align-super">™</span></>
+          )}
         </h2>
       </motion.div>
       <style

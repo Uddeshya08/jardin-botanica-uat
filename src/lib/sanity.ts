@@ -1,4 +1,5 @@
 import { client } from "../sanity/lib/client"
+import type { SanityHomePage } from "types/sanity-home"
 import type {
   SanityBlog,
   SanityBlogTemplate1,
@@ -12,6 +13,29 @@ const cacheOpts = (revalidate: number) =>
   process.env.NODE_ENV === "production"
     ? ({ next: { revalidate } } as const)
     : ({ cache: "no-store" } as const)
+
+export async function getHomePageSanity(): Promise<SanityHomePage | null> {
+  try {
+    return await client.fetch<SanityHomePage | null>(
+      `*[_type == "homePage" && _id == "homePage"][0]{
+        heroSlides[]{_key, title, headline, description,
+          "image": image{"url": asset->url, alt},
+          "videoUrl": coalesce(video.asset->url, videoUrl), ctaLabel, ctaAction, ctaLink},
+        philosophy{eyebrow, heading, description, "image": image{"url": asset->url, alt}, ctaLabel, ctaLink},
+        products{heading},
+        ritual{heading, description, "image": image{"url": asset->url, alt}, ctaLabel, emailPlaceholder, submitLabel},
+        gifting{heading, description, secondaryText, "image": image{"url": asset->url, alt}, ctaLabel, contactEmail, emailSubject},
+        journal{heading, ctaLabel},
+        newsletter{heading, description, emailPlaceholder, submitLabel}
+      }`,
+      {},
+      cacheOpts(60)
+    )
+  } catch (error) {
+    console.error("Error fetching Sanity homepage:", error)
+    return null
+  }
+}
 
 const BLOG_PROJECTION = `{
   title,

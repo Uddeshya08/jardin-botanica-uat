@@ -2,6 +2,7 @@ import { motion } from "motion/react"
 import Link from "next/link"
 import React, { useState } from "react"
 import type { SanityJournalListItem } from "types/sanity-blog"
+import type { HomeEditorialSection } from "types/sanity-home"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 type Blog = SanityJournalListItem
@@ -9,6 +10,7 @@ type Blog = SanityJournalListItem
 interface JournalSectionProps {
   blogs?: Blog[]
   countryCode?: string
+  content?: HomeEditorialSection
 }
 
 function JournalPostCard({
@@ -97,7 +99,7 @@ function JournalPostCard({
   )
 }
 
-export function JournalSection({ blogs, countryCode }: JournalSectionProps) {
+export function JournalSection({ blogs, countryCode, content }: JournalSectionProps) {
   if (!blogs || blogs.length === 0) {
     return null
   }
@@ -113,7 +115,7 @@ export function JournalSection({ blogs, countryCode }: JournalSectionProps) {
           className="mb-12 max-w-8xl mx-auto px-6"
         >
           <h2 className="font-american-typewriter text-center text-2xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-black leading-tight">
-            From the Journal
+            {content?.heading || "From the Journal"}
           </h2>
         </motion.div>
 
@@ -142,7 +144,7 @@ export function JournalSection({ blogs, countryCode }: JournalSectionProps) {
                 whileTap={{ scale: 0.98 }}
                 className="font-din-arabic px-8 py-3 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide"
               >
-                View all
+                {content?.ctaLabel || "View all"}
               </motion.button>
             </Link>
           </motion.div>
