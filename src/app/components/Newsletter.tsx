@@ -2,8 +2,9 @@
 
 import { useNewsletterSubscription } from "@lib/hooks/use-newsletter-subscription"
 import { motion } from "motion/react"
+import type { HomeEditorialSection } from "types/sanity-home"
 
-const Newsletter = () => {
+const Newsletter = ({ content }: { content?: HomeEditorialSection }) => {
   const { email, setEmail, message, isSuccess, isPending, handleSubmit } =
     useNewsletterSubscription()
 
@@ -51,7 +52,7 @@ const Newsletter = () => {
             viewport={{ once: true }}
             className="font-american-typewriter text-3xl lg:text-4xl tracking-tight mb-6 text-black"
           >
-            Join the Circle
+            {content?.heading || "Join the Circle"}
           </motion.h3>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -60,8 +61,7 @@ const Newsletter = () => {
             viewport={{ once: true }}
             className="font-din-arabic text-black/70 mb-8 leading-relaxed text-lg"
           >
-            Be the first to discover new blends, exclusive rituals, and stories from our botanical
-            laboratory.
+            {content?.description || "Be the first to discover new blends, exclusive rituals, and stories from our botanical laboratory."}
           </motion.p>
           <motion.form
             onSubmit={handleSubmit}
@@ -75,7 +75,7 @@ const Newsletter = () => {
               <motion.input
                 whileFocus={{ scale: 1.02 }}
                 type="email"
-                placeholder="Enter your email"
+                placeholder={content?.emailPlaceholder || "Enter your email"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -89,7 +89,7 @@ const Newsletter = () => {
                 disabled={isPending}
                 className="font-din-arabic px-8 py-3 bg-black text-white hover:bg-black/90 transition-colors tracking-wide"
               >
-                {isPending ? "Subscribing..." : "Subscribe"}
+                {isPending ? "Subscribing..." : content?.submitLabel || "Subscribe"}
               </motion.button>
             </div>
             {message && (

@@ -1,10 +1,15 @@
 import { motion } from "motion/react"
 import Link from "next/link"
 import React, { useState } from "react"
+import type { HomeEditorialSection } from "types/sanity-home"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
-export function DesignPhilosophy() {
+export function DesignPhilosophy({ content }: { content?: HomeEditorialSection }) {
   const [isPressed, setIsPressed] = useState(false)
+  const eyebrow = content?.eyebrow || "Design Philosophy"
+  const heading = content?.heading || "From Kyoto’s Moss Gardens to Kew’s Glasshouses"
+  const description = content?.description || "We study living collections and translate them into disciplined blends built on measured actives and climate-smart bases. Design carries it home through the weight of the vessel, the rhythm of use, and the soft afterfeel, turning daily gestures into deliberate pleasure."
+  const ctaLink = content?.ctaLink?.startsWith("/") && !content.ctaLink.startsWith("//") ? content.ctaLink : "/the-lab"
 
   return (
     <section className="pt-12 lg:pt-16 pb-0" style={{ backgroundColor: "#edede2" }}>
@@ -19,7 +24,7 @@ export function DesignPhilosophy() {
               viewport={{ once: true }}
             >
               <p className="font-din-arabic text-sm tracking-widest text-black/50 uppercase">
-                Design Philosophy
+                {eyebrow}
               </p>
             </motion.div>
             <motion.div
@@ -29,7 +34,7 @@ export function DesignPhilosophy() {
               viewport={{ once: true }}
             >
               <h2 className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 md:mb-8 text-black leading-tight">
-                From Kyoto’s Moss Gardens to Kew’s Glasshouses
+                {heading}
               </h2>
             </motion.div>
           </div>
@@ -53,8 +58,8 @@ export function DesignPhilosophy() {
                 className="w-full h-full"
               >
                 <img
-                  src="/assets/second.png"
-                  alt="Botanical glass greenhouse with palm fronds"
+                  src={content?.image?.url || "/assets/second.png"}
+                  alt={content?.image?.alt || "Botanical glass greenhouse with palm fronds"}
                   className="w-full h-full object-cover transition-all duration-600 group-hover:brightness-110"
                 />
               </motion.div>
@@ -94,7 +99,7 @@ export function DesignPhilosophy() {
               className="hidden lg:block"
             >
               <p className="font-din-arabic text-sm tracking-widest text-black/50 uppercase">
-                Design Philosophy
+                {eyebrow}
               </p>
             </motion.div>
 
@@ -107,7 +112,7 @@ export function DesignPhilosophy() {
               className="hidden lg:block"
             >
               <h2 className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-4 text-black leading-tight">
-                From Kyoto’s Moss Gardens to Kew’s Glasshouses
+                {heading}
               </h2>
             </motion.div>
 
@@ -120,9 +125,7 @@ export function DesignPhilosophy() {
               className="space-y-4"
             >
               <p className="font-american-typewriter text-lg text-black/75 leading-relaxed max-w-lg">
-               We study living collections and translate them into disciplined blends built on measured actives
-               and climate-smart bases. Design carries it home through the weight of the vessel, the rhythm of use,
-               and the soft afterfeel, turning daily gestures into deliberate pleasure.
+                {description}
               </p>
             </motion.div>
 
@@ -133,9 +136,9 @@ export function DesignPhilosophy() {
               transition={{ duration: 0.8, delay: 0.6 }}
               viewport={{ once: true }}
             >
-              <Link href="/the-lab" passHref>
+              <Link href={ctaLink} passHref>
                 <motion.button className="font-din-arabic inline-flex items-center px-8 py-3 bg-transparent border border-black/30 text-black hover:bg-black hover:text-white transition-all duration-300 tracking-wide group">
-                  Explore more
+                  {content?.ctaLabel || "Explore more"}
                   <motion.span className="ml-2 transition-transform duration-300 group-hover:translate-x-1">
                     →
                   </motion.span>

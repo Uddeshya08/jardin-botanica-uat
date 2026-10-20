@@ -1,8 +1,9 @@
 import { useNewsletterSubscription } from "@lib/hooks/use-newsletter-subscription"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
+import type { HomeEditorialSection } from "types/sanity-home"
 
-export function FeaturedRitual() {
+export function FeaturedRitual({ content }: { content?: HomeEditorialSection }) {
   const [isPressed, setIsPressed] = useState(false)
   const [isEmailFormOpen, setIsEmailFormOpen] = useState(false)
   const { email, setEmail, message, isSuccess, isPending, handleSubmit } =
@@ -27,7 +28,7 @@ export function FeaturedRitual() {
             viewport={{ once: true }}
             className="font-american-typewriter text-2xl md:text-3xl lg:text-4xl tracking-tight mb-6 md:mb-8 text-black leading-tight"
           >
-            The Botanist's Hand Ritual
+            {content?.heading || "The Botanist's Hand Ritual"}
           </motion.h2>
 
           {/* Main Description */}
@@ -36,11 +37,9 @@ export function FeaturedRitual() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
-            className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8 md:mb-12"
+            className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8 md:mb-12 whitespace-pre-line"
           >
-            Clean that isn't squeaky; softness that isn't sticky.
-            <br />A considered approach to hand care that brings together gentle exfoliation and
-            lightweight nourishment in one everyday ritual.
+            {content?.description || "Clean that isn't squeaky; softness that isn't sticky.\nA considered approach to hand care that brings together gentle exfoliation and lightweight nourishment in one everyday ritual."}
           </motion.p>
 
           {/* Early access signup */}
@@ -64,7 +63,7 @@ export function FeaturedRitual() {
                   onClick={() => setIsEmailFormOpen(true)}
                   className="border border-black/30 bg-transparent px-6 py-3 font-din-arabic text-sm tracking-wide text-black transition-colors duration-300 hover:bg-black hover:text-white md:px-8 md:text-base"
                 >
-                  Get Early Access
+                  {content?.ctaLabel || "Get Early Access"}
                 </motion.button>
               ) : (
                 <motion.form
@@ -81,7 +80,7 @@ export function FeaturedRitual() {
                       type="email"
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
-                      placeholder="Enter your email"
+                      placeholder={content?.emailPlaceholder || "Enter your email"}
                       autoComplete="email"
                       required
                       disabled={isPending}
@@ -93,7 +92,7 @@ export function FeaturedRitual() {
                       disabled={isPending}
                       className="shrink-0 border-l border-black/30 bg-black px-4 py-3 font-din-arabic text-sm tracking-wide text-white transition-colors hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-60 md:px-6"
                     >
-                      {isPending ? "Submitting..." : "Submit"}
+                      {isPending ? "Submitting..." : content?.submitLabel || "Submit"}
                     </button>
                   </div>
 
@@ -130,8 +129,8 @@ export function FeaturedRitual() {
           <div className="h-[40vh] md:h-[60vh] overflow-hidden">
             {/* Image zooms inside container */}
             <motion.img
-              src="/assets/handwashImg.png"
-              alt="Jardin Botanica handwash with natural bristle brush"
+              src={content?.image?.url || "/assets/handwashImg.png"}
+              alt={content?.image?.alt || "Jardin Botanica handwash with natural bristle brush"}
               className="w-full h-full object-cover"
               whileHover={{ scale: 1.03 }}
               animate={{ scale: isPressed ? 1.03 : 1 }}

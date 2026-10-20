@@ -672,7 +672,7 @@ export function Navigation({
                             color:
                               item.name.toLowerCase().includes("body") &&
                               item.name.toLowerCase().includes("hand")
-                                ? "#fff"
+                                ? navStyles.textColor
                                 : "#9ca3af",
                           }}
                         >

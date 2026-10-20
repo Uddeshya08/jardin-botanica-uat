@@ -11,5 +11,19 @@ export default defineConfig({
   projectId,
   dataset,
   schema,
-  plugins: [structureTool(), visionTool({ defaultApiVersion: apiVersion })],
+  plugins: [
+    structureTool({
+      structure: (S) =>
+        S.list()
+          .title("Content")
+          .items([
+            S.listItem()
+              .title("Homepage")
+              .id("homePage")
+              .child(S.document().schemaType("homePage").documentId("homePage")),
+            ...S.documentTypeListItems().filter((item) => item.getId() !== "homePage"),
+          ]),
+    }),
+    visionTool({ defaultApiVersion: apiVersion }),
+  ],
 })

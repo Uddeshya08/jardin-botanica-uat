@@ -1,5 +1,5 @@
 import { listProductsByContentfulCategories } from "@lib/data/contentful"
-import { getLatestJournalWithCoverSanity, getPageSEOSanity } from "@lib/sanity"
+import { getHomePageSanity, getLatestJournalWithCoverSanity, getPageSEOSanity } from "@lib/sanity"
 import { buildMetadata } from "@lib/seo"
 import Hero from "@modules/home/components/hero"
 import type { Metadata } from "next"
@@ -16,19 +16,15 @@ export default async function Home(props: { params: Promise<{ countryCode: strin
   const params = await props.params
   const { countryCode } = params
 
-  const { products } = await listProductsByContentfulCategories({
-    countryCode,
-    maxProducts: 6,
-  })
-
-  // Latest 3 journal entries with a cover image, merged across both Sanity
-  // blog types. If any of the newest N have no cover, the next-newest that
-  // does takes its place.
-  const blogs = await getLatestJournalWithCoverSanity(3)
+  const [productResult, blogs, homeContent] = await Promise.all([
+    listProductsByContentfulCategories({ countryCode, maxProducts: 6 }),
+    getLatestJournalWithCoverSanity(3),
+    getHomePageSanity(),
+  ])
 
   return (
     <>
-      <Hero products={products} blogs={blogs} countryCode={countryCode} />
+      <Hero products={productResult.products} blogs={blogs} countryCode={countryCode} content={homeContent} />
     </>
   )
 }

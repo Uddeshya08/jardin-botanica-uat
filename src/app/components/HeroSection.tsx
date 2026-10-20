@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
+import type { HomeHeroSlide } from "types/sanity-home"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 
 interface HeroPanel {
@@ -16,6 +17,9 @@ interface HeroPanel {
   videoUrl?: string
   cta: string
   isSpecial?: boolean
+  ctaAction?: "link" | "newsletter"
+  ctaLink?: string
+  imageAlt?: string
 }
 
 const heroPanels: HeroPanel[] = [
@@ -27,6 +31,7 @@ const heroPanels: HeroPanel[] = [
     imageUrl: "https://images.unsplash.com/photo-1674620305515-1394fe40c634",
     videoUrl: "/assets/video-banner.mp4",
     cta: "Build your set",
+    ctaLink: "/body-hands",
   },
   {
     id: 2,
@@ -35,6 +40,7 @@ const heroPanels: HeroPanel[] = [
     description: "A gentle glow, a scent that stays close.",
     imageUrl: "https://images.unsplash.com/photo-1650482713537-8de547ea7a16",
     cta: "Shop candles",
+    ctaLink: "/candles",
   },
   {
     id: 3,
@@ -44,6 +50,7 @@ const heroPanels: HeroPanel[] = [
       "Formulas with measured actives and climate-smart bases — finished with design you can feel.",
     imageUrl: "https://images.unsplash.com/photo-1720275273886-89966091ce4d",
     cta: "Enter the lab",
+    ctaLink: "/the-lab",
   },
   {
     id: 4,
@@ -53,10 +60,25 @@ const heroPanels: HeroPanel[] = [
       "An invitation to the inner world.\nEarly access. Limited blends. Private gatherings.",
     imageUrl: "https://images.unsplash.com/photo-1740513348123-72148a7dbf5b",
     cta: "Join the Circle",
+    ctaAction: "newsletter",
   },
 ]
 
-export function HeroSection() {
+export function HeroSection({ slides }: { slides?: HomeHeroSlide[] }) {
+  const panels: HeroPanel[] = slides?.length
+    ? slides.map((slide, index) => ({
+        id: index + 1,
+        title: slide.title || heroPanels[index]?.title || "Explore",
+        subtitle: slide.headline || heroPanels[index]?.subtitle || "",
+        description: slide.description ?? heroPanels[index]?.description ?? "",
+        imageUrl: slide.image?.url || heroPanels[index]?.imageUrl || heroPanels[0].imageUrl,
+        imageAlt: slide.image?.alt,
+        videoUrl: slide.videoUrl,
+        cta: slide.ctaLabel || heroPanels[index]?.cta || "Explore",
+        ctaAction: slide.ctaAction || "link",
+        ctaLink: slide.ctaLink,
+      }))
+    : heroPanels
   const router = useRouter()
   const [activePanel, setActivePanel] = useState(1)
   const [videoError, setVideoError] = useState<Record<number, boolean>>({})
@@ -68,7 +90,7 @@ export function HeroSection() {
   const [showEmailForm, setShowEmailForm] = useState(false)
   const { email, setEmail, message, isSuccess, isPending, subscribe } = useNewsletterSubscription()
 
-  const currentPanel = heroPanels.find((p) => p.id === activePanel) || heroPanels[0]
+  const currentPanel = panels.find((p) => p.id === activePanel) || panels[0]
 
   // Keep video playback on a single path to avoid Safari repaint flashes.
   useEffect(() => {
@@ -81,9 +103,9 @@ export function HeroSection() {
 
   // Function to transition to next panel
   const goToNextPanel = () => {
-    const currentIndex = heroPanels.findIndex((p) => p.id === activePanel)
-    const nextIndex = (currentIndex + 1) % heroPanels.length
-    setActivePanel(heroPanels[nextIndex].id)
+    const currentIndex = panels.findIndex((p) => p.id === activePanel)
+    const nextIndex = (currentIndex + 1) % panels.length
+    setActivePanel(panels[nextIndex].id)
   }
 
   // Handle video end - pause on last frame
@@ -97,20 +119,11 @@ export function HeroSection() {
   const minSwipeDistance = 80
 
   // Handle CTA button clicks
-  const handleCTAClick = (panelId: number) => {
-    switch (panelId) {
-      case 1:
-        router.push("/body-hands")
-        break
-      case 2:
-        router.push("/candles")
-        break
-      case 3:
-        router.push("/the-lab")
-        break
-      case 4:
-        setShowEmailForm(true)
-        break
+  const handleCTAClick = (panel: HeroPanel) => {
+    if (panel.ctaAction === "newsletter") {
+      setShowEmailForm(true)
+    } else if (panel.ctaLink?.startsWith("/") && !panel.ctaLink.startsWith("//")) {
+      router.push(panel.ctaLink)
     }
   }
 
@@ -168,9 +181,9 @@ export function HeroSection() {
     if (isLeftSwipe) {
       goToNextPanel()
     } else if (isRightSwipe) {
-      const currentIndex = heroPanels.findIndex((p) => p.id === activePanel)
-      const prevIndex = (currentIndex - 1 + heroPanels.length) % heroPanels.length
-      setActivePanel(heroPanels[prevIndex].id)
+      const currentIndex = panels.findIndex((p) => p.id === activePanel)
+      const prevIndex = (currentIndex - 1 + panels.length) % panels.length
+      setActivePanel(panels[prevIndex].id)
     }
 
     setIsSwiping(false)
@@ -227,7 +240,7 @@ export function HeroSection() {
               ) : (
                 <ImageWithFallback
                   src={currentPanel.imageUrl}
-                  alt={currentPanel.title}
+                  alt={currentPanel.imageAlt || currentPanel.title}
                   className="w-full h-full object-cover"
                   style={{
                     minHeight: "100svh",
@@ -298,7 +311,7 @@ export function HeroSection() {
 
             {/* CTA Button with Email Form */}
             <div className="mt-4">
-              {activePanel === 4 && showEmailForm ? (
+              {currentPanel.ctaAction === "newsletter" && showEmailForm ? (
                 <motion.div
                   key="email-form"
                   initial={{ opacity: 0, y: 20 }}
@@ -341,7 +354,7 @@ export function HeroSection() {
                       ? "bg-white text-black"
                       : "text-white border border-white/30"
                   }`}
-                  onClick={() => handleCTAClick(activePanel)}
+                  onClick={() => handleCTAClick(currentPanel)}
                   type="button"
                   style={{
                     WebkitTapHighlightColor: "transparent",
@@ -365,7 +378,7 @@ export function HeroSection() {
         <div className="container mx-auto px-2 sm:px-4 md:px-6 lg:px-12">
           <div className="flex justify-center">
             <div className="flex rounded-full px-1 sm:px-1.5 md:px-2 py-1 sm:py-1.5 md:py-2 gap-0.5 sm:gap-1 bg-black/55 border border-white/10">
-              {heroPanels.map((panel) => (
+              {panels.map((panel) => (
                 <button
                   key={panel.id}
                   className={`relative px-2.5 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-2.5 md:py-3 text-[10px] sm:text-xs font-din-arabic tracking-wide sm:tracking-wider transition-all duration-300 rounded-full whitespace-nowrap touch-manipulation ${
