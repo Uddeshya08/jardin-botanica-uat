@@ -1,6 +1,7 @@
 "use client"
 
 import { placeOrder, updateCart } from "@lib/data/cart"
+import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
 import type { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useGiftContextSafe } from "app/context/gift-context"
@@ -132,8 +133,8 @@ export const RazorpayPaymentButton = ({
       },
       prefill: {
         name: `${cart.billing_address?.first_name} ${cart.billing_address?.last_name}`,
-        email: cart?.email,
-        contact: cart?.shipping_address?.phone ?? undefined,
+        email: cart.email?.trim() || undefined,
+        contact: normalizeCheckoutPhone(cart.shipping_address?.phone || ""),
       },
     }
 

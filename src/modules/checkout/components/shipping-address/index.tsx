@@ -1,6 +1,7 @@
 import type { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
 import compareAddresses from "@lib/util/compare-addresses"
+import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import { mapKeys } from "lodash"
@@ -152,13 +153,13 @@ const ShippingAddress = ({
   cart,
   checked,
   onChange,
-  onEmailValidationChange,
+  onContactValidationChange,
 }: {
   customer: HttpTypes.StoreCustomer | null
   cart: HttpTypes.StoreCart | null
   checked: boolean
   onChange: () => void
-    onEmailValidationChange?: (isValid: boolean) => void
+  onContactValidationChange?: (isValid: boolean) => void
 }) => {
   const router = useRouter()
   const [formData, setFormData] = useState<Record<string, any>>({
@@ -170,7 +171,7 @@ const ShippingAddress = ({
     "shipping_address.city": cart?.shipping_address?.city || "",
     "shipping_address.country_code": cart?.shipping_address?.country_code || "",
     "shipping_address.province": cart?.shipping_address?.province || "",
-    "shipping_address.phone": cart?.shipping_address?.phone || "",
+    "shipping_address.phone": cart?.shipping_address?.phone || customer?.phone || "",
     email: cart?.email || "",
   })
 
@@ -192,7 +193,7 @@ const ShippingAddress = ({
     isDefault: false,
   })
   const [emailError, setEmailError] = useState<string>("")
-  const [emailTouched, setEmailTouched] = useState<boolean>(false)
+  const [phoneTouched, setPhoneTouched] = useState(false)
   const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
 
   const countriesInRegion = useMemo(
@@ -221,7 +222,7 @@ const ShippingAddress = ({
         "shipping_address.city": address?.city || "",
         "shipping_address.country_code": address?.country_code || "",
         "shipping_address.province": address?.province || "",
-        "shipping_address.phone": address?.phone || "",
+        "shipping_address.phone": prevState["shipping_address.phone"] || address?.phone || "",
       }))
 
     email &&
@@ -378,28 +379,22 @@ const ShippingAddress = ({
       }, 100)
 
       return () => clearTimeout(timer)
-    } else if (!formData.email || formData.email.trim() === "") {
-      // Email is required, but only show error if field has been touched
-      if (emailTouched) {
-        setEmailError("Email address is required")
-      } else {
-        // Don't show error visually, but validation will still fail (button disabled)
-        setEmailError("")
-      }
+    } else {
+      setEmailError("")
     }
-  }, [formData.email, emailTouched]) // Validate when email changes
+  }, [formData.email]) // Validate when email changes
 
-  // Notify parent component about email validation status
+  let phoneError = ""
+  try {
+    normalizeCheckoutPhone(formData["shipping_address.phone"] || "")
+  } catch (error) {
+    phoneError = (error as Error).message
+  }
+
+  // Phone is required; email is optional but must be valid when entered.
   useEffect(() => {
-    if (onEmailValidationChange) {
-      // Email is invalid if there's an error OR if email is empty (required field)
-      // emailError is a string, so check if it's truthy (non-empty)
-      const hasError = emailError && emailError.trim() !== ""
-      const hasEmail = formData.email && formData.email.trim() !== ""
-      const isValid = !hasError && hasEmail
-      onEmailValidationChange(isValid)
-    }
-  }, [emailError, formData.email, onEmailValidationChange])
+    onContactValidationChange?.(!phoneError && !emailError)
+  }, [phoneError, emailError, onContactValidationChange])
 
   const handleEditAddress = (address: SavedAddress) => {
     setNewAddressData({
@@ -449,17 +444,10 @@ const ShippingAddress = ({
     }
   }, [newAddressData.pincode])
 
-  const validateEmail = (email: string, showRequiredError: boolean = true): boolean => {
-    // Check if email is required and empty
+  const validateEmail = (email: string): boolean => {
     if (!email || email.trim() === "") {
-      // Show required error only if field has been touched (user interacted with it)
-      if (emailTouched && showRequiredError) {
-        setEmailError("Email address is required")
-      } else {
-        // Don't show error visually, but still return false to disable button
-        setEmailError("")
-      }
-      return false
+      setEmailError("")
+      return true
     }
 
     // Basic email format validation
@@ -526,24 +514,66 @@ const ShippingAddress = ({
       [e.target.name]: value,
     })
 
-    // Validate email in real-time
     if (e.target.name === "email") {
-      // Mark field as touched when user starts typing
-      if (!emailTouched) {
-        setEmailTouched(true)
-      }
       validateEmail(value)
     }
   }
 
   const handleEmailBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Mark field as touched when user leaves the field
-    setEmailTouched(true)
-    validateEmail(e.target.value, true)
+    validateEmail(e.target.value)
   }
+
+  const emailField = (
+    <div>
+      <Label htmlFor="email" className="font-din-arabic mb-2 block">
+        Email Address (Optional)
+      </Label>
+      <Input
+        id="email"
+        label=""
+        name="email"
+        type="email"
+        autoComplete="email"
+        value={formData.email}
+        onChange={handleChange}
+        onBlur={handleEmailBlur}
+        placeholder="Enter email address"
+        className={`h-9 w-full rounded-md border px-3 py-1 bg-white/60 font-din-arabic ${emailError ? "border-red-500" : "border-black/20"}`}
+        aria-invalid={Boolean(emailError)}
+        data-testid="shipping-email-input"
+      />
+      {emailError && (
+        <p className="mt-1.5 text-sm text-red-500 font-din-arabic">{emailError}</p>
+      )}
+    </div>
+  )
 
   return (
     <div className="space-y-6">
+      <div className="space-y-4 pb-6 border-b border-black/10">
+        <h3 className="font-din-arabic text-sm text-black/50">Contact Information</h3>
+        <Label htmlFor="checkout-phone" className="font-din-arabic mb-2 block">
+          Phone Number <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          id="checkout-phone"
+          label=""
+          name="shipping_address.phone"
+          type="tel"
+          autoComplete="tel"
+          required
+          value={formData["shipping_address.phone"]}
+          onChange={handleChange}
+          onBlur={() => setPhoneTouched(true)}
+          placeholder="10-digit mobile number or +91..."
+          className={`h-9 w-full rounded-md border px-3 py-1 bg-white/60 font-din-arabic ${phoneTouched && phoneError ? "border-red-500" : "border-black/20"}`}
+          aria-invalid={phoneTouched && Boolean(phoneError)}
+          data-testid="shipping-phone-input"
+        />
+        {phoneTouched && phoneError && (
+          <p className="font-din-arabic text-sm text-red-500">{phoneError}</p>
+        )}
+      </div>
       {savedAddresses.length > 0 && !showAddressForm && (
         <div className="mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -583,8 +613,6 @@ const ShippingAddress = ({
                     {address.city}, {address.state} {address.pincode}
                   </p>
                   <div className="flex items-center space-x-2 pt-1">
-                    <p className="font-din-arabic text-sm text-black/60">{address.phone}</p>
-                    <span className="text-black/30">|</span>
                     <span className="font-din-arabic text-xs px-2 py-1 bg-black/5 rounded-full text-black/50">
                       {address.label}
                     </span>
@@ -666,7 +694,7 @@ const ShippingAddress = ({
             transition={{ duration: 0.4, ease: "easeInOut" }}
             className="space-y-6 overflow-hidden"
           >
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="newName" className="font-din-arabic mb-2 block">
                   Full Name
@@ -686,32 +714,7 @@ const ShippingAddress = ({
                   className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30"
                 />
               </div>
-              <div>
-                <Label htmlFor="newPhone" className="font-din-arabic mb-2 block">
-                  Phone Number
-                </Label>
-                <div className="flex space-x-2">
-                  <div className="w-16 bg-white/80 border border-black/10 rounded-md flex items-center justify-center text-xs font-din-arabic text-black/60">
-                    +91
-                  </div>
-                  <Input
-                    id="newPhone"
-                    label=""
-                    placeholder="Enter 10 digit number"
-                    name="newPhone"
-                    type="tel"
-                    value={newAddressData.phone}
-                    onChange={(e) =>
-                      setNewAddressData({
-                        ...newAddressData,
-                        phone: e.target.value,
-                      })
-                    }
-                    className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30"
-                    maxLength={10}
-                  />
-                </div>
-              </div>
+              {emailField}
             </div>
             <div>
               <Label htmlFor="newAddress1" className="font-din-arabic mb-2 block">
@@ -876,12 +879,23 @@ const ShippingAddress = ({
                     !newAddressData.addressLine1 ||
                     !newAddressData.city ||
                     !newAddressData.state ||
-                    !newAddressData.pincode ||
-                    !newAddressData.phone
+                    !newAddressData.pincode
                   ) {
                     toast.error("Please fill in all required fields")
                     return
                   }
+
+                  let phone: string
+                  try {
+                    phone = normalizeCheckoutPhone(formData["shipping_address.phone"])
+                  } catch (error) {
+                    toast.error((error as Error).message)
+                    return
+                  }
+                  if (!validateEmail(formData.email)) {
+                    return
+                  }
+                  const addressToSave = { ...newAddressData, phone }
 
                   // Validate pincode
                   if (newAddressData.pincode.replace(/\D/g, "").length !== 6) {
@@ -901,7 +915,7 @@ const ShippingAddress = ({
                     formDataToSubmit.append("city", newAddressData.city)
                     formDataToSubmit.append("province", newAddressData.state)
                     formDataToSubmit.append("postal_code", newAddressData.pincode)
-                    formDataToSubmit.append("phone", newAddressData.phone)
+                    formDataToSubmit.append("phone", phone)
                     formDataToSubmit.append("country_code", "in")
                     if (newAddressData.isDefault) {
                       formDataToSubmit.append("is_default_shipping", "on")
@@ -932,7 +946,7 @@ const ShippingAddress = ({
                     if (isEditingAddress) {
                       // Update existing address
                       const updated = savedAddresses.map((addr) =>
-                        addr.id === editingAddressId ? { ...addr, ...newAddressData } : addr
+                        addr.id === editingAddressId ? { ...addr, ...addressToSave } : addr
                       )
                       setSavedAddresses(updated)
                       sessionStorage.setItem("jardinBotanica_savedAddresses", JSON.stringify(updated))
@@ -941,7 +955,7 @@ const ShippingAddress = ({
                       if (selectedAddressId === editingAddressId) {
                         populateAddressFields({
                           id: editingAddressId,
-                          ...newAddressData,
+                          ...addressToSave,
                         } as SavedAddress)
                       }
                       
@@ -950,7 +964,7 @@ const ShippingAddress = ({
                       // Save new address
                       const newAddr: SavedAddress = {
                         id: `address-${Date.now()}`,
-                        ...newAddressData,
+                        ...addressToSave,
                       }
                       const updated = [...savedAddresses, newAddr]
                       setSavedAddresses(updated)
@@ -1015,41 +1029,14 @@ const ShippingAddress = ({
         )}
       </AnimatePresence>
 
-      {/* Contact Information - Always visible when not adding address */}
+      {/* Shipping email remains editable when using a saved address. */}
       {!showAddressForm && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="space-y-4 pt-6 border-t border-black/10"
         >
-          <h3 className="font-din-arabic text-sm text-black/50 mb-4">Contact Information</h3>
-          <div>
-            <label
-              data-slot="label"
-              className="items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 font-din-arabic mb-2 block"
-              htmlFor="email"
-            >
-              Email Address <span className="text-red-500">*</span>
-            </label>
-            <Input
-              id="email"
-              label=""
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={handleEmailBlur}
-              className={`file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30 ${emailError
-                ? "border-red-500 focus:border-red-500"
-                : "border-black/10 focus:border-black/30"
-                }`}
-              aria-invalid={emailError ? "true" : "false"}
-              data-testid="shipping-email-input"
-            />
-            {emailError && (
-              <p className="mt-1.5 text-sm text-red-500 font-din-arabic">{emailError}</p>
-            )}
-          </div>
+          {emailField}
         </motion.div>
       )}
 
@@ -1073,13 +1060,6 @@ const ShippingAddress = ({
 
       {/* Hidden form fields for form submission */}
       <div className="hidden">
-        <Input
-          label=""
-          name="email"
-          type="email"
-          value={formData.email || ""}
-          onChange={handleChange}
-        />
         <Input
           label=""
           name="shipping_address.first_name"
@@ -1120,12 +1100,6 @@ const ShippingAddress = ({
           label=""
           name="shipping_address.province"
           value={formData["shipping_address.province"]}
-          onChange={handleChange}
-        />
-        <Input
-          label=""
-          name="shipping_address.phone"
-          value={formData["shipping_address.phone"]}
           onChange={handleChange}
         />
         <CountrySelect

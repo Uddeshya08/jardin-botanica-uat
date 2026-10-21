@@ -2,6 +2,8 @@
 
 import { isManual, isRazorpay, isStripe } from "@lib/constants"
 import { placeOrder, updateCart } from "@lib/data/cart"
+import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
+import { isCheckoutReady } from "@lib/util/checkout-readiness"
 import type { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
@@ -18,12 +20,7 @@ type PaymentButtonProps = {
 }
 
 const PaymentButton: React.FC<PaymentButtonProps> = ({ cart, "data-testid": dataTestId }) => {
-  const notReady =
-    !cart ||
-    !cart.shipping_address ||
-    !cart.billing_address ||
-    !cart.email ||
-    (cart.shipping_methods?.length ?? 0) < 1
+  const notReady = !isCheckoutReady(cart)
 
   const paymentSession = cart.payment_collection?.payment_sessions?.find(
     (session) => session.status === "pending"
@@ -135,8 +132,8 @@ const StripePaymentButton = ({
               postal_code: cart.billing_address?.postal_code ?? undefined,
               state: cart.billing_address?.province ?? undefined,
             },
-            email: cart.email,
-            phone: cart.billing_address?.phone ?? undefined,
+            email: cart.email?.trim() || undefined,
+            phone: normalizeCheckoutPhone(cart.shipping_address?.phone || ""),
           },
         },
       }
