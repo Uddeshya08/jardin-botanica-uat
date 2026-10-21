@@ -57,14 +57,6 @@ const Addresses = ({
         formData.get("shipping_address.phone")?.toString() || ""
       )
 
-      const trimmedEmail = formData.get("email")?.toString().trim() || ""
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (trimmedEmail && !emailRegex.test(trimmedEmail)) {
-        setSubmitError("Please use a valid email address")
-        setIsSubmitting(false)
-        return
-      }
-
       // Step 1: Set addresses first using updateCart (without redirect)
       const addressData = {
         shipping_address: {
@@ -79,7 +71,6 @@ const Addresses = ({
           province: formData.get("shipping_address.province")?.toString() || "",
           phone,
         },
-        ...(trimmedEmail ? { email: trimmedEmail } : {}),
       } as any
 
       addressData.shipping_address.postal_code = addressData.shipping_address.postal_code.trim()

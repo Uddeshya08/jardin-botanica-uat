@@ -1,11 +1,13 @@
 "use client"
 
-import { paymentInfoMap } from "@lib/constants"
+import { isManual, isRazorpay, paymentInfoMap } from "@lib/constants"
 import { ArrowLeftMini } from "@medusajs/icons"
 import { Button, clx, Heading, Text } from "@medusajs/ui"
 import { ChevronLeft, CreditCard, Edit, MapPin, Shield } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useState } from "react"
 import PaymentButton from "../payment-button"
+import { CodPhoneVerification } from "./cod-phone-verification"
 
 // Payment type options - matching the ones in payment component
 const PAYMENT_TYPES = [
@@ -40,6 +42,7 @@ const Review = ({ cart }: { cart: any }) => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+  const [verifiedFor, setVerifiedFor] = useState<string | null>(null)
 
   const isOpen = searchParams.get("step") === "review"
 
@@ -50,13 +53,19 @@ const Review = ({ cart }: { cart: any }) => {
     cart.shipping_methods.length > 0 &&
     (cart.payment_collection || paidByGiftcard)
 
-  const activeSession = cart.payment_collection?.payment_sessions?.find(
-    (paymentSession: any) => paymentSession.status === "pending"
-  )
-
-  // Get payment type from URL or default to 'card'
   const paymentType = searchParams.get("paymenttype") || "card"
+  const pendingSessions = cart.payment_collection?.payment_sessions?.filter(
+    (paymentSession: any) => paymentSession.status === "pending"
+  ) || []
+  const activeSession = paymentType === "cod"
+    ? pendingSessions.find((session: any) => isManual(session.provider_id))
+    : pendingSessions.find((session: any) => isRazorpay(session.provider_id)) ||
+      pendingSessions.find((session: any) => !isManual(session.provider_id))
+
   const selectedPaymentType = PAYMENT_TYPES.find((pt) => pt.id === paymentType)
+  const isCod = !paidByGiftcard && paymentType === "cod"
+  const verificationKey = `${cart.id}:${cart.shipping_address?.phone || ""}:${activeSession?.id || ""}`
+  const codVerified = verifiedFor === verificationKey
 
   const handleEditShipping = () => {
     const params = new URLSearchParams(searchParams.toString())
@@ -96,6 +105,9 @@ const Review = ({ cart }: { cart: any }) => {
   const getPaymentMethodDisplay = () => {
     if (paidByGiftcard) {
       return "Gift Card"
+    }
+    if (isCod) {
+      return "Cash on Delivery"
     }
     // Use the selected payment type label if available
     if (selectedPaymentType) {
@@ -204,10 +216,24 @@ const Review = ({ cart }: { cart: any }) => {
                   </p>
                   <div className="flex items-center space-x-2 text-sm font-din-arabic text-black/60">
                     <Shield className="w-4 h-4 text-emerald-600" />
-                    <span>Payment will be processed securely via Razorpay</span>
+                    <span>
+                      {isCod
+                        ? "Pay when your order is delivered"
+                        : "Payment will be processed securely via Razorpay"}
+                    </span>
                   </div>
                 </div>
               </div>
+            )}
+
+            {isCod && (
+              <CodPhoneVerification
+                key={verificationKey}
+                cartId={cart.id}
+                phone={cart.shipping_address?.phone || ""}
+                verified={codVerified}
+                onVerified={() => setVerifiedFor(verificationKey)}
+              />
             )}
 
             {/* Previous and Place Order Buttons */}
@@ -220,11 +246,17 @@ const Review = ({ cart }: { cart: any }) => {
               <ChevronLeft className="w-4 h-4" />
               <span>Previous</span>
             </button>
-            <div className="flex-shrink-0">
-              <div className="[&_button]:!w-auto [&_button]:!min-w-fit">
-                <PaymentButton cart={cart} data-testid="submit-order-button" />
+            {(!isCod || codVerified) && (
+              <div className="flex-shrink-0">
+                <div className="[&_button]:!w-auto [&_button]:!min-w-fit">
+                  <PaymentButton
+                    cart={cart}
+                    codVerified={codVerified}
+                    data-testid="submit-order-button"
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </>
       )}

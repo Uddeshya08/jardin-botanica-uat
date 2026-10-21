@@ -90,35 +90,6 @@ const indianCities = [
   "Chandigarh",
 ]
 
-// Valid email providers - only well-known legitimate email providers
-const validEmailProviders = [
-  "gmail.com",
-  "yahoo.com",
-  "yahoo.co.in",
-  "yahoo.in",
-  "outlook.com",
-  "hotmail.com",
-  "hotmail.co.in",
-  "msn.com",
-  "live.com",
-  "icloud.com",
-  "me.com",
-  "mac.com",
-  "protonmail.com",
-  "proton.me",
-  "rediffmail.com",
-  "rediff.com",
-  "zoho.com",
-  "zoho.in",
-  "aol.com",
-  "mail.com",
-  "gmx.com",
-  "yandex.com",
-  "inbox.com",
-  "fastmail.com",
-  "tutanota.com",
-]
-
 interface SavedAddress {
   id: string
   name: string
@@ -172,7 +143,6 @@ const ShippingAddress = ({
     "shipping_address.country_code": cart?.shipping_address?.country_code || "",
     "shipping_address.province": cart?.shipping_address?.province || "",
     "shipping_address.phone": cart?.shipping_address?.phone || customer?.phone || "",
-    email: cart?.email || "",
   })
 
   // Local state for saved addresses
@@ -192,7 +162,6 @@ const ShippingAddress = ({
     label: "Home",
     isDefault: false,
   })
-  const [emailError, setEmailError] = useState<string>("")
   const [phoneTouched, setPhoneTouched] = useState(false)
   const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
 
@@ -210,7 +179,7 @@ const ShippingAddress = ({
     [customer?.addresses, countriesInRegion]
   )
 
-  const setFormAddress = (address?: HttpTypes.StoreCartAddress, email?: string) => {
+  const setFormAddress = (address?: HttpTypes.StoreCartAddress) => {
     address &&
       setFormData((prevState: Record<string, any>) => ({
         ...prevState,
@@ -225,11 +194,6 @@ const ShippingAddress = ({
         "shipping_address.phone": prevState["shipping_address.phone"] || address?.phone || "",
       }))
 
-    email &&
-      setFormData((prevState: Record<string, any>) => ({
-        ...prevState,
-        email: email,
-      }))
   }
 
   const populateAddressFields = (address: SavedAddress) => {
@@ -314,75 +278,9 @@ const ShippingAddress = ({
   useEffect(() => {
     // Ensure cart is not null and has a shipping_address before setting form data
     if (cart && cart.shipping_address) {
-      setFormAddress(cart?.shipping_address, cart?.email)
-    }
-
-    if (cart && !cart.email && customer?.email) {
-      setFormAddress(undefined, customer.email)
+      setFormAddress(cart.shipping_address)
     }
   }, [cart]) // Add cart as a dependency
-
-  // Validate email when formData.email changes (but not on every render)
-  // This handles initial load and programmatic changes
-  useEffect(() => {
-    if (formData.email && formData.email.trim() !== "") {
-      // Defer validation to next tick to ensure validateEmail is available
-      const timer = setTimeout(() => {
-        // Re-use the validation logic by triggering a synthetic validation
-        // We'll validate directly here to avoid dependency issues
-        const email = formData.email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!emailRegex.test(email)) {
-          setEmailError("Please use a valid email address")
-          return
-        }
-
-        const domain = email.split("@")[1]?.toLowerCase()
-        if (!domain) {
-          setEmailError("Please use a valid email address")
-          return
-        }
-
-        const exactMatch = validEmailProviders.some((provider) => domain === provider)
-        if (exactMatch) {
-          setEmailError("")
-          return
-        }
-
-        const subdomainMatch = validEmailProviders.some((provider) =>
-          domain.endsWith(`.${provider}`)
-        )
-        if (subdomainMatch) {
-          setEmailError("")
-          return
-        }
-
-        const corporateTlds = ["com", "co", "org", "edu", "gov", "net", "in"]
-        const domainParts = domain.split(".")
-        if (domainParts.length >= 2) {
-          const tld = domainParts[domainParts.length - 1]
-          if (corporateTlds.includes(tld)) {
-            const secondLevelDomain = domainParts[domainParts.length - 2]
-            if (
-              secondLevelDomain &&
-              secondLevelDomain.length >= 2 &&
-              /^[a-z0-9-]+$/.test(secondLevelDomain) &&
-              /[a-z]/.test(secondLevelDomain)
-            ) {
-              setEmailError("")
-              return
-            }
-          }
-        }
-
-        setEmailError("Please use a valid email address")
-      }, 100)
-
-      return () => clearTimeout(timer)
-    } else {
-      setEmailError("")
-    }
-  }, [formData.email]) // Validate when email changes
 
   let phoneError = ""
   try {
@@ -391,10 +289,9 @@ const ShippingAddress = ({
     phoneError = (error as Error).message
   }
 
-  // Phone is required; email is optional but must be valid when entered.
   useEffect(() => {
-    onContactValidationChange?.(!phoneError && !emailError)
-  }, [phoneError, emailError, onContactValidationChange])
+    onContactValidationChange?.(!phoneError)
+  }, [phoneError, onContactValidationChange])
 
   const handleEditAddress = (address: SavedAddress) => {
     setNewAddressData({
@@ -444,67 +341,6 @@ const ShippingAddress = ({
     }
   }, [newAddressData.pincode])
 
-  const validateEmail = (email: string): boolean => {
-    if (!email || email.trim() === "") {
-      setEmailError("")
-      return true
-    }
-
-    // Basic email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      setEmailError("Please use a valid email address")
-      return false
-    }
-
-    // Extract domain from email
-    const domain = email.split("@")[1]?.toLowerCase()
-    if (!domain) {
-      setEmailError("Please use a valid email address")
-      return false
-    }
-
-    // Check if domain matches any valid provider exactly
-    const exactMatch = validEmailProviders.some((provider) => domain === provider)
-    if (exactMatch) {
-      setEmailError("")
-      return true
-    }
-
-    // Check if domain ends with a valid provider (e.g., "mail.gmail.com")
-    const subdomainMatch = validEmailProviders.some((provider) => {
-      return domain.endsWith(`.${provider}`)
-    })
-    if (subdomainMatch) {
-      setEmailError("")
-      return true
-    }
-
-    // Allow corporate/educational domains with common TLDs (.com, .co, .org, .edu, .gov, .net, .in)
-    // but only if the domain looks legitimate (not random strings)
-    const corporateTlds = ["com", "co", "org", "edu", "gov", "net", "in"]
-    const domainParts = domain.split(".")
-    if (domainParts.length >= 2) {
-      const tld = domainParts[domainParts.length - 1]
-      if (corporateTlds.includes(tld)) {
-        const secondLevelDomain = domainParts[domainParts.length - 2]
-        // Allow if second level domain looks legitimate (at least 2 characters, contains letters)
-        if (
-          secondLevelDomain &&
-          secondLevelDomain.length >= 2 &&
-          /^[a-z0-9-]+$/.test(secondLevelDomain) &&
-          /[a-z]/.test(secondLevelDomain)
-        ) {
-          setEmailError("")
-          return true
-        }
-      }
-    }
-
-    setEmailError("Please use a valid email address")
-    return false
-  }
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -514,66 +350,10 @@ const ShippingAddress = ({
       [e.target.name]: value,
     })
 
-    if (e.target.name === "email") {
-      validateEmail(value)
-    }
   }
-
-  const handleEmailBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    validateEmail(e.target.value)
-  }
-
-  const emailField = (
-    <div>
-      <Label htmlFor="email" className="font-din-arabic mb-2 block">
-        Email Address (Optional)
-      </Label>
-      <Input
-        id="email"
-        label=""
-        name="email"
-        type="email"
-        autoComplete="email"
-        value={formData.email}
-        onChange={handleChange}
-        onBlur={handleEmailBlur}
-        placeholder="Enter email address"
-        className={`h-9 w-full rounded-md border px-3 py-1 bg-white/60 font-din-arabic ${emailError ? "border-red-500" : "border-black/20"}`}
-        aria-invalid={Boolean(emailError)}
-        data-testid="shipping-email-input"
-      />
-      {emailError && (
-        <p className="mt-1.5 text-sm text-red-500 font-din-arabic">{emailError}</p>
-      )}
-    </div>
-  )
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4 pb-6 border-b border-black/10">
-        <h3 className="font-din-arabic text-sm text-black/50">Contact Information</h3>
-        <Label htmlFor="checkout-phone" className="font-din-arabic mb-2 block">
-          Phone Number <span className="text-red-500">*</span>
-        </Label>
-        <Input
-          id="checkout-phone"
-          label=""
-          name="shipping_address.phone"
-          type="tel"
-          autoComplete="tel"
-          required
-          value={formData["shipping_address.phone"]}
-          onChange={handleChange}
-          onBlur={() => setPhoneTouched(true)}
-          placeholder="10-digit mobile number or +91..."
-          className={`h-9 w-full rounded-md border px-3 py-1 bg-white/60 font-din-arabic ${phoneTouched && phoneError ? "border-red-500" : "border-black/20"}`}
-          aria-invalid={phoneTouched && Boolean(phoneError)}
-          data-testid="shipping-phone-input"
-        />
-        {phoneTouched && phoneError && (
-          <p className="font-din-arabic text-sm text-red-500">{phoneError}</p>
-        )}
-      </div>
       {savedAddresses.length > 0 && !showAddressForm && (
         <div className="mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -694,7 +474,7 @@ const ShippingAddress = ({
             transition={{ duration: 0.4, ease: "easeInOut" }}
             className="space-y-6 overflow-hidden"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
               <div>
                 <Label htmlFor="newName" className="font-din-arabic mb-2 block">
                   Full Name
@@ -714,7 +494,6 @@ const ShippingAddress = ({
                   className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30"
                 />
               </div>
-              {emailField}
             </div>
             <div>
               <Label htmlFor="newAddress1" className="font-din-arabic mb-2 block">
@@ -892,9 +671,6 @@ const ShippingAddress = ({
                     toast.error((error as Error).message)
                     return
                   }
-                  if (!validateEmail(formData.email)) {
-                    return
-                  }
                   const addressToSave = { ...newAddressData, phone }
 
                   // Validate pincode
@@ -1029,16 +805,30 @@ const ShippingAddress = ({
         )}
       </AnimatePresence>
 
-      {/* Shipping email remains editable when using a saved address. */}
-      {!showAddressForm && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="space-y-4 pt-6 border-t border-black/10"
-        >
-          {emailField}
-        </motion.div>
-      )}
+      <div className="space-y-4 pt-6 border-t border-black/10">
+        <h3 className="font-din-arabic text-sm text-black/50">Contact Information</h3>
+        <Label htmlFor="checkout-phone" className="font-din-arabic mb-2 block">
+          Phone Number <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          id="checkout-phone"
+          label=""
+          name="shipping_address.phone"
+          type="tel"
+          autoComplete="tel"
+          required
+          value={formData["shipping_address.phone"]}
+          onChange={handleChange}
+          onBlur={() => setPhoneTouched(true)}
+          placeholder="10-digit mobile number or +91..."
+          className={`h-9 w-full rounded-md border px-3 py-1 bg-white/60 font-din-arabic ${phoneTouched && phoneError ? "border-red-500" : "border-black/20"}`}
+          aria-invalid={phoneTouched && Boolean(phoneError)}
+          data-testid="shipping-phone-input"
+        />
+        {phoneTouched && phoneError && (
+          <p className="font-din-arabic text-sm text-red-500">{phoneError}</p>
+        )}
+      </div>
 
       {/* Billing Address Checkbox */}
       {!showAddressForm && (
