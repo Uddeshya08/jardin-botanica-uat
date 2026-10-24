@@ -1093,14 +1093,16 @@ export function ProductHero({
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full lg:w-[60%] relative overflow-hidden h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-auto lg:min-h-[calc(100vh-80px)] flex"
+        className="w-full lg:w-[60%] min-w-0 relative overflow-hidden h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-auto lg:min-h-[calc(100vh-80px)]"
         style={{ backgroundColor: "#d6d6c6" }}
+        data-testid="product-image-gallery"
       >
-        {/* Product Image - Full Section Coverage */}
+        {/* Fill the original gallery frame without changing the hero layout. */}
         <img
           src={productImages[currentImageIndex]}
-          alt="Jardin Botanica Tea Exfoliant Rinse"
-          className="absolute inset-0 w-full h-full object-contain object-center"
+          alt={`${product.title} — image ${currentImageIndex + 1}`}
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          data-testid="product-gallery-image"
           style={{
             filter: "drop-shadow(0 20px 45px rgba(0, 0, 0, 0.15))",
           }}

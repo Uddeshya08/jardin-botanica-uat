@@ -11,7 +11,13 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react"
 import { toast } from "sonner"
 import type { FromTheLabSection } from "../../types/contentful"
 
-type ProductLike = { metadata?: Record<string, any> }
+type ProductLike = {
+  id?: string
+  handle?: string | null
+  title?: string
+  variants?: { id: string }[] | null
+  metadata?: Record<string, any>
+}
 
 type Card = {
   id?: string | number
@@ -231,7 +237,29 @@ export function PeopleAlsoBought({
     }
   }, [product, fromTheLabContent])
 
-  const { heading, subheading, bg, products: cards } = meta
+  const { heading, subheading, bg } = meta
+  const cards = useMemo(() => {
+    const variantIds = new Set(product?.variants?.map((variant) => variant.id) || [])
+    return meta.products.filter((card) => {
+      if (product?.id && String(card.id) === product.id) return false
+      if (card.variantId && variantIds.has(card.variantId)) return false
+      if (product?.handle && card.url) {
+        try {
+          const segments = new URL(card.url, "https://jardinbotanica.com").pathname
+            .split("/").filter(Boolean)
+          const productIndex = segments.indexOf("products")
+          const handle = productIndex >= 0 ? segments[productIndex + 1] : segments.at(-1)
+          if (handle && decodeURIComponent(handle).toLowerCase() === product.handle.toLowerCase()) {
+            return false
+          }
+        } catch {
+          // Other identifiers still allow filtering cards with a malformed URL.
+        }
+      }
+      return !(product?.title && !card.url && !card.variantId &&
+        card.name.trim().toLowerCase() === product.title.trim().toLowerCase())
+    })
+  }, [meta.products, product?.id, product?.handle, product?.title, product?.variants])
 
   const getProductPath = (productCard: Card) => {
     if (!productCard.url || productCard.url.trim() === "" || productCard.url === "/") {
@@ -300,12 +328,14 @@ export function PeopleAlsoBought({
     }
 
     sc.addEventListener("scroll", handleScroll, { passive: true })
+    window.addEventListener("resize", updateScrollProgress)
     updateScrollProgress()
 
     return () => {
       sc.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("resize", updateScrollProgress)
     }
-  }, [])
+  }, [cards])
   useEffect(() => {
     const up = () => setIsDragging(false)
     const move = (e: MouseEvent) => handleScrollBarDrag(e as any)
@@ -493,6 +523,7 @@ export function PeopleAlsoBought({
 
   return (
     <section
+      data-testid="pdp-related-products"
       className="pt-8 lg:pt-12 relative"
       style={{
         backgroundColor: bg,
@@ -577,7 +608,8 @@ export function PeopleAlsoBought({
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: index * 0.08 }}
             viewport={{ once: true }}
-            className="flex-shrink-0 group cursor-pointer relative w-full px-6 md:w-[280px] md:px-0 md:mr-8"
+            className="flex-shrink-0 group cursor-pointer relative w-full px-6 md:w-[280px] lg:w-[320px] md:px-0 md:mr-8"
+            data-testid="pdp-related-product-card"
             style={{
               scrollSnapAlign: "center",
             }}
@@ -589,8 +621,7 @@ export function PeopleAlsoBought({
               {productPath ? (
                 <Link
                   href={productPath}
-                  className="block relative mb-4 md:mb-6 overflow-hidden bg-white/20 rounded-sm"
-                  style={{ paddingBottom: "125%" }}
+                  className="block relative aspect-[3/4] mb-4 md:mb-6 overflow-hidden bg-white/20"
                 >
                   <motion.div
                     whileHover={{ scale: 1.02 }}
@@ -602,7 +633,7 @@ export function PeopleAlsoBought({
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-contain transition-opacity duration-300"
+                        className="w-full h-full object-cover transition-opacity duration-300"
                         style={{
                           opacity: hoveredProduct === product.id ? 0 : 1,
                           userSelect: "none",
@@ -621,7 +652,7 @@ export function PeopleAlsoBought({
                       <img
                         src={product.hoverImage}
                         alt={`${product.name}`}
-                        className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300"
+                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
                         style={{
                           opacity: hoveredProduct === product.id ? 1 : 0,
                           userSelect: "none",
@@ -650,8 +681,7 @@ export function PeopleAlsoBought({
                 </Link>
               ) : (
                 <div
-                  className="relative mb-4 md:mb-6 overflow-hidden bg-white/20 rounded-sm"
-                  style={{ paddingBottom: "125%" }}
+                  className="relative aspect-[3/4] mb-4 md:mb-6 overflow-hidden bg-white/20"
                 >
                   <motion.div
                     whileHover={{ scale: 1.02 }}
@@ -663,7 +693,7 @@ export function PeopleAlsoBought({
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-contain transition-opacity duration-300"
+                        className="w-full h-full object-cover transition-opacity duration-300"
                         style={{
                           opacity: hoveredProduct === product.id ? 0 : 1,
                           userSelect: "none",
@@ -682,7 +712,7 @@ export function PeopleAlsoBought({
                       <img
                         src={product.hoverImage}
                         alt={`${product.name}`}
-                        className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300"
+                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
                         style={{
                           opacity: hoveredProduct === product.id ? 1 : 0,
                           userSelect: "none",
