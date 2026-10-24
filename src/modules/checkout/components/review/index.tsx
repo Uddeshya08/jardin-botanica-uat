@@ -183,10 +183,10 @@ const Review = ({ cart }: { cart: any }) => {
                     {cart.shipping_address.first_name} {cart.shipping_address.last_name}
                   </p>
                   <p className="text-black/70">{formatAddress()}</p>
+                  {cart.email && <p className="text-black/70">Email: {cart.email}</p>}
                   {cart.shipping_address.phone && (
                     <p className="text-black/70">{cart.shipping_address.phone}</p>
                   )}
-                  {cart.email && <p className="text-black/70">{cart.email}</p>}
                 </div>
               </div>
             )}

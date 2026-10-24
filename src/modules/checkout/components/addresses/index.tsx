@@ -56,6 +56,12 @@ const Addresses = ({
       const phone = normalizeCheckoutPhone(
         formData.get("shipping_address.phone")?.toString() || ""
       )
+      const email = formData.get("email")?.toString().trim() || ""
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setSubmitError("Please enter a valid email address")
+        setIsSubmitting(false)
+        return
+      }
 
       // Step 1: Set addresses first using updateCart (without redirect)
       const addressData = {
@@ -71,6 +77,7 @@ const Addresses = ({
           province: formData.get("shipping_address.province")?.toString() || "",
           phone,
         },
+        ...(email ? { email } : {}),
       } as any
 
       addressData.shipping_address.postal_code = addressData.shipping_address.postal_code.trim()
@@ -93,9 +100,7 @@ const Addresses = ({
         }
       }
 
-      await updateCart(addressData)
-
-      // Step 2: Check serviceability
+      // Validate before persisting the address to avoid saving incomplete edits.
       const pincode = addressData.shipping_address.postal_code
 
       if (!pincode) {
@@ -103,6 +108,23 @@ const Addresses = ({
         setIsSubmitting(false)
         return
       }
+
+      if (addressData.shipping_address.country_code === "in" && !/^[1-9]\d{5}$/.test(pincode)) {
+        setSubmitError("Please enter a valid 6-digit PIN code")
+        setIsSubmitting(false)
+        return
+      }
+
+      if (!addressData.shipping_address.first_name.trim() ||
+          !addressData.shipping_address.address_1.trim() ||
+          !addressData.shipping_address.city.trim() ||
+          !addressData.shipping_address.province.trim()) {
+        setSubmitError("Please complete your shipping name, address, city and state")
+        setIsSubmitting(false)
+        return
+      }
+
+      const updatedCart = await updateCart(addressData)
 
       // Step 3: Set shipping method
       if (cart?.id) {
@@ -125,6 +147,9 @@ const Addresses = ({
         await setShippingMethod({
           cartId: cart.id,
           shippingMethodId: preferredShippingOption.id,
+          paymentMethod: "PREPAID",
+          totalAmount: updatedCart.item_total ??
+            (updatedCart.total - (updatedCart.shipping_total || 0)),
         })
 
         // Step 4: Redirect to payment step
@@ -229,6 +254,7 @@ const Addresses = ({
                     <Text className="txt-medium text-ui-fg-subtle">
                       {cart.shipping_address.country_code?.toUpperCase()}
                     </Text>
+                    {cart.email && <Text className="txt-medium text-ui-fg-subtle">Email: {cart.email}</Text>}
                   </div>
 
                   <div className="flex flex-col w-1/3 " data-testid="shipping-contact-summary">
@@ -238,7 +264,6 @@ const Addresses = ({
                     <Text className="txt-medium text-ui-fg-subtle">
                       {cart.shipping_address.phone}
                     </Text>
-                    {cart.email && <Text className="txt-medium text-ui-fg-subtle">Email: {cart.email}</Text>}
                   </div>
 
                   <div className="flex flex-col w-1/3" data-testid="billing-address-summary">

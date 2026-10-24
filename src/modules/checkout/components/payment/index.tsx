@@ -92,7 +92,7 @@ function CashOnDeliveryCard() {
               style={{ color: "rgb(107, 93, 71)" }}
             >
               <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span>Additional ₹50 COD handling charges will be added to your order.</span>
+              <span>Additional ₹100 COD handling charges will be added to your order.</span>
             </p>
           </div>
         </div>
@@ -176,14 +176,14 @@ const Payment = ({
 
   const isStripe = isStripeFunc(selectedPaymentMethod)
 
-  const setPaymentMethod = async (method: string) => {
+  const setPaymentMethod = async (method: string, paymentCart = cart) => {
     setError(null)
     setSelectedPaymentMethod(method)
 
-    const existingSession = getPendingSessionForProvider(cart, method)
+    const existingSession = getPendingSessionForProvider(paymentCart, method)
 
     if (!existingSession) {
-      await initiatePaymentSession(cart, {
+      await initiatePaymentSession(paymentCart, {
         provider_id: method,
       })
     }
@@ -221,17 +221,24 @@ const Payment = ({
   }
 
   const handlePaymentTypeChange = async (type: PaymentType) => {
-    setSelectedPaymentType(type)
-
-    if (type === "cod") {
-      await setPaymentMethod(COD_PROVIDER_ID)
-    } else {
-      await setPaymentMethod(PAYMENT_PROVIDER_ID)
+    setIsLoading(true)
+    setError(null)
+    try {
+      const updatedCart = await setShippingMethod({
+        cartId: cart.id,
+        shippingMethodId: cart.shipping_methods[0].shipping_option_id,
+        paymentMethod: type === "cod" ? "COD" : "PREPAID",
+        totalAmount: cart.item_total ?? (cart.total - (cart.shipping_total || 0)),
+      })
+      await setPaymentMethod(type === "cod" ? COD_PROVIDER_ID : PAYMENT_PROVIDER_ID, updatedCart)
+      router.push(pathname + "?" + updateQueryParams({ step: "payment", paymenttype: type }), {
+        scroll: false,
+      })
+    } catch (err: any) {
+      setError(err.message || "Unable to update your payment method. Please try again.")
+    } finally {
+      setIsLoading(false)
     }
-
-    router.push(pathname + "?" + updateQueryParams({ step: "payment", paymenttype: type }), {
-      scroll: false,
-    })
   }
 
   const handleSubmit = async () => {
@@ -244,7 +251,7 @@ const Payment = ({
         cartId: cart.id,
         shippingMethodId: cart.shipping_methods[0].shipping_option_id,
         paymentMethod: selectedPaymentType === "cod" ? "COD" : "PREPAID",
-        totalAmount: cart.total,
+        totalAmount: cart.item_total ?? (cart.total - (cart.shipping_total || 0)),
       })
 
       const nextCart = updatedCart || cart
@@ -301,8 +308,8 @@ const Payment = ({
     const defaultProviderId = selectedPaymentType === "cod" ? COD_PROVIDER_ID : PAYMENT_PROVIDER_ID
     const hasActiveSession = getPendingSessionForProvider(cart, defaultProviderId)
 
-    if (!hasActiveSession) {
-      setPaymentMethod(defaultProviderId)
+    if (!hasActiveSession && !isLoading) {
+      setPaymentMethod(defaultProviderId).catch((err) => setError(err.message))
     }
   }, [cart, selectedPaymentType])
 
@@ -361,6 +368,7 @@ const Payment = ({
                     return (
                       <button
                         key={type.id}
+                        disabled={isLoading}
                         onClick={() => handlePaymentTypeChange(type.id)}
                         className={clx(
                           "relative flex items-center space-x-4 p-5 rounded-2xl text-left cursor-pointer transition-all duration-300 overflow-hidden bg-white/40 hover:bg-white/60 hover:shadow-md",
@@ -447,7 +455,7 @@ const Payment = ({
             <button
               className="ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
               onClick={handleSubmit}
-              disabled={(isStripe && !cardComplete) || (!selectedPaymentMethod && !paidByGiftcard)}
+              disabled={isLoading || (isStripe && !cardComplete) || (!selectedPaymentMethod && !paidByGiftcard)}
               data-testid="submit-payment-button"
             >
               Continue

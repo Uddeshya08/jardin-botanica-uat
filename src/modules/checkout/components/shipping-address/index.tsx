@@ -8,7 +8,7 @@ import { mapKeys } from "lodash"
 import { Edit, Plus } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import type React from "react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Checkbox as ShadcnCheckbox } from "../../../../app/components/ui/checkbox"
 import { Label } from "../../../../app/components/ui/label"
@@ -143,12 +143,14 @@ const ShippingAddress = ({
     "shipping_address.country_code": cart?.shipping_address?.country_code || "",
     "shipping_address.province": cart?.shipping_address?.province || "",
     "shipping_address.phone": cart?.shipping_address?.phone || customer?.phone || "",
+    email: cart?.email || customer?.email || "",
   })
 
   // Local state for saved addresses
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([])
   const [showAddressForm, setShowAddressForm] = useState(false)
   const [selectedAddressId, setSelectedAddressId] = useState<string>("")
+  const selectedCheckoutAddress = useRef<SavedAddress | null>(null)
   const [isEditingAddress, setIsEditingAddress] = useState(false)
   const [editingAddressId, setEditingAddressId] = useState<string>("")
   const [newAddressData, setNewAddressData] = useState<Omit<SavedAddress, "id">>({
@@ -164,6 +166,20 @@ const ShippingAddress = ({
   })
   const [phoneTouched, setPhoneTouched] = useState(false)
   const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
+
+  // Submit the address being edited, even when Continue is used before Save Address.
+  const shippingAddress = showAddressForm
+    ? toComparableAddress({ id: "draft", ...newAddressData })
+    : {
+        first_name: formData["shipping_address.first_name"],
+        last_name: formData["shipping_address.last_name"],
+        address_1: formData["shipping_address.address_1"],
+        company: formData["shipping_address.company"],
+        postal_code: formData["shipping_address.postal_code"],
+        city: formData["shipping_address.city"],
+        province: formData["shipping_address.province"],
+        country_code: formData["shipping_address.country_code"] || "in",
+      }
 
   const countriesInRegion = useMemo(
     () => cart?.region?.countries?.map((c) => c.iso_2),
@@ -202,6 +218,7 @@ const ShippingAddress = ({
   }
 
   const selectSavedAddress = (address: SavedAddress) => {
+    selectedCheckoutAddress.current = address
     setSelectedAddressId(address.id)
     populateAddressFields(address)
   }
@@ -255,6 +272,20 @@ const ShippingAddress = ({
 
     if (allAddresses.length > 0) {
       setSavedAddresses(allAddresses)
+      // Customer refreshes must retain the address just saved or selected.
+      if (selectedCheckoutAddress.current) {
+        const selectedAddress = allAddresses.find((address) =>
+          compareAddresses(
+            toComparableAddress(address),
+            toComparableAddress(selectedCheckoutAddress.current!)
+          )
+        )
+        if (selectedAddress) {
+          selectedCheckoutAddress.current = selectedAddress
+          setSelectedAddressId(selectedAddress.id)
+        }
+        return
+      }
       const matchingCartAddress = cart?.shipping_address
         ? allAddresses.find((address) =>
             compareAddresses(toComparableAddress(address), cart.shipping_address)
@@ -263,11 +294,18 @@ const ShippingAddress = ({
 
       // Auto-select default address if available
       const defaultAddr = allAddresses.find((addr: SavedAddress) => addr.isDefault)
+      const hasCartAddress = Boolean(
+        cart?.shipping_address?.postal_code?.trim() &&
+        cart.shipping_address.address_1?.trim() &&
+        cart.shipping_address.city?.trim() &&
+        cart.shipping_address.country_code
+      )
       if (matchingCartAddress) {
         setSelectedAddressId(matchingCartAddress.id)
-      } else if (defaultAddr && !cart?.shipping_address) {
+        populateAddressFields(matchingCartAddress)
+      } else if (defaultAddr && !hasCartAddress) {
         selectSavedAddress(defaultAddr)
-      } else if (!cart?.shipping_address) {
+      } else if (!hasCartAddress) {
         selectSavedAddress(allAddresses[0])
       } else {
         setSelectedAddressId("")
@@ -277,7 +315,7 @@ const ShippingAddress = ({
 
   useEffect(() => {
     // Ensure cart is not null and has a shipping_address before setting form data
-    if (cart && cart.shipping_address) {
+    if (cart?.shipping_address && !selectedCheckoutAddress.current && !showAddressForm) {
       setFormAddress(cart.shipping_address)
     }
   }, [cart]) // Add cart as a dependency
@@ -289,9 +327,14 @@ const ShippingAddress = ({
     phoneError = (error as Error).message
   }
 
+  const email = formData.email.trim()
+  const emailError = email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ? "Please enter a valid email address"
+    : ""
+
   useEffect(() => {
-    onContactValidationChange?.(!phoneError)
-  }, [phoneError, onContactValidationChange])
+    onContactValidationChange?.(!phoneError && !emailError)
+  }, [phoneError, emailError, onContactValidationChange])
 
   const handleEditAddress = (address: SavedAddress) => {
     setNewAddressData({
@@ -352,6 +395,33 @@ const ShippingAddress = ({
 
   }
 
+  const emailField = (
+    <div>
+      <Label htmlFor="shipping-email" className="font-din-arabic mb-2 block">
+        Email Address
+      </Label>
+      <Input
+        id="shipping-email"
+        label=""
+        name="email"
+        type="email"
+        autoComplete="email"
+        value={formData.email}
+        onChange={handleChange}
+        placeholder="Enter email address"
+        className={`h-9 w-full rounded-md border px-3 py-1 bg-white/60 font-din-arabic ${emailError ? "border-red-500" : "border-black/20"}`}
+        aria-invalid={Boolean(emailError)}
+        aria-describedby={emailError ? "shipping-email-error" : undefined}
+        data-testid="shipping-email-input"
+      />
+      {emailError && (
+        <p id="shipping-email-error" className="mt-1.5 text-sm text-red-500 font-din-arabic">
+          {emailError}
+        </p>
+      )}
+    </div>
+  )
+
   return (
     <div className="space-y-6">
       {savedAddresses.length > 0 && !showAddressForm && (
@@ -372,6 +442,7 @@ const ShippingAddress = ({
               >
                 {/* Edit Icon */}
                 <motion.button
+                  type="button"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={(e) => {
@@ -474,8 +545,8 @@ const ShippingAddress = ({
             transition={{ duration: 0.4, ease: "easeInOut" }}
             className="space-y-6 overflow-hidden"
           >
-            <div>
-              <div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="min-w-0">
                 <Label htmlFor="newName" className="font-din-arabic mb-2 block">
                   Full Name
                 </Label>
@@ -494,6 +565,7 @@ const ShippingAddress = ({
                   className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30"
                 />
               </div>
+              <div className="min-w-0">{emailField}</div>
             </div>
             <div>
               <Label htmlFor="newAddress1" className="font-din-arabic mb-2 block">
@@ -753,6 +825,13 @@ const ShippingAddress = ({
                     }
                   }
 
+                  // Both customer and guest saves must update checkout fields before
+                  // the editor closes; saving to the address book alone is insufficient.
+                  selectSavedAddress({
+                    id: editingAddressId || `address-${Date.now()}`,
+                    ...addressToSave,
+                  })
+
                   // Reset and hide form
                   setNewAddressData({
                     name: "",
@@ -850,52 +929,53 @@ const ShippingAddress = ({
 
       {/* Hidden form fields for form submission */}
       <div className="hidden">
+        {!showAddressForm && <input type="hidden" name="email" value={formData.email} />}
         <Input
           label=""
           name="shipping_address.first_name"
-          value={formData["shipping_address.first_name"]}
+          value={shippingAddress.first_name || ""}
           onChange={handleChange}
         />
         <Input
           label=""
           name="shipping_address.last_name"
-          value={formData["shipping_address.last_name"]}
+          value={shippingAddress.last_name || ""}
           onChange={handleChange}
         />
         <Input
           label=""
           name="shipping_address.address_1"
-          value={formData["shipping_address.address_1"]}
+          value={shippingAddress.address_1 || ""}
           onChange={handleChange}
         />
         <Input
           label=""
           name="shipping_address.company"
-          value={formData["shipping_address.company"]}
+          value={shippingAddress.company || ""}
           onChange={handleChange}
         />
         <Input
           label=""
           name="shipping_address.postal_code"
-          value={formData["shipping_address.postal_code"]}
+          value={shippingAddress.postal_code || ""}
           onChange={handleChange}
         />
         <Input
           label=""
           name="shipping_address.city"
-          value={formData["shipping_address.city"]}
+          value={shippingAddress.city || ""}
           onChange={handleChange}
         />
         <Input
           label=""
           name="shipping_address.province"
-          value={formData["shipping_address.province"]}
+          value={shippingAddress.province || ""}
           onChange={handleChange}
         />
         <CountrySelect
           name="shipping_address.country_code"
           region={cart?.region}
-          value={formData["shipping_address.country_code"] || "in"}
+          value={shippingAddress.country_code || "in"}
           onChange={handleChange}
         />
       </div>
