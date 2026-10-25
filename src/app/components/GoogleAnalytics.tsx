@@ -1,28 +1,10 @@
 "use client"
 
 import Script from "next/script"
-import { useEffect, useState } from "react"
 
-const MEASUREMENT_ID = "G-NREJ5ZDPRL"
+const MEASUREMENT_ID = "G-2XT3X045KM"
 
 export default function GoogleAnalytics() {
-  const [enabled, setEnabled] = useState(false)
-
-  useEffect(() => {
-    const updateConsent = () => {
-      setEnabled(localStorage.getItem("jardinBotanica_cookieConsent") === "accepted")
-    }
-    updateConsent()
-    window.addEventListener("jardinBotanica:cookie-consent", updateConsent)
-    window.addEventListener("storage", updateConsent)
-    return () => {
-      window.removeEventListener("jardinBotanica:cookie-consent", updateConsent)
-      window.removeEventListener("storage", updateConsent)
-    }
-  }, [])
-
-  if (!enabled) return null
-
   return (
     <>
       <Script id="google-analytics-init" strategy="afterInteractive">
