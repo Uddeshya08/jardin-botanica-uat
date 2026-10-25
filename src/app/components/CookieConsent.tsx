@@ -35,12 +35,14 @@ export default function CookieConsent() {
 
   const handleAccept = () => {
     localStorage.setItem("jardinBotanica_cookieConsent", "accepted")
+    window.dispatchEvent(new Event("jardinBotanica:cookie-consent"))
     setIsVisible(false)
     setTimeout(() => setShowBanner(false), 300)
   }
 
   const handleDecline = () => {
     localStorage.setItem("jardinBotanica_cookieConsent", "declined")
+    window.dispatchEvent(new Event("jardinBotanica:cookie-consent"))
     setIsVisible(false)
     setTimeout(() => setShowBanner(false), 300)
   }
