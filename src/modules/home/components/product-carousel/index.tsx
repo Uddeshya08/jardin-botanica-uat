@@ -1,5 +1,7 @@
 "use client"
 
+import { useSequentialCarousel } from "@lib/hooks/use-sequential-carousel"
+
 import { ImageWithFallback } from "app/components/figma/ImageWithFallback"
 import {
   Carousel,
@@ -38,19 +40,20 @@ function ProductCard({
   onToggleLedger,
   isAddedToCart,
   isInLedger,
-  isMobile,
+  autoAlternate,
 }: {
   product: Product
   onAddToCart: () => void
   onToggleLedger: () => void
   isAddedToCart: boolean
   isInLedger: boolean
-  isMobile: boolean
+  autoAlternate: boolean
 }) {
   const router = useRouter()
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const videoRef = React.useRef<HTMLVideoElement>(null)
+  const showAlternate = isImageHovered || autoAlternate
 
   const handleProductClick = () => {
     // Normalize slug to ensure it starts with /
@@ -79,71 +82,19 @@ function ProductCard({
     }
   }
 
-  // Visibility-based auto-rotate effect for mobile
-  const cardRef = React.useRef<HTMLDivElement>(null)
-  const [isVisible, setIsVisible] = useState(false)
-
   useEffect(() => {
-    if (!isMobile || !cardRef.current) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting)
-      },
-      { threshold: 0.5 }
-    )
-
-    observer.observe(cardRef.current)
-    return () => observer.disconnect()
-  }, [isMobile])
-
-  useEffect(() => {
-    if (!isMobile || !isVisible) {
-      // Reset to main image when not visible
-      setIsImageHovered(false)
-      if (videoRef.current) {
-        videoRef.current.pause()
-        videoRef.current.currentTime = 0
-      }
-      return
+    const video = videoRef.current
+    if (!video) return
+    if (showAlternate) video.play().catch(() => {})
+    else {
+      video.pause()
+      video.currentTime = 0
     }
-
-    // Start with main image when becoming visible
-    setIsImageHovered(false)
-    if (videoRef.current) {
-      videoRef.current.pause()
-      videoRef.current.currentTime = 0
-    }
-
-    const interval = setInterval(() => {
-      setIsImageHovered((prev) => {
-        // Only toggle if we have a hover image or video to show
-        if (!product.hoverImage && !product.video) return false
-
-        const next = !prev
-        if (videoRef.current) {
-          if (next) {
-            // Show hover media - play video
-            videoRef.current.currentTime = 0
-            videoRef.current.play().catch((e) => {
-              console.warn("Video autoplay prevented:", e)
-            })
-          } else {
-            // Show main image - pause and reset video
-            videoRef.current.pause()
-            videoRef.current.currentTime = 0
-          }
-        }
-        return next
-      })
-    }, 2500)
-
-    return () => clearInterval(interval)
-  }, [isMobile, isVisible])
+  }, [showAlternate])
 
   return (
     <div
-      ref={cardRef}
+      data-auto-alternate={autoAlternate}
       className="group flex flex-col w-full max-w-[480px] min-h-0 md:min-h-[480px] mx-auto h-auto md:h-full px-1 md:pl-6"
     >
       {/* Product Image */}
@@ -155,8 +106,8 @@ function ProductCard({
       >
         {/* Hover Media - Video or Image - Behind */}
         <div
-          className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-          style={{ opacity: isImageHovered ? 1 : 0 }}
+          className="absolute inset-0 product-image-fade"
+          style={{ opacity: showAlternate ? 1 : 0 }}
         >
           {product.video ? (
             <video
@@ -178,9 +129,9 @@ function ProductCard({
 
         {/* Main Image - On Top */}
         <div
-          className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+          className="absolute inset-0 product-image-fade"
           style={{
-            opacity: isImageHovered && (product.hoverImage || product.video) ? 0 : 1,
+            opacity: showAlternate && (product.hoverImage || product.video) ? 0 : 1,
           }}
         >
           <ImageWithFallback
@@ -277,7 +228,6 @@ export function ProductCarousel({
   const { cartItems, handleCartUpdate } = useCartItems()
   const { toggleLedgerItem, isInLedger } = useLedger()
   const [api, setApi] = useState<CarouselApi>()
-  const [isMobile, setIsMobile] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
   const [isPending, startTransition] = React.useTransition()
@@ -331,67 +281,12 @@ export function ProductCarousel({
     })
   }, [sourceProducts, countryCode])
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 750)
-    }
-
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
-
-    return () => window.removeEventListener("resize", checkMobile)
-  }, [])
+  const alternateImages = useSequentialCarousel(api, mergedProducts.length, !hasInteracted)
 
   useEffect(() => {
     if (!api) return
-
-    // Ensure carousel starts at the beginning on mount (especially for mobile)
-    const isMobileCheck = typeof window !== "undefined" && window.innerWidth < 750
-    if (isMobileCheck) {
-      // Multiple attempts to ensure proper scroll position on mobile
-      const scrollToStart = () => {
-        api.scrollTo(0, true)
-        // Force scroll to start position
-        const content = document.querySelector('[data-slot="carousel-content"]') as HTMLElement
-        if (content) {
-          content.scrollLeft = 0
-        }
-      }
-      // Initial scroll
-      setTimeout(scrollToStart, 100)
-      // Additional scroll after layout settles
-      setTimeout(scrollToStart, 300)
-      // Final scroll after everything is rendered
-      requestAnimationFrame(() => {
-        setTimeout(scrollToStart, 100)
-      })
-    } else {
-      setTimeout(() => {
-        api.scrollTo(0, true)
-      }, 100)
-    }
+    api.scrollTo(0, true)
   }, [api])
-
-  // Auto-scroll effect for mobile view
-  useEffect(() => {
-    if (!api || !isMobile || hasInteracted) return
-
-    const autoScrollInterval = setInterval(() => {
-      const currentIndex = api.selectedScrollSnap()
-      const totalSnaps = api.scrollSnapList().length
-
-      // Loop back to first item when reaching the last item
-      if (currentIndex >= totalSnaps - 1) {
-        api.scrollTo(0)
-        return
-      }
-
-      const nextIndex = currentIndex + 1
-      api.scrollTo(nextIndex)
-    }, 5000) // 5 second interval
-
-    return () => clearInterval(autoScrollInterval)
-  }, [api, isMobile, hasInteracted])
 
   const scrollTo = (index: number) => {
     api?.scrollTo(index)
@@ -485,6 +380,7 @@ export function ProductCarousel({
 
   return (
     <section
+      data-testid="home-product-carousel"
       className="pt-12 pb-0 lg:pt-16 lg:pb-0"
       style={{ backgroundColor: "#edede2" }}
       onMouseDownCapture={() => setHasInteracted(true)}
@@ -639,6 +535,7 @@ export function ProductCarousel({
             setApi={setApi}
             opts={{
               align: "start",
+              slidesToScroll: "auto",
               loop: false,
               dragFree: false,
               skipSnaps: false,
@@ -654,7 +551,7 @@ export function ProductCarousel({
                 mergedProducts.length <= 4 ? "product-carousel-content--centered" : ""
               }`}
             >
-              {mergedProducts.map((product) => (
+              {mergedProducts.map((product, index) => (
                 <CarouselItem key={product.id} className="product-carousel-item">
                   <ProductCard
                     product={product}
@@ -662,7 +559,7 @@ export function ProductCarousel({
                     onToggleLedger={() => handleToggleLedger(product)}
                     isAddedToCart={recentlyAddedProducts.has(product.id)}
                     isInLedger={isInLedger(product.medusaId || product.id)}
-                    isMobile={isMobile}
+                    autoAlternate={alternateImages.has(index)}
                   />
                 </CarouselItem>
               ))}

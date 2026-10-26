@@ -275,7 +275,7 @@ export function Navigation({
   // Close mobile menu when window is resized to desktop
   useEffect(() => {
     function handleResize() {
-      if (window.innerWidth >= 1024) {
+      if (window.innerWidth >= 1280) {
         setIsMobileMenuOpen(false)
       }
     }
@@ -646,7 +646,7 @@ export function Navigation({
                 initial={introInitial({ opacity: 0 })}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
                 transition={disableAnimations ? undefined : { delay: 0.4, duration: 0.6 }}
-                className="hidden lg:flex space-x-8 absolute left-1/2 transform -translate-x-1/2"
+                className="hidden xl:flex space-x-8 absolute left-1/2 transform -translate-x-1/2"
               >
                 {menuItems
                   .filter((item) => !item.name.toLowerCase().includes("gift"))
@@ -857,7 +857,7 @@ export function Navigation({
                 initial={introInitial({ opacity: 0 })}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
                 transition={disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }}
-                className="lg:hidden flex items-center space-x-1 z-10"
+                className="xl:hidden flex items-center space-x-1 z-10"
               >
                 {/* Mobile Cart */}
                 <div className="relative" ref={cartRef}>
@@ -1046,7 +1046,7 @@ export function Navigation({
                 initial={introInitial({ opacity: 0 })}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
                 transition={disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }}
-                className="hidden lg:flex items-center gap-6"
+                className="hidden xl:flex items-center gap-6"
               >
                 {/* Search Section - Hidden when SearchMegaMenu is open */}
                 {!isSearchOpen && (
@@ -1269,7 +1269,7 @@ export function Navigation({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+              className="fixed inset-0 bg-black/60 z-40 xl:hidden"
               onClick={() => setIsMobileMenuOpen(false)}
               style={{ top: "106px" }}
             />
@@ -1280,7 +1280,7 @@ export function Navigation({
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed right-0 top-[106px] bottom-0 w-full max-w-sm z-50 overflow-y-auto lg:hidden"
+              className="fixed right-0 top-[106px] bottom-0 w-full max-w-sm z-50 overflow-y-auto xl:hidden"
               style={{ backgroundColor: "#e3e3d8" }}
             >
               <div className="p-6">

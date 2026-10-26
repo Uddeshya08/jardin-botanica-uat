@@ -318,6 +318,43 @@ export default async function ProductPage(props: Props) {
         fromTheLabContent = await getFromTheLabSectionByKey("pdp-from-the-lab", params.countryCode);
     }
 
+    // Candle PDPs show every other candle, even if the shared CMS list omits one.
+    const candleCategory = pricedProduct.categories?.find(
+        (category) => category.handle === "candles" || category.name?.toLowerCase() === "candles"
+    );
+    if (candleCategory && fromTheLabContent?.isActive !== false) {
+        try {
+            const { response } = await listProducts({
+                countryCode: params.countryCode,
+                queryParams: { category_id: [candleCategory.id], limit: 100 },
+            });
+            const candles = response.products.filter((candle) => candle.id !== pricedProduct.id);
+            fromTheLabContent = {
+                heading: fromTheLabContent?.heading || "Other Aromas Worth Lighting",
+                subheading: fromTheLabContent?.subheading || "Because one scent is never enough",
+                backgroundColor: fromTheLabContent?.backgroundColor || "#e3e3d8",
+                isActive: true,
+                featuredProductHandles: candles.map((candle) => candle.handle || ""),
+                products: candles.map((candle) => {
+                    const variant = candle.variants?.[0];
+                    return {
+                        id: candle.id,
+                        name: candle.title,
+                        price: variant?.calculated_price?.calculated_amount ?? undefined,
+                        currency: variant?.calculated_price?.currency_code ?? undefined,
+                        image: candle.thumbnail || undefined,
+                        hoverImage: candle.images?.[1]?.url || candle.thumbnail || undefined,
+                        description: candle.subtitle || undefined,
+                        url: `/${params.countryCode}/products/${candle.handle}`,
+                        variantId: variant?.id,
+                    };
+                }),
+            };
+        } catch (error) {
+            console.error("Failed to load candle recommendations:", error);
+        }
+    }
+
     console.log("From The Lab Section Data:", fromTheLabContent);
 
     // Check for gift option in category metadata
