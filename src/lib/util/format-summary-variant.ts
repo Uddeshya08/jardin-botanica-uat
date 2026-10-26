@@ -1,6 +1,6 @@
 type SummaryItem = {
   product?: { categories?: { name?: string }[] | null } | null
-  variant?: { title?: string; options?: { value?: string }[] | null } | null
+  variant?: { title?: string | null; options?: { value?: string }[] | null } | null
 }
 
 export default function formatSummaryVariant(item: SummaryItem): string {
