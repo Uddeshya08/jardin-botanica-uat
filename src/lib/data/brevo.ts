@@ -10,6 +10,20 @@ export async function subscribeToNewsletter(
   email: string,
   firstName?: string
 ): Promise<{ success: boolean; message: string }> {
+  return subscribeToList(email, firstName, process.env.BREVO_LIST_ID)
+}
+
+export async function subscribeToEarlyAccess(
+  email: string
+): Promise<{ success: boolean; message: string }> {
+  return subscribeToList(email, undefined, "7")
+}
+
+async function subscribeToList(
+  email: string,
+  firstName: string | undefined,
+  configuredListId: string | undefined
+): Promise<{ success: boolean; message: string }> {
   try {
     // Validate email
     if (!email || !email.includes("@")) {
@@ -20,7 +34,7 @@ export async function subscribeToNewsletter(
     }
 
     const BREVO_API_KEY = process.env.BREVO_API_KEY
-    const BREVO_LIST_ID = process.env.BREVO_LIST_ID
+    const BREVO_LIST_ID = configuredListId
 
     if (!BREVO_API_KEY) {
       return {

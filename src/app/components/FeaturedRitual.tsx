@@ -7,7 +7,7 @@ export function FeaturedRitual({ content }: { content?: HomeEditorialSection }) 
   const [isPressed, setIsPressed] = useState(false)
   const [isEmailFormOpen, setIsEmailFormOpen] = useState(false)
   const { email, setEmail, message, isSuccess, isPending, handleSubmit } =
-    useNewsletterSubscription()
+    useNewsletterSubscription("early-access")
 
   return (
     <section className="py-12 lg:py-16" style={{ backgroundColor: "#edede2" }}>

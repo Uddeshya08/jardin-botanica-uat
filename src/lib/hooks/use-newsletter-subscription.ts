@@ -8,7 +8,7 @@ type NewsletterResult = {
   message: string
 }
 
-export function useNewsletterSubscription() {
+export function useNewsletterSubscription(audience: "newsletter" | "early-access" = "newsletter") {
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState("")
   const [isSuccess, setIsSuccess] = useState(false)
@@ -24,8 +24,10 @@ export function useNewsletterSubscription() {
     }
 
     startTransition(async () => {
-      const { subscribeToNewsletter } = await import("@lib/data/brevo")
-      const result: NewsletterResult = await subscribeToNewsletter(trimmedEmail)
+      const { subscribeToNewsletter, subscribeToEarlyAccess } = await import("@lib/data/brevo")
+      const result: NewsletterResult = await (
+        audience === "early-access" ? subscribeToEarlyAccess : subscribeToNewsletter
+      )(trimmedEmail)
 
       setIsSuccess(result.success)
       setMessage(result.message)
