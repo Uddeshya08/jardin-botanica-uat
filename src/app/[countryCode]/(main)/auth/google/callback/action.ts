@@ -35,9 +35,11 @@ export async function handleGoogleCallback(queryParams: Record<string, string>) 
         throw new Error(`Failed to resolve Google account (${resolveRes.status})`)
       }
 
-      const { email, existed } = (await resolveRes.json()) as {
+      const { email, existed, first_name, last_name } = (await resolveRes.json()) as {
         email: string | null
         existed: boolean
+        first_name?: string | null
+        last_name?: string | null
       }
 
       if (!email) {
@@ -47,7 +49,15 @@ export async function handleGoogleCallback(queryParams: Record<string, string>) 
       // No existing customer for this email — create one (also links the
       // auth identity to the new customer).
       if (!existed) {
-        await sdk.store.customer.create({ email }, {}, { authorization: `Bearer ${token}` })
+        await sdk.store.customer.create(
+          {
+            email,
+            ...(first_name && { first_name }),
+            ...(last_name && { last_name }),
+          },
+          {},
+          { authorization: `Bearer ${token}` }
+        )
       }
 
       // The current token predates the link — refresh it so the new token
@@ -63,6 +73,23 @@ export async function handleGoogleCallback(queryParams: Record<string, string>) 
 
       const refreshed = (await refreshRes.json()) as { token: string }
       token = refreshed.token
+    } else {
+      // Backfill only missing name fields for customers linked before this fix.
+      // Profile enrichment must not prevent an existing customer from signing in.
+      try {
+        const resolveRes = await fetch(`${backendUrl}/store/custom/auth/google-resolve`, {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${token}`,
+            "x-publishable-api-key": publishableKey,
+          },
+        })
+        if (!resolveRes.ok) {
+          console.error(`Failed to backfill Google account name (${resolveRes.status})`)
+        }
+      } catch (backfillError) {
+        console.error("Failed to backfill Google account name:", backfillError)
+      }
     }
 
     // Store the final, actor-bearing token.
