@@ -1,6 +1,7 @@
 import { listCartOptions, retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { getBaseURL } from "@lib/util/env"
+import formatSummaryVariant from "@lib/util/format-summary-variant"
 import type { StoreCartShippingOption } from "@medusajs/types"
 import ScrollIndicator from "@modules/common/components/scroll-indicator"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
@@ -45,7 +46,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       const isBundle = !!metadata?.["_bundle_id"]
 
       // Get variant title if available and construct name with variant info
-      const variantTitle = (item as any).variant?.title
+      const variantTitle = formatSummaryVariant(item)
 
       // For bundle items, use bundle title from metadata, otherwise use product title
       let displayName: string
@@ -55,7 +56,8 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
         displayName = metadata["_bundle_title"] as string
         displayImage = metadata["_bundle_image"] as string | undefined
       } else {
-        displayName = variantTitle ? `${item.title} (${variantTitle})` : item.title
+        const productTitle = item.product_title || item.title
+        displayName = variantTitle ? `${productTitle} (${variantTitle})` : productTitle
         displayImage = item.thumbnail
       }
 

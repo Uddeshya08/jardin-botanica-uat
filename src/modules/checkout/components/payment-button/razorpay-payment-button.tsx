@@ -131,10 +131,9 @@ export const RazorpayPaymentButton = ({
       amount: Number(razorpayOrder.amount),
       order_id: orderData.razorpayOrder.id,
       currency: razorpayOrder.currency as CurrencyCode,
-      name: process.env.COMPANY_NAME ?? "your company name",
+      name: "Jardin Botanica",
       description: `Order number ${orderData.razorpayOrder.id}`,
       remember_customer: true,
-      image: "https://example.com/your_logo",
       ...paymentMethodConfig,
       modal: {
         backdropclose: true,

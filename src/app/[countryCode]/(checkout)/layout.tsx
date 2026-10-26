@@ -1,5 +1,6 @@
 import { retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
+import formatSummaryVariant from "@lib/util/format-summary-variant"
 import { AuthProvider } from "app/context/auth-context"
 import { CartItemsProvider } from "app/context/cart-items-context"
 import { LedgerProvider } from "app/context/ledger-context"
@@ -22,8 +23,12 @@ export default async function CheckoutLayout({ children }: { children: React.Rea
       const isBundle = !!metadata?.["_bundle_id"]
 
       // For bundle items, use bundle title and image from metadata
+      const variantTitle = formatSummaryVariant(item)
+      const productTitle = item.product_title || item.title
       const displayName =
-        isBundle && metadata?.["_bundle_title"] ? (metadata["_bundle_title"] as string) : item.title
+        isBundle && metadata?.["_bundle_title"]
+          ? (metadata["_bundle_title"] as string)
+          : variantTitle ? `${productTitle} (${variantTitle})` : productTitle
 
       const displayImage =
         isBundle && metadata?.["_bundle_image"]

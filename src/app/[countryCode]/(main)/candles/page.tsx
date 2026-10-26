@@ -3,6 +3,7 @@
 import { addToCartAction } from "@lib/data/cart-actions"
 import { getProductCategoryByHandle } from "@lib/data/contentful"
 import { useNewsletterSubscription } from "@lib/hooks/use-newsletter-subscription"
+import { useSequentialCarousel } from "@lib/hooks/use-sequential-carousel"
 import { getProductByHandle } from "@lib/data/products"
 import { ImageWithFallback } from "app/components/figma/ImageWithFallback"
 import { Navigation } from "app/components/Navigation"
@@ -272,6 +273,7 @@ const ProductCard = ({
   price,
   variantId,
   countryCode,
+  autoAlternate,
 }: {
   src: string
   label: string
@@ -282,10 +284,12 @@ const ProductCard = ({
   price: number
   variantId?: string
   countryCode: string
+  autoAlternate: boolean
 }) => {
   const { toggleLedgerItem, isInLedger } = useLedger()
   const { cartItems, handleCartUpdate } = useCartItems()
   const [isImageHovered, setIsImageHovered] = useState(false)
+  const showAlternate = isImageHovered || autoAlternate
   const [isRecentlyAdded, setIsRecentlyAdded] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const isItemInLedger = isInLedger(productId)
@@ -389,6 +393,7 @@ const ProductCard = ({
     <div
       className="group flex flex-col w-full mx-auto"
       style={{ width: "364px", minHeight: "455px" }}
+      data-auto-alternate={autoAlternate}
     >
       {/* Product Image */}
       {url ? (
@@ -400,7 +405,7 @@ const ProductCard = ({
             onMouseLeave={() => setIsImageHovered(false)}
           >
             {/* Hover Image - Behind */}
-            {hoverSrc && isImageHovered && (
+            {hoverSrc && (
               <div className="absolute inset-0">
                 <ImageWithFallback
                   src={hoverSrc}
@@ -412,8 +417,8 @@ const ProductCard = ({
 
             {/* Main Image - On Top */}
             <div
-              className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-              style={{ opacity: isImageHovered && hoverSrc ? 0 : 1 }}
+              className="absolute inset-0 product-image-fade"
+              style={{ opacity: showAlternate && hoverSrc ? 0 : 1 }}
             >
               <ImageWithFallback
                 src={src}
@@ -446,8 +451,8 @@ const ProductCard = ({
         >
           {/* Hover Image - Behind */}
           <div
-            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-            style={{ opacity: isImageHovered ? 1 : 0 }}
+            className="absolute inset-0 product-image-fade"
+            style={{ opacity: showAlternate ? 1 : 0 }}
           >
             {hoverSrc && (
               <ImageWithFallback
@@ -460,8 +465,8 @@ const ProductCard = ({
 
           {/* Main Image - On Top */}
           <div
-            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-            style={{ opacity: isImageHovered && hoverSrc ? 0 : 1 }}
+            className="absolute inset-0 product-image-fade"
+            style={{ opacity: showAlternate && hoverSrc ? 0 : 1 }}
           >
             <ImageWithFallback
               src={src}
@@ -551,10 +556,12 @@ const BannerProductCard = ({
   item,
   index,
   countryCode,
+  autoAlternate,
 }: {
   item: CandlesCollectionItem
   index: number
   countryCode: string
+  autoAlternate: boolean
 }) => {
   const router = useRouter()
   const { cartItems, handleCartUpdate } = useCartItems() // Added useCartItems
@@ -675,6 +682,7 @@ const BannerProductCard = ({
       onClick={handleProductClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      data-auto-alternate={autoAlternate}
     >
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 overflow-hidden">
@@ -684,11 +692,19 @@ const BannerProductCard = ({
           transition={{ duration: 1.2, ease: "easeOut" }}
           style={{ willChange: "transform" }}
         >
-          <ImageWithFallback
-            src={item.src}
-            alt={item.label}
-            className="w-full h-full object-cover"
-          />
+          {item.hoverSrc && (
+            <ImageWithFallback
+              src={item.hoverSrc}
+              alt={`${item.label} alternate view`}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+          <div
+            className="absolute inset-0 product-image-fade"
+            style={{ opacity: (autoAlternate || isHovered) && item.hoverSrc ? 0 : 1 }}
+          >
+            <ImageWithFallback src={item.src} alt={item.label} className="w-full h-full object-cover" />
+          </div>
         </motion.div>
         <div
           className="absolute inset-0 opacity-80 transition-opacity duration-700 ease-in-out group-hover:opacity-70 pointer-events-none"
@@ -789,6 +805,9 @@ const Candles = () => {
   const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null)
   const [bannerCarouselApi, setBannerCarouselApi] = useState<CarouselApi>()
   const [bannerCurrent, setBannerCurrent] = useState(0)
+  const [hasCarouselInteracted, setHasCarouselInteracted] = useState(false)
+  const desktopAlternateImages = useSequentialCarousel(carouselApi, candlesCollection.length, !hasCarouselInteracted)
+  const mobileAlternateImages = useSequentialCarousel(bannerCarouselApi, candlesCollection.length, !hasCarouselInteracted)
   const { email, setEmail, message, isSuccess, isPending, handleSubmit } =
     useNewsletterSubscription()
 
@@ -1120,6 +1139,9 @@ const Candles = () => {
           transition={{ duration: 0.8, ease: smoothEase }}
           viewport={{ once: true, amount: 0.1 }}
           className="hidden md:block w-full md:pt-12 lg:pt-16"
+          data-testid="candle-desktop-carousel"
+          onMouseDownCapture={() => setHasCarouselInteracted(true)}
+          onTouchStartCapture={() => setHasCarouselInteracted(true)}
         >
           <div className="pl-[5rem] pb-4">
             <motion.h2
@@ -1213,6 +1235,7 @@ const Candles = () => {
                 setApi={setCarouselApi}
                 opts={{
                   align: "start",
+                  slidesToScroll: "auto",
                   loop: false,
                   dragFree: false,
                   skipSnaps: false,
@@ -1237,6 +1260,7 @@ const Candles = () => {
                           price={price || 0}
                           variantId={variantId}
                           countryCode={countryCode}
+                          autoAlternate={desktopAlternateImages.has(i)}
                         />
                       </CarouselItem>
                     )
@@ -1258,6 +1282,9 @@ const Candles = () => {
           transition={{ duration: 0.8, ease: smoothEase }}
           viewport={{ once: true, amount: 0.1 }}
           className="md:hidden w-full py-8 overflow-hidden"
+          data-testid="candle-mobile-carousel"
+          onMouseDownCapture={() => setHasCarouselInteracted(true)}
+          onTouchStartCapture={() => setHasCarouselInteracted(true)}
         >
           <div className="relative">
             {/* Mobile Heading for Banner Carousel */}
@@ -1353,7 +1380,7 @@ const Candles = () => {
                     ? // Mobile: One product per slide
                       candlesCollection.map((item, index) => (
                         <CarouselItem key={index} className="banner-carousel-item">
-                          <BannerProductCard item={item} index={index} countryCode={countryCode} />
+                          <BannerProductCard item={item} index={index} countryCode={countryCode} autoAlternate={mobileAlternateImages.has(index)} />
                         </CarouselItem>
                       ))
                     : // Desktop: Groups of 3 products
@@ -1368,6 +1395,7 @@ const Candles = () => {
                                     item={item}
                                     index={globalIndex}
                                     countryCode={countryCode}
+                                    autoAlternate={mobileAlternateImages.has(groupIndex)}
                                   />
                                 </div>
                               )
@@ -1545,10 +1573,14 @@ const Candles = () => {
                 className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed"
               >
                 candlelight rituals, and a peek behind the scenes{" "}
-                <span className="text-orange-500 font-din-arabic">@</span>
-                <span className="text-orange-500 font-din-arabic border-b-[1px] border-orange-500">
-                  JardinBotanica
-                </span>
+                <a
+                  href="https://www.instagram.com/jardinbotanica/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-orange-500 font-din-arabic border-b-[1px] border-orange-500"
+                >
+                  @JardinBotanica
+                </a>
                 .
               </motion.p>
             </motion.div>
