@@ -889,9 +889,8 @@ const ShippingAddress = ({
         <Label htmlFor="checkout-phone" className="font-din-arabic mb-2 block">
           Phone Number <span className="text-red-500">*</span>
         </Label>
-        <Input
+        <input
           id="checkout-phone"
-          label=""
           name="shipping_address.phone"
           type="tel"
           autoComplete="tel"
