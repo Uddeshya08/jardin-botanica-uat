@@ -1,13 +1,14 @@
 import type { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
 import compareAddresses from "@lib/util/compare-addresses"
+import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import { mapKeys } from "lodash"
 import { Edit, Plus } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import type React from "react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Checkbox as ShadcnCheckbox } from "../../../../app/components/ui/checkbox"
 import { Label } from "../../../../app/components/ui/label"
@@ -89,35 +90,6 @@ const indianCities = [
   "Chandigarh",
 ]
 
-// Valid email providers - only well-known legitimate email providers
-const validEmailProviders = [
-  "gmail.com",
-  "yahoo.com",
-  "yahoo.co.in",
-  "yahoo.in",
-  "outlook.com",
-  "hotmail.com",
-  "hotmail.co.in",
-  "msn.com",
-  "live.com",
-  "icloud.com",
-  "me.com",
-  "mac.com",
-  "protonmail.com",
-  "proton.me",
-  "rediffmail.com",
-  "rediff.com",
-  "zoho.com",
-  "zoho.in",
-  "aol.com",
-  "mail.com",
-  "gmx.com",
-  "yandex.com",
-  "inbox.com",
-  "fastmail.com",
-  "tutanota.com",
-]
-
 interface SavedAddress {
   id: string
   name: string
@@ -152,13 +124,13 @@ const ShippingAddress = ({
   cart,
   checked,
   onChange,
-  onEmailValidationChange,
+  onContactValidationChange,
 }: {
   customer: HttpTypes.StoreCustomer | null
   cart: HttpTypes.StoreCart | null
   checked: boolean
   onChange: () => void
-    onEmailValidationChange?: (isValid: boolean) => void
+  onContactValidationChange?: (isValid: boolean) => void
 }) => {
   const router = useRouter()
   const [formData, setFormData] = useState<Record<string, any>>({
@@ -170,14 +142,15 @@ const ShippingAddress = ({
     "shipping_address.city": cart?.shipping_address?.city || "",
     "shipping_address.country_code": cart?.shipping_address?.country_code || "",
     "shipping_address.province": cart?.shipping_address?.province || "",
-    "shipping_address.phone": cart?.shipping_address?.phone || "",
-    email: cart?.email || "",
+    "shipping_address.phone": cart?.shipping_address?.phone || customer?.phone || "",
+    email: cart?.email || customer?.email || "",
   })
 
   // Local state for saved addresses
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([])
   const [showAddressForm, setShowAddressForm] = useState(false)
   const [selectedAddressId, setSelectedAddressId] = useState<string>("")
+  const selectedCheckoutAddress = useRef<SavedAddress | null>(null)
   const [isEditingAddress, setIsEditingAddress] = useState(false)
   const [editingAddressId, setEditingAddressId] = useState<string>("")
   const [newAddressData, setNewAddressData] = useState<Omit<SavedAddress, "id">>({
@@ -191,9 +164,22 @@ const ShippingAddress = ({
     label: "Home",
     isDefault: false,
   })
-  const [emailError, setEmailError] = useState<string>("")
-  const [emailTouched, setEmailTouched] = useState<boolean>(false)
+  const [phoneTouched, setPhoneTouched] = useState(false)
   const [isLoadingPostalData, setIsLoadingPostalData] = useState(false)
+
+  // Submit the address being edited, even when Continue is used before Save Address.
+  const shippingAddress = showAddressForm
+    ? toComparableAddress({ id: "draft", ...newAddressData })
+    : {
+        first_name: formData["shipping_address.first_name"],
+        last_name: formData["shipping_address.last_name"],
+        address_1: formData["shipping_address.address_1"],
+        company: formData["shipping_address.company"],
+        postal_code: formData["shipping_address.postal_code"],
+        city: formData["shipping_address.city"],
+        province: formData["shipping_address.province"],
+        country_code: formData["shipping_address.country_code"] || "in",
+      }
 
   const countriesInRegion = useMemo(
     () => cart?.region?.countries?.map((c) => c.iso_2),
@@ -209,7 +195,7 @@ const ShippingAddress = ({
     [customer?.addresses, countriesInRegion]
   )
 
-  const setFormAddress = (address?: HttpTypes.StoreCartAddress, email?: string) => {
+  const setFormAddress = (address?: HttpTypes.StoreCartAddress) => {
     address &&
       setFormData((prevState: Record<string, any>) => ({
         ...prevState,
@@ -221,14 +207,9 @@ const ShippingAddress = ({
         "shipping_address.city": address?.city || "",
         "shipping_address.country_code": address?.country_code || "",
         "shipping_address.province": address?.province || "",
-        "shipping_address.phone": address?.phone || "",
+        "shipping_address.phone": prevState["shipping_address.phone"] || address?.phone || "",
       }))
 
-    email &&
-      setFormData((prevState: Record<string, any>) => ({
-        ...prevState,
-        email: email,
-      }))
   }
 
   const populateAddressFields = (address: SavedAddress) => {
@@ -237,6 +218,7 @@ const ShippingAddress = ({
   }
 
   const selectSavedAddress = (address: SavedAddress) => {
+    selectedCheckoutAddress.current = address
     setSelectedAddressId(address.id)
     populateAddressFields(address)
   }
@@ -290,6 +272,20 @@ const ShippingAddress = ({
 
     if (allAddresses.length > 0) {
       setSavedAddresses(allAddresses)
+      // Customer refreshes must retain the address just saved or selected.
+      if (selectedCheckoutAddress.current) {
+        const selectedAddress = allAddresses.find((address) =>
+          compareAddresses(
+            toComparableAddress(address),
+            toComparableAddress(selectedCheckoutAddress.current!)
+          )
+        )
+        if (selectedAddress) {
+          selectedCheckoutAddress.current = selectedAddress
+          setSelectedAddressId(selectedAddress.id)
+        }
+        return
+      }
       const matchingCartAddress = cart?.shipping_address
         ? allAddresses.find((address) =>
             compareAddresses(toComparableAddress(address), cart.shipping_address)
@@ -298,11 +294,18 @@ const ShippingAddress = ({
 
       // Auto-select default address if available
       const defaultAddr = allAddresses.find((addr: SavedAddress) => addr.isDefault)
+      const hasCartAddress = Boolean(
+        cart?.shipping_address?.postal_code?.trim() &&
+        cart.shipping_address.address_1?.trim() &&
+        cart.shipping_address.city?.trim() &&
+        cart.shipping_address.country_code
+      )
       if (matchingCartAddress) {
         setSelectedAddressId(matchingCartAddress.id)
-      } else if (defaultAddr && !cart?.shipping_address) {
+        populateAddressFields(matchingCartAddress)
+      } else if (defaultAddr && !hasCartAddress) {
         selectSavedAddress(defaultAddr)
-      } else if (!cart?.shipping_address) {
+      } else if (!hasCartAddress) {
         selectSavedAddress(allAddresses[0])
       } else {
         setSelectedAddressId("")
@@ -312,94 +315,26 @@ const ShippingAddress = ({
 
   useEffect(() => {
     // Ensure cart is not null and has a shipping_address before setting form data
-    if (cart && cart.shipping_address) {
-      setFormAddress(cart?.shipping_address, cart?.email)
-    }
-
-    if (cart && !cart.email && customer?.email) {
-      setFormAddress(undefined, customer.email)
+    if (cart?.shipping_address && !selectedCheckoutAddress.current && !showAddressForm) {
+      setFormAddress(cart.shipping_address)
     }
   }, [cart]) // Add cart as a dependency
 
-  // Validate email when formData.email changes (but not on every render)
-  // This handles initial load and programmatic changes
+  let phoneError = ""
+  try {
+    normalizeCheckoutPhone(formData["shipping_address.phone"] || "")
+  } catch (error) {
+    phoneError = (error as Error).message
+  }
+
+  const email = formData.email.trim()
+  const emailError = email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ? "Please enter a valid email address"
+    : ""
+
   useEffect(() => {
-    if (formData.email && formData.email.trim() !== "") {
-      // Defer validation to next tick to ensure validateEmail is available
-      const timer = setTimeout(() => {
-        // Re-use the validation logic by triggering a synthetic validation
-        // We'll validate directly here to avoid dependency issues
-        const email = formData.email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!emailRegex.test(email)) {
-          setEmailError("Please use a valid email address")
-          return
-        }
-
-        const domain = email.split("@")[1]?.toLowerCase()
-        if (!domain) {
-          setEmailError("Please use a valid email address")
-          return
-        }
-
-        const exactMatch = validEmailProviders.some((provider) => domain === provider)
-        if (exactMatch) {
-          setEmailError("")
-          return
-        }
-
-        const subdomainMatch = validEmailProviders.some((provider) =>
-          domain.endsWith(`.${provider}`)
-        )
-        if (subdomainMatch) {
-          setEmailError("")
-          return
-        }
-
-        const corporateTlds = ["com", "co", "org", "edu", "gov", "net", "in"]
-        const domainParts = domain.split(".")
-        if (domainParts.length >= 2) {
-          const tld = domainParts[domainParts.length - 1]
-          if (corporateTlds.includes(tld)) {
-            const secondLevelDomain = domainParts[domainParts.length - 2]
-            if (
-              secondLevelDomain &&
-              secondLevelDomain.length >= 2 &&
-              /^[a-z0-9-]+$/.test(secondLevelDomain) &&
-              /[a-z]/.test(secondLevelDomain)
-            ) {
-              setEmailError("")
-              return
-            }
-          }
-        }
-
-        setEmailError("Please use a valid email address")
-      }, 100)
-
-      return () => clearTimeout(timer)
-    } else if (!formData.email || formData.email.trim() === "") {
-      // Email is required, but only show error if field has been touched
-      if (emailTouched) {
-        setEmailError("Email address is required")
-      } else {
-        // Don't show error visually, but validation will still fail (button disabled)
-        setEmailError("")
-      }
-    }
-  }, [formData.email, emailTouched]) // Validate when email changes
-
-  // Notify parent component about email validation status
-  useEffect(() => {
-    if (onEmailValidationChange) {
-      // Email is invalid if there's an error OR if email is empty (required field)
-      // emailError is a string, so check if it's truthy (non-empty)
-      const hasError = emailError && emailError.trim() !== ""
-      const hasEmail = formData.email && formData.email.trim() !== ""
-      const isValid = !hasError && hasEmail
-      onEmailValidationChange(isValid)
-    }
-  }, [emailError, formData.email, onEmailValidationChange])
+    onContactValidationChange?.(!phoneError && !emailError)
+  }, [phoneError, emailError, onContactValidationChange])
 
   const handleEditAddress = (address: SavedAddress) => {
     setNewAddressData({
@@ -449,74 +384,6 @@ const ShippingAddress = ({
     }
   }, [newAddressData.pincode])
 
-  const validateEmail = (email: string, showRequiredError: boolean = true): boolean => {
-    // Check if email is required and empty
-    if (!email || email.trim() === "") {
-      // Show required error only if field has been touched (user interacted with it)
-      if (emailTouched && showRequiredError) {
-        setEmailError("Email address is required")
-      } else {
-        // Don't show error visually, but still return false to disable button
-        setEmailError("")
-      }
-      return false
-    }
-
-    // Basic email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      setEmailError("Please use a valid email address")
-      return false
-    }
-
-    // Extract domain from email
-    const domain = email.split("@")[1]?.toLowerCase()
-    if (!domain) {
-      setEmailError("Please use a valid email address")
-      return false
-    }
-
-    // Check if domain matches any valid provider exactly
-    const exactMatch = validEmailProviders.some((provider) => domain === provider)
-    if (exactMatch) {
-      setEmailError("")
-      return true
-    }
-
-    // Check if domain ends with a valid provider (e.g., "mail.gmail.com")
-    const subdomainMatch = validEmailProviders.some((provider) => {
-      return domain.endsWith(`.${provider}`)
-    })
-    if (subdomainMatch) {
-      setEmailError("")
-      return true
-    }
-
-    // Allow corporate/educational domains with common TLDs (.com, .co, .org, .edu, .gov, .net, .in)
-    // but only if the domain looks legitimate (not random strings)
-    const corporateTlds = ["com", "co", "org", "edu", "gov", "net", "in"]
-    const domainParts = domain.split(".")
-    if (domainParts.length >= 2) {
-      const tld = domainParts[domainParts.length - 1]
-      if (corporateTlds.includes(tld)) {
-        const secondLevelDomain = domainParts[domainParts.length - 2]
-        // Allow if second level domain looks legitimate (at least 2 characters, contains letters)
-        if (
-          secondLevelDomain &&
-          secondLevelDomain.length >= 2 &&
-          /^[a-z0-9-]+$/.test(secondLevelDomain) &&
-          /[a-z]/.test(secondLevelDomain)
-        ) {
-          setEmailError("")
-          return true
-        }
-      }
-    }
-
-    setEmailError("Please use a valid email address")
-    return false
-  }
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -526,21 +393,34 @@ const ShippingAddress = ({
       [e.target.name]: value,
     })
 
-    // Validate email in real-time
-    if (e.target.name === "email") {
-      // Mark field as touched when user starts typing
-      if (!emailTouched) {
-        setEmailTouched(true)
-      }
-      validateEmail(value)
-    }
   }
 
-  const handleEmailBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Mark field as touched when user leaves the field
-    setEmailTouched(true)
-    validateEmail(e.target.value, true)
-  }
+  const emailField = (
+    <div>
+      <Label htmlFor="shipping-email" className="font-din-arabic mb-2 block">
+        Email Address
+      </Label>
+      <Input
+        id="shipping-email"
+        label=""
+        name="email"
+        type="email"
+        autoComplete="email"
+        value={formData.email}
+        onChange={handleChange}
+        placeholder="Enter email address"
+        className={`h-9 w-full rounded-md border px-3 py-1 bg-white/60 font-din-arabic ${emailError ? "border-red-500" : "border-black/20"}`}
+        aria-invalid={Boolean(emailError)}
+        aria-describedby={emailError ? "shipping-email-error" : undefined}
+        data-testid="shipping-email-input"
+      />
+      {emailError && (
+        <p id="shipping-email-error" className="mt-1.5 text-sm text-red-500 font-din-arabic">
+          {emailError}
+        </p>
+      )}
+    </div>
+  )
 
   return (
     <div className="space-y-6">
@@ -562,6 +442,7 @@ const ShippingAddress = ({
               >
                 {/* Edit Icon */}
                 <motion.button
+                  type="button"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={(e) => {
@@ -583,8 +464,6 @@ const ShippingAddress = ({
                     {address.city}, {address.state} {address.pincode}
                   </p>
                   <div className="flex items-center space-x-2 pt-1">
-                    <p className="font-din-arabic text-sm text-black/60">{address.phone}</p>
-                    <span className="text-black/30">|</span>
                     <span className="font-din-arabic text-xs px-2 py-1 bg-black/5 rounded-full text-black/50">
                       {address.label}
                     </span>
@@ -667,7 +546,7 @@ const ShippingAddress = ({
             className="space-y-6 overflow-hidden"
           >
             <div className="grid grid-cols-2 gap-4">
-              <div>
+              <div className="min-w-0">
                 <Label htmlFor="newName" className="font-din-arabic mb-2 block">
                   Full Name
                 </Label>
@@ -686,32 +565,7 @@ const ShippingAddress = ({
                   className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30"
                 />
               </div>
-              <div>
-                <Label htmlFor="newPhone" className="font-din-arabic mb-2 block">
-                  Phone Number
-                </Label>
-                <div className="flex space-x-2">
-                  <div className="w-16 bg-white/80 border border-black/10 rounded-md flex items-center justify-center text-xs font-din-arabic text-black/60">
-                    +91
-                  </div>
-                  <Input
-                    id="newPhone"
-                    label=""
-                    placeholder="Enter 10 digit number"
-                    name="newPhone"
-                    type="tel"
-                    value={newAddressData.phone}
-                    onChange={(e) =>
-                      setNewAddressData({
-                        ...newAddressData,
-                        phone: e.target.value,
-                      })
-                    }
-                    className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30"
-                    maxLength={10}
-                  />
-                </div>
-              </div>
+              <div className="min-w-0">{emailField}</div>
             </div>
             <div>
               <Label htmlFor="newAddress1" className="font-din-arabic mb-2 block">
@@ -876,12 +730,20 @@ const ShippingAddress = ({
                     !newAddressData.addressLine1 ||
                     !newAddressData.city ||
                     !newAddressData.state ||
-                    !newAddressData.pincode ||
-                    !newAddressData.phone
+                    !newAddressData.pincode
                   ) {
                     toast.error("Please fill in all required fields")
                     return
                   }
+
+                  let phone: string
+                  try {
+                    phone = normalizeCheckoutPhone(formData["shipping_address.phone"])
+                  } catch (error) {
+                    toast.error((error as Error).message)
+                    return
+                  }
+                  const addressToSave = { ...newAddressData, phone }
 
                   // Validate pincode
                   if (newAddressData.pincode.replace(/\D/g, "").length !== 6) {
@@ -901,7 +763,7 @@ const ShippingAddress = ({
                     formDataToSubmit.append("city", newAddressData.city)
                     formDataToSubmit.append("province", newAddressData.state)
                     formDataToSubmit.append("postal_code", newAddressData.pincode)
-                    formDataToSubmit.append("phone", newAddressData.phone)
+                    formDataToSubmit.append("phone", phone)
                     formDataToSubmit.append("country_code", "in")
                     if (newAddressData.isDefault) {
                       formDataToSubmit.append("is_default_shipping", "on")
@@ -932,7 +794,7 @@ const ShippingAddress = ({
                     if (isEditingAddress) {
                       // Update existing address
                       const updated = savedAddresses.map((addr) =>
-                        addr.id === editingAddressId ? { ...addr, ...newAddressData } : addr
+                        addr.id === editingAddressId ? { ...addr, ...addressToSave } : addr
                       )
                       setSavedAddresses(updated)
                       sessionStorage.setItem("jardinBotanica_savedAddresses", JSON.stringify(updated))
@@ -941,7 +803,7 @@ const ShippingAddress = ({
                       if (selectedAddressId === editingAddressId) {
                         populateAddressFields({
                           id: editingAddressId,
-                          ...newAddressData,
+                          ...addressToSave,
                         } as SavedAddress)
                       }
                       
@@ -950,7 +812,7 @@ const ShippingAddress = ({
                       // Save new address
                       const newAddr: SavedAddress = {
                         id: `address-${Date.now()}`,
-                        ...newAddressData,
+                        ...addressToSave,
                       }
                       const updated = [...savedAddresses, newAddr]
                       setSavedAddresses(updated)
@@ -962,6 +824,13 @@ const ShippingAddress = ({
                       toast.success("Address saved successfully")
                     }
                   }
+
+                  // Both customer and guest saves must update checkout fields before
+                  // the editor closes; saving to the address book alone is insufficient.
+                  selectSavedAddress({
+                    id: editingAddressId || `address-${Date.now()}`,
+                    ...addressToSave,
+                  })
 
                   // Reset and hide form
                   setNewAddressData({
@@ -1015,43 +884,29 @@ const ShippingAddress = ({
         )}
       </AnimatePresence>
 
-      {/* Contact Information - Always visible when not adding address */}
-      {!showAddressForm && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="space-y-4 pt-6 border-t border-black/10"
-        >
-          <h3 className="font-din-arabic text-sm text-black/50 mb-4">Contact Information</h3>
-          <div>
-            <label
-              data-slot="label"
-              className="items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 font-din-arabic mb-2 block"
-              htmlFor="email"
-            >
-              Email Address <span className="text-red-500">*</span>
-            </label>
-            <Input
-              id="email"
-              label=""
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={handleEmailBlur}
-              className={`file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30 ${emailError
-                ? "border-red-500 focus:border-red-500"
-                : "border-black/10 focus:border-black/30"
-                }`}
-              aria-invalid={emailError ? "true" : "false"}
-              data-testid="shipping-email-input"
-            />
-            {emailError && (
-              <p className="mt-1.5 text-sm text-red-500 font-din-arabic">{emailError}</p>
-            )}
-          </div>
-        </motion.div>
-      )}
+      <div className="space-y-4 pt-6 border-t border-black/10">
+        <h3 className="font-din-arabic text-sm text-black/50">Contact Information</h3>
+        <Label htmlFor="checkout-phone" className="font-din-arabic mb-2 block">
+          Phone Number <span className="text-red-500">*</span>
+        </Label>
+        <input
+          id="checkout-phone"
+          name="shipping_address.phone"
+          type="tel"
+          autoComplete="tel"
+          required
+          value={formData["shipping_address.phone"]}
+          onChange={handleChange}
+          onBlur={() => setPhoneTouched(true)}
+          placeholder="10-digit mobile number or +91..."
+          className={`h-9 w-full rounded-md border px-3 py-1 bg-white/60 font-din-arabic ${phoneTouched && phoneError ? "border-red-500" : "border-black/20"}`}
+          aria-invalid={phoneTouched && Boolean(phoneError)}
+          data-testid="shipping-phone-input"
+        />
+        {phoneTouched && phoneError && (
+          <p className="font-din-arabic text-sm text-red-500">{phoneError}</p>
+        )}
+      </div>
 
       {/* Billing Address Checkbox */}
       {!showAddressForm && (
@@ -1073,65 +928,53 @@ const ShippingAddress = ({
 
       {/* Hidden form fields for form submission */}
       <div className="hidden">
-        <Input
-          label=""
-          name="email"
-          type="email"
-          value={formData.email || ""}
-          onChange={handleChange}
-        />
+        {!showAddressForm && <input type="hidden" name="email" value={formData.email} />}
         <Input
           label=""
           name="shipping_address.first_name"
-          value={formData["shipping_address.first_name"]}
+          value={shippingAddress.first_name || ""}
           onChange={handleChange}
         />
         <Input
           label=""
           name="shipping_address.last_name"
-          value={formData["shipping_address.last_name"]}
+          value={shippingAddress.last_name || ""}
           onChange={handleChange}
         />
         <Input
           label=""
           name="shipping_address.address_1"
-          value={formData["shipping_address.address_1"]}
+          value={shippingAddress.address_1 || ""}
           onChange={handleChange}
         />
         <Input
           label=""
           name="shipping_address.company"
-          value={formData["shipping_address.company"]}
+          value={shippingAddress.company || ""}
           onChange={handleChange}
         />
         <Input
           label=""
           name="shipping_address.postal_code"
-          value={formData["shipping_address.postal_code"]}
+          value={shippingAddress.postal_code || ""}
           onChange={handleChange}
         />
         <Input
           label=""
           name="shipping_address.city"
-          value={formData["shipping_address.city"]}
+          value={shippingAddress.city || ""}
           onChange={handleChange}
         />
         <Input
           label=""
           name="shipping_address.province"
-          value={formData["shipping_address.province"]}
-          onChange={handleChange}
-        />
-        <Input
-          label=""
-          name="shipping_address.phone"
-          value={formData["shipping_address.phone"]}
+          value={shippingAddress.province || ""}
           onChange={handleChange}
         />
         <CountrySelect
           name="shipping_address.country_code"
           region={cart?.region}
-          value={formData["shipping_address.country_code"] || "in"}
+          value={shippingAddress.country_code || "in"}
           onChange={handleChange}
         />
       </div>

@@ -2,11 +2,14 @@
 
 import { isManual, isRazorpay, isStripe } from "@lib/constants"
 import { placeOrder, updateCart } from "@lib/data/cart"
+import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
+import { isCheckoutReady } from "@lib/util/checkout-readiness"
 import type { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
 import { useGiftContextSafe } from "app/context/gift-context"
 import { Lock, Sparkles } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 import type React from "react"
 import { useState } from "react"
 import ErrorMessage from "../error-message"
@@ -14,20 +17,21 @@ import { RazorpayPaymentButton } from "./razorpay-payment-button"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
+  codVerified?: boolean
   "data-testid": string
 }
 
-const PaymentButton: React.FC<PaymentButtonProps> = ({ cart, "data-testid": dataTestId }) => {
-  const notReady =
-    !cart ||
-    !cart.shipping_address ||
-    !cart.billing_address ||
-    !cart.email ||
-    (cart.shipping_methods?.length ?? 0) < 1
+const PaymentButton: React.FC<PaymentButtonProps> = ({ cart, codVerified = false, "data-testid": dataTestId }) => {
+  const notReady = !isCheckoutReady(cart)
+  const paymentType = useSearchParams().get("paymenttype") || "card"
 
-  const paymentSession = cart.payment_collection?.payment_sessions?.find(
+  const pendingSessions = cart.payment_collection?.payment_sessions?.filter(
     (session) => session.status === "pending"
-  )
+  ) || []
+  const paymentSession = paymentType === "cod"
+    ? pendingSessions.find((session) => isManual(session.provider_id))
+    : pendingSessions.find((session) => isRazorpay(session.provider_id)) ||
+      pendingSessions.find((session) => !isManual(session.provider_id))
 
   switch (true) {
     case isStripe(paymentSession?.provider_id):
@@ -53,7 +57,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ cart, "data-testid": data
         />
       )
     case isManual(paymentSession?.provider_id):
-      return <ManualTestPaymentButton notReady={notReady} data-testid={dataTestId} />
+      return <ManualTestPaymentButton notReady={notReady || (cart.total !== 0 && !codVerified)} data-testid={dataTestId} />
     default:
       return (
         <Button
@@ -135,8 +139,8 @@ const StripePaymentButton = ({
               postal_code: cart.billing_address?.postal_code ?? undefined,
               state: cart.billing_address?.province ?? undefined,
             },
-            email: cart.email,
-            phone: cart.billing_address?.phone ?? undefined,
+            email: cart.email?.trim() || undefined,
+            phone: normalizeCheckoutPhone(cart.shipping_address?.phone || ""),
           },
         },
       }

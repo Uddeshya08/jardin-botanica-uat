@@ -3,7 +3,7 @@
 import { signout } from "@lib/data/customer"
 import type { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { ChevronRight, CreditCard, Heart, LogOut, MapPin, Package, Settings } from "lucide-react"
+import { ChevronRight, CreditCard, Heart, LogOut, MapPin, Package, Settings, Truck } from "lucide-react"
 import { motion } from "motion/react"
 import { useParams, usePathname } from "next/navigation"
 
@@ -34,6 +34,7 @@ const AccountNav = ({ customer }: { customer: HttpTypes.StoreCustomer | null }) 
       icon: Settings,
     },
     { id: "orders", href: "/account/orders", label: "Orders", icon: Package },
+    { id: "track-order", href: "/account/track-order", label: "Track my order", icon: Truck },
     { id: "ledger", href: "/account/ledger", label: "Ledger", icon: Heart },
     {
       id: "addresses",
@@ -134,7 +135,7 @@ const AccountNav = ({ customer }: { customer: HttpTypes.StoreCustomer | null }) 
 
       {/* Mobile Tab Navigation */}
       <div className="lg:hidden" data-testid="mobile-account-nav">
-        <div className="flex justify-center space-x-3">
+        <div className="flex w-max min-w-full justify-center gap-2">
           {sidebarItems.map((item) => {
             const Icon = item.icon
             const active = isActive(item.href)

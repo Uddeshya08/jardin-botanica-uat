@@ -3,6 +3,7 @@
 import { setShippingMethod, updateCart } from "@lib/data/cart"
 import { listCartShippingMethods } from "@lib/data/fulfillment"
 import compareAddresses from "@lib/util/compare-addresses"
+import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
 import { CheckCircleSolid } from "@medusajs/icons"
 import type { HttpTypes } from "@medusajs/types"
 import { Heading, Text, useToggleState } from "@medusajs/ui"
@@ -31,7 +32,7 @@ const Addresses = ({
 
   const isOpen = searchParams.get("step") === "address"
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isEmailValid, setIsEmailValid] = useState(true)
+  const [isContactValid, setIsContactValid] = useState(false)
 
   const { state: sameAsBilling, toggle: toggleSameAsBilling } = useToggleState(
     cart?.shipping_address && cart?.billing_address
@@ -52,21 +53,12 @@ const Addresses = ({
 
     try {
       const formData = new FormData(e.currentTarget)
-
-      // Validate email before submission
-      const email = formData.get("email") as string
-      if (!email || !email.trim()) {
-        setSubmitError("Email is required")
-        setIsSubmitting(false)
-        return
-      }
-
-      const trimmedEmail = email.trim()
-
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(trimmedEmail)) {
-        setSubmitError("Please use a valid email address")
+      const phone = normalizeCheckoutPhone(
+        formData.get("shipping_address.phone")?.toString() || ""
+      )
+      const email = formData.get("email")?.toString().trim() || ""
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setSubmitError("Please enter a valid email address")
         setIsSubmitting(false)
         return
       }
@@ -83,9 +75,9 @@ const Addresses = ({
           city: formData.get("shipping_address.city")?.toString() || "",
           country_code: formData.get("shipping_address.country_code")?.toString() || "",
           province: formData.get("shipping_address.province")?.toString() || "",
-          phone: formData.get("shipping_address.phone")?.toString() || "",
+          phone,
         },
-        email: trimmedEmail,
+        ...(email ? { email } : {}),
       } as any
 
       addressData.shipping_address.postal_code = addressData.shipping_address.postal_code.trim()
@@ -104,13 +96,11 @@ const Addresses = ({
           city: formData.get("billing_address.city")?.toString() || "",
           country_code: formData.get("billing_address.country_code")?.toString() || "",
           province: formData.get("billing_address.province")?.toString() || "",
-          phone: formData.get("billing_address.phone")?.toString() || "",
+          phone,
         }
       }
 
-      await updateCart(addressData)
-
-      // Step 2: Check serviceability
+      // Validate before persisting the address to avoid saving incomplete edits.
       const pincode = addressData.shipping_address.postal_code
 
       if (!pincode) {
@@ -118,6 +108,23 @@ const Addresses = ({
         setIsSubmitting(false)
         return
       }
+
+      if (addressData.shipping_address.country_code === "in" && !/^[1-9]\d{5}$/.test(pincode)) {
+        setSubmitError("Please enter a valid 6-digit PIN code")
+        setIsSubmitting(false)
+        return
+      }
+
+      if (!addressData.shipping_address.first_name.trim() ||
+          !addressData.shipping_address.address_1.trim() ||
+          !addressData.shipping_address.city.trim() ||
+          !addressData.shipping_address.province.trim()) {
+        setSubmitError("Please complete your shipping name, address, city and state")
+        setIsSubmitting(false)
+        return
+      }
+
+      const updatedCart = await updateCart(addressData)
 
       // Step 3: Set shipping method
       if (cart?.id) {
@@ -140,6 +147,9 @@ const Addresses = ({
         await setShippingMethod({
           cartId: cart.id,
           shippingMethodId: preferredShippingOption.id,
+          paymentMethod: "PREPAID",
+          totalAmount: updatedCart.item_total ??
+            (updatedCart.total - (updatedCart.shipping_total || 0)),
         })
 
         // Step 4: Redirect to payment step
@@ -190,7 +200,7 @@ const Addresses = ({
               checked={sameAsBilling}
               onChange={toggleSameAsBilling}
               cart={cart}
-              onEmailValidationChange={setIsEmailValid}
+              onContactValidationChange={setIsContactValid}
             />
 
             {!sameAsBilling && <BillingAddress cart={cart} />}
@@ -202,7 +212,7 @@ const Addresses = ({
             {items && items.length > 0 ? (
               <SubmitButton
                 data-testid="submit-address-button"
-                disabled={!isEmailValid}
+                disabled={!isContactValid || isSubmitting}
                 className="ml-auto px-8 py-3 bg-black text-white rounded-xl font-din-arabic transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
               >
                 {isSubmitting ? "Processing..." : "Continue"}
@@ -244,6 +254,7 @@ const Addresses = ({
                     <Text className="txt-medium text-ui-fg-subtle">
                       {cart.shipping_address.country_code?.toUpperCase()}
                     </Text>
+                    {cart.email && <Text className="txt-medium text-ui-fg-subtle">Email: {cart.email}</Text>}
                   </div>
 
                   <div className="flex flex-col w-1/3 " data-testid="shipping-contact-summary">
@@ -253,7 +264,6 @@ const Addresses = ({
                     <Text className="txt-medium text-ui-fg-subtle">
                       {cart.shipping_address.phone}
                     </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">{cart.email}</Text>
                   </div>
 
                   <div className="flex flex-col w-1/3" data-testid="billing-address-summary">

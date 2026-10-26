@@ -152,7 +152,7 @@ const Shipping: React.FC<ShippingProps> = ({ cart, availableShippingMethods }) =
           Delivery
           {!isOpen && (cart.shipping_methods?.length ?? 0) > 0 && <CheckCircleSolid />}
         </Heading>
-        {!isOpen && cart?.shipping_address && cart?.billing_address && cart?.email && (
+        {!isOpen && cart?.shipping_address?.phone && cart?.billing_address && (
           <Text>
             <button
               onClick={handleEdit}

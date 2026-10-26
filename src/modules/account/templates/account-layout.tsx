@@ -2,6 +2,7 @@ import type { HttpTypes } from "@medusajs/types"
 import UnderlineLink from "@modules/common/components/interactive-link"
 import type React from "react"
 import AccountNav from "../components/account-nav"
+import MobileSignOut from "../components/mobile-sign-out"
 
 interface AccountLayoutProps {
   customer: HttpTypes.StoreCustomer | null
@@ -73,6 +74,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ customer, children }) => 
       <main className="flex-1 py-8 lg:py-12 px-6 lg:pl-16 lg:pr-6 account-content overflow-y-auto">
         {children}
       </main>
+      {customer && <MobileSignOut />}
     </div>
   )
 }

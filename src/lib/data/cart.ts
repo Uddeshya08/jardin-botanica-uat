@@ -3,6 +3,7 @@
 
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
+import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
 import type { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
@@ -45,7 +46,7 @@ export async function retrieveCart(cartId?: string) {
       method: "GET",
       query: {
         fields:
-          "*items, *region, *items.product, *items.product.categories, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name",
+          "*items, *region, *items.product, *items.product.categories, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name, +shipping_methods.data",
       },
       headers,
       cache: "no-store",
@@ -95,6 +96,15 @@ export async function getOrSetCart(countryCode: string) {
 }
 
 export async function updateCart(data: HttpTypes.StoreUpdateCart) {
+  if (data.shipping_address && typeof data.shipping_address === "object") {
+    data = {
+      ...data,
+      shipping_address: {
+        ...data.shipping_address,
+        phone: normalizeCheckoutPhone(data.shipping_address.phone || ""),
+      },
+    }
+  }
   const cartId = await getCartId()
 
   if (!cartId) {
@@ -519,7 +529,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         city: formData.get("billing_address.city")?.toString() || "",
         country_code: formData.get("billing_address.country_code")?.toString() || "",
         province: formData.get("billing_address.province")?.toString() || "",
-        phone: formData.get("billing_address.phone")?.toString() || "",
+        phone: data.shipping_address.phone,
       }
     }
     await updateCart(data)
@@ -541,6 +551,9 @@ export async function placeOrder(cartId?: string) {
   if (!id) {
     throw new Error("No existing cart found when placing an order")
   }
+
+  const cart = await retrieveCart(id)
+  normalizeCheckoutPhone(cart?.shipping_address?.phone || "")
 
   const headers = {
     ...(await getAuthHeaders()),

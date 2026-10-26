@@ -1,6 +1,8 @@
 "use client"
 
 import { placeOrder, updateCart } from "@lib/data/cart"
+import { getRazorpayKeyId } from "@lib/data/payment"
+import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
 import type { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useGiftContextSafe } from "app/context/gift-context"
@@ -25,7 +27,9 @@ export const RazorpayPaymentButton = ({
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
   const { Razorpay } = useRazorpay()
-  const [orderData, setOrderData] = useState({ razorpayOrder: { id: "" } })
+  const [orderData, setOrderData] = useState<{
+    razorpayOrder: { id: string; amount: number; currency: string }
+  }>({ razorpayOrder: { id: "", amount: 0, currency: "" } })
 
   // Payment type param
   const searchParams = useSearchParams()
@@ -39,7 +43,9 @@ export const RazorpayPaymentButton = ({
   }
 
   useEffect(() => {
-    setOrderData(session.data as { razorpayOrder: { id: string } })
+    setOrderData(session.data as {
+      razorpayOrder: { id: string; amount: number; currency: string }
+    })
   }, [session.data])
 
   // Map payment type to Razorpay config
@@ -104,12 +110,27 @@ export const RazorpayPaymentButton = ({
 
     const paymentMethodConfig = getPaymentMethodConfig(paymentType)
 
+    const razorpayOrder = orderData.razorpayOrder
+    if (!razorpayOrder?.id || !Number.isFinite(Number(razorpayOrder.amount)) || Number(razorpayOrder.amount) <= 0) {
+      setErrorMessage("Payment details are unavailable. Please refresh checkout and try again.")
+      setSubmitting(false)
+      return
+    }
+
+    let keyId: string
+    try {
+      keyId = await getRazorpayKeyId()
+    } catch {
+      setErrorMessage("Payment is temporarily unavailable. Please try again shortly.")
+      setSubmitting(false)
+      return
+    }
+
     const options: RazorpayOrderOptions = {
-      key: "rzp_test_KZp3v4sgtPHTJI",
-      callback_url: `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/razorpay/hooks`,
-      amount: session.amount * 100 * 100,
+      key: keyId,
+      amount: Number(razorpayOrder.amount),
       order_id: orderData.razorpayOrder.id,
-      currency: cart.currency_code.toUpperCase() as CurrencyCode,
+      currency: razorpayOrder.currency as CurrencyCode,
       name: process.env.COMPANY_NAME ?? "your company name",
       description: `Order number ${orderData.razorpayOrder.id}`,
       remember_customer: true,
@@ -132,8 +153,8 @@ export const RazorpayPaymentButton = ({
       },
       prefill: {
         name: `${cart.billing_address?.first_name} ${cart.billing_address?.last_name}`,
-        email: cart?.email,
-        contact: cart?.shipping_address?.phone ?? undefined,
+        email: cart.email?.trim() || undefined,
+        contact: normalizeCheckoutPhone(cart.shipping_address?.phone || ""),
       },
     }
 
@@ -148,11 +169,11 @@ export const RazorpayPaymentButton = ({
     Razorpay,
     cart.billing_address?.first_name,
     cart.billing_address?.last_name,
-    cart.currency_code,
     cart?.email,
     cart?.shipping_address?.phone,
     orderData.razorpayOrder.id,
-    session.amount,
+    orderData.razorpayOrder.amount,
+    orderData.razorpayOrder.currency,
     paymentType,
     giftContext,
   ])

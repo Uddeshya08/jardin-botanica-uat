@@ -273,7 +273,7 @@ export function OrderConfirmationUI({
           className="font-din-arabic text-sm sm:text-base text-black/70 mb-12 leading-relaxed max-w-xl"
           style={{ letterSpacing: "0.1em", fontSize: "16px" }}
         >
-          We'll notify you the moment your parcel leaves the studio.
+          We'll notify you the moment your parcel leaves the conservatory.
         </motion.p>
 
         {/* Action Buttons */}

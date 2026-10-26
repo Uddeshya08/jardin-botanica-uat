@@ -94,7 +94,6 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
     "billing_address.city": cart?.billing_address?.city || "",
     "billing_address.country_code": cart?.billing_address?.country_code || "in",
     "billing_address.province": cart?.billing_address?.province || "",
-    "billing_address.phone": cart?.billing_address?.phone || "",
     fullName: getFullName(),
   })
 
@@ -113,7 +112,6 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         "billing_address.city": cart.billing_address.city || "",
         "billing_address.country_code": cart.billing_address.country_code || "in",
         "billing_address.province": cart.billing_address.province || "",
-        "billing_address.phone": cart.billing_address.phone || "",
         fullName: `${firstName} ${lastName}`.trim(),
       })
     }
@@ -183,7 +181,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         transition={{ duration: 0.4, ease: "easeInOut" }}
         className="space-y-6 overflow-hidden pt-6 border-t border-black/10"
       >
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <Label htmlFor="billing_full_name" className="font-din-arabic mb-2 block">
               Full Name
@@ -199,29 +197,6 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
               className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30"
               data-testid="billing-full-name-input"
             />
-          </div>
-          <div>
-            <Label htmlFor="billing_phone" className="font-din-arabic mb-2 block">
-              Phone Number
-            </Label>
-            <div className="flex space-x-2">
-              <div className="w-16 bg-white/80 border border-black/10 rounded-md flex items-center justify-center text-xs font-din-arabic text-black/60">
-                +91
-              </div>
-              <Input
-                id="billing_phone"
-                label=""
-                name="billing_address.phone"
-                placeholder="XXXXX XXXXX"
-                type="tel"
-                autoComplete="tel"
-                value={formData["billing_address.phone"]}
-                onChange={handleChange}
-                maxLength={10}
-                className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex-1 bg-white/60 border-black/20 font-din-arabic focus:border-black transition-all placeholder:text-black/30"
-                data-testid="billing-phone-input"
-              />
-            </div>
           </div>
         </div>
         <div>

@@ -16,6 +16,7 @@ type CartTotalsProps = {
     gift_card_total?: number | null
     currency_code: string
     shipping_subtotal?: number | null
+    shipping_methods?: { data?: Record<string, unknown> | null }[]
   }
 }
 
@@ -25,17 +26,27 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
     total,
     subtotal,
     item_total,
-    tax_total,
     discount_total,
     gift_card_total,
     shipping_subtotal,
+    shipping_methods,
   } = totals
+
+  // The backend includes this fee in shipping and the cart total. Split it out
+  // for display without adding it to the amount payable a second time.
+  const codFee = shipping_methods?.reduce(
+    (sum, method) => sum + (method.data?.paymentMethod === "COD"
+      ? Number(method.data.cod_fee || 0)
+      : 0),
+    0
+  ) || 0
+  const shippingAmount = Math.max(0, (shipping_subtotal ?? 0) - codFee)
 
   return (
     <div>
       <div className="flex flex-col py-3 gap-y-2 font-din-arabi text-black/70 ">
         <div className="flex items-center justify-between">
-          <span className="flex gap-x-1 items-center text-black/70 font-din-arabic">Subtotal</span>
+          <span className="flex gap-x-1 items-center text-black/70 font-din-arabic">Subtotal(incl. GST)</span>
           <span data-testid="cart-subtotal" data-value={subtotal || 0}>
             {convertToLocale({ amount: item_total ?? 0, currency_code })}
           </span>
@@ -54,18 +65,18 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
         )}
         <div className="flex items-center justify-between">
           <span className="text-black/70 font-din-arabic">Shipping</span>
-          <span data-testid="cart-shipping" data-value={shipping_subtotal || 0}>
-            {convertToLocale({ amount: shipping_subtotal ?? 0, currency_code })}
+          <span data-testid="cart-shipping" data-value={shippingAmount}>
+            {convertToLocale({ amount: shippingAmount, currency_code })}
           </span>
         </div>
-        <div className="flex justify-between">
-          <span className="flex gap-x-1 items-center text-black/70 font-din-arabic">
-            Taxes (GST added)
-          </span>
-          <span data-testid="cart-taxes" data-value={tax_total || 0}>
-            {convertToLocale({ amount: tax_total ?? 0, currency_code })}
-          </span>
-        </div>
+        {codFee > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-black/70 font-din-arabic">COD</span>
+            <span data-testid="cart-cod" data-value={codFee}>
+              {convertToLocale({ amount: codFee, currency_code })}
+            </span>
+          </div>
+        )}
         {!!gift_card_total && (
           <div className="flex items-center justify-between">
             <span>Gift card</span>
