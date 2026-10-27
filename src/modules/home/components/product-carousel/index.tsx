@@ -53,8 +53,8 @@ function ProductCard({
   const router = useRouter()
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
-  const videoRef = React.useRef<HTMLVideoElement>(null)
   const media = useProductMediaState(product.hoverImage, product.video)
+  const videoRef = media.videoRef
   const showAlternate = media.state === "ready" && (isImageHovered || autoAlternate)
 
   const handleProductClick = () => {
@@ -126,6 +126,7 @@ function ProductCard({
             />
           ) : (
             <img
+              ref={media.imageRef}
               src={product.hoverImage || undefined}
               alt={`${product.name} alternate view`}
               className="w-full h-full object-cover"

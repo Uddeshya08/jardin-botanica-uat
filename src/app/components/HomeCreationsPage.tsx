@@ -481,6 +481,7 @@ function ProductCard({
           >
             {product.hoverImage && (
               <img
+                ref={media.imageRef}
                 src={product.hoverImage}
                 alt={`${product.name} alternate view`}
                 className="w-full h-full object-cover"
