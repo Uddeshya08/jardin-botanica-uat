@@ -137,7 +137,7 @@ function ProductCard({
             />
           ) : (
             <img
-              src={product.hoverImage}
+              src={product.hoverImage || undefined}
               alt={`${product.name} alternate view`}
               className="w-full h-full object-cover"
               decoding="async"
