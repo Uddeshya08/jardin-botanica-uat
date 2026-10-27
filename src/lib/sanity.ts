@@ -1,4 +1,5 @@
 import { client } from "../sanity/lib/client"
+import { getJournalPath, type JournalArticleLink } from "./util/journal-url"
 import type { SanityHomePage } from "types/sanity-home"
 import type {
   SanityBlog,
@@ -13,6 +14,18 @@ const cacheOpts = (revalidate: number) =>
   process.env.NODE_ENV === "production"
     ? ({ next: { revalidate } } as const)
     : ({ cache: "no-store" } as const)
+
+export async function getJournalArticleRouteSanity(
+  slug: string,
+  template?: "blog" | "blogTemplate1"
+): Promise<(JournalArticleLink & { _type: "blog" | "blogTemplate1" }) | null> {
+  return client.fetch(
+    `*[_type in ["blog", "blogTemplate1"] && slug.current == $slug &&
+      ($template == "" || _type == $template)][0]{_type, title, "slug": slug.current, category}`,
+    { slug, template: template || "" },
+    cacheOpts(60)
+  )
+}
 
 export async function getHomePageSanity(): Promise<SanityHomePage | null> {
   try {
@@ -39,6 +52,7 @@ export async function getHomePageSanity(): Promise<SanityHomePage | null> {
 
 const BLOG_PROJECTION = `{
   title,
+  category,
   "slug": slug.current,
   description,
   publishedDate,
@@ -82,11 +96,12 @@ export async function getBlogBySlugSanity(slug: string): Promise<SanityBlog | nu
 export async function getLatestBlogCardsSanity(
   limit: number = 8,
   excludeSlug?: string
-): Promise<{ title: string; slug: string; image?: string }[]> {
+): Promise<(JournalArticleLink & { image?: string })[]> {
   try {
-    const cards = await client.fetch<{ title: string; slug: string; image?: string }[]>(
+    const cards = await client.fetch<(JournalArticleLink & { image?: string })[]>(
       `*[_type == "blog" && slug.current != $excludeSlug] | order(publishedDate desc) [0...$limit]{
         title,
+        category,
         "slug": slug.current,
         "image": coverImage.asset->url
       }`,
@@ -103,6 +118,7 @@ export async function getLatestBlogCardsSanity(
 
 const BLOG_TEMPLATE1_PROJECTION = `{
   title,
+  category,
   "slug": slug.current,
   description,
   publishedDate,
@@ -144,11 +160,12 @@ export async function getBlogTemplate1BySlugSanity(
  */
 export async function getLatestBlogTemplate1LinksSanity(
   limit: number = 8
-): Promise<{ title: string; slug: string }[]> {
+): Promise<JournalArticleLink[]> {
   try {
-    return await client.fetch<{ title: string; slug: string }[]>(
+    return await client.fetch<JournalArticleLink[]>(
       `*[_type == "blogTemplate1"] | order(publishedDate desc) [0...$limit]{
         title,
+        category,
         "slug": slug.current
       }`,
       { limit },
@@ -165,12 +182,13 @@ export async function getLatestBlogTemplate1LinksSanity(
  * previous/next post navigation.
  */
 export async function getAllBlogTemplate1LinksSanity(): Promise<
-  { title: string; slug: string }[]
+  JournalArticleLink[]
 > {
   try {
-    return await client.fetch<{ title: string; slug: string }[]>(
+    return await client.fetch<JournalArticleLink[]>(
       `*[_type == "blogTemplate1"] | order(publishedDate desc){
         title,
+        category,
         "slug": slug.current
       }`,
       {},
@@ -182,9 +200,7 @@ export async function getAllBlogTemplate1LinksSanity(): Promise<
   }
 }
 
-// GROQ projection for the merged journal listing. Uses `select()` to derive
-// per-type href so page components don't need to know which schema an item
-// came from.
+// Both templates share category-based journal URLs.
 const JOURNAL_LIST_PROJECTION = `{
   _type,
   title,
@@ -194,12 +210,7 @@ const JOURNAL_LIST_PROJECTION = `{
   isFeatured,
   category,
   "image": coalesce(coverImage.asset->url, ""),
-  "imageAlt": coalesce(imageAlt, ""),
-  "href": select(
-    _type == "blog" => "/blogs/template-2/" + slug.current,
-    _type == "blogTemplate1" => "/blogs/" + slug.current,
-    "/blogs/" + slug.current
-  )
+  "imageAlt": coalesce(imageAlt, "")
 }`
 
 /**
@@ -233,11 +244,15 @@ export async function getJournalBlogsSanity({
 }): Promise<SanityJournalListItem[]> {
   try {
     const { featuredFilter, categoryFilter } = buildJournalFilters(featured, category)
-    return await client.fetch<SanityJournalListItem[]>(
+    const articles = await client.fetch<SanityJournalListItem[]>(
       `*[_type in ["blog", "blogTemplate1"] ${featuredFilter} ${categoryFilter}] | order(publishedDate desc) [$offset...$end]${JOURNAL_LIST_PROJECTION}`,
       { offset, end: offset + limit, category: category ?? "" },
       cacheOpts(60)
     )
+    return articles.map((article) => ({
+      ...article,
+      href: getJournalPath(article.slug, article.category),
+    }))
   } catch (error) {
     console.error("Error fetching Sanity journal blogs:", error)
     return []

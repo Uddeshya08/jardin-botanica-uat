@@ -96,9 +96,6 @@ export async function getProductContentByHandle(
       limit: 1,
     })
 
-    console.log("PRODUCT CONTENT RESPONSE")
-    console.log(response.items[0].fields)
-
     if (!response.items || response.items.length === 0) {
       console.warn(`No content found for product handle: ${productHandle}`)
       return null

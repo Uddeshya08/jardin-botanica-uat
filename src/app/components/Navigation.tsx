@@ -169,7 +169,10 @@ export function Navigation({
               return {
                 name: item.name,
                 href: isBodyHands ? "#" : item.href,
-                dropdown,
+                dropdown:
+                  (isBotanistsLab && !SHOW_MATERIAL_ARCHIVE_MENU) || !dropdown?.length
+                    ? undefined
+                    : dropdown,
               }
             })
         )
@@ -410,6 +413,7 @@ export function Navigation({
   const prefixCountryCode = (href: string | undefined): string => {
     if (!href || href === "#") return "#"
     if (href.startsWith("http")) return href
+    href = href.replace(/\/blogs\/?$/, "/journal")
     const countryCode = getCountryCode()
     if (href.startsWith(`/${countryCode}/`)) return href
     return href.startsWith("/") ? `/${countryCode}${href}` : `/${countryCode}/${href}`

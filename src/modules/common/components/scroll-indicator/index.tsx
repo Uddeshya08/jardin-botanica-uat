@@ -24,7 +24,8 @@ export default function ScrollIndicator() {
     pathname?.endsWith("/home-creations") ||
     pathname?.includes("/in/home-creations") ||
     pathname?.endsWith("/blogs") ||
-    pathname?.includes("/in/blogs")
+    pathname?.includes("/in/blogs") ||
+    pathname?.includes("/journal")
 
   // Check if we're on the BotanistLabPage
   const isBotanistLabPage = pathname?.includes("/the-lab")

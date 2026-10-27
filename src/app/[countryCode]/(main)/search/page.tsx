@@ -1,5 +1,6 @@
 import { getRegion } from "@lib/data/regions"
 import { searchProducts } from "@lib/data/search"
+import { getJournalBlogsSanity } from "@lib/sanity"
 import { notFound } from "next/navigation"
 import SearchResults from "./search-results"
 
@@ -28,6 +29,13 @@ export default async function SearchPage(props: Props) {
     countryCode: params.countryCode,
     limit: 12,
   })
+  const journalArticles = await getJournalBlogsSanity({ limit: 100 })
+  const normalizedQuery = query.toLowerCase()
+  const relatedArticles = journalArticles.filter((article) =>
+    [article.title, article.description, article.category].some((text) =>
+      text?.toLowerCase().includes(normalizedQuery)
+    )
+  )
 
   return (
     <SearchResults
@@ -35,6 +43,7 @@ export default async function SearchPage(props: Props) {
       searchResults={searchResults}
       region={region}
       countryCode={params.countryCode}
+      relatedArticles={relatedArticles}
     />
   )
 }
