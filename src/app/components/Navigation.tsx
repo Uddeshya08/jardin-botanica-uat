@@ -961,13 +961,13 @@ export function Navigation({
                                     {item.image && (
                                       <img
                                         src={item.image}
-                                        alt={item.name}
+                                        alt={item.name.replace(/\(Candle\b/g, "(candle")}
                                         className="w-16 h-16 object-contain"
                                       />
                                     )}
                                     <div className="flex-1 min-w-0">
                                       <h4 className="font-din-arabic text-black font-medium truncate">
-                                        {item.name}
+                                        {item.name.replace(/\(Candle\b/g, "(candle")}
                                       </h4>
                                       <p className="font-din-arabic text-black/70 text-sm">
                                         {convertToLocale({
@@ -1191,13 +1191,13 @@ export function Navigation({
                                     {item.image && (
                                       <img
                                         src={item.image}
-                                        alt={item.name}
+                                        alt={item.name.replace(/\(Candle\b/g, "(candle")}
                                         className="w-16 h-16 object-contain"
                                       />
                                     )}
                                     <div className="flex-1">
                                       <h4 className="font-din-arabic text-black font-medium">
-                                        {item.name}
+                                        {item.name.replace(/\(Candle\b/g, "(candle")}
                                       </h4>
                                       <p className="font-din-arabic text-black/70 text-sm">
                                         {convertToLocale({

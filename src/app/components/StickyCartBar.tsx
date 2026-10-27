@@ -746,9 +746,7 @@ export function StickyCartBar({
                           color: showGoToCart ? "#f97316" : "#545d4a",
                         }}
                       >
-                        {existingCartTotal >= shippingThresholdMinor
-                          ? "Cart qualifies for complimentary shipping"
-                          : "Order qualifies for complimentary shipping"}
+                        Order qualifies for complimentary shipping
                       </motion.p>
                     )}
                   </div>

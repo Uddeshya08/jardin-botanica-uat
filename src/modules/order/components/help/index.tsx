@@ -9,7 +9,7 @@ const Help = () => {
       <div className="text-base-regular my-2">
         <ul className="gap-y-2 flex flex-col">
           <li>
-            <LocalizedClientLink href="/contact">Contact</LocalizedClientLink>
+            <a href="https://www.jardinbotanica.com/in/help-and-faqs">Contact</a>
           </li>
           {/* <li>
             <LocalizedClientLink href="/contact">

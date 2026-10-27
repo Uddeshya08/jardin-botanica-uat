@@ -1,3 +1,4 @@
+import { getOrderStatus } from "@lib/util/order-status"
 import type { HttpTypes } from "@medusajs/types"
 import { getOrderReference } from "@lib/util/order-reference"
 
@@ -7,11 +8,7 @@ type OrderDetailsProps = {
 }
 
 const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
-  const formatStatus = (str: string) => {
-    const formatted = str.split("_").join(" ")
-
-    return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
-  }
+  const status = getOrderStatus(order.fulfillment_status)
 
   const formattedDate = new Date(order.created_at).toLocaleDateString("en-US", {
     year: "numeric",
@@ -51,19 +48,10 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
             <span className="text-xs uppercase tracking-wide text-black/60">Order status:</span>
             <span
-              className={`text-sm font-medium tracking-wide ${
-                order.fulfillment_status === "delivered"
-                  ? "text-green-600"
-                  : order.fulfillment_status === "shipped" ||
-                      order.fulfillment_status === "partially_shipped"
-                    ? "text-blue-600"
-                    : order.fulfillment_status === "canceled"
-                      ? "text-red-600"
-                      : "text-yellow-600"
-              }`}
+              className={`text-sm font-medium tracking-wide ${status.className}`}
               data-testid="order-status"
             >
-              {formatStatus(order.fulfillment_status || "not_fulfilled")}
+              {status.label}
             </span>
           </div>
         )}
