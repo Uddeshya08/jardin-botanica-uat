@@ -86,7 +86,8 @@ const PRIVACY_SECTIONS: PrivacySection[] = [
     number: "10",
     title: "Who We Share Personal Data With",
     content:
-      "We share personal data only as needed to run our business, including with: Website and hosting provider: Hostinger | Payment processor: Razorpay | Email/SMS service provider: Brevo |SMS and OTP verification provider: MSG91 | Shipping and logistics partners: Delhivery | Professional advisors and authorities where required by law (accountants, lawyers, regulators). We do not sell your personal data.",
+      'We share personal data only as needed to run our business, including with: Website and hosting provider: Hostinger | Payment processor: Razorpay | Email/SMS service provider: Brevo | SMS and OTP verification provider: MSG91 | Shipping and logistics partners: Delhivery | Professional advisors and authorities where required by law (accountants, lawyers, regulators). We do not sell your personal data.'
+    ,
   },
   {
     number: "11",
