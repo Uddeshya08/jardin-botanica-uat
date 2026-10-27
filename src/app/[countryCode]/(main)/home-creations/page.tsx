@@ -1,6 +1,6 @@
-import { formatProductSize } from "@lib/util/format-product-size"
 "use client"
 
+import { formatProductSize } from "@lib/util/format-product-size"
 import { getProductCategoryByHandle } from "@lib/data/contentful"
 import { getProductByHandle } from "@lib/data/products"
 import { HomeCreationsPage, type Product } from "app/components/HomeCreationsPage"
