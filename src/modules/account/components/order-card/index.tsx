@@ -1,4 +1,5 @@
 import { convertToLocale } from "@lib/util/money"
+import { getOrderReference } from "@lib/util/order-reference"
 import type { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -89,7 +90,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
       <div className="flex items-start justify-between gap-4 w-full sm:w-[60%]">
         <div className="flex flex-col">
           <div className="font-din-arabic text-base text-black tracking-wide mb-2">
-            #<span data-testid="order-display-id">{order.display_id}</span>
+            <span data-testid="order-display-id">{getOrderReference(order)}</span>
           </div>
           <span
             className="font-din-arabic text-sm text-black/50 tracking-wide"

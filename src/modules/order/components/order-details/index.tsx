@@ -1,4 +1,5 @@
 import type { HttpTypes } from "@medusajs/types"
+import { getOrderReference } from "@lib/util/order-reference"
 
 type OrderDetailsProps = {
   order: HttpTypes.StoreOrder
@@ -42,7 +43,7 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
           <span className="text-xs uppercase tracking-wide text-black/60">Order number:</span>
           <span className="text-sm text-black font-medium tracking-wide" data-testid="order-id">
-            #{order.display_id}
+            {getOrderReference(order)}
           </span>
         </div>
 

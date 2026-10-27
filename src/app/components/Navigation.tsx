@@ -593,7 +593,7 @@ export function Navigation({
           <div className="px-6 lg:px-12">
             <div className="flex justify-center">
               <p className="font-din-arabic text-xs tracking-wider whitespace-nowrap">
-                Complimentary shipping on orders above ₹2500
+                Complimentary shipping on all orders
               </p>
             </div>
           </div>

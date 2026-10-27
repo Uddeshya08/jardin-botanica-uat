@@ -258,7 +258,7 @@ export function StickyCartBar({
   const name = product?.title ?? "Product"
   const image = (Array.isArray(product?.images) && product!.images[0]?.url) || product?.thumbnail
 
-  const shippingThresholdMinor = 2500 // you appear to treat prices as whole rupees already
+  const shippingThresholdMinor = 0 // Complimentary shipping on all orders during the current offer.
 
   // Calculate total based on current state:
   // - If showing ritual suggestion: show only ritual product total
