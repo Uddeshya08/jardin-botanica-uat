@@ -169,7 +169,10 @@ export function Navigation({
               return {
                 name: item.name,
                 href: isBodyHands ? "#" : item.href,
-                dropdown,
+                dropdown:
+                  (isBotanistsLab && !SHOW_MATERIAL_ARCHIVE_MENU) || !dropdown?.length
+                    ? undefined
+                    : dropdown,
               }
             })
         )

@@ -10,7 +10,7 @@ import type { SanityAccordionBlock, SanityBlog } from "types/sanity-blog"
 
 /**
  * Template 2 — editorial single-article layout inspired by framacph.com/blogs/stories.
- * Centered narrative column, full-bleed image breaks, minimal metadata, "Also" related grid.
+ * Full-width narrative content, image breaks, minimal metadata, "Also" related grid.
  * Kept fully separate from SingleBlogTemplate so the live blog route is untouched.
  */
 
@@ -231,20 +231,12 @@ export const SingleBlogTemplate2 = ({
   atmosphereProducts = [],
 }: SingleBlogTemplate2Props) => {
   const [isScrolled, setIsScrolled] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
   const showJournalStoryGrid = blog?.slug === "on-wax-rooms-and-scent"
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50)
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768)
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
-    return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
   // Same theme tokens as the live template — font/colour/size untouched, only layout differs.
@@ -271,7 +263,9 @@ export const SingleBlogTemplate2 = ({
 
   const portableTextComponents: PortableTextComponents = {
     block: {
-      normal: ({ children }) => <p className="mb-6">{children}</p>,
+      normal: ({ children }) => (
+        <p style={{ marginBottom: "1.5rem", whiteSpace: "pre-line" }}>{children}</p>
+      ),
       h2: ({ children }) => (
         <h2
           className="mb-6 mt-4"
@@ -466,38 +460,6 @@ export const SingleBlogTemplate2 = ({
   const bylineDate = formatByline(blog.publishedDate)
   const bylineAuthor = blog.author?.name
 
-  // statementBlock, accordionBlock, and center-aligned images break out to a
-  // full-width row of their own. Everything else pairs up in plain document
-  // order — first block in a pair lands col 1, second lands col 2 — so a text
-  // block followed by an image reads text-left/image-right, and an image
-  // followed by text reads image-left/text-right, matching the zigzag straight
-  // from array order. Left/right on an imageBlock only styles how the image
-  // sits *inside* whichever column it lands in (see the imageBlock renderer) —
-  // it never moves the column itself, or pairing with neighbors breaks.
-  let contentRow = 1
-  let pendingCol = 0
-  const contentLayout = blog.content.map((block) => {
-    const isCenterImage = block._type === "imageBlock" && (block.alignment || "center") === "center"
-
-    if (block._type === "statementBlock" || block._type === "accordionBlock" || isCenterImage) {
-      if (pendingCol === 1) {
-        contentRow += 1
-        pendingCol = 0
-      }
-      const layout = { gridColumn: "1 / -1", gridRow: contentRow }
-      contentRow += 1
-      return layout
-    }
-
-    const layout = { gridColumn: pendingCol + 1, gridRow: contentRow }
-    pendingCol += 1
-    if (pendingCol === 2) {
-      pendingCol = 0
-      contentRow += 1
-    }
-    return layout
-  })
-
   return (
     <div className="bg-[#FEFDF3] min-h-screen overflow-x-hidden">
       <Navigation isScrolled={isScrolled} disableSticky={true} forceBlackText={true} />
@@ -595,10 +557,8 @@ export const SingleBlogTemplate2 = ({
         </div>
       </motion.div>
 
-      {/* Narrative body — zigzag two-column: each block alternates left/right down the page */}
-      <div
-        className={`${showJournalStoryGrid ? "w-full max-w-none px-6 md:px-12 lg:px-20" : "max-w-5xl px-6 md:px-4"} mx-auto`}
-      >
+      {/* Keep editorial blocks in a single full-width document flow. */}
+      <div className="w-full max-w-none px-6 md:px-12 lg:px-20 mx-auto">
         {!showJournalStoryGrid && (
           <motion.div
             className="mb-8"
@@ -620,31 +580,21 @@ export const SingleBlogTemplate2 = ({
           </motion.div>
         )}
 
-        <div
-          className={
-            showJournalStoryGrid
-              ? "flex flex-col gap-y-4"
-              : "grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 items-start"
-          }
+        <motion.div
+          data-testid="blog-template-2-content"
+          className="w-full"
           style={{
             fontFamily: "Georgia, serif",
             fontSize: "16px",
             lineHeight: "1.8",
             color: "#333",
           }}
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
         >
-          {blog.content.map((block, i) => (
-            <motion.div
-              key={block._key}
-              style={isMobile || showJournalStoryGrid ? undefined : contentLayout[i]}
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1 * i, duration: 0.6 }}
-            >
-              <PortableText value={[block]} components={portableTextComponents} />
-            </motion.div>
-          ))}
-        </div>
+          <PortableText value={blog.content} components={portableTextComponents} />
+        </motion.div>
       </div>
 
       {/* Featured Products — up to 3 tiles, editorially chosen per article in Sanity */}
