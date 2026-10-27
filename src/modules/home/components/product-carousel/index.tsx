@@ -1,6 +1,7 @@
 "use client"
 
 import { useSequentialCarousel } from "@lib/hooks/use-sequential-carousel"
+import { useProductMediaState } from "@lib/hooks/use-product-media-state"
 
 import { ImageWithFallback } from "app/components/figma/ImageWithFallback"
 import {
@@ -53,7 +54,8 @@ function ProductCard({
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const videoRef = React.useRef<HTMLVideoElement>(null)
-  const showAlternate = isImageHovered || autoAlternate
+  const media = useProductMediaState(product.hoverImage, product.video)
+  const showAlternate = media.state === "ready" && (isImageHovered || autoAlternate)
 
   const handleProductClick = () => {
     // Normalize slug to ensure it starts with /
@@ -100,6 +102,7 @@ function ProductCard({
       {/* Product Image */}
       <div
         className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] mb-4 md:mb-10"
+        data-carousel-media-state={media.state}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleProductClick}
@@ -116,13 +119,18 @@ function ProductCard({
               muted
               loop
               playsInline
+              preload="auto"
+              onLoadedData={media.onVideoLoaded}
+              onError={media.onError}
               className="w-full h-full object-cover"
             />
           ) : (
-            <ImageWithFallback
-              src={product.hoverImage}
+            <img
+              src={product.hoverImage || undefined}
               alt={`${product.name} alternate view`}
               className="w-full h-full object-cover"
+              onLoad={media.onImageLoad}
+              onError={media.onError}
             />
           )}
         </div>
@@ -229,6 +237,7 @@ export function ProductCarousel({
   const { toggleLedgerItem, isInLedger } = useLedger()
   const [api, setApi] = useState<CarouselApi>()
   const [hasInteracted, setHasInteracted] = useState(false)
+  const [sequencePaused, setSequencePaused] = useState(false)
   const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
   const [isPending, startTransition] = React.useTransition()
 
@@ -281,7 +290,7 @@ export function ProductCarousel({
     })
   }, [sourceProducts, countryCode])
 
-  const alternateImages = useSequentialCarousel(api, mergedProducts.length, !hasInteracted)
+  const alternateImages = useSequentialCarousel(api, mergedProducts.length, !hasInteracted, sequencePaused)
 
   useEffect(() => {
     if (!api) return
@@ -385,6 +394,8 @@ export function ProductCarousel({
       style={{ backgroundColor: "#edede2" }}
       onMouseDownCapture={() => setHasInteracted(true)}
       onTouchStartCapture={() => setHasInteracted(true)}
+      onPointerEnter={(event) => { if (event.pointerType !== "touch") setSequencePaused(true) }}
+      onPointerLeave={() => setSequencePaused(false)}
     >
       <motion.div
         initial={{ opacity: 0, y: 30 }}

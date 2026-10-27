@@ -1,6 +1,9 @@
 "use client"
 
 import { addToCartAction } from "@lib/data/cart-actions"
+import { useNativeProductCarousel } from "@lib/hooks/use-native-product-carousel"
+import { useProductMediaState } from "@lib/hooks/use-product-media-state"
+import { useSequentialCarousel } from "@lib/hooks/use-sequential-carousel"
 import { useCartItems } from "app/context/cart-items-context"
 import { type LedgerItem, useLedger } from "app/context/ledger-context"
 import { Heart } from "lucide-react"
@@ -114,6 +117,19 @@ export function HomeCreationsPage({
     }
     return products.filter((product) => product.subCategoryName === selectedFilter)
   }, [selectedFilter, products])
+
+  const firstProducts = filteredProducts.slice(0, 6)
+  const remainingProducts = filteredProducts.slice(6)
+  const firstRef = React.useRef<HTMLDivElement>(null)
+  const remainingRef = React.useRef<HTMLDivElement>(null)
+  const [sequencePaused, setSequencePaused] = useState(false)
+  const [hasInteracted, setHasInteracted] = useState(false)
+  const firstApi = useNativeProductCarousel(firstRef, firstProducts.length, firstProducts.map((product) => product.id).join(","))
+  const remainingApi = useNativeProductCarousel(remainingRef, remainingProducts.length, remainingProducts.map((product) => product.id).join(","))
+  const firstAlternate = useSequentialCarousel(firstApi, firstProducts.length, !hasInteracted, sequencePaused)
+  const remainingAlternate = useSequentialCarousel(remainingApi, remainingProducts.length, !hasInteracted, sequencePaused)
+
+  useEffect(() => { setHasInteracted(false) }, [selectedFilter])
 
   const categoryProductCounts = useMemo(() => {
     const counts: Record<string, number> = { all: products.length }
@@ -315,14 +331,20 @@ export function HomeCreationsPage({
       </section>
 
       {/* Products Grid - First Set */}
-      <section className="py-10 sm:py-14 lg:py-20">
+      <section className="py-10 sm:py-14 lg:py-20"
+        data-testid="home-creations-products"
+        onPointerEnter={(event) => { if (event.pointerType !== "touch") setSequencePaused(true) }}
+        onPointerLeave={() => setSequencePaused(false)}
+        onPointerDownCapture={() => setHasInteracted(true)}
+      >
         <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20">
-          <div className="scrollbar-hide flex snap-x snap-mandatory gap-x-2 overflow-x-auto md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-16 md:overflow-visible lg:grid-cols-3 lg:gap-y-20">
+          <div ref={firstRef} className="scrollbar-hide flex snap-x snap-mandatory gap-x-2 overflow-x-auto md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-16 md:overflow-visible lg:grid-cols-3 lg:gap-y-20">
             {filteredProducts.slice(0, 3).map((product, index) => (
               <ProductCard
                 key={product.id}
                 product={product}
                 index={index}
+                autoAlternate={firstAlternate.has(index)}
                 isInLedger={isInLedger}
                 handleToggleLedger={handleToggleLedger}
                 handleAddToCart={handleAddToCart}
@@ -336,6 +358,7 @@ export function HomeCreationsPage({
                 key={product.id}
                 product={product}
                 index={index + 3}
+                autoAlternate={firstAlternate.has(index + 3)}
                 isInLedger={isInLedger}
                 handleToggleLedger={handleToggleLedger}
                 handleAddToCart={handleAddToCart}
@@ -363,12 +386,17 @@ export function HomeCreationsPage({
 
             {/* Remaining Products */}
             {filteredProducts.length > 6 && (
-              <div className="scrollbar-hide mb-16 flex snap-x snap-mandatory gap-x-2 overflow-x-auto md:mb-24 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-16 md:overflow-visible lg:mb-32 lg:grid-cols-3 lg:gap-y-20">
+              <div ref={remainingRef}
+                onPointerEnter={(event) => { if (event.pointerType !== "touch") setSequencePaused(true) }}
+                onPointerLeave={() => setSequencePaused(false)}
+                onPointerDownCapture={() => setHasInteracted(true)}
+                className="scrollbar-hide mb-16 flex snap-x snap-mandatory gap-x-2 overflow-x-auto md:mb-24 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-16 md:overflow-visible lg:mb-32 lg:grid-cols-3 lg:gap-y-20">
                 {filteredProducts.slice(6).map((product, index) => (
                   <ProductCard
                     key={product.id}
                     product={product}
                     index={index + 6}
+                    autoAlternate={remainingAlternate.has(index)}
                     isInLedger={isInLedger}
                     handleToggleLedger={handleToggleLedger}
                     handleAddToCart={handleAddToCart}
@@ -396,6 +424,7 @@ export function HomeCreationsPage({
 interface ProductCardProps {
   product: Product
   index: number
+  autoAlternate: boolean
   isInLedger: (id: string) => boolean
   handleToggleLedger: (product: Product) => void
   handleAddToCart: (product: Product) => void
@@ -406,6 +435,7 @@ interface ProductCardProps {
 function ProductCard({
   product,
   index,
+  autoAlternate,
   isInLedger,
   handleToggleLedger,
   handleAddToCart,
@@ -413,6 +443,8 @@ function ProductCard({
   cartItems,
 }: ProductCardProps) {
   const [isImageHovered, setIsImageHovered] = useState(false)
+  const media = useProductMediaState(product.hoverImage)
+  const showAlternate = media.state === "ready" && (isImageHovered || autoAlternate)
   const isRecentlyAdded = recentlyAddedProducts.has(product.id)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const productSlug = getProductSlug(product.name)
@@ -427,6 +459,7 @@ function ProductCard({
 
   return (
     <motion.div
+      data-auto-alternate={autoAlternate}
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
@@ -437,19 +470,22 @@ function ProductCard({
       <Link href={`/products/${productSlug}`}>
         <div
           className="relative mb-3 aspect-[3/4] w-full cursor-pointer overflow-hidden md:mb-6"
+          data-carousel-media-state={media.state}
           onMouseEnter={() => setIsImageHovered(true)}
           onMouseLeave={() => setIsImageHovered(false)}
         >
           {/* Hover Image - Behind */}
           <div
             className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-            style={{ opacity: isImageHovered ? 1 : 0 }}
+            style={{ opacity: showAlternate ? 1 : 0 }}
           >
             {product.hoverImage && (
-              <ImageWithFallback
+              <img
                 src={product.hoverImage}
                 alt={`${product.name} alternate view`}
                 className="w-full h-full object-cover"
+                onLoad={media.onImageLoad}
+                onError={media.onError}
               />
             )}
           </div>
@@ -457,7 +493,7 @@ function ProductCard({
           {/* Main Image - On Top */}
           <div
             className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-            style={{ opacity: isImageHovered && product.hoverImage ? 0 : 1 }}
+            style={{ opacity: showAlternate ? 0 : 1 }}
           >
             <ImageWithFallback
               src={product.image || ""}
