@@ -53,7 +53,8 @@ interface FullWidthFeature {
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1632118588340-c4c7a674c707?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncmVlbmhvdXNlJTIwYm90YW5pY2FsJTIwdmludGFnZXxlbnwxfHx8fDE3NjIwMDk0Mjh8MA&ixlib=rb-4.1.0&q=80&w=1920&utm_source=figma&utm_medium=referral"
 
-const EDITORIAL_IMAGE = "/assets/99b7e68b7e2b2dbbfbf85a52e8237ce212b58258.png"
+const FRAGRANCE_GUIDE_IMAGE = "/assets/candle-fragrance-guide.webp"
+const FRAGRANCE_ARCHITECTURE_IMAGE = "/assets/fragrance-architecture.webp"
 
 const fullWidthFeatures: FullWidthFeature[] = [
   {
@@ -625,8 +626,8 @@ function EditorialBlogSection({ countryCode }: { countryCode?: string }) {
           className="absolute inset-0 w-full h-full z-0"
         >
           <ImageWithFallback
-            src={EDITORIAL_IMAGE}
-            alt="Creating atmosphere through fragrance"
+            src={FRAGRANCE_GUIDE_IMAGE}
+            alt="Traditional apothecary drawers and botanical ingredients"
             className="w-full h-full object-cover"
           />
         </motion.div>
@@ -953,10 +954,11 @@ function HomeFragranceRitualSection() {
               whileInView={{ scale: 1 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 1.2, ease: "easeOut" }}
+              className="absolute inset-0"
             >
               <ImageWithFallback
-                src={EDITORIAL_IMAGE}
-                alt="Home fragrance ritual"
+                src={FRAGRANCE_ARCHITECTURE_IMAGE}
+                alt="Lavender plants beside weathered wooden boards"
                 className="w-full h-full object-cover"
               />
             </motion.div>

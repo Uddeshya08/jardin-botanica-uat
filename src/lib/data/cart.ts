@@ -76,7 +76,9 @@ export async function getOrSetCart(countryCode: string) {
     ...(await getAuthHeaders()),
   }
 
-  if (!cart) {
+  // An emptied cart starts a new purchase. Do not carry its shipping method,
+  // COD surcharge or payment sessions into newly added products.
+  if (!cart || cart.items?.length === 0) {
     const cartResp = await sdk.store.cart.create({ region_id: region.id }, {}, headers)
     cart = cartResp.cart
 
@@ -348,6 +350,11 @@ export async function deleteLineItem(lineId: string) {
       method: "DELETE",
       headers,
     })
+
+    const remainingCart = await retrieveCart(cartId)
+    if (remainingCart?.items?.length === 0) {
+      await removeCartId()
+    }
 
     await revalidateCartShippingState()
   } catch (error) {

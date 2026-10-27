@@ -1,4 +1,5 @@
 "use client"
+import { formatProductSize } from "@lib/util/format-product-size"
 
 import { useSequentialCarousel } from "@lib/hooks/use-sequential-carousel"
 import { useProductMediaState } from "@lib/hooks/use-product-media-state"
@@ -270,11 +271,10 @@ export function ProductCarousel({
       const categories = ((p as any).categories || []) as { name?: string }[]
       const categoryName = categories[categories.length - 1]?.name || categories[0]?.name || ""
 
-      const sizeLabel = categoryName
-        ? quantityLabel
-          ? `${categoryName} · ${quantityLabel}`
-          : categoryName
-        : quantityLabel || "Default"
+      const sizeLabel = formatProductSize(
+        categoryName ? quantityLabel : variant?.title || quantityLabel || "Default",
+        categoryName
+      )
 
       return {
         id: p.id,

@@ -5,8 +5,8 @@ type SummaryItem = {
 
 export default function formatSummaryVariant(item: SummaryItem): string {
   const categoryName = item.product?.categories?.at(-1)?.name?.trim()
-  const category = categoryName?.toLowerCase() === "candles"
-    ? "Candle"
+  const category = /^candles?$/i.test(categoryName || "")
+    ? "candle"
     : categoryName
       ? categoryName.charAt(0).toUpperCase() + categoryName.slice(1)
       : ""

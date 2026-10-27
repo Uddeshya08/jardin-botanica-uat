@@ -1,3 +1,4 @@
+import { formatProductSize } from "@lib/util/format-product-size"
 "use client"
 
 import { getProductCategoryByHandle } from "@lib/data/contentful"
@@ -97,6 +98,8 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string): Pr
   if (!size && variants.length > 0) {
     size = variants[0].size
   }
+
+  size = formatProductSize(size, subCategoryName)
 
   return {
     id: medusaProduct.id,
