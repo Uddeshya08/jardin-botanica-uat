@@ -1,6 +1,6 @@
 "use client"
 
-import { PRODUCT_FADE_MS, useSequentialCarousel } from "@lib/hooks/use-sequential-carousel"
+import { useSequentialCarousel } from "@lib/hooks/use-sequential-carousel"
 
 import { ImageWithFallback } from "app/components/figma/ImageWithFallback"
 import {
@@ -41,7 +41,6 @@ function ProductCard({
   isAddedToCart,
   isInLedger,
   autoAlternate,
-  manualHover,
 }: {
   product: Product
   onAddToCart: () => void
@@ -49,28 +48,12 @@ function ProductCard({
   isAddedToCart: boolean
   isInLedger: boolean
   autoAlternate: boolean
-  manualHover: boolean
 }) {
   const router = useRouter()
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const videoRef = React.useRef<HTMLVideoElement>(null)
-  const hoverTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const [alternateReady, setAlternateReady] = useState(false)
-  const wantsAlternate = manualHover ? isImageHovered : autoAlternate
-  const showAlternate = alternateReady && wantsAlternate
-
-  useEffect(() => {
-    setAlternateReady(false)
-  }, [product.hoverImage, product.video])
-
-  const cancelHover = () => {
-    if (hoverTimer.current !== undefined) clearTimeout(hoverTimer.current)
-    hoverTimer.current = undefined
-  }
-  useEffect(() => () => {
-    if (hoverTimer.current !== undefined) clearTimeout(hoverTimer.current)
-  }, [])
+  const showAlternate = isImageHovered || autoAlternate
 
   const handleProductClick = () => {
     // Normalize slug to ensure it starts with /
@@ -79,31 +62,35 @@ function ProductCard({
   }
 
   const handleMouseEnter = () => {
-    cancelHover()
     if (product.hoverImage || product.video) {
-      hoverTimer.current = setTimeout(() => setIsImageHovered(true), 120)
+      setIsImageHovered(true)
+    }
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0
+      videoRef.current.play().catch((e) => {
+        // Auto-play was prevented
+        console.warn("Video autoplay prevented:", e)
+      })
     }
   }
 
   const handleMouseLeave = () => {
-    cancelHover()
     setIsImageHovered(false)
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+    }
   }
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-    if (wantsAlternate) {
-      video.play().catch(() => {})
-      return
-    }
-    // Keep the outgoing video frame stable until the primary image covers it.
-    const timer = setTimeout(() => {
+    if (showAlternate) video.play().catch(() => {})
+    else {
       video.pause()
       video.currentTime = 0
-    }, PRODUCT_FADE_MS)
-    return () => clearTimeout(timer)
-  }, [wantsAlternate, product.video])
+    }
+  }, [showAlternate])
 
   return (
     <div
@@ -112,15 +99,15 @@ function ProductCard({
     >
       {/* Product Image */}
       <div
-        className="home-product-media relative w-full overflow-hidden cursor-pointer aspect-[3/4] mb-4 md:mb-10"
-        data-alternate-ready={alternateReady}
-        onPointerEnter={(event) => { if (event.pointerType !== "touch") handleMouseEnter() }}
-        onPointerLeave={handleMouseLeave}
+        className="relative w-full overflow-hidden cursor-pointer aspect-[3/4] mb-4 md:mb-10"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         onClick={handleProductClick}
       >
         {/* Hover Media - Video or Image - Behind */}
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+          style={{ opacity: showAlternate ? 1 : 0 }}
         >
           {product.video ? (
             <video
@@ -129,33 +116,20 @@ function ProductCard({
               muted
               loop
               playsInline
-              preload="auto"
-              poster={product.image}
-              onLoadedData={() => setAlternateReady(true)}
-              onError={() => setAlternateReady(false)}
               className="w-full h-full object-cover"
             />
           ) : (
-            <img
-              src={product.hoverImage || undefined}
+            <ImageWithFallback
+              src={product.hoverImage}
               alt={`${product.name} alternate view`}
               className="w-full h-full object-cover"
-              decoding="async"
-              onLoad={(event) => {
-                const image = event.currentTarget
-                const source = image.currentSrc
-                image.decode().then(() => {
-                  if (image.currentSrc === source) setAlternateReady(true)
-                }).catch(() => setAlternateReady(false))
-              }}
-              onError={() => setAlternateReady(false)}
             />
           )}
         </div>
 
         {/* Main Image - On Top */}
         <div
-          className="absolute inset-0 pointer-events-none home-product-image-fade"
+          className="absolute inset-0 transition-opacity duration-700 ease-in-out"
           style={{
             opacity: showAlternate && (product.hoverImage || product.video) ? 0 : 1,
           }}
@@ -255,7 +229,6 @@ export function ProductCarousel({
   const { toggleLedgerItem, isInLedger } = useLedger()
   const [api, setApi] = useState<CarouselApi>()
   const [hasInteracted, setHasInteracted] = useState(false)
-  const [manualHover, setManualHover] = useState(false)
   const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<Set<string>>(new Set())
   const [isPending, startTransition] = React.useTransition()
 
@@ -308,7 +281,7 @@ export function ProductCarousel({
     })
   }, [sourceProducts, countryCode])
 
-  const alternateImages = useSequentialCarousel(api, mergedProducts.length, !hasInteracted && !manualHover)
+  const alternateImages = useSequentialCarousel(api, mergedProducts.length, !hasInteracted)
 
   useEffect(() => {
     if (!api) return
@@ -412,8 +385,6 @@ export function ProductCarousel({
       style={{ backgroundColor: "#edede2" }}
       onMouseDownCapture={() => setHasInteracted(true)}
       onTouchStartCapture={() => setHasInteracted(true)}
-      onPointerEnter={(event) => { if (event.pointerType !== "touch") setManualHover(true) }}
-      onPointerLeave={() => setManualHover(false)}
     >
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -589,7 +560,6 @@ export function ProductCarousel({
                     isAddedToCart={recentlyAddedProducts.has(product.id)}
                     isInLedger={isInLedger(product.medusaId || product.id)}
                     autoAlternate={alternateImages.has(index)}
-                    manualHover={manualHover}
                   />
                 </CarouselItem>
               ))}
