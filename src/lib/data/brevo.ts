@@ -16,7 +16,13 @@ export async function subscribeToNewsletter(
 export async function subscribeToEarlyAccess(
   email: string
 ): Promise<{ success: boolean; message: string }> {
-  return subscribeToList(email, undefined, "7")
+  const result = await subscribeToList(email, undefined, "7")
+  return result.success
+    ? {
+        success: true,
+        message: "You're on the list. We'll be in touch when early access to the Botanist Hand Ritual begins.",
+      }
+    : result
 }
 
 async function subscribeToList(

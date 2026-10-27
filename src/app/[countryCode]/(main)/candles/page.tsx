@@ -3,7 +3,6 @@
 import { addToCartAction } from "@lib/data/cart-actions"
 import { getProductCategoryByHandle } from "@lib/data/contentful"
 import { useNewsletterSubscription } from "@lib/hooks/use-newsletter-subscription"
-import { useSequentialCarousel } from "@lib/hooks/use-sequential-carousel"
 import { getProductByHandle } from "@lib/data/products"
 import { ImageWithFallback } from "app/components/figma/ImageWithFallback"
 import { Navigation } from "app/components/Navigation"
@@ -266,30 +265,24 @@ const MobileProductCard = ({
 const ProductCard = ({
   src,
   label,
-  hoverSrc,
   url,
   index,
   productId,
   price,
   variantId,
   countryCode,
-  autoAlternate,
 }: {
   src: string
   label: string
-  hoverSrc?: string
   url?: string
   index: number
   productId: string
   price: number
   variantId?: string
   countryCode: string
-  autoAlternate: boolean
 }) => {
   const { toggleLedgerItem, isInLedger } = useLedger()
   const { cartItems, handleCartUpdate } = useCartItems()
-  const [isImageHovered, setIsImageHovered] = useState(false)
-  const showAlternate = isImageHovered || autoAlternate
   const [isRecentlyAdded, setIsRecentlyAdded] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const isItemInLedger = isInLedger(productId)
@@ -393,7 +386,6 @@ const ProductCard = ({
     <div
       className="group flex flex-col w-full mx-auto"
       style={{ width: "364px", minHeight: "455px" }}
-      data-auto-alternate={autoAlternate}
     >
       {/* Product Image */}
       {url ? (
@@ -401,25 +393,8 @@ const ProductCard = ({
           <div
             className="relative w-full overflow-hidden cursor-pointer"
             style={{ aspectRatio: "4/5", marginBottom: "1.5rem" }}
-            onMouseEnter={() => setIsImageHovered(true)}
-            onMouseLeave={() => setIsImageHovered(false)}
           >
-            {/* Hover Image - Behind */}
-            {hoverSrc && (
-              <div className="absolute inset-0">
-                <ImageWithFallback
-                  src={hoverSrc}
-                  alt={`${label} alternate view`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-
-            {/* Main Image - On Top */}
-            <div
-              className="absolute inset-0 product-image-fade"
-              style={{ opacity: showAlternate && hoverSrc ? 0 : 1 }}
-            >
+            <div className="absolute inset-0">
               <ImageWithFallback
                 src={src}
                 alt={label || "Product"}
@@ -446,28 +421,8 @@ const ProductCard = ({
         <div
           className="relative w-full overflow-hidden cursor-pointer"
           style={{ aspectRatio: "3/4", marginBottom: "1.5rem" }}
-          onMouseEnter={() => setIsImageHovered(true)}
-          onMouseLeave={() => setIsImageHovered(false)}
         >
-          {/* Hover Image - Behind */}
-          <div
-            className="absolute inset-0 product-image-fade"
-            style={{ opacity: showAlternate ? 1 : 0 }}
-          >
-            {hoverSrc && (
-              <ImageWithFallback
-                src={hoverSrc}
-                alt={`${label} alternate view`}
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-
-          {/* Main Image - On Top */}
-          <div
-            className="absolute inset-0 product-image-fade"
-            style={{ opacity: showAlternate && hoverSrc ? 0 : 1 }}
-          >
+          <div className="absolute inset-0">
             <ImageWithFallback
               src={src}
               alt={label || "Product"}
@@ -556,12 +511,10 @@ const BannerProductCard = ({
   item,
   index,
   countryCode,
-  autoAlternate,
 }: {
   item: CandlesCollectionItem
   index: number
   countryCode: string
-  autoAlternate: boolean
 }) => {
   const router = useRouter()
   const { cartItems, handleCartUpdate } = useCartItems() // Added useCartItems
@@ -682,7 +635,6 @@ const BannerProductCard = ({
       onClick={handleProductClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      data-auto-alternate={autoAlternate}
     >
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 overflow-hidden">
@@ -692,17 +644,7 @@ const BannerProductCard = ({
           transition={{ duration: 1.2, ease: "easeOut" }}
           style={{ willChange: "transform" }}
         >
-          {item.hoverSrc && (
-            <ImageWithFallback
-              src={item.hoverSrc}
-              alt={`${item.label} alternate view`}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          )}
-          <div
-            className="absolute inset-0 product-image-fade"
-            style={{ opacity: (autoAlternate || isHovered) && item.hoverSrc ? 0 : 1 }}
-          >
+          <div className="absolute inset-0">
             <ImageWithFallback src={item.src} alt={item.label} className="w-full h-full object-cover" />
           </div>
         </motion.div>
@@ -716,24 +658,6 @@ const BannerProductCard = ({
       <div className="relative z-10 flex flex-col justify-between h-full p-6 md:p-8 lg:p-12 text-white">
         {/* Top Text Section */}
         <div className="mt-auto mb-6 md:mb-8">
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xs md:text-sm font-normal mb-2 md:mb-3 tracking-wide opacity-90 uppercase"
-            style={{
-              fontFamily: "system-ui, -apple-system, sans-serif",
-              letterSpacing: "0.05em",
-              fontSize: "8px",
-            }}
-          >
-            {positionInGroup === 0
-              ? "MODERN LIGHTING"
-              : positionInGroup === 1
-                ? "CANDLES & REED DIFFUSERS"
-                : "GLOBALLY AWARDED"}
-          </motion.p>
-
           <motion.h3
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -806,8 +730,23 @@ const Candles = () => {
   const [bannerCarouselApi, setBannerCarouselApi] = useState<CarouselApi>()
   const [bannerCurrent, setBannerCurrent] = useState(0)
   const [hasCarouselInteracted, setHasCarouselInteracted] = useState(false)
-  const desktopAlternateImages = useSequentialCarousel(carouselApi, candlesCollection.length, !hasCarouselInteracted)
-  const mobileAlternateImages = useSequentialCarousel(bannerCarouselApi, candlesCollection.length, !hasCarouselInteracted)
+  useEffect(() => {
+    if (hasCarouselInteracted || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+
+    const timer = window.setInterval(() => {
+      if (document.hidden) return
+
+      for (const api of [carouselApi, bannerCarouselApi]) {
+        if (!api || api.scrollSnapList().length < 2) continue
+        const bounds = api.rootNode().getBoundingClientRect()
+        if (!bounds.width || bounds.bottom <= 0 || bounds.top >= window.innerHeight) continue
+
+        api.scrollTo(api.canScrollNext() ? api.selectedScrollSnap() + 1 : 0)
+      }
+    }, 5000)
+
+    return () => window.clearInterval(timer)
+  }, [carouselApi, bannerCarouselApi, hasCarouselInteracted])
   const { email, setEmail, message, isSuccess, isPending, handleSubmit } =
     useNewsletterSubscription()
 
@@ -897,8 +836,7 @@ const Candles = () => {
 
             return {
               label: product.title,
-              src: product.images?.[0]?.url || product.thumbnail || "",
-              hoverSrc: product.images?.[1]?.url || undefined,
+              src: product.images?.[1]?.url || product.images?.[0]?.url || product.thumbnail || "",
               url: `/products/${product.handle}`,
               order: index,
               isActive: true,
@@ -917,11 +855,10 @@ const Candles = () => {
     fetchCandlesCollection()
   }, [countryCode])
 
-  // Transform collection items for desktop products view (with hover images)
+  // Use the same static product image on desktop and mobile.
   const products = candlesCollection.map((item) => ({
     src: item.src,
     label: item.label,
-    hoverSrc: item.hoverSrc,
     url: item.url,
     price: item.price,
     variantId: item.variantId,
@@ -1246,7 +1183,7 @@ const Candles = () => {
                 className="w-full"
               >
                 <CarouselContent className="candles-carousel-content -ml-0">
-                  {products.map(({ src, label, hoverSrc, url, price, variantId }, i) => {
+                  {products.map(({ src, label, url, price, variantId }, i) => {
                     const productId = url || label.toLowerCase().replace(/\s+/g, "-")
                     return (
                       <CarouselItem key={i} className="candles-carousel-item pl-0">
@@ -1254,13 +1191,11 @@ const Candles = () => {
                           index={i}
                           src={src}
                           label={label}
-                          hoverSrc={hoverSrc}
                           url={url}
                           productId={productId}
                           price={price || 0}
                           variantId={variantId}
                           countryCode={countryCode}
-                          autoAlternate={desktopAlternateImages.has(i)}
                         />
                       </CarouselItem>
                     )
@@ -1380,7 +1315,7 @@ const Candles = () => {
                     ? // Mobile: One product per slide
                       candlesCollection.map((item, index) => (
                         <CarouselItem key={index} className="banner-carousel-item">
-                          <BannerProductCard item={item} index={index} countryCode={countryCode} autoAlternate={mobileAlternateImages.has(index)} />
+                          <BannerProductCard item={item} index={index} countryCode={countryCode} />
                         </CarouselItem>
                       ))
                     : // Desktop: Groups of 3 products
@@ -1395,7 +1330,6 @@ const Candles = () => {
                                     item={item}
                                     index={globalIndex}
                                     countryCode={countryCode}
-                                    autoAlternate={mobileAlternateImages.has(groupIndex)}
                                   />
                                 </div>
                               )

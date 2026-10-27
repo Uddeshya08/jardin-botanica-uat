@@ -103,23 +103,19 @@ const Addresses = ({
       // Validate before persisting the address to avoid saving incomplete edits.
       const pincode = addressData.shipping_address.postal_code
 
-      if (!pincode) {
-        setSubmitError("Postal code is required")
+      if (!addressData.shipping_address.first_name.trim() ||
+          !addressData.shipping_address.address_1.trim() ||
+          !addressData.shipping_address.city.trim() ||
+          !addressData.shipping_address.province.trim() ||
+          !addressData.shipping_address.country_code.trim() ||
+          !pincode) {
+        setSubmitError("Please enter your complete delivery address to continue.")
         setIsSubmitting(false)
         return
       }
 
       if (addressData.shipping_address.country_code === "in" && !/^[1-9]\d{5}$/.test(pincode)) {
         setSubmitError("Please enter a valid 6-digit PIN code")
-        setIsSubmitting(false)
-        return
-      }
-
-      if (!addressData.shipping_address.first_name.trim() ||
-          !addressData.shipping_address.address_1.trim() ||
-          !addressData.shipping_address.city.trim() ||
-          !addressData.shipping_address.province.trim()) {
-        setSubmitError("Please complete your shipping name, address, city and state")
         setIsSubmitting(false)
         return
       }

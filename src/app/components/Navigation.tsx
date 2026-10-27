@@ -25,6 +25,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 // re-entry.
 let hasPlayedNavIntro = false
 
+// Temporary menu switches; pages and Contentful links remain available.
+const SHOW_MATERIAL_ARCHIVE_MENU = false
+const ENABLE_BODY_HANDS_ALL_PRODUCTS = false
+
 interface DropdownItem {
   label: string
   href: string
@@ -124,10 +128,15 @@ export function Navigation({
                 item.name.toLowerCase().includes("body") && item.name.toLowerCase().includes("hand")
               const contentfulDropdown = item.dropdown
                 ?.filter(
-                  (d) => !(item.name === "HOME CREATIONS" && d.label?.toLowerCase() === "diffuser")
+                  (d) =>
+                    !(item.name === "HOME CREATIONS" && d.label?.toLowerCase() === "diffuser") &&
+                    !(!SHOW_MATERIAL_ARCHIVE_MENU && isBotanistsLab &&
+                      (d.href.includes("material-archive") || d.label.trim().toLowerCase() === "material archive"))
                 )
                 .map((d) => {
-                  const label = d.label.toLowerCase()
+                  const label = d.label.trim().toLowerCase()
+                  const disableAllProducts =
+                    !ENABLE_BODY_HANDS_ALL_PRODUCTS && isBodyHands && label === "all products"
                   const comingSoon =
                     isBodyHands &&
                     ((label.includes("cleanser") && label.includes("exfoliant")) ||
@@ -135,7 +144,7 @@ export function Navigation({
 
                   return {
                     label: d.label,
-                    href: comingSoon ? "#" : d.href,
+                    href: comingSoon || disableAllProducts ? "#" : d.href,
                     image: d.image,
                     titleContent: d.titleContent,
                     comingSoon,
@@ -144,6 +153,7 @@ export function Navigation({
               const dropdown = isBotanistsLab ? (contentfulDropdown ?? []) : contentfulDropdown
 
               if (
+                SHOW_MATERIAL_ARCHIVE_MENU &&
                 isBotanistsLab &&
                 dropdown &&
                 !dropdown.some((dropdownItem) => dropdownItem.href.includes("material-archive"))
