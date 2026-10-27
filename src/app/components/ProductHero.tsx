@@ -163,7 +163,12 @@ export function ProductHero({
   const { isLoggedIn } = useAuth()
   const [showLoginDialog, setShowLoginDialog] = useState(false)
   const [quantity, setQuantity] = useState(1)
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const initialImageIndex = (product.images?.filter((image) => image.url).length ?? 0) > 1 ? 1 : 0
+  const [currentImageIndex, setCurrentImageIndex] = useState(initialImageIndex)
+
+  useEffect(() => {
+    setCurrentImageIndex(initialImageIndex)
+  }, [product.id, initialImageIndex])
   const [isAddedToCart, setIsAddedToCart] = useState(false)
   const [adding, setAdding] = useState(false)
   const [uiError, setUiError] = useState<string | null>(null)

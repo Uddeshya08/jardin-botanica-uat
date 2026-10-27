@@ -726,13 +726,13 @@ const ShippingAddress = ({
                 onClick={async () => {
                   // Validate required fields
                   if (
-                    !newAddressData.name ||
-                    !newAddressData.addressLine1 ||
-                    !newAddressData.city ||
-                    !newAddressData.state ||
-                    !newAddressData.pincode
+                    !newAddressData.name.trim() ||
+                    !newAddressData.addressLine1.trim() ||
+                    !newAddressData.city.trim() ||
+                    !newAddressData.state.trim() ||
+                    !newAddressData.pincode.trim()
                   ) {
-                    toast.error("Please fill in all required fields")
+                    toast.error("Please enter your complete delivery address to continue.")
                     return
                   }
 

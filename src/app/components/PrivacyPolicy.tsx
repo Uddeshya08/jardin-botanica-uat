@@ -50,7 +50,7 @@ const PRIVACY_SECTIONS: PrivacySection[] = [
     number: "4",
     title: "Why We Collect and Use Personal Data",
     content:
-      "We use your personal data to: Process orders, payments, deliveries, returns, and refunds | Communicate with you about your order (confirmations, shipping updates, service messages) | Provide customer support and resolve issues | Send marketing communications if you opt in (email/SMS), and measure their performance | Maintain site security, prevent fraud, and protect our business and customers | Improve our Site, products, and customer experience (analytics and performance) | Comply with applicable laws, regulations, and lawful requests",
+      "We use your personal data to: Process orders, payments, deliveries, returns, and refunds | Communicate with you about your order (confirmations, shipping updates, service messages) | Provide customer support and resolve issues | Send marketing communications if you opt in (email/SMS), and measure their performance | Maintain site security, prevent fraud, and protect our business and customers | Improve our Site, products, and customer experience (analytics and performance) | Comply with applicable laws, regulations, and lawful requests | Verify phone numbers for cash on delivery orders, confirm order authenticity, and help prevent fraudulent or unsuccessful deliveries."
   },
   {
     number: "5",
@@ -72,9 +72,9 @@ const PRIVACY_SECTIONS: PrivacySection[] = [
   },
   {
     number: "8",
-    title: "Email / SMS / Transactional Communications (Brevo)",
+    title: "Email / SMS / Transactional Communications (Brevo and MSG91)",
     content:
-      "We use Brevo to send: Transactional messages (order confirmations, shipping updates, service emails) | Marketing emails (if you opt in) | SMS/WhatsApp communications (only if enabled and if you opt in, where required). Brevo may process your contact details and engagement data (e.g., email opens/clicks) so we can deliver messages and improve communication. Brevo privacy policy: https://www.brevo.com/legal/privacypolicy/",
+      "We use Brevo to send transactional emails, including order confirmations, shipping updates, and service communications, as well as marketing emails where you have opted in. Brevo may process your contact details and email engagement data, such as opens and clicks, to help us deliver and improve these communications.| We use MSG91 to send one-time passwords (OTPs) via SMS for phone number verification, including verification of cash on delivery orders. Your phone number and relevant verification information may be processed by MSG91 for this purpose. | OTP verification messages are transactional and do not constitute consent to receive marketing communications. | Brevo Privacy Policy: https://www.brevo.com/legal/privacypolicy | MSG91 Privacy Policy: https://msg91.com/privacy-policy ",
   },
   {
     number: "9",
@@ -86,7 +86,7 @@ const PRIVACY_SECTIONS: PrivacySection[] = [
     number: "10",
     title: "Who We Share Personal Data With",
     content:
-      "We share personal data only as needed to run our business, including with: Website and hosting provider: Hostinger | Payment processor: Razorpay | Email/SMS service provider: Brevo | Shipping and logistics partners: Delhivery | Professional advisors and authorities where required by law (accountants, lawyers, regulators). We do not sell your personal data.",
+      "We share personal data only as needed to run our business, including with: Website and hosting provider: Hostinger | Payment processor: Razorpay | Email/SMS service provider: Brevo |SMS and OTP verification provider: MSG91 | Shipping and logistics partners: Delhivery | Professional advisors and authorities where required by law (accountants, lawyers, regulators). We do not sell your personal data.",
   },
   {
     number: "11",
