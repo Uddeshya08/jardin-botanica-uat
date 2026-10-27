@@ -138,7 +138,7 @@ export function JournalSection({ blogs, countryCode, content }: JournalSectionPr
             viewport={{ once: true }}
             className="text-center px-6"
           >
-            <Link href={countryCode ? `/${countryCode}/blogs` : "/blogs"}>
+            <Link href={countryCode ? `/${countryCode}/journal` : "/journal"}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

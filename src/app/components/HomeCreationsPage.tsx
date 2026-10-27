@@ -647,7 +647,7 @@ function EditorialBlogSection({ countryCode }: { countryCode?: string }) {
               familiar rooms into spaces that feel entirely your own.
             </motion.p>
 
-            <Link href={`/${countryCode || "in"}/blogs/template-2/on-wax-rooms-and-scent`}>
+            <Link href={`/${countryCode || "in"}/journal/spaces/on-wax-rooms-and-scent-home-fragrance-guide`}>
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}

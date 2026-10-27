@@ -413,6 +413,7 @@ export function Navigation({
   const prefixCountryCode = (href: string | undefined): string => {
     if (!href || href === "#") return "#"
     if (href.startsWith("http")) return href
+    href = href.replace(/\/blogs\/?$/, "/journal")
     const countryCode = getCountryCode()
     if (href.startsWith(`/${countryCode}/`)) return href
     return href.startsWith("/") ? `/${countryCode}${href}` : `/${countryCode}/${href}`

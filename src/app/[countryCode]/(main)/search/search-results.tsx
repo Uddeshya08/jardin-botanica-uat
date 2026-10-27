@@ -10,12 +10,14 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import type { SanityJournalListItem } from "types/sanity-blog"
 
 interface SearchResultsProps {
   query: string
   searchResults: SearchResult
   region: HttpTypes.StoreRegion
   countryCode: string
+  relatedArticles: SanityJournalListItem[]
 }
 
 interface CartItem {
@@ -31,6 +33,7 @@ export default function SearchResults({
   searchResults,
   region,
   countryCode,
+  relatedArticles,
 }: SearchResultsProps) {
   const router = useRouter()
   const [cartItems, setCartItems] = useState<CartItem[]>([])
@@ -68,27 +71,6 @@ export default function SearchResults({
       currencyCode: price.currency_code || region.currency_code,
     }
   }
-
-  // Mock articles data - in production, this would come from your CMS/API
-  const relatedArticles = [
-    {
-      id: "1",
-      title: "Understanding your skin type",
-      excerpt: "A comprehensive guide to identifying and caring for your unique skin",
-      category: "Skincare",
-    },
-    {
-      id: "2",
-      title: "The art of botanical formulation",
-      excerpt: "How we blend nature and science in our laboratory",
-      category: "Behind the scenes",
-    },
-  ].filter(
-    (article) =>
-      article.title.toLowerCase().includes(query.toLowerCase()) ||
-      article.excerpt.toLowerCase().includes(query.toLowerCase()) ||
-      article.category.toLowerCase().includes(query.toLowerCase())
-  )
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#e3e3d8" }}>
@@ -222,13 +204,13 @@ export default function SearchResults({
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                       {relatedArticles.map((article) => (
                         <motion.div
-                          key={article.id}
+                          key={article.href}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.4 }}
                           className="group"
                         >
-                          <Link href={`/${countryCode}/blogs/${article.id}`}>
+                          <Link href={`/${countryCode}${article.href}`}>
                             <div className="space-y-3">
                               <p className="font-din-arabic text-black/50 text-xs uppercase tracking-wider">
                                 {article.category}
@@ -237,7 +219,7 @@ export default function SearchResults({
                                 {article.title}
                               </h3>
                               <p className="font-din-arabic text-black/60 text-sm leading-relaxed">
-                                {article.excerpt}
+                                {article.description}
                               </p>
                             </div>
                           </Link>
