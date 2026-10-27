@@ -1,4 +1,5 @@
 import { motion } from "motion/react"
+import { getJournalPath } from "@lib/util/journal-url"
 import Link from "next/link"
 import React, { useState } from "react"
 import type { SanityJournalListItem } from "types/sanity-blog"
@@ -25,7 +26,7 @@ function JournalPostCard({
   const [isPressed, setIsPressed] = useState(false)
 
   return (
-    <Link href={`/${countryCode}${blog.href}`} className="block h-full">
+    <Link href={getJournalPath(blog.slug, blog.category, countryCode || "in")} className="block h-full">
       <motion.article
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -138,7 +139,7 @@ export function JournalSection({ blogs, countryCode, content }: JournalSectionPr
             viewport={{ once: true }}
             className="text-center px-6"
           >
-            <Link href={countryCode ? `/${countryCode}/journal` : "/journal"}>
+            <Link href={`/${countryCode || "in"}/journal`}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

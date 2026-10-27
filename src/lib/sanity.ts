@@ -213,6 +213,11 @@ const JOURNAL_LIST_PROJECTION = `{
   "imageAlt": coalesce(imageAlt, "")
 }`
 
+const withJournalHref = (article: Omit<SanityJournalListItem, "href">): SanityJournalListItem => ({
+  ...article,
+  href: getJournalPath(article.slug, article.category),
+})
+
 /**
  * Fetch merged journal blog entries across `blog` + `blogTemplate1`, ordered
  * by publishedDate desc, paginated. Pass `featured: true` for the Featured
@@ -244,15 +249,12 @@ export async function getJournalBlogsSanity({
 }): Promise<SanityJournalListItem[]> {
   try {
     const { featuredFilter, categoryFilter } = buildJournalFilters(featured, category)
-    const articles = await client.fetch<SanityJournalListItem[]>(
+    const articles = await client.fetch<Omit<SanityJournalListItem, "href">[]>(
       `*[_type in ["blog", "blogTemplate1"] ${featuredFilter} ${categoryFilter}] | order(publishedDate desc) [$offset...$end]${JOURNAL_LIST_PROJECTION}`,
       { offset, end: offset + limit, category: category ?? "" },
       cacheOpts(60)
     )
-    return articles.map((article) => ({
-      ...article,
-      href: getJournalPath(article.slug, article.category),
-    }))
+    return articles.map(withJournalHref)
   } catch (error) {
     console.error("Error fetching Sanity journal blogs:", error)
     return []
@@ -293,11 +295,12 @@ export async function getLatestJournalWithCoverSanity(
   limit: number = 3
 ): Promise<SanityJournalListItem[]> {
   try {
-    return await client.fetch<SanityJournalListItem[]>(
+    const articles = await client.fetch<Omit<SanityJournalListItem, "href">[]>(
       `*[_type in ["blog", "blogTemplate1"] && defined(coverImage.asset)] | order(publishedDate desc) [0...$limit]${JOURNAL_LIST_PROJECTION}`,
       { limit },
       cacheOpts(60)
     )
+    return articles.map(withJournalHref)
   } catch (error) {
     console.error("Error fetching latest Sanity journal with cover:", error)
     return []
