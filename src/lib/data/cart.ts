@@ -180,11 +180,13 @@ export async function addOrUpdateLineItem({
   countryCode,
   canBeGifted,
   metadata,
+  quantityMode = "add",
 }: {
   variantId: string
   quantity: number
   countryCode: string
   canBeGifted?: boolean
+  quantityMode?: "add" | "replace"
   metadata?: Record<string, unknown>
 }): Promise<{ lineItemId: string; cartId: string }> {
   if (!variantId) {
@@ -208,7 +210,7 @@ export async function addOrUpdateLineItem({
 
   if (existingLineItem) {
     // Update existing line item quantity (preserves metadata including gift flags)
-    const newQuantity = existingLineItem.quantity + quantity
+    const newQuantity = quantityMode === "replace" ? quantity : existingLineItem.quantity + quantity
     lineItemId = existingLineItem.id
     await sdk.store.cart
       .updateLineItem(cart.id, existingLineItem.id, { quantity: newQuantity }, {}, headers)

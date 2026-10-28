@@ -6,6 +6,7 @@ type AddPayload = {
   variantId: string
   quantity: number
   countryCode: string
+  quantityMode?: "add" | "replace"
   canBeGifted?: boolean
 }
 
@@ -23,6 +24,7 @@ export async function addToCartAction({
   quantity,
   countryCode,
   canBeGifted,
+  quantityMode,
 }: AddPayload) {
   if (!variantId) throw new Error("Missing variantId")
   const qty = Math.max(1, Number(quantity || 1))
@@ -37,6 +39,7 @@ export async function addToCartAction({
         quantity: qty,
         countryCode: cc,
         canBeGifted,
+        quantityMode,
       })
       return { ok: true, quantity: qty, lineItemId }
     } catch (err: any) {
