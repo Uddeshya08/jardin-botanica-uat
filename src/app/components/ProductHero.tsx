@@ -446,12 +446,12 @@ export function ProductHero({
           toast.error("Inventory error", {
             description:
               "This product is currently out of stock or unavailable. Please try again later.",
-            duration: 5000,
+            duration: 2000,
           })
         } else {
           toast.error("Failed to add to cart", {
             description: errorMessage,
-            duration: 4000,
+            duration: 2000,
           })
         }
       } finally {

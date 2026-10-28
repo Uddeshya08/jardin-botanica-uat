@@ -3,6 +3,7 @@
 import { updateLineItemGift } from "@lib/data/cart"
 import { addToCartAction } from "@lib/data/cart-actions"
 import { emitCartUpdated } from "@lib/util/cart-client"
+import { formatProductSize } from "@lib/util/format-product-size"
 import type { HttpTypes } from "@medusajs/types"
 import { useCartItemsSafe } from "app/context/cart-items-context"
 import { Gift, Minus, Plus, ShoppingBag } from "lucide-react"
@@ -451,12 +452,12 @@ export function StickyCartBar({
           toast.error("Inventory error", {
             description:
               "This product is currently out of stock or unavailable. Please try again later.",
-            duration: 5000,
+            duration: 2000,
           })
         } else {
           toast.error("Failed to add to cart", {
             description: errorMessage,
-            duration: 4000,
+            duration: 2000,
           })
         }
       } finally {
@@ -595,12 +596,12 @@ export function StickyCartBar({
           toast.error("Inventory error", {
             description:
               "This product is currently out of stock or unavailable. Please try again later.",
-            duration: 5000,
+            duration: 2000,
           })
         } else {
           toast.error("Failed to add ritual product", {
             description: errorMessage,
-            duration: 4000,
+            duration: 2000,
           })
         }
       } finally {
@@ -662,7 +663,7 @@ export function StickyCartBar({
     // Show toast with gift confirmation
     toast.success("Gift option selected", {
       description: "Your item has been marked as a gift.",
-      duration: 3000,
+      duration: 2000,
     })
 
     // Show "Go to Cart" button
@@ -718,7 +719,7 @@ export function StickyCartBar({
                     <h3 className="font-american-typewriter text-black/90 text-xs md:text-sm truncate">
                       {ritualProduct && showRitualSuggestion && !showGoToCart
                         ? ritualProduct.name
-                        : `${name}${variant?.title ? ` • ${variant.title}` : ""}`}
+                        : `${name}${variant?.title ? ` • ${formatProductSize(variant.title)}` : ""}`}
                     </h3>
                     <p className="font-din-arabic-bold text-xs md:text-sm text-black/70 whitespace-nowrap mt-0.5 md:mt-0">
                       {ritualProduct && showRitualSuggestion && !showGoToCart

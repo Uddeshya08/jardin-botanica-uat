@@ -67,7 +67,7 @@ const VerifyEmailUpdate = () => {
         setSuccess(true)
         toast.success(
           `Email updated to ${result.new_email}. Please log in with your new credentials.`,
-          { duration: 5000 }
+          { duration: 2000 }
         )
         setTimeout(() => router.push("/account"), 3000)
       } else {

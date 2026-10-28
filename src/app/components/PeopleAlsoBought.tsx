@@ -72,10 +72,13 @@ function formatPrice(price?: number, currency?: string) {
       return new Intl.NumberFormat(undefined, {
         style: "currency",
         currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+        useGrouping: false,
       }).format(value)
     } catch {
       // Fallback formatting
-      const formattedValue = Math.round(value).toLocaleString()
+      const formattedValue = String(Math.round(value))
       return currency === "INR" ? `₹${formattedValue}` : `${currency} ${formattedValue}`
     }
   }
@@ -476,12 +479,12 @@ export function PeopleAlsoBought({
             toast.error("Inventory error", {
               description:
                 "This product is currently out of stock or unavailable. Please try again later.",
-              duration: 5000,
+              duration: 2000,
             })
           } else {
             toast.error("Failed to add to cart", {
               description: errorMessage,
-              duration: 4000,
+              duration: 2000,
             })
           }
         }
@@ -621,7 +624,7 @@ export function PeopleAlsoBought({
               {productPath ? (
                 <Link
                   href={productPath}
-                  className="block relative aspect-[3/4] mb-4 md:mb-6 overflow-hidden bg-white/20"
+                  className="block relative aspect-[3/4] mb-4 md:mb-6 overflow-hidden"
                 >
                   <motion.div
                     whileHover={{ scale: 1.02 }}
@@ -681,7 +684,7 @@ export function PeopleAlsoBought({
                 </Link>
               ) : (
                 <div
-                  className="relative aspect-[3/4] mb-4 md:mb-6 overflow-hidden bg-white/20"
+                  className="relative aspect-[3/4] mb-4 md:mb-6 overflow-hidden"
                 >
                   <motion.div
                     whileHover={{ scale: 1.02 }}

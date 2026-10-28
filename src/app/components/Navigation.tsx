@@ -6,6 +6,7 @@ import { BLOCKS } from "@contentful/rich-text-types"
 import { deleteLineItem, updateLineItem } from "@lib/data/cart"
 import { getNavigation } from "@lib/data/contentful"
 import { convertToLocale } from "@lib/util/money"
+import { formatProductLabel } from "@lib/util/format-product-size"
 import type { HttpTypes } from "@medusajs/types"
 import { useAuth } from "app/context/auth-context"
 import { type CartItem, useCartItemsSafe } from "app/context/cart-items-context"
@@ -288,7 +289,7 @@ export function Navigation({
   // Close mobile menu when window is resized to desktop
   useEffect(() => {
     function handleResize() {
-      if (window.innerWidth >= 1280) {
+      if (window.innerWidth >= 1000) {
         setIsMobileMenuOpen(false)
       }
     }
@@ -650,7 +651,7 @@ export function Navigation({
                     alt="Jardin Botanica Logo"
                     width={270}
                     height={60}
-                    className="transition-all duration-300"
+                    className="transition-all duration-300 min-[1000px]:max-xl:w-[210px] min-[1000px]:max-xl:h-auto"
                   />
                 </a>
               </motion.div>
@@ -660,7 +661,7 @@ export function Navigation({
                 initial={introInitial({ opacity: 0 })}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
                 transition={disableAnimations ? undefined : { delay: 0.4, duration: 0.6 }}
-                className="hidden xl:flex space-x-8 absolute left-1/2 transform -translate-x-1/2"
+                className="hidden min-[1000px]:flex space-x-4 xl:space-x-8 absolute left-1/2 transform -translate-x-1/2"
               >
                 {menuItems
                   .filter((item) => !item.name.toLowerCase().includes("gift"))
@@ -871,7 +872,7 @@ export function Navigation({
                 initial={introInitial({ opacity: 0 })}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
                 transition={disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }}
-                className="xl:hidden flex items-center space-x-1 z-10"
+                className="min-[1000px]:hidden flex items-center space-x-1 z-10"
               >
                 {/* Mobile Cart */}
                 <div className="relative" ref={cartRef}>
@@ -961,13 +962,13 @@ export function Navigation({
                                     {item.image && (
                                       <img
                                         src={item.image}
-                                        alt={item.name.replace(/\(Candle\b/g, "(candle")}
+                                        alt={formatProductLabel(item.name)}
                                         className="w-16 h-16 object-contain"
                                       />
                                     )}
                                     <div className="flex-1 min-w-0">
                                       <h4 className="font-din-arabic text-black font-medium truncate">
-                                        {item.name.replace(/\(Candle\b/g, "(candle")}
+                                        {formatProductLabel(item.name)}
                                       </h4>
                                       <p className="font-din-arabic text-black/70 text-sm">
                                         {convertToLocale({
@@ -1060,7 +1061,7 @@ export function Navigation({
                 initial={introInitial({ opacity: 0 })}
                 animate={disableAnimations ? undefined : { opacity: 1 }}
                 transition={disableAnimations ? undefined : { delay: 0.7, duration: 0.6 }}
-                className="hidden xl:flex items-center gap-6"
+                className="hidden min-[1000px]:flex items-center gap-3 xl:gap-6"
               >
                 {/* Search Section - Hidden when SearchMegaMenu is open */}
                 {!isSearchOpen && (
@@ -1191,13 +1192,13 @@ export function Navigation({
                                     {item.image && (
                                       <img
                                         src={item.image}
-                                        alt={item.name.replace(/\(Candle\b/g, "(candle")}
+                                        alt={formatProductLabel(item.name)}
                                         className="w-16 h-16 object-contain"
                                       />
                                     )}
                                     <div className="flex-1">
                                       <h4 className="font-din-arabic text-black font-medium">
-                                        {item.name.replace(/\(Candle\b/g, "(candle")}
+                                        {formatProductLabel(item.name)}
                                       </h4>
                                       <p className="font-din-arabic text-black/70 text-sm">
                                         {convertToLocale({
@@ -1283,7 +1284,7 @@ export function Navigation({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black/60 z-40 xl:hidden"
+              className="fixed inset-0 bg-black/60 z-40 min-[1000px]:hidden"
               onClick={() => setIsMobileMenuOpen(false)}
               style={{ top: "106px" }}
             />
@@ -1294,7 +1295,7 @@ export function Navigation({
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed right-0 top-[106px] bottom-0 w-full max-w-sm z-50 overflow-y-auto xl:hidden"
+              className="fixed right-0 top-[106px] bottom-0 w-full max-w-sm z-50 overflow-y-auto min-[1000px]:hidden"
               style={{ backgroundColor: "#e3e3d8" }}
             >
               <div className="p-6">

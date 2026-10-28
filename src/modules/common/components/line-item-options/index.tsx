@@ -1,3 +1,4 @@
+import { formatProductSize } from "@lib/util/format-product-size"
 import type { HttpTypes } from "@medusajs/types"
 import { Text } from "@medusajs/ui"
 
@@ -18,7 +19,7 @@ const LineItemOptions = ({
       data-value={dataValue}
       className="inline-block txt-medium text-ui-fg-subtle w-full overflow-hidden text-ellipsis"
     >
-      Variant: {variant?.title}
+      Variant: {formatProductSize(variant?.title || "")}
     </Text>
   )
 }
