@@ -34,14 +34,14 @@ export async function addToCartAction({
 
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const { lineItemId } = await addOrUpdateLineItem({
+      const { lineItemId, cartQuantity } = await addOrUpdateLineItem({
         variantId,
         quantity: qty,
         countryCode: cc,
         canBeGifted,
         quantityMode,
       })
-      return { ok: true, quantity: qty, lineItemId }
+      return { ok: true, quantity: qty, cartQuantity, lineItemId }
     } catch (err: any) {
       // Medusa often throws this when channel/location/region is slightly out of sync.
       const msg = String(err?.message ?? "")

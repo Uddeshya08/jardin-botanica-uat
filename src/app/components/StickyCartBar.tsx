@@ -407,7 +407,7 @@ export function StickyCartBar({
         const result = await addToCartAction({
           variantId: variant.id,
           quantity,
-          quantityMode: "replace",
+          quantityMode: "add",
           countryCode,
           canBeGifted: giftOption?.enabled,
         })
@@ -417,13 +417,13 @@ export function StickyCartBar({
           id: existingItem?.id || result.lineItemId,
           name: existingItem?.name || name,
           price: minor,
-          quantity,
+          quantity: result.cartQuantity,
           image: existingItem?.image || image || undefined,
           variant_id: variant.id,
           product_id: productId,
           handle: product?.handle,
         })
-        emitCartUpdated({ quantityDelta: quantity - (existingItem?.quantity || 0) })
+        emitCartUpdated({ quantityDelta: quantity })
         setIsAddedToCart(true)
 
         // After successful add to cart, show ritual suggestion if available

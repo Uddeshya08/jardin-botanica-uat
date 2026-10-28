@@ -188,7 +188,7 @@ export async function addOrUpdateLineItem({
   canBeGifted?: boolean
   quantityMode?: "add" | "replace"
   metadata?: Record<string, unknown>
-}): Promise<{ lineItemId: string; cartId: string }> {
+}): Promise<{ lineItemId: string; cartId: string; cartQuantity: number }> {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
   }
@@ -207,10 +207,12 @@ export async function addOrUpdateLineItem({
   }
 
   let lineItemId: string
+  let cartQuantity: number
 
   if (existingLineItem) {
     // Update existing line item quantity (preserves metadata including gift flags)
     const newQuantity = quantityMode === "replace" ? quantity : existingLineItem.quantity + quantity
+    cartQuantity = newQuantity
     lineItemId = existingLineItem.id
     await sdk.store.cart
       .updateLineItem(cart.id, existingLineItem.id, { quantity: newQuantity }, {}, headers)
@@ -219,6 +221,7 @@ export async function addOrUpdateLineItem({
       })
       .catch(medusaError)
   } else {
+    cartQuantity = quantity
     // Create new line item with optional gift eligibility metadata
     const lineItemData: { variant_id: string; quantity: number; metadata?: Record<string, any> } = {
       variant_id: variantId,
@@ -256,7 +259,7 @@ export async function addOrUpdateLineItem({
     lineItemId = newLineItem?.id || ""
   }
 
-  return { lineItemId, cartId: cart.id }
+  return { lineItemId, cartId: cart.id, cartQuantity }
 }
 
 export async function updateLineItem({ lineId, quantity }: { lineId: string; quantity: number }) {
