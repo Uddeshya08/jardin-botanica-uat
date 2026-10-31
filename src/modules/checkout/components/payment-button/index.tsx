@@ -18,12 +18,11 @@ import { RazorpayPaymentButton } from "./razorpay-payment-button"
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
   codVerified?: boolean
-  consentSaving?: boolean
   "data-testid": string
 }
 
-const PaymentButton: React.FC<PaymentButtonProps> = ({ cart, codVerified = false, consentSaving = false, "data-testid": dataTestId }) => {
-  const notReady = !isCheckoutReady(cart) || consentSaving
+const PaymentButton: React.FC<PaymentButtonProps> = ({ cart, codVerified = false, "data-testid": dataTestId }) => {
+  const notReady = !isCheckoutReady(cart)
   const paymentType = useSearchParams().get("paymenttype") || "card"
 
   const pendingSessions = cart.payment_collection?.payment_sessions?.filter(
