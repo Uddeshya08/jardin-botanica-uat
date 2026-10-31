@@ -8,6 +8,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import PaymentButton from "../payment-button"
 import { CodPhoneVerification } from "./cod-phone-verification"
+import { MarketingConsent } from "./marketing-consent"
 
 // Payment type options - matching the ones in payment component
 const PAYMENT_TYPES = [
@@ -43,6 +44,7 @@ const Review = ({ cart }: { cart: any }) => {
   const router = useRouter()
   const pathname = usePathname()
   const [verifiedFor, setVerifiedFor] = useState<string | null>(null)
+  const [consentSaving, setConsentSaving] = useState(false)
 
   const isOpen = searchParams.get("step") === "review"
 
@@ -226,6 +228,13 @@ const Review = ({ cart }: { cart: any }) => {
               </div>
             )}
 
+            <MarketingConsent
+              key={cart.id}
+              cartId={cart.id}
+              savedConsent={cart.metadata?.meta_capi_consent === true}
+              onSavingChange={setConsentSaving}
+            />
+
             {isCod && (
               <CodPhoneVerification
                 key={verificationKey}
@@ -252,6 +261,7 @@ const Review = ({ cart }: { cart: any }) => {
                   <PaymentButton
                     cart={cart}
                     codVerified={codVerified}
+                    consentSaving={consentSaving}
                     data-testid="submit-order-button"
                   />
                 </div>
