@@ -11,6 +11,7 @@ interface PageBannerProps {
   titleClassName?: string
   descriptionClassName?: string
   containerClassName?: string
+  mediaClassName?: string
 }
 
 export function PageBanner({
@@ -19,6 +20,7 @@ export function PageBanner({
   titleClassName = "text-white font-medium mb-6 md:mb-8 tracking-tight font-american-typewriter text-5xl md:text-6xl lg:text-7xl",
   descriptionClassName = "font-din-arabic text-base md:text-lg text-white/70 leading-relaxed max-w-2xl mx-auto mb-2 md:mb-4 px-2 md:px-0",
   containerClassName = "absolute top-[37%] md:top-1/2 left-8 md:left-[70px] md:-translate-y-1/2 max-w-xs md:max-w-md",
+  mediaClassName = "w-full h-full",
 }: PageBannerProps) {
   const [bannerData, setBannerData] = useState<PageBannerType | null>(null)
   const [videoError, setVideoError] = useState(false)
@@ -67,7 +69,9 @@ export function PageBanner({
   if (isLoading) {
     return (
       <div className={className}>
-        <div className="w-full h-full bg-gray-200 animate-pulse" />
+        <div className={mediaClassName}>
+          <div className="w-full h-full bg-gray-200 animate-pulse" />
+        </div>
       </div>
     )
   }
@@ -86,39 +90,42 @@ export function PageBanner({
       viewport={{ once: true }}
       className={className}
     >
-      {/* Render video if mediaType is video and videoUrl exists, otherwise render image */}
-      {displayBanner.mediaType === "video" && displayBanner.videoUrl && !videoError ? (
-        <motion.video
-          initial={{ scale: 1.1, opacity: 0 }}
-          whileInView={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.2 }}
-          viewport={{ once: true }}
-          src={displayBanner.videoUrl}
-          autoPlay
-          loop
-          muted
-          playsInline
-          onError={() => setVideoError(true)}
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <motion.img
-          initial={{ scale: 1.1, opacity: 0 }}
-          whileInView={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.2 }}
-          viewport={{ once: true }}
-          src={(videoError && displayBanner.fallbackImageUrl) || displayBanner.imageUrl}
-          alt={displayBanner.title || "Banner"}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            console.error(`[PageBanner] Image failed to load:`, e)
-            // If image fails, try to show fallback or default
-            if (!videoError && displayBanner.fallbackImageUrl) {
-              setVideoError(true)
-            }
-          }}
-        />
-      )}
+      <div className={mediaClassName}>
+        {/* Render video if mediaType is video and videoUrl exists, otherwise render image */}
+        {displayBanner.mediaType === "video" && displayBanner.videoUrl && !videoError ? (
+          <motion.video
+            initial={{ scale: 1.1, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.2 }}
+            viewport={{ once: true }}
+            src={displayBanner.videoUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            onError={() => setVideoError(true)}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <motion.img
+            initial={{ scale: 1.1, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.2 }}
+            viewport={{ once: true }}
+            src={(videoError && displayBanner.fallbackImageUrl) || displayBanner.imageUrl}
+            alt={displayBanner.title || "Banner"}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              console.error(`[PageBanner] Image failed to load:`, e)
+              // If image fails, try to show fallback or default
+              if (!videoError && displayBanner.fallbackImageUrl) {
+                setVideoError(true)
+              }
+            }}
+          />
+        )}
+
+      </div>
 
       {/* Text Overlay */}
       <motion.div

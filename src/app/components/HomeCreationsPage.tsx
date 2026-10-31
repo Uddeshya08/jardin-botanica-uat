@@ -233,30 +233,32 @@ export function HomeCreationsPage({
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#e3e3d8" }}>
       {/* Hero Banner */}
-      <section className="relative h-screen sm:h-[65vh] lg:h-[75vh] overflow-hidden">
-        <motion.div
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          className="absolute inset-0 w-full h-full z-0"
-        >
-          <ImageWithFallback
-            src={HERO_IMAGE}
-            alt="Home Creations Collection"
-            className="w-full h-full object-cover"
+      <section className="collection-banner relative overflow-hidden">
+        <div className="collection-banner-media">
+          <motion.div
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="absolute inset-0 w-full h-full z-0"
+          >
+            <ImageWithFallback
+              src={HERO_IMAGE}
+              alt="Home Creations Collection"
+              className="w-full h-full object-cover"
+            />
+          </motion.div>
+          {/* Background Overlay - smooth natural gradient from top extending below center */}
+          <div
+            className="absolute inset-0 z-10"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.02) 85%, transparent 95%)",
+            }}
           />
-        </motion.div>
-        {/* Background Overlay - smooth natural gradient from top extending below center */}
-        <div
-          className="absolute inset-0 z-10"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.02) 85%, transparent 95%)",
-          }}
-        />
+        </div>
 
         {/* Hero Text */}
-        <div className="absolute inset-0 flex items-center justify-center z-20">
+        <div className="collection-banner-copy collection-banner-copy-centered absolute inset-0 flex items-center justify-center z-20">
           <div className="text-center px-4 sm:px-6">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
