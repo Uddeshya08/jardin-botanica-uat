@@ -187,7 +187,7 @@ const Overview: React.FC<OverviewProps> = ({ customer, orders, preferences }) =>
         setEmailUpdateData({ currentPassword: "", newEmail: "" })
         toast.success(
           `Verification email sent to ${emailUpdateData.newEmail}. Please check your inbox and follow the instructions.`,
-          { duration: 6000 }
+          { duration: 2000 }
         )
       } else {
         toast.error(result.message || "Failed to send verification email")

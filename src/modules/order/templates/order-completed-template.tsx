@@ -2,6 +2,7 @@ import type { HttpTypes } from "@medusajs/types"
 import OnboardingCta from "@modules/order/components/onboarding-cta"
 import { OrderConfirmationUI } from "@modules/order/components/order-confirmation-ui"
 import { cookies as nextCookies } from "next/headers"
+import { getOrderReference } from "@lib/util/order-reference"
 
 type OrderCompletedTemplateProps = {
   order: HttpTypes.StoreOrder
@@ -14,7 +15,7 @@ export default async function OrderCompletedTemplate({
 }: OrderCompletedTemplateProps) {
   const cookies = await nextCookies()
   const isOnboarding = cookies.get("_medusa_onboarding")?.value === "true"
-  const orderNumber = `#JB${order.display_id}`
+  const orderNumber = getOrderReference(order)
 
   return (
     <div data-testid="order-complete-container">
@@ -22,7 +23,7 @@ export default async function OrderCompletedTemplate({
       <OrderConfirmationUI
         orderNumber={orderNumber}
         isAuthenticated={!!customer}
-        orderEmail={order.email}
+        orderEmail={order.email ?? undefined}
       />
     </div>
   )

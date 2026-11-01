@@ -1,4 +1,6 @@
+import { getOrderStatus } from "@lib/util/order-status"
 import { convertToLocale } from "@lib/util/money"
+import { getOrderReference } from "@lib/util/order-reference"
 import type { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -26,49 +28,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
     return order.items && order.items.length > 0 ? order.items[0].title : ""
   }, [order])
 
-  const fulfillmentBadge = useMemo(() => {
-    const status = order.fulfillment_status
-
-    console.log("status", status)
-    console.log("order", order)
-    if (!status) return { label: "", className: "", buttonText: "View details" }
-
-    // Map Medusa fulfillment statuses to UI labels/colors
-    switch (status) {
-      case "fulfilled":
-        return {
-          label: "SHIPPED",
-          className: "text-blue-600",
-          buttonText: "View details",
-        }
-      case "delivered":
-        return {
-          label: "DELIVERED",
-          className: "text-green-600",
-          buttonText: "View details",
-        }
-      case "shipped":
-      case "partially_shipped":
-        return {
-          label: "IN TRANSIT",
-          className: "text-blue-600",
-          buttonText: "Track order",
-        }
-      case "canceled":
-        return {
-          label: "CANCELLED",
-          className: "text-red-600",
-          buttonText: "View details",
-        }
-      case "not_fulfilled":
-      default:
-        return {
-          label: "PROCESSING",
-          className: "text-yellow-600",
-          buttonText: "View details",
-        }
-    }
-  }, [order])
+  const fulfillmentBadge = getOrderStatus(order.fulfillment_status)
 
   const formattedDate = useMemo(() => {
     const date = new Date(order.created_at)
@@ -89,7 +49,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
       <div className="flex items-start justify-between gap-4 w-full sm:w-[60%]">
         <div className="flex flex-col">
           <div className="font-din-arabic text-base text-black tracking-wide mb-2">
-            #<span data-testid="order-display-id">{order.display_id}</span>
+            <span data-testid="order-display-id">{getOrderReference(order)}</span>
           </div>
           <span
             className="font-din-arabic text-sm text-black/50 tracking-wide"

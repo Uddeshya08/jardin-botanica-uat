@@ -6,14 +6,15 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import type { HomeHeroSlide } from "types/sanity-home"
-import { ImageWithFallback } from "./figma/ImageWithFallback"
+import { HeroBackground } from "./HeroBackground"
+import { getHeroMedia } from "@lib/util/hero-media"
 
 interface HeroPanel {
   id: number
   title: string
   subtitle: string
   description: string
-  imageUrl: string
+  imageUrl?: string
   videoUrl?: string
   cta: string
   isSpecial?: boolean
@@ -71,9 +72,11 @@ export function HeroSection({ slides }: { slides?: HomeHeroSlide[] }) {
         title: slide.title || heroPanels[index]?.title || "Explore",
         subtitle: slide.headline || heroPanels[index]?.subtitle || "",
         description: slide.description ?? heroPanels[index]?.description ?? "",
-        imageUrl: slide.image?.url || heroPanels[index]?.imageUrl || heroPanels[0].imageUrl,
+        ...getHeroMedia(
+          slide.videoUrl,
+          slide.image?.url || (!slide.videoUrl ? heroPanels[index]?.imageUrl || heroPanels[0].imageUrl : undefined)
+        ),
         imageAlt: slide.image?.alt,
-        videoUrl: slide.videoUrl,
         cta: slide.ctaLabel || heroPanels[index]?.cta || "Explore",
         ctaAction: slide.ctaAction || "link",
         ctaLink: slide.ctaLink,
@@ -81,10 +84,8 @@ export function HeroSection({ slides }: { slides?: HomeHeroSlide[] }) {
     : heroPanels
   const router = useRouter()
   const [activePanel, setActivePanel] = useState(1)
-  const [videoError, setVideoError] = useState<Record<number, boolean>>({})
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)
-  const videoRef = useRef<HTMLVideoElement | null>(null)
   const [swipeOffset, setSwipeOffset] = useState(0)
   const [isSwiping, setIsSwiping] = useState(false)
   const [showEmailForm, setShowEmailForm] = useState(false)
@@ -92,27 +93,11 @@ export function HeroSection({ slides }: { slides?: HomeHeroSlide[] }) {
 
   const currentPanel = panels.find((p) => p.id === activePanel) || panels[0]
 
-  // Keep video playback on a single path to avoid Safari repaint flashes.
-  useEffect(() => {
-    if (videoRef.current && currentPanel.videoUrl) {
-      videoRef.current.play().catch(() => {
-        setVideoError((prev) => ({ ...prev, [activePanel]: true }))
-      })
-    }
-  }, [activePanel, currentPanel.videoUrl])
-
   // Function to transition to next panel
   const goToNextPanel = () => {
     const currentIndex = panels.findIndex((p) => p.id === activePanel)
     const nextIndex = (currentIndex + 1) % panels.length
     setActivePanel(panels[nextIndex].id)
-  }
-
-  // Handle video end - pause on last frame
-  const handleVideoEnd = () => {
-    if (videoRef.current) {
-      videoRef.current.pause()
-    }
   }
 
   // Minimum swipe distance
@@ -223,33 +208,12 @@ export function HeroSection({ slides }: { slides?: HomeHeroSlide[] }) {
               WebkitBackfaceVisibility: "hidden",
             }}
           >
-            <div className="w-full h-full relative overflow-hidden">
-              {!videoError[currentPanel.id] && currentPanel.videoUrl ? (
-                <video
-                  ref={videoRef}
-                  src={currentPanel.videoUrl}
-                  muted
-                  playsInline
-                  preload="auto"
-                  autoPlay
-                  onEnded={handleVideoEnd}
-                  onError={() => setVideoError((prev) => ({ ...prev, [currentPanel.id]: true }))}
-                  className="w-full h-full object-cover"
-                  style={{ minHeight: "100svh", backfaceVisibility: "hidden" }}
-                />
-              ) : (
-                <ImageWithFallback
-                  src={currentPanel.imageUrl}
-                  alt={currentPanel.imageAlt || currentPanel.title}
-                  className="w-full h-full object-cover"
-                  style={{
-                    minHeight: "100svh",
-                    backfaceVisibility: "hidden",
-                    transform: "translateZ(0)",
-                  }}
-                />
-              )}
-            </div>
+            <HeroBackground
+              key={currentPanel.videoUrl || currentPanel.imageUrl || currentPanel.id}
+              videoUrl={currentPanel.videoUrl}
+              imageUrl={currentPanel.imageUrl}
+              alt={currentPanel.imageAlt || currentPanel.title}
+            />
             <div className="absolute inset-0 bg-black/50" />
           </motion.div>
         </AnimatePresence>

@@ -4,7 +4,7 @@ import { defineArrayMember, defineField, defineType } from "sanity"
  * Blog Template 1 — the classic single-column journal article (migrated off
  * Contentful). Rich text with inline images, a cover image, author byline, and
  * a "From the Botanist's Shelf" featured-products row resolved from Medusa.
- * Rendered by SingleBlogTemplate at /[countryCode]/blogs/[id].
+ * Rendered by SingleBlogTemplate at /[countryCode]/journal/[category]/[id].
  */
 export const blogTemplate1 = defineType({
   name: "blogTemplate1",
@@ -40,7 +40,7 @@ export const blogTemplate1 = defineType({
       name: "isFeatured",
       title: "Featured on journal page",
       type: "boolean",
-      description: "Toggle on to include this article in the Featured section on /blogs. Off = shows only in Recent Entries.",
+      description: "Toggle on to include this article in the Featured section on /journal. Off = shows only in Recent Entries.",
       initialValue: false,
     }),
     defineField({
@@ -63,7 +63,7 @@ export const blogTemplate1 = defineType({
       name: "category",
       title: "Category",
       type: "string",
-      description: "Section the article belongs to on /blogs. Drives the tab filter under the journal header.",
+      description: "Section the article belongs to on /journal. Drives the tab filter under the journal header.",
       options: {
         list: [
           { title: "Rituals", value: "Rituals" },

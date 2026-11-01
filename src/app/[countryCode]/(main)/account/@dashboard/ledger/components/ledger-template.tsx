@@ -502,7 +502,7 @@ export default function LedgerTemplate() {
                               <img
                                 src={item.image}
                                 alt={item.name}
-                                className="w-full h-full object-contain"
+                                className="w-full h-full object-cover object-center"
                               />
                             </div>
 
@@ -572,7 +572,7 @@ export default function LedgerTemplate() {
                               <img
                                 src={item.image}
                                 alt={item.name}
-                                className="w-full h-full object-contain"
+                                className="w-full h-full object-cover object-center"
                               />
                             </div>
 

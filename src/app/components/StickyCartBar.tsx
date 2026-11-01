@@ -3,6 +3,7 @@
 import { updateLineItemGift } from "@lib/data/cart"
 import { addToCartAction } from "@lib/data/cart-actions"
 import { emitCartUpdated } from "@lib/util/cart-client"
+import { formatProductSize } from "@lib/util/format-product-size"
 import type { HttpTypes } from "@medusajs/types"
 import { useCartItemsSafe } from "app/context/cart-items-context"
 import { Gift, Minus, Plus, ShoppingBag } from "lucide-react"
@@ -113,6 +114,11 @@ export function StickyCartBar({
     }
     return pickVariant(product ?? undefined)
   }, [product, selectedVariantIdProp])
+
+  // Draft quantity belongs to the selected variant, not to cart refreshes.
+  useEffect(() => {
+    setQuantity(1)
+  }, [variant?.id])
 
   // Monitor cart changes and update sticky cart bar state accordingly
   useEffect(() => {
@@ -235,10 +241,6 @@ export function StickyCartBar({
       setShowGiftOption(false)
     }
 
-    // Sync quantity state with cart if main product is in cart
-    if (mainProductInCart) {
-      setQuantity(mainProductInCart.quantity)
-    }
 
     // Sync ritual quantity state with cart if ritual product is in cart
     if (ritualProductInCart) {
@@ -258,7 +260,7 @@ export function StickyCartBar({
   const name = product?.title ?? "Product"
   const image = (Array.isArray(product?.images) && product!.images[0]?.url) || product?.thumbnail
 
-  const shippingThresholdMinor = 2500 // you appear to treat prices as whole rupees already
+  const shippingThresholdMinor = 0 // Complimentary shipping on all orders during the current offer.
 
   // Calculate total based on current state:
   // - If showing ritual suggestion: show only ritual product total
@@ -387,54 +389,43 @@ export function StickyCartBar({
 
     setAdding(true)
     setUiError(null)
-    setIsAddedToCart(true)
+    setIsAddedToCart(false)
 
     // Check if item already exists in cart
     const productId = product?.id ?? variant.id
     const existingItem = cartItems.find((item) => {
       // Check for composite ID format: "productId-variantId"
       const isCompositeMatch =
-        item.id.startsWith(`${productId}-`) || item.id.includes(`-${variant.id}`)
+        item.id === `${productId}-${variant.id}` || item.id.endsWith(`-${variant.id}`)
       // Check for exact ID or variant_id match
-      const isExactMatch = item.id === productId || item.variant_id === variant.id
+      const isExactMatch = item.variant_id === variant.id || (!item.variant_id && item.id === productId)
       return isCompositeMatch || isExactMatch
     })
-
-    // optimistic updates for nav / other UIs
-    if (existingItem) {
-      // If item exists, update quantity
-      onCartUpdate?.({
-        ...existingItem,
-        quantity: existingItem.quantity + quantity,
-      })
-    } else {
-      // If item doesn't exist, add as new (regular product - no image in nav)
-      // calculated_amount is already in major units (rupees), no conversion needed
-      console.log("🔍 StickyCartBar - Adding item with price:", {
-        minor,
-        calculated_amount: variant?.calculated_price?.calculated_amount,
-        variantId: variant.id,
-      })
-      onCartUpdate?.({
-        id: productId,
-        name,
-        price: minor,
-        quantity,
-        image: image ?? undefined,
-      } as any)
-    }
-
-    emitCartUpdated({ quantityDelta: quantity })
 
     // background network
     startTransition(async () => {
       try {
-        await addToCartAction({
+        const result = await addToCartAction({
           variantId: variant.id,
           quantity,
+          quantityMode: "add",
           countryCode,
           canBeGifted: giftOption?.enabled,
         })
+
+        onCartUpdate?.({
+          ...(existingItem || {}),
+          id: existingItem?.id || result.lineItemId,
+          name: existingItem?.name || name,
+          price: minor,
+          quantity: result.cartQuantity,
+          image: existingItem?.image || image || undefined,
+          variant_id: variant.id,
+          product_id: productId,
+          handle: product?.handle,
+        })
+        emitCartUpdated({ quantityDelta: quantity })
+        setIsAddedToCart(true)
 
         // After successful add to cart, show ritual suggestion if available
         if (ritualProduct && !ritualCompleted) {
@@ -461,12 +452,12 @@ export function StickyCartBar({
           toast.error("Inventory error", {
             description:
               "This product is currently out of stock or unavailable. Please try again later.",
-            duration: 5000,
+            duration: 2000,
           })
         } else {
           toast.error("Failed to add to cart", {
             description: errorMessage,
-            duration: 4000,
+            duration: 2000,
           })
         }
       } finally {
@@ -605,12 +596,12 @@ export function StickyCartBar({
           toast.error("Inventory error", {
             description:
               "This product is currently out of stock or unavailable. Please try again later.",
-            duration: 5000,
+            duration: 2000,
           })
         } else {
           toast.error("Failed to add ritual product", {
             description: errorMessage,
-            duration: 4000,
+            duration: 2000,
           })
         }
       } finally {
@@ -672,7 +663,7 @@ export function StickyCartBar({
     // Show toast with gift confirmation
     toast.success("Gift option selected", {
       description: "Your item has been marked as a gift.",
-      duration: 3000,
+      duration: 2000,
     })
 
     // Show "Go to Cart" button
@@ -728,7 +719,7 @@ export function StickyCartBar({
                     <h3 className="font-american-typewriter text-black/90 text-xs md:text-sm truncate">
                       {ritualProduct && showRitualSuggestion && !showGoToCart
                         ? ritualProduct.name
-                        : `${name}${variant?.title ? ` • ${variant.title}` : ""}`}
+                        : `${name}${variant?.title ? ` • ${formatProductSize(variant.title)}` : ""}`}
                     </h3>
                     <p className="font-din-arabic-bold text-xs md:text-sm text-black/70 whitespace-nowrap mt-0.5 md:mt-0">
                       {ritualProduct && showRitualSuggestion && !showGoToCart
@@ -746,9 +737,7 @@ export function StickyCartBar({
                           color: showGoToCart ? "#f97316" : "#545d4a",
                         }}
                       >
-                        {existingCartTotal >= shippingThresholdMinor
-                          ? "Cart qualifies for complimentary shipping"
-                          : "Order qualifies for complimentary shipping"}
+                        Order qualifies for complimentary shipping
                       </motion.p>
                     )}
                   </div>
@@ -804,11 +793,7 @@ export function StickyCartBar({
                           }
                         }}
                         className="p-1 md:p-1.5 hover:bg-black/10 transition-colors rounded-l-lg"
-                        disabled={
-                          ritualProduct && showRitualSuggestion && !showGoToCart
-                            ? ritualQuantity <= 1
-                            : quantity <= 1
-                        }
+                        disabled={adding || isPending || (ritualProduct && showRitualSuggestion && !showGoToCart ? ritualQuantity <= 1 : quantity <= 1)}
                       >
                         <Minus className="w-3 h-3 text-black/70" />
                       </motion.button>
@@ -828,11 +813,7 @@ export function StickyCartBar({
                           }
                         }}
                         className="p-1 md:p-1.5 hover:bg-black/10 transition-colors rounded-r-lg"
-                        disabled={
-                          ritualProduct && showRitualSuggestion && !showGoToCart
-                            ? ritualQuantity >= 10
-                            : quantity >= 10
-                        }
+                        disabled={adding || isPending || (ritualProduct && showRitualSuggestion && !showGoToCart ? ritualQuantity >= 10 : quantity >= 10)}
                       >
                         <Plus className="w-3 h-3 text-black/70" />
                       </motion.button>

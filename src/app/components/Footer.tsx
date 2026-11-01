@@ -24,7 +24,7 @@ export function Footer() {
       title: "About Us",
       links: [
         { name: "Brand", href: `/${countryCode}/the-lab` },
-        { name: "Journal", href: `/${countryCode}/blogs` },
+        { name: "Journal", href: `/${countryCode}/journal` },
         { name: "Careers", href: `/${countryCode}/careers` },
       ],
     },

@@ -32,7 +32,7 @@ export default async function AccountPageLayout({
     <>
       {/* Hydrate a client component with the fetched data */}
       <ClientAccountShell customer={customer} dashboard={dashboard} login={login} />
-      <Toaster />
+      <Toaster duration={2000} />
     </>
   )
 }

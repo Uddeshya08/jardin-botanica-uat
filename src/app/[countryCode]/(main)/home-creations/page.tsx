@@ -1,5 +1,6 @@
 "use client"
 
+import { formatProductSize } from "@lib/util/format-product-size"
 import { getProductCategoryByHandle } from "@lib/data/contentful"
 import { getProductByHandle } from "@lib/data/products"
 import { HomeCreationsPage, type Product } from "app/components/HomeCreationsPage"
@@ -97,6 +98,8 @@ function transformMedusaProduct(medusaProduct: any, subCategoryName: string): Pr
   if (!size && variants.length > 0) {
     size = variants[0].size
   }
+
+  size = formatProductSize(size, subCategoryName)
 
   return {
     id: medusaProduct.id,

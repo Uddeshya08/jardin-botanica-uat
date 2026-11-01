@@ -1,4 +1,5 @@
 "use client"
+import { getJournalPath, type JournalArticleLink } from "@lib/util/journal-url"
 import { PortableText, type PortableTextComponents } from "@portabletext/react"
 import { Navigation } from "app/components/Navigation"
 import { Carousel, CarouselContent, CarouselItem } from "app/components/ui/carousel"
@@ -10,7 +11,7 @@ import type { SanityAccordionBlock, SanityBlog } from "types/sanity-blog"
 
 /**
  * Template 2 — editorial single-article layout inspired by framacph.com/blogs/stories.
- * Full-width narrative content, image breaks, minimal metadata, "Also" related grid.
+ * Centered narrative content, image breaks, minimal metadata, "Also" related grid.
  * Kept fully separate from SingleBlogTemplate so the live blog route is untouched.
  */
 
@@ -115,7 +116,7 @@ const AccordionItem = ({
 interface SingleBlogTemplate2Props {
   blog: SanityBlog | null
   countryCode: string
-  alsoArticles: { title: string; slug: string; image?: string; imagealt?: string }[]
+  alsoArticles: (JournalArticleLink & { image?: string; imagealt?: string })[]
   featuredProducts?: FeaturedProduct[]
   atmosphereProducts?: FeaturedProduct[]
 }
@@ -489,7 +490,7 @@ export const SingleBlogTemplate2 = ({
             transition={{ delay: 0.1, duration: 0.6 }}
           >
             <Link
-              href={`/${countryCode}/blogs`}
+              href={`/${countryCode}/journal`}
               className="inline-flex items-center text-base md:text-lg text-white hover:text-white/75 transition-colors duration-200 drop-shadow-md"
               style={{
                 fontFamily: '"American Typewriter"',
@@ -557,8 +558,8 @@ export const SingleBlogTemplate2 = ({
         </div>
       </motion.div>
 
-      {/* Keep editorial blocks in a single full-width document flow. */}
-      <div className="w-full max-w-none px-6 md:px-12 lg:px-20 mx-auto">
+      {/* Center the article column while preserving document order and paragraph spacing. */}
+      <div className="journal-article-content">
         {!showJournalStoryGrid && (
           <motion.div
             className="mb-8"
@@ -567,7 +568,7 @@ export const SingleBlogTemplate2 = ({
             transition={{ delay: 0.1, duration: 0.6 }}
           >
             <Link
-              href={`/${countryCode}/blogs`}
+              href={`/${countryCode}/journal`}
               className="inline-flex items-center text-xs md:text-sm text-[#999] hover:text-[#626262] transition-colors duration-200"
               style={{
                 fontFamily: '"American Typewriter"',
@@ -740,7 +741,7 @@ export const SingleBlogTemplate2 = ({
             {alsoArticles.map((article) => (
               <Link
                 key={article.slug}
-                href={`/${countryCode}/blogs/${article.slug}`}
+                href={getJournalPath(article.slug, article.category, countryCode)}
                 className="group block"
               >
                 <div className="relative overflow-hidden mb-4" style={{ aspectRatio: "4/5" }}>

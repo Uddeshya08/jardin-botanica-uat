@@ -2,6 +2,7 @@
 
 import { deleteLineItem, updateLineItem, updateLineItemGift } from "@lib/data/cart"
 import formatSummaryVariant from "@lib/util/format-summary-variant"
+import { formatProductSize } from "@lib/util/format-product-size"
 import type { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
@@ -37,7 +38,7 @@ const Item = ({ item, type = "full", currencyCode, index = 0 }: ItemProps) => {
 
   const summaryVariant = type === "preview" && !isBundle
     ? formatSummaryVariant(item)
-    : item.variant?.title
+    : formatProductSize(item.variant?.title || "")
 
   // Read gift data from line item metadata (persisted in database)
   const isGift = itemMetadata.is_gift === true || itemMetadata.is_gift === "true"

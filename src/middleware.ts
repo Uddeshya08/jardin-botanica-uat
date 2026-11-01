@@ -99,7 +99,7 @@ async function getCountryCode(
 export async function middleware(request: NextRequest) {
   let redirectUrl = request.nextUrl.href
 
-  let response = NextResponse.redirect(redirectUrl, 307)
+  let response = NextResponse.next()
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set("x-current-path", `${request.nextUrl.pathname}${request.nextUrl.search}`)
 
@@ -146,22 +146,26 @@ export async function middleware(request: NextRequest) {
   const countryCode = regionMap && (await getCountryCode(request, regionMap))
 
   const urlHasCountryCode =
-    countryCode && request.nextUrl.pathname.split("/")[1].includes(countryCode)
+    countryCode && request.nextUrl.pathname.split("/")[1].toLowerCase() === countryCode
 
-  // if one of the country codes is in the url and the cache id is set, return next
-  if (urlHasCountryCode && cacheIdCookie) {
-    return NextResponse.next({
+  // Country URLs must render even when crawlers or visitors do not retain cookies.
+  if (urlHasCountryCode) {
+    if (!cacheIdCookie) {
+      // Server components need the new cache ID on this first request too.
+      // Previously they received it only after the cookie-setting redirect.
+      const existingCookies = requestHeaders.get("cookie")
+      requestHeaders.set("cookie", [existingCookies, `_medusa_cache_id=${cacheId}`].filter(Boolean).join("; "))
+    }
+    response = NextResponse.next({
       request: {
         headers: requestHeaders,
       },
     })
-  }
-
-  // if one of the country codes is in the url and the cache id is not set, set the cache id and redirect
-  if (urlHasCountryCode && !cacheIdCookie) {
-    response.cookies.set("_medusa_cache_id", cacheId, {
-      maxAge: 60 * 60 * 24,
-    })
+    if (!cacheIdCookie) {
+      response.cookies.set("_medusa_cache_id", cacheId, {
+        maxAge: 60 * 60 * 24,
+      })
+    }
 
     return response
   }
@@ -190,6 +194,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|studio|_next/static|_next/image|favicon.ico|images|assets|png|svg|jpg|jpeg|gif|webp).*)",
+    "/((?!robots\\.txt$|sitemap\\.xml$|api|studio|_next/static|_next/image|favicon.ico|images|assets|png|svg|jpg|jpeg|gif|webp).*)",
   ],
 }

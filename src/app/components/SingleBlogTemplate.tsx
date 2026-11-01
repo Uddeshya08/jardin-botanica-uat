@@ -1,4 +1,5 @@
 "use client"
+import { getJournalPath, type JournalArticleLink } from "@lib/util/journal-url"
 import { PortableText, type PortableTextComponents } from "@portabletext/react"
 import { addToCart } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
@@ -222,10 +223,10 @@ const FeaturedBlogProduct = ({
 interface SingleBlogTemplateProps {
   blog: SanityBlogTemplate1 | null
   countryCode: string
-  latestArticles: { title: string; slug: string }[]
+  latestArticles: JournalArticleLink[]
   navigationPosts: {
-    previous: { title: string; slug: string } | null
-    next: { title: string; slug: string } | null
+    previous: JournalArticleLink | null
+    next: JournalArticleLink | null
   }
 }
 
@@ -428,7 +429,7 @@ export const SingleBlogTemplate = ({
           transition={{ delay: 0.1, duration: 0.6 }}
         >
           <Link
-            href={`/${countryCode}/blogs`}
+            href={`/${countryCode}/journal`}
             className="inline-flex items-center text-xs md:text-sm text-[#999] hover:text-[#626262] transition-colors duration-200"
             style={{
               fontFamily: '"American Typewriter"',
@@ -635,7 +636,7 @@ export const SingleBlogTemplate = ({
                   </p>
                   {navigationPosts.previous ? (
                     <Link
-                      href={`/${countryCode}/blogs/${navigationPosts.previous.slug}`}
+                      href={getJournalPath(navigationPosts.previous.slug, navigationPosts.previous.category, countryCode)}
                       className="block hover:opacity-70 transition-opacity duration-200"
                     >
                       <h4
@@ -669,7 +670,7 @@ export const SingleBlogTemplate = ({
                   </p>
                   {navigationPosts.next ? (
                     <Link
-                      href={`/${countryCode}/blogs/${navigationPosts.next.slug}`}
+                      href={getJournalPath(navigationPosts.next.slug, navigationPosts.next.category, countryCode)}
                       className="block hover:opacity-70 transition-opacity duration-200"
                     >
                       <h4
@@ -805,7 +806,7 @@ export const SingleBlogTemplate = ({
                       <motion.div className="flex items-start" variants={textHoverVariants}>
                         <span className=" mr-2 mt-1">•</span>
                         <Link
-                          href={`/${countryCode}/blogs/${article.slug}`}
+                          href={getJournalPath(article.slug, article.category, countryCode)}
                           className="leading-relaxed"
                           style={styles.subCopy}
                         >

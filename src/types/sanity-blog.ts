@@ -85,6 +85,7 @@ export interface SanityFeaturedProduct {
 }
 
 export interface SanityBlog {
+  category?: JournalCategory
   title: string
   slug: string
   description?: string
@@ -124,6 +125,7 @@ export interface ResolvedFeaturedProduct {
 // `featuredProducts` holds raw Medusa handles until the route resolves them
 // into ResolvedFeaturedProduct[].
 export interface SanityBlogTemplate1 {
+  category?: JournalCategory
   title: string
   slug: string
   description?: string
@@ -154,7 +156,7 @@ export const JOURNAL_CATEGORIES: JournalCategory[] = [
 ]
 
 // Merged journal-listing item (across `blog` + `blogTemplate1` types).
-// `href` is derived from `_type` server-side; consumers link to it directly.
+// `href` is built from category and slug; consumers link to it directly.
 export interface SanityJournalListItem {
   _type: "blog" | "blogTemplate1"
   title: string

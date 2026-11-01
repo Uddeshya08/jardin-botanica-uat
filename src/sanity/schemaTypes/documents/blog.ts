@@ -34,7 +34,7 @@ export const blog = defineType({
       name: "isFeatured",
       title: "Featured on journal page",
       type: "boolean",
-      description: "Toggle on to include this article in the Featured section on /blogs. Off = shows only in Recent Entries.",
+      description: "Toggle on to include this article in the Featured section on /journal. Off = shows only in Recent Entries.",
       initialValue: false,
     }),
     defineField({
@@ -47,7 +47,7 @@ export const blog = defineType({
       name: "category",
       title: "Category",
       type: "string",
-      description: "Section the article belongs to on /blogs. Drives the tab filter under the journal header.",
+      description: "Section the article belongs to on /journal. Drives the tab filter under the journal header.",
       options: {
         list: [
           { title: "Rituals", value: "Rituals" },

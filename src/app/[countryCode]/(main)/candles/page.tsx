@@ -934,7 +934,9 @@ const Candles = () => {
       />
       <PageBanner
         pageKey="candles"
-        containerClassName="absolute top-[37%] md:top-1/2 ps-6 md:ps-0 md:left-9 lg:left-[4.5rem] md:-translate-y-1/2 max-w-xs md:max-w-md"
+        className="collection-banner relative w-full overflow-hidden"
+        mediaClassName="collection-banner-media"
+        containerClassName="collection-banner-copy absolute ps-6 md:ps-0 md:left-9 lg:left-[4.5rem] md:top-[calc(50%+53px)] md:-translate-y-1/2 max-w-xs md:max-w-md"
       />
       {/* Mobile Product Carousel Section - Mobile Only */}
       {!isLoadingCollection && candlesCollection.length > 0 && (
@@ -1396,7 +1398,7 @@ const Candles = () => {
           </motion.a>
         </div>
       </motion.div>
-      {/* Soft Orris Section */};
+      {/* Journal feature */}
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -1412,10 +1414,12 @@ const Candles = () => {
             viewport={{ once: true, amount: 0.2 }}
             className="w-full md:w-[55%] h-[300px] md:h-[500px] overflow-hidden"
           >
-            <video autoPlay loop muted playsInline className="w-full h-full object-cover">
-              <source src="https://assets.mixkit.co/videos/5224/5224-720.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            <ImageWithFallback
+              src="/Images/on-wax-rooms-and-scent.webp"
+              alt="Candlelight and a quiet moment at home — On Wax, Rooms, and Scent"
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
           </motion.div>
           <motion.div
             initial={{ opacity: 0, x: 50 }}
@@ -1432,7 +1436,7 @@ const Candles = () => {
                 viewport={{ once: true, amount: 0.3 }}
                 className="text-2xl md:text-3xl lg:text-4xl font-normal opacity-[50%] mb-6 tracking-tight leading-tight font-american-typewriter"
               >
-                Soft Orris - The Scent of Stillness
+                On Wax, Rooms, and Scent
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
@@ -1441,9 +1445,9 @@ const Candles = () => {
                 viewport={{ once: true, amount: 0.3 }}
                 className="font-din-arabic text-base md:text-lg text-black/70 leading-relaxed mb-8"
               >
-                Powdery, elegant, and quietly floral-Soft Orris wraps your space in a gentle hug.
-                Perfect for slow mornings, self-care rituals, or unwinding at dusk. It's calm,
-                bottled in wax.
+                Some scents belong to rooms full of conversation, others to the quiet after the last
+                guest has left. A guide to the subtle relationship between fragrance, candlelight and
+                the spaces we call home.
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -1451,14 +1455,15 @@ const Candles = () => {
                 transition={{ duration: 0.8, delay: 0.5, ease: smoothEase }}
                 viewport={{ once: true, amount: 0.3 }}
               >
-                <motion.button
+                <motion.a
+                  href={`/${countryCode || "in"}/journal/spaces/on-wax-rooms-and-scent-home-fragrance-guide`}
                   whileHover={{ scale: 1.02, backgroundColor: "#000", color: "#fff" }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ duration: 0.3, ease: smoothEase }}
-                  className="bg-transparent border border-black/30 text-black px-8 py-3 font-normal tracking-wide rounded-none font-din-arabic text-base transition-colors duration-300"
+                  className="inline-block bg-transparent border border-black/30 text-black px-8 py-3 font-normal tracking-wide rounded-none font-din-arabic text-base transition-colors duration-300"
                 >
                   Read more
-                </motion.button>
+                </motion.a>
               </motion.div>
             </div>
           </motion.div>

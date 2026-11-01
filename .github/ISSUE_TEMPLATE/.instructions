@@ -1,0 +1,3 @@
+before pushing code check for build errors
+Never push code without permission
+Do not check build status after commit

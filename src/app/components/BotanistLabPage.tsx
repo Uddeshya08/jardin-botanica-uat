@@ -1246,7 +1246,7 @@ export function BotanistLabPage() {
                 backgroundColor: "rgba(0, 0, 0, 0.95)",
               }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => router.push(`/${resolvedCountryCode}/blogs`)}
+              onClick={() => router.push(`/${resolvedCountryCode}/journal`)}
               className="px-8 py-4 bg-black text-white font-din-arabic transition-all duration-300"
               style={{ letterSpacing: "0.1em" }}
             >

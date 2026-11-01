@@ -898,7 +898,7 @@ const ShippingAddress = ({
           value={formData["shipping_address.phone"]}
           onChange={handleChange}
           onBlur={() => setPhoneTouched(true)}
-          placeholder="10-digit mobile number or +91..."
+          placeholder="Enter your 10-digit mobile number"
           className={`h-9 w-full rounded-md border px-3 py-1 bg-white/60 font-din-arabic ${phoneTouched && phoneError ? "border-red-500" : "border-black/20"}`}
           aria-invalid={phoneTouched && Boolean(phoneError)}
           data-testid="shipping-phone-input"

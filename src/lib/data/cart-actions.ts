@@ -6,6 +6,7 @@ type AddPayload = {
   variantId: string
   quantity: number
   countryCode: string
+  quantityMode?: "add" | "replace"
   canBeGifted?: boolean
 }
 
@@ -23,6 +24,7 @@ export async function addToCartAction({
   quantity,
   countryCode,
   canBeGifted,
+  quantityMode,
 }: AddPayload) {
   if (!variantId) throw new Error("Missing variantId")
   const qty = Math.max(1, Number(quantity || 1))
@@ -32,13 +34,14 @@ export async function addToCartAction({
 
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const { lineItemId } = await addOrUpdateLineItem({
+      const { lineItemId, cartQuantity } = await addOrUpdateLineItem({
         variantId,
         quantity: qty,
         countryCode: cc,
         canBeGifted,
+        quantityMode,
       })
-      return { ok: true, quantity: qty, lineItemId }
+      return { ok: true, quantity: qty, cartQuantity, lineItemId }
     } catch (err: any) {
       // Medusa often throws this when channel/location/region is slightly out of sync.
       const msg = String(err?.message ?? "")

@@ -1,11 +1,15 @@
 import { getBaseURL } from "@lib/util/env"
 import type { Metadata } from "next"
 import GoogleAnalytics from "./components/GoogleAnalytics"
+import MicrosoftClarity from "./components/MicrosoftClarity"
 import { Toaster } from "./components/ui/sonner"
 import "styles/globals.css"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
+  icons: {
+    icon: "/favicon.ico",
+  },
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {
@@ -13,6 +17,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <html lang="en" data-mode="light" className="overflow-x-hidden">
       <body className="overflow-x-hidden">
         <GoogleAnalytics />
+        <MicrosoftClarity />
         <main className="relative">{props.children}</main>
         <Toaster />
       </body>

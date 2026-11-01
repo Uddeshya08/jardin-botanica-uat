@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSEOSanity("home")
   return buildMetadata(seo, {
     title: "Jardin Botanica",
-    description: "Discover botanical skincare crafted with nature's finest ingredients.",
+    description: "Discover Jardin Botanica's botanical candles, home fragrances, and body and hand care. Thoughtful essentials for everyday rituals and considered gifting.",
   })
 }
 
