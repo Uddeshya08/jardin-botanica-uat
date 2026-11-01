@@ -934,7 +934,9 @@ const Candles = () => {
       />
       <PageBanner
         pageKey="candles"
-        containerClassName="absolute top-[37%] md:top-1/2 ps-6 md:ps-0 md:left-9 lg:left-[4.5rem] md:-translate-y-1/2 max-w-xs md:max-w-md"
+        className="collection-banner collection-banner-candles relative w-full overflow-hidden"
+        mediaClassName="collection-banner-media"
+        containerClassName="collection-banner-copy absolute ps-6 md:ps-0 md:left-9 lg:left-[4.5rem] md:top-[calc(50%+53px)] md:-translate-y-1/2 max-w-xs md:max-w-md"
       />
       {/* Mobile Product Carousel Section - Mobile Only */}
       {!isLoadingCollection && candlesCollection.length > 0 && (
@@ -1216,14 +1218,14 @@ const Candles = () => {
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.8, ease: smoothEase }}
           viewport={{ once: true, amount: 0.1 }}
-          className="md:hidden w-full py-8 overflow-hidden"
+          className="md:hidden w-full pt-2 pb-6 overflow-hidden"
           data-testid="candle-mobile-carousel"
           onMouseDownCapture={() => setHasCarouselInteracted(true)}
           onTouchStartCapture={() => setHasCarouselInteracted(true)}
         >
           <div className="relative">
             {/* Mobile Heading for Banner Carousel */}
-            <div className="pl-6 pb-6">
+            <div className="px-6 pb-3">
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}

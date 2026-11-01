@@ -233,30 +233,32 @@ export function HomeCreationsPage({
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#e3e3d8" }}>
       {/* Hero Banner */}
-      <section className="relative h-screen sm:h-[65vh] lg:h-[75vh] overflow-hidden">
-        <motion.div
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          className="absolute inset-0 w-full h-full z-0"
-        >
-          <ImageWithFallback
-            src={HERO_IMAGE}
-            alt="Home Creations Collection"
-            className="w-full h-full object-cover"
+      <section className="collection-banner relative overflow-hidden">
+        <div className="collection-banner-media">
+          <motion.div
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="absolute inset-0 w-full h-full z-0"
+          >
+            <ImageWithFallback
+              src={HERO_IMAGE}
+              alt="Home Creations Collection"
+              className="w-full h-full object-cover"
+            />
+          </motion.div>
+          {/* Background Overlay - smooth natural gradient from top extending below center */}
+          <div
+            className="absolute inset-0 z-10"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.02) 85%, transparent 95%)",
+            }}
           />
-        </motion.div>
-        {/* Background Overlay - smooth natural gradient from top extending below center */}
-        <div
-          className="absolute inset-0 z-10"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.65) 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.02) 85%, transparent 95%)",
-          }}
-        />
+        </div>
 
         {/* Hero Text */}
-        <div className="absolute inset-0 flex items-center justify-center z-20">
+        <div className="collection-banner-copy collection-banner-copy-centered absolute inset-0 flex items-center justify-center z-20">
           <div className="text-center px-4 sm:px-6">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -339,7 +341,7 @@ export function HomeCreationsPage({
         onPointerDownCapture={() => setHasInteracted(true)}
       >
         <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20">
-          <div ref={firstRef} className="scrollbar-hide flex snap-x snap-mandatory gap-x-2 overflow-x-auto md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-16 md:overflow-visible lg:grid-cols-3 lg:gap-y-20">
+          <div ref={firstRef} className="grid grid-cols-2 gap-x-2 gap-y-6 md:gap-x-8 md:gap-y-16 lg:grid-cols-3 lg:gap-y-20">
             {filteredProducts.slice(0, 3).map((product, index) => (
               <ProductCard
                 key={product.id}
@@ -391,7 +393,7 @@ export function HomeCreationsPage({
                 onPointerEnter={(event) => { if (event.pointerType !== "touch") setSequencePaused(true) }}
                 onPointerLeave={() => setSequencePaused(false)}
                 onPointerDownCapture={() => setHasInteracted(true)}
-                className="scrollbar-hide mb-16 flex snap-x snap-mandatory gap-x-2 overflow-x-auto md:mb-24 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-16 md:overflow-visible lg:mb-32 lg:grid-cols-3 lg:gap-y-20">
+                className="mb-16 grid grid-cols-2 gap-x-2 gap-y-6 md:mb-24 md:gap-x-8 md:gap-y-16 lg:mb-32 lg:grid-cols-3 lg:gap-y-20">
                 {filteredProducts.slice(6).map((product, index) => (
                   <ProductCard
                     key={product.id}
@@ -465,7 +467,7 @@ function ProductCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group mx-0 flex w-[calc((100%_-_0.5rem)/2)] min-w-[calc((100%_-_0.5rem)/2)] flex-none snap-start flex-col md:mx-auto md:min-h-[600px] md:w-full md:min-w-0 md:max-w-[420px] md:snap-none"
+      className="group mx-0 flex w-full min-w-0 flex-col md:mx-auto md:min-h-[600px] md:max-w-[420px]"
     >
       {/* Product Image */}
       <Link href={`/products/${productSlug}`}>
