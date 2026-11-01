@@ -19411,18 +19411,18 @@ html {
     padding-inline: 0;
   }
 }
-/* Collection header media matches FIG's 1200:504 mobile and 2400:680 desktop banners.
+/* Collection media is 20% taller than the reference proportions.
    The extra 106px accounts for our fixed announcement/navigation overlay. */
 .collection-banner-media {
   position: relative;
   width: 100%;
-  height: calc(42vw + 106px);
+  height: calc(50vw + 106px);
   overflow: hidden;
 }
 
 @media (min-width: 768px) {
   .collection-banner-media {
-    height: calc(28.333333vw + 106px);
+    height: calc(34vw + 106px);
   }
 
   .collection-banner-copy-centered {
@@ -19458,5 +19458,9 @@ html {
 
   .collection-banner .collection-banner-copy p:not(:last-child) {
     margin-bottom: 12px;
+  }
+
+  .collection-banner-candles .collection-banner-copy {
+    padding-bottom: 12px;
   }
 }
