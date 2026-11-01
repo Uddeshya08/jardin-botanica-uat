@@ -341,7 +341,7 @@ export function HomeCreationsPage({
         onPointerDownCapture={() => setHasInteracted(true)}
       >
         <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20">
-          <div ref={firstRef} className="scrollbar-hide flex snap-x snap-mandatory gap-x-2 overflow-x-auto md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-16 md:overflow-visible lg:grid-cols-3 lg:gap-y-20">
+          <div ref={firstRef} className="grid grid-cols-2 gap-x-2 gap-y-6 md:gap-x-8 md:gap-y-16 lg:grid-cols-3 lg:gap-y-20">
             {filteredProducts.slice(0, 3).map((product, index) => (
               <ProductCard
                 key={product.id}
@@ -393,7 +393,7 @@ export function HomeCreationsPage({
                 onPointerEnter={(event) => { if (event.pointerType !== "touch") setSequencePaused(true) }}
                 onPointerLeave={() => setSequencePaused(false)}
                 onPointerDownCapture={() => setHasInteracted(true)}
-                className="scrollbar-hide mb-16 flex snap-x snap-mandatory gap-x-2 overflow-x-auto md:mb-24 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-16 md:overflow-visible lg:mb-32 lg:grid-cols-3 lg:gap-y-20">
+                className="mb-16 grid grid-cols-2 gap-x-2 gap-y-6 md:mb-24 md:gap-x-8 md:gap-y-16 lg:mb-32 lg:grid-cols-3 lg:gap-y-20">
                 {filteredProducts.slice(6).map((product, index) => (
                   <ProductCard
                     key={product.id}
@@ -467,7 +467,7 @@ function ProductCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group mx-0 flex w-[calc((100%_-_0.5rem)/2)] min-w-[calc((100%_-_0.5rem)/2)] flex-none snap-start flex-col md:mx-auto md:min-h-[600px] md:w-full md:min-w-0 md:max-w-[420px] md:snap-none"
+      className="group mx-0 flex w-full min-w-0 flex-col md:mx-auto md:min-h-[600px] md:max-w-[420px]"
     >
       {/* Product Image */}
       <Link href={`/products/${productSlug}`}>
