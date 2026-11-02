@@ -1,6 +1,6 @@
 "use client"
 
-import { addToCart } from "@lib/data/cart"
+import { addToCart } from "@lib/data/tracked-cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import type { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"

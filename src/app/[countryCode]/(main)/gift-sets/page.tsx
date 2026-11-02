@@ -1,6 +1,6 @@
 "use client"
 
-import { addOrUpdateLineItem } from "@lib/data/cart"
+import { addOrUpdateLineItem } from "@lib/data/tracked-cart"
 import { emitCartUpdated } from "@lib/util/cart-client"
 import { useLedger } from "app/context/ledger-context"
 import { useParams } from "next/navigation"

@@ -1,5 +1,6 @@
 "use client"
 import type { HttpTypes } from "@medusajs/types"
+import MetaProductView from "@modules/products/components/meta-product-view"
 import { Afterlife } from "app/components/Afterlife"
 import { CustomerTestimonials } from "app/components/CustomerTestimonials"
 import Featured from "app/components/Featured"
@@ -138,6 +139,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
   return (
     <>
+      <MetaProductView product={product} />
       {/* my new code tamplate */}
       <div className="min-h-screen">
         <RippleEffect />

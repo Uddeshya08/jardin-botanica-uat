@@ -1,6 +1,6 @@
-"use server"
+"use client"
 
-import { addOrUpdateLineItem } from "@lib/data/cart"
+import { addOrUpdateLineItem } from "@lib/data/tracked-cart"
 
 type AddPayload = {
   variantId: string

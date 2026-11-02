@@ -1,7 +1,7 @@
 "use client"
 import { getJournalPath, type JournalArticleLink } from "@lib/util/journal-url"
 import { PortableText, type PortableTextComponents } from "@portabletext/react"
-import { addToCart } from "@lib/data/cart"
+import { addToCart } from "@lib/data/tracked-cart"
 import { convertToLocale } from "@lib/util/money"
 import { Navigation } from "app/components/Navigation"
 import {
