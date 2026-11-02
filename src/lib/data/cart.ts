@@ -4,6 +4,8 @@
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
+import { getMetaCartEvent } from "@lib/util/meta-event-data"
+import type { MetaProductEvent } from "@lib/util/meta-event-data"
 import type { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
@@ -150,7 +152,7 @@ export async function addToCart({
     ...(await getAuthHeaders()),
   }
 
-  await sdk.store.cart
+  return sdk.store.cart
     .createLineItem(
       cart.id,
       {
@@ -160,8 +162,9 @@ export async function addToCart({
       {},
       headers
     )
-    .then(async () => {
+    .then(async ({ cart: updatedCart }) => {
       await revalidateCartShippingState()
+      return getMetaCartEvent(updatedCart, variantId, quantity)
     })
     .catch(medusaError)
 }
@@ -188,7 +191,7 @@ export async function addOrUpdateLineItem({
   canBeGifted?: boolean
   quantityMode?: "add" | "replace"
   metadata?: Record<string, unknown>
-}): Promise<{ lineItemId: string; cartId: string; cartQuantity: number }> {
+}): Promise<{ lineItemId: string; cartId: string; cartQuantity: number; metaEvent?: MetaProductEvent }> {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
   }
@@ -208,6 +211,7 @@ export async function addOrUpdateLineItem({
 
   let lineItemId: string
   let cartQuantity: number
+  let metaEvent: MetaProductEvent | undefined
 
   if (existingLineItem) {
     // Update existing line item quantity (preserves metadata including gift flags)
@@ -216,7 +220,8 @@ export async function addOrUpdateLineItem({
     lineItemId = existingLineItem.id
     await sdk.store.cart
       .updateLineItem(cart.id, existingLineItem.id, { quantity: newQuantity }, {}, headers)
-      .then(async () => {
+      .then(async ({ cart: updatedCart }) => {
+        metaEvent = getMetaCartEvent(updatedCart, variantId, newQuantity - existingLineItem.quantity)
         await revalidateCartShippingState()
       })
       .catch(medusaError)
@@ -248,7 +253,8 @@ export async function addOrUpdateLineItem({
 
     await sdk.store.cart
       .createLineItem(cart.id, lineItemData, {}, headers)
-      .then(async () => {
+      .then(async ({ cart: updatedCart }) => {
+        metaEvent = getMetaCartEvent(updatedCart, variantId, quantity)
         await revalidateCartShippingState()
       })
       .catch(medusaError)
@@ -259,7 +265,7 @@ export async function addOrUpdateLineItem({
     lineItemId = newLineItem?.id || ""
   }
 
-  return { lineItemId, cartId: cart.id, cartQuantity }
+  return { lineItemId, cartId: cart.id, cartQuantity, metaEvent }
 }
 
 export async function updateLineItem({ lineId, quantity }: { lineId: string; quantity: number }) {

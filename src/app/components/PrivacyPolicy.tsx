@@ -50,7 +50,7 @@ const PRIVACY_SECTIONS: PrivacySection[] = [
     number: "4",
     title: "Why We Collect and Use Personal Data",
     content:
-      "We use your personal data to: Process orders, payments, deliveries, returns, and refunds | Communicate with you about your order (confirmations, shipping updates, service messages) | Provide customer support and resolve issues | Send marketing communications if you opt in (email/SMS), and measure their performance | Maintain site security, prevent fraud, and protect our business and customers | Improve our Site, products, and customer experience (analytics and performance) | Measure advertising performance through Meta using purchase events | Comply with applicable laws, regulations, and lawful requests | Verify phone numbers for cash on delivery orders, confirm order authenticity, and help prevent fraudulent or unsuccessful deliveries."
+      "We use your personal data to: Process orders, payments, deliveries, returns, and refunds | Communicate with you about your order (confirmations, shipping updates, service messages) | Provide customer support and resolve issues | Send marketing communications if you opt in (email/SMS), and measure their performance | Maintain site security, prevent fraud, and protect our business and customers | Improve our Site, products, and customer experience (analytics and performance) | Measure advertising performance through Meta using product-view, add-to-cart, and purchase events | Comply with applicable laws, regulations, and lawful requests | Verify phone numbers for cash on delivery orders, confirm order authenticity, and help prevent fraudulent or unsuccessful deliveries."
   },
   {
     number: "5",
@@ -60,9 +60,9 @@ const PRIVACY_SECTIONS: PrivacySection[] = [
   },
   {
     number: "6",
-    title: "Cookies and Analytics",
+    title: "Cookies, Analytics, and Advertising",
     content:
-      "We use cookies and similar technologies to: Keep the Site working (essential cookies) | Understand Site usage and improve performance (analytics cookies, if enabled) | Support advertising/retargeting (marketing cookies, if enabled). You can manage cookies through our cookie banner (where available), and/or your browser settings (you can block or delete cookies). Note: Blocking certain cookies may impact how the Site functions. | Meta advertising measurement: When enabled, we send eligible purchase events directly from our server to Meta through its Conversions API. These include order value, currency, order and product identifiers, quantity, purchase time, and website URL. Email addresses, phone numbers, and customer identifiers are hashed before transmission to help Meta match purchases to its users and measure advertising performance. Hashing does not make this information anonymous. | This server-to-server sharing does not depend on browser cookies; blocking cookies alone does not stop it. For questions or requests about this processing, contact hello@jardinbotanica.com. Meta processes received data under its own privacy practices: https://www.facebook.com/privacy/policy/",
+      "We use cookies and similar technologies to: Keep the Site working (essential cookies) | Understand Site usage and improve performance (analytics cookies, if enabled) | Support advertising/retargeting (marketing cookies, if enabled). You can manage cookies through our cookie banner (where available), and/or your browser settings (you can block or delete cookies). Note: Blocking certain cookies may impact how the Site functions. | Meta advertising measurement: When enabled, we send eligible purchase events directly from our server to Meta through its Conversions API. These include order value, currency, order and product identifiers, quantity, purchase time, and website URL. Email addresses, phone numbers, customer identifiers, names, city, state, postal code, and country are normalized and hashed before transmission. Gender and date of birth are included only if explicitly supplied and stored in a customer profile; unavailable values are omitted. These matching details help Meta match purchases to its users and measure advertising performance. Hashing does not make this information anonymous. | We also use the Meta Pixel to send product-view and successful add-to-cart events, including product identifiers, quantities, available prices, and currency. The Pixel may use cookies and process browser, device, and network information to support advertising measurement. We honor a recorded rejection in our cookie banner for these browser events. | This server-to-server Purchase sharing does not depend on browser cookies; blocking cookies alone does not stop it. For questions or requests about this processing, contact hello@jardinbotanica.com. Meta processes received data under its own privacy practices: https://www.facebook.com/privacy/policy/",
   },
   {
     number: "7",
@@ -148,7 +148,7 @@ export function PrivacyPolicy() {
           <h1 className="font-american-typewriter text-3xl mb-6 text-black">Privacy Policy</h1>
           <div className="h-px w-20 bg-black/15 mb-6"></div>
           <p className="font-din-arabic text-black/50 tracking-wide">
-            Effective date: October 31, 2026
+            Effective date: November 02, 2026
           </p>
         </motion.div>
 
