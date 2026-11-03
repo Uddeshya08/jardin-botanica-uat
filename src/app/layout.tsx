@@ -8,7 +8,10 @@ import "styles/globals.css"
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico", type: "image/x-icon" },
+      { url: "/favicon-256.png", type: "image/png", sizes: "256x256" },
+    ],
   },
 }
 
