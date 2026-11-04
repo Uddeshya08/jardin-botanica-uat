@@ -50,6 +50,16 @@ function initializePixel(): boolean {
   return true
 }
 
+export function trackMetaPageView(): boolean {
+  try {
+    if (!initializePixel()) return false
+    window.fbq?.("track", "PageView")
+    return true
+  } catch {
+    return false
+  }
+}
+
 export function trackMetaProductEvent(name: "ViewContent" | "AddToCart", event?: MetaProductEvent): void {
   try {
     if (!event?.productId || !Number.isFinite(event.quantity) || event.quantity <= 0) return

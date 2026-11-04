@@ -34,6 +34,75 @@ function browser(id = "1489706953077337", choice = null) {
 }
 const event = { productId: "prod_candle", quantity: 2, value: 3600, currency: "INR" }
 
+test("PageView and product events share one loader and one initialization", () => {
+  const b = browser()
+  assert.equal(b.trackMetaPageView(), true)
+  b.trackMetaProductEvent("ViewContent", event)
+  b.trackMetaProductEvent("AddToCart", event)
+  const queue = b.globals.window.fbq.queue
+  assert.equal(b.scripts.length, 1)
+  assert.equal(queue.filter((entry) => entry[0] === "init").length, 1)
+  assert.equal(queue.find((entry) => entry[0] === "init")[1], "1489706953077337")
+  assert.equal(queue.filter((entry) => entry[0] === "track").map((entry) => entry[1]).join(","),
+    "PageView,ViewContent,AddToCart")
+})
+
+test("PageView is suppressed on rejection or missing configuration", () => {
+  for (const b of [browser(""), browser("invalid"), browser(undefined, "declined")]) {
+    assert.equal(b.trackMetaPageView(), false)
+    assert.equal(b.scripts.length, 0)
+  }
+})
+
+test("PageView handles navigation and search changes without effect replay duplicates", () => {
+  const ref = { current: undefined }, listeners = new Set(), events = []
+  let effect, pathname = "/in", search = "", allowed = true
+  const { default: PageView } = load("src/app/components/MetaPageView.tsx", {
+    window: { addEventListener: (_, fn) => listeners.add(fn), removeEventListener: (_, fn) => listeners.delete(fn) },
+  }, {
+    "react": { useRef: () => ref, useEffect: (fn) => { effect = fn } },
+    "next/navigation": { usePathname: () => pathname, useSearchParams: () => ({ toString: () => search }) },
+    "@lib/util/meta-pixel": { trackMetaPageView: () => {
+      if (!allowed) return false
+      events.push(`${pathname}?${search}`)
+      return true
+    } },
+  })
+  PageView(); let cleanup = effect(); cleanup(); cleanup = effect()
+  assert.equal(events.length, 1)
+  cleanup(); pathname = "/in/products/candle"; PageView(); cleanup = effect()
+  cleanup(); search = "variant=small"; PageView(); cleanup = effect()
+  assert.equal(events.length, 3)
+  cleanup(); pathname = "/in"; search = ""; PageView(); cleanup = effect()
+  assert.equal(events.length, 4)
+  cleanup(); pathname = "/in/candles"; allowed = false; PageView(); cleanup = effect()
+  assert.equal(events.length, 4)
+  allowed = true; for (const listener of listeners) listener()
+  assert.equal(events.length, 5)
+  for (const listener of listeners) listener()
+  assert.equal(events.length, 5)
+  cleanup(); assert.equal(listeners.size, 0)
+})
+
+test("server-rendered Pixel supplies the no-JavaScript fallback for the configured ID", () => {
+  const { renderToStaticMarkup } = require("react-dom/server")
+  for (const id of ["1489706953077337", "", "invalid"]) {
+    const { default: Pixel } = load("src/app/components/MetaPixel.tsx", {
+      process: { env: { NEXT_PUBLIC_META_PIXEL_ID: id } },
+    }, {
+      "react": require("react"), "react/jsx-runtime": require("react/jsx-runtime"),
+      "./MetaPageView": { default: () => null },
+    })
+    const html = renderToStaticMarkup(Pixel())
+    if (id === "1489706953077337") {
+      assert.match(html, /<noscript><img/)
+      assert.match(html, /id=1489706953077337&amp;ev=PageView&amp;noscript=1/)
+      assert.match(html, /display:none/)
+      assert.doesNotMatch(html, /4120952484705648/)
+    } else assert.equal(html, "")
+  }
+})
+
 test("Pixel uses the public dataset, initializes once and never emits Purchase", () => {
   const b = browser()
   b.trackMetaProductEvent("ViewContent", { ...event, quantity: 1, value: 1800 })
