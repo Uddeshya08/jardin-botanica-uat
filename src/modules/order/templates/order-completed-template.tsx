@@ -3,6 +3,7 @@ import OnboardingCta from "@modules/order/components/onboarding-cta"
 import { OrderConfirmationUI } from "@modules/order/components/order-confirmation-ui"
 import { cookies as nextCookies } from "next/headers"
 import { getOrderReference } from "@lib/util/order-reference"
+import MetaPurchase from "@modules/order/components/meta-purchase"
 
 type OrderCompletedTemplateProps = {
   order: HttpTypes.StoreOrder
@@ -19,6 +20,7 @@ export default async function OrderCompletedTemplate({
 
   return (
     <div data-testid="order-complete-container">
+      <MetaPurchase orderId={order.id} />
       {isOnboarding && <OnboardingCta orderId={order.id} />}
       <OrderConfirmationUI
         orderNumber={orderNumber}

@@ -20,17 +20,20 @@ function load(file, globals = {}, imports = {}) {
 }
 
 function browser(id = "1489706953077337", choice = null) {
-  const scripts = [], listeners = {}
+  const scripts = [], listeners = {}, requests = [], receipts = new Map()
   let eventNumber = 0
   const globals = {
     process: { env: { NEXT_PUBLIC_META_PIXEL_ID: id } },
-    window: { addEventListener: (name, fn) => { listeners[name] = fn } },
+    window: { location: { href: "https://www.jardinbotanica.com/in?email=private" },
+      addEventListener: (name, fn) => { listeners[name] = fn } },
     localStorage: { getItem: () => choice },
-    document: { createElement: () => ({}), head: { appendChild: (script) => scripts.push(script) } },
-    crypto: { randomUUID: () => `event-${++eventNumber}` },
+    sessionStorage: { getItem: (key) => receipts.get(key), setItem: (key, value) => receipts.set(key, value) },
+    document: { cookie: "_fbp=fb.1.1760000000000.1234", createElement: () => ({}), head: { appendChild: (script) => scripts.push(script) } },
+    crypto: { randomUUID: () => `00000000-0000-4000-8000-${String(++eventNumber).padStart(12, "0")}` },
+    fetch: async (url, options) => { requests.push({ url, options }); return { status: 202 } },
   }
   const pixel = load("src/lib/util/meta-pixel.ts", globals)
-  return { ...pixel, globals, scripts, listeners, setChoice: (next) => { choice = next } }
+  return { ...pixel, globals, scripts, listeners, requests, receipts, setChoice: (next) => { choice = next } }
 }
 const event = { productId: "prod_candle", quantity: 2, value: 3600, currency: "INR" }
 
@@ -45,6 +48,150 @@ test("PageView and product events share one loader and one initialization", () =
   assert.equal(queue.find((entry) => entry[0] === "init")[1], "1489706953077337")
   assert.equal(queue.filter((entry) => entry[0] === "track").map((entry) => entry[1]).join(","),
     "PageView,ViewContent,AddToCart")
+})
+
+test("PageView, ViewContent and AddToCart use the same IDs on Pixel and CAPI relay", () => {
+  const b = browser()
+  b.trackMetaPageView()
+  b.trackMetaProductEvent("ViewContent", event)
+  b.trackMetaProductEvent("AddToCart", event)
+  const pixelEvents = b.globals.window.fbq.queue.filter((entry) => entry[0] === "track")
+  assert.equal(b.requests.length, 3)
+  b.requests.forEach(({ url, options }, index) => {
+    const body = JSON.parse(options.body)
+    assert.equal(url, "/api/meta/events")
+    assert.equal(body.event_name, pixelEvents[index][1])
+    assert.equal(body.event_id, pixelEvents[index][3].eventID)
+    assert.equal(body.event_source_url, "https://www.jardinbotanica.com/in")
+    assert.equal(body.fbp, "fb.1.1760000000000.1234")
+    assert.equal(options.keepalive, true)
+    assert.equal(body.user_data, undefined)
+    assert.equal(body.access_token, undefined)
+  })
+  assert.equal(new Set(pixelEvents.map((entry) => entry[3].eventID)).size, 3)
+})
+
+test("Purchase uses its backend-issued order ID and prevents repeated browser sends", () => {
+  const b = browser()
+  const plan = { state: "ready", dataset_id: "1489706953077337", event_id: "purchase_order_test",
+    custom_data: { order_id: "order_test", value: 1900, currency: "INR", content_ids: ["prod_candle"] } }
+  assert.equal(b.trackMetaPurchase(plan), true)
+  assert.equal(b.trackMetaPurchase(plan), true)
+  const purchases = b.globals.window.fbq.queue.filter((entry) => entry[1] === "Purchase")
+  assert.equal(purchases.length, 1)
+  assert.equal(purchases[0][3].eventID, "purchase_order_test")
+  assert.equal(purchases[0][2].value, 1900)
+  assert.equal(b.requests.length, 0) // CAPI Purchase is already independently queued by order.placed.
+  assert.equal(b.receipts.size, 1)
+})
+
+test("Purchase never invents a new ID, changes datasets, sends rejected or invalid orders", () => {
+  const plan = { state: "ready", dataset_id: "1489706953077337", event_id: "purchase_order_test",
+    custom_data: { order_id: "order_test", value: 1900, currency: "INR" } }
+  const b = browser()
+  for (const invalid of [{ ...plan, event_id: "random-id" }, { ...plan, dataset_id: "999" },
+    { ...plan, state: "waiting" }, { ...plan, custom_data: { ...plan.custom_data, value: 0 } }]) {
+    assert.equal(b.trackMetaPurchase(invalid), false)
+  }
+  const declined = browser(undefined, "declined")
+  assert.equal(declined.trackMetaPurchase(plan), false)
+  assert.equal(b.scripts.length, 0)
+  assert.equal(declined.scripts.length, 0)
+})
+
+test("first-party relay validates origin, uses server credentials and ignores client identity spoofing", async () => {
+  const calls = []
+  const relay = load("src/app/api/meta/events/route.ts", {
+    URL, Buffer, AbortSignal, process: { env: { META_CAPI_RELAY_SECRET: "s".repeat(64), NEXT_PUBLIC_META_PIXEL_ID: "1489706953077337" } },
+  }, {
+    "node:crypto": require("node:crypto"),
+    "next/server": { NextResponse: { json: (body, options = {}) => ({ body, status: options.status || 200 }) } },
+    "@medusajs/js-sdk": { Client: class {
+      constructor(settings) { assert.equal(settings.debug, false) }
+      async fetch(url, options) { calls.push({ url, options }); return { queued: true } }
+    } },
+  })
+  const headers = new Map([["origin", "https://www.jardinbotanica.com"], ["user-agent", "real-agent"], ["x-forwarded-for", "192.0.2.1"]])
+  const req = { url: "https://www.jardinbotanica.com/api/meta/events", headers: { get: (name) => headers.get(name) },
+    text: async () => JSON.stringify({ event_name: "PageView", event_id: "pageview_test", event_source_url: "https://www.jardinbotanica.com/in",
+      user_data: { client_ip_address: "malicious", client_user_agent: "spoofed" } }) }
+  const result = await relay.POST(req)
+  assert.equal(result.status, 200)
+  assert.equal(calls[0].options.headers["x-meta-relay-secret"], "s".repeat(64))
+  assert.equal(calls[0].options.body.user_data.client_user_agent, "real-agent")
+  assert.equal(calls[0].options.body.user_data.client_ip_address, "192.0.2.1")
+  assert.equal(JSON.stringify(result).includes("s".repeat(64)), false)
+  headers.set("origin", "https://attacker.example")
+  assert.equal((await relay.POST(req)).status, 403)
+  assert.equal(calls.length, 1)
+})
+
+test("transport retries preserve the exact same event ID and body", async () => {
+  const requests = [], timers = []
+  const pixel = load("src/lib/util/meta-pixel.ts", {
+    process: { env: { NEXT_PUBLIC_META_PIXEL_ID: "1489706953077337" } },
+    window: { location: { href: "https://www.jardinbotanica.com/in" }, addEventListener: () => {} },
+    localStorage: { getItem: () => null },
+    document: { cookie: "", createElement: () => ({}), head: { appendChild: () => {} } },
+    crypto: { randomUUID: () => "00000000-0000-4000-8000-000000000001" },
+    setTimeout: (fn) => { timers.push(fn) },
+    fetch: async (_, options) => { requests.push(options.body); if (requests.length === 1) throw new Error("timeout"); return { status: 202 } },
+  })
+  pixel.trackMetaPageView()
+  await new Promise(setImmediate)
+  assert.equal(timers.length, 1)
+  timers[0]()
+  await new Promise(setImmediate)
+  assert.equal(requests.length, 2)
+  assert.equal(requests[0], requests[1])
+})
+
+test("confirmation reads canonical Purchase data and ignores an unmounted effect", async () => {
+  let effect
+  const requests = [], tracked = []
+  const plan = { state: "ready", dataset_id: "1489706953077337", event_id: "purchase_order_test",
+    custom_data: { order_id: "order_test", value: 1900, currency: "INR" } }
+  const { default: Purchase } = load("src/modules/order/components/meta-purchase/index.tsx", {
+    AbortController, setTimeout, clearTimeout,
+    fetch: async (_, options) => { requests.push(options); return { ok: true, json: async () => plan } },
+  }, {
+    "react": { useEffect: (fn) => { effect = fn } },
+    "@lib/util/meta-pixel": { trackMetaPurchase: (data) => tracked.push(data) },
+  })
+  Purchase({ orderId: "order_test" }); const first = effect(); first()
+  const second = effect()
+  await new Promise(setImmediate)
+  assert.equal(requests.length, 2)
+  assert.equal(tracked.length, 1)
+  assert.equal(tracked[0].event_id, "purchase_order_test")
+  assert.equal(JSON.parse(requests[1].body).order_id, "order_test")
+  assert.equal(JSON.parse(requests[1].body).custom_data, undefined)
+  second()
+})
+
+test("Purchase proxy uses a read-only backend plan and never queues a second CAPI Purchase", async () => {
+  const calls = []
+  const plan = { state: "ready", dataset_id: "1489706953077337", event_id: "purchase_order_test",
+    custom_data: { order_id: "order_test", value: 1900, currency: "INR" } }
+  const relay = load("src/app/api/meta/events/route.ts", {
+    URL, Buffer, AbortSignal, process: { env: { META_CAPI_RELAY_SECRET: "s".repeat(64), NEXT_PUBLIC_META_PIXEL_ID: "1489706953077337" } },
+  }, {
+    "node:crypto": require("node:crypto"),
+    "next/server": { NextResponse: { json: (body, options = {}) => ({ body, status: options.status || 200 }) } },
+    "@medusajs/js-sdk": { Client: class {
+      constructor(settings) { assert.equal(settings.debug, false) }
+      async fetch(url, options) { calls.push({ url, options }); return plan }
+    } },
+  })
+  const req = { url: "https://www.jardinbotanica.com/api/meta/events",
+    headers: { get: (key) => key === "origin" ? "https://www.jardinbotanica.com" : null },
+    text: async () => JSON.stringify({ event_name: "Purchase", order_id: "order_test", custom_data: { value: 1 } }) }
+  const result = await relay.POST(req)
+  assert.equal(result.body.custom_data.value, 1900)
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0].url, "/store/custom/meta/purchase/order_test")
+  assert.equal(calls[0].options.method, "GET")
+  assert.equal(calls[0].options.body, undefined)
 })
 
 test("PageView is suppressed on rejection or missing configuration", () => {
