@@ -1,4 +1,4 @@
-import { getBaseURL } from "@lib/util/env"
+import { getSEOBaseURL } from "@lib/util/env"
 import type { Metadata } from "next"
 import GoogleAnalytics from "./components/GoogleAnalytics"
 import MicrosoftClarity from "./components/MicrosoftClarity"
@@ -7,7 +7,7 @@ import { Toaster } from "./components/ui/sonner"
 import "styles/globals.css"
 
 export const metadata: Metadata = {
-  metadataBase: new URL(getBaseURL()),
+  metadataBase: new URL(getSEOBaseURL()),
   icons: {
     icon: [
       { url: "/favicon.ico", type: "image/x-icon" },
