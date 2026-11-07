@@ -1,8 +1,7 @@
 "use client"
 
 import Script from "next/script"
-
-const MEASUREMENT_ID = "G-2XT3X045KM"
+import { GOOGLE_MEASUREMENT_ID as MEASUREMENT_ID } from "@lib/util/google-purchase"
 
 export default function GoogleAnalytics() {
   return (

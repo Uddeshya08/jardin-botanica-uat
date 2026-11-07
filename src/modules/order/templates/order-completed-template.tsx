@@ -4,6 +4,8 @@ import { OrderConfirmationUI } from "@modules/order/components/order-confirmatio
 import { cookies as nextCookies } from "next/headers"
 import { getOrderReference } from "@lib/util/order-reference"
 import MetaPurchase from "@modules/order/components/meta-purchase"
+import GooglePurchase from "@modules/order/components/google-purchase"
+import { buildGooglePurchase } from "@lib/util/google-purchase"
 
 type OrderCompletedTemplateProps = {
   order: HttpTypes.StoreOrder
@@ -21,6 +23,7 @@ export default async function OrderCompletedTemplate({
   return (
     <div data-testid="order-complete-container">
       <MetaPurchase orderId={order.id} />
+      <GooglePurchase purchase={buildGooglePurchase(order)} />
       {isOnboarding && <OnboardingCta orderId={order.id} />}
       <OrderConfirmationUI
         orderNumber={orderNumber}

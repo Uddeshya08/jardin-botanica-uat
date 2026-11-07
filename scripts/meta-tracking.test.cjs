@@ -37,6 +37,88 @@ function browser(id = "1489706953077337", choice = null) {
 }
 const event = { productId: "prod_candle", quantity: 2, value: 3600, currency: "INR" }
 
+function googleOrder(overrides = {}) {
+  return { id: "order_ga", status: "pending", created_at: new Date().toISOString(), currency_code: "inr",
+    tax_total: 110, shipping_total: 110, shipping_tax_total: 10,
+    items: [{ id: "item_1", variant_id: "variant_1", product_title: "Candle", quantity: 2,
+      total: 1100, tax_total: 100 }], ...overrides }
+}
+
+test("GA4 purchase uses discounted net merchandise, separate shipping/tax and major units", () => {
+  const ga = load("src/lib/util/google-purchase.ts")
+  const purchase = ga.buildGooglePurchase(googleOrder())
+  assert.equal(purchase.transaction_id, "order_ga")
+  assert.equal(purchase.currency, "INR")
+  assert.equal(purchase.value, 1000)
+  assert.equal(purchase.shipping, 100)
+  assert.equal(purchase.tax, 110)
+  assert.equal(purchase.items[0].price, 500)
+  assert.equal(purchase.items[0].quantity, 2)
+  assert.equal(purchase.items[0].item_id, "variant_1")
+  assert.equal(purchase.value, purchase.items.reduce((sum, item) => sum + item.price * item.quantity, 0))
+  assert.equal(purchase.email, undefined)
+})
+
+test("GA4 skips canceled, historical, malformed and incomplete orders", () => {
+  const ga = load("src/lib/util/google-purchase.ts")
+  for (const overrides of [{ status: "canceled" }, { currency_code: "" }, { tax_total: null },
+    { created_at: new Date(Date.now() - 2 * 86400000).toISOString() }, { items: [] },
+    { items: [{ id: "item", quantity: 1, total: 100, tax_total: 200 }] }]) {
+    assert.equal(ga.buildGooglePurchase(googleOrder(overrides)), undefined)
+  }
+})
+
+test("GA4 waits for gtag, respects decline, and deduplicates reloads with stable transaction_id", () => {
+  let choice = null
+  const receipts = new Map(), calls = []
+  const globals = { window: {}, localStorage: {
+    getItem: (key) => key === "jardinBotanica_cookieConsent" ? choice : receipts.get(key),
+    setItem: (key, value) => receipts.set(key, value),
+  } }
+  const ga = load("src/lib/util/google-purchase.ts", globals)
+  const purchase = ga.buildGooglePurchase(googleOrder())
+  assert.equal(ga.trackGooglePurchase(purchase), false)
+  assert.equal(receipts.size, 0)
+  globals.window.gtag = (...args) => calls.push(args)
+  choice = "declined"
+  assert.equal(ga.trackGooglePurchase(purchase), false)
+  choice = "accepted"
+  assert.equal(ga.trackGooglePurchase(purchase), true)
+  assert.equal(ga.trackGooglePurchase(purchase), true)
+  const reloaded = load("src/lib/util/google-purchase.ts", globals)
+  assert.equal(reloaded.trackGooglePurchase(purchase), true)
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0][0], "event")
+  assert.equal(calls[0][1], "purchase")
+  assert.equal(calls[0][2].send_to, "G-2XT3X045KM")
+  assert.equal(calls[0][2].transaction_id, "order_ga")
+})
+
+test("GA4 confirmation retries script readiness and cancels work on unmount", () => {
+  let effect, timer, cleanup
+  let sends = 0, ready = false, cleared = false
+  const listeners = {}
+  const Component = load("src/modules/order/components/google-purchase/index.tsx", {
+    window: { addEventListener: (key, fn) => { listeners[key] = fn },
+      removeEventListener: (key) => { delete listeners[key] } },
+    setTimeout: (fn) => { timer = fn; return 1 },
+    clearTimeout: () => { cleared = true; timer = undefined },
+  }, { react: { useEffect: (fn) => { effect = fn } },
+    "@lib/util/google-purchase": { trackGooglePurchase: () => { sends++; return ready } } })
+    .default
+  Component({ purchase: { transaction_id: "order_ga" } })
+  cleanup = effect()
+  assert.equal(sends, 1)
+  assert.equal(typeof timer, "function")
+  ready = true
+  timer()
+  assert.equal(sends, 2)
+  assert.equal(timer, undefined)
+  cleanup()
+  assert.equal(cleared, true)
+  assert.equal(Object.keys(listeners).length, 0)
+})
+
 test("PageView and product events share one loader and one initialization", () => {
   const b = browser()
   assert.equal(b.trackMetaPageView(), true)
