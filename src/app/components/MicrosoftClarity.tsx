@@ -6,7 +6,7 @@ const PROJECT_ID = "z4w1tbb6r8"
 
 export default function MicrosoftClarity() {
   return (
-    <Script id="microsoft-clarity-init" strategy="afterInteractive">
+    <Script id="microsoft-clarity-init" strategy="lazyOnload">
       {`
         (function(c,l,a,r,i,t,y){
           c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};

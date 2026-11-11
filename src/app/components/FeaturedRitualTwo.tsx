@@ -1,6 +1,7 @@
 "use client"
 import { motion } from "motion/react"
 import React from "react"
+import Image from "next/image"
 import type { FeaturedRitualTwoSection } from "../../types/contentful"
 
 type FeaturedRitualTwoProps = {
@@ -103,9 +104,11 @@ export function FeaturedRitualTwo({ featuredRitualTwoContent }: FeaturedRitualTw
         <motion.div
           whileHover={{ scale: 1.02 }}
           transition={{ duration: 0.9 }}
-          className="w-full h-full"
+          className="relative w-full h-full"
         >
-          <img
+          <Image
+            fill
+            sizes="(max-width: 1023px) 100vw, 60vw"
             src={meta.imageUrl}
             alt={meta.imageAlt}
             className="w-full h-full object-contain md:object-cover object-center scale-150 md:scale-100"

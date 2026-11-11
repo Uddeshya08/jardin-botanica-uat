@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import React, { useEffect, useMemo, useState, useTransition } from "react"
 import { IoIosArrowDown } from "react-icons/io"
@@ -528,7 +529,7 @@ export function ProductHero({
     >
       {/* LEFT: (content) */}
       <motion.div
-        initial={{ opacity: 0, x: -50 }}
+        initial={false}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="w-full lg:w-[40%] flex items-center py-8 md:py-12 px-4 md:px-4 relative overflow-hidden"
@@ -537,7 +538,7 @@ export function ProductHero({
         <div className="space-y-6 px-4 md:pl-2 md:pr-12 relative z-10">
           {/* Breadcrumbs */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
@@ -645,7 +646,7 @@ export function ProductHero({
           </motion.div>
           {/* Title */}
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="font-american-typewriter text-2xl md:text-3xl tracking-tight text-black relative"
@@ -666,7 +667,7 @@ export function ProductHero({
           {/* Subtitle */}
           {product.subtitle && (
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
               className="font-din-arabic text-black/80 leading-relaxed mb-4"
@@ -678,7 +679,7 @@ export function ProductHero({
           {/* Size Selection with Radio Buttons */}
           {shouldShowSizeOptions && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
               className="space-y-3 pb-0 pt-3"
@@ -728,7 +729,7 @@ export function ProductHero({
 
           {/* Price */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             className="space-y-2 pb-4 pt-2"
@@ -740,7 +741,7 @@ export function ProductHero({
 
           {/* QTY + Add */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
             className="space-y-4"
@@ -818,7 +819,7 @@ export function ProductHero({
           {/* Description */}
           {product.description && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
               className="space-y-2 mt-6 mb-6"
@@ -848,7 +849,7 @@ export function ProductHero({
 
               {/* Collapsible Accordion Item */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
                   duration: 0.6,
@@ -953,7 +954,7 @@ export function ProductHero({
 
                   {/* Panel Button */}
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={false}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{
                       duration: 0.6,
@@ -1095,7 +1096,7 @@ export function ProductHero({
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, x: 50 }}
+        initial={false}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="w-full lg:w-[60%] min-w-0 relative overflow-hidden h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-auto lg:min-h-[calc(100vh-80px)]"
@@ -1103,7 +1104,10 @@ export function ProductHero({
         data-testid="product-image-gallery"
       >
         {/* Fill the original gallery frame without changing the hero layout. */}
-        <img
+        <Image
+          fill
+          sizes="(max-width: 1023px) 100vw, 60vw"
+          priority={currentImageIndex === initialImageIndex}
           src={productImages[currentImageIndex]}
           alt={`${product.title} — image ${currentImageIndex + 1}`}
           className="absolute inset-0 w-full h-full object-cover object-center"

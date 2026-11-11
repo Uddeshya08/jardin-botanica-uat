@@ -4,6 +4,7 @@ import { emitCartUpdated } from "@lib/util/cart-client"
 import { useCartItemsSafe } from "app/context/cart-items-context"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { motion } from "motion/react"
+import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type React from "react"
@@ -633,7 +634,9 @@ export function PeopleAlsoBought({
                   >
                     {/* Base Image */}
                     {product.image ? (
-                      <img
+                      <Image
+                        fill
+                        sizes="(max-width: 767px) 340px, (max-width: 1023px) 50vw, 30vw"
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover transition-opacity duration-300"
@@ -652,7 +655,9 @@ export function PeopleAlsoBought({
 
                     {/* Hover Image */}
                     {product.hoverImage && (
-                      <img
+                      <Image
+                        fill
+                        sizes="(max-width: 767px) 340px, (max-width: 1023px) 50vw, 30vw"
                         src={product.hoverImage}
                         alt={`${product.name}`}
                         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
@@ -693,7 +698,9 @@ export function PeopleAlsoBought({
                   >
                     {/* Base Image */}
                     {product.image ? (
-                      <img
+                      <Image
+                        fill
+                        sizes="(max-width: 767px) 340px, (max-width: 1023px) 50vw, 30vw"
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover transition-opacity duration-300"
@@ -712,7 +719,9 @@ export function PeopleAlsoBought({
 
                     {/* Hover Image */}
                     {product.hoverImage && (
-                      <img
+                      <Image
+                        fill
+                        sizes="(max-width: 767px) 340px, (max-width: 1023px) 50vw, 30vw"
                         src={product.hoverImage}
                         alt={`${product.name}`}
                         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
