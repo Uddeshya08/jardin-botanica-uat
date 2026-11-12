@@ -1,6 +1,7 @@
 "use client"
 
 import type { MetaProductEvent } from "./meta-event-data"
+import { latestMetaClick, META_CLICK_COOKIE } from "./meta-click-cookie"
 
 type PixelFunction = ((...args: unknown[]) => void) & {
   callMethod?: (...args: unknown[]) => void
@@ -25,10 +26,36 @@ function declined(): boolean {
   catch { return true }
 }
 
+function readMetaCookie(name: string): string | undefined {
+  const value = document.cookie.split(/;\s*/).find((entry) => entry.startsWith(`${name}=`))?.slice(name.length + 1)
+  try { return value ? decodeURIComponent(value) : undefined } catch { return undefined }
+}
+
+function readMetaClick(): string | undefined {
+  return latestMetaClick(readMetaCookie("_fbc"), readMetaCookie(META_CLICK_COOKIE))
+}
+
+function captureMetaClick(): void {
+  const clickId = new URLSearchParams(window.location.search).get("fbclid")
+  if (!clickId || clickId.length > 480 || !/^[a-zA-Z0-9_.-]+$/.test(clickId)) return
+  if (readMetaClick()?.split(".").slice(3).join(".") === clickId) return
+
+  const depth = window.location.hostname.split(".").length - 1
+  const value = `fb.${depth}.${Date.now()}.${clickId}`
+  const secure = window.location.protocol === "https:" ? "; Secure" : ""
+  document.cookie = `${META_CLICK_COOKIE}=${value}; Path=/; Max-Age=7776000; SameSite=Lax${secure}`
+}
+
+export function getMetaCheckoutConsent(): boolean | undefined {
+  if (typeof window === "undefined" || !process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim()) return undefined
+  return !declined()
+}
+
 function initializePixel(): boolean {
   if (typeof window === "undefined" || declined()) return false
   const id = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim()
   if (!id || !/^\d+$/.test(id)) return false
+  captureMetaClick()
   if (initialized) return true
   if (!window.fbq) {
     const fbq: PixelFunction = Object.assign(function (...args: unknown[]) {
@@ -54,13 +81,9 @@ function initializePixel(): boolean {
 function relayMetaEvent(name: string, eventId: string, customData?: Record<string, unknown>): void {
   try {
     if (typeof fetch !== "function") return
-    const cookie = (name: string) => {
-      const value = document.cookie?.split("; ").find((entry) => entry.startsWith(`${name}=`))?.split("=").slice(1).join("=")
-      return value ? decodeURIComponent(value) : undefined
-    }
     const body = JSON.stringify({ event_name: name, event_id: eventId, event_time: Math.floor(Date.now() / 1000),
       event_source_url: window.location.href.split(/[?#]/)[0], custom_data: customData,
-      fbp: cookie("_fbp"), fbc: cookie("_fbc") })
+      fbp: readMetaCookie("_fbp"), fbc: readMetaClick() })
     const send = (retry: boolean) => {
       void fetch("/api/meta/events", { method: "POST", credentials: "same-origin",
         headers: { "Content-Type": "application/json" }, body, keepalive: true })

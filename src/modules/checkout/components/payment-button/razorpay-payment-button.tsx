@@ -1,6 +1,7 @@
 "use client"
 
 import { placeOrder, updateCart } from "@lib/data/cart"
+import { getMetaCheckoutConsent } from "@lib/util/meta-pixel"
 import { getRazorpayKeyId } from "@lib/data/payment"
 import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
 import type { HttpTypes } from "@medusajs/types"
@@ -36,7 +37,7 @@ export const RazorpayPaymentButton = ({
   const paymentType = searchParams.get("paymenttype") || "card"
 
   const onPaymentCompleted = async () => {
-    await placeOrder().catch(() => {
+    await placeOrder(undefined, getMetaCheckoutConsent()).catch(() => {
       setErrorMessage("An error occurred, please try again.")
       setSubmitting(false)
     })

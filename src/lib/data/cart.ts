@@ -4,10 +4,12 @@
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
+import { latestMetaClick, META_CLICK_COOKIE } from "@lib/util/meta-click-cookie"
 import { getMetaCartEvent } from "@lib/util/meta-event-data"
 import type { MetaProductEvent } from "@lib/util/meta-event-data"
 import type { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
+import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import {
   getAuthHeaders,
@@ -563,7 +565,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
  * @param cartId - optional - The ID of the cart to place an order for.
  * @returns The cart object if the order was successful, or null if not.
  */
-export async function placeOrder(cartId?: string) {
+export async function placeOrder(cartId?: string, metaConsent?: boolean) {
   const id = cartId || (await getCartId())
 
   if (!id) {
@@ -575,6 +577,28 @@ export async function placeOrder(cartId?: string) {
 
   const headers = {
     ...(await getAuthHeaders()),
+  }
+
+  if (typeof metaConsent === "boolean") {
+    try {
+      const cookieStore = await cookies()
+      const click = latestMetaClick(cookieStore.get("_fbc")?.value, cookieStore.get(META_CLICK_COOKIE)?.value)
+      await sdk.client.fetch(`/store/carts/${id}`, {
+        method: "POST",
+        headers,
+        signal: AbortSignal.timeout(2000),
+        body: {
+          metadata: {
+            ...cart?.metadata,
+            meta_capi_consent: metaConsent,
+            meta_fbp: metaConsent ? cookieStore.get("_fbp")?.value?.slice(0, 256) ?? null : null,
+            meta_fbc: metaConsent ? click?.slice(0, 512) ?? null : null,
+          },
+        },
+      })
+    } catch {
+      // Attribution must not block checkout.
+    }
   }
 
   const cartRes = await sdk.store.cart

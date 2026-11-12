@@ -2,6 +2,7 @@
 
 import { isManual, isRazorpay, isStripe } from "@lib/constants"
 import { placeOrder, updateCart } from "@lib/data/cart"
+import { getMetaCheckoutConsent } from "@lib/util/meta-pixel"
 import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
 import { isCheckoutReady } from "@lib/util/checkout-readiness"
 import type { HttpTypes } from "@medusajs/types"
@@ -85,7 +86,7 @@ const StripePaymentButton = ({
 
   const onPaymentCompleted = async () => {
     try {
-      await placeOrder()
+      await placeOrder(undefined, getMetaCheckoutConsent())
     } catch (err: any) {
       setErrorMessage(err.message)
     } finally {
@@ -201,7 +202,7 @@ const ManualTestPaymentButton = ({
 
   const onPaymentCompleted = async () => {
     try {
-      await placeOrder()
+      await placeOrder(undefined, getMetaCheckoutConsent())
     } catch (err: any) {
       setErrorMessage(err.message)
     } finally {
