@@ -7,6 +7,8 @@ import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
 import { latestMetaClick, META_CLICK_COOKIE } from "@lib/util/meta-click-cookie"
 import { getMetaCartEvent } from "@lib/util/meta-event-data"
 import type { MetaProductEvent } from "@lib/util/meta-event-data"
+import { buildGoogleCartEvent } from "@lib/util/google-event-data"
+import type { GoogleEcommerce } from "@lib/util/google-event-data"
 import type { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
 import { cookies } from "next/headers"
@@ -166,7 +168,8 @@ export async function addToCart({
     )
     .then(async ({ cart: updatedCart }) => {
       await revalidateCartShippingState()
-      return getMetaCartEvent(updatedCart, variantId, quantity)
+      return { metaEvent: getMetaCartEvent(updatedCart, variantId, quantity),
+        googleEvent: buildGoogleCartEvent(updatedCart, variantId, quantity) }
     })
     .catch(medusaError)
 }
@@ -193,7 +196,7 @@ export async function addOrUpdateLineItem({
   canBeGifted?: boolean
   quantityMode?: "add" | "replace"
   metadata?: Record<string, unknown>
-}): Promise<{ lineItemId: string; cartId: string; cartQuantity: number; metaEvent?: MetaProductEvent }> {
+}): Promise<{ lineItemId: string; cartId: string; cartQuantity: number; metaEvent?: MetaProductEvent; googleEvent?: GoogleEcommerce }> {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
   }
@@ -214,6 +217,7 @@ export async function addOrUpdateLineItem({
   let lineItemId: string
   let cartQuantity: number
   let metaEvent: MetaProductEvent | undefined
+  let googleEvent: GoogleEcommerce | undefined
 
   if (existingLineItem) {
     // Update existing line item quantity (preserves metadata including gift flags)
@@ -224,6 +228,7 @@ export async function addOrUpdateLineItem({
       .updateLineItem(cart.id, existingLineItem.id, { quantity: newQuantity }, {}, headers)
       .then(async ({ cart: updatedCart }) => {
         metaEvent = getMetaCartEvent(updatedCart, variantId, newQuantity - existingLineItem.quantity)
+        googleEvent = buildGoogleCartEvent(updatedCart, variantId, newQuantity - existingLineItem.quantity)
         await revalidateCartShippingState()
       })
       .catch(medusaError)
@@ -257,6 +262,7 @@ export async function addOrUpdateLineItem({
       .createLineItem(cart.id, lineItemData, {}, headers)
       .then(async ({ cart: updatedCart }) => {
         metaEvent = getMetaCartEvent(updatedCart, variantId, quantity)
+        googleEvent = buildGoogleCartEvent(updatedCart, variantId, quantity)
         await revalidateCartShippingState()
       })
       .catch(medusaError)
@@ -267,7 +273,7 @@ export async function addOrUpdateLineItem({
     lineItemId = newLineItem?.id || ""
   }
 
-  return { lineItemId, cartId: cart.id, cartQuantity, metaEvent }
+  return { lineItemId, cartId: cart.id, cartQuantity, metaEvent, googleEvent }
 }
 
 export async function updateLineItem({ lineId, quantity }: { lineId: string; quantity: number }) {

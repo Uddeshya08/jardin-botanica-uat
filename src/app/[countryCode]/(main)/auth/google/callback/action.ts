@@ -7,6 +7,7 @@ import { revalidateTag } from "next/cache"
 
 export async function handleGoogleCallback(queryParams: Record<string, string>) {
   try {
+    let registrationId: string | undefined
     const backendUrl = process.env.MEDUSA_BACKEND_URL
     const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
 
@@ -49,7 +50,7 @@ export async function handleGoogleCallback(queryParams: Record<string, string>) 
       // No existing customer for this email — create one (also links the
       // auth identity to the new customer).
       if (!existed) {
-        await sdk.store.customer.create(
+        const { customer } = await sdk.store.customer.create(
           {
             email,
             ...(first_name && { first_name }),
@@ -58,6 +59,7 @@ export async function handleGoogleCallback(queryParams: Record<string, string>) 
           {},
           { authorization: `Bearer ${token}` }
         )
+        registrationId = customer.id
       }
 
       // The current token predates the link — refresh it so the new token
@@ -108,7 +110,7 @@ export async function handleGoogleCallback(queryParams: Record<string, string>) 
       console.error("Cart transfer after Google sign-in failed:", transferError)
     }
 
-    return { success: true }
+    return { success: true, registrationId }
   } catch (error: any) {
     console.error("Google callback error:", error)
     return {

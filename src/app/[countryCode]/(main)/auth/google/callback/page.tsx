@@ -1,4 +1,5 @@
 "use client"
+import { trackGoogleEvent } from "@lib/util/google-events"
 
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -24,6 +25,9 @@ export default function GoogleCallbackPage() {
       const result = await handleGoogleCallback(queryParams)
 
       if (result.success) {
+        if (result.registrationId) {
+          trackGoogleEvent("sign_up", { method: "google" }, result.registrationId)
+        }
         setStatus("success")
         const storedRedirect = sessionStorage.getItem("jardinBotanica_googleRedirectPath")
         const redirectPath = storedRedirect?.startsWith(`/${countryCode}/`)

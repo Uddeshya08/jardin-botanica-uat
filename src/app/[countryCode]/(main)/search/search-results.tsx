@@ -9,7 +9,9 @@ import { motion } from "motion/react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { trackGoogleEvent } from "@lib/util/google-events"
+import { googleSearchTerm } from "@lib/util/google-event-data"
 import type { SanityJournalListItem } from "types/sanity-blog"
 
 interface SearchResultsProps {
@@ -36,6 +38,16 @@ export default function SearchResults({
   relatedArticles,
 }: SearchResultsProps) {
   const router = useRouter()
+  const trackedQuery = useRef<string | null>(null)
+  useEffect(() => {
+    const term = query.trim()
+    // Track committed results, not autocomplete requests; filter search text before sending.
+    if (term && trackedQuery.current !== term) {
+      const searchTerm = googleSearchTerm(term)
+      const googleTracked = searchTerm ? trackGoogleEvent("search", { search_term: searchTerm }) : false
+      if (googleTracked) trackedQuery.current = term
+    }
+  }, [query])
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [searchQuery, setSearchQuery] = useState(query)
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)

@@ -2,7 +2,8 @@
 "use client"
 
 import { sdk } from "@lib/config"
-import { login, signup } from "@lib/data/customer"
+import { login } from "@lib/data/customer"
+import { signup } from "@lib/data/tracked-customer"
 import { Navigation } from "app/components/Navigation"
 import { PhoneOtpLogin } from "app/components/PhoneOtpLogin"
 import { RippleEffect } from "app/components/RippleEffect"
@@ -313,7 +314,7 @@ export default function AuthPage() {
 
   useEffect(() => {
     if (signupMessage === null) return
-    if (signupMessage === "") {
+    if (signupMessage && typeof signupMessage === "object") {
       // Clear session storage after successful signup
       sessionStorage.removeItem("jardinBotanica_orderEmail")
       sessionStorage.removeItem("jardinBotanica_redirectAfterLogin")

@@ -1,7 +1,8 @@
 "use client"
 
 import { sdk } from "@lib/config"
-import { login, signup } from "@lib/data/customer"
+import { login } from "@lib/data/customer"
+import { signup } from "@lib/data/tracked-customer"
 import { PhoneOtpLogin } from "app/components/PhoneOtpLogin"
 import { DatePicker } from "app/components/ui/date-picker"
 import { clsx } from "clsx"

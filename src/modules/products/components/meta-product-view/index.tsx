@@ -2,6 +2,8 @@
 
 import type { HttpTypes } from "@medusajs/types"
 import { trackMetaProductEvent } from "@lib/util/meta-pixel"
+import { trackGoogleEvent } from "@lib/util/google-events"
+import { buildGoogleProductView } from "@lib/util/google-event-data"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef } from "react"
 
@@ -12,6 +14,7 @@ export default function MetaProductView({ product }: { product: HttpTypes.StoreP
     const key = `${pathname}:${product.id}`
     if (!product.id || lastView.current === key) return
     lastView.current = key
+    trackGoogleEvent("view_item", buildGoogleProductView(product))
     const prices = (product.variants || []).flatMap((variant) => {
       const amount = variant.calculated_price?.calculated_amount
       if (typeof amount !== "number" || !Number.isFinite(amount) || amount < 0) return []

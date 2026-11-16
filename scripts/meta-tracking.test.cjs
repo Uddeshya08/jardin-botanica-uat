@@ -11,8 +11,11 @@ function load(file, globals = {}, imports = {}) {
     module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX,
   } }).outputText
   const module = { exports: {} }
-  vm.runInNewContext(code, { module, exports: module.exports,
+  vm.runInNewContext(code, { module, exports: module.exports, URLSearchParams,
     require: (name) => {
+      if (name === "./meta-click-cookie") return load("src/lib/util/meta-click-cookie.ts")
+      if (name === "@lib/util/google-events" && !(name in imports)) return { trackGoogleEvent: () => true }
+      if (name === "@lib/util/google-event-data" && !(name in imports)) return load("src/lib/util/google-event-data.ts")
       if (!(name in imports)) throw new Error(`Unexpected dependency: ${name}`)
       return imports[name]
     }, ...globals }, { filename: file })
@@ -24,7 +27,7 @@ function browser(id = "1489706953077337", choice = null) {
   let eventNumber = 0
   const globals = {
     process: { env: { NEXT_PUBLIC_META_PIXEL_ID: id } },
-    window: { location: { href: "https://www.jardinbotanica.com/in?email=private" },
+    window: { location: new URL("https://www.jardinbotanica.com/in?email=private"),
       addEventListener: (name, fn) => { listeners[name] = fn } },
     localStorage: { getItem: () => choice },
     sessionStorage: { getItem: (key) => receipts.get(key), setItem: (key, value) => receipts.set(key, value) },
@@ -384,7 +387,7 @@ test("cart data uses only the quantity added and Medusa major currency units", (
 test("cart wrapper emits only after successful mutation and preserves errors", async () => {
   const calls = []
   const server = {
-    addToCart: async () => { calls.push("saved"); return event },
+    addToCart: async () => { calls.push("saved"); return { metaEvent: event } },
     addOrUpdateLineItem: async () => ({ lineItemId: "item_1", metaEvent: undefined }),
   }
   const tracked = load("src/lib/data/tracked-cart.ts", {}, {

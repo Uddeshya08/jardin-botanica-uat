@@ -1,11 +1,14 @@
 "use client"
 
 import { convertToLocale } from "@lib/util/money"
+import { trackGoogleEvent } from "@lib/util/google-events"
+import { googleSearchTerm } from "@lib/util/google-event-data"
 import type { HttpTypes } from "@medusajs/types"
 import { Search, X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
 interface SearchMegaMenuProps {
@@ -31,6 +34,7 @@ interface Product {
 }
 
 export function SearchMegaMenu({ isOpen, onClose, countryCode, region }: SearchMegaMenuProps) {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<{
@@ -134,6 +138,8 @@ export function SearchMegaMenu({ isOpen, onClose, countryCode, region }: SearchM
   }
 
   const handleProductClick = () => {
+    const searchTerm = googleSearchTerm(searchQuery)
+    if (searchTerm) trackGoogleEvent("search", { search_term: searchTerm })
     handleClose()
   }
 
@@ -174,6 +180,13 @@ export function SearchMegaMenu({ isOpen, onClose, countryCode, region }: SearchM
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && searchQuery.trim()) {
+                          event.preventDefault()
+                          router.push(`/${countryCode}/search?q=${encodeURIComponent(searchQuery.trim())}`)
+                          handleClose()
+                        }
+                      }}
                       placeholder="I'm looking for..."
                       className="flex-1 px-0 py-4 pr-16 text-xl sm:text-2xl border-b-2 border-black/20 bg-transparent font-din-arabic focus:outline-none focus:border-black transition-colors placeholder:text-black/30"
                       style={{

@@ -1,6 +1,6 @@
 "use client"
 
-import { signup } from "@lib/data/customer"
+import { signup } from "@lib/data/tracked-customer"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"

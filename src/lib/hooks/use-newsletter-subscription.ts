@@ -2,6 +2,7 @@
 
 import type { FormEvent } from "react"
 import { useState, useTransition } from "react"
+import { trackGoogleEvent } from "@lib/util/google-events"
 
 type NewsletterResult = {
   success: boolean
@@ -33,6 +34,7 @@ export function useNewsletterSubscription(audience: "newsletter" | "early-access
       setMessage(result.message)
 
       if (result.success) {
+        trackGoogleEvent("generate_lead", { lead_source: audience })
         setEmail("")
         setTimeout(() => {
           setMessage("")

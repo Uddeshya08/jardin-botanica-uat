@@ -1,4 +1,7 @@
 "use client"
+import { useEffect } from "react"
+import { trackGoogleEvent } from "@lib/util/google-events"
+import { buildGoogleCartEvent } from "@lib/util/google-event-data"
 import type { HttpTypes } from "@medusajs/types"
 import Addresses from "@modules/checkout/components/addresses"
 import Payment from "@modules/checkout/components/payment"
@@ -25,6 +28,15 @@ export default function CheckoutFormClient({
   paymentMethods,
 }: CheckoutFormClientProps) {
   const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const track = () => {
+      trackGoogleEvent("begin_checkout", buildGoogleCartEvent(cart), cart.id)
+    }
+    track()
+    window.addEventListener("jardinBotanica:cookie-consent", track)
+    return () => window.removeEventListener("jardinBotanica:cookie-consent", track)
+  }, [cart])
 
   const currentStep = (searchParams.get("step") as CheckoutStep) || "address"
 
