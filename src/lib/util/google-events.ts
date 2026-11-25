@@ -7,6 +7,7 @@ type GoogleEvents = {
   view_item: GoogleEcommerce
   add_to_cart: GoogleEcommerce
   begin_checkout: GoogleEcommerce
+  add_shipping_info: GoogleEcommerce & { shipping_tier: string }
   add_payment_info: GoogleEcommerce & { payment_type: string }
   search: { search_term: string }
   generate_lead: { lead_source: "newsletter" | "early-access" }

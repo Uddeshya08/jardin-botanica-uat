@@ -11,6 +11,7 @@ database migration is needed for this GA4 addition.
 | View a product | view_item | ViewContent |
 | Successfully add quantity to cart | add_to_cart | AddToCart |
 | Enter checkout with a non-empty cart | begin_checkout | InitiateCheckout |
+| Successfully save address and select shipping | add_shipping_info | — |
 | Successfully continue after payment setup | add_payment_info | AddPaymentInfo |
 | Commit a search or select a search-menu result | search | Search |
 | Successful newsletter/early-access subscription | generate_lead | Lead |
@@ -18,7 +19,7 @@ database migration is needed for this GA4 addition.
 | Confirm a qualifying order | purchase (existing implementation) | Purchase |
 
 ```text
-view_item -> add_to_cart -> begin_checkout -> add_payment_info -> purchase
+view_item -> add_to_cart -> begin_checkout -> add_shipping_info -> add_payment_info -> purchase
 ```
 
 - Existing Google tag page-view behavior is unchanged; no second manual page_view sender is added.
@@ -26,6 +27,9 @@ view_item -> add_to_cart -> begin_checkout -> add_payment_info -> purchase
 - Checkout sends once per cart per browser session. Payment info sends once per cart/payment selection per session.
 - Signup sends once per new customer per session. Product/search effects ignore React replays.
 - COD payment_type is cod: this means a confirmed method, not cash capture.
+- add_shipping_info fires after both address save and shipping-method selection succeed, before continuing to payment. It sends items, available net value/currency, and a controlled shipping_tier (Surface, Express or Delivery).
+- Shipping sends once per cart/shipping option per browser session. Address edits that keep the same option do not add another event. Failed address validation/save, unavailable shipping or failed selection do not send this success event.
+- No shipping/billing address, customer name, postcode, email or phone fields are included in add_shipping_info.
 - The gift-set page uses the shared tracked cart action and is covered by add_to_cart.
 - Direct enquiry links do not prove a successful lead submission and do not emit generate_lead.
 

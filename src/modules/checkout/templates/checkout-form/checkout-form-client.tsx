@@ -1,5 +1,7 @@
 "use client"
 import { useEffect } from "react"
+import { getMetaCheckoutEvent } from "@lib/util/meta-event-data"
+import { trackMetaFunnelEvent } from "@lib/util/meta-pixel"
 import { trackGoogleEvent } from "@lib/util/google-events"
 import { buildGoogleCartEvent } from "@lib/util/google-event-data"
 import type { HttpTypes } from "@medusajs/types"
@@ -31,6 +33,8 @@ export default function CheckoutFormClient({
 
   useEffect(() => {
     const track = () => {
+      const event = getMetaCheckoutEvent(cart)
+      if (event) trackMetaFunnelEvent("InitiateCheckout", event, cart.id)
       trackGoogleEvent("begin_checkout", buildGoogleCartEvent(cart), cart.id)
     }
     track()

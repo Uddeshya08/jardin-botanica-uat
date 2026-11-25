@@ -4,6 +4,8 @@ import { setShippingMethod, updateCart } from "@lib/data/cart"
 import { listCartShippingMethods } from "@lib/data/fulfillment"
 import compareAddresses from "@lib/util/compare-addresses"
 import { normalizeCheckoutPhone } from "@lib/util/checkout-phone"
+import { buildGoogleCartEvent } from "@lib/util/google-event-data"
+import { trackGoogleEvent } from "@lib/util/google-events"
 import { CheckCircleSolid } from "@medusajs/icons"
 import type { HttpTypes } from "@medusajs/types"
 import { Heading, Text, useToggleState } from "@medusajs/ui"
@@ -140,13 +142,21 @@ const Addresses = ({
           return
         }
 
-        await setShippingMethod({
+        const shippingCart = await setShippingMethod({
           cartId: cart.id,
           shippingMethodId: preferredShippingOption.id,
           paymentMethod: "PREPAID",
           totalAmount: updatedCart.item_total ??
             (updatedCart.total - (updatedCart.shipping_total || 0)),
         })
+
+        // Track a completed address/shipping step, never raw address or contact fields.
+        const googleEvent = buildGoogleCartEvent(shippingCart)
+        const mode = preferredShippingOption.data?.shipping_mode
+        const shippingTier = mode === "Surface" || mode === "Express" ? mode : "Delivery"
+        if (googleEvent) trackGoogleEvent("add_shipping_info", {
+          ...googleEvent, shipping_tier: shippingTier,
+        }, `${cart.id}:${preferredShippingOption.id}`)
 
         // Step 4: Redirect to payment step
         router.push(`${pathname}?step=payment`)

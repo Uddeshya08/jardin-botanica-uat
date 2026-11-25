@@ -1,6 +1,6 @@
 "use client"
 
-import type { MetaProductEvent } from "./meta-event-data"
+import type { MetaProductEvent, MetaFunnelData } from "./meta-event-data"
 import { latestMetaClick, META_CLICK_COOKIE } from "./meta-click-cookie"
 
 type PixelFunction = ((...args: unknown[]) => void) & {
@@ -20,6 +20,31 @@ declare global {
 
 let initialized = false
 const sentPurchases = new Set<string>()
+const sentFunnelEvents = new Set<string>()
+
+export type MetaFunnelEventName = "InitiateCheckout" | "AddPaymentInfo"
+
+// receiptKey is local only: never send cart/customer IDs or form values as custom data.
+export function trackMetaFunnelEvent(name: MetaFunnelEventName, data: MetaFunnelData = {}, receiptKey?: string): boolean {
+  try {
+    if (typeof window === "undefined" || declined()) return false
+    if ((name === "InitiateCheckout" || name === "AddPaymentInfo") && !data.content_ids?.length) return false
+    const receipt = receiptKey ? `meta-funnel:${process.env.NEXT_PUBLIC_META_PIXEL_ID}:${name}:${receiptKey}` : undefined
+    if (receipt) {
+      if (sentFunnelEvents.has(receipt)) return true
+      try { if (sessionStorage.getItem(receipt)) return true } catch { /* Memory deduplication remains available. */ }
+    }
+    if (!initializePixel()) return false
+    const eventId = `${name.toLowerCase()}_${crypto.randomUUID()}`
+    relayMetaEvent(name, eventId, data)
+    window.fbq?.("track", name, data, { eventID: eventId })
+    if (receipt) {
+      sentFunnelEvents.add(receipt)
+      try { sessionStorage.setItem(receipt, "sent") } catch { /* Memory receipt covers React replays. */ }
+    }
+    return true
+  } catch { return false }
+}
 function declined(): boolean {
   // Honor the existing explicit cookie choice. A storage error must not break shopping.
   try { return localStorage.getItem("jardinBotanica_cookieConsent") === "declined" }

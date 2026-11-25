@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       })
       return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } })
     }
-    if (!["PageView", "ViewContent", "AddToCart"].includes(body?.event_name)) {
+    if (!["PageView", "ViewContent", "AddToCart", "InitiateCheckout", "AddPaymentInfo"].includes(body?.event_name)) {
       return NextResponse.json({ queued: false }, { status: 400 })
     }
     // Use the HTTP browser context, not client-supplied identities or IP addresses.

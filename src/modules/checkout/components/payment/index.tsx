@@ -3,6 +3,8 @@
 import { RadioGroup } from "@headlessui/react"
 import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { initiatePaymentSession, setShippingMethod } from "@lib/data/cart"
+import { getMetaCheckoutEvent } from "@lib/util/meta-event-data"
+import { trackMetaFunnelEvent } from "@lib/util/meta-pixel"
 import { trackGoogleEvent } from "@lib/util/google-events"
 import { buildGoogleCartEvent } from "@lib/util/google-event-data"
 import { ArrowLeftMini, CheckCircleSolid, CreditCard } from "@medusajs/icons"
@@ -274,6 +276,8 @@ const Payment = ({
       const shouldInputCard = isStripeFunc(targetProviderId) && !pendingSessionForProvider
 
       if (!shouldInputCard) {
+        const event = getMetaCheckoutEvent(nextCart)
+        if (event) trackMetaFunnelEvent("AddPaymentInfo", event, `${cart.id}:${selectedPaymentType}`)
         const googleEvent = buildGoogleCartEvent(nextCart)
         if (googleEvent) trackGoogleEvent("add_payment_info", { ...googleEvent, payment_type: selectedPaymentType }, `${cart.id}:${selectedPaymentType}`)
         return router.push(

@@ -420,3 +420,131 @@ test("ViewContent ignores React effect replay and variant rerenders, tracks a ne
   ProductView({ product: { ...product, id: "prod_2" } }); effect()
   assert.equal(events.length, 2)
 })
+
+test("checkout entry pairs InitiateCheckout once per cart across effect replay and reload", () => {
+  const b = browser()
+  let effect
+  const jsx = () => null
+  b.globals.window.removeEventListener = () => {}
+  const Checkout = load("src/modules/checkout/templates/checkout-form/checkout-form-client.tsx", { window: b.globals.window }, {
+    react: { useEffect: (fn) => { effect = fn } }, "react/jsx-runtime": { jsx, jsxs: jsx },
+    "@lib/util/meta-event-data": load("src/lib/util/meta-event-data.ts"),
+    "@lib/util/meta-pixel": { trackMetaFunnelEvent: b.trackMetaFunnelEvent },
+    "@lib/util/google-event-data": load("src/lib/util/google-event-data.ts"),
+    "next/navigation": { useSearchParams: () => ({ get: () => "address" }) },
+    "./checkout-steps": {}, "@modules/checkout/components/addresses": {},
+    "@modules/checkout/components/payment": {}, "@modules/checkout/components/review": {}, "@modules/checkout/components/shipping": {},
+  }).default
+  const cart = { id: "cart_1", currency_code: "inr", total: 1800, items: [{ product_id: "prod_candle", quantity: 1 }] }
+  Checkout({ cart, customer: null, shippingMethods: [], paymentMethods: [] })
+  effect()(); effect()()
+  Checkout({ cart: { ...cart }, customer: null, shippingMethods: [], paymentMethods: [] })
+  effect()()
+  assert.equal(b.requests.length, 1)
+  const body = JSON.parse(b.requests[0].options.body)
+  assert.equal(body.event_name, "InitiateCheckout")
+  assert.equal(body.custom_data.value, 1800)
+  assert.equal(body.custom_data.currency, "INR")
+  const pixel = b.globals.window.fbq.queue.find((entry) => entry[1] === "InitiateCheckout")
+  assert.equal(body.event_id, pixel[3].eventID)
+  const reloaded = load("src/lib/util/meta-pixel.ts", b.globals)
+  reloaded.trackMetaFunnelEvent("InitiateCheckout", body.custom_data, "cart_1")
+  assert.equal(b.requests.length, 1)
+})
+
+
+test("new funnel events pair Pixel and relay IDs with real fbp/fbc and no raw form data", () => {
+  const b = browser()
+  b.globals.document.cookie += "; _fbc=fb.1.1760000000000.realClick"
+  const cart = { content_type: "product", content_ids: ["prod_candle"], num_items: 1, value: 1800, currency: "INR" }
+  for (const [name, data] of [["InitiateCheckout", cart], ["AddPaymentInfo", cart]]) {
+    assert.equal(b.trackMetaFunnelEvent(name, data), true)
+  }
+  const pixel = b.globals.window.fbq.queue.filter((entry) => entry[0] === "track")
+  assert.equal(pixel.length, 2)
+  b.requests.forEach(({ options }, index) => {
+    const body = JSON.parse(options.body)
+    assert.equal(body.event_name, pixel[index][1])
+    assert.equal(body.event_id, pixel[index][3].eventID)
+    assert.equal(body.fbp, "fb.1.1760000000000.1234")
+    assert.equal(body.fbc, "fb.1.1760000000000.realClick")
+    assert.ok(!options.body.includes("email=private"))
+  })
+})
+
+
+test("checkout receipts survive replay/reload, distinguish payment methods and respect refusal", () => {
+  const b = browser()
+  const data = { content_type: "product", content_ids: ["prod_candle"], num_items: 1 }
+  b.trackMetaFunnelEvent("InitiateCheckout", data, "cart_1")
+  b.trackMetaFunnelEvent("InitiateCheckout", data, "cart_1")
+  const reloaded = load("src/lib/util/meta-pixel.ts", b.globals)
+  reloaded.trackMetaFunnelEvent("InitiateCheckout", data, "cart_1")
+  b.trackMetaFunnelEvent("AddPaymentInfo", data, "cart_1:cod")
+  b.trackMetaFunnelEvent("AddPaymentInfo", data, "cart_1:cod")
+  b.trackMetaFunnelEvent("AddPaymentInfo", data, "cart_1:card")
+  assert.equal(b.requests.length, 3)
+  b.setChoice("declined")
+  assert.equal(b.trackMetaFunnelEvent("Lead", { content_name: "newsletter" }), false)
+  assert.equal(b.requests.length, 3)
+  assert.equal(browser().trackMetaFunnelEvent("InitiateCheckout", {}, "empty"), false)
+})
+
+
+test("checkout payload aggregates product quantities and preserves discounted cart total in major units", () => {
+  const { getMetaCheckoutEvent } = load("src/lib/util/meta-event-data.ts")
+  const cart = { total: 1775, currency_code: "inr", items: [
+    { product_id: "prod_candle", quantity: 1 }, { product_id: "prod_candle", quantity: 2 },
+  ] }
+  const data = getMetaCheckoutEvent(cart)
+  assert.equal(data.value, 1775)
+  assert.equal(data.currency, "INR")
+  assert.equal(data.num_items, 3)
+  assert.equal(data.contents.length, 1)
+  assert.equal(data.contents[0].quantity, 3)
+  assert.equal(getMetaCheckoutEvent({ ...cart, items: [] }), undefined)
+  assert.equal(getMetaCheckoutEvent({ ...cart, items: [{ quantity: 1 }] }), undefined)
+  assert.equal(getMetaCheckoutEvent({ ...cart, items: [{ product_id: "prod_candle", quantity: -1 }] }), undefined)
+})
+
+
+test("payment submission tracks only after shipping and payment setup succeed for prepaid and COD", async () => {
+  for (const method of ["card", "cod"]) for (const failure of ["shipping", "payment", null]) {
+    const sequence = []
+    const cart = { id: "cart_1", total: 1800, item_total: 1800, currency_code: "inr",
+      items: [{ product_id: "prod_candle", quantity: 1 }], shipping_methods: [{ shipping_option_id: "so_1" }] }
+    const ui = new Proxy({}, { get: (_, key) => key === "clx" ? () => "" : String(key) })
+    const jsx = (type, props) => ({ type, props })
+    const Payment = load("src/modules/checkout/components/payment/index.tsx", { URLSearchParams }, {
+      "react/jsx-runtime": { jsx, jsxs: jsx },
+      react: { useState: (value) => [value, () => {}], useEffect: () => {}, useCallback: (fn) => fn },
+      "@headlessui/react": ui, "@medusajs/icons": ui, "@medusajs/ui": ui, "lucide-react": ui,
+      "@modules/checkout/components/error-message": {}, "@modules/common/components/divider": {},
+      "@lib/constants": { isStripe: () => false, paymentInfoMap: {} },
+      "@lib/util/meta-event-data": load("src/lib/util/meta-event-data.ts"),
+      "@lib/util/meta-pixel": { trackMetaFunnelEvent: (name) => sequence.push(name) },
+      "@lib/util/google-events": { trackGoogleEvent: (name, payload) => {
+        assert.equal(payload.payment_type, method)
+        sequence.push(name)
+      } },
+      "next/navigation": { usePathname: () => "/in/checkout", useSearchParams: () => new URLSearchParams(`step=payment&paymenttype=${method}`),
+        useRouter: () => ({ push: () => sequence.push("navigate") }) },
+      "@lib/data/cart": {
+        setShippingMethod: async () => { sequence.push("shipping"); if (failure === "shipping") throw new Error("failed"); return cart },
+        initiatePaymentSession: async () => { sequence.push("payment"); if (failure === "payment") throw new Error("failed") },
+      },
+    }).default
+    const find = (node) => {
+      if (!node || typeof node !== "object") return undefined
+      if (node.props?.["data-testid"] === "submit-payment-button") return node
+      const children = node.props?.children
+      for (const child of Array.isArray(children) ? children.flat(Infinity) : [children]) {
+        const found = find(child); if (found) return found
+      }
+    }
+    await find(Payment({ cart, availablePaymentMethods: [] })).props.onClick()
+    assert.equal(sequence.includes("AddPaymentInfo"), !failure)
+    assert.equal(sequence.includes("add_payment_info"), !failure)
+    if (!failure) assert.deepEqual(sequence, ["shipping", "payment", "AddPaymentInfo", "add_payment_info", "navigate"])
+  }
+})
